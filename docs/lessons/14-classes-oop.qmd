@@ -1,0 +1,106 @@
+---
+title: Classes and Object-Oriented Programming
+description: Model related data and behavior together.
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Sometimes functions and dictionaries are enough. Sometimes it is clearer to
+bundle data and behavior into objects.
+
+::: {.analogy}
+### Analogy: blueprint and house
+
+A class is a blueprint. An object is one house built from the blueprint. The
+blueprint describes what each house should have and what it can do.
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+By the end, you should be able to:
+
+- define a simple class;
+- create objects;
+- understand attributes and methods;
+- explain `self`;
+- use a dataclass for data-focused objects.
+:::
+
+## A simple class
+
+```python
+class BankAccount:
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self.balance = balance
+
+    def deposit(self, amount):
+        self.balance = self.balance + amount
+
+    def show_balance(self):
+        return f"{self.owner} has {self.balance}"
+
+account = BankAccount("Ada", 100)
+account.deposit(25)
+print(account.show_balance())
+```
+
+## Dataclasses
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Point:
+    x: float
+    y: float
+```
+
+## Guided practice
+
+::: {.practice-box}
+Add a `withdraw` method to `BankAccount`. Prevent withdrawals larger than the
+current balance.
+:::
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+1. What is the difference between a class and an object?
+2. What does `self` refer to?
+3. What does `__init__` do?
+4. When is a dataclass useful?
+:::
+
+<details class="solution">
+<summary>Show answers</summary>
+
+1. A class is the blueprint; an object is one instance built from it.
+2. The current object.
+3. It initializes a new object.
+4. When a class mainly stores data.
+
+</details>
+
+## Debugging corner
+
+::: {.debugging-corner}
+```python
+class Student:
+    def __init__(name):
+        name.name = name
+```
+
+The method is missing `self`. Use `def __init__(self, name):` and then
+`self.name = name`.
+:::
+
+## Summary
+
+::: {.lesson-summary}
+Classes create new types. Objects combine attributes with methods. Use classes
+when they make a model clearer, not just because they are available.
+:::

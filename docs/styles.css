@@ -1,0 +1,108 @@
+.hero {
+  border: 1px solid #d8dee4;
+  border-radius: 12px;
+  margin-block: 1.5rem;
+  padding: 1.25rem;
+}
+
+.learning-objectives,
+.prerequisites,
+.key-idea,
+.analogy,
+.practice-box,
+.quiz-box,
+.debugging-corner,
+.lesson-summary,
+.toolbox,
+.project-box {
+  border-left: 4px solid #1a73e8;
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+}
+
+.learning-objectives {
+  background: #eef4ff;
+}
+
+.prerequisites {
+  background: #f6f8fa;
+  border-left-color: #5f6368;
+}
+
+.key-idea {
+  background: #eef7f0;
+  border-left-color: #137333;
+}
+
+.analogy {
+  background: #f3e8ff;
+  border-left-color: #8e24aa;
+}
+
+.practice-box {
+  background: #fff8e1;
+  border-left-color: #f9ab00;
+}
+
+.quiz-box {
+  background: #eef4ff;
+  border-left-color: #1a73e8;
+}
+
+.debugging-corner {
+  background: #fff4f1;
+  border-left-color: #d93025;
+}
+
+.lesson-summary {
+  background: #eef7f0;
+  border-left-color: #137333;
+}
+
+.toolbox {
+  background: #f6f8fa;
+  border-left-color: #5f6368;
+}
+
+.project-box {
+  background: #f1f8ff;
+  border-left-color: #0969da;
+}
+
+.course-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  margin: 1rem 0;
+}
+
+.course-card {
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.course-card h3 {
+  margin-top: 0;
+}
+
+details.solution,
+details.hint {
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+  border-radius: 6px;
+  margin: 0.75rem 0;
+  padding: 0.65rem 0.85rem;
+}
+
+details.solution summary,
+details.hint summary {
+  color: #1558b0;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.colab-button {
+  display: inline-block;
+  margin: 0.4rem 0;
+}

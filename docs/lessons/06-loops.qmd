@@ -1,0 +1,102 @@
+---
+title: Loops
+description: Repeat instructions safely with for loops and while loops.
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Computers are powerful because they can repeat simple instructions quickly and
+reliably.
+
+::: {.analogy}
+### Analogy: a checklist
+
+A `for` loop is like saying, "Do this task for each item on the checklist." A
+`while` loop is like saying, "Keep doing this until the condition changes."
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+By the end, you should be able to:
+
+- write `for` loops over ranges and lists;
+- use accumulators;
+- write basic `while` loops;
+- explain infinite loops;
+- use `break` and `continue` carefully.
+:::
+
+## For loops
+
+```python
+for number in range(1, 6):
+    print(number)
+```
+
+## Accumulators
+
+```python
+total = 0
+for number in range(1, 101):
+    total = total + number
+print(total)
+```
+
+## While loops
+
+```python
+count = 1
+while count <= 5:
+    print(count)
+    count = count + 1
+```
+
+## Guided practice
+
+::: {.practice-box}
+1. Print the numbers from 10 down to 1.
+2. Add all even numbers from 2 to 50.
+3. Ask for a password until the user types `python`.
+:::
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+1. When is a `for` loop a good choice?
+2. When is a `while` loop a good choice?
+3. What is an accumulator?
+4. What causes many infinite loops?
+:::
+
+<details class="solution">
+<summary>Show answers</summary>
+
+1. When you know the sequence of items to loop over.
+2. When repetition depends on a condition becoming false.
+3. A variable that collects a running result.
+4. Forgetting to update the condition that should eventually stop the loop.
+
+</details>
+
+## Debugging corner
+
+::: {.debugging-corner}
+```python
+count = 1
+while count <= 5:
+    print(count)
+```
+
+This loop never changes `count`, so it never stops. Add `count = count + 1`
+inside the loop.
+:::
+
+## Summary
+
+::: {.lesson-summary}
+Loops repeat work. Use `for` for known collections and `while` for condition-
+based repetition. Always know how a loop stops.
+:::

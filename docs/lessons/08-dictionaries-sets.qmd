@@ -1,0 +1,102 @@
+---
+title: Dictionaries and Sets
+description: Organize data by key and track unique values.
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Lists organize values by position. Dictionaries organize values by meaning. Sets
+help answer membership and uniqueness questions.
+
+::: {.analogy}
+### Analogy: phone book and guest list
+
+A dictionary is like a phone book: use a name to find a number. A set is like a
+guest list: it cares whether someone is present, not how many times the name was
+written.
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+By the end, you should be able to:
+
+- create dictionaries;
+- read and update key-value pairs;
+- loop through keys, values, and items;
+- use `.get()` for missing keys;
+- create sets and remove duplicates.
+:::
+
+## Dictionaries
+
+```python
+student = {
+    "name": "Ana",
+    "age": 19,
+    "course": "Python",
+}
+
+print(student["name"])
+student["age"] = 20
+print(student)
+```
+
+## Safer lookup
+
+```python
+print(student.get("grade", "No grade yet"))
+```
+
+## Sets
+
+```python
+names = ["Ada", "Grace", "Ada", "Linus"]
+unique_names = set(names)
+print(unique_names)
+```
+
+## Guided practice
+
+::: {.practice-box}
+Build a small contact book with names as keys and email addresses as values.
+Add one contact, update one contact, and look up one contact.
+:::
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+1. What is a dictionary key?
+2. Can a dictionary have the same key twice?
+3. Why are sets useful for removing duplicates?
+4. When would a list be better than a dictionary?
+:::
+
+<details class="solution">
+<summary>Show answers</summary>
+
+1. A key is the lookup name used to find a value.
+2. No. A later value for the same key replaces the earlier one.
+3. Sets keep only unique values.
+4. When order and position matter more than named lookup.
+
+</details>
+
+## Debugging corner
+
+::: {.debugging-corner}
+```python
+student = {"name": "Ana", "age": 19}
+print(student["grade"])
+```
+
+This raises `KeyError` because `grade` is not a key. Use `.get()` or add the key.
+:::
+
+## Summary
+
+::: {.lesson-summary}
+Use dictionaries for key-value data and sets for uniqueness and membership.
+:::

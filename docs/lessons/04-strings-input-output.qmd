@@ -1,0 +1,94 @@
+---
+title: Strings, Input, and Output
+description: Build tiny interactive programs with text.
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Programs become more interesting when they can ask questions and respond to the
+user.
+
+::: {.analogy}
+### Analogy: conversation
+
+`input()` is Python asking a question. `print()` is Python speaking back.
+Strings are the sentences in that conversation.
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+By the end, you should be able to:
+
+- print messages;
+- ask for user input;
+- remember that `input()` returns text;
+- use f-strings to build readable messages;
+- write a small converter program.
+:::
+
+## Printing
+
+```python
+print("Welcome to Python!")
+```
+
+## Input returns text
+
+```python
+name = input("What is your name? ")
+print(f"Hello, {name}!")
+```
+
+For numeric input, convert the text:
+
+```python
+celsius = float(input("Temperature in Celsius: "))
+fahrenheit = celsius * 9 / 5 + 32
+print(f"{celsius}°C is {fahrenheit}°F")
+```
+
+## Guided practice
+
+::: {.practice-box}
+Create a program that asks for a distance in kilometers and prints the distance
+in miles. Use `miles = kilometers * 0.621371`.
+:::
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+1. What type does `input()` return?
+2. Why do we use `float(input(...))` for decimal numbers?
+3. What does the `f` in `f"Hello, {name}"` do?
+:::
+
+<details class="solution">
+<summary>Show answers</summary>
+
+1. `str`.
+2. Because input text must be converted before numeric calculations.
+3. It creates an f-string, allowing expressions inside `{}`.
+
+</details>
+
+## Debugging corner
+
+::: {.debugging-corner}
+```python
+name = input("What is your name? ")
+print("Hello, name")
+```
+
+This prints the literal word `name`. Use `print(f"Hello, {name}")` to print the
+variable's value.
+:::
+
+## Summary
+
+::: {.lesson-summary}
+Use `input()` to ask, conversion functions to prepare data, and f-strings to
+create friendly output.
+:::

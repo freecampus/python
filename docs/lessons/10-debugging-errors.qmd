@@ -1,0 +1,114 @@
+---
+title: Debugging and Python Error Messages
+description: Read tracebacks and fix common beginner errors.
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Every programmer sees errors. The skill is not avoiding every error; the skill
+is reading the clues and responding calmly.
+
+::: {.analogy}
+### Analogy: a GPS route after a wrong turn
+
+A traceback shows the route Python followed before it got stuck. It gives a file,
+a line number, the code Python was running, and the error type.
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+By the end, you should be able to:
+
+- identify the last line of a traceback;
+- find the line number to inspect;
+- recognize common errors;
+- debug with print statements and breakpoints;
+- make one small fix at a time.
+:::
+
+## A beginner debugging routine
+
+1. Read the last line of the error.
+2. Name the error type.
+3. Find the line number in your own code.
+4. Read that line out loud.
+5. Inspect values and types.
+6. Make one small change.
+7. Run again.
+
+## Common errors
+
+| Error | Beginner meaning |
+| --- | --- |
+| `SyntaxError` | Python could not understand the code structure. |
+| `IndentationError` | Spaces at the start of lines do not match Python's block rules. |
+| `NameError` | A name was used before it was defined, or it was misspelled. |
+| `TypeError` | An operation was used with the wrong kind of value. |
+| `ValueError` | The type is acceptable, but the specific value is not. |
+| `IndexError` | A sequence index does not exist. |
+| `KeyError` | A dictionary key does not exist. |
+
+## Example
+
+```python
+scores = [10, 8, "9", 7]
+print(sum(scores))
+```
+
+This fails because one value is text, not a number.
+
+## Guided practice
+
+::: {.practice-box}
+For each broken program, fill in this table:
+
+| Error type | Line to inspect | Likely cause | Fix |
+| --- | --- | --- | --- |
+| | | | |
+:::
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+1. Why should beginners look at the last traceback line?
+2. What often causes `NameError`?
+3. What often causes `IndexError`?
+4. What is one advantage of a breakpoint?
+:::
+
+<details class="solution">
+<summary>Show answers</summary>
+
+1. It names the error type and message.
+2. A misspelled or undefined name.
+3. Asking for a position that does not exist.
+4. You can pause the program and inspect values without adding many prints.
+
+</details>
+
+## Debugging corner
+
+::: {.debugging-corner}
+Broken code:
+
+```python
+def average(values):
+    return sum(values) / len(values)
+
+scores = [10, 8, "9", 7]
+print(average(scores))
+```
+
+Question: What is the type of each item in `scores`? Where does Python first
+notice the problem?
+:::
+
+## Summary
+
+::: {.lesson-summary}
+Tracebacks are structured clues. Start at the last line, find your line number,
+inspect values, and change one thing at a time.
+:::

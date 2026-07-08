@@ -1,0 +1,111 @@
+---
+title: Conditionals
+description: Teach programs to make decisions with if, elif, and else.
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Without decisions, a program always follows the same path. Conditionals let code
+respond to different situations.
+
+::: {.analogy}
+### Analogy: a fork in the road
+
+An `if` statement is a fork in the road. Python checks a condition and chooses
+which path to follow.
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+By the end, you should be able to:
+
+- create boolean expressions;
+- compare values;
+- write `if`, `elif`, and `else` branches;
+- combine conditions with `and`, `or`, and `not`;
+- avoid confusing `=` and `==`.
+:::
+
+## Comparisons
+
+```python
+score = 85
+print(score >= 70)
+print(score == 100)
+```
+
+## Branching
+
+```python
+score = 85
+
+if score >= 90:
+    print("Excellent")
+elif score >= 70:
+    print("Passing")
+else:
+    print("Keep practicing")
+```
+
+## Combining conditions
+
+```python
+age = 20
+has_ticket = True
+
+if age >= 18 and has_ticket:
+    print("You can enter")
+else:
+    print("You cannot enter yet")
+```
+
+## Guided practice
+
+::: {.practice-box}
+Build a ticket-price calculator:
+
+- children under 12 pay 5;
+- adults from 12 to 64 pay 12;
+- seniors 65 and older pay 8.
+:::
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+1. What is the difference between `=` and `==`?
+2. Why does indentation matter after `if`?
+3. When should you use `elif`?
+4. What does `not is_raining` mean?
+:::
+
+<details class="solution">
+<summary>Show answers</summary>
+
+1. `=` assigns; `==` compares.
+2. Indentation tells Python which lines belong to the branch.
+3. Use `elif` for another condition in the same decision chain.
+4. It means the opposite of `is_raining`.
+
+</details>
+
+## Debugging corner
+
+::: {.debugging-corner}
+```python
+score = 80
+if score = 80:
+    print("Great job")
+```
+
+This causes a `SyntaxError`. Use `score == 80` to compare.
+:::
+
+## Summary
+
+::: {.lesson-summary}
+Conditionals let programs choose. Comparisons create booleans; indentation shows
+which code belongs to each choice.
+:::

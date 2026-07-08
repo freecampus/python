@@ -1,0 +1,103 @@
+---
+title: Lists and Tuples
+description: Store ordered collections of values.
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Most useful programs manage more than one value. Lists and tuples let you group
+related values together.
+
+::: {.analogy}
+### Analogy: numbered lockers
+
+A list is a row of numbered lockers. Each locker has an index. Python starts
+counting at `0`, so the first locker is index `0`.
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+By the end, you should be able to:
+
+- create lists and tuples;
+- access items by index;
+- slice a sequence;
+- add, remove, and update list items;
+- explain list mutability and tuple immutability.
+:::
+
+## Lists
+
+```python
+colors = ["red", "green", "blue"]
+print(colors[0])
+print(colors[-1])
+```
+
+## Changing lists
+
+```python
+shopping = []
+shopping.append("rice")
+shopping.append("beans")
+shopping.append("fruit")
+shopping.remove("beans")
+print(shopping)
+```
+
+## Tuples
+
+```python
+point = (3, 4)
+print(point[0])
+print(point[1])
+```
+
+Tuples are useful for values that belong together and should not be changed.
+
+## Guided practice
+
+::: {.practice-box}
+Create a list of five favorite foods. Print the first, last, and middle item.
+Then add one food and remove one food.
+:::
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+1. What is the index of the first list item?
+2. What does `items[-1]` mean?
+3. What is one difference between a list and a tuple?
+4. What does `.append()` do?
+:::
+
+<details class="solution">
+<summary>Show answers</summary>
+
+1. `0`.
+2. The last item.
+3. Lists can be changed; tuples are not meant to be changed.
+4. It adds an item to the end of a list.
+
+</details>
+
+## Debugging corner
+
+::: {.debugging-corner}
+```python
+colors = ["red", "green", "blue"]
+print(colors[3])
+```
+
+This raises `IndexError` because valid indexes are `0`, `1`, and `2`.
+:::
+
+## Summary
+
+::: {.lesson-summary}
+Use lists for ordered collections that may change. Use tuples for small ordered
+records that should stay stable.
+:::

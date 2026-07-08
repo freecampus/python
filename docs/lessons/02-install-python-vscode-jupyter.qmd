@@ -1,0 +1,119 @@
+---
+title: Install Python, VS Code, and Jupyter
+description: Set up local tools after practicing in Colab.
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Colab is great for starting, but local tools help you build projects, manage
+files, debug with breakpoints, and work offline.
+
+::: {.analogy}
+### Analogy: choosing a desk
+
+Python is the language. Colab, VS Code, Jupyter, and the terminal are different
+desks where you can write and run that language.
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+By the end, you should be able to:
+
+- install Python;
+- check your Python version;
+- install VS Code and the Python extension;
+- create a virtual environment;
+- install and start Jupyter.
+:::
+
+## Install Python
+
+Download Python from <https://www.python.org/downloads/>. After installation,
+open a terminal and try:
+
+```bash
+python --version
+```
+
+On some systems, the command is:
+
+```bash
+python3 --version
+```
+
+## Install VS Code
+
+Download VS Code from <https://code.visualstudio.com/>. Then install the Python
+extension from Microsoft. Open a folder before creating project files.
+
+## Create a virtual environment
+
+A virtual environment is a separate toolbox for one project.
+
+```bash
+python -m venv .venv
+```
+
+Then activate it and install packages. Activation differs by operating system,
+so students should follow their platform instructions. To install packages:
+
+```bash
+python -m pip install jupyterlab ruff pytest numpy pandas matplotlib
+```
+
+## Start Jupyter
+
+```bash
+jupyter lab
+```
+
+Jupyter notebooks are useful for exploration, notes, plots, and data analysis.
+
+## Guided practice
+
+::: {.practice-box}
+Create a folder named `python-practice`. Open it in VS Code. Create a file named
+`hello.py` with this code:
+
+```python
+print("Hello from VS Code")
+```
+
+Run it from the VS Code terminal.
+:::
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+1. What command checks your Python version?
+2. Why should you open a folder in VS Code?
+3. What is a virtual environment for?
+4. When is Jupyter especially useful?
+:::
+
+<details class="solution">
+<summary>Show answers</summary>
+
+1. `python --version` or sometimes `python3 --version`.
+2. VS Code works best when it knows the whole project folder.
+3. It keeps dependencies for one project separate from others.
+4. It is useful for notebooks, explanations, plots, and data exploration.
+
+</details>
+
+## Debugging corner
+
+::: {.debugging-corner}
+If you see `python: command not found`, Python may not be installed, may not be
+on your PATH, or your system may use `python3` instead of `python`.
+:::
+
+## Summary
+
+::: {.lesson-summary}
+Use Colab for quick practice, VS Code for projects, Jupyter for exploratory
+notebooks, and virtual environments to keep dependencies organized.
+:::

@@ -1,0 +1,78 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: FreeCampus Python
+  description: A beginner-first Python course from zero programming experience to practical projects.
+  site-url: https://freecampus-org.github.io/python/
+  repo-url: https://github.com/freecampus-org/python
+  repo-actions: [edit, issue]
+  page-navigation: true
+  bread-crumbs: true
+  navbar:
+    background: primary
+    search: true
+    left:
+      - href: index.qmd
+        text: Home
+      - href: lessons/index.qmd
+        text: Lessons
+      - href: lessons/10-debugging-errors.qmd
+        text: Debugging
+    right:
+      - icon: github
+        href: https://github.com/freecampus-org/python
+        aria-label: GitHub repository
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - index.qmd
+      - section: Course
+        contents:
+          - lessons/index.qmd
+          - lessons/00-start-here.qmd
+          - lessons/01-colab-quickstart.qmd
+          - lessons/02-install-python-vscode-jupyter.qmd
+      - section: Core Python
+        contents:
+          - lessons/03-values-variables-types.qmd
+          - lessons/04-strings-input-output.qmd
+          - lessons/05-conditionals.qmd
+          - lessons/06-loops.qmd
+          - lessons/07-lists-tuples.qmd
+          - lessons/08-dictionaries-sets.qmd
+          - lessons/09-functions.qmd
+      - section: Independent Python
+        contents:
+          - lessons/10-debugging-errors.qmd
+          - lessons/11-files-exceptions.qmd
+          - lessons/12-modules-packages-environments.qmd
+          - lessons/13-testing-style-linting.qmd
+      - section: Deeper Python
+        contents:
+          - lessons/14-classes-oop.qmd
+          - lessons/15-python-power-tools.qmd
+      - section: Applied Python
+        contents:
+          - lessons/16-scientific-python.qmd
+          - lessons/17-data-science.qmd
+          - lessons/18-ai-libraries.qmd
+          - lessons/19-capstone.qmd
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    link-external-newwindow: true
+
+execute:
+  freeze: auto
+  eval: false
