@@ -110,15 +110,17 @@
   background: rgba(9, 105, 218, 0.08);
   border: 1px solid rgba(9, 105, 218, 0.24);
   border-radius: 14px;
-  display: grid;
-  gap: 0.5rem 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   margin: 1rem 0 1.5rem;
   padding: 0.9rem 1rem;
 }
 
-.lesson-meta p {
+.lesson-meta ul {
   margin: 0;
+  padding-left: 1.25rem;
+}
+
+.lesson-meta li {
+  margin: 0.25rem 0;
 }
 
 .lesson-meta strong {
