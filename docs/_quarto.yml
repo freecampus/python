@@ -18,7 +18,7 @@ website:
         text: Home
       - href: lessons/index.qmd
         text: Lessons
-      - href: lessons/10-debugging-errors.qmd
+      - href: lessons/debugging/error-messages.qmd
         text: Debugging
     right:
       - icon: github
@@ -32,34 +32,105 @@ website:
       - section: Course
         contents:
           - lessons/index.qmd
-          - lessons/00-start-here.qmd
-          - lessons/01-colab-quickstart.qmd
-          - lessons/02-install-python-vscode-jupyter.qmd
+          - lessons/learner-profiles.qmd
+          - lessons/instructor-notes.qmd
+      - section: Getting Started
+        contents:
+          - lessons/getting-started/index.qmd
+          - lessons/getting-started/what-is-programming.qmd
+          - lessons/getting-started/google-colab.qmd
+          - lessons/getting-started/local-python-tools.qmd
       - section: Core Python
         contents:
-          - lessons/03-values-variables-types.qmd
-          - lessons/04-strings-input-output.qmd
-          - lessons/05-conditionals.qmd
-          - lessons/06-loops.qmd
-          - lessons/07-lists-tuples.qmd
-          - lessons/08-dictionaries-sets.qmd
-          - lessons/09-functions.qmd
-      - section: Independent Python
+          - lessons/core-python/index.qmd
+          - lessons/core-python/values-variables-types.qmd
+          - lessons/core-python/strings-input-output.qmd
+          - lessons/core-python/booleans-and-conditionals.qmd
+          - lessons/core-python/loops-and-tracing.qmd
+      - section: Data Structures
         contents:
-          - lessons/10-debugging-errors.qmd
-          - lessons/11-files-exceptions.qmd
-          - lessons/12-modules-packages-environments.qmd
-          - lessons/13-testing-style-linting.qmd
-      - section: Deeper Python
+          - lessons/data-structures/index.qmd
+          - lessons/data-structures/lists.qmd
+          - lessons/data-structures/tuples.qmd
+          - lessons/data-structures/dictionaries.qmd
+          - lessons/data-structures/sets.qmd
+          - lessons/data-structures/nested-data.qmd
+      - section: Functions
         contents:
-          - lessons/14-classes-oop.qmd
-          - lessons/15-python-power-tools.qmd
-      - section: Applied Python
+          - lessons/functions/index.qmd
+          - lessons/functions/function-basics.qmd
+          - lessons/functions/function-contracts.qmd
+          - lessons/functions/decomposition-and-testing.qmd
+      - section: Debugging
         contents:
-          - lessons/16-scientific-python.qmd
-          - lessons/17-data-science.qmd
-          - lessons/18-ai-libraries.qmd
-          - lessons/19-capstone.qmd
+          - lessons/debugging/index.qmd
+          - lessons/debugging/error-messages.qmd
+          - lessons/debugging/debugging-tools.qmd
+          - lessons/debugging/minimal-reproducible-examples.qmd
+      - section: Files and Data
+        contents:
+          - lessons/files-and-data/index.qmd
+          - lessons/files-and-data/paths-and-text-files.qmd
+          - lessons/files-and-data/structured-files.qmd
+          - lessons/files-and-data/exceptions-and-validation.qmd
+      - section: Projects and Environments
+        contents:
+          - lessons/projects-and-environments/index.qmd
+          - lessons/projects-and-environments/modules-and-packages.qmd
+          - lessons/projects-and-environments/environments-and-dependencies.qmd
+          - lessons/projects-and-environments/command-line-programs.qmd
+          - lessons/projects-and-environments/project-layout.qmd
+      - section: Code Quality
+        contents:
+          - lessons/code-quality/index.qmd
+          - lessons/code-quality/testing-with-pytest.qmd
+          - lessons/code-quality/style-formatting-and-linting.qmd
+          - lessons/code-quality/type-checking.qmd
+          - lessons/code-quality/pre-commit-and-ci.qmd
+      - section: Object-Oriented Python
+        contents:
+          - lessons/object-oriented-python/index.qmd
+          - lessons/object-oriented-python/oop-basics.qmd
+          - lessons/object-oriented-python/dataclasses.qmd
+          - lessons/object-oriented-python/oop-design.qmd
+      - section: Advanced Python Patterns
+        contents:
+          - lessons/advanced-python-patterns/index.qmd
+          - lessons/advanced-python-patterns/comprehensions.qmd
+          - lessons/advanced-python-patterns/iterables-and-generators.qmd
+          - lessons/advanced-python-patterns/decorators.qmd
+          - lessons/advanced-python-patterns/context-managers.qmd
+          - lessons/advanced-python-patterns/logging-and-configuration.qmd
+      - section: Scientific Python
+        contents:
+          - lessons/scientific-python/index.qmd
+          - lessons/scientific-python/numpy.qmd
+          - lessons/scientific-python/random-simulation.qmd
+          - lessons/scientific-python/matplotlib-basics.qmd
+          - lessons/scientific-python/sympy-symbolic-math.qmd
+          - lessons/scientific-python/scipy-overview.qmd
+      - section: Data Science
+        contents:
+          - lessons/data-science/index.qmd
+          - lessons/data-science/workflow-and-loading.qmd
+          - lessons/data-science/inspecting-selecting-cleaning.qmd
+          - lessons/data-science/grouping-and-statistics.qmd
+          - lessons/data-science/visualization-with-seaborn.qmd
+          - lessons/data-science/communicating-results.qmd
+      - section: Machine Learning and AI
+        contents:
+          - lessons/machine-learning-ai/index.qmd
+          - lessons/machine-learning-ai/concepts-and-datasets.qmd
+          - lessons/machine-learning-ai/training-and-evaluation.qmd
+          - lessons/machine-learning-ai/deep-learning-libraries.qmd
+          - lessons/machine-learning-ai/transformers-overview.qmd
+          - lessons/machine-learning-ai/responsible-ai.qmd
+      - section: Capstone
+        contents:
+          - lessons/capstone/index.qmd
+          - lessons/capstone/project-selection-and-planning.qmd
+          - lessons/capstone/testing-and-readme.qmd
+          - lessons/capstone/presentation-and-rubric.qmd
 
 format:
   html:

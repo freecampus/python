@@ -1,0 +1,512 @@
+---
+title: "Object-Oriented Basics"
+description: "Define classes, create objects, store attributes, write methods, and use self."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Define classes, create objects, store attributes, write methods, and use self.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one mental model.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Object-Oriented Basics** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 3 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- Section 1: **Classes and Objects** — Define a new kind of object and create instances from it.
+- Section 2: **Attributes and Methods** — Store object data in attributes and object behavior in methods.
+- Section 3: **__init__ and self** — Initialize each object with its own starting data.
+
+<!-- mermaid-visual-model -->
+## Visual model
+
+::: {.visual-model}
+A class describes a kind of object. Each object has its own attributes, and
+methods use `self` to work with that particular object.
+
+```{mermaid}
+flowchart LR
+  class["class Student<br/>blueprint"] --> ada["object<br/>ada"]
+  class --> grace["object<br/>grace"]
+  ada --> ada_name["attribute<br/>name = 'Ada'"]
+  grace --> grace_name["attribute<br/>name = 'Grace'"]
+  ada --> method["method call<br/>ada.study()"]
+  method --> self["self refers to<br/>ada"]
+```
+
+If `self` feels mysterious, read it as "this specific object."
+:::
+
+## Section 1: Classes and Objects
+
+Define a new kind of object and create instances from it.
+
+::: {.analogy}
+### Analogy for this section
+
+A class is a cookie cutter, and objects are the individual cookies.
+:::
+
+### Mental model
+
+A class is a blueprint; an object is one concrete instance built from that blueprint.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+class Dog:
+    pass
+
+fido = Dog()
+print(type(fido))
+```
+
+### Walkthrough
+
+1. `class Dog:` — read this line slowly and ask what value or action it creates.
+2. `pass` — read this line slowly and ask what value or action it creates.
+3. `fido = Dog()` — read this line slowly and ask what value or action it creates.
+4. `print(type(fido))` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+A class describes many possible objects; an instance is one actual object.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "object-oriented-python-classes-and-objects",
+  "title": "Classes and Objects checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Classes and Objects?",
+      "options": [
+        "A class is a blueprint; an object is one concrete instance built from that blueprint.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A class is a blueprint; an object is one concrete instance built from that blueprint."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A class is a cookie cutter, and objects are the individual cookies."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 2: Attributes and Methods
+
+Store object data in attributes and object behavior in methods.
+
+::: {.analogy}
+### Analogy for this section
+
+Attributes are facts on an ID card; methods are actions the person can perform.
+:::
+
+### Mental model
+
+Attributes describe what an object knows; methods describe what it can do.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+class Counter:
+    value = 0
+
+    def show(self):
+        print(self.value)
+
+counter = Counter()
+counter.show()
+```
+
+### Walkthrough
+
+1. `class Counter:` — read this line slowly and ask what value or action it creates.
+2. `value = 0` — read this line slowly and ask what value or action it creates.
+3. `def show(self):` — read this line slowly and ask what value or action it creates.
+4. `print(self.value)` — read this line slowly and ask what value or action it creates.
+5. `counter = Counter()` — read this line slowly and ask what value or action it creates.
+6. Continue the same process for the remaining lines, one line at a time.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+A method needs self as its first parameter so it can work with the specific object.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "object-oriented-python-attributes-and-methods",
+  "title": "Attributes and Methods checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Attributes and Methods?",
+      "options": [
+        "Attributes describe what an object knows; methods describe what it can do.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Attributes describe what an object knows; methods describe what it can do."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: Attributes are facts on an ID card; methods are actions the person can perform."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 3: __init__ and self
+
+Initialize each object with its own starting data.
+
+::: {.analogy}
+### Analogy for this section
+
+__init__ is the sign-up form each new club member fills out; self is the individual
+member's record.
+:::
+
+### Mental model
+
+__init__ runs when a new object is created; self refers to that object.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+student = Student("Ada")
+print(student.name)
+```
+
+### Walkthrough
+
+1. `class Student:` — read this line slowly and ask what value or action it creates.
+2. `def __init__(self, name):` — read this line slowly and ask what value or action it creates.
+3. `self.name = name` — read this line slowly and ask what value or action it creates.
+4. `student = Student("Ada")` — read this line slowly and ask what value or action it creates.
+5. `print(student.name)` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Forgetting self.name stores nothing on the object. name alone is just a local variable.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "object-oriented-python-init-and-self",
+  "title": "__init__ and self checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes __init__ and self?",
+      "options": [
+        "__init__ runs when a new object is created; self refers to that object.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: __init__ runs when a new object is created; self refers to that object."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: __init__ is the sign-up form each new club member fills out; self is the individual member's record."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+tiny example, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- **Classes and Objects**: A class is a blueprint; an object is one concrete instance built from that blueprint.
+- **Attributes and Methods**: Attributes describe what an object knows; methods describe what it can do.
+- **__init__ and self**: __init__ runs when a new object is created; self refers to that object.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- Python classes tutorial: https://docs.python.org/3/tutorial/classes.html
+- dataclasses documentation: https://docs.python.org/3/library/dataclasses.html
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

@@ -1,0 +1,72 @@
+---
+title: "Data Science"
+description: "Turn questions and datasets into cleaned, analyzed, visualized, and communicated results."
+execute:
+  echo: true
+---
+
+## Why this chapter matters
+
+Turn questions and datasets into cleaned, analyzed, visualized, and communicated results.
+
+Lessons are now grouped by coherent learner topics. A page may contain multiple
+short quizzes when the page has multiple sections, so students can check one
+idea before moving to the next.
+
+::: {.questions}
+### Questions
+
+- Which lessons belong in this chapter?
+- What should I review before moving on?
+- How do the lesson sections build one practical skill?
+:::
+
+## Lesson path
+
+- [Workflow and Loading Data](workflow-and-loading.qmd) — Move from question to dataset and load tabular data with pandas.
+- [Inspecting, Selecting, and Cleaning](inspecting-selecting-cleaning.qmd) — Understand DataFrames, choose relevant data, and handle missing values.
+- [Grouping and Statistics](grouping-and-statistics.qmd) — Summarize categories and describe distributions.
+- [Visualization with seaborn](visualization-with-seaborn.qmd) — Create statistical plots with seaborn.
+- [Communicating Results](communicating-results.qmd) — Explain findings with evidence, uncertainty, and limitations.
+
+## Chapter checkpoint
+
+::: {.quiz-box}
+Use this short checkpoint before starting the chapter.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-science-overview",
+  "title": "Data Science overview checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "chapter-purpose",
+      "prompt": "What is the purpose of the Data Science chapter?",
+      "options": [
+        "Turn questions and datasets into cleaned, analyzed, visualized, and communicated results.",
+        "To memorize disconnected commands",
+        "To skip practice",
+        "To avoid debugging"
+      ],
+      "answer_index": 0,
+      "explanation": "Turn questions and datasets into cleaned, analyzed, visualized, and communicated results."
+    },
+    {
+      "id": "study-flow",
+      "prompt": "Why can a lesson contain multiple quizzes?",
+      "options": [
+        "Each quiz checks one section before the next section builds on it.",
+        "Quizzes replace examples.",
+        "Multiple quizzes mean the topic is unrelated.",
+        "Quizzes should only appear at the end of the course."
+      ],
+      "answer_index": 0,
+      "explanation": "Section-level quizzes help learners review while the idea is still fresh."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}

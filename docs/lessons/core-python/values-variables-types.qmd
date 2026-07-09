@@ -1,0 +1,504 @@
+---
+title: "Values, Variables, and Types"
+description: "Understand values, expressions, assignment, names, and type conversion together."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Understand values, expressions, assignment, names, and type conversion together.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one mental model.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Values, Variables, and Types** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 3 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- Section 1: **Values and Expressions** — Recognize Python values and combine them with operators to produce new values.
+- Section 2: **Variables and Assignment** — Use names to remember values and make programs readable.
+- Section 3: **Types and Conversion** — Understand common types and convert between them deliberately.
+
+<!-- mermaid-visual-model -->
+## Visual model
+
+::: {.visual-model}
+The picture below separates three ideas beginners often mix together: the code
+line, the name created by assignment, and the value object Python remembers.
+
+```{mermaid}
+flowchart LR
+  line["Python line<br/>price = 10"] --> assign["assignment<br/>="]
+  assign --> name["name<br/>price"]
+  name --> object["value object<br/>10"]
+  object --> type["type<br/>int"]
+  textline["Python line<br/>price = '10'"] --> textname["name<br/>price"]
+  textname --> textobject["value object<br/>'10'"]
+  textobject --> texttype["type<br/>str"]
+```
+
+Use the diagram as a reading routine: find the line of code, identify the name,
+then ask what value and type that name points to.
+:::
+
+## Section 1: Values and Expressions
+
+Recognize Python values and combine them with operators to produce new values.
+
+::: {.analogy}
+### Analogy for this section
+
+An expression is like a calculator entry: Python evaluates it and gives one result back.
+:::
+
+### Mental model
+
+A value is a piece of information; an expression is a question Python can answer with a
+value.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+2 + 3
+10 / 4
+"Py" + "thon"
+```
+
+### Walkthrough
+
+1. `2 + 3` — read this line slowly and ask what value or action it creates.
+2. `10 / 4` — read this line slowly and ask what value or action it creates.
+3. `"Py" + "thon"` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Quotation marks change meaning. 42 is a number, but "42" is text.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "values-variables-types",
+  "title": "Values, variables, and types checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "quoted-number-type",
+      "prompt": "What is the type of the value \"42\"?",
+      "options": [
+        "int",
+        "float",
+        "str",
+        "bool"
+      ],
+      "answer_index": 2,
+      "explanation": "Quotation marks create text, so \"42\" is a string even though it contains digits."
+    },
+    {
+      "id": "integer-type",
+      "prompt": "What is the type of the value 42?",
+      "options": [
+        "str",
+        "int",
+        "bool",
+        "list"
+      ],
+      "answer_index": 1,
+      "explanation": "Whole numbers without quotation marks are integers."
+    },
+    {
+      "id": "assignment-meaning",
+      "prompt": "What does this line do: price = 10?",
+      "options": [
+        "It checks whether price already equals 10.",
+        "It assigns the value 10 to the name price.",
+        "It prints the value 10.",
+        "It creates a text value named price."
+      ],
+      "answer_index": 1,
+      "explanation": "In Python, a single equals sign assigns a value to a name. Use == when you want to compare two values."
+    },
+    {
+      "id": "string-addition",
+      "prompt": "Why does \"2\" + \"3\" produce \"23\" instead of 5?",
+      "options": [
+        "Python made a math mistake.",
+        "The plus sign always creates text.",
+        "Both values are strings, so + joins them together.",
+        "Strings cannot use the plus sign."
+      ],
+      "answer_index": 2,
+      "explanation": "When both operands are strings, + performs concatenation: it joins text together."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 2: Variables and Assignment
+
+Use names to remember values and make programs readable.
+
+::: {.analogy}
+### Analogy for this section
+
+A variable is like a sticky note on an object. The note is not the object; it helps you
+find the object again.
+:::
+
+### Mental model
+
+Assignment attaches a name to a value so later code can reuse it.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+price = 12
+quantity = 3
+total = price * quantity
+print(total)
+```
+
+### Walkthrough
+
+1. `price = 12` — read this line slowly and ask what value or action it creates.
+2. `quantity = 3` — read this line slowly and ask what value or action it creates.
+3. `total = price * quantity` — read this line slowly and ask what value or action it creates.
+4. `print(total)` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+A single equals sign assigns. A double equals sign compares. Mixing them changes the
+question you are asking Python.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "core-python-variables-and-assignment",
+  "title": "Variables and Assignment checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Variables and Assignment?",
+      "options": [
+        "Assignment attaches a name to a value so later code can reuse it.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Assignment attaches a name to a value so later code can reuse it."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A variable is like a sticky note on an object. The note is not the object; it helps you find the object again."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 3: Types and Conversion
+
+Understand common types and convert between them deliberately.
+
+::: {.analogy}
+### Analogy for this section
+
+A type is like a label on a box: flour, sugar, and salt may look similar, but recipes
+treat them differently.
+:::
+
+### Mental model
+
+Types tell Python what operations make sense for a value.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+age_text = "12"
+age = int(age_text)
+print(age + 1)
+```
+
+### Walkthrough
+
+1. `age_text = "12"` — read this line slowly and ask what value or action it creates.
+2. `age = int(age_text)` — read this line slowly and ask what value or action it creates.
+3. `print(age + 1)` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Python will not always guess the conversion you wanted. Convert input text explicitly
+before doing arithmetic.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "core-python-types-and-conversion",
+  "title": "Types and Conversion checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Types and Conversion?",
+      "options": [
+        "Types tell Python what operations make sense for a value.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Types tell Python what operations make sense for a value."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A type is like a label on a box: flour, sugar, and salt may look similar, but recipes treat them differently."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+tiny example, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- **Values and Expressions**: A value is a piece of information; an expression is a question Python can answer with a
+value.
+- **Variables and Assignment**: Assignment attaches a name to a value so later code can reuse it.
+- **Types and Conversion**: Types tell Python what operations make sense for a value.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Built-in types: https://docs.python.org/3/library/stdtypes.html
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

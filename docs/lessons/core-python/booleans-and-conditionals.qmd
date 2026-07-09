@@ -1,0 +1,374 @@
+---
+title: "Booleans and Conditionals"
+description: "Ask yes/no questions and choose different paths with if, elif, and else."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Ask yes/no questions and choose different paths with if, elif, and else.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one mental model.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Booleans and Conditionals** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 2 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- Section 1: **Booleans and Comparisons** — Use True/False values and comparisons to ask questions in code.
+- Section 2: **Conditionals** — Choose different actions with if, elif, and else.
+
+<!-- mermaid-visual-model -->
+## Visual model
+
+::: {.visual-model}
+A conditional is a branching path. Python asks a yes/no question, then runs only
+the first block whose condition is true.
+
+```{mermaid}
+flowchart TD
+  start([Start]) --> q1{"score >= 90?"}
+  q1 -- True --> excellent["print('excellent')"]
+  q1 -- False --> q2{"score >= 70?"}
+  q2 -- True --> passing["print('passing')"]
+  q2 -- False --> practice["print('keep practicing')"]
+  excellent --> stop([Continue after conditional])
+  passing --> stop
+  practice --> stop
+```
+
+When debugging conditionals, trace the questions in order and stop at the first
+true branch.
+:::
+
+## Section 1: Booleans and Comparisons
+
+Use True/False values and comparisons to ask questions in code.
+
+::: {.analogy}
+### Analogy for this section
+
+A comparison is like a yes/no question on a form: exactly one box should describe the
+result.
+:::
+
+### Mental model
+
+A Boolean value is either True or False; comparisons produce Booleans.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+temperature = 18
+print(temperature < 20)
+print(temperature == 18)
+print(temperature != 30)
+```
+
+### Walkthrough
+
+1. `temperature = 18` — read this line slowly and ask what value or action it creates.
+2. `print(temperature < 20)` — read this line slowly and ask what value or action it creates.
+3. `print(temperature == 18)` — read this line slowly and ask what value or action it creates.
+4. `print(temperature != 30)` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Use == to compare values. Using = inside a condition is not how Python asks equality
+questions.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "core-python-booleans-and-comparisons",
+  "title": "Booleans and Comparisons checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Booleans and Comparisons?",
+      "options": [
+        "A Boolean value is either True or False; comparisons produce Booleans.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A Boolean value is either True or False; comparisons produce Booleans."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A comparison is like a yes/no question on a form: exactly one box should describe the result."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 2: Conditionals
+
+Choose different actions with if, elif, and else.
+
+::: {.analogy}
+### Analogy for this section
+
+A conditional is like a fork in a path: the sign decides which branch you walk down.
+:::
+
+### Mental model
+
+A conditional runs a block of code only when a condition is true.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+score = 82
+if score >= 90:
+    print("excellent")
+elif score >= 70:
+    print("passing")
+else:
+    print("keep practicing")
+```
+
+### Walkthrough
+
+1. `score = 82` — read this line slowly and ask what value or action it creates.
+2. `if score >= 90:` — read this line slowly and ask what value or action it creates.
+3. `print("excellent")` — read this line slowly and ask what value or action it creates.
+4. `elif score >= 70:` — read this line slowly and ask what value or action it creates.
+5. `print("passing")` — read this line slowly and ask what value or action it creates.
+6. Continue the same process for the remaining lines, one line at a time.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Indentation controls what belongs inside a branch. Misaligned spaces can change program
+meaning.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "core-python-conditionals",
+  "title": "Conditionals checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Conditionals?",
+      "options": [
+        "A conditional runs a block of code only when a condition is true.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A conditional runs a block of code only when a condition is true."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A conditional is like a fork in a path: the sign decides which branch you walk down."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+tiny example, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- **Booleans and Comparisons**: A Boolean value is either True or False; comparisons produce Booleans.
+- **Conditionals**: A conditional runs a block of code only when a condition is true.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Built-in types: https://docs.python.org/3/library/stdtypes.html
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

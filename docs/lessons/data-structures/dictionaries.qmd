@@ -1,0 +1,503 @@
+---
+title: "Dictionaries"
+description: "Use key-value mappings for lookup, looping, counting, grouping, and simple records."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Use key-value mappings for lookup, looping, counting, grouping, and simple records.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one mental model.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Dictionaries** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 3 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- Section 1: **Dictionaries** — Store key-value pairs for fast lookup by meaningful labels.
+- Section 2: **Dictionary Looping** — Loop through dictionary keys, values, and key-value pairs.
+- Section 3: **Dictionary Patterns** — Use dictionaries for counting, grouping, and simple records.
+
+<!-- mermaid-visual-model -->
+## Visual model
+
+::: {.visual-model}
+A dictionary is a lookup table. You provide a key; Python returns the value stored
+under that key.
+
+```{mermaid}
+flowchart LR
+  key1["key<br/>'name'"] --> value1["value<br/>'Ada'"]
+  key2["key<br/>'role'"] --> value2["value<br/>'programmer'"]
+  key3["key<br/>'language'"] --> value3["value<br/>'Python'"]
+  lookup["person['name']"] --> key1
+  value1 --> result["result<br/>'Ada'"]
+```
+
+When a `KeyError` appears, compare the key you asked for with the keys actually
+inside the dictionary.
+:::
+
+## Section 1: Dictionaries
+
+Store key-value pairs for fast lookup by meaningful labels.
+
+::: {.analogy}
+### Analogy for this section
+
+A dictionary is like a real dictionary: look up a word and get its definition.
+:::
+
+### Mental model
+
+A dictionary maps unique keys to values.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+person = {"name": "Ada", "role": "programmer"}
+print(person["name"])
+person["language"] = "Python"
+print(person)
+```
+
+### Walkthrough
+
+1. `person = {"name": "Ada", "role": "programmer"}` — read this line slowly and ask what value or action it creates.
+2. `print(person["name"])` — read this line slowly and ask what value or action it creates.
+3. `person["language"] = "Python"` — read this line slowly and ask what value or action it creates.
+4. `print(person)` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Looking up a missing key raises KeyError. Use in or .get() when a key may be absent.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-structures-dictionaries",
+  "title": "Dictionaries checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Dictionaries?",
+      "options": [
+        "A dictionary maps unique keys to values.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A dictionary maps unique keys to values."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A dictionary is like a real dictionary: look up a word and get its definition."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 2: Dictionary Looping
+
+Loop through dictionary keys, values, and key-value pairs.
+
+::: {.analogy}
+### Analogy for this section
+
+Looping through a dictionary is like reading a contact list: you can read names, phone
+numbers, or both together.
+:::
+
+### Mental model
+
+Dictionary loops let you inspect labels and values in a mapping.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+scores = {"Ada": 95, "Grace": 98}
+for name, score in scores.items():
+    print(f"{name}: {score}")
+```
+
+### Walkthrough
+
+1. `scores = {"Ada": 95, "Grace": 98}` — read this line slowly and ask what value or action it creates.
+2. `for name, score in scores.items():` — read this line slowly and ask what value or action it creates.
+3. `print(f"{name}: {score}")` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Looping over a dictionary directly gives keys, not values. Use .items() when you need
+both.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-structures-dictionary-looping",
+  "title": "Dictionary Looping checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Dictionary Looping?",
+      "options": [
+        "Dictionary loops let you inspect labels and values in a mapping.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Dictionary loops let you inspect labels and values in a mapping."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: Looping through a dictionary is like reading a contact list: you can read names, phone numbers, or both together."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 3: Dictionary Patterns
+
+Use dictionaries for counting, grouping, and simple records.
+
+::: {.analogy}
+### Analogy for this section
+
+A counting dictionary is a scoreboard: each key has a score that changes as events
+happen.
+:::
+
+### Mental model
+
+Dictionaries shine when you need to update a value associated with a label.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+counts = {}
+for letter in "banana":
+    counts[letter] = counts.get(letter, 0) + 1
+print(counts)
+```
+
+### Walkthrough
+
+1. `counts = {}` — read this line slowly and ask what value or action it creates.
+2. `for letter in "banana":` — read this line slowly and ask what value or action it creates.
+3. `counts[letter] = counts.get(letter, 0) + 1` — read this line slowly and ask what value or action it creates.
+4. `print(counts)` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Starting from an empty dictionary requires a default value before adding 1. .get(key, 0)
+is a common pattern.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-structures-dictionary-patterns",
+  "title": "Dictionary Patterns checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Dictionary Patterns?",
+      "options": [
+        "Dictionaries shine when you need to update a value associated with a label.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Dictionaries shine when you need to update a value associated with a label."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A counting dictionary is a scoreboard: each key has a score that changes as events happen."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+tiny example, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- **Dictionaries**: A dictionary maps unique keys to values.
+- **Dictionary Looping**: Dictionary loops let you inspect labels and values in a mapping.
+- **Dictionary Patterns**: Dictionaries shine when you need to update a value associated with a label.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- Python data structures tutorial: https://docs.python.org/3/tutorial/datastructures.html
+- Built-in types: https://docs.python.org/3/library/stdtypes.html
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

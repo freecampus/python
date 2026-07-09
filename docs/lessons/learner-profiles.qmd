@@ -1,0 +1,112 @@
+---
+title: "Learner Profiles and Study Paths"
+description: "Choose a course path based on your background, goals, and constraints."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Different learners arrive with different goals, time, confidence, and access to
+computers. A beginner-first course should offer safe paths without lowering the
+standard for understanding.
+
+::: {.questions}
+### Questions
+
+- Which path should I follow if I have never programmed before?
+- What should I do if installation blocks my learning?
+- How can I study if I have limited time each week?
+:::
+
+## Suggested paths
+
+| Learner | Recommended path | Notes |
+| --- | --- | --- |
+| Absolute beginner | Start with Getting Started and Core Python in order. | Use Colab first to avoid setup friction. |
+| Returning learner | Take the quizzes in Core Python and Data Structures. | Review any lesson where the quiz feels uncertain. |
+| Data-focused learner | Complete Core Python, Data Structures, Functions, Debugging, then Data Science. | Do not skip debugging or data structures. |
+| Project-focused learner | Complete through Projects and Environments, then start the Capstone. | Add tests and a README early. |
+| Instructor | Use the lesson questions, challenges, and debugging corners as teaching beats. | Keep live coding small and participatory. |
+
+## Beginner safety principles
+
+- Use Colab when local installation blocks progress.
+- Work in small examples until you can explain them.
+- Save mistakes and fixes in a debugging journal.
+- Ask for help with exact error text, code, and what you expected.
+- Prefer steady practice over long memorization sessions.
+
+## Reflection prompt
+
+Write two sentences before starting:
+
+1. "I want to learn Python because..."
+2. "When I get stuck, my first debugging step will be..."
+
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+Use this OJS quiz to confirm the purpose of this support page.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "learner-profiles",
+  "title": "Learner Profiles and Study Paths checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Learner Profiles and Study Paths?",
+      "options": [
+        "Learners should choose a path that preserves the practice loop: predict, run, explain, modify, and debug.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Learners should choose a path that preserves the practice loop: predict, run, explain, modify, and debug."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A course support page is a guide rail that helps learners and teachers stay safe and oriented."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include _includes/ojs-quiz.qmd >}}

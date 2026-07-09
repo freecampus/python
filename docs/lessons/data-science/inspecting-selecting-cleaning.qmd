@@ -1,0 +1,490 @@
+---
+title: "Inspecting, Selecting, and Cleaning"
+description: "Understand DataFrames, choose relevant data, and handle missing values."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Understand DataFrames, choose relevant data, and handle missing values.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one mental model.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Inspecting, Selecting, and Cleaning** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 3 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- Section 1: **Inspecting DataFrames** — Use shape, columns, dtypes, head, info, and describe to understand data.
+- Section 2: **Selecting and Filtering Data** — Choose columns, rows, and conditions from a DataFrame.
+- Section 3: **Cleaning Missing Values** — Find and handle missing data deliberately.
+
+## Section 1: Inspecting DataFrames
+
+Use shape, columns, dtypes, head, info, and describe to understand data.
+
+::: {.analogy}
+### Analogy for this section
+
+Inspection is checking a shipment before unpacking everything: count boxes, read labels,
+notice damage.
+:::
+
+### Mental model
+
+Inspection reveals structure before you transform or model data.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import pandas as pd
+
+df = pd.DataFrame({"score": [1, 2, 3], "group": ["a", "a", "b"]})
+print(df.shape)
+print(df.dtypes)
+print(df.describe())
+```
+
+### Walkthrough
+
+1. `import pandas as pd` — read this line slowly and ask what value or action it creates.
+2. `df = pd.DataFrame({"score": [1, 2, 3], "group": ["a", "a", "b"]})` — read this line slowly and ask what value or action it creates.
+3. `print(df.shape)` — read this line slowly and ask what value or action it creates.
+4. `print(df.dtypes)` — read this line slowly and ask what value or action it creates.
+5. `print(df.describe())` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Assuming column types from appearance is risky. Always inspect dtypes.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-science-inspecting-dataframes",
+  "title": "Inspecting DataFrames checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Inspecting DataFrames?",
+      "options": [
+        "Inspection reveals structure before you transform or model data.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Inspection reveals structure before you transform or model data."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: Inspection is checking a shipment before unpacking everything: count boxes, read labels, notice damage."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 2: Selecting and Filtering Data
+
+Choose columns, rows, and conditions from a DataFrame.
+
+::: {.analogy}
+### Analogy for this section
+
+Filtering is like using a sieve: keep rows that match the condition and let others pass
+away.
+:::
+
+### Mental model
+
+Selection narrows a table to relevant columns or rows.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import pandas as pd
+
+df = pd.DataFrame({"name": ["Ada", "Grace"], "score": [95, 88]})
+high = df[df["score"] >= 90]
+print(high[["name", "score"]])
+```
+
+### Walkthrough
+
+1. `import pandas as pd` — read this line slowly and ask what value or action it creates.
+2. `df = pd.DataFrame({"name": ["Ada", "Grace"], "score": [95, 88]})` — read this line slowly and ask what value or action it creates.
+3. `high = df[df["score"] >= 90]` — read this line slowly and ask what value or action it creates.
+4. `print(high[["name", "score"]])` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Use parentheses around combined conditions in pandas: (a) & (b), not a and b.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-science-selecting-filtering-data",
+  "title": "Selecting and Filtering Data checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Selecting and Filtering Data?",
+      "options": [
+        "Selection narrows a table to relevant columns or rows.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Selection narrows a table to relevant columns or rows."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: Filtering is like using a sieve: keep rows that match the condition and let others pass away."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 3: Cleaning Missing Values
+
+Find and handle missing data deliberately.
+
+::: {.analogy}
+### Analogy for this section
+
+Missing values are blank cells on a form: you must decide whether to ask again, fill
+carefully, or exclude.
+:::
+
+### Mental model
+
+Missing data are absent values that can affect calculations and conclusions.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import pandas as pd
+
+df = pd.DataFrame({"score": [10, None, 30]})
+print(df.isna().sum())
+print(df.dropna())
+```
+
+### Walkthrough
+
+1. `import pandas as pd` — read this line slowly and ask what value or action it creates.
+2. `df = pd.DataFrame({"score": [10, None, 30]})` — read this line slowly and ask what value or action it creates.
+3. `print(df.isna().sum())` — read this line slowly and ask what value or action it creates.
+4. `print(df.dropna())` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Dropping missing rows can bias results. Explain your cleaning decision.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-science-cleaning-missing-values",
+  "title": "Cleaning Missing Values checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Cleaning Missing Values?",
+      "options": [
+        "Missing data are absent values that can affect calculations and conclusions.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Missing data are absent values that can affect calculations and conclusions."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: Missing values are blank cells on a form: you must decide whether to ask again, fill carefully, or exclude."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+tiny example, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- **Inspecting DataFrames**: Inspection reveals structure before you transform or model data.
+- **Selecting and Filtering Data**: Selection narrows a table to relevant columns or rows.
+- **Cleaning Missing Values**: Missing data are absent values that can affect calculations and conclusions.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- pandas documentation: https://pandas.pydata.org/docs/
+- seaborn documentation: https://seaborn.pydata.org/
+- Matplotlib documentation: https://matplotlib.org/stable/
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

@@ -1,0 +1,241 @@
+---
+title: "Matplotlib Basics"
+description: "Create simple line plots and scatter plots."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Create simple line plots and scatter plots.
+
+Beginners often try to learn Python as a list of commands. This lesson teaches one idea
+at a time: what problem it solves, how to recognize it in code, how to practice it, and
+how to debug a common mistake. Treat the code examples as small experiments, not as text
+to memorize.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- What problem does **Matplotlib Basics** help me solve?
+- What words or symbols should I recognize in a small example?
+- What should I check first when the example does not behave as expected?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the main idea in everyday language;
+- read a short example line by line;
+- predict the result before running the code;
+- make one safe variation of the example;
+- debug one common beginner mistake.
+:::
+
+::: {.analogy}
+### Analogy
+
+A plot is a map of data: axes are directions and marks are locations.
+:::
+
+## Vocabulary
+
+- **figure** — a word you should be able to explain after this lesson.
+- **axis** — a word you should be able to explain after this lesson.
+- **plot** — a word you should be able to explain after this lesson.
+- **label** — a word you should be able to explain after this lesson.
+- **marker** — a word you should be able to explain after this lesson.
+
+## Mental model
+
+Matplotlib turns numerical data into visual marks such as points, lines, and axes.
+
+A useful mental model has three parts:
+
+1. **Name the thing.** Say what concept you are using.
+2. **Name the input.** Identify the values, files, objects, or settings involved.
+3. **Name the result.** Explain what changes, what is returned, or what is printed.
+
+## Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import matplotlib.pyplot as plt
+
+years = [2024, 2025, 2026]
+values = [2, 5, 9]
+plt.plot(years, values, marker="o")
+plt.xlabel("Year")
+plt.ylabel("Value")
+plt.show()
+```
+
+## Walkthrough
+
+1. `import matplotlib.pyplot as plt` — read this line slowly and ask what value or action it creates.
+2. `years = [2024, 2025, 2026]` — read this line slowly and ask what value or action it creates.
+3. `values = [2, 5, 9]` — read this line slowly and ask what value or action it creates.
+4. `plt.plot(years, values, marker="o")` — read this line slowly and ask what value or action it creates.
+5. `plt.xlabel("Year")` — read this line slowly and ask what value or action it creates.
+6. Continue the same process for the remaining lines, one line at a time.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+## Worked example: read, predict, modify
+
+Use this routine with every example in the course:
+
+| Step | What to do | Why it helps |
+| --- | --- | --- |
+| Read | Point to each name, value, and operator. | Slows the code down enough to understand it. |
+| Predict | Write what you think will happen. | Builds a testable mental model. |
+| Run | Execute the smallest complete example. | Lets Python give evidence. |
+| Explain | Say what happened in plain language. | Converts recognition into understanding. |
+| Modify | Change one small thing and run again. | Shows which part caused which result. |
+
+## Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+## Common mistakes
+
+::: {.debugging-corner}
+A plot without axis labels can be visually attractive but scientifically unclear.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+Answer these questions before moving on. The quiz runs with Quarto OJS in the
+browser, so it does not need a Python kernel during website rendering.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "scientific-python-matplotlib-basics",
+  "title": "Matplotlib Basics checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Matplotlib Basics?",
+      "options": [
+        "Matplotlib turns numerical data into visual marks such as points, lines, and axes.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Matplotlib turns numerical data into visual marks such as points, lines, and axes."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A plot is a map of data: axes are directions and marks are locations."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at https://colab.new, copy the tiny example, and run three small
+variations. You can also use a local Jupyter notebook or VS Code.
+Keep one cell for the original example, one cell for your prediction, and one
+cell for your modified version.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Ask learners to predict before execution; do not skip this step.
+- Invite one learner to explain the analogy and another to explain the code.
+- When an error appears, model calm traceback reading instead of immediately fixing it.
+- If time is short, keep the tiny example and quiz; move the challenge to homework.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- Matplotlib turns numerical data into visual marks such as points, lines, and axes.
+- Small examples are more useful than large copied programs when a concept is new.
+- Prediction, execution, explanation, and one small modification form the core practice loop.
+- Debugging starts by reading clues and changing one thing at a time.
+:::
+
+## References
+
+- Matplotlib documentation: https://matplotlib.org/stable/
+- NumPy documentation: https://numpy.org/doc/stable/
+- SciPy documentation: https://docs.scipy.org/doc/scipy/
+- SymPy documentation: https://docs.sympy.org/
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

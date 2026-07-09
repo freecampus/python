@@ -1,0 +1,355 @@
+---
+title: "Structured Files"
+description: "Read and write CSV and JSON data formats."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Read and write CSV and JSON data formats.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one mental model.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Structured Files** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 2 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- Section 1: **CSV Files** — Read and write tabular data in comma-separated value files.
+- Section 2: **JSON Files** — Use JSON for nested data that can be shared between programs.
+
+## Section 1: CSV Files
+
+Read and write tabular data in comma-separated value files.
+
+::: {.analogy}
+### Analogy for this section
+
+A CSV file is a plain-text spreadsheet: each line is a row and commas separate cells.
+:::
+
+### Mental model
+
+CSV stores rows and columns as text, making it common for spreadsheets and simple
+datasets.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import csv
+
+with open("scores.csv", newline="", encoding="utf-8") as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        print(row["name"], row["score"])
+```
+
+### Walkthrough
+
+1. `import csv` — read this line slowly and ask what value or action it creates.
+2. `with open("scores.csv", newline="", encoding="utf-8") as file:` — read this line slowly and ask what value or action it creates.
+3. `reader = csv.DictReader(file)` — read this line slowly and ask what value or action it creates.
+4. `for row in reader:` — read this line slowly and ask what value or action it creates.
+5. `print(row["name"], row["score"])` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+CSV values are text when read. Convert numeric columns before arithmetic.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "files-and-data-csv-files",
+  "title": "CSV Files checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes CSV Files?",
+      "options": [
+        "CSV stores rows and columns as text, making it common for spreadsheets and simple datasets.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: CSV stores rows and columns as text, making it common for spreadsheets and simple datasets."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A CSV file is a plain-text spreadsheet: each line is a row and commas separate cells."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 2: JSON Files
+
+Use JSON for nested data that can be shared between programs.
+
+::: {.analogy}
+### Analogy for this section
+
+JSON is like a labeled shipping box: programs in different places can read the labels
+and contents.
+:::
+
+### Mental model
+
+JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language-
+independent text format.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import json
+
+text = '{"name": "Ada", "scores": [90, 95]}'
+data = json.loads(text)
+print(data["scores"][0])
+```
+
+### Walkthrough
+
+1. `import json` — read this line slowly and ask what value or action it creates.
+2. `text = '{"name": "Ada", "scores": [90, 95]}'` — read this line slowly and ask what value or action it creates.
+3. `data = json.loads(text)` — read this line slowly and ask what value or action it creates.
+4. `print(data["scores"][0])` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+JSON uses true/false/null, while Python uses True/False/None. Use json.loads instead of
+hand-parsing.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "files-and-data-json-files",
+  "title": "JSON Files checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes JSON Files?",
+      "options": [
+        "JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language-independent text format.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language-independent text format."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: JSON is like a labeled shipping box: programs in different places can read the labels and contents."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+tiny example, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- **CSV Files**: CSV stores rows and columns as text, making it common for spreadsheets and simple
+datasets.
+- **JSON Files**: JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language-
+independent text format.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- csv documentation: https://docs.python.org/3/library/csv.html
+- pathlib documentation: https://docs.python.org/3/library/pathlib.html
+- json documentation: https://docs.python.org/3/library/json.html
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

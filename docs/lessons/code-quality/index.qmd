@@ -1,0 +1,71 @@
+---
+title: "Code Quality"
+description: "Make code trustworthy with tests, style, formatting, linting, types, and automation."
+execute:
+  echo: true
+---
+
+## Why this chapter matters
+
+Make code trustworthy with tests, style, formatting, linting, types, and automation.
+
+Lessons are now grouped by coherent learner topics. A page may contain multiple
+short quizzes when the page has multiple sections, so students can check one
+idea before moving to the next.
+
+::: {.questions}
+### Questions
+
+- Which lessons belong in this chapter?
+- What should I review before moving on?
+- How do the lesson sections build one practical skill?
+:::
+
+## Lesson path
+
+- [Testing with pytest](testing-with-pytest.qmd) — Use assertions, pytest, and edge cases to check behavior.
+- [Style, Formatting, and Linting](style-formatting-and-linting.qmd) — Use PEP 8 and Ruff to keep Python readable and consistent.
+- [Type Checking](type-checking.qmd) — Use type hints and a checker to catch mismatched value types early.
+- [Pre-commit and CI](pre-commit-and-ci.qmd) — Run checks automatically before commits and on shared repositories.
+
+## Chapter checkpoint
+
+::: {.quiz-box}
+Use this short checkpoint before starting the chapter.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "code-quality-overview",
+  "title": "Code Quality overview checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "chapter-purpose",
+      "prompt": "What is the purpose of the Code Quality chapter?",
+      "options": [
+        "Make code trustworthy with tests, style, formatting, linting, types, and automation.",
+        "To memorize disconnected commands",
+        "To skip practice",
+        "To avoid debugging"
+      ],
+      "answer_index": 0,
+      "explanation": "Make code trustworthy with tests, style, formatting, linting, types, and automation."
+    },
+    {
+      "id": "study-flow",
+      "prompt": "Why can a lesson contain multiple quizzes?",
+      "options": [
+        "Each quiz checks one section before the next section builds on it.",
+        "Quizzes replace examples.",
+        "Multiple quizzes mean the topic is unrelated.",
+        "Quizzes should only appear at the end of the course."
+      ],
+      "answer_index": 0,
+      "explanation": "Section-level quizzes help learners review while the idea is still fresh."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}

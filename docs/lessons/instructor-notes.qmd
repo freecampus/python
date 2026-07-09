@@ -1,0 +1,141 @@
+---
+title: "Instructor Notes"
+description: "Teach the course with active learning, beginner safety, and calm debugging."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Beginner programming lessons fail when learners only watch someone type. This
+course should be taught as active practice: short explanations, short examples,
+frequent predictions, small challenges, and calm debugging.
+
+::: {.questions}
+### Questions
+
+- How should an instructor pace beginner Python lessons?
+- What should students do every few minutes?
+- How can debugging become a normal habit instead of a crisis?
+:::
+
+## Teaching principles
+
+::: {.key-idea}
+### Teach by doing
+
+Use this cycle repeatedly:
+
+1. explain the purpose;
+2. show a tiny example;
+3. ask learners to predict the output;
+4. run the code;
+5. ask learners to explain it;
+6. make one small change;
+7. give a challenge with a hidden solution path.
+:::
+
+This active-learning rhythm is inspired by The Carpentries lesson style:
+predictable episodes, setup checks, short challenges, and instructor-facing
+notes. The goal is not to copy their lessons, but to apply the same teaching
+wisdom to this Python course.
+
+## Setup verification script
+
+::: {.setup-check}
+```bash
+python --version
+python -m pip --version
+python -c "print('Python works')"
+python -c "import sys; print(sys.executable)"
+```
+:::
+
+If a student is blocked by installation, move them to Colab temporarily so they
+can keep learning while setup is fixed.
+
+## Debugging routine to model aloud
+
+1. What did I expect?
+2. What happened instead?
+3. What is the error type or wrong output?
+4. Which line should I inspect first?
+5. What value or type is suspicious?
+6. What is the smallest change I can test?
+7. Did the change teach me something?
+
+## Responsible AI note
+
+::: {.responsible-ai}
+Students may use AI tools for explanations, but they should not outsource the
+thinking. Ask AI to explain an error, suggest debugging questions, or review a
+small function. Students should still run the code, test it, and explain it in
+their own words. Do not paste private data or secrets into AI tools.
+:::
+
+
+## Checkpoint quiz
+
+::: {.quiz-box}
+Use this OJS quiz to confirm the purpose of this support page.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "instructor-notes",
+  "title": "Instructor Notes checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Instructor Notes?",
+      "options": [
+        "Instructors should teach Python through prediction, small examples, guided practice, quizzes, and debugging routines.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Instructors should teach Python through prediction, small examples, guided practice, quizzes, and debugging routines."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A course support page is a guide rail that helps learners and teachers stay safe and oriented."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include _includes/ojs-quiz.qmd >}}

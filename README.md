@@ -12,20 +12,50 @@ a capstone portfolio project.
 
 - Course home: [`docs/index.qmd`](docs/index.qmd)
 - Lesson path: [`docs/lessons/index.qmd`](docs/lessons/index.qmd)
-- Full course plan: [`PLAN.md`](PLAN.md)
+- First lesson:
+  [`docs/lessons/getting-started/what-is-programming.qmd`](docs/lessons/getting-started/what-is-programming.qmd)
+- Google Colab:
+  [`docs/lessons/getting-started/google-colab.qmd`](docs/lessons/getting-started/google-colab.qmd)
+- Lists lesson:
+  [`docs/lessons/data-structures/lists.qmd`](docs/lessons/data-structures/lists.qmd)
+- Debugging reference:
+  [`docs/lessons/debugging/error-messages.qmd`](docs/lessons/debugging/error-messages.qmd)
+- Learner profiles:
+  [`docs/lessons/learner-profiles.qmd`](docs/lessons/learner-profiles.qmd)
+- Instructor notes:
+  [`docs/lessons/instructor-notes.qmd`](docs/lessons/instructor-notes.qmd)
 - Practice immediately in Colab: <https://colab.new>
+- Quiz notebook example:
+  [`notebooks/03_values_variables_types_quiz.ipynb`](notebooks/03_values_variables_types_quiz.ipynb)
 
 ## Course structure
 
-1. **First contact**: mindset, Colab, local setup, VS Code, Jupyter.
-2. **Core Python**: values, variables, strings, conditionals, loops, data
-   structures, and functions.
-3. **Independent Python**: debugging, files, exceptions, modules, packages,
-   environments, testing, PEP 8, linting, formatting, and type hints.
-4. **Deeper Python**: classes, comprehensions, generators, decorators, and
-   context managers.
-5. **Applied Python**: scientific libraries, data science libraries,
-   introductory AI libraries, and a capstone project.
+1. **Getting Started**: mindset, Colab, local Python tools.
+2. **Core Python**: values/variables/types, strings/input/output, conditionals,
+   loops/tracing.
+3. **Data Structures**: lists, tuples, dictionaries, sets, and nested data as
+   cohesive lessons.
+4. **Functions**: basics, contracts, decomposition, and testing.
+5. **Debugging and data I/O**: error messages, debugging tools, files,
+   structured data, exceptions, and validation.
+6. **Projects and quality**: modules/packages, environments/dependencies,
+   command-line programs, layout, tests, style, Ruff, mypy, and CI.
+7. **Deeper Python**: OOP, dataclasses, design, comprehensions,
+   iteration/generators, decorators, context managers, logging, and
+   configuration.
+8. **Applied Python**: NumPy, Matplotlib, SymPy, SciPy, pandas, seaborn,
+   scikit-learn, PyTorch, TensorFlow/Keras, Transformers, responsible AI, and a
+   capstone.
+
+Lessons are cohesive rather than microscopic. A page can contain multiple
+section-level OJS quizzes so students review one idea before moving to the next.
+Reusable notebook quizzes live in `src/fcpython` and can be rendered with
+ipywidgets in Jupyter or Google Colab.
+
+## Local planning note
+
+`PLAN.md` is intentionally ignored by git. It is for local course planning, not
+the public roadmap.
 
 ## Development
 
@@ -50,11 +80,11 @@ makim docs.preview
 
 ```text
 .
-├── PLAN.md
 ├── docs/
 │   ├── index.qmd
 │   ├── _quarto.yml
 │   └── lessons/
+├── notebooks/
 ├── src/fcpython/
 └── tests/
 ```

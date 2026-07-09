@@ -1,0 +1,126 @@
+```{ojs}
+//| echo: false
+//| eval: true
+{
+  const scripts = Array.from(
+    document.querySelectorAll("script.fcpython-ojs-quiz-config")
+  );
+  const script = scripts.find(
+    (node) => node.dataset.fcpythonRendered !== "true"
+  );
+
+  if (!script) {
+    return html`<div class="fcpython-quiz fcpython-quiz-warning">
+      Quiz configuration was not found.
+    </div>`;
+  }
+
+  script.dataset.fcpythonRendered = "true";
+  const quiz = JSON.parse(script.textContent);
+  const container = html`<div class="fcpython-quiz"></div>`;
+  const title = document.createElement("h3");
+  title.textContent = quiz.title;
+  container.appendChild(title);
+
+  const instructions = document.createElement("p");
+  instructions.textContent = quiz.instructions;
+  container.appendChild(instructions);
+
+  const feedbackNodes = [];
+
+  quiz.questions.forEach((question, questionIndex) => {
+    const fieldset = document.createElement("fieldset");
+    fieldset.className = "fcpython-quiz-question";
+
+    const legend = document.createElement("legend");
+    legend.textContent = `${questionIndex + 1}. ${question.prompt}`;
+    fieldset.appendChild(legend);
+
+    question.options.forEach((option, optionIndex) => {
+      const label = document.createElement("label");
+      label.className = "fcpython-quiz-option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `${quiz.id}-${question.id}`;
+      input.value = String(optionIndex);
+
+      const text = document.createElement("span");
+      text.textContent = option;
+
+      label.appendChild(input);
+      label.appendChild(text);
+      fieldset.appendChild(label);
+    });
+
+    const feedback = document.createElement("p");
+    feedback.className = "fcpython-quiz-feedback";
+    feedback.setAttribute("aria-live", "polite");
+    feedbackNodes.push(feedback);
+    fieldset.appendChild(feedback);
+    container.appendChild(fieldset);
+  });
+
+  const actions = document.createElement("div");
+  actions.className = "fcpython-quiz-actions";
+
+  const check = document.createElement("button");
+  check.type = "button";
+  check.textContent = "Check answers";
+
+  const reset = document.createElement("button");
+  reset.type = "button";
+  reset.textContent = "Reset";
+
+  const score = document.createElement("p");
+  score.className = "fcpython-quiz-score";
+  score.setAttribute("aria-live", "polite");
+
+  check.addEventListener("click", () => {
+    let correctCount = 0;
+
+    quiz.questions.forEach((question, questionIndex) => {
+      const selected = container.querySelector(
+        `input[name="${quiz.id}-${question.id}"]:checked`
+      );
+      const feedback = feedbackNodes[questionIndex];
+
+      if (!selected) {
+        feedback.textContent = "Choose an answer before checking.";
+        feedback.className = "fcpython-quiz-feedback";
+        return;
+      }
+
+      const selectedIndex = Number(selected.value);
+      if (selectedIndex === question.answer_index) {
+        correctCount += 1;
+        feedback.textContent = `✅ Correct. ${question.explanation}`;
+        feedback.className = "fcpython-quiz-feedback is-correct";
+      } else {
+        const answer = question.options[question.answer_index];
+        feedback.textContent = `❌ Not yet. Correct answer: ${answer}. ${question.explanation}`;
+        feedback.className = "fcpython-quiz-feedback is-incorrect";
+      }
+    });
+
+    score.textContent = `Score: ${correctCount}/${quiz.questions.length}`;
+  });
+
+  reset.addEventListener("click", () => {
+    container.querySelectorAll("input[type='radio']").forEach((input) => {
+      input.checked = false;
+    });
+    feedbackNodes.forEach((feedback) => {
+      feedback.textContent = "";
+      feedback.className = "fcpython-quiz-feedback";
+    });
+    score.textContent = "";
+  });
+
+  actions.appendChild(check);
+  actions.appendChild(reset);
+  container.appendChild(actions);
+  container.appendChild(score);
+  return container;
+}
+```

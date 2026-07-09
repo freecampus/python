@@ -39,8 +39,9 @@ groups:
         help: Build the Quarto documentation website
         backend: bash
         run: |
-          mkdir -p .quarto-tmp .cache/deno
-          TMPDIR="$PWD/.quarto-tmp" \
+          mkdir -p .quarto-tmp .cache/deno .cache/quarto-home
+          HOME="$PWD/.cache/quarto-home" \
+            TMPDIR="$PWD/.quarto-tmp" \
             XDG_CACHE_HOME="$PWD/.cache" \
             DENO_DIR="$PWD/.cache/deno" \
             quarto render docs --no-execute-daemon
@@ -58,8 +59,9 @@ groups:
           pre-run:
             - task: docs.build
         run: |
-          mkdir -p .quarto-tmp .cache/deno
-          TMPDIR="$PWD/.quarto-tmp" \
+          mkdir -p .quarto-tmp .cache/deno .cache/quarto-home
+          HOME="$PWD/.cache/quarto-home" \
+            TMPDIR="$PWD/.quarto-tmp" \
             XDG_CACHE_HOME="$PWD/.cache" \
             DENO_DIR="$PWD/.cache/deno" \
             quarto preview docs

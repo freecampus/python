@@ -7,23 +7,28 @@ execute:
 
 ## Why this matters
 
-Start with a real situation and a friendly analogy.
+Use this template when adding a new atomic lesson. One lesson should teach one
+central topic, not a bundle of loosely related topics.
+
+::: {.questions}
+### Questions
+
+- What problem does this concept help learners solve?
+- What should learners predict, run, and explain?
+- Which mistake should they debug first?
+:::
 
 ::: {.learning-objectives}
 ### Learning objectives
 
-By the end, you should be able to:
-
-- define the main idea;
-- read a small code example;
-- write a similar example;
-- debug one common mistake.
+By the end, learners should be able to explain, read, write, modify, and debug a
+small example for the topic.
 :::
 
 ::: {.analogy}
 ### Analogy
 
-Use an everyday comparison before formal vocabulary.
+Start with an everyday comparison before formal vocabulary.
 :::
 
 ## Tiny example
@@ -32,40 +37,35 @@ Use an everyday comparison before formal vocabulary.
 print("Hello, Python!")
 ```
 
-## Predict, run, explain
+## Challenge
 
-1. Predict the output.
-2. Run the code.
-3. Explain what happened.
-4. Change one small part and run again.
-
-## Guided practice
-
-::: {.practice-box}
-Write short exercises with hints and solutions.
+::: {.challenge}
+Ask learners to change one thing, predict the result, and explain what changed.
 :::
 
 ## Checkpoint quiz
 
-::: {.quiz-box}
-Add 3 to 5 questions.
-:::
+Every lesson must include a browser-side OJS quiz. If the same quiz should also
+appear in notebooks, store it in `src/fcpython/quiz_banks.py` and render it with
+an import cell that uses `#| echo: false`.
 
-<details class="solution">
-<summary>Show answers</summary>
-
-Explain answers step by step.
-
-</details>
+```python
+# In a notebook/Quarto cell, keep setup hidden with:
+#| echo: false
+#| eval: false
+#| output: asis
+# from fcpython.quiz_banks import example_quiz
+# print(example_quiz().to_json_script())
+```
 
 ## Debugging corner
 
-::: {.debugging-corner}
 Show broken code, the likely error, and a debugging routine.
-:::
 
-## Summary
+## Key points
 
-::: {.lesson-summary}
-End with 3 to 5 key takeaways and a link to the next lesson.
+::: {.key-points}
+- Keep lessons atomic.
+- Use analogies, examples, challenges, OJS quizzes, and references.
+- Make mistakes visible and teachable.
 :::

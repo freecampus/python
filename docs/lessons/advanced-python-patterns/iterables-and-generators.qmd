@@ -1,0 +1,374 @@
+---
+title: "Iterables and Generators"
+description: "Understand iteration and produce values lazily with generators."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Understand iteration and produce values lazily with generators.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one mental model.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Iterables and Generators** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 2 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- Section 1: **Iterables and Iterators** — Understand objects that can be looped over and the mechanism that produces one item at a time.
+- Section 2: **Generators** — Write functions that yield values lazily instead of returning a complete collection.
+
+<!-- mermaid-visual-model -->
+## Visual model
+
+::: {.visual-model}
+A generator produces one value, pauses, remembers its state, and resumes when the
+next value is requested.
+
+```{mermaid}
+stateDiagram-v2
+  [*] --> Ready
+  Ready --> YieldOne: next()
+  YieldOne --> Paused: yield value
+  Paused --> YieldTwo: next()
+  YieldTwo --> PausedAgain: yield next value
+  PausedAgain --> Done: no more values
+  Done --> [*]
+```
+
+Generators are useful when you want a sequence over time instead of building the
+whole collection immediately.
+:::
+
+## Section 1: Iterables and Iterators
+
+Understand objects that can be looped over and the mechanism that produces one item at a time.
+
+::: {.analogy}
+### Analogy for this section
+
+An iterator is a bookmark moving through a book one page at a time.
+:::
+
+### Mental model
+
+An iterable can provide an iterator; an iterator remembers where it is in a sequence of
+values.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+numbers = iter([10, 20, 30])
+print(next(numbers))
+print(next(numbers))
+```
+
+### Walkthrough
+
+1. `numbers = iter([10, 20, 30])` — read this line slowly and ask what value or action it creates.
+2. `print(next(numbers))` — read this line slowly and ask what value or action it creates.
+3. `print(next(numbers))` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+An iterator can be consumed. If it is exhausted, looping over it again may produce
+nothing.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "advanced-python-patterns-iterables-and-iterators",
+  "title": "Iterables and Iterators checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Iterables and Iterators?",
+      "options": [
+        "An iterable can provide an iterator; an iterator remembers where it is in a sequence of values.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: An iterable can provide an iterator; an iterator remembers where it is in a sequence of values."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: An iterator is a bookmark moving through a book one page at a time."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 2: Generators
+
+Write functions that yield values lazily instead of returning a complete collection.
+
+::: {.analogy}
+### Analogy for this section
+
+A generator is a vending machine: it gives one item when asked, not the whole warehouse.
+:::
+
+### Mental model
+
+A generator produces values one at a time, pausing between yields.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+def countdown(start):
+    while start > 0:
+        yield start
+        start -= 1
+
+for number in countdown(3):
+    print(number)
+```
+
+### Walkthrough
+
+1. `def countdown(start):` — read this line slowly and ask what value or action it creates.
+2. `while start > 0:` — read this line slowly and ask what value or action it creates.
+3. `yield start` — read this line slowly and ask what value or action it creates.
+4. `start -= 1` — read this line slowly and ask what value or action it creates.
+5. `for number in countdown(3):` — read this line slowly and ask what value or action it creates.
+6. Continue the same process for the remaining lines, one line at a time.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+yield pauses the function; return ends it. Use yield when callers should receive a
+sequence over time.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "advanced-python-patterns-generators",
+  "title": "Generators checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Generators?",
+      "options": [
+        "A generator produces values one at a time, pausing between yields.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A generator produces values one at a time, pausing between yields."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A generator is a vending machine: it gives one item when asked, not the whole warehouse."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+tiny example, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- **Iterables and Iterators**: An iterable can provide an iterator; an iterator remembers where it is in a sequence of
+values.
+- **Generators**: A generator produces values one at a time, pausing between yields.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- Python functional tools: https://docs.python.org/3/howto/functional.html
+- contextlib documentation: https://docs.python.org/3/library/contextlib.html
+- logging documentation: https://docs.python.org/3/library/logging.html
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

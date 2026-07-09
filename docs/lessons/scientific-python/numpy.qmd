@@ -1,0 +1,489 @@
+---
+title: "NumPy"
+description: "Use arrays, shapes, indexing, and vectorized operations for numerical data."
+execute:
+  echo: true
+---
+
+## Why this matters
+
+Use arrays, shapes, indexing, and vectorized operations for numerical data.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one mental model.
+
+::: {.questions}
+### Questions
+
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **NumPy** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.learning-objectives}
+### Learning objectives
+
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 3 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- Section 1: **NumPy Arrays** — Use NumPy arrays for efficient numerical data.
+- Section 2: **NumPy Indexing and Shapes** — Read array dimensions and select rows, columns, and slices.
+- Section 3: **Vectorized Operations** — Apply operations to whole arrays without manual Python loops.
+
+## Section 1: NumPy Arrays
+
+Use NumPy arrays for efficient numerical data.
+
+::: {.analogy}
+### Analogy for this section
+
+A NumPy array is like a tray of identical measuring cups arranged in rows and columns.
+:::
+
+### Mental model
+
+A NumPy array stores same-type numerical values in a shape that supports fast
+operations.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import numpy as np
+
+values = np.array([1, 2, 3])
+print(values * 10)
+```
+
+### Walkthrough
+
+1. `import numpy as np` — read this line slowly and ask what value or action it creates.
+2. `values = np.array([1, 2, 3])` — read this line slowly and ask what value or action it creates.
+3. `print(values * 10)` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+NumPy arrays and Python lists look similar but operations behave differently. [1,2]*2
+repeats; np.array([1,2])*2 multiplies.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "scientific-python-numpy-arrays",
+  "title": "NumPy Arrays checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes NumPy Arrays?",
+      "options": [
+        "A NumPy array stores same-type numerical values in a shape that supports fast operations.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A NumPy array stores same-type numerical values in a shape that supports fast operations."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A NumPy array is like a tray of identical measuring cups arranged in rows and columns."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 2: NumPy Indexing and Shapes
+
+Read array dimensions and select rows, columns, and slices.
+
+::: {.analogy}
+### Analogy for this section
+
+Shape is the layout of a theater, and indexing chooses seats by row and column.
+:::
+
+### Mental model
+
+Shape describes array dimensions; indexing selects parts of the array.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import numpy as np
+
+grid = np.array([[1, 2, 3], [4, 5, 6]])
+print(grid.shape)
+print(grid[1, 2])
+```
+
+### Walkthrough
+
+1. `import numpy as np` — read this line slowly and ask what value or action it creates.
+2. `grid = np.array([[1, 2, 3], [4, 5, 6]])` — read this line slowly and ask what value or action it creates.
+3. `print(grid.shape)` — read this line slowly and ask what value or action it creates.
+4. `print(grid[1, 2])` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+A 2D NumPy array often uses array[row, column], not two separate list indexes.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "scientific-python-numpy-indexing-shapes",
+  "title": "NumPy Indexing and Shapes checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes NumPy Indexing and Shapes?",
+      "options": [
+        "Shape describes array dimensions; indexing selects parts of the array.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Shape describes array dimensions; indexing selects parts of the array."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: Shape is the layout of a theater, and indexing chooses seats by row and column."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Section 3: Vectorized Operations
+
+Apply operations to whole arrays without manual Python loops.
+
+::: {.analogy}
+### Analogy for this section
+
+Vectorization is like stamping every envelope with one press instead of writing each
+stamp by hand.
+:::
+
+### Mental model
+
+Vectorization lets library code apply an operation across many values efficiently.
+
+### Tiny example
+
+Predict what will happen before you run the code.
+
+```python
+import numpy as np
+
+temperatures_c = np.array([0, 10, 20])
+temperatures_f = temperatures_c * 9 / 5 + 32
+print(temperatures_f)
+```
+
+### Walkthrough
+
+1. `import numpy as np` — read this line slowly and ask what value or action it creates.
+2. `temperatures_c = np.array([0, 10, 20])` — read this line slowly and ask what value or action it creates.
+3. `temperatures_f = temperatures_c * 9 / 5 + 32` — read this line slowly and ask what value or action it creates.
+4. `print(temperatures_f)` — read this line slowly and ask what value or action it creates.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.challenge}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.debugging-corner}
+Vectorized expressions still need matching shapes. Shape mismatches are clues, not
+random failures.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Section checkpoint
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "scientific-python-vectorized-operations",
+  "title": "Vectorized Operations checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Vectorized Operations?",
+      "options": [
+        "Vectorization lets library code apply an operation across many values efficiently.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Vectorization lets library code apply an operation across many values efficiently."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: Vectorization is like stamping every envelope with one press instead of writing each stamp by hand."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after the tiny example works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+tiny example, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.key-points}
+- **NumPy Arrays**: A NumPy array stores same-type numerical values in a shape that supports fast
+operations.
+- **NumPy Indexing and Shapes**: Shape describes array dimensions; indexing selects parts of the array.
+- **Vectorized Operations**: Vectorization lets library code apply an operation across many values efficiently.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- NumPy documentation: https://numpy.org/doc/stable/
+- Matplotlib documentation: https://matplotlib.org/stable/
+- SciPy documentation: https://docs.scipy.org/doc/scipy/
+- SymPy documentation: https://docs.sympy.org/
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

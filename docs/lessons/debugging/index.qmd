@@ -1,0 +1,70 @@
+---
+title: "Debugging"
+description: "Read errors calmly, inspect state, and make small experiments instead of guessing."
+execute:
+  echo: true
+---
+
+## Why this chapter matters
+
+Read errors calmly, inspect state, and make small experiments instead of guessing.
+
+Lessons are now grouped by coherent learner topics. A page may contain multiple
+short quizzes when the page has multiple sections, so students can check one
+idea before moving to the next.
+
+::: {.questions}
+### Questions
+
+- Which lessons belong in this chapter?
+- What should I review before moving on?
+- How do the lesson sections build one practical skill?
+:::
+
+## Lesson path
+
+- [Error Messages](error-messages.qmd) — Read tracebacks and recognize common beginner error patterns.
+- [Debugging Tools](debugging-tools.qmd) — Use print debugging, VS Code breakpoints, and pdb to inspect running programs.
+- [Minimal Reproducible Examples](minimal-reproducible-examples.qmd) — Shrink a bug into the smallest code that still shows the problem.
+
+## Chapter checkpoint
+
+::: {.quiz-box}
+Use this short checkpoint before starting the chapter.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "debugging-overview",
+  "title": "Debugging overview checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "chapter-purpose",
+      "prompt": "What is the purpose of the Debugging chapter?",
+      "options": [
+        "Read errors calmly, inspect state, and make small experiments instead of guessing.",
+        "To memorize disconnected commands",
+        "To skip practice",
+        "To avoid debugging"
+      ],
+      "answer_index": 0,
+      "explanation": "Read errors calmly, inspect state, and make small experiments instead of guessing."
+    },
+    {
+      "id": "study-flow",
+      "prompt": "Why can a lesson contain multiple quizzes?",
+      "options": [
+        "Each quiz checks one section before the next section builds on it.",
+        "Quizzes replace examples.",
+        "Multiple quizzes mean the topic is unrelated.",
+        "Quizzes should only appear at the end of the course."
+      ],
+      "answer_index": 0,
+      "explanation": "Section-level quizzes help learners review while the idea is still fresh."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
