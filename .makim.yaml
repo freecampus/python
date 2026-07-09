@@ -45,6 +45,7 @@ groups:
             XDG_CACHE_HOME="$PWD/.cache" \
             DENO_DIR="$PWD/.cache/deno" \
             quarto render docs --no-execute-daemon
+          python scripts/build_colab_notebooks.py
 
       render:
         help: Alias for docs.build

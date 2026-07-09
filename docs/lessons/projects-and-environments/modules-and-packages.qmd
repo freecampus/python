@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [projects-and-environments]
 order: 320
+colab_notebook: "notebooks/lessons/projects-and-environments/modules-and-packages.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,105 @@ order: 320
 **You will learn:** Organize reusable code into Python files and package folders.
 **Practice in:** VS Code and the terminal
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Modules and Packages** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **modules and packages** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Modules and Packages
+
+A module is a Python file that can be imported. A package is a folder of modules. Imports connect names from one file to code in another file.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Imagine this helper function lives in `temperature.py`; the script imports it and calls it.
+
+```python
+# temperature.py
+def c_to_f(celsius):
+return celsius * 9 / 5 + 32
+
+# app.py
+from temperature import c_to_f
+print(c_to_f(20))
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The function definition belongs in a module whose name communicates its topic.
+- `from temperature import c_to_f` loads the function name into the script.
+- The script can call the function without copying its body.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Rename the file to `math.py` and import the standard `math` module elsewhere. This can shadow the real library and create confusing import behavior, which is why file names matter.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Rename the file to `math.py` and import the standard `math` module elsewhere.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+If an import fails, check the file name, current folder, spelling, and whether you are running the command from the project root. Circular imports can happen when two modules need each other at import time; move shared logic to a third module or simplify the dependency.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Split a small calculator into `operations.py` and `app.py`. Import two functions, call them, and then run the script from the project root.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -66,8 +166,8 @@ print(math.sqrt(16))
 
 ### Step-by-step explanation
 
-1. `import math` — identify the value, name, or action on this line.
-2. `print(math.sqrt(16))` — identify the value, name, or action on this line.
+1. `import math` — pause here and say what this line reads, creates, changes, or displays.
+2. `print(math.sqrt(16))` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -196,8 +296,8 @@ print(Path("src") / "my_project")
 
 ### Step-by-step explanation
 
-1. `from pathlib import Path` — identify the value, name, or action on this line.
-2. `print(Path("src") / "my_project")` — identify the value, name, or action on this line.
+1. `from pathlib import Path` — pause here and say what this line reads, creates, changes, or displays.
+2. `print(Path("src") / "my_project")` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

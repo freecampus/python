@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [scientific-python]
 order: 530
+colab_notebook: "notebooks/lessons/scientific-python/random-simulation.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,108 @@ order: 530
 **You will learn:** Use random numbers to model uncertainty and repeated experiments.
 **Practice in:** Jupyter or Google Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Random Simulation** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **random simulation** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Random Simulation
+
+A simulation uses random draws, repeated trials, and summaries to estimate behavior under uncertainty. A seed makes random results reproducible for learning and debugging.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict whether the estimate gets steadier as trials increase.
+
+```python
+import random
+
+random.seed(42)
+heads = 0
+trials = 1000
+for _ in range(trials):
+if random.choice(["H", "T"]) == "H":
+heads = heads + 1
+print(heads / trials)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The seed makes this practice run repeatable.
+- Each loop trip simulates one coin flip.
+- The conditional counts only heads.
+- Dividing by `trials` gives an estimated probability.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Change `trials` to `10`, then `10000`. Small samples jump around more; large samples usually settle closer to the expected pattern.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Change `trials` to `10`, then `10000`.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+A seed does not make randomness fake; it makes the sequence repeatable. Also do not trust a tiny number of trials. Simulation estimates need enough repetitions to be meaningful.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Estimate the probability of rolling a six on a die. Then estimate the probability that two dice sum to seven. Compare results for 100 and 10,000 trials.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -47,11 +150,11 @@ event.
 
 ## Vocabulary
 
-- **random** — a word you should be able to explain after this lesson.
-- **simulation** — a word you should be able to explain after this lesson.
-- **seed** — a word you should be able to explain after this lesson.
-- **sample** — a word you should be able to explain after this lesson.
-- **mean** — a word you should be able to explain after this lesson.
+- **random** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **simulation** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **seed** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **sample** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **mean** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -77,10 +180,10 @@ print(rolls.mean())
 
 ## Step-by-step explanation
 
-1. `import numpy as np` — identify the value, name, or action on this line.
-2. `rng = np.random.default_rng(42)` — identify the value, name, or action on this line.
-3. `rolls = rng.integers(1, 7, size=10)` — identify the value, name, or action on this line.
-4. `print(rolls.mean())` — identify the value, name, or action on this line.
+1. `import numpy as np` — pause here and say what this line reads, creates, changes, or displays.
+2. `rng = np.random.default_rng(42)` — pause here and say what this line reads, creates, changes, or displays.
+3. `rolls = rng.integers(1, 7, size=10)` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(rolls.mean())` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

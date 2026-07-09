@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [files-and-data]
 order: 280
+colab_notebook: "notebooks/lessons/files-and-data/paths-and-text-files.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,106 @@ order: 280
 **You will learn:** Find files reliably and read or write plain text safely.
 **Practice in:** VS Code, Jupyter, and local files
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Paths and Text Files** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **paths and text files** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Paths and Text Files
+
+A path points to a file or folder. `open` connects your program to a file, and a `with` block makes sure the file is closed even if something goes wrong.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict what file will be created and what text will be read back.
+
+```python
+from pathlib import Path
+
+path = Path("notes.txt")
+path.write_text("Practice one idea at a time.
+")
+message = path.read_text()
+print(message)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `Path("notes.txt")` creates a path relative to the current working directory.
+- `write_text` stores text in that file, replacing old content if the file already exists.
+- `read_text` loads the file contents back into Python as a string.
+- The print call displays the text so you can verify the round trip.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Change the file name to `data/notes.txt` before creating the `data` folder. The error tells you the folder path does not exist yet, which is different from the file contents being wrong.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Change the file name to `data/notes.txt` before creating the `data` folder.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+When Python cannot find a file, first print the current working directory and the path you are using. Many file bugs are location bugs. Be careful with write mode because it can overwrite a file that already exists.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+In Colab, write a short journal entry to a text file, read it back, append one more line, and print the final contents. Explain which line creates data and which line preserves it.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -70,10 +171,10 @@ print(data_file)
 
 ### Step-by-step explanation
 
-1. `from pathlib import Path` — identify the value, name, or action on this line.
-2. `print(Path.cwd())` — identify the value, name, or action on this line.
-3. `data_file = Path("data") / "scores.csv"` — identify the value, name, or action on this line.
-4. `print(data_file)` — identify the value, name, or action on this line.
+1. `from pathlib import Path` — pause here and say what this line reads, creates, changes, or displays.
+2. `print(Path.cwd())` — pause here and say what this line reads, creates, changes, or displays.
+3. `data_file = Path("data") / "scores.csv"` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(data_file)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -203,9 +304,9 @@ print(text)
 
 ### Step-by-step explanation
 
-1. `from pathlib import Path` — identify the value, name, or action on this line.
-2. `text = Path("notes.txt").read_text(encoding="utf-8")` — identify the value, name, or action on this line.
-3. `print(text)` — identify the value, name, or action on this line.
+1. `from pathlib import Path` — pause here and say what this line reads, creates, changes, or displays.
+2. `text = Path("notes.txt").read_text(encoding="utf-8")` — pause here and say what this line reads, creates, changes, or displays.
+3. `print(text)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -334,9 +435,9 @@ Path("report.txt").write_text(report, encoding="utf-8")
 
 ### Step-by-step explanation
 
-1. `from pathlib import Path` — identify the value, name, or action on this line.
-2. `report = "Result: success\n"` — identify the value, name, or action on this line.
-3. `Path("report.txt").write_text(report, encoding="utf-8")` — identify the value, name, or action on this line.
+1. `from pathlib import Path` — pause here and say what this line reads, creates, changes, or displays.
+2. `report = "Result: success\n"` — pause here and say what this line reads, creates, changes, or displays.
+3. `Path("report.txt").write_text(report, encoding="utf-8")` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

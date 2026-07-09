@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [machine-learning-ai]
 order: 650
+colab_notebook: "notebooks/lessons/machine-learning-ai/training-and-evaluation.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,108 @@ order: 650
 **You will learn:** Split data, fit a first model, evaluate predictions, and recognize overfitting.
 **Practice in:** Jupyter or Google Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Training and Evaluation** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **training and evaluation** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Training and Evaluation
+
+Training fits a model to examples. Evaluation tests predictions on held-out data using metrics that match the problem and the cost of mistakes.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read the workflow as fit, predict, evaluate.
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.tree import DecisionTreeClassifier
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+model = DecisionTreeClassifier(random_state=42)
+model.fit(X_train, y_train)
+predictions = model.predict(X_test)
+print(accuracy_score(y_test, predictions))
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The split separates practice data from exam data.
+- `fit` lets the model learn patterns from the training examples.
+- `predict` asks the trained model for answers on test features.
+- The metric compares predictions with known test labels.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Evaluate on `X_train` and compare the score with `X_test`. A very high training score with a lower test score can signal overfitting.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Evaluate on `X_train` and compare the score with `X_test`.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not tune decisions by repeatedly peeking at the test set. The test set should stay as honest as possible. Also choose metrics based on consequences; accuracy can hide serious failure when classes are imbalanced.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Train a simple classifier or regressor in Colab, print one metric, inspect a few predictions, and write whether the metric is enough to trust the model.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -97,10 +200,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 
 ### Step-by-step explanation
 
-1. `from sklearn.model_selection import train_test_split` — identify the value, name, or action on this line.
-2. `X = [[1], [2], [3], [4]]` — identify the value, name, or action on this line.
-3. `y = [2, 4, 6, 8]` — identify the value, name, or action on this line.
-4. `X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)` — identify the value, name, or action on this line.
+1. `from sklearn.model_selection import train_test_split` — pause here and say what this line reads, creates, changes, or displays.
+2. `X = [[1], [2], [3], [4]]` — pause here and say what this line reads, creates, changes, or displays.
+3. `y = [2, 4, 6, 8]` — pause here and say what this line reads, creates, changes, or displays.
+4. `X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -231,10 +334,10 @@ print(model.predict([[4]]))
 
 ### Step-by-step explanation
 
-1. `from sklearn.linear_model import LinearRegression` — identify the value, name, or action on this line.
-2. `model = LinearRegression()` — identify the value, name, or action on this line.
-3. `model.fit([[1], [2], [3]], [2, 4, 6])` — identify the value, name, or action on this line.
-4. `print(model.predict([[4]]))` — identify the value, name, or action on this line.
+1. `from sklearn.linear_model import LinearRegression` — pause here and say what this line reads, creates, changes, or displays.
+2. `model = LinearRegression()` — pause here and say what this line reads, creates, changes, or displays.
+3. `model.fit([[1], [2], [3]], [2, 4, 6])` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(model.predict([[4]]))` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -367,10 +470,10 @@ print(mean_absolute_error(y_true, y_pred))
 
 ### Step-by-step explanation
 
-1. `from sklearn.metrics import mean_absolute_error` — identify the value, name, or action on this line.
-2. `y_true = [10, 20, 30]` — identify the value, name, or action on this line.
-3. `y_pred = [12, 18, 33]` — identify the value, name, or action on this line.
-4. `print(mean_absolute_error(y_true, y_pred))` — identify the value, name, or action on this line.
+1. `from sklearn.metrics import mean_absolute_error` — pause here and say what this line reads, creates, changes, or displays.
+2. `y_true = [10, 20, 30]` — pause here and say what this line reads, creates, changes, or displays.
+3. `y_pred = [12, 18, 33]` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(mean_absolute_error(y_true, y_pred))` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -500,9 +603,9 @@ print("possible overfitting", training_score - test_score)
 
 ### Step-by-step explanation
 
-1. `training_score = 0.99` — identify the value, name, or action on this line.
-2. `test_score = 0.60` — identify the value, name, or action on this line.
-3. `print("possible overfitting", training_score - test_score)` — identify the value, name, or action on this line.
+1. `training_score = 0.99` — pause here and say what this line reads, creates, changes, or displays.
+2. `test_score = 0.60` — pause here and say what this line reads, creates, changes, or displays.
+3. `print("possible overfitting", training_score - test_score)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

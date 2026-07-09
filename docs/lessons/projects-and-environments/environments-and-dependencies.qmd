@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [projects-and-environments]
 order: 330
+colab_notebook: "notebooks/lessons/projects-and-environments/environments-and-dependencies.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,101 @@ order: 330
 **You will learn:** Use virtual environments, install packages, and understand pyproject.toml.
 **Practice in:** VS Code and the terminal
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Environments and Dependencies** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **environments and dependencies** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Environments and Dependencies
+
+A dependency is external code your project needs. An environment is the Python interpreter plus installed packages used for one project.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read these commands as a reproducible setup story, not as magic terminal incantations.
+
+```bash
+python -m venv .venv
+python -m pip install pandas
+python -m pip freeze > requirements.txt
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The first command creates a local environment folder for this project.
+- The second command installs a package using the selected Python interpreter.
+- The third command records installed package versions so another person can recreate the setup.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+After installing a package, run `python -c "import pandas; print(pandas.__version__)"`. This verifies that the same interpreter can import the package.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: After installing a package, run `python -c "import pandas; print(pandas.__version__)"`.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+The most common environment bug is using one Python to install and another Python to run. Always check the interpreter path in VS Code, Jupyter, and the terminal. Recording dependencies is part of the project, not an optional cleanup step.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Create a tiny environment, install one library, verify the import, record dependencies, and write down the exact commands another learner would need to repeat your setup.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -90,9 +186,9 @@ python -m pip install requests
 
 ### Step-by-step explanation
 
-1. `python -m venv .venv` — identify the value, name, or action on this line.
-2. `source .venv/bin/activate` — identify the value, name, or action on this line.
-3. `python -m pip install requests` — identify the value, name, or action on this line.
+1. `python -m venv .venv` — pause here and say what this line reads, creates, changes, or displays.
+2. `source .venv/bin/activate` — pause here and say what this line reads, creates, changes, or displays.
+3. `python -m pip install requests` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -221,8 +317,8 @@ python -m pip show numpy
 
 ### Step-by-step explanation
 
-1. `python -m pip install numpy` — identify the value, name, or action on this line.
-2. `python -m pip show numpy` — identify the value, name, or action on this line.
+1. `python -m pip install numpy` — pause here and say what this line reads, creates, changes, or displays.
+2. `python -m pip show numpy` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -353,10 +449,10 @@ dependencies = ["numpy"]
 
 ### Step-by-step explanation
 
-1. `[project]` — identify the value, name, or action on this line.
-2. `name = "my-project"` — identify the value, name, or action on this line.
-3. `version = "0.1.0"` — identify the value, name, or action on this line.
-4. `dependencies = ["numpy"]` — identify the value, name, or action on this line.
+1. `[project]` — pause here and say what this line reads, creates, changes, or displays.
+2. `name = "my-project"` — pause here and say what this line reads, creates, changes, or displays.
+3. `version = "0.1.0"` — pause here and say what this line reads, creates, changes, or displays.
+4. `dependencies = ["numpy"]` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

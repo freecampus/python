@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [files-and-data]
 order: 290
+colab_notebook: "notebooks/lessons/files-and-data/structured-files.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,105 @@ order: 290
 **You will learn:** Read and write CSV and JSON data formats.
 **Practice in:** VS Code, Jupyter, and local files
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Structured Files** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **CSV and JSON structured files** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Structured Files
+
+CSV represents table-like data; JSON represents nested data built from dictionaries, lists, strings, numbers, booleans, and null-like values.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read the JSON example as nested Python-style data before thinking about files.
+
+```python
+import json
+
+profile = {"name": "Ada", "scores": [8, 9, 10]}
+text = json.dumps(profile)
+loaded = json.loads(text)
+print(loaded["scores"][0])
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The profile dictionary contains a string and a list of numbers.
+- `json.dumps` converts the Python data structure into JSON text.
+- `json.loads` converts JSON text back into Python data.
+- The final line uses a dictionary key and then a list index to reach the first score.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Add a new key such as `"city"` and inspect the JSON text. Notice that the file format preserves labels, not just values.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Add a new key such as `"city"` and inspect the JSON text.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not parse CSV by splitting every line on commas unless you know the data is extremely simple. Real CSV files can contain commas inside quoted values. Use the `csv` module or pandas when appropriate. For JSON, check brackets and quotes when a decoder error appears.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Create a tiny contacts dataset as a list of dictionaries, save it as JSON, load it again, and print one contact's email. Then describe whether CSV or JSON would fit the same data better.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -71,11 +171,11 @@ with open("scores.csv", newline="", encoding="utf-8") as file:
 
 ### Step-by-step explanation
 
-1. `import csv` — identify the value, name, or action on this line.
-2. `with open("scores.csv", newline="", encoding="utf-8") as file:` — identify the value, name, or action on this line.
-3. `reader = csv.DictReader(file)` — identify the value, name, or action on this line.
-4. `for row in reader:` — identify the value, name, or action on this line.
-5. `print(row["name"], row["score"])` — identify the value, name, or action on this line.
+1. `import csv` — pause here and say what this line reads, creates, changes, or displays.
+2. `with open("scores.csv", newline="", encoding="utf-8") as file:` — pause here and say what this line reads, creates, changes, or displays.
+3. `reader = csv.DictReader(file)` — pause here and say what this line reads, creates, changes, or displays.
+4. `for row in reader:` — pause here and say what this line reads, creates, changes, or displays.
+5. `print(row["name"], row["score"])` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -208,10 +308,10 @@ print(data["scores"][0])
 
 ### Step-by-step explanation
 
-1. `import json` — identify the value, name, or action on this line.
-2. `text = '{"name": "Ada", "scores": [90, 95]}'` — identify the value, name, or action on this line.
-3. `data = json.loads(text)` — identify the value, name, or action on this line.
-4. `print(data["scores"][0])` — identify the value, name, or action on this line.
+1. `import json` — pause here and say what this line reads, creates, changes, or displays.
+2. `text = '{"name": "Ada", "scores": [90, 95]}'` — pause here and say what this line reads, creates, changes, or displays.
+3. `data = json.loads(text)` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(data["scores"][0])` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [core-python, beginner]
 order: 100
+colab_notebook: "notebooks/lessons/core-python/strings-input-output.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner
@@ -12,6 +13,103 @@ order: 100
 **You will learn:** Work with text, formatted messages, and simple user interaction.
 **Practice in:** Google Colab, Jupyter, or VS Code
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Strings, Input, and Output** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **strings, input, and output** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Strings, Input, and Output
+
+A string is a text value. `print` displays values, f-strings combine stored values with text, and `input` always returns text even when the person typed digits.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict the exact message, including spaces and punctuation.
+
+```python
+name = "Maya"
+score = 8
+message = f"Hello, {name}. Your score is {score}."
+print(message)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The first line stores the text `Maya` under the name `name`.
+- The second line stores the integer `8` under the name `score`.
+- The f-string starts with `f`, so Python replaces `{name}` and `{score}` with their current values.
+- `print(message)` displays the final string, not the word `message`.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Remove the `f` before the string and run again. The braces will print literally. This small experiment shows that the `f` is not decoration; it changes how Python interprets the string.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Remove the `f` before the string and run again.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+The classic beginner bug is adding input directly to a number. `input()` returns a string, so `age = input(...)` gives you text. If you need arithmetic, convert intentionally with `int(age)` or `float(age)` and be ready to handle invalid input later.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+In Colab, ask for a learner's name and favorite topic. Print a two-sentence welcome message using an f-string. Then ask for a number, convert it, add one, and print the result.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## The problem this lesson solves
 
@@ -284,10 +382,9 @@ This raises `ValueError` because Python does not know how to turn the word
 unexpected text and be ready to validate it later.
 :::
 
-### Practice in Colab
+### Try it
 
-Open <https://colab.new>, create one code cell, and build a tiny greeting
-program:
+In the notebook, create one code cell and build a tiny greeting program:
 
 ```python
 name = input("Name: ")

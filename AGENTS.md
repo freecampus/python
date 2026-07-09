@@ -47,10 +47,15 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   multiple sections. Use them as checkpoints before the next section.
 - Every public lesson/chapter/support page should include an OJS quiz config and
   the shared OJS include.
+- Every public lesson/chapter/support page should include the shared Colab
+  launch include so learners can open the generated notebook immediately.
 - Content lesson pages should start with a compact `.lesson-meta` block that
   states level, estimated time, learning outcome, and practice environment.
 - Lesson front matter should include `categories` and `order` so pages can later
   be used by Quarto listings without rebuilding the course map by hand.
+- Lesson front matter should also include `colab_notebook` pointing to the
+  generated notebook path, for example
+  `notebooks/lessons/core-python/values-variables-types.ipynb`.
 - Prefer analogies, small examples, debugging corners, hidden solution paths,
   and references over long abstract explanations.
 - Prefer Quarto callouts for standard teaching boxes, such as key ideas,
@@ -71,26 +76,37 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   tracebacks, environments, OOP, decorators, and ML workflows.
 - Keep examples beginner-safe: one idea at a time, explicit prediction prompts,
   and small modifications.
+- Treat each lesson as a hands-on lab, not as a reference note. Start from a
+  concrete task, give questions/objectives, run code, explain the output, ask
+  learners to change one thing, include a challenge/solution path, and finish
+  with key points.
 
 ## Quarto and lesson conventions
 
 - Site config lives in `docs/_quarto.yml`; update sidebar navigation whenever
   adding, removing, or renaming lesson pages.
 - Shared OJS renderer: `docs/lessons/_includes/ojs-quiz.qmd`.
+- Shared Colab launch link: `docs/lessons/_includes/colab-link.qmd`.
 - For root lesson pages, include with:
 
   ```markdown
   {{< include _includes/ojs-quiz.qmd >}}
+  {{< include _includes/colab-link.qmd >}}
   ```
 
 - For chapter lesson pages one directory below `docs/lessons`, include with:
 
   ```markdown
   {{< include ../_includes/ojs-quiz.qmd >}}
+  {{< include ../_includes/colab-link.qmd >}}
   ```
 
 - Quarto execution is disabled globally with `execute.eval: false`. Avoid adding
   executable Python chunks that require a kernel during docs builds.
+- QMD lesson files are the source of truth. `scripts/build_colab_notebooks.py`
+  generates matching notebooks under `docs/_site/notebooks/lessons/` after the
+  Quarto render step, and Colab links point at those generated notebooks on the
+  `gh-pages` branch.
 - If a notebook or example imports from `fcpython`, keep setup/import cells
   hidden in rendered teaching material with `#| echo: false` when appropriate.
 - Mermaid diagrams should use fenced blocks like:
@@ -139,7 +155,7 @@ makim docs.build
 Useful Makim tasks:
 
 ```bash
-makim docs.build     # Render Quarto site into docs/_site
+makim docs.build     # Render Quarto site and generated Colab notebooks
 makim docs.preview   # Build then preview the site
 makim tests.unit     # Run pytest
 makim tests.linter   # Run pre-commit on all files

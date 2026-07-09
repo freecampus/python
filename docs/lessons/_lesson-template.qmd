@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [course]
 order: 9990
+colab_notebook: "notebooks/lessons/_lesson-template.ipynb"
 ---
 
 ::: {.lesson-meta}
@@ -13,6 +14,68 @@ order: 9990
 **You will learn:** Replace this with the concrete learner outcome.
 **Practice in:** Google Colab, Jupyter, or VS Code
 :::
+
+{{< include _includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What practical problem does this lesson help learners solve?
+- What should learners predict before running the first code cell?
+- What common mistake should learners be able to debug?
+
+## Objectives
+
+- Run a complete starter example in Colab.
+- Explain each line in beginner-friendly language.
+- Change one thing and compare prediction with output.
+- Record one debugging clue from an error or surprising result.
+
+## Hands-on episode: Replace with the lesson title
+
+Start with the smallest useful task. Introduce vocabulary only when the learner
+needs it to understand the task.
+
+### 1. Run the starting example
+
+Ask learners to predict the output first.
+
+```python
+print("Replace this with the smallest useful example.")
+```
+
+### 2. Read the example slowly
+
+Explain what each line reads, creates, changes, returns, displays, or raises.
+Then ask the learner to change exactly one part and compare the result.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Change one value, name, condition, or line. Predict the output before running.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change one thing.
+3. Run the cell.
+4. Compare the result with the prediction.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+Show a realistic beginner mistake and model a calm debugging routine: read the
+error, inspect the closest value and type, change one thing, and run again.
+
+## Key points
+
+- Runnable examples teach better than definitions alone.
+- Predictions make learner thinking visible.
+- Small changes make cause and effect clear.
+<!-- fcpython-lab: end -->
 
 ## The problem this lesson solves
 

@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [capstone]
 order: 700
+colab_notebook: "notebooks/lessons/capstone/project-selection-and-planning.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Project practice
@@ -12,6 +13,105 @@ order: 700
 **You will learn:** Choose a small capstone and break it into realistic milestones.
 **Practice in:** VS Code, Jupyter, and GitHub
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Project Selection and Planning** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **capstone project selection and planning** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Project Selection and Planning
+
+Project planning turns an idea into a question, a user, a minimum useful feature set, milestones, risks, and evidence of completion.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read this plan as a promise small enough to keep.
+
+```python
+project = {
+"user": "a learner tracking practice",
+"input": "daily minutes",
+"output": "weekly summary",
+"first_milestone": "save and total one week",
+}
+print(project["first_milestone"])
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The user explains who benefits from the project.
+- The input and output define the smallest useful workflow.
+- The first milestone is concrete enough to test.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Add a tempting feature, such as AI recommendations, then decide whether it belongs in version one or a later stretch goal. Cutting scope protects completion.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Add a tempting feature, such as AI recommendations, then decide whether it belongs in version one or a later stretch goal.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Avoid project ideas that require many unknown skills before producing any result. Choose a thin slice: one input, one transformation, one output, one test, and one explanation.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Write a one-page proposal with problem, user, input, output, first milestone, risks, and stretch goals. Then cut at least one feature.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -67,8 +167,8 @@ print(idea)
 
 ### Step-by-step explanation
 
-1. `idea = {"user": "student", "input": "study log", "output": "weekly summ...` — identify the value, name, or action on this line.
-2. `print(idea)` — identify the value, name, or action on this line.
+1. `idea = {"user": "student", "input": "study log", "output": "weekly summ...` — pause here and say what this line reads, creates, changes, or displays.
+2. `print(idea)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -197,9 +297,9 @@ for task in tasks:
 
 ### Step-by-step explanation
 
-1. `tasks = ["load data", "clean data", "summarize", "plot", "write README"]` — identify the value, name, or action on this line.
-2. `for task in tasks:` — identify the value, name, or action on this line.
-3. `print("[ ]", task)` — identify the value, name, or action on this line.
+1. `tasks = ["load data", "clean data", "summarize", "plot", "write README"]` — pause here and say what this line reads, creates, changes, or displays.
+2. `for task in tasks:` — pause here and say what this line reads, creates, changes, or displays.
+3. `print("[ ]", task)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

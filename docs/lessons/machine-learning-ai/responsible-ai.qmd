@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [machine-learning-ai]
 order: 680
+colab_notebook: "notebooks/lessons/machine-learning-ai/responsible-ai.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,107 @@ order: 680
 **You will learn:** Use AI tools with attention to privacy, bias, evaluation, and accountability.
 **Practice in:** Jupyter or Google Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Responsible AI** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **responsible AI** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Responsible AI
+
+Responsible AI considers privacy, bias, evaluation, transparency, human oversight, and accountability across the full system lifecycle.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read this checklist as questions to ask before sharing a model.
+
+```python
+checklist = [
+"What data was used?",
+"Who could be harmed by mistakes?",
+"How was the model evaluated?",
+"What should a human review?",
+]
+for item in checklist:
+print("-", item)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The first question checks data origin and privacy.
+- The second question focuses on people affected by errors.
+- The third question asks whether evaluation matched the real use case.
+- The fourth question keeps human responsibility visible.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Add a project-specific question, such as whether student data can be uploaded to a third-party tool. Responsible AI checklists should fit the context.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Add a project-specific question, such as whether student data can be uploaded to a third-party tool.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not treat benchmark scores as the whole story. A model can score well on a test set and still be unfair, privacy-invasive, brittle, or inappropriate for a real decision.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Choose a toy AI project and write a five-question risk checklist covering data, users, errors, privacy, and human review.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -47,11 +149,11 @@ and accountability.
 
 ## Vocabulary
 
-- **privacy** — a word you should be able to explain after this lesson.
-- **bias** — a word you should be able to explain after this lesson.
-- **evaluation** — a word you should be able to explain after this lesson.
-- **accountability** — a word you should be able to explain after this lesson.
-- **documentation** — a word you should be able to explain after this lesson.
+- **privacy** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **bias** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **evaluation** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **accountability** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **documentation** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -76,9 +178,9 @@ for item in checklist:
 
 ## Step-by-step explanation
 
-1. `checklist = ["privacy", "bias", "evaluation", "human review", "document...` — identify the value, name, or action on this line.
-2. `for item in checklist:` — identify the value, name, or action on this line.
-3. `print(f"Check: {item}")` — identify the value, name, or action on this line.
+1. `checklist = ["privacy", "bias", "evaluation", "human review", "document...` — pause here and say what this line reads, creates, changes, or displays.
+2. `for item in checklist:` — pause here and say what this line reads, creates, changes, or displays.
+3. `print(f"Check: {item}")` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

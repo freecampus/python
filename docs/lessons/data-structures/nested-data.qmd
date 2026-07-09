@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [data-structures, beginner]
 order: 180
+colab_notebook: "notebooks/lessons/data-structures/nested-data.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner
@@ -12,6 +13,104 @@ order: 180
 **You will learn:** Represent structured information with containers inside containers.
 **Practice in:** Google Colab, Jupyter, or VS Code
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Nested Data** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **nested data** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Nested Data
+
+Nested data means containers inside containers. Read it one level at a time: outer collection first, then inner collection, then the specific value.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict the output by naming each level before reading the next one.
+
+```python
+students = [
+{"name": "Ada", "score": 9},
+{"name": "Grace", "score": 8},
+]
+
+print(students[0]["name"])
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `students` is a list, so `students[0]` means the first record.
+- The first record is a dictionary, so `["name"]` looks up a labeled value inside that record.
+- The final value is the string `Ada`, which is what gets printed.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Change the outer index to `1` and predict the name. Then change the key to `"score"`. Only one level changed each time, so the cause and effect stay visible.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Change the outer index to `1` and predict the name.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+The most common nested-data bug is mixing up list indexes and dictionary keys. If you see `TypeError` or `KeyError`, pause and ask: what type is the value at this level? Print `type(students[0])` before going deeper.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Add a third student record, loop through the list, and print `name: score` for each learner. Then compute the average score by accumulating one field from each dictionary.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -72,11 +171,11 @@ and so on.
 
 ## Vocabulary
 
-- **nested** — a word you should be able to explain after this lesson.
-- **record** — a word you should be able to explain after this lesson.
-- **path** — a word you should be able to explain after this lesson.
-- **level** — a word you should be able to explain after this lesson.
-- **structure** — a word you should be able to explain after this lesson.
+- **nested** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **record** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **path** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **level** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **structure** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -103,11 +202,11 @@ print(students[0]["scores"][1])
 
 ## Step-by-step explanation
 
-1. `students = [` — identify the value, name, or action on this line.
-2. `{"name": "Ada", "scores": [90, 95]},` — identify the value, name, or action on this line.
-3. `{"name": "Grace", "scores": [100, 98]},` — identify the value, name, or action on this line.
-4. `]` — identify the value, name, or action on this line.
-5. `print(students[0]["scores"][1])` — identify the value, name, or action on this line.
+1. `students = [` — pause here and say what this line reads, creates, changes, or displays.
+2. `{"name": "Ada", "scores": [90, 95]},` — pause here and say what this line reads, creates, changes, or displays.
+3. `{"name": "Grace", "scores": [100, 98]},` — pause here and say what this line reads, creates, changes, or displays.
+4. `]` — pause here and say what this line reads, creates, changes, or displays.
+5. `print(students[0]["scores"][1])` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

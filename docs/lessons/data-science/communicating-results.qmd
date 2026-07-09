@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [data-science]
 order: 620
+colab_notebook: "notebooks/lessons/data-science/communicating-results.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,105 @@ order: 620
 **You will learn:** Explain findings with evidence, uncertainty, and limitations.
 **Practice in:** Jupyter or Google Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Communicating Results** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **communicating data results** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Communicating Results
+
+A strong data message has a claim, evidence, context, limitation, and recommended next action.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Compare a weak conclusion with a stronger one based on the same data.
+
+```python
+claim = "Group A scored higher on average."
+evidence = "Group A mean: 8.4; Group B mean: 7.9; each group has 12 learners."
+limitation = "This is one small class, so we should not generalize too far."
+print(claim)
+print(evidence)
+print(limitation)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The claim states the main finding in one sentence.
+- The evidence gives numbers and sample sizes so the reader can judge strength.
+- The limitation prevents overclaiming.
+- Together they are more useful than a chart pasted without explanation.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Remove the limitation and read the message again. It sounds more confident but less responsible. Good communication includes uncertainty.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Remove the limitation and read the message again.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not confuse correlation with causation. If study hours and scores move together, that does not prove study hours caused the entire score difference. State what the data can and cannot support.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Write a three-sentence finding from a tiny table: claim, evidence, limitation. Then revise it for a non-technical audience.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -47,11 +147,11 @@ others can follow.
 
 ## Vocabulary
 
-- **claim** — a word you should be able to explain after this lesson.
-- **evidence** — a word you should be able to explain after this lesson.
-- **limitation** — a word you should be able to explain after this lesson.
-- **audience** — a word you should be able to explain after this lesson.
-- **reproducibility** — a word you should be able to explain after this lesson.
+- **claim** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **evidence** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **limitation** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **audience** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **reproducibility** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -76,10 +176,10 @@ print(claim, evidence, limitation, sep="\n")
 
 ## Step-by-step explanation
 
-1. `claim = "Group B has the higher median score in this sample."` — identify the value, name, or action on this line.
-2. `evidence = "median_a=7, median_b=9, n=40"` — identify the value, name, or action on this line.
-3. `limitation = "Observational data cannot prove causation."` — identify the value, name, or action on this line.
-4. `print(claim, evidence, limitation, sep="\n")` — identify the value, name, or action on this line.
+1. `claim = "Group B has the higher median score in this sample."` — pause here and say what this line reads, creates, changes, or displays.
+2. `evidence = "median_a=7, median_b=9, n=40"` — pause here and say what this line reads, creates, changes, or displays.
+3. `limitation = "Observational data cannot prove causation."` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(claim, evidence, limitation, sep="\n")` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

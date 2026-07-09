@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [debugging, beginner]
 order: 250
+colab_notebook: "notebooks/lessons/debugging/debugging-tools.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner
@@ -12,6 +13,102 @@ order: 250
 **You will learn:** Use print debugging, VS Code breakpoints, and pdb to inspect running programs.
 **Practice in:** Colab, VS Code, and the terminal
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Debugging Tools** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **debugging tools** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Debugging Tools
+
+Debugging is controlled observation. You choose a place to inspect, run the program to that place, compare actual values with expected values, and then change one thing.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Use print debugging to reveal a type problem before it causes confusion later.
+
+```python
+price = "10"
+print("price:", price, type(price))
+total = int(price) * 2
+print(total)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The first line stores text, not a number, because of the quotes.
+- The temporary print shows both the value and its type, which is the clue.
+- `int(price)` converts the string before multiplication, so the final result is numeric.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Remove `int(...)` and predict whether Python repeats the text, multiplies numerically, or raises an error. Then run it and explain the evidence.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Remove `int(...)` and predict whether Python repeats the text, multiplies numerically, or raises an error.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Printing too much creates noise. Print the smallest useful value, include a label, and remove the temporary print after learning from it. In VS Code, avoid stepping into library code at first; stay inside the code you wrote.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Use the same bug three ways: inspect it with `print`, pause on it with a VS Code breakpoint, and step through it with `pdb`. Write which tool felt clearest and why.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -71,10 +168,10 @@ print(total)
 
 ### Step-by-step explanation
 
-1. `price = "10"` — identify the value, name, or action on this line.
-2. `print("price:", price, type(price))` — identify the value, name, or action on this line.
-3. `total = int(price) * 2` — identify the value, name, or action on this line.
-4. `print(total)` — identify the value, name, or action on this line.
+1. `price = "10"` — pause here and say what this line reads, creates, changes, or displays.
+2. `print("price:", price, type(price))` — pause here and say what this line reads, creates, changes, or displays.
+3. `total = int(price) * 2` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(total)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -210,11 +307,11 @@ print(total([2, 3, 4]))
 
 ### Step-by-step explanation
 
-1. `def total(prices):` — identify the value, name, or action on this line.
-2. `result = 0` — identify the value, name, or action on this line.
-3. `for price in prices:` — identify the value, name, or action on this line.
-4. `result += price` — identify the value, name, or action on this line.
-5. `return result` — identify the value, name, or action on this line.
+1. `def total(prices):` — pause here and say what this line reads, creates, changes, or displays.
+2. `result = 0` — pause here and say what this line reads, creates, changes, or displays.
+3. `for price in prices:` — pause here and say what this line reads, creates, changes, or displays.
+4. `result += price` — pause here and say what this line reads, creates, changes, or displays.
+5. `return result` — pause here and say what this line reads, creates, changes, or displays.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -345,8 +442,8 @@ python -m pdb script.py
 
 ### Step-by-step explanation
 
-1. `python -m pdb script.py` — identify the value, name, or action on this line.
-2. `# commands to try inside pdb: n, s, p variable, c, q` — identify the value, name, or action on this line.
+1. `python -m pdb script.py` — pause here and say what this line reads, creates, changes, or displays.
+2. `# commands to try inside pdb: n, s, p variable, c, q` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

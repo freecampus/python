@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [core-python, beginner]
 order: 110
+colab_notebook: "notebooks/lessons/core-python/booleans-and-conditionals.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner
@@ -12,6 +13,107 @@ order: 110
 **You will learn:** Ask yes/no questions and choose different paths with if, elif, and else.
 **Practice in:** Google Colab, Jupyter, or VS Code
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Booleans and Conditionals** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **Booleans and conditionals** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Booleans and Conditionals
+
+A Boolean is either `True` or `False`. A conditional uses a Boolean expression to decide which indented block of code should run.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict which message appears for this score and explain which comparison made the decision.
+
+```python
+score = 82
+
+if score >= 90:
+print("Excellent")
+elif score >= 70:
+print("Passed")
+else:
+print("Review and try again")
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- Python checks `score >= 90` first. With `82`, that question is false.
+- Python then checks `score >= 70`. With `82`, that question is true.
+- Only the indented block under the first true branch runs.
+- The `else` block is skipped because Python already found a matching branch.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Change the score to `95`, then `65`, and trace the branches again. The code did not change, but the data changed, so a different path through the program becomes active.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Change the score to `95`, then `65`, and trace the branches again.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Branch order matters. If you check `score >= 70` before `score >= 90`, then a score of `95` will match the earlier branch and never reach the excellent case. When a conditional surprises you, write each condition as a yes-or-no sentence and test them in order.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Create a small recommendation program in Colab: if the number of study minutes is under 10, suggest a short review; if it is under 30, suggest one exercise; otherwise suggest a mini-project.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## The problem this lesson solves
 

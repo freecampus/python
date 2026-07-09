@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [scientific-python]
 order: 550
+colab_notebook: "notebooks/lessons/scientific-python/sympy-symbolic-math.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,105 @@ order: 550
 **You will learn:** Use SymPy for algebraic expressions and exact symbolic manipulation.
 **Practice in:** Jupyter or Google Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **SymPy Symbolic Math** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **SymPy symbolic math** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: SymPy Symbolic Math
+
+A SymPy symbol represents a mathematical variable inside an expression. This is different from an ordinary Python variable name that points to a value.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict the simplified expression before substituting a number.
+
+```python
+import sympy as sp
+
+x = sp.Symbol("x")
+expression = 2 * x + x
+print(sp.simplify(expression))
+print(expression.subs(x, 5))
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `sp.Symbol("x")` creates a symbolic object for algebra.
+- The expression `2 * x + x` keeps the symbol instead of computing a decimal.
+- `simplify` combines like terms into `3*x`.
+- `subs` replaces the symbol with a value for evaluation.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Create `y = 5` as a normal Python variable and compare it with `sp.Symbol("y")`. One has a concrete value; the other is symbolic.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Create `y = 5` as a normal Python variable and compare it with `sp.Symbol("y")`.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Beginners often confuse Python assignment with mathematical equality. `x = sp.Symbol("x")` creates a Python name pointing to a symbolic object; it does not solve for x. Use SymPy solving functions when you want solutions.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Create a symbol, build a quadratic expression, substitute two values, and solve a small equation. Write which step is symbolic and which step is numerical.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -46,11 +146,11 @@ SymPy is like doing algebra on a whiteboard: x stays x until you substitute a va
 
 ## Vocabulary
 
-- **symbol** — a word you should be able to explain after this lesson.
-- **expression** — a word you should be able to explain after this lesson.
-- **factor** — a word you should be able to explain after this lesson.
-- **solve** — a word you should be able to explain after this lesson.
-- **exact** — a word you should be able to explain after this lesson.
+- **symbol** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **expression** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **factor** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **solve** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **exact** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -76,10 +176,10 @@ print(sp.factor(expression))
 
 ## Step-by-step explanation
 
-1. `import sympy as sp` — identify the value, name, or action on this line.
-2. `x = sp.symbols("x")` — identify the value, name, or action on this line.
-3. `expression = x**2 + 2*x + 1` — identify the value, name, or action on this line.
-4. `print(sp.factor(expression))` — identify the value, name, or action on this line.
+1. `import sympy as sp` — pause here and say what this line reads, creates, changes, or displays.
+2. `x = sp.symbols("x")` — pause here and say what this line reads, creates, changes, or displays.
+3. `expression = x**2 + 2*x + 1` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(sp.factor(expression))` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

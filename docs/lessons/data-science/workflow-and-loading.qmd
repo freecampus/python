@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [data-science]
 order: 580
+colab_notebook: "notebooks/lessons/data-science/workflow-and-loading.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,107 @@ order: 580
 **You will learn:** Move from question to dataset and load tabular data with pandas.
 **Practice in:** Jupyter or Google Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Workflow and Loading Data** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **data science workflow and loading data** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Workflow and Loading Data
+
+A data workflow moves from question to data loading, inspection, cleaning, analysis, visualization, and communication. In pandas, rows are observations and columns are variables.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict the shape and column names after loading this tiny table.
+
+```python
+import pandas as pd
+
+data = pd.DataFrame({
+"name": ["Ada", "Grace"],
+"score": [9, 8],
+})
+print(data.shape)
+print(data.head())
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The DataFrame has two rows because there are two learners.
+- It has two columns: `name` and `score`.
+- `.shape` reports row count and column count.
+- `.head()` displays the first rows so you can inspect before analyzing.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Add a third learner and run `.shape` again. The first number changes because the number of observations changed.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Add a third learner and run `.shape` again.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not skip inspection after loading. File paths, headers, missing values, and data types often differ from what you expected. Start every dataset by checking shape, columns, head, and types.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Load or create a small DataFrame in Colab. Write one question about it, inspect it with `.shape`, `.head()`, and `.dtypes`, then say whether the data can answer your question.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -88,9 +190,9 @@ print(question, steps)
 
 ### Step-by-step explanation
 
-1. `question = "Which category has the highest average score?"` — identify the value, name, or action on this line.
-2. `steps = ["load", "inspect", "clean", "analyze", "communicate"]` — identify the value, name, or action on this line.
-3. `print(question, steps)` — identify the value, name, or action on this line.
+1. `question = "Which category has the highest average score?"` — pause here and say what this line reads, creates, changes, or displays.
+2. `steps = ["load", "inspect", "clean", "analyze", "communicate"]` — pause here and say what this line reads, creates, changes, or displays.
+3. `print(question, steps)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -221,9 +323,9 @@ print(df.head())
 
 ### Step-by-step explanation
 
-1. `import pandas as pd` — identify the value, name, or action on this line.
-2. `df = pd.read_csv("data.csv")` — identify the value, name, or action on this line.
-3. `print(df.head())` — identify the value, name, or action on this line.
+1. `import pandas as pd` — pause here and say what this line reads, creates, changes, or displays.
+2. `df = pd.read_csv("data.csv")` — pause here and say what this line reads, creates, changes, or displays.
+3. `print(df.head())` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [advanced-python-patterns]
 order: 480
+colab_notebook: "notebooks/lessons/advanced-python-patterns/decorators.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Intermediate
@@ -12,6 +13,111 @@ order: 480
 **You will learn:** Wrap a function to add behavior without changing its body.
 **Practice in:** VS Code, Jupyter, or Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Decorators** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **decorators** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Decorators
+
+A decorator is a function that takes a function and returns a new function, often a wrapper that runs code before or after the original function.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read the manual wrapper idea before focusing on the `@` syntax.
+
+```python
+def announce(func):
+def wrapper():
+print("Starting")
+func()
+print("Done")
+return wrapper
+
+@announce
+def greet():
+print("Hello")
+
+greet()
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `announce` receives another function as its input.
+- `wrapper` describes the extra behavior around the original function call.
+- `return wrapper` gives back the replacement function.
+- `@announce` applies that replacement to `greet` before you call it.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Remove `@announce` and call `greet()` again. The core function still works, but the starting and done messages disappear because the wrapper is no longer applied.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Remove `@announce` and call `greet()` again.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+A common decorator bug is calling the function too early: write `func`, not `func()`, when you mean to pass the function itself. Also remember to return the wrapper. In real code, use `functools.wraps` to preserve the original function's name and documentation.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Write a decorator that prints a message before a no-argument function runs. Then add `functools.wraps` and inspect the function name before and after.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -67,11 +173,11 @@ rewriting the function body.
 
 ## Vocabulary
 
-- **decorator** — a word you should be able to explain after this lesson.
-- **wrapper** — a word you should be able to explain after this lesson.
-- **function object** — a word you should be able to explain after this lesson.
-- **@ syntax** — a word you should be able to explain after this lesson.
-- **higher-order function** — a word you should be able to explain after this lesson.
+- **decorator** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **wrapper** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **function object** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **@ syntax** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **higher-order function** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -104,11 +210,11 @@ greet()
 
 ## Step-by-step explanation
 
-1. `def announce(function):` — identify the value, name, or action on this line.
-2. `def wrapper():` — identify the value, name, or action on this line.
-3. `print("starting")` — identify the value, name, or action on this line.
-4. `function()` — identify the value, name, or action on this line.
-5. `print("done")` — identify the value, name, or action on this line.
+1. `def announce(function):` — pause here and say what this line reads, creates, changes, or displays.
+2. `def wrapper():` — pause here and say what this line reads, creates, changes, or displays.
+3. `print("starting")` — pause here and say what this line reads, creates, changes, or displays.
+4. `function()` — pause here and say what this line reads, creates, changes, or displays.
+5. `print("done")` — pause here and say what this line reads, creates, changes, or displays.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If

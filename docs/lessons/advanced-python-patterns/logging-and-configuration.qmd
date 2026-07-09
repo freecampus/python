@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [advanced-python-patterns]
 order: 500
+colab_notebook: "notebooks/lessons/advanced-python-patterns/logging-and-configuration.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Intermediate
@@ -12,6 +13,104 @@ order: 500
 **You will learn:** Record useful program events and separate settings from code.
 **Practice in:** VS Code, Jupyter, or Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Logging and Configuration** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **logging and configuration** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Logging and Configuration
+
+Logging records events with levels such as debug, info, warning, and error. Configuration stores choices such as file paths, thresholds, and modes outside the main logic.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict which message is routine information and which one asks for attention.
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+limit = 10
+logging.info("Using limit %s", limit)
+logging.warning("Demo warning: check your input data")
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `basicConfig` sets a simple logging threshold for the program.
+- `logging.info` records ordinary progress information.
+- `logging.warning` records something that may need attention but does not necessarily stop the program.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Change the level to `logging.WARNING`. The info message disappears, but the warning remains. This shows how levels control the amount of detail.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Change the level to `logging.WARNING`.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not log secrets such as tokens, passwords, or private data. Also avoid using print as the only diagnostic tool in long-running programs where you need timestamps and severity levels.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Add logging to a small script with one info message, one warning, and one error-handling path. Move one setting, such as an input file name, into a configuration variable.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -69,9 +168,9 @@ logging.info("Starting analysis")
 
 ### Step-by-step explanation
 
-1. `import logging` — identify the value, name, or action on this line.
-2. `logging.basicConfig(level=logging.INFO)` — identify the value, name, or action on this line.
-3. `logging.info("Starting analysis")` — identify the value, name, or action on this line.
+1. `import logging` — pause here and say what this line reads, creates, changes, or displays.
+2. `logging.basicConfig(level=logging.INFO)` — pause here and say what this line reads, creates, changes, or displays.
+3. `logging.info("Starting analysis")` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -203,10 +302,10 @@ print(DATA_DIR, MAX_ROWS)
 
 ### Step-by-step explanation
 
-1. `from pathlib import Path` — identify the value, name, or action on this line.
-2. `DATA_DIR = Path("data")` — identify the value, name, or action on this line.
-3. `MAX_ROWS = 100` — identify the value, name, or action on this line.
-4. `print(DATA_DIR, MAX_ROWS)` — identify the value, name, or action on this line.
+1. `from pathlib import Path` — pause here and say what this line reads, creates, changes, or displays.
+2. `DATA_DIR = Path("data")` — pause here and say what this line reads, creates, changes, or displays.
+3. `MAX_ROWS = 100` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(DATA_DIR, MAX_ROWS)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

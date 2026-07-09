@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [scientific-python]
 order: 540
+colab_notebook: "notebooks/lessons/scientific-python/matplotlib-basics.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,107 @@ order: 540
 **You will learn:** Create simple line plots and scatter plots.
 **Practice in:** Jupyter or Google Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Matplotlib Basics** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **Matplotlib basics** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Matplotlib Basics
+
+Matplotlib builds figures and axes. The axes hold the data drawing, labels, title, and visual choices that explain the chart.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict what the x-axis and y-axis represent before looking at the plot.
+
+```python
+import matplotlib.pyplot as plt
+
+days = [1, 2, 3, 4]
+temperatures = [18, 20, 19, 22]
+plt.plot(days, temperatures, marker="o")
+plt.xlabel("Day")
+plt.ylabel("Temperature (C)")
+plt.title("Temperature over time")
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The two lists must have matching lengths because each x value pairs with one y value.
+- `plot` draws a line through the pairs in order.
+- The labels explain units and meaning, not just variable names.
+- The title states the message of the chart in plain language.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Remove the labels and imagine handing the plot to someone else. The picture may still render, but the meaning becomes weaker. Good visualization includes explanation.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Remove the labels and imagine handing the plot to someone else.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Wrong plot type is a common beginner issue. Use a line plot for ordered change, a scatter plot for relationships, a bar chart for category comparisons, and labels for every chart you expect someone else to read.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Plot a four-day study-time series, label both axes, add a title, and write a one-sentence caption describing the pattern.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -46,11 +148,11 @@ A plot is a map of data: axes are directions and marks are locations.
 
 ## Vocabulary
 
-- **figure** — a word you should be able to explain after this lesson.
-- **axis** — a word you should be able to explain after this lesson.
-- **plot** — a word you should be able to explain after this lesson.
-- **label** — a word you should be able to explain after this lesson.
-- **marker** — a word you should be able to explain after this lesson.
+- **figure** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **axis** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **plot** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **label** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **marker** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -79,11 +181,11 @@ plt.show()
 
 ## Step-by-step explanation
 
-1. `import matplotlib.pyplot as plt` — identify the value, name, or action on this line.
-2. `years = [2024, 2025, 2026]` — identify the value, name, or action on this line.
-3. `values = [2, 5, 9]` — identify the value, name, or action on this line.
-4. `plt.plot(years, values, marker="o")` — identify the value, name, or action on this line.
-5. `plt.xlabel("Year")` — identify the value, name, or action on this line.
+1. `import matplotlib.pyplot as plt` — pause here and say what this line reads, creates, changes, or displays.
+2. `years = [2024, 2025, 2026]` — pause here and say what this line reads, creates, changes, or displays.
+3. `values = [2, 5, 9]` — pause here and say what this line reads, creates, changes, or displays.
+4. `plt.plot(years, values, marker="o")` — pause here and say what this line reads, creates, changes, or displays.
+5. `plt.xlabel("Year")` — pause here and say what this line reads, creates, changes, or displays.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If

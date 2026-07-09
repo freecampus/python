@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [object-oriented-python]
 order: 420
+colab_notebook: "notebooks/lessons/object-oriented-python/oop-basics.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Intermediate
@@ -12,6 +13,109 @@ order: 420
 **You will learn:** Define classes, create objects, store attributes, write methods, and use self.
 **Practice in:** VS Code, Jupyter, or Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Object-Oriented Basics** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **object-oriented basics** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Object-Oriented Basics
+
+A class defines attributes and methods. An object stores its own attribute values, and methods use `self` to access the object they are working on.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict how each method changes the individual counter object.
+
+```python
+class Counter:
+def __init__(self):
+self.value = 0
+
+def increment(self):
+self.value = self.value + 1
+
+counter = Counter()
+counter.increment()
+print(counter.value)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `class Counter` defines a blueprint for counter objects.
+- `__init__` runs when a new counter is created and gives it a starting value.
+- `self.value` belongs to this particular counter object.
+- `counter.increment()` calls the method with `counter` as `self`, so that object's value changes.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Create `other = Counter()` and print both values after incrementing only `counter`. Each object has its own attribute value, which is the point of making instances.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Create `other = Counter()` and print both values after incrementing only `counter`.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Forgetting `self` is common. If a method needs to read or change the object's data, use `self.attribute`. Also do not make a class just because classes exist; functions and dictionaries are often clearer for small tasks.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Create a `Student` class with `name` and `score`, then add a method that increases the score. Make two students and show that changing one does not change the other.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -91,10 +195,10 @@ print(type(fido))
 
 ### Step-by-step explanation
 
-1. `class Dog:` — identify the value, name, or action on this line.
-2. `pass` — identify the value, name, or action on this line.
-3. `fido = Dog()` — identify the value, name, or action on this line.
-4. `print(type(fido))` — identify the value, name, or action on this line.
+1. `class Dog:` — pause here and say what this line reads, creates, changes, or displays.
+2. `pass` — pause here and say what this line reads, creates, changes, or displays.
+3. `fido = Dog()` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(type(fido))` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -228,11 +332,11 @@ counter.show()
 
 ### Step-by-step explanation
 
-1. `class Counter:` — identify the value, name, or action on this line.
-2. `value = 0` — identify the value, name, or action on this line.
-3. `def show(self):` — identify the value, name, or action on this line.
-4. `print(self.value)` — identify the value, name, or action on this line.
-5. `counter = Counter()` — identify the value, name, or action on this line.
+1. `class Counter:` — pause here and say what this line reads, creates, changes, or displays.
+2. `value = 0` — pause here and say what this line reads, creates, changes, or displays.
+3. `def show(self):` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(self.value)` — pause here and say what this line reads, creates, changes, or displays.
+5. `counter = Counter()` — pause here and say what this line reads, creates, changes, or displays.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -366,11 +470,11 @@ print(student.name)
 
 ### Step-by-step explanation
 
-1. `class Student:` — identify the value, name, or action on this line.
-2. `def __init__(self, name):` — identify the value, name, or action on this line.
-3. `self.name = name` — identify the value, name, or action on this line.
-4. `student = Student("Ada")` — identify the value, name, or action on this line.
-5. `print(student.name)` — identify the value, name, or action on this line.
+1. `class Student:` — pause here and say what this line reads, creates, changes, or displays.
+2. `def __init__(self, name):` — pause here and say what this line reads, creates, changes, or displays.
+3. `self.name = name` — pause here and say what this line reads, creates, changes, or displays.
+4. `student = Student("Ada")` — pause here and say what this line reads, creates, changes, or displays.
+5. `print(student.name)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

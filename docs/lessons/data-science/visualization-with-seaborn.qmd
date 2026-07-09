@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [data-science]
 order: 610
+colab_notebook: "notebooks/lessons/data-science/visualization-with-seaborn.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,104 @@ order: 610
 **You will learn:** Create statistical plots with seaborn.
 **Practice in:** Jupyter or Google Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Visualization with seaborn** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **visualization with seaborn** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Visualization with seaborn
+
+Seaborn maps DataFrame columns to visual features such as x position, y position, color, and facets. The best plot type depends on the question and variable types.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict what each point represents in the scatter plot.
+
+```python
+import seaborn as sns
+import pandas as pd
+
+data = pd.DataFrame({"hours": [1, 2, 3], "score": [60, 75, 85]})
+sns.scatterplot(data=data, x="hours", y="score")
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- Each row becomes one point.
+- The `hours` column controls horizontal position.
+- The `score` column controls vertical position.
+- The plot helps you inspect whether more hours seem associated with higher scores.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Change the plot to a line plot and ask whether that honestly represents the data. Plot type should match the story: relationships, distributions, comparisons, or change over order.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Change the plot to a line plot and ask whether that honestly represents the data.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Avoid unlabeled or overplotted charts. If points overlap heavily, consider transparency, jitter, a different plot type, or aggregation. Always write a caption that states the main finding and a limitation.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Make one scatter plot, one bar plot, or one histogram from a small DataFrame. Add labels and write a caption explaining the visual evidence.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -46,11 +145,11 @@ seaborn is like graph paper with helpful templates for common data stories.
 
 ## Vocabulary
 
-- **seaborn** — a word you should be able to explain after this lesson.
-- **scatterplot** — a word you should be able to explain after this lesson.
-- **hue** — a word you should be able to explain after this lesson.
-- **DataFrame** — a word you should be able to explain after this lesson.
-- **statistical plot** — a word you should be able to explain after this lesson.
+- **seaborn** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **scatterplot** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **hue** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **DataFrame** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **statistical plot** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -76,9 +175,9 @@ sns.scatterplot(data=tips, x="total_bill", y="tip", hue="time")
 
 ## Step-by-step explanation
 
-1. `import seaborn as sns` — identify the value, name, or action on this line.
-2. `tips = sns.load_dataset("tips")` — identify the value, name, or action on this line.
-3. `sns.scatterplot(data=tips, x="total_bill", y="tip", hue="time")` — identify the value, name, or action on this line.
+1. `import seaborn as sns` — pause here and say what this line reads, creates, changes, or displays.
+2. `tips = sns.load_dataset("tips")` — pause here and say what this line reads, creates, changes, or displays.
+3. `sns.scatterplot(data=tips, x="total_bill", y="tip", hue="time")` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

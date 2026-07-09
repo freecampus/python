@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [object-oriented-python]
 order: 440
+colab_notebook: "notebooks/lessons/object-oriented-python/oop-design.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Intermediate
@@ -12,6 +13,108 @@ order: 440
 **You will learn:** Choose composition, inheritance, or simpler functions based on the relationship you need.
 **Practice in:** VS Code, Jupyter, or Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Object-Oriented Design** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **object-oriented design** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Object-Oriented Design
+
+Use functions for actions, dictionaries or dataclasses for records, composition for objects made of other objects, and inheritance only when a genuine is-a relationship helps.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read this as composition: a report uses a formatter instead of becoming every possible formatter.
+
+```python
+class TextFormatter:
+def format(self, title, value):
+return f"{title}: {value}"
+
+class Report:
+def __init__(self, formatter):
+self.formatter = formatter
+
+def line(self, title, value):
+return self.formatter.format(title, value)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `TextFormatter` has one job: turn a title and value into text.
+- `Report` receives a formatter object instead of hard-coding one formatting style.
+- The report delegates formatting to the object it contains, which is composition.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Replace `TextFormatter` with a `MarkdownFormatter` that returns `**title:** value`. The report class does not need to change because the collaborator has the same method.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Replace `TextFormatter` with a `MarkdownFormatter` that returns `**title:** value`.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Avoid deep inheritance trees for beginner projects. If you cannot explain the relationship as a clear 'is a' sentence, composition or a plain function is probably easier. A class that only wraps one unrelated function may be unnecessary.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Design a tiny project two ways: once with functions and dictionaries, once with classes. Write which version a beginner teammate would understand faster and why.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -97,11 +200,11 @@ car.engine.start()
 
 ### Step-by-step explanation
 
-1. `class Engine:` — identify the value, name, or action on this line.
-2. `def start(self):` — identify the value, name, or action on this line.
-3. `print("engine on")` — identify the value, name, or action on this line.
-4. `class Car:` — identify the value, name, or action on this line.
-5. `def __init__(self):` — identify the value, name, or action on this line.
+1. `class Engine:` — pause here and say what this line reads, creates, changes, or displays.
+2. `def start(self):` — pause here and say what this line reads, creates, changes, or displays.
+3. `print("engine on")` — pause here and say what this line reads, creates, changes, or displays.
+4. `class Car:` — pause here and say what this line reads, creates, changes, or displays.
+5. `def __init__(self):` — pause here and say what this line reads, creates, changes, or displays.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -238,11 +341,11 @@ Cat().speak()
 
 ### Step-by-step explanation
 
-1. `class Animal:` — identify the value, name, or action on this line.
-2. `def speak(self):` — identify the value, name, or action on this line.
-3. `print("sound")` — identify the value, name, or action on this line.
-4. `class Cat(Animal):` — identify the value, name, or action on this line.
-5. `def speak(self):` — identify the value, name, or action on this line.
+1. `class Animal:` — pause here and say what this line reads, creates, changes, or displays.
+2. `def speak(self):` — pause here and say what this line reads, creates, changes, or displays.
+3. `print("sound")` — pause here and say what this line reads, creates, changes, or displays.
+4. `class Cat(Animal):` — pause here and say what this line reads, creates, changes, or displays.
+5. `def speak(self):` — pause here and say what this line reads, creates, changes, or displays.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -375,9 +478,9 @@ print(calculate_total([3, 4, 5]))
 
 ### Step-by-step explanation
 
-1. `def calculate_total(prices):` — identify the value, name, or action on this line.
-2. `return sum(prices)` — identify the value, name, or action on this line.
-3. `print(calculate_total([3, 4, 5]))` — identify the value, name, or action on this line.
+1. `def calculate_total(prices):` — pause here and say what this line reads, creates, changes, or displays.
+2. `return sum(prices)` — pause here and say what this line reads, creates, changes, or displays.
+3. `print(calculate_total([3, 4, 5]))` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

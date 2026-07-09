@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [advanced-python-patterns]
 order: 460
+colab_notebook: "notebooks/lessons/advanced-python-patterns/comprehensions.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Intermediate
@@ -12,6 +13,102 @@ order: 460
 **You will learn:** Build lists, dictionaries, and sets with compact loop expressions.
 **Practice in:** VS Code, Jupyter, or Colab
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Comprehensions** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **comprehensions** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Comprehensions
+
+A comprehension builds a new list, dictionary, or set from an iterable by combining an expression, a loop clause, and sometimes a filter clause.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read the loop version first, then the comprehension as the same idea in a smaller package.
+
+```python
+numbers = [1, 2, 3, 4]
+squares = [number * number for number in numbers if number % 2 == 0]
+print(squares)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `for number in numbers` visits each input value.
+- `if number % 2 == 0` keeps only even numbers.
+- `number * number` transforms each kept number into its square.
+- The brackets collect the transformed values into a new list.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Remove the `if` clause and predict the result. Then change the expression to `number + 10`. Each part of the comprehension has a distinct role.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Remove the `if` clause and predict the result.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+A comprehension that takes a full minute to read should probably be a regular loop. Readability is more important than cleverness. If debugging is hard, rewrite the comprehension as a loop and print intermediate values.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Convert three loops into comprehensions: one list of squares, one set of lowercase names, and one dictionary mapping names to lengths. Keep only versions you can explain aloud.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -47,11 +144,11 @@ output item.
 
 ## Vocabulary
 
-- **comprehension** — a word you should be able to explain after this lesson.
-- **transform** — a word you should be able to explain after this lesson.
-- **filter** — a word you should be able to explain after this lesson.
-- **iterable** — a word you should be able to explain after this lesson.
-- **expression** — a word you should be able to explain after this lesson.
+- **comprehension** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **transform** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **filter** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **iterable** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
+- **expression** — a key term for this lesson; after the example, write a one-sentence definition in your own words.
 
 ## What this means
 
@@ -74,8 +171,8 @@ print(squares)
 
 ## Step-by-step explanation
 
-1. `squares = [number * number for number in range(5)]` — identify the value, name, or action on this line.
-2. `print(squares)` — identify the value, name, or action on this line.
+1. `squares = [number * number for number in range(5)]` — pause here and say what this line reads, creates, changes, or displays.
+2. `print(squares)` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

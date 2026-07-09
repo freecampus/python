@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [functions, beginner]
 order: 210
+colab_notebook: "notebooks/lessons/functions/function-contracts.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner
@@ -12,6 +13,104 @@ order: 210
 **You will learn:** Use docstrings and type hints to communicate how functions should be used.
 **Practice in:** Google Colab, Jupyter, or VS Code
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Function Contracts** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **function contracts** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Function Contracts
+
+Docstrings, type hints, clear names, and examples communicate a function's contract. They do not replace tests, but they make the function easier to read and safer to change.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Read the contract before reading the body, then predict what the function should return.
+
+```python
+def add_tax(price: float, tax_rate: float) -> float:
+"""Return price after applying tax_rate as a decimal."""
+return price * (1 + tax_rate)
+
+print(add_tax(100, 0.07))
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- The name `add_tax` says the purpose in a verb phrase.
+- The type hints say both inputs should be numbers that may contain decimals.
+- The docstring explains that `0.07` means seven percent, which avoids a common ambiguity.
+- The return annotation says callers should expect a floating-point number back.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Call `add_tax(100, 7)` and notice the result is much too large. The type is still allowed, but the meaning violates the contract. This is why examples and assumptions matter.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Call `add_tax(100, 7)` and notice the result is much too large.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Type hints do not convert values. If `price` is the string `"100"`, the annotation `price: float` will not magically turn it into a float at runtime. Convert and validate data before calling the function.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Add a docstring and type hints to three simple functions: one that formats a name, one that computes an average, and one that checks whether a score passes.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -69,9 +168,9 @@ def area(width, height):
 
 ### Step-by-step explanation
 
-1. `def area(width, height):` — identify the value, name, or action on this line.
-2. `"""Return the area of a rectangle."""` — identify the value, name, or action on this line.
-3. `return width * height` — identify the value, name, or action on this line.
+1. `def area(width, height):` — pause here and say what this line reads, creates, changes, or displays.
+2. `"""Return the area of a rectangle."""` — pause here and say what this line reads, creates, changes, or displays.
+3. `return width * height` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -202,9 +301,9 @@ print(repeat("ha", 3))
 
 ### Step-by-step explanation
 
-1. `def repeat(word: str, times: int) -> str:` — identify the value, name, or action on this line.
-2. `return word * times` — identify the value, name, or action on this line.
-3. `print(repeat("ha", 3))` — identify the value, name, or action on this line.
+1. `def repeat(word: str, times: int) -> str:` — pause here and say what this line reads, creates, changes, or displays.
+2. `return word * times` — pause here and say what this line reads, creates, changes, or displays.
+3. `print(repeat("ha", 3))` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can

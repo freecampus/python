@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [core-python, beginner]
 order: 120
+colab_notebook: "notebooks/lessons/core-python/loops-and-tracing.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner
@@ -12,6 +13,106 @@ order: 120
 **You will learn:** Repeat work with for and while loops, control loop flow, and trace changing values.
 **Practice in:** Google Colab, Jupyter, or VS Code
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Loops and Tracing** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **loops and tracing** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Loops and Tracing
+
+A loop repeats an indented block. The loop variable takes one value at a time, and any accumulator variable should be traced carefully because it changes across repetitions.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict the final value of `total`, then trace each loop trip.
+
+```python
+scores = [4, 5, 3]
+total = 0
+
+for score in scores:
+total = total + score
+
+print(total)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- Before the loop, `total` is `0`, which means the accumulator starts empty.
+- On the first trip, `score` is `4`, so `total` becomes `4`.
+- On the second trip, `score` is `5`, so `total` becomes `9`.
+- On the third trip, `score` is `3`, so `total` becomes `12`.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Move `total = 0` inside the loop and run again. The total will keep resetting, which is a common accumulator bug. This shows why the position of a line can matter as much as the line itself.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Move `total = 0` inside the loop and run again.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+For `while` loops, the common danger is forgetting to update the value that controls the loop. If a cell keeps running, stop it safely, then ask: which condition is supposed to become false, and where does the code change that value?
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+In Colab, total a list of prices, count how many are above 10, and search for the first price above 100. Use a small trace table before running each version.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## The problem this lesson solves
 

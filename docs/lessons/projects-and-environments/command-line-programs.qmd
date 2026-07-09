@@ -5,6 +5,7 @@ execute:
   echo: true
 categories: [projects-and-environments]
 order: 340
+colab_notebook: "notebooks/lessons/projects-and-environments/command-line-programs.ipynb"
 ---
 ::: {.lesson-meta}
 **Level:** Beginner to intermediate
@@ -12,6 +13,108 @@ order: 340
 **You will learn:** Run scripts and accept command-line arguments with argparse.
 **Practice in:** VS Code and the terminal
 :::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Command-Line Programs** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **command-line programs** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Command-Line Programs
+
+A command-line program reads inputs typed after the command, validates them, and produces output that can be repeated or automated.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### 1. Run the starting example
+
+Predict what the script prints when the user supplies `--name Ada --times 2`.
+
+```python
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--name")
+parser.add_argument("--times", type=int, default=1)
+args = parser.parse_args()
+
+for _ in range(args.times):
+print(f"Hello, {args.name}!")
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### 2. Read the example slowly
+
+- `ArgumentParser` creates a small interface for terminal inputs.
+- `--name` is read as text unless you say otherwise.
+- `--times` uses `type=int`, so argparse converts the text argument into an integer.
+- The loop repeats the greeting according to the parsed value.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### 3. Make one controlled change
+
+::: {.callout-note title="Challenge"}
+Remove `type=int` and run with `--times 2`. The loop will not accept a string where it needs an integer, so the type conversion belongs at the boundary of the program.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy the starting example into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Remove `type=int` and run with `--times 2`.
+
+</details>
+
+### 4. Debug one realistic mistake
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not hard-code file paths or names that should be user choices. Also write helpful `--help` text; command-line programs should explain themselves when a user forgets how to run them.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### 5. Build a tiny variation
+
+Write a greeting script with `--name` and `--times`, run it with three different arguments, and then run it with `--help` to inspect the user-facing instructions.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
 
 ## Why this matters
 
@@ -66,8 +169,8 @@ python -m my_project
 
 ### Step-by-step explanation
 
-1. `python scripts/hello.py` — identify the value, name, or action on this line.
-2. `python -m my_project` — identify the value, name, or action on this line.
+1. `python scripts/hello.py` — pause here and say what this line reads, creates, changes, or displays.
+2. `python -m my_project` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -201,11 +304,11 @@ print(f"Hello, {args.name}")
 
 ### Step-by-step explanation
 
-1. `import argparse` — identify the value, name, or action on this line.
-2. `parser = argparse.ArgumentParser()` — identify the value, name, or action on this line.
-3. `parser.add_argument("name")` — identify the value, name, or action on this line.
-4. `args = parser.parse_args()` — identify the value, name, or action on this line.
-5. `print(f"Hello, {args.name}")` — identify the value, name, or action on this line.
+1. `import argparse` — pause here and say what this line reads, creates, changes, or displays.
+2. `parser = argparse.ArgumentParser()` — pause here and say what this line reads, creates, changes, or displays.
+3. `parser.add_argument("name")` — pause here and say what this line reads, creates, changes, or displays.
+4. `args = parser.parse_args()` — pause here and say what this line reads, creates, changes, or displays.
+5. `print(f"Hello, {args.name}")` — pause here and say what this line reads, creates, changes, or displays.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
