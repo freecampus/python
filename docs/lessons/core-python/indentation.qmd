@@ -875,6 +875,80 @@ method body:
 
 1. Is the `def method_name(...)` line indented inside the class?
 2. Did you spell the method name the same way in the class and in the call?
+3. Is the method accidentally indented inside another method?
+:::
+
+### Common issue: method is inside another method by accident
+
+There is a second version of the same mistake. Sometimes the method is not all
+the way outside the class. Instead, it is accidentally placed inside another
+method.
+
+Broken code:
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+        def increment(self):
+            self.value = self.value + 1
+
+counter = Counter()
+counter.increment()
+```
+
+At first glance, this can look close to correct because `increment` is visually
+near the class. But count the indentation levels:
+
+```text
+class Counter:                 # level 0
+    def __init__(self):        # level 1, method inside class
+        self.value = 0         # level 2, inside __init__
+        def increment(self):   # level 2, also inside __init__
+```
+
+The line `def increment(self):` lines up with `self.value = 0`, not with
+`def __init__(self):`. That means Python treats `increment` as a local function
+created while `__init__` is running. It is not a method stored on the `Counter`
+class, so this line:
+
+```python
+counter.increment()
+```
+
+will likely raise:
+
+```text
+AttributeError: 'Counter' object has no attribute 'increment'
+```
+
+The fix is to move `def increment(self):` one indentation level to the left, so
+it lines up with the other method definition:
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+    def increment(self):
+        self.value = self.value + 1
+
+counter = Counter()
+counter.increment()
+print(counter.value)
+```
+
+Expected output:
+
+```text
+1
+```
+
+::: {.callout-tip title="How to spot this quickly"}
+Inside a class, method definitions usually line up with each other. If
+`def increment(...)` is farther to the right than `def __init__(...)`, then
+`increment` is probably inside `__init__` by accident.
 :::
 
 ### Common issue: method body is not indented enough
@@ -1100,6 +1174,7 @@ runs lines at the wrong time.
 | `return outside function` | `return` is not inside a function body | Indent it under the correct `def` |
 | `break outside loop` | `break` is not inside a loop body | Indent it under the correct `for` or `while` |
 | Method missing from class | `def method(...)` starts at the left margin | Indent the method under `class` |
+| Method missing from object | `def method(...)` is nested inside another method | Line up method definitions with each other |
 
 ### Example 8: diagnose before fixing
 
@@ -1310,6 +1385,18 @@ bodies are one level deeper inside their methods.
       "explanation": "A method is a function defined inside a class body, so its def line is indented under the class header."
     },
     {
+      "id": "method-inside-method",
+      "prompt": "In a class, def increment(...) is indented under def __init__(...) instead of lining up with it. What is the likely problem?",
+      "options": [
+        "increment is a local function inside __init__, not a method on the object.",
+        "increment becomes the class name.",
+        "Python automatically moves increment to the correct indentation level.",
+        "The object will call increment before __init__."
+      ],
+      "answer_index": 0,
+      "explanation": "Method definitions should usually line up with each other inside the class. If def increment(...) is inside def __init__(...), counter.increment() will not find it as a method."
+    },
+    {
       "id": "tabs-spaces",
       "prompt": "What is the safest beginner habit for indentation whitespace?",
       "options": [
@@ -1348,6 +1435,7 @@ bodies are one level deeper inside their methods.
 - Loop setup often belongs before the loop; loop updates often belong inside the loop.
 - Function bodies are indented under `def`; `return` must be inside the function.
 - Methods are indented under `class`; method bodies are indented under method definitions.
+- Method definitions inside the same class usually line up with each other.
 - Use four spaces per indentation level and avoid mixing tabs and spaces.
 - When debugging indentation, inspect block structure before changing program logic.
 :::

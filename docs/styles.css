@@ -125,6 +125,11 @@
   color: #0969da;
 }
 
+pre.numberSource code > span > a:first-child::before {
+  border-right-color: rgba(108, 117, 125, 0.2);
+  color: rgba(108, 117, 125, 0.55);
+}
+
 body.quarto-dark .hero-stat {
   background: rgba(255, 255, 255, 0.08);
 }
@@ -132,6 +137,11 @@ body.quarto-dark .hero-stat {
 body.quarto-dark .hero-kicker,
 body.quarto-dark .lesson-meta strong {
   color: #8ab4f8;
+}
+
+body.quarto-dark pre.numberSource code > span > a:first-child::before {
+  border-right-color: rgba(222, 226, 230, 0.18);
+  color: rgba(222, 226, 230, 0.42);
 }
 
 @media (max-width: 700px) {
