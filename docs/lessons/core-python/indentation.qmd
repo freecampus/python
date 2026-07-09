@@ -1,0 +1,1360 @@
+---
+title: "Indentation in Python"
+description: "Use indentation to group code inside if statements, loops, functions, classes, and methods."
+execute:
+  echo: true
+categories: [core-python, beginner]
+order: 115
+colab_notebook: "notebooks/lessons/core-python/indentation.ipynb"
+---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 45–70 minutes
+**You will learn:** Use indentation to group code blocks and debug indentation errors.
+**Practice in:** Google Colab, Jupyter, or VS Code
+:::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- Why does Python care about spaces at the beginning of a line?
+- How do indentation rules apply to `if`, `for`, `while`, functions, classes, and methods?
+- How can we read and fix `IndentationError`, `TabError`, and mistakes where code runs outside the intended block?
+
+## Objectives
+
+- Identify the header line and body of a Python block.
+- Indent code consistently with four spaces.
+- Predict which lines run inside and outside nested blocks.
+- Fix common indentation mistakes in conditionals, loops, functions, classes, and methods.
+
+## Hands-on episode: Indentation in Python
+
+Python uses indentation as part of the language. In many languages, curly braces
+or keywords mark where a block starts and ends. In Python, the spaces at the
+start of the line do that job. This makes code readable, but it also means that
+spacing is not decoration. Spacing changes what the program means.
+
+A **block** is a group of lines that belongs together. The body of an `if`
+statement is a block. The body of a loop is a block. The body of a function is a
+block. A method inside a class has a block, and that method may contain more
+blocks inside it.
+
+Use this lesson as a debugging lab. Some examples work. Some examples are
+intentionally broken. Run each cell in Colab, read the error or output, and then
+fix only the indentation before changing anything else.
+
+### Example 1.1
+
+Predict the output. Which lines belong to the `if` statement, and which line runs
+after the `if` statement is finished?
+
+```python
+score = 85
+
+if score >= 70:
+    print("Passed")
+    print("Keep practicing")
+
+print("Done checking score")
+```
+
+Expected output:
+
+```text
+Passed
+Keep practicing
+Done checking score
+```
+
+### Explain Example 1.1
+
+- `if score >= 70:` is a **header line**. The colon says, "a block is coming next."
+- The next two `print` lines are indented four spaces, so they are inside the `if` body.
+- The blank line does not end the program. It only separates ideas for the reader.
+- `print("Done checking score")` is back at the left margin, so it is outside the `if` block.
+- Because the score is `85`, the condition is true, so the indented block runs.
+- The final `print` runs no matter what, because it is not inside the `if` block.
+
+A good beginner habit is to point to the left edge of each line and ask: "Which
+block does this line belong to?" If two lines begin at the same column, they are
+usually siblings in the same block. If one line is farther to the right, it is
+inside a more specific block.
+
+### Challenge 1.1
+
+::: {.callout-note title="Challenge"}
+Change `score` to `50` and run the cell again. Predict exactly which lines will
+print before you run.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+With `score = 50`, the condition `score >= 70` is false. The two indented lines
+inside the `if` block do not run. The final line is outside the block, so it
+still runs.
+
+```python
+score = 50
+
+if score >= 70:
+    print("Passed")
+    print("Keep practicing")
+
+print("Done checking score")
+```
+
+Expected output:
+
+```text
+Done checking score
+```
+
+</details>
+
+### Debugging checkpoint 1.1
+
+::: {.callout-warning title="Debugging checkpoint"}
+If Python says `IndentationError`, first check the line **after a colon**. A
+colon usually means the next real line must be indented.
+:::
+
+The most important rule is:
+
+> Header line with `:` first. Indented body next. Return to the previous
+> indentation level when the block is finished.
+
+### Apply it
+
+In the Colab notebook, create a cell named "indentation scratchpad" in Markdown.
+For every example in this lesson, write one sentence before running:
+
+- "I think this line is inside the block because..."
+- "I think this line is outside the block because..."
+- "I expect this error because..."
+
+## Key points
+
+- Indentation is syntax in Python, not visual decoration.
+- A colon usually introduces an indented block.
+- Lines at the same indentation level belong to the same surrounding block.
+- Four spaces per indentation level is the standard Python style.
+- Most indentation bugs are fixed by asking which block each line should belong to.
+<!-- fcpython-lab: end -->
+
+## 1. The basic block rule
+
+A Python block normally starts with a **header line** ending in a colon. The body
+of the block is indented under that header. When the indentation returns to a
+previous level, the block is over.
+
+Here is the shape:
+
+```text
+header:
+    body line 1
+    body line 2
+outside again
+```
+
+You will see this shape many times:
+
+```python
+if condition:
+    do_this()
+
+for item in items:
+    do_that(item)
+
+while still_working:
+    keep_going()
+
+def function_name():
+    function_body()
+
+class ClassName:
+    class_body()
+```
+
+The words change, but the block shape stays the same. This is why indentation is
+a core concept, not a small formatting detail.
+
+::: {.concept-diagram}
+This diagram shows how indentation creates nested blocks.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A[Left margin\nTop-level code] --> B[Header line ending with colon]
+  B --> C[Indented body\ninside the block]
+  C --> D[Same indentation\nmore lines in same block]
+  C --> E[More indentation\nnested block]
+  C --> F[Back to previous indentation\nblock is finished]
+```
+:::
+
+### Example 1
+
+```python
+ready = True
+
+if ready:
+    print("Start")
+    print("Work")
+
+print("Finish")
+```
+
+Read it as a map:
+
+- `ready = True` is top-level code.
+- `if ready:` starts a conditional block.
+- The two indented lines are inside that block.
+- The final line is back at the top level.
+
+### Common issue: missing indented body
+
+Broken code:
+
+```python
+ready = True
+
+if ready:
+print("Start")
+```
+
+The line after `if ready:` should be indented. Python cannot tell what belongs to
+the `if` statement, so it raises an `IndentationError`.
+
+Fixed code:
+
+```python
+ready = True
+
+if ready:
+    print("Start")
+```
+
+### Common issue: a block that is accidentally empty
+
+Broken code:
+
+```python
+ready = True
+
+if ready:
+
+print("Start")
+```
+
+A blank line is allowed inside code, but it does not count as the body of the
+`if` statement. Python still expects an indented statement after the colon.
+
+If you need a placeholder while planning code, use `pass`:
+
+```python
+ready = True
+
+if ready:
+    pass
+
+print("Start later")
+```
+
+`pass` means "do nothing here on purpose." It is useful while sketching a
+program, but replace it with real code when the behavior is ready.
+
+## 2. Indentation with `if`, `elif`, and `else`
+
+The `if`, `elif`, and `else` headers must line up with each other. Their bodies
+are indented one level deeper.
+
+### Example 2
+
+```python
+temperature = 18
+
+if temperature < 10:
+    print("Wear a heavy coat")
+elif temperature < 20:
+    print("Wear a light jacket")
+else:
+    print("Short sleeves are fine")
+
+print("Weather check complete")
+```
+
+The three headers are siblings:
+
+```text
+if temperature < 10:
+elif temperature < 20:
+else:
+```
+
+Each body is indented under its own header:
+
+```text
+    print(...)
+```
+
+### Common issue: `else` indented under `if` body
+
+Broken code:
+
+```python
+temperature = 18
+
+if temperature < 10:
+    print("Wear a heavy coat")
+    else:
+        print("Not that cold")
+```
+
+The `else` is too far to the right. Python reads it as if you are trying to put
+an `else` statement **inside** the `if` body, but `else` must match the `if`.
+
+Fixed code:
+
+```python
+temperature = 18
+
+if temperature < 10:
+    print("Wear a heavy coat")
+else:
+    print("Not that cold")
+```
+
+### Common issue: code that should be conditional but is outside
+
+This code runs, but the indentation changes the meaning:
+
+```python
+logged_in = False
+
+if logged_in:
+    print("Welcome back")
+print("Show private dashboard")
+```
+
+The dashboard line is not indented, so it runs even when `logged_in` is false.
+That is not a syntax error. It is a logic error.
+
+Fixed code:
+
+```python
+logged_in = False
+
+if logged_in:
+    print("Welcome back")
+    print("Show private dashboard")
+```
+
+::: {.callout-warning title="Common mistake"}
+Not every indentation bug creates an error message. Sometimes the code runs, but
+a line belongs to the wrong block. When output surprises you, inspect the left
+edge of the lines before changing conditions or values.
+:::
+
+### Checkpoint quiz
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "indentation-conditionals-checkpoint",
+  "title": "Indentation with conditionals checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "colon-meaning",
+      "prompt": "What usually comes after a Python line that ends with a colon?",
+      "options": [
+        "An indented block",
+        "A closing curly brace",
+        "A semicolon",
+        "A line that must start with elif"
+      ],
+      "answer_index": 0,
+      "explanation": "A colon usually introduces an indented block, such as an if body, loop body, function body, or class body."
+    },
+    {
+      "id": "else-alignment",
+      "prompt": "Where should else line up in a simple if/else statement?",
+      "options": [
+        "With the matching if",
+        "Four spaces deeper than the if body",
+        "Inside the print statement",
+        "At any indentation level"
+      ],
+      "answer_index": 0,
+      "explanation": "else is a sibling of the matching if, so it should have the same indentation as that if."
+    },
+    {
+      "id": "logic-error",
+      "prompt": "Why is an accidentally unindented line dangerous?",
+      "options": [
+        "It may run outside the intended block without causing a syntax error.",
+        "Python always ignores it.",
+        "It automatically becomes a comment.",
+        "It can only happen inside classes."
+      ],
+      "answer_index": 0,
+      "explanation": "Incorrect indentation can create a logic error: the program runs, but a line runs at the wrong time."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## 3. Indentation with `for` loops
+
+A `for` loop repeats its indented body once for each item. Lines inside the loop
+are indented. Lines after the loop return to the previous indentation level.
+
+### Example 3
+
+```python
+names = ["Ada", "Grace", "Katherine"]
+
+for name in names:
+    print("Hello", name)
+    print("This line is inside the loop")
+
+print("All greetings sent")
+```
+
+Expected output:
+
+```text
+Hello Ada
+This line is inside the loop
+Hello Grace
+This line is inside the loop
+Hello Katherine
+This line is inside the loop
+All greetings sent
+```
+
+The first two `print` lines repeat because they are inside the loop. The final
+line prints once because it is outside the loop.
+
+### Common issue: the accumulator is inside the loop
+
+This code is broken logically:
+
+```python
+scores = [10, 20, 30]
+
+for score in scores:
+    total = 0
+    total = total + score
+
+print(total)
+```
+
+It prints `30`, not `60`, because `total = 0` runs at the start of every loop
+trip. The accumulator resets again and again.
+
+Fixed code:
+
+```python
+scores = [10, 20, 30]
+total = 0
+
+for score in scores:
+    total = total + score
+
+print(total)
+```
+
+The line `total = 0` belongs **before** the loop because it sets up the starting
+state once. The update belongs **inside** the loop because it should happen once
+per score.
+
+### Common issue: the loop body is too short
+
+This code runs, but only the last value is summarized:
+
+```python
+prices = [4, 6, 8]
+
+for price in prices:
+    tax = price * 0.10
+print("tax:", tax)
+```
+
+The final `print` is outside the loop. It prints once, after the loop, using the
+last value of `tax`.
+
+If you want one line per price, indent the `print`:
+
+```python
+prices = [4, 6, 8]
+
+for price in prices:
+    tax = price * 0.10
+    print("tax:", tax)
+```
+
+If you want only the last tax after the loop, leave it unindented, but name the
+choice clearly:
+
+```python
+prices = [4, 6, 8]
+
+for price in prices:
+    last_tax = price * 0.10
+
+print("last tax:", last_tax)
+```
+
+### Challenge 3.1
+
+::: {.callout-note title="Challenge"}
+Move the final `print(total)` line inside the loop. Predict how many lines will
+print and what each line will show.
+:::
+
+<details class="solution">
+<summary>Show the explanation</summary>
+
+```python
+scores = [10, 20, 30]
+total = 0
+
+for score in scores:
+    total = total + score
+    print(total)
+```
+
+Expected output:
+
+```text
+10
+30
+60
+```
+
+Inside the loop, `print(total)` runs after every update, so it shows the running
+total. Outside the loop, it would show only the final total.
+
+</details>
+
+## 4. Indentation with `while` loops
+
+A `while` loop repeats as long as its condition is true. Indentation decides what
+repeats. This is especially important because a misplaced update can create an
+infinite loop.
+
+### Example 4
+
+```python
+countdown = 3
+
+while countdown > 0:
+    print(countdown)
+    countdown = countdown - 1
+
+print("Go")
+```
+
+Expected output:
+
+```text
+3
+2
+1
+Go
+```
+
+The update line `countdown = countdown - 1` is inside the loop, so the condition
+will eventually become false.
+
+### Common issue: update outside the loop
+
+Broken code:
+
+```python
+countdown = 3
+
+while countdown > 0:
+    print(countdown)
+
+countdown = countdown - 1
+```
+
+The update is outside the loop, so `countdown` stays `3` forever while the loop
+is running. In Colab, stop the cell if it keeps printing. Then move the update
+line into the loop body.
+
+Fixed code:
+
+```python
+countdown = 3
+
+while countdown > 0:
+    print(countdown)
+    countdown = countdown - 1
+```
+
+### Common issue: `break` and `continue` at the wrong level
+
+`break` and `continue` only make sense inside a loop.
+
+Broken code:
+
+```python
+items = ["a", "stop", "c"]
+
+for item in items:
+    print(item)
+
+    if item == "stop":
+        print("found stop")
+
+break
+```
+
+The `break` is at the top level, outside the `for` loop. Python raises a syntax
+error because there is no loop to break out of at that indentation level.
+
+Fixed code:
+
+```python
+items = ["a", "stop", "c"]
+
+for item in items:
+    print(item)
+
+    if item == "stop":
+        print("found stop")
+        break
+```
+
+The `break` is inside the `if`, and the `if` is inside the loop. That means
+`break` runs only when the loop reaches the stop item.
+
+## 5. Indentation with functions
+
+A function definition has a header line and an indented body. Code inside the
+body runs only when the function is called. Code outside the body runs normally
+as the program reaches it.
+
+### Example 5
+
+```python
+def greet(name):
+    message = f"Hello, {name}!"
+    return message
+
+print(greet("Ada"))
+```
+
+The function body is:
+
+```python
+    message = f"Hello, {name}!"
+    return message
+```
+
+The call is outside the function:
+
+```python
+print(greet("Ada"))
+```
+
+### Common issue: function body is not indented
+
+Broken code:
+
+```python
+def greet(name):
+message = f"Hello, {name}!"
+return message
+```
+
+Python raises `IndentationError` because a function definition needs an indented
+body.
+
+Fixed code:
+
+```python
+def greet(name):
+    message = f"Hello, {name}!"
+    return message
+```
+
+### Common issue: `return` outside the function
+
+Broken code:
+
+```python
+def add_one(number):
+    result = number + 1
+
+return result
+```
+
+The `return` line is not indented, so it is outside the function. Python raises
+`SyntaxError: 'return' outside function`.
+
+Fixed code:
+
+```python
+def add_one(number):
+    result = number + 1
+    return result
+```
+
+### Common issue: calling the function inside its own body by accident
+
+This code is valid, but it hides the function call inside the function body:
+
+```python
+def greet(name):
+    message = f"Hello, {name}!"
+    print(message)
+    greet("Ada")
+```
+
+The call `greet("Ada")` is indented inside `greet`, so calling `greet` would call
+itself again and again. That is recursion, and it is not what beginners usually
+intend here.
+
+Move the call outside the function:
+
+```python
+def greet(name):
+    message = f"Hello, {name}!"
+    print(message)
+
+greet("Ada")
+```
+
+### Challenge 5.1
+
+::: {.callout-note title="Challenge"}
+Write a function named `is_passing(score)` that returns `True` when the score is
+at least `70` and `False` otherwise. Use indentation to put the `return` lines in
+the correct blocks.
+:::
+
+<details class="solution">
+<summary>Show one solution</summary>
+
+```python
+def is_passing(score):
+    if score >= 70:
+        return True
+    else:
+        return False
+
+print(is_passing(85))
+print(is_passing(50))
+```
+
+The `if` and `else` headers are inside the function. The `return` lines are
+inside the matching conditional bodies.
+
+</details>
+
+## 6. Indentation with classes and methods
+
+A class body is indented under the `class` header. Methods are functions defined
+inside a class, so method definitions are indented under the class, and method
+bodies are indented under the method definition.
+
+### Example 6
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+    def increment(self):
+        self.value = self.value + 1
+
+    def report(self):
+        return f"Counter value: {self.value}"
+
+counter = Counter()
+counter.increment()
+print(counter.report())
+```
+
+There are three indentation levels:
+
+```text
+class Counter:                 # level 0
+    def __init__(self):        # level 1, inside class
+        self.value = 0         # level 2, inside method
+```
+
+The lines after the class return to the left margin:
+
+```python
+counter = Counter()
+counter.increment()
+print(counter.report())
+```
+
+Those lines are outside the class. They create and use an object.
+
+### Common issue: method is not inside the class
+
+This code runs, but `increment` is not a method of `Counter`:
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+def increment(self):
+    self.value = self.value + 1
+```
+
+The `increment` definition starts at the left margin, so it is a regular
+function, not a method inside `Counter`.
+
+That difference becomes visible when you try to call it as a method:
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+def increment(self):
+    self.value = self.value + 1
+
+counter = Counter()
+counter.increment()
+```
+
+Python creates a `Counter` object, but that object does not know about
+`increment`. The function named `increment` exists at the top level, beside the
+class, not inside the class. The likely error is:
+
+```text
+AttributeError: 'Counter' object has no attribute 'increment'
+```
+
+This error can be confusing because you can see a function named `increment` in
+the cell. The indentation is the clue: Python does not ask "is there a function
+nearby with this name?" It asks "does this object have a method with this name?"
+For `counter.increment()` to work, the `def increment(...)` line must be indented
+inside the `class Counter:` block.
+
+Fixed code:
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+    def increment(self):
+        self.value = self.value + 1
+
+counter = Counter()
+counter.increment()
+print(counter.value)
+```
+
+Expected output:
+
+```text
+1
+```
+
+::: {.callout-note title="Debugging routine"}
+When a method call raises `AttributeError`, check two things before changing the
+method body:
+
+1. Is the `def method_name(...)` line indented inside the class?
+2. Did you spell the method name the same way in the class and in the call?
+:::
+
+### Common issue: method body is not indented enough
+
+Broken code:
+
+```python
+class Counter:
+    def __init__(self):
+    self.value = 0
+```
+
+The assignment should be inside the method body. It needs one more indentation
+level than the method header.
+
+Fixed code:
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+```
+
+### Common issue: object code accidentally inside the class
+
+This code is valid in some cases but usually not what beginners intend:
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+    counter = Counter()
+```
+
+The line `counter = Counter()` is indented inside the class body. It tries to
+create a `Counter` while Python is still building the `Counter` class. Move
+object-creation code outside the class:
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+counter = Counter()
+```
+
+::: {.callout-warning title="Common mistake"}
+Classes often have two nested levels before any real behavior happens: method
+definitions inside the class, then method bodies inside each method. Count the
+levels before editing.
+:::
+
+## 7. Tabs, spaces, and inconsistent indentation
+
+Python can technically read tabs, but the standard style is four spaces. Mixing
+tabs and spaces can produce errors that are hard to see because a tab may look
+like several spaces in your editor.
+
+### Common issue: inconsistent indentation
+
+Broken code, with inconsistent whitespace:
+
+```python
+if True:
+    print("four spaces")
+	print("tab")
+```
+
+Python may raise `TabError: inconsistent use of tabs and spaces in indentation`.
+The fix is not to count invisible characters by hand. Use your editor to convert
+tabs to spaces.
+
+In VS Code:
+
+1. Open the command palette.
+2. Search for **Convert Indentation to Spaces**.
+3. Use four spaces per indent level.
+4. Save and run again.
+
+In Colab, avoid pressing Tab at the beginning of a line unless you know how the
+notebook handles it. If indentation looks strange, delete the whitespace at the
+start of the line and press Space four times.
+
+### Common issue: indentation width changes inside the same block
+
+Broken code:
+
+```python
+if True:
+    print("line one")
+  print("line two")
+```
+
+The second print line is indented two spaces, not four. Python sees it as a
+mismatched indentation level.
+
+Fixed code:
+
+```python
+if True:
+    print("line one")
+    print("line two")
+```
+
+The exact number of spaces matters less than consistency, but four spaces is the
+community standard and the style used throughout this course.
+
+## 8. Nested blocks
+
+A nested block is a block inside another block. You have already seen this with
+loops inside functions, `if` statements inside loops, and methods inside classes.
+Each nested level moves four more spaces to the right.
+
+### Example 7
+
+```python
+def summarize_scores(scores):
+    total = 0
+
+    for score in scores:
+        if score >= 70:
+            print("passing score:", score)
+        else:
+            print("needs review:", score)
+
+        total = total + score
+
+    return total
+
+print(summarize_scores([80, 55, 90]))
+```
+
+Indentation levels:
+
+```text
+def summarize_scores(scores):        # level 0
+    total = 0                         # level 1, function body
+    for score in scores:              # level 1, function body
+        if score >= 70:               # level 2, loop body
+            print(...)                # level 3, if body
+        else:                         # level 2, matches if
+            print(...)                # level 3, else body
+        total = total + score         # level 2, loop body
+    return total                      # level 1, function body
+print(...)                            # level 0, outside function
+```
+
+This example is worth tracing slowly. Ask three questions for each line:
+
+1. Is this line inside the function?
+2. Is this line inside the loop?
+3. Is this line inside the `if` or `else` body?
+
+### Challenge 8.1
+
+::: {.callout-note title="Challenge"}
+Move `return total` four spaces to the right so it is inside the loop. Predict
+what changes before running.
+:::
+
+<details class="solution">
+<summary>Show the explanation</summary>
+
+If `return total` is inside the loop, the function returns during the first loop
+trip. That means it never processes the remaining scores. The code may run, but
+the logic is wrong.
+
+Broken version:
+
+```python
+def summarize_scores(scores):
+    total = 0
+
+    for score in scores:
+        total = total + score
+        return total
+
+print(summarize_scores([80, 55, 90]))
+```
+
+Expected output:
+
+```text
+80
+```
+
+Fixed version:
+
+```python
+def summarize_scores(scores):
+    total = 0
+
+    for score in scores:
+        total = total + score
+
+    return total
+
+print(summarize_scores([80, 55, 90]))
+```
+
+Expected output:
+
+```text
+225
+```
+
+</details>
+
+## 9. A debugging checklist for indentation problems
+
+Use this checklist when code looks correct but Python complains about spacing or
+runs lines at the wrong time.
+
+| Symptom | Likely cause | First thing to check |
+| --- | --- | --- |
+| `IndentationError: expected an indented block` | A header line ending in `:` has no indented body | Look at the first real line after the colon |
+| `IndentationError: unexpected indent` | A line is indented even though no block is open | Look at the previous non-blank line |
+| `IndentationError: unindent does not match any outer indentation level` | A line returned to a column Python does not recognize | Check spaces/tabs and block levels |
+| `TabError` | Tabs and spaces are mixed | Convert indentation to spaces |
+| Code runs too often | A line is inside a loop by accident | Check whether it should be left of the loop body |
+| Code runs too rarely | A line is outside a loop or conditional by accident | Check whether it should be indented under the header |
+| `return outside function` | `return` is not inside a function body | Indent it under the correct `def` |
+| `break outside loop` | `break` is not inside a loop body | Indent it under the correct `for` or `while` |
+| Method missing from class | `def method(...)` starts at the left margin | Indent the method under `class` |
+
+### Example 8: diagnose before fixing
+
+Broken code:
+
+```python
+class StudyLog:
+    def __init__(self):
+        self.minutes = []
+
+    def add(self, minutes):
+        if minutes > 0:
+            self.minutes.append(minutes)
+        else:
+        print("minutes must be positive")
+
+    def total(self):
+        total = 0
+        for minutes in self.minutes:
+        total = total + minutes
+        return total
+
+log = StudyLog()
+log.add(20)
+log.add(-5)
+print(log.total())
+```
+
+Before fixing, identify the problem lines:
+
+1. `print("minutes must be positive")` should be inside the `else` body.
+2. `total = total + minutes` should be inside the `for` loop body.
+3. `return total` should be inside the method but outside the loop.
+
+Fixed code:
+
+```python
+class StudyLog:
+    def __init__(self):
+        self.minutes = []
+
+    def add(self, minutes):
+        if minutes > 0:
+            self.minutes.append(minutes)
+        else:
+            print("minutes must be positive")
+
+    def total(self):
+        total = 0
+        for minutes in self.minutes:
+            total = total + minutes
+        return total
+
+log = StudyLog()
+log.add(20)
+log.add(-5)
+print(log.total())
+```
+
+Expected output:
+
+```text
+minutes must be positive
+20
+```
+
+This example combines class, method, conditional, loop, and return indentation.
+It is a good final check because it uses several block levels at once.
+
+## 10. Style rules that prevent indentation bugs
+
+PEP 8, Python's style guide, recommends four spaces per indentation level. This
+course follows that rule.
+
+Good habits:
+
+- Use four spaces for each block level.
+- Configure your editor to insert spaces when you press Tab.
+- Keep related lines at the same indentation level.
+- Do not align code by hand with random numbers of spaces.
+- Let formatters such as Ruff format handle mechanical spacing when possible.
+- Fix indentation before debugging values, conditions, or algorithms.
+
+Avoid this style:
+
+```python
+if True:
+ print("one space")
+ print("still works sometimes, but do not do this")
+```
+
+Prefer this style:
+
+```python
+if True:
+    print("four spaces")
+    print("clear block")
+```
+
+You will occasionally see compact one-line statements like this:
+
+```python
+if ready: print("Start")
+```
+
+Python allows it, but beginners should avoid it. Separate lines make the block
+structure visible:
+
+```python
+if ready:
+    print("Start")
+```
+
+## Final challenge
+
+::: {.callout-note title="Challenge"}
+Create a small `Notebook` class with three methods:
+
+1. `__init__` creates an empty list named `notes`.
+2. `add(note)` appends the note only if it is not an empty string.
+3. `show()` loops over notes and prints each one.
+
+Use an `if`, a `for` loop, a class, and methods. Then intentionally break one
+indentation level, run the cell, read the error, and fix it.
+:::
+
+<details class="solution">
+<summary>Show one possible solution</summary>
+
+```python
+class Notebook:
+    def __init__(self):
+        self.notes = []
+
+    def add(self, note):
+        if note != "":
+            self.notes.append(note)
+        else:
+            print("empty note ignored")
+
+    def show(self):
+        for note in self.notes:
+            print("-", note)
+
+notebook = Notebook()
+notebook.add("Practice indentation")
+notebook.add("")
+notebook.add("Run small examples")
+notebook.show()
+```
+
+Expected output:
+
+```text
+empty note ignored
+- Practice indentation
+- Run small examples
+```
+
+The class body is indented under `class Notebook`. Each method is indented inside
+the class. Each method body is indented inside its `def` line. The `if` and `for`
+bodies are one level deeper inside their methods.
+
+</details>
+
+## Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "indentation-final-checkpoint",
+  "title": "Indentation in Python checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "function-body",
+      "prompt": "Where should the body of a function be placed?",
+      "options": [
+        "Indented under the def line",
+        "At the left margin beside the def line",
+        "Inside quotation marks",
+        "Only after the function is called"
+      ],
+      "answer_index": 0,
+      "explanation": "A function body is an indented block under the def header."
+    },
+    {
+      "id": "loop-update",
+      "prompt": "In a while countdown, where should the line that decreases the countdown usually go?",
+      "options": [
+        "Inside the while loop body",
+        "Only after the loop has finished",
+        "Inside a class but outside the loop",
+        "In a comment"
+      ],
+      "answer_index": 0,
+      "explanation": "The update usually belongs inside the loop so the condition can eventually become false."
+    },
+    {
+      "id": "method-indentation",
+      "prompt": "How can you tell that a function definition is a method inside a class?",
+      "options": [
+        "Its def line is indented under the class header.",
+        "Its name always starts with a capital letter.",
+        "It appears after all object creation code.",
+        "It has no parameters."
+      ],
+      "answer_index": 0,
+      "explanation": "A method is a function defined inside a class body, so its def line is indented under the class header."
+    },
+    {
+      "id": "tabs-spaces",
+      "prompt": "What is the safest beginner habit for indentation whitespace?",
+      "options": [
+        "Use four spaces per indentation level and avoid mixing tabs and spaces.",
+        "Use a random number of spaces as long as the code looks centered.",
+        "Use tabs on some lines and spaces on others.",
+        "Never indent after a colon."
+      ],
+      "answer_index": 0,
+      "explanation": "Four spaces per indentation level is the standard Python style and avoids many invisible whitespace problems."
+    },
+    {
+      "id": "logic-error",
+      "prompt": "Which indentation problem may not produce an error message?",
+      "options": [
+        "A line is outside a loop even though you meant it to be inside.",
+        "A function header ends with a colon and has no body.",
+        "Tabs and spaces are mixed in the same block.",
+        "return appears outside every function."
+      ],
+      "answer_index": 0,
+      "explanation": "Misplaced but syntactically valid indentation can create a logic error: the code runs, but at the wrong time."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Python uses indentation to decide which lines belong to a block.
+- A header line ending in `:` usually requires an indented body.
+- `if`, `elif`, and `else` headers that belong together should line up.
+- Loop setup often belongs before the loop; loop updates often belong inside the loop.
+- Function bodies are indented under `def`; `return` must be inside the function.
+- Methods are indented under `class`; method bodies are indented under method definitions.
+- Use four spaces per indentation level and avoid mixing tabs and spaces.
+- When debugging indentation, inspect block structure before changing program logic.
+:::
+
+## References
+
+- Python Tutorial: control flow: https://docs.python.org/3/tutorial/controlflow.html
+- Python Tutorial: defining functions: https://docs.python.org/3/tutorial/controlflow.html#defining-functions
+- Python Tutorial: classes: https://docs.python.org/3/tutorial/classes.html
+- PEP 8 indentation guidance: https://peps.python.org/pep-0008/#indentation
