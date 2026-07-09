@@ -3,7 +3,15 @@ title: "Loops and Tracing"
 description: "Repeat work with for and while loops, control loop flow, and trace changing values."
 execute:
   echo: true
+categories: [core-python, beginner]
+order: 120
 ---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 35–50 minutes
+**You will learn:** Repeat work with for and while loops, control loop flow, and trace changing values.
+**Practice in:** Google Colab, Jupyter, or VS Code
+:::
 
 ## The problem this lesson solves
 
@@ -121,7 +129,7 @@ with a bigger value.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: forgetting to indent the loop body.**
 
 ```python
@@ -132,7 +140,7 @@ print(name)
 The `print` line must be indented so Python knows it belongs inside the loop.
 :::
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: resetting the total inside the loop.**
 
 ```python
@@ -337,7 +345,7 @@ The negative score is skipped. The loop still continues with later items.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: using `break` when you meant `continue`.**
 
 If one bad item should be skipped, use `continue`. If the whole search should
@@ -450,7 +458,7 @@ After you understand the program, you can remove them.
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - A `for` loop repeats once for each item in a collection.
 - A `while` loop repeats while a condition is true.
 - Indentation defines the loop body.

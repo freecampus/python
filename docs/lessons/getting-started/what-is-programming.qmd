@@ -3,7 +3,15 @@ title: "What Is Programming?"
 description: "Understand programs, Python, interpreters, and the beginner learning loop."
 execute:
   echo: true
+categories: [getting-started, beginner]
+order: 50
 ---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 20–30 minutes
+**You will learn:** Understand programs, Python, interpreters, and the beginner learning loop.
+**Practice in:** Google Colab and browser notebooks
+:::
 
 ## The problem this lesson solves
 
@@ -115,7 +123,7 @@ text ends, so it raises a syntax error. Fix it by closing the string:
 print("Make tea")
 ```
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 When an error appears, do not delete everything. Read the message, find the line,
 look for one small mismatch, and run again.
 :::
@@ -206,7 +214,7 @@ three small versions:
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - A program is a precise set of instructions.
 - Python is a programming language; the interpreter runs Python code.
 - `print(...)` displays output.

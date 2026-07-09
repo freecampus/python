@@ -3,7 +3,15 @@ title: "Strings, Input, and Output"
 description: "Work with text, formatted messages, and simple user interaction."
 execute:
   echo: true
+categories: [core-python, beginner]
+order: 100
 ---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 25–40 minutes
+**You will learn:** Work with text, formatted messages, and simple user interaction.
+**Practice in:** Google Colab, Jupyter, or VS Code
+:::
 
 ## The problem this lesson solves
 
@@ -125,7 +133,7 @@ print(f"Ada scored {score} points.")
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake 1: forgetting the `f` in an f-string.**
 
 ```python
@@ -141,7 +149,7 @@ print(f"Hello, {name}!")
 ```
 :::
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake 2: using an index that does not exist.**
 
 ```python
@@ -264,7 +272,7 @@ print(number + number)
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: trying to convert text that is not a whole number.**
 
 ```python
@@ -345,7 +353,7 @@ Then change one thing at a time:
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - Strings are text values surrounded by quotes in your code.
 - String indexes start at `0`; negative indexes count from the end.
 - F-strings let you place Python values inside messages.

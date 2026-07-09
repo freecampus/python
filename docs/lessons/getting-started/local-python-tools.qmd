@@ -3,7 +3,15 @@ title: "Local Python Tools"
 description: "Install Python and use VS Code, Jupyter, and the terminal as one local learning toolkit."
 execute:
   echo: true
+categories: [getting-started, beginner]
+order: 70
 ---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 25–40 minutes
+**You will learn:** Install Python and use VS Code, Jupyter, and the terminal as one local learning toolkit.
+**Practice in:** Google Colab and browser notebooks
+:::
 
 ## The problem this lesson solves
 
@@ -76,7 +84,7 @@ On some systems the command may be `python3` instead of `python`. On Windows,
    - Runs a tiny Python program directly from the command line.
    - If it prints `Python works`, the interpreter can execute code.
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 If `python` is not found, try `python3 --version` or `py --version`. If one of
 those works, use that command consistently in your practice notes.
 :::
@@ -231,7 +239,7 @@ A `.py` file is good for code you want to keep, rerun, test, and share. A
 notebook is good for exploration and explanation. You will use both in this
 course.
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 If VS Code says a package is missing but the terminal can import it, VS Code may
 be using a different interpreter. Re-select the interpreter and run the check
 command again.
@@ -359,7 +367,7 @@ Then verify three paths:
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - Local Python lets your computer run scripts outside the browser.
 - Verify with `python --version` and `python -m pip --version`.
 - The terminal runs commands; VS Code edits project files; Jupyter runs notebooks.

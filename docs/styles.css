@@ -1,108 +1,75 @@
 .hero {
-  border: 1px solid #d8dee4;
-  border-radius: 12px;
-  margin-block: 1.5rem;
-  padding: 1.25rem;
+  background: radial-gradient(
+      circle at top left,
+      rgba(26, 115, 232, 0.24),
+      transparent 28rem
+    ),
+    linear-gradient(135deg, rgba(9, 105, 218, 0.14), rgba(19, 115, 51, 0.08));
+  border: 1px solid var(--quarto-border-color, #d8dee4);
+  border-radius: 22px;
+  box-shadow: 0 1rem 2.5rem rgba(31, 35, 40, 0.1);
+  margin-block: 1.5rem 2rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
 }
 
-.learning-objectives,
-.prerequisites,
-.questions,
-.key-idea,
-.analogy,
-.challenge,
-.practice-box,
-.quiz-box,
-.debugging-corner,
-.lesson-summary,
-.key-points,
-.instructor-note,
-.setup-check,
-.responsible-ai,
-.toolbox,
-.project-box {
+.hero h1 {
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.15rem;
+  max-width: 72ch;
+}
+
+.hero-kicker {
+  color: #0969da;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.hero-actions .btn {
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.hero-stats {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  margin-top: 1.5rem;
+  max-width: 42rem;
+}
+
+.hero-stat {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(9, 105, 218, 0.2);
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+}
+
+.hero-stat strong {
+  font-size: 1.65rem;
+}
+
+/* Course-specific boxes that are not covered by Quarto callouts. */
+.quiz-box {
+  background: rgba(26, 115, 232, 0.08);
   border-left: 4px solid #1a73e8;
   margin: 1rem 0;
   padding: 0.85rem 1rem;
-}
-
-.learning-objectives {
-  background: #eef4ff;
-}
-
-.questions {
-  background: #eef4ff;
-  border-left-color: #1a73e8;
-}
-
-.challenge {
-  background: #fff8e1;
-  border-left-color: #f9ab00;
-}
-
-.key-points {
-  background: #eef7f0;
-  border-left-color: #137333;
-}
-
-.instructor-note {
-  background: #f6f8fa;
-  border-left-color: #8250df;
-}
-
-.setup-check {
-  background: #f1f8ff;
-  border-left-color: #0969da;
-}
-
-.responsible-ai {
-  background: #fff4f1;
-  border-left-color: #d93025;
-}
-
-.prerequisites {
-  background: #f6f8fa;
-  border-left-color: #5f6368;
-}
-
-.key-idea {
-  background: #eef7f0;
-  border-left-color: #137333;
-}
-
-.analogy {
-  background: #f3e8ff;
-  border-left-color: #8e24aa;
-}
-
-.practice-box {
-  background: #fff8e1;
-  border-left-color: #f9ab00;
-}
-
-.quiz-box {
-  background: #eef4ff;
-  border-left-color: #1a73e8;
-}
-
-.debugging-corner {
-  background: #fff4f1;
-  border-left-color: #d93025;
-}
-
-.lesson-summary {
-  background: #eef7f0;
-  border-left-color: #137333;
-}
-
-.toolbox {
-  background: #f6f8fa;
-  border-left-color: #5f6368;
-}
-
-.project-box {
-  background: #f1f8ff;
-  border-left-color: #0969da;
 }
 
 .course-grid {
@@ -113,13 +80,64 @@
 }
 
 .course-card {
-  border: 1px solid #d8dee4;
-  border-radius: 8px;
+  background: var(--quarto-body-bg, #ffffff);
+  border: 1px solid var(--quarto-border-color, #d8dee4);
+  border-radius: 14px;
+  box-shadow: 0 0.35rem 1.1rem rgba(31, 35, 40, 0.06);
   padding: 1rem;
 }
 
 .course-card h3 {
   margin-top: 0;
+}
+
+.course-card .card-link,
+.course-card a.card-link {
+  font-weight: 800;
+}
+
+.audience-grid .course-card {
+  min-height: 12rem;
+}
+
+.pathway {
+  column-count: 2;
+  column-gap: 2rem;
+  line-height: 1.8;
+}
+
+.lesson-meta {
+  background: rgba(9, 105, 218, 0.08);
+  border: 1px solid rgba(9, 105, 218, 0.24);
+  border-radius: 14px;
+  display: grid;
+  gap: 0.5rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  margin: 1rem 0 1.5rem;
+  padding: 0.9rem 1rem;
+}
+
+.lesson-meta p {
+  margin: 0;
+}
+
+.lesson-meta strong {
+  color: #0969da;
+}
+
+body.quarto-dark .hero-stat {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.quarto-dark .hero-kicker,
+body.quarto-dark .lesson-meta strong {
+  color: #8ab4f8;
+}
+
+@media (max-width: 700px) {
+  .pathway {
+    column-count: 1;
+  }
 }
 
 details.solution,

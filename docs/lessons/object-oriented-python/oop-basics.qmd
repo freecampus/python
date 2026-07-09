@@ -3,7 +3,15 @@ title: "Object-Oriented Basics"
 description: "Define classes, create objects, store attributes, write methods, and use self."
 execute:
   echo: true
+categories: [object-oriented-python]
+order: 420
 ---
+::: {.lesson-meta}
+**Level:** Intermediate
+**Estimated time:** 35–50 minutes
+**You will learn:** Define classes, create objects, store attributes, write methods, and use self.
+**Practice in:** VS Code, Jupyter, or Colab
+:::
 
 ## Why this matters
 
@@ -13,9 +21,7 @@ This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
 need to jump between separate pages while building one clear explanation.
 
-::: {.questions}
-### Questions
-
+::: {.callout-note title="Guiding questions"}
 By the end of this lesson, you should be able to answer:
 
 - How do the sections in **Object-Oriented Basics** fit together?
@@ -23,9 +29,7 @@ By the end of this lesson, you should be able to answer:
 - Which debugging clue should I check first for each section?
 :::
 
-::: {.learning-objectives}
-### Learning objectives
-
+::: {.callout-note title="Learning objectives"}
 You will practice how to:
 
 - explain the shared concept for this lesson;
@@ -65,9 +69,7 @@ If `self` feels mysterious, read it as "this specific object."
 
 Define a new kind of object and create instances from it.
 
-::: {.analogy}
-### Analogy for this section
-
+::: {.callout-tip title="Analogy"}
 A class is a cookie cutter, and objects are the individual cookies.
 :::
 
@@ -100,7 +102,7 @@ teach you the most.
 
 ### Challenge
 
-::: {.challenge}
+::: {.callout-note title="Practice"}
 Change one input value, predict the new output, run the code, and explain the difference
 in one sentence.
 :::
@@ -121,7 +123,7 @@ experiment where you can explain cause and effect.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 A class describes many possible objects; an instance is one actual object.
 :::
 
@@ -201,9 +203,7 @@ This quiz checks the ideas in this section before you move on.
 
 Store object data in attributes and object behavior in methods.
 
-::: {.analogy}
-### Analogy for this section
-
+::: {.callout-tip title="Analogy"}
 Attributes are facts on an ID card; methods are actions the person can perform.
 :::
 
@@ -241,7 +241,7 @@ teach you the most.
 
 ### Challenge
 
-::: {.challenge}
+::: {.callout-note title="Practice"}
 Change one input value, predict the new output, run the code, and explain the difference
 in one sentence.
 :::
@@ -262,7 +262,7 @@ experiment where you can explain cause and effect.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 A method needs self as its first parameter so it can work with the specific object.
 :::
 
@@ -342,9 +342,7 @@ This quiz checks the ideas in this section before you move on.
 
 Initialize each object with its own starting data.
 
-::: {.analogy}
-### Analogy for this section
-
+::: {.callout-tip title="Analogy"}
 __init__ is the sign-up form each new club member fills out; self is the individual
 member's record.
 :::
@@ -380,7 +378,7 @@ teach you the most.
 
 ### Challenge
 
-::: {.challenge}
+::: {.callout-note title="Practice"}
 Change one input value, predict the new output, run the code, and explain the difference
 in one sentence.
 :::
@@ -401,7 +399,7 @@ experiment where you can explain cause and effect.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 Forgetting self.name stores nothing on the object. name alone is just a local variable.
 :::
 
@@ -497,7 +495,7 @@ to the next section. This is better than copying the entire page at once.
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - **Classes and Objects**: A class is a blueprint; an object is one concrete instance built from that blueprint.
 - **Attributes and Methods**: Attributes describe what an object knows; methods describe what it can do.
 - **__init__ and self**: __init__ runs when a new object is created; self refers to that object.

@@ -3,7 +3,15 @@ title: "Google Colab"
 description: "Run Python in a browser and learn the notebook workflow without installing software."
 execute:
   echo: true
+categories: [getting-started, beginner]
+order: 60
 ---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 20–30 minutes
+**You will learn:** Run Python in a browser and learn the notebook workflow without installing software.
+**Practice in:** Google Colab and browser notebooks
+:::
 
 ## The problem this lesson solves
 
@@ -93,7 +101,7 @@ print(name)
 If you run Cell 2 before Cell 1, Python raises `NameError` because `name` does
 not exist yet. Run Cell 1 first, then Cell 2.
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 If notebook output stops making sense, restart the runtime and run all cells from
 the top. This clears old hidden state.
 :::
@@ -237,7 +245,7 @@ print(f"Welcome, {name}!")
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - Colab lets you run Python in a browser.
 - A notebook contains code cells, note cells, and output.
 - The runtime remembers values from cells that have run.

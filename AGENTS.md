@@ -47,8 +47,16 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   multiple sections. Use them as checkpoints before the next section.
 - Every public lesson/chapter/support page should include an OJS quiz config and
   the shared OJS include.
+- Content lesson pages should start with a compact `.lesson-meta` block that
+  states level, estimated time, learning outcome, and practice environment.
+- Lesson front matter should include `categories` and `order` so pages can later
+  be used by Quarto listings without rebuilding the course map by hand.
 - Prefer analogies, small examples, debugging corners, hidden solution paths,
   and references over long abstract explanations.
+- Prefer Quarto callouts for standard teaching boxes, such as key ideas,
+  analogies, practice prompts, common mistakes, and key points. Keep custom
+  classes only for course-specific components such as OJS quiz wrappers and
+  concept diagrams.
 - Do not use generic "Mental model", "Tiny example", or vague "Walkthrough"
   sections. Prefer concrete headings such as "The problem this lesson solves",
   "First example", "Step-by-step explanation", "Common mistake", and "Check your

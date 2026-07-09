@@ -3,14 +3,23 @@ title: Lesson Template
 description: Standard structure for FreeCampus Python lessons.
 execute:
   echo: true
+categories: [course]
+order: 9990
 ---
+
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 20–30 minutes
+**You will learn:** Replace this with the concrete learner outcome.
+**Practice in:** Google Colab, Jupyter, or VS Code
+:::
 
 ## The problem this lesson solves
 
 Open with the learner's problem, not the vocabulary. Explain when a beginner
 would need this concept and what task becomes easier after learning it.
 
-::: {.questions}
+::: {.callout-note title="Guiding questions"}
 ### Questions this lesson should answer
 
 - What practical problem does this concept solve?
@@ -18,9 +27,7 @@ would need this concept and what task becomes easier after learning it.
 - What should learners inspect when output or an error surprises them?
 :::
 
-::: {.learning-objectives}
-### Learning objectives
-
+::: {.callout-note title="Learning objectives"}
 By the end, learners should be able to explain, read, write, modify, quiz, and
 debug a small example for the topic.
 :::
@@ -50,7 +57,7 @@ Explain every line in beginner language:
 
 ## Try changing one thing
 
-::: {.challenge}
+::: {.callout-note title="Practice"}
 Ask learners to change exactly one part, predict the result, run the code, and
 explain the difference in one sentence.
 :::
@@ -68,7 +75,7 @@ explain the difference in one sentence.
 
 ## Common mistake and fix
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 Show broken code, the likely error or unexpected output, and a small repair.
 Explain why the repair works.
 :::
@@ -95,7 +102,7 @@ large blank-page exercises.
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - State the concept in one sentence.
 - Include one concrete example and one explained mistake.
 - Use OJS quizzes as checkpoints before moving on.

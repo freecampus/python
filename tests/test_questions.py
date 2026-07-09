@@ -90,6 +90,11 @@ def _lesson_pages() -> list[Path]:
     )
 
 
+def _content_lesson_pages() -> list[Path]:
+    skipped = {"index.qmd", "learner-profiles.qmd", "instructor-notes.qmd"}
+    return [path for path in _lesson_pages() if path.name not in skipped]
+
+
 def test_all_lessons_include_ojs_quiz() -> None:
     missing = []
     for path in _lesson_pages():
@@ -145,6 +150,65 @@ def test_lessons_do_not_use_generic_generated_scaffold() -> None:
         for phrase in forbidden_phrases:
             if phrase in text:
                 hits.append(f"{path}: {phrase}")
+
+    assert hits == []
+
+
+def test_course_links_match_repository_remote() -> None:
+    quarto = Path("docs/_quarto.yml").read_text()
+    pyproject = Path("pyproject.toml").read_text()
+
+    assert "https://github.com/freecampus/python" in quarto
+    assert "https://freecampus.github.io/python/" in quarto
+    assert "https://github.com/freecampus/python" in pyproject
+    assert "freecampus-org/python" not in quarto
+    assert "freecampus-org/python" not in pyproject
+
+
+def test_content_lessons_include_orientation_metadata() -> None:
+    missing = []
+    for path in _content_lesson_pages():
+        text = path.read_text()
+        if "::: {.lesson-meta}" not in text:
+            missing.append(str(path))
+
+    assert missing == []
+
+
+def test_lesson_front_matter_supports_future_listings() -> None:
+    missing = []
+    for path in _lesson_pages():
+        text = path.read_text()
+        front_matter = text.split("---", 2)[1] if text.startswith("---") else ""
+        if "categories:" not in front_matter or "order:" not in front_matter:
+            missing.append(str(path))
+
+    assert missing == []
+
+
+def test_lessons_use_quarto_callouts_for_standard_boxes() -> None:
+    old_box_classes = (
+        "{.learning-objectives}",
+        "{.questions}",
+        "{.key-idea}",
+        "{.analogy}",
+        "{.challenge}",
+        "{.practice-box}",
+        "{.debugging-corner}",
+        "{.lesson-summary}",
+        "{.key-points}",
+        "{.instructor-note}",
+        "{.setup-check}",
+        "{.responsible-ai}",
+        "{.toolbox}",
+        "{.project-box}",
+    )
+    hits = []
+    for path in _lesson_pages():
+        text = path.read_text()
+        for old_class in old_box_classes:
+            if old_class in text:
+                hits.append(f"{path}: {old_class}")
 
     assert hits == []
 

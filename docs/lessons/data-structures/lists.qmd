@@ -3,7 +3,15 @@ title: "Lists"
 description: "Store, access, slice, update, copy, and loop over ordered mutable collections."
 execute:
   echo: true
+categories: [data-structures, beginner]
+order: 140
 ---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 25–40 minutes
+**You will learn:** Store, access, slice, update, copy, and loop over ordered mutable collections.
+**Practice in:** Google Colab, Jupyter, or VS Code
+:::
 
 ## The problem this lesson solves
 
@@ -91,7 +99,7 @@ and `2`.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: reaching past the end.**
 
 ```python
@@ -290,7 +298,7 @@ print(copy)
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: expecting assignment to copy a list.**
 
 `alias = original` does not copy the list. It adds another name for the same list
@@ -362,7 +370,7 @@ Before each line, predict the exact list.
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - Lists store ordered collections of values.
 - Indexes start at `0`; the last index is `len(items) - 1`.
 - Lists are mutable: methods and item assignment can change them.

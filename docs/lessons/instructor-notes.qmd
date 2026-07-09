@@ -3,6 +3,8 @@ title: "Instructor Notes"
 description: "Teach the course with active learning, beginner safety, and calm debugging."
 execute:
   echo: true
+categories: [course]
+order: 30
 ---
 
 ## Why this matters
@@ -11,9 +13,7 @@ Beginner programming lessons fail when learners only watch someone type. This
 course should be taught as active practice: short explanations, short examples,
 frequent predictions, small challenges, and calm debugging.
 
-::: {.questions}
-### Questions
-
+::: {.callout-note title="Guiding questions"}
 - How should an instructor pace beginner Python lessons?
 - What should students do every few minutes?
 - How can debugging become a normal habit instead of a crisis?
@@ -21,7 +21,7 @@ frequent predictions, small challenges, and calm debugging.
 
 ## Teaching principles
 
-::: {.key-idea}
+::: {.callout-tip title="Key idea"}
 ### Teach by doing
 
 Use this cycle repeatedly:
@@ -42,7 +42,7 @@ wisdom to this Python course.
 
 ## Setup verification script
 
-::: {.setup-check}
+::: {.callout-important title="Setup check"}
 ```bash
 python --version
 python -m pip --version
@@ -66,7 +66,7 @@ can keep learning while setup is fixed.
 
 ## Responsible AI note
 
-::: {.responsible-ai}
+::: {.callout-caution title="Responsible AI"}
 Students may use AI tools for explanations, but they should not outsource the
 thinking. Ask AI to explain an error, suggest debugging questions, or review a
 small function. Students should still run the code, test it, and explain it in

@@ -3,7 +3,15 @@ title: "Decorators"
 description: "Wrap a function to add behavior without changing its body."
 execute:
   echo: true
+categories: [advanced-python-patterns]
+order: 480
 ---
+::: {.lesson-meta}
+**Level:** Intermediate
+**Estimated time:** 25–40 minutes
+**You will learn:** Wrap a function to add behavior without changing its body.
+**Practice in:** VS Code, Jupyter, or Colab
+:::
 
 ## Why this matters
 
@@ -14,9 +22,7 @@ at a time: what problem it solves, how to recognize it in code, how to practice 
 how to debug a common mistake. Treat the code examples as small experiments, not as text
 to memorize.
 
-::: {.questions}
-### Questions
-
+::: {.callout-note title="Guiding questions"}
 By the end of this lesson, you should be able to answer:
 
 - What problem does **Decorators** help me solve?
@@ -24,9 +30,7 @@ By the end of this lesson, you should be able to answer:
 - What should I check first when the example does not behave as expected?
 :::
 
-::: {.learning-objectives}
-### Learning objectives
-
+::: {.callout-note title="Learning objectives"}
 You will practice how to:
 
 - explain the main idea in everyday language;
@@ -36,9 +40,7 @@ You will practice how to:
 - debug one common beginner mistake.
 :::
 
-::: {.analogy}
-### Analogy
-
+::: {.callout-tip title="Analogy"}
 A decorator is like putting a protective cover on a book: the story remains, but the
 outside behavior changes.
 :::
@@ -127,7 +129,7 @@ Use this routine with every example in the course:
 
 ## Challenge
 
-::: {.challenge}
+::: {.callout-note title="Practice"}
 Change one input value, predict the new output, run the code, and explain the difference
 in one sentence.
 :::
@@ -148,7 +150,7 @@ experiment where you can explain cause and effect.
 
 ## Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 A decorator replaces the original name with the returned wrapper. Preserve arguments and
 metadata when writing real decorators.
 :::
@@ -249,7 +251,7 @@ cell for your modified version.
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - A decorator is a function that takes a function and returns a modified function.
 - Small examples are more useful than large copied programs when a concept is new.
 - Prediction, execution, explanation, and one small modification form the core practice loop.

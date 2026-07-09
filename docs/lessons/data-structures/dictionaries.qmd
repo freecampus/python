@@ -3,7 +3,15 @@ title: "Dictionaries"
 description: "Store, loop over, and use key-value pairs for lookup, counting, grouping, and records."
 execute:
   echo: true
+categories: [data-structures, beginner]
+order: 160
 ---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 25–40 minutes
+**You will learn:** Store, loop over, and use key-value pairs for lookup, counting, grouping, and records.
+**Practice in:** Google Colab, Jupyter, or VS Code
+:::
 
 ## The problem this lesson solves
 
@@ -88,7 +96,7 @@ The later value wins, so the dictionary contains only `{"Ada": 95}`.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: asking for a key that is not there.**
 
 ```python
@@ -278,7 +286,7 @@ This is common in data science because one row of data often has named fields.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: trying to update a count before the key exists.**
 
 ```python
@@ -362,7 +370,7 @@ Before running, predict which letter has the largest count.
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - Dictionaries map keys to values.
 - Keys are used for lookup and must be unique.
 - A missing key raises `KeyError` when accessed with square brackets.

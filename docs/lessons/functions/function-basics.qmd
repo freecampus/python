@@ -3,7 +3,15 @@ title: "Function Basics"
 description: "Define functions, pass arguments, return results, and understand scope."
 execute:
   echo: true
+categories: [functions, beginner]
+order: 200
 ---
+::: {.lesson-meta}
+**Level:** Beginner
+**Estimated time:** 25–40 minutes
+**You will learn:** Define functions, pass arguments, return results, and understand scope.
+**Practice in:** Google Colab, Jupyter, or VS Code
+:::
 
 ## The problem this lesson solves
 
@@ -80,7 +88,7 @@ print("After")
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: defining a function but never calling it.**
 
 ```python
@@ -91,7 +99,7 @@ def greet():
 Nothing prints because the function is only defined. Add `greet()` to call it.
 :::
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: forgetting parentheses.**
 
 ```python
@@ -193,7 +201,7 @@ Keyword arguments can make calls easier to read.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: passing the wrong number of arguments.**
 
 ```python
@@ -301,7 +309,7 @@ body do not run for that call.
 
 ### Common mistakes
 
-::: {.debugging-corner}
+::: {.callout-warning title="Common mistake"}
 **Mistake: printing instead of returning.**
 
 ```python
@@ -449,7 +457,7 @@ Then modify one thing at a time:
 
 ## Key points
 
-::: {.key-points}
+::: {.callout-tip title="Key points"}
 - `def` defines a function; parentheses call it.
 - Defining a function does not run its body.
 - Parameters are names in the definition; arguments are values in the call.

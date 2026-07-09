@@ -4,40 +4,131 @@ description: A beginner-first Python course from zero programming experience to 
 ---
 
 ::: {.hero}
-# Python from Zero to Hero
-
-This course is for learners who are new to programming. It starts in Google
-Colab, then gradually introduces local Python, VS Code, Jupyter, debugging,
-testing, scientific computing, data science, introductory AI libraries, and a
-capstone portfolio project.
+::: {.hero-kicker}
+Beginner-first Python course
 :::
 
-## Start here
+# Learn Python from zero
 
-- Read the [lesson index](lessons/index.qmd) to understand the full path.
-- Use [learner profiles](lessons/learner-profiles.qmd) to choose a study path.
-- See [instructor notes](lessons/instructor-notes.qmd) for teaching guidance.
-- Begin with [What Is Programming?](lessons/getting-started/what-is-programming.qmd)
-  if programming is new to you.
-- Use [Google Colab](lessons/getting-started/google-colab.qmd) if you want to
-  practice immediately without installing anything.
-- Study [Lists](lessons/data-structures/lists.qmd) when you are ready to work
-  with ordered collections.
-- Keep [Error Messages](lessons/debugging/error-messages.qmd) nearby whenever
-  Python prints red text.
+Build practical confidence with short explanations, runnable examples, quizzes,
+debugging practice, diagrams, notebooks, and projects. Start in the browser with
+Google Colab, then grow into VS Code, Jupyter, testing, data science, and AI
+libraries.
 
-## Course promise
+::: {.hero-actions}
+[Start the course](lessons/getting-started/what-is-programming.qmd){.btn .btn-primary .btn-lg}
+[View the lesson path](lessons/index.qmd){.btn .btn-outline-primary .btn-lg}
+[Debug Python errors](lessons/debugging/error-messages.qmd){.btn .btn-outline-secondary .btn-lg}
+:::
 
-The course teaches programming as a learnable process:
+::: {.hero-stats}
+::: {.hero-stat}
+**14**
+chapters
+:::
 
-1. predict what code will do;
-2. run it;
-3. answer the section quiz;
-4. explain the result in everyday language;
-5. change one small thing;
-6. debug using clues instead of guessing.
+::: {.hero-stat}
+**55+**
+course pages
+:::
 
-## Tools used
+::: {.hero-stat}
+**OJS**
+interactive quizzes
+:::
+:::
+:::
+
+::: {.course-grid .audience-grid}
+::: {.course-card}
+### New to programming?
+
+Start with what programs are, how Python runs instructions, how notebooks work,
+and why errors are feedback instead of failure.
+
+[Begin with lesson 1](lessons/getting-started/what-is-programming.qmd){.card-link}
+:::
+
+::: {.course-card}
+### Already know some basics?
+
+Jump to the parts you need: lists, dictionaries, functions, files, testing,
+scientific Python, data science, or machine learning.
+
+[Browse the full path](lessons/index.qmd){.card-link}
+:::
+
+::: {.course-card}
+### Teaching this course?
+
+Use learner profiles, instructor notes, section quizzes, debugging routines, and
+small practice loops for live or self-paced instruction.
+
+[Open instructor notes](lessons/instructor-notes.qmd){.card-link}
+:::
+:::
+
+::: {.callout-tip title="Course promise"}
+You will not learn by memorizing commands. You will learn by predicting, running,
+explaining, modifying, quizzing, and debugging small examples until the ideas are
+usable.
+:::
+
+## How the course works
+
+Each lesson follows a practical beginner loop:
+
+1. read the purpose of the concept;
+2. predict what a small example will do;
+3. run it in Colab, Jupyter, VS Code, or the terminal;
+4. answer one or more quick quizzes;
+5. explain the result in everyday language;
+6. change one small thing;
+7. debug using clues instead of guessing.
+
+::: {.course-grid}
+::: {.course-card}
+### Practice immediately
+
+Use [Google Colab](lessons/getting-started/google-colab.qmd) to run Python in a
+browser before installing anything.
+:::
+
+::: {.course-card}
+### Build local confidence
+
+Use [Local Python Tools](lessons/getting-started/local-python-tools.qmd) to set
+up Python, VS Code, Jupyter, and the terminal.
+:::
+
+::: {.course-card}
+### Keep errors calm
+
+Keep [Error Messages](lessons/debugging/error-messages.qmd) nearby whenever
+Python prints red text.
+:::
+:::
+
+## Learning path
+
+::: {.pathway}
+1. [Getting Started](lessons/getting-started/index.qmd)
+2. [Core Python](lessons/core-python/index.qmd)
+3. [Data Structures](lessons/data-structures/index.qmd)
+4. [Functions](lessons/functions/index.qmd)
+5. [Debugging](lessons/debugging/index.qmd)
+6. [Files and Data](lessons/files-and-data/index.qmd)
+7. [Projects and Environments](lessons/projects-and-environments/index.qmd)
+8. [Code Quality](lessons/code-quality/index.qmd)
+9. [Object-Oriented Python](lessons/object-oriented-python/index.qmd)
+10. [Advanced Python Patterns](lessons/advanced-python-patterns/index.qmd)
+11. [Scientific Python](lessons/scientific-python/index.qmd)
+12. [Data Science](lessons/data-science/index.qmd)
+13. [Machine Learning and AI](lessons/machine-learning-ai/index.qmd)
+14. [Capstone](lessons/capstone/index.qmd)
+:::
+
+## Tools you will meet
 
 - [Google Colab](https://colab.research.google.com/) for no-install practice.
 - [Python](https://www.python.org/downloads/) for local programming.
@@ -47,19 +138,8 @@ The course teaches programming as a learnable process:
 - NumPy, pandas, Matplotlib, scikit-learn, PyTorch, TensorFlow/Keras, and
   Transformers for applied work.
 
-## Course chapters
-
-- [Getting Started](lessons/getting-started/index.qmd) — Set up your learning environment and understand how Python runs before memorizing syntax.
-- [Core Python](lessons/core-python/index.qmd) — Learn the small building blocks that almost every Python program uses: values, names, decisions, and repetition.
-- [Data Structures](lessons/data-structures/index.qmd) — Store, organize, search, and transform many values with the right container for the job.
-- [Functions](lessons/functions/index.qmd) — Package useful steps behind names so code can be reused, tested, and explained.
-- [Debugging](lessons/debugging/index.qmd) — Read errors calmly, inspect state, and make small experiments instead of guessing.
-- [Files and Data](lessons/files-and-data/index.qmd) — Read, write, validate, and recover from problems when programs interact with data outside memory.
-- [Projects and Environments](lessons/projects-and-environments/index.qmd) — Organize code into files, install dependencies safely, and run programs as small projects.
-- [Code Quality](lessons/code-quality/index.qmd) — Make code trustworthy with tests, style, formatting, linting, types, and automation.
-- [Object-Oriented Python](lessons/object-oriented-python/index.qmd) — Use classes when data and behavior belong together, while avoiding unnecessary complexity.
-- [Advanced Python Patterns](lessons/advanced-python-patterns/index.qmd) — Learn powerful Python patterns one at a time after core concepts are stable.
-- [Scientific Python](lessons/scientific-python/index.qmd) — Use Python's scientific stack for arrays, simulation, plotting, symbolic math, and numerical methods.
-- [Data Science](lessons/data-science/index.qmd) — Turn questions and datasets into cleaned, analyzed, visualized, and communicated results.
-- [Machine Learning and AI](lessons/machine-learning-ai/index.qmd) — Understand AI vocabulary, train simple models, evaluate them responsibly, and know where major libraries fit.
-- [Capstone](lessons/capstone/index.qmd) — Plan, build, test, document, and present a beginner-friendly Python project that integrates the course.
+::: {.callout-note title="Not sure where to start?"}
+If programming is new to you, start with [What Is Programming?](lessons/getting-started/what-is-programming.qmd).
+If you have written small Python scripts before, skim the [lesson path](lessons/index.qmd)
+and use the quizzes to find your level.
+:::
