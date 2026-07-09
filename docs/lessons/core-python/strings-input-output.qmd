@@ -5,169 +5,197 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Work with text, formatted messages, and simple user interaction.
+Most beginner programs need to talk with people. They display instructions,
+show results, and sometimes ask the user to type information. Python uses
+**strings** for text, `print()` for output, and `input()` for simple input.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+A string is not just "words". It can contain letters, digits, spaces,
+punctuation, emojis, and line breaks. This matters because a program often needs
+to build messages such as:
 
-::: {.questions}
-### Questions
+```python
+"Hello, Ada!"
+"Your total is $12"
+"Try again: password is too short"
+```
 
-By the end of this lesson, you should be able to answer:
+In this lesson you will learn how text values work, how to combine them safely,
+and why user input must often be converted before doing math.
 
-- How do the sections in **Strings, Input, and Output** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
+## How input becomes output
+
+::: {.concept-diagram}
+A simple interactive program is a conversation: prompt, receive text, process,
+then print a reply.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  prompt["input prompt<br/>What is your name?"] --> user["user types<br/>Ada"]
+  user --> text["Python stores text<br/>'Ada'"]
+  text --> build["build message<br/>f'Hello, {name}!'"]
+  build --> output["print output<br/>Hello, Ada!"]
+```
+
+The important beginner detail is that `input()` always gives you text, even when
+the user typed digits.
 :::
 
-::: {.learning-objectives}
-### Learning objectives
+## 1. Strings are text values
 
-You will practice how to:
+A **string** is a value that represents text. In Python, the most common way to
+create a string is to put quotation marks around the text.
 
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 2 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
+```python
+name = "Ada"
+language = "Python"
+message = "Hello"
+```
 
-## Lesson map
+The quotation marks tell Python: "treat this as text". The quotes are not part
+of the text displayed to the user; they are the boundary markers in your code.
 
-- Section 1: **Strings** — Create, combine, index, and format text values.
-- Section 2: **Input and Output** — Read simple input from a user and display useful output.
+### First example
 
-## Section 1: Strings
-
-Create, combine, index, and format text values.
-
-::: {.analogy}
-### Analogy for this section
-
-A string is like a necklace of beads: each character has a position, and the whole
-necklace has an order.
-:::
-
-### Mental model
-
-A string is an ordered sequence of characters such as letters, spaces, and punctuation.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+Before running this code, predict the four printed lines.
 
 ```python
 word = "Python"
+print(word)
 print(word[0])
 print(word[-1])
-print(f"I am learning {word}")
+print(f"I am learning {word}.")
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `word = "Python"` — read this line slowly and ask what value or action it creates.
-2. `print(word[0])` — read this line slowly and ask what value or action it creates.
-3. `print(word[-1])` — read this line slowly and ask what value or action it creates.
-4. `print(f"I am learning {word}")` — read this line slowly and ask what value or action it creates.
+1. `word = "Python"`
+   - Python creates a string value containing the six characters `P`, `y`, `t`,
+     `h`, `o`, and `n`.
+   - The name `word` now refers to that string.
+2. `print(word)`
+   - Python looks up `word` and displays the whole string: `Python`.
+3. `print(word[0])`
+   - Python strings are ordered. The first character is at index `0`, not index
+     `1`.
+   - `word[0]` is `"P"`.
+4. `print(word[-1])`
+   - Negative indexes count from the end.
+   - `word[-1]` is `"n"`, the last character.
+5. `print(f"I am learning {word}.")`
+   - The `f` before the opening quote makes an **f-string**.
+   - Anything inside `{...}` is evaluated by Python.
+   - `{word}` is replaced by the value of `word`, so the output is
+     `I am learning Python.`
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Why indexes start at 0
 
-### Challenge
+Think of indexes as distance from the beginning. The first character is zero
+steps away from the beginning, so its index is `0`.
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+```text
+string:  P  y  t  h  o  n
+index:   0  1  2  3  4  5
+negative -6 -5 -4 -3 -2 -1
+```
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+### Joining strings
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+You can join strings with `+`:
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
+```python
+first = "Ada"
+last = "Lovelace"
+full_name = first + " " + last
+print(full_name)
+```
 
-</details>
+The middle string, `" "`, is a space. Without it, the result would be
+`"AdaLovelace"`.
+
+For longer messages, prefer f-strings because they are easier to read:
+
+```python
+score = 95
+print(f"Ada scored {score} points.")
+```
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-Indexes start at 0, not 1. The first character of "Python" is word[0].
+**Mistake 1: forgetting the `f` in an f-string.**
+
+```python
+name = "Ada"
+print("Hello, {name}!")
+```
+
+This prints `Hello, {name}!` because Python treats `{name}` as ordinary text.
+Fix it by adding `f` before the string:
+
+```python
+print(f"Hello, {name}!")
+```
 :::
 
-When you get stuck, use this debugging routine:
+::: {.debugging-corner}
+**Mistake 2: using an index that does not exist.**
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
+```python
+word = "Python"
+print(word[10])
+```
 
-### Section checkpoint
+`word` has indexes `0` through `5`. Index `10` is outside the string, so Python
+raises `IndexError`.
+:::
 
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-strings",
+  "id": "strings-text-checkpoint",
   "title": "Strings checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Strings?",
+      "id": "first-index",
+      "prompt": "What does word[0] mean when word = \"Python\"?",
       "options": [
-        "A string is an ordered sequence of characters such as letters, spaces, and punctuation.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "The first character, \"P\".",
+        "The second character, \"y\".",
+        "The last character, \"n\".",
+        "The number of characters in the string."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A string is an ordered sequence of characters such as letters, spaces, and punctuation."
+      "explanation": "Python indexes start at 0, so word[0] is the first character."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "missing-f",
+      "prompt": "What prints from print(\"Hello, {name}!\") when name = \"Ada\"?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Hello, Ada!",
+        "Hello, {name}!",
+        "A NameError",
+        "Nothing"
       ],
-      "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A string is like a necklace of beads: each character has a position, and the whole necklace has an order."
+      "answer_index": 1,
+      "explanation": "Without the f prefix, Python treats {name} as ordinary text."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "string-plus",
+      "prompt": "What does \"Py\" + \"thon\" produce?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Python",
+        "Py thon",
+        "An error",
+        "5"
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "The plus sign joins two strings together."
     }
   ]
 }
@@ -175,130 +203,139 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Input and Output
+## 2. Input and output
 
-Read simple input from a user and display useful output.
-
-::: {.analogy}
-### Analogy for this section
-
-Input/output is like a conversation: listen first, then reply clearly.
-:::
-
-### Mental model
-
-Input brings information into a program; output sends information back out.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+`print()` sends information out of a program. `input()` brings information in
+from the user.
 
 ```python
 name = input("What is your name? ")
 print(f"Hello, {name}!")
 ```
 
-### Walkthrough
+When Python runs the first line, it pauses and waits. Whatever the user types is
+returned as a string and assigned to `name`.
 
-1. `name = input("What is your name? ")` — read this line slowly and ask what value or action it creates.
-2. `print(f"Hello, {name}!")` — read this line slowly and ask what value or action it creates.
+### First example
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+Try this in Google Colab or a local notebook. In Colab, use the play button on
+the left side of the code cell.
 
-### Challenge
+```python
+age_text = input("How old are you? ")
+age = int(age_text)
+next_year = age + 1
+print(f"Next year you will be {next_year}.")
+```
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+### Step-by-step explanation
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+1. `input("How old are you? ")`
+   - The prompt text is displayed.
+   - The user types something, such as `12`.
+   - Python returns the text value `"12"`.
+2. `age_text = input(...)`
+   - The name `age_text` stores that text.
+3. `age = int(age_text)`
+   - `int(...)` tries to convert the text into an integer.
+   - If `age_text` is `"12"`, the result is the number `12`.
+4. `next_year = age + 1`
+   - Now the value is numeric, so arithmetic works.
+5. `print(f"Next year you will be {next_year}.")`
+   - The result is placed inside the message and printed.
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+### Why conversion matters
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
+`input()` always returns a string. This surprises many beginners.
 
-</details>
+```python
+number = input("Type a number: ")
+print(number + number)
+```
+
+If the user types `5`, the output is `55`, not `10`, because Python is joining
+strings. Convert first when you need arithmetic:
+
+```python
+number_text = input("Type a number: ")
+number = int(number_text)
+print(number + number)
+```
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-input() always returns text. Convert it if you need a number.
+**Mistake: trying to convert text that is not a whole number.**
+
+```python
+age = int("twelve")
+```
+
+This raises `ValueError` because Python does not know how to turn the word
+`"twelve"` into an integer. When using `input()`, assume users may type
+unexpected text and be ready to validate it later.
 :::
 
-When you get stuck, use this debugging routine:
+### Practice in Colab
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
+Open <https://colab.new>, create one code cell, and build a tiny greeting
+program:
 
-### Section checkpoint
+```python
+name = input("Name: ")
+city = input("City: ")
+print(f"Hello, {name} from {city}!")
+```
 
-This quiz checks the ideas in this section before you move on.
+Then change one thing at a time:
+
+1. Add a third input for a favorite food.
+2. Print the final message on two lines.
+3. Ask for a number and convert it with `int()`.
+
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-input-and-output",
-  "title": "Input and Output checkpoint",
+  "id": "strings-input-output-checkpoint",
+  "title": "Input and output checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Input and Output?",
+      "id": "input-type",
+      "prompt": "What type does input() return?",
       "options": [
-        "Input brings information into a program; output sends information back out.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "str",
+        "int",
+        "float",
+        "bool"
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Input brings information into a program; output sends information back out."
+      "explanation": "input() always returns text, even if the user typed digits."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "convert-age",
+      "prompt": "Why do we use int(age_text) before age + 1?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "To convert text into a number for arithmetic.",
+        "To make the prompt shorter.",
+        "To print the value immediately.",
+        "To remove quotation marks from the source code."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Input/output is like a conversation: listen first, then reply clearly."
+      "explanation": "Arithmetic requires numeric values. Text that looks numeric is still text until converted."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "print-purpose",
+      "prompt": "What is the main job of print()?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Display information from the program.",
+        "Pause and wait for the user.",
+        "Convert text into an integer.",
+        "Create a new variable name."
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "print() sends values out so the user can see them."
     }
   ]
 }
@@ -306,35 +343,18 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
-
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
-
-## Instructor note
-
-<details class="instructor">
-<summary>Teaching notes</summary>
-
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
-
-</details>
-
 ## Key points
 
 ::: {.key-points}
-- **Strings**: A string is an ordered sequence of characters such as letters, spaces, and punctuation.
-- **Input and Output**: Input brings information into a program; output sends information back out.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- Strings are text values surrounded by quotes in your code.
+- String indexes start at `0`; negative indexes count from the end.
+- F-strings let you place Python values inside messages.
+- `print()` displays output.
+- `input()` returns text, so convert with `int()` or `float()` before arithmetic.
 :::
 
 ## References
 
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Built-in types: https://docs.python.org/3/library/stdtypes.html
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Python Tutorial: strings: https://docs.python.org/3/tutorial/introduction.html#strings
+- Python built-in functions: `print`, `input`, and `int`: https://docs.python.org/3/library/functions.html
+- Google Colab: https://colab.new

@@ -11,7 +11,7 @@ Read and write CSV and JSON data formats.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,10 +36,10 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **CSV Files** — Read and write tabular data in comma-separated value files.
-- Section 2: **JSON Files** — Use JSON for nested data that can be shared between programs.
+- **1. CSV Files** — Read and write tabular data in comma-separated value files.
+- **2. JSON Files** — Use JSON for nested data that can be shared between programs.
 
-## Section 1: CSV Files
+## 1. CSV Files
 
 Read and write tabular data in comma-separated value files.
 
@@ -49,12 +49,12 @@ Read and write tabular data in comma-separated value files.
 A CSV file is a plain-text spreadsheet: each line is a row and commas separate cells.
 :::
 
-### Mental model
+### What this means
 
 CSV stores rows and columns as text, making it common for spreadsheets and simple
 datasets.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -67,13 +67,13 @@ with open("scores.csv", newline="", encoding="utf-8") as file:
         print(row["name"], row["score"])
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `import csv` — read this line slowly and ask what value or action it creates.
-2. `with open("scores.csv", newline="", encoding="utf-8") as file:` — read this line slowly and ask what value or action it creates.
-3. `reader = csv.DictReader(file)` — read this line slowly and ask what value or action it creates.
-4. `for row in reader:` — read this line slowly and ask what value or action it creates.
-5. `print(row["name"], row["score"])` — read this line slowly and ask what value or action it creates.
+1. `import csv` — identify the value, name, or action on this line.
+2. `with open("scores.csv", newline="", encoding="utf-8") as file:` — identify the value, name, or action on this line.
+3. `reader = csv.DictReader(file)` — identify the value, name, or action on this line.
+4. `for row in reader:` — identify the value, name, or action on this line.
+5. `print(row["name"], row["score"])` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -89,7 +89,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -114,7 +114,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -162,7 +162,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -178,7 +178,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: JSON Files
+## 2. JSON Files
 
 Use JSON for nested data that can be shared between programs.
 
@@ -189,12 +189,12 @@ JSON is like a labeled shipping box: programs in different places can read the l
 and contents.
 :::
 
-### Mental model
+### What this means
 
 JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language-
 independent text format.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -206,12 +206,12 @@ data = json.loads(text)
 print(data["scores"][0])
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `import json` — read this line slowly and ask what value or action it creates.
-2. `text = '{"name": "Ada", "scores": [90, 95]}'` — read this line slowly and ask what value or action it creates.
-3. `data = json.loads(text)` — read this line slowly and ask what value or action it creates.
-4. `print(data["scores"][0])` — read this line slowly and ask what value or action it creates.
+1. `import json` — identify the value, name, or action on this line.
+2. `text = '{"name": "Ada", "scores": [90, 95]}'` — identify the value, name, or action on this line.
+3. `data = json.loads(text)` — identify the value, name, or action on this line.
+4. `print(data["scores"][0])` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -227,7 +227,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -253,7 +253,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -301,7 +301,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -320,7 +320,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

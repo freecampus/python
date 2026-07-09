@@ -5,48 +5,34 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Ask yes/no questions and choose different paths with if, elif, and else.
+Programs often need to make decisions. A weather program decides whether to show
+"bring a jacket". A form decides whether a password is long enough. A game
+decides whether the player has won.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+Python decisions start with **Boolean values**: `True` and `False`. A
+conditional statement then uses those values to choose which block of code runs.
 
-::: {.questions}
-### Questions
+## Learning goals
 
-By the end of this lesson, you should be able to answer:
+By the end of this lesson, you should be able to:
 
-- How do the sections in **Booleans and Conditionals** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
-:::
+- read comparison expressions such as `score >= 70`;
+- explain the difference between assignment `=` and comparison `==`;
+- write `if`, `elif`, and `else` blocks with correct indentation;
+- trace which branch Python will run;
+- debug common conditional mistakes.
 
-::: {.learning-objectives}
-### Learning objectives
+## How conditionals choose a path
 
-You will practice how to:
-
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 2 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
-
-## Lesson map
-
-- Section 1: **Booleans and Comparisons** — Use True/False values and comparisons to ask questions in code.
-- Section 2: **Conditionals** — Choose different actions with if, elif, and else.
-
-<!-- mermaid-visual-model -->
-## Visual model
-
-::: {.visual-model}
-A conditional is a branching path. Python asks a yes/no question, then runs only
-the first block whose condition is true.
+::: {.concept-diagram}
+A conditional is a branching path. Python asks yes/no questions in order, then
+runs only the first block whose condition is true.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart TD
   start([Start]) --> q1{"score >= 90?"}
   q1 -- True --> excellent["print('excellent')"]
@@ -62,24 +48,33 @@ When debugging conditionals, trace the questions in order and stop at the first
 true branch.
 :::
 
-## Section 1: Booleans and Comparisons
+## 1. Boolean values and comparisons
 
-Use True/False values and comparisons to ask questions in code.
+A **Boolean** is a value with only two possibilities: `True` or `False`.
+Booleans are useful because they answer yes/no questions.
 
-::: {.analogy}
-### Analogy for this section
+```python
+print(10 > 3)
+print(10 == 3)
+print("Ada" == "Ada")
+```
 
-A comparison is like a yes/no question on a form: exactly one box should describe the
-result.
-:::
+### Comparison operators
 
-### Mental model
+| Operator | Meaning | Example |
+| --- | --- | --- |
+| `==` | equal to | `score == 10` |
+| `!=` | not equal to | `name != ""` |
+| `<` | less than | `age < 18` |
+| `<=` | less than or equal to | `temperature <= 0` |
+| `>` | greater than | `total > 100` |
+| `>=` | greater than or equal to | `score >= 70` |
 
-A Boolean value is either True or False; comparisons produce Booleans.
+A comparison expression produces a Boolean value.
 
-### Tiny example
+### First example
 
-Predict what will happen before you run the code.
+Predict each printed value before running the code.
 
 ```python
 temperature = 18
@@ -88,110 +83,116 @@ print(temperature == 18)
 print(temperature != 30)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `temperature = 18` — read this line slowly and ask what value or action it creates.
-2. `print(temperature < 20)` — read this line slowly and ask what value or action it creates.
-3. `print(temperature == 18)` — read this line slowly and ask what value or action it creates.
-4. `print(temperature != 30)` — read this line slowly and ask what value or action it creates.
+1. `temperature = 18`
+   - This is assignment. The name `temperature` now refers to the integer `18`.
+2. `temperature < 20`
+   - Python checks: "Is 18 less than 20?"
+   - Yes, so the expression becomes `True`.
+3. `temperature == 18`
+   - Python checks: "Is 18 equal to 18?"
+   - Yes, so the expression becomes `True`.
+4. `temperature != 30`
+   - Python checks: "Is 18 not equal to 30?"
+   - Yes, so the expression becomes `True`.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Assignment is not comparison
 
-### Challenge
+This line stores a value:
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+```python
+score = 10
+```
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+This expression asks a question:
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+```python
+score == 10
+```
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
+Beginners often mix these up because in everyday math we say "equals" for both.
+In Python, one equals sign assigns; two equals signs compare.
 
-</details>
+### Combining questions with `and`, `or`, and `not`
+
+You can combine Boolean expressions:
+
+```python
+age = 20
+has_ticket = True
+
+print(age >= 18 and has_ticket)
+print(age < 18 or has_ticket)
+print(not has_ticket)
+```
+
+- `and` is true only when both sides are true.
+- `or` is true when at least one side is true.
+- `not` flips a Boolean value.
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-Use == to compare values. Using = inside a condition is not how Python asks equality
-questions.
+**Mistake: using `=` when you meant `==`.**
+
+```python
+if score = 10:
+    print("perfect")
+```
+
+Python raises `SyntaxError` because assignment is not a question. Use `==` for
+comparison:
+
+```python
+if score == 10:
+    print("perfect")
+```
 :::
 
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-booleans-and-comparisons",
-  "title": "Booleans and Comparisons checkpoint",
+  "id": "booleans-comparisons-checkpoint",
+  "title": "Booleans and comparisons checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Booleans and Comparisons?",
+      "id": "comparison-result",
+      "prompt": "What value does 18 < 20 produce?",
       "options": [
-        "A Boolean value is either True or False; comparisons produce Booleans.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "True",
+        "False",
+        "18",
+        "20"
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A Boolean value is either True or False; comparisons produce Booleans."
+      "explanation": "A comparison asks a yes/no question. 18 is less than 20, so the result is True."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "equals-choice",
+      "prompt": "Which operator compares two values for equality?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "=",
+        "==",
+        "!=",
+        ">="
       ],
-      "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A comparison is like a yes/no question on a form: exactly one box should describe the result."
+      "answer_index": 1,
+      "explanation": "Use == to compare. A single = assigns a value to a name."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "and-meaning",
+      "prompt": "When is A and B true?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Only when both A and B are true.",
+        "When either A or B is true.",
+        "Only when A is false.",
+        "Always."
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "and requires both sides to be true."
     }
   ]
 }
@@ -199,26 +200,24 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Conditionals
+## 2. Conditionals choose a path
 
-Choose different actions with if, elif, and else.
+A **conditional** runs one block of code when a condition is true. The most
+common form is `if`:
 
-::: {.analogy}
-### Analogy for this section
+```python
+if condition:
+    code_to_run_when_true
+```
 
-A conditional is like a fork in a path: the sign decides which branch you walk down.
-:::
+The indented lines belong to the `if` block. Indentation is not decoration in
+Python; it is how Python knows which lines belong together.
 
-### Mental model
-
-A conditional runs a block of code only when a condition is true.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+### First example
 
 ```python
 score = 82
+
 if score >= 90:
     print("excellent")
 elif score >= 70:
@@ -227,112 +226,133 @@ else:
     print("keep practicing")
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `score = 82` — read this line slowly and ask what value or action it creates.
-2. `if score >= 90:` — read this line slowly and ask what value or action it creates.
-3. `print("excellent")` — read this line slowly and ask what value or action it creates.
-4. `elif score >= 70:` — read this line slowly and ask what value or action it creates.
-5. `print("passing")` — read this line slowly and ask what value or action it creates.
-6. Continue the same process for the remaining lines, one line at a time.
+1. `score = 82`
+   - The name `score` stores the integer `82`.
+2. `if score >= 90:`
+   - Python asks: "Is 82 greater than or equal to 90?"
+   - The answer is `False`, so Python skips the indented block under this `if`.
+3. `elif score >= 70:`
+   - `elif` means "else, if this new condition is true".
+   - Python asks: "Is 82 greater than or equal to 70?"
+   - The answer is `True`, so Python runs `print("passing")`.
+4. `else:`
+   - Python does not run the `else` block because an earlier branch already ran.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Branch order matters
 
-### Challenge
+Python checks branches from top to bottom and stops at the first true branch.
+This code has a bug:
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+```python
+score = 95
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+if score >= 70:
+    print("passing")
+elif score >= 90:
+    print("excellent")
+```
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+The output is `passing`, not `excellent`, because `score >= 70` is already true.
+Put the more specific condition first:
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
+```python
+if score >= 90:
+    print("excellent")
+elif score >= 70:
+    print("passing")
+```
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-Indentation controls what belongs inside a branch. Misaligned spaces can change program
-meaning.
+**Mistake: forgetting the colon.**
+
+```python
+if score >= 70
+    print("passing")
+```
+
+The colon tells Python that an indented block is coming. Add it after the
+condition:
+
+```python
+if score >= 70:
+    print("passing")
+```
 :::
 
-When you get stuck, use this debugging routine:
+::: {.debugging-corner}
+**Mistake: inconsistent indentation.**
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
+```python
+if score >= 70:
+print("passing")
+```
 
-### Section checkpoint
+The `print` line must be indented so Python knows it belongs to the `if` block.
+:::
 
-This quiz checks the ideas in this section before you move on.
+### Practice
+
+Try this in Colab. Change only `age` first, then only `has_permission`.
+
+```python
+age = 16
+has_permission = True
+
+if age >= 18 or has_permission:
+    print("You can enter.")
+else:
+    print("Ask an adult for help.")
+```
+
+Before each run, write down which branch you expect and why.
+
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-conditionals",
+  "id": "conditionals-checkpoint",
   "title": "Conditionals checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Conditionals?",
+      "id": "first-true-branch",
+      "prompt": "In an if/elif/else chain, which branch runs?",
       "options": [
-        "A conditional runs a block of code only when a condition is true.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "The first branch whose condition is true.",
+        "Every branch whose condition is true.",
+        "Only the else branch.",
+        "The last branch in the file."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A conditional runs a block of code only when a condition is true."
+      "explanation": "Python checks from top to bottom and stops after the first true branch."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "indentation-purpose",
+      "prompt": "Why do lines under if need indentation?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Indentation tells Python which lines belong to the block.",
+        "Indentation makes code run faster.",
+        "Indentation converts text to numbers.",
+        "Indentation is optional style only."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A conditional is like a fork in a path: the sign decides which branch you walk down."
+      "explanation": "In Python, indentation is part of the syntax."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "branch-order",
+      "prompt": "Why should score >= 90 come before score >= 70 in a grading example?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Because 95 also satisfies score >= 70, so the broader branch would run first.",
+        "Because Python cannot compare numbers below 90.",
+        "Because elif always runs before if.",
+        "Because else requires it."
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Put more specific checks before broader checks when both could be true."
     }
   ]
 }
@@ -340,35 +360,18 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
-
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
-
-## Instructor note
-
-<details class="instructor">
-<summary>Teaching notes</summary>
-
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
-
-</details>
-
 ## Key points
 
 ::: {.key-points}
-- **Booleans and Comparisons**: A Boolean value is either True or False; comparisons produce Booleans.
-- **Conditionals**: A conditional runs a block of code only when a condition is true.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- Boolean values are `True` and `False`.
+- Comparisons such as `score >= 70` produce Boolean values.
+- `=` assigns; `==` compares.
+- `if`, `elif`, and `else` let a program choose one path.
+- Python uses indentation to decide which lines belong to a block.
+- Branches are checked from top to bottom.
 :::
 
 ## References
 
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Built-in types: https://docs.python.org/3/library/stdtypes.html
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Python Tutorial: control flow: https://docs.python.org/3/tutorial/controlflow.html
+- Python Boolean operations: https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not

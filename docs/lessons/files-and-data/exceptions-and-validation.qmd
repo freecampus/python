@@ -11,7 +11,7 @@ Handle expected failures and validate user input before trusting it.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,17 +36,18 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Exceptions** — Handle expected failures with try and except.
-- Section 2: **Validating User Input** — Check user input before trusting it in calculations or file operations.
+- **1. Exceptions** — Handle expected failures with try and except.
+- **2. Validating User Input** — Check user input before trusting it in calculations or file operations.
 
-<!-- mermaid-visual-model -->
-## Visual model
+## How validation handles unsafe input
 
-::: {.visual-model}
+::: {.concept-diagram}
 Validation prevents many errors. Exception handling gives a planned response for
 failures you still expect might happen.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart TD
   input["User input"] --> valid{"Looks valid?"}
   valid -- No --> message["Show helpful message"]
@@ -62,7 +63,7 @@ Use validation for checks you can make before the risky operation, and `except`
 for failures raised during the operation.
 :::
 
-## Section 1: Exceptions
+## 1. Exceptions
 
 Handle expected failures with try and except.
 
@@ -73,12 +74,12 @@ An exception handler is like a safety net under a tightrope: it does not remove 
 but it gives a planned response.
 :::
 
-### Mental model
+### What this means
 
 An exception interrupts normal flow when something goes wrong; handling catches a
 specific expected problem.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -90,13 +91,13 @@ except ValueError:
     print("Please enter digits only.")
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `text = "abc"` — read this line slowly and ask what value or action it creates.
-2. `try:` — read this line slowly and ask what value or action it creates.
-3. `number = int(text)` — read this line slowly and ask what value or action it creates.
-4. `except ValueError:` — read this line slowly and ask what value or action it creates.
-5. `print("Please enter digits only.")` — read this line slowly and ask what value or action it creates.
+1. `text = "abc"` — identify the value, name, or action on this line.
+2. `try:` — identify the value, name, or action on this line.
+3. `number = int(text)` — identify the value, name, or action on this line.
+4. `except ValueError:` — identify the value, name, or action on this line.
+5. `print("Please enter digits only.")` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -112,7 +113,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -138,7 +139,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -186,7 +187,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -202,7 +203,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Validating User Input
+## 2. Validating User Input
 
 Check user input before trusting it in calculations or file operations.
 
@@ -213,11 +214,11 @@ Validation is a door checklist: do you have a ticket, is it for today, and is it
 this room?
 :::
 
-### Mental model
+### What this means
 
 Validation confirms that input has the shape and meaning your program needs.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -230,13 +231,13 @@ else:
     print("Use digits only.")
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `age_text = input("Age: ")` — read this line slowly and ask what value or action it creates.
-2. `if age_text.isdigit():` — read this line slowly and ask what value or action it creates.
-3. `age = int(age_text)` — read this line slowly and ask what value or action it creates.
-4. `print(age + 1)` — read this line slowly and ask what value or action it creates.
-5. `else:` — read this line slowly and ask what value or action it creates.
+1. `age_text = input("Age: ")` — identify the value, name, or action on this line.
+2. `if age_text.isdigit():` — identify the value, name, or action on this line.
+3. `age = int(age_text)` — identify the value, name, or action on this line.
+4. `print(age + 1)` — identify the value, name, or action on this line.
+5. `else:` — identify the value, name, or action on this line.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -253,7 +254,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -278,7 +279,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -326,7 +327,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -345,7 +346,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

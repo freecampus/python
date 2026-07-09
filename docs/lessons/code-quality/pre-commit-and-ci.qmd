@@ -43,14 +43,15 @@ Pre-commit and CI are like a departure checklist: lights, doors, fuel, and docum
 before takeoff.
 :::
 
-<!-- mermaid-visual-model -->
-## Visual model
+## How checks move from your laptop to CI
 
-::: {.visual-model}
+::: {.concept-diagram}
 Automation repeats the same checks at predictable moments: before a commit and
 after code is pushed.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart LR
   edit["Edit files"] --> precommit["pre-commit<br/>local checks"]
   precommit --> commit["git commit"]
@@ -71,17 +72,17 @@ The best CI checks are commands learners can also run locally.
 - **automation** — a word you should be able to explain after this lesson.
 - **check** — a word you should be able to explain after this lesson.
 
-## Mental model
+## What this means
 
 Automation makes quality checks repeatable instead of dependent on memory.
 
-A useful mental model has three parts:
+A useful explanation has three parts:
 
 1. **Name the thing.** Say what concept you are using.
 2. **Name the input.** Identify the values, files, objects, or settings involved.
 3. **Name the result.** Explain what changes, what is returned, or what is printed.
 
-## Tiny example
+## First example
 
 Predict what will happen before you run the code.
 
@@ -91,11 +92,11 @@ pytest
 ruff check src tests
 ```
 
-## Walkthrough
+## Step-by-step explanation
 
-1. `pre-commit run --all-files` — read this line slowly and ask what value or action it creates.
-2. `pytest` — read this line slowly and ask what value or action it creates.
-3. `ruff check src tests` — read this line slowly and ask what value or action it creates.
+1. `pre-commit run --all-files` — identify the value, name, or action on this line.
+2. `pytest` — identify the value, name, or action on this line.
+3. `ruff check src tests` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -108,7 +109,7 @@ Use this routine with every example in the course:
 | Step | What to do | Why it helps |
 | --- | --- | --- |
 | Read | Point to each name, value, and operator. | Slows the code down enough to understand it. |
-| Predict | Write what you think will happen. | Builds a testable mental model. |
+| Predict | Write what you think will happen. | Creates a testable prediction. |
 | Run | Execute the smallest complete example. | Lets Python give evidence. |
 | Explain | Say what happened in plain language. | Converts recognition into understanding. |
 | Modify | Change one small thing and run again. | Shows which part caused which result. |
@@ -123,7 +124,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -200,7 +201,7 @@ browser, so it does not need a Python kernel during website rendering.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -218,7 +219,7 @@ browser, so it does not need a Python kernel during website rendering.
 
 ## Notebook and Colab practice
 
-Open a blank notebook at https://colab.new, copy the tiny example, and run three small
+Open a blank notebook at https://colab.new, copy the first example, and run three small
 variations. You can also use a local Jupyter notebook or VS Code.
 Keep one cell for the original example, one cell for your prediction, and one
 cell for your modified version.
@@ -231,7 +232,7 @@ cell for your modified version.
 - Ask learners to predict before execution; do not skip this step.
 - Invite one learner to explain the analogy and another to explain the code.
 - When an error appears, model calm traceback reading instead of immediately fixing it.
-- If time is short, keep the tiny example and quiz; move the challenge to homework.
+- If time is short, keep the first example and quiz; move the challenge to homework.
 
 </details>
 

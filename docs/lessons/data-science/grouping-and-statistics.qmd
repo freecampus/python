@@ -11,7 +11,7 @@ Summarize categories and describe distributions.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,10 +36,10 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Grouping and Aggregation** — Summarize data by categories with groupby.
-- Section 2: **Descriptive Statistics** — Summarize data with counts, averages, medians, spread, and distributions.
+- **1. Grouping and Aggregation** — Summarize data by categories with groupby.
+- **2. Descriptive Statistics** — Summarize data with counts, averages, medians, spread, and distributions.
 
-## Section 1: Grouping and Aggregation
+## 1. Grouping and Aggregation
 
 Summarize data by categories with groupby.
 
@@ -50,11 +50,11 @@ groupby is sorting receipts into envelopes, totaling each envelope, then compari
 totals.
 :::
 
-### Mental model
+### What this means
 
 Grouping splits data into categories, applies a calculation, and combines the results.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -65,11 +65,11 @@ df = pd.DataFrame({"group": ["a", "a", "b"], "score": [1, 3, 10]})
 print(df.groupby("group")["score"].mean())
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `import pandas as pd` — read this line slowly and ask what value or action it creates.
-2. `df = pd.DataFrame({"group": ["a", "a", "b"], "score": [1, 3, 10]})` — read this line slowly and ask what value or action it creates.
-3. `print(df.groupby("group")["score"].mean())` — read this line slowly and ask what value or action it creates.
+1. `import pandas as pd` — identify the value, name, or action on this line.
+2. `df = pd.DataFrame({"group": ["a", "a", "b"], "score": [1, 3, 10]})` — identify the value, name, or action on this line.
+3. `print(df.groupby("group")["score"].mean())` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -85,7 +85,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -111,7 +111,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -159,7 +159,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -175,7 +175,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Descriptive Statistics
+## 2. Descriptive Statistics
 
 Summarize data with counts, averages, medians, spread, and distributions.
 
@@ -186,11 +186,11 @@ Descriptive statistics are a class photo summary: how many people, typical heigh
 variation, not every life story.
 :::
 
-### Mental model
+### What this means
 
 Descriptive statistics describe what is in the data without claiming causation.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -201,12 +201,12 @@ print(mean)
 print(max(values) - min(values))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `values = [2, 4, 4, 10]` — read this line slowly and ask what value or action it creates.
-2. `mean = sum(values) / len(values)` — read this line slowly and ask what value or action it creates.
-3. `print(mean)` — read this line slowly and ask what value or action it creates.
-4. `print(max(values) - min(values))` — read this line slowly and ask what value or action it creates.
+1. `values = [2, 4, 4, 10]` — identify the value, name, or action on this line.
+2. `mean = sum(values) / len(values)` — identify the value, name, or action on this line.
+3. `print(mean)` — identify the value, name, or action on this line.
+4. `print(max(values) - min(values))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -222,7 +222,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -247,7 +247,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -295,7 +295,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -314,7 +314,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

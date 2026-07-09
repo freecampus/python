@@ -5,49 +5,29 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Understand values, expressions, assignment, names, and type conversion together.
+A program is useful because it can remember information and combine it in new
+ways. For example, a store program may need to remember a price, remember a
+quantity, multiply them, and print the total.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+Before you can write larger programs, you need four tiny but important ideas:
 
-::: {.questions}
-### Questions
+- a **value** is a piece of information, like `10` or `"Ada"`;
+- an **expression** is code Python can evaluate to produce a value, like `2 + 3`;
+- a **variable** is a name that helps you reuse a value later, like `price`;
+- a **type** tells Python what kind of value something is, like `int` or `str`.
 
-By the end of this lesson, you should be able to answer:
+These ideas are small, but almost every Python program uses them.
 
-- How do the sections in **Values, Variables, and Types** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
-:::
+## How names point to values
 
-::: {.learning-objectives}
-### Learning objectives
-
-You will practice how to:
-
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 3 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
-
-## Lesson map
-
-- Section 1: **Values and Expressions** — Recognize Python values and combine them with operators to produce new values.
-- Section 2: **Variables and Assignment** — Use names to remember values and make programs readable.
-- Section 3: **Types and Conversion** — Understand common types and convert between them deliberately.
-
-<!-- mermaid-visual-model -->
-## Visual model
-
-::: {.visual-model}
-The picture below separates three ideas beginners often mix together: the code
-line, the name created by assignment, and the value object Python remembers.
+::: {.concept-diagram}
+The diagram separates the line of code, the name, the value, and the type.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart LR
   line["Python line<br/>price = 10"] --> assign["assignment<br/>="]
   assign --> name["name<br/>price"]
@@ -58,28 +38,23 @@ flowchart LR
   textobject --> texttype["type<br/>str"]
 ```
 
-Use the diagram as a reading routine: find the line of code, identify the name,
-then ask what value and type that name points to.
+The name `price` is not the value itself. It is more like a label attached to a
+value. Python also knows the value's type.
 :::
 
-## Section 1: Values and Expressions
+## 1. Values and expressions
 
-Recognize Python values and combine them with operators to produce new values.
+A **value** is data Python can work with. These are values:
 
-::: {.analogy}
-### Analogy for this section
+```python
+42
+3.14
+"hello"
+True
+```
 
-An expression is like a calculator entry: Python evaluates it and gives one result back.
-:::
-
-### Mental model
-
-A value is a piece of information; an expression is a question Python can answer with a
-value.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+An **expression** is a small piece of code that Python can turn into one value.
+Try reading the examples below like calculator entries.
 
 ```python
 2 + 3
@@ -87,54 +62,17 @@ Predict what will happen before you run the code.
 "Py" + "thon"
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `2 + 3` — read this line slowly and ask what value or action it creates.
-2. `10 / 4` — read this line slowly and ask what value or action it creates.
-3. `"Py" + "thon"` — read this line slowly and ask what value or action it creates.
+- `2 + 3` asks Python to add two whole numbers. The result is `5`.
+- `10 / 4` asks Python to divide. The result is `2.5`, which is a decimal number.
+- `"Py" + "thon"` asks Python to join two pieces of text. The result is
+  `"Python"`.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+The same symbol can mean different things depending on the values around it.
+With numbers, `+` means addition. With strings, `+` means joining text.
 
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Quotation marks change meaning. 42 is a number, but "42" is text.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
@@ -196,136 +134,82 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Variables and Assignment
+## 2. Variables and assignment
 
-Use names to remember values and make programs readable.
-
-::: {.analogy}
-### Analogy for this section
-
-A variable is like a sticky note on an object. The note is not the object; it helps you
-find the object again.
-:::
-
-### Mental model
-
-Assignment attaches a name to a value so later code can reuse it.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+A variable lets you give a name to a value so you can use it later.
 
 ```python
-price = 12
+price = 10
 quantity = 3
 total = price * quantity
 print(total)
 ```
 
-### Walkthrough
+### What Python does, line by line
 
-1. `price = 12` — read this line slowly and ask what value or action it creates.
-2. `quantity = 3` — read this line slowly and ask what value or action it creates.
-3. `total = price * quantity` — read this line slowly and ask what value or action it creates.
-4. `print(total)` — read this line slowly and ask what value or action it creates.
+1. `price = 10`
+   - Python creates the value `10`.
+   - Python attaches the name `price` to that value.
+2. `quantity = 3`
+   - Python creates the value `3`.
+   - Python attaches the name `quantity` to that value.
+3. `total = price * quantity`
+   - Python looks up `price` and finds `10`.
+   - Python looks up `quantity` and finds `3`.
+   - Python multiplies `10 * 3` and gets `30`.
+   - Python attaches the name `total` to `30`.
+4. `print(total)`
+   - Python looks up `total` and finds `30`.
+   - Python displays `30`.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### A common beginner misunderstanding
 
-### Challenge
+`=` in Python does **not** mean "these are already equal". It means "store this
+value under this name".
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+```python
+score = 8
+score = score + 1
+print(score)
+```
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+The second line means:
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+1. look up the old value of `score`, which is `8`;
+2. add `1`, producing `9`;
+3. attach the name `score` to the new value `9`.
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-A single equals sign assigns. A double equals sign compares. Mixing them changes the
-question you are asking Python.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-variables-and-assignment",
-  "title": "Variables and Assignment checkpoint",
+  "id": "assignment-checkpoint",
+  "title": "Assignment checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Variables and Assignment?",
+      "id": "single-equals",
+      "prompt": "What does a single equals sign do in Python?",
       "options": [
-        "Assignment attaches a name to a value so later code can reuse it.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "It assigns a value to a name.",
+        "It compares two values.",
+        "It prints a value.",
+        "It deletes a value."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Assignment attaches a name to a value so later code can reuse it."
+      "explanation": "A single equals sign is assignment. Use == when you want to compare."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "lookup",
+      "prompt": "In total = price * quantity, what does Python do with price?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "It looks up the value currently attached to price.",
+        "It prints the word price.",
+        "It creates a new number named price.",
+        "It ignores price."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A variable is like a sticky note on an object. The note is not the object; it helps you find the object again."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "A variable name is looked up so Python can use the value it points to."
     }
   ]
 }
@@ -333,134 +217,82 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: Types and Conversion
+## 3. Types and conversion
 
-Understand common types and convert between them deliberately.
-
-::: {.analogy}
-### Analogy for this section
-
-A type is like a label on a box: flour, sugar, and salt may look similar, but recipes
-treat them differently.
-:::
-
-### Mental model
-
-Types tell Python what operations make sense for a value.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+A type tells Python what kind of value it is working with. That matters because
+Python treats different kinds of values differently.
 
 ```python
-age_text = "12"
+print(type(42))
+print(type("42"))
+```
+
+The first value, `42`, is an integer. The second value, `"42"`, is a string
+because it has quotation marks.
+
+If you ask a user for input, Python gives you text:
+
+```python
+age_text = input("How old are you? ")
 age = int(age_text)
 print(age + 1)
 ```
 
-### Walkthrough
+### What Python does, line by line
 
-1. `age_text = "12"` — read this line slowly and ask what value or action it creates.
-2. `age = int(age_text)` — read this line slowly and ask what value or action it creates.
-3. `print(age + 1)` — read this line slowly and ask what value or action it creates.
+1. `input(...)` waits for the user to type something.
+2. Whatever the user types is stored as text. If the user types `12`, Python
+   stores `"12"`, not the number `12`.
+3. `int(age_text)` tries to convert the text into an integer.
+4. After conversion, `age + 1` works as arithmetic.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Common mistake: text that looks like a number
 
-### Challenge
+Broken code:
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+```python
+age = "12"
+print(age + 1)
+```
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+Python cannot add text and a number. The fix is to convert the text first:
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+```python
+age = int("12")
+print(age + 1)
+```
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Python will not always guess the conversion you wanted. Convert input text explicitly
-before doing arithmetic.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-types-and-conversion",
-  "title": "Types and Conversion checkpoint",
+  "id": "types-conversion-checkpoint",
+  "title": "Types and conversion checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Types and Conversion?",
+      "id": "input-type",
+      "prompt": "What type does input() return?",
       "options": [
-        "Types tell Python what operations make sense for a value.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "str",
+        "int",
+        "float",
+        "bool"
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Types tell Python what operations make sense for a value."
+      "explanation": "input() always returns text, even when the text contains digits."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "convert-before-math",
+      "prompt": "Why do we write int(age_text)?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "To convert text into an integer before doing arithmetic.",
+        "To print the age.",
+        "To make a variable global.",
+        "To join two strings."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A type is like a label on a box: flour, sugar, and salt may look similar, but recipes treat them differently."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Arithmetic needs numeric values, not text that merely looks numeric."
     }
   ]
 }
@@ -468,37 +300,34 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
+## Practice
 
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
+Open <https://colab.new> and try this small receipt calculator:
 
-## Instructor note
+```python
+notebook_price = 4
+pen_price = 2
+notebooks = 3
+pens = 5
 
-<details class="instructor">
-<summary>Teaching notes</summary>
+total = notebook_price * notebooks + pen_price * pens
+print(total)
+```
 
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
-
-</details>
+Then change exactly one number and predict the new total before running the code.
 
 ## Key points
 
 ::: {.key-points}
-- **Values and Expressions**: A value is a piece of information; an expression is a question Python can answer with a
-value.
-- **Variables and Assignment**: Assignment attaches a name to a value so later code can reuse it.
-- **Types and Conversion**: Types tell Python what operations make sense for a value.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- Values are pieces of information, such as numbers, text, and booleans.
+- Expressions are evaluated by Python to produce values.
+- Assignment attaches a name to a value.
+- Types matter because Python uses them to decide which operations make sense.
+- Convert text to numbers before doing arithmetic with user input.
 :::
 
 ## References
 
-- Python Tutorial: https://docs.python.org/3/tutorial/
+- Python Tutorial: https://docs.python.org/3/tutorial/introduction.html
 - Built-in types: https://docs.python.org/3/library/stdtypes.html
 - Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

@@ -11,7 +11,7 @@ Understand iteration and produce values lazily with generators.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,17 +36,18 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Iterables and Iterators** — Understand objects that can be looped over and the mechanism that produces one item at a time.
-- Section 2: **Generators** — Write functions that yield values lazily instead of returning a complete collection.
+- **1. Iterables and Iterators** — Understand objects that can be looped over and the mechanism that produces one item at a time.
+- **2. Generators** — Write functions that yield values lazily instead of returning a complete collection.
 
-<!-- mermaid-visual-model -->
-## Visual model
+## How iteration produces one value at a time
 
-::: {.visual-model}
+::: {.concept-diagram}
 A generator produces one value, pauses, remembers its state, and resumes when the
 next value is requested.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 stateDiagram-v2
   [*] --> Ready
   Ready --> YieldOne: next()
@@ -61,7 +62,7 @@ Generators are useful when you want a sequence over time instead of building the
 whole collection immediately.
 :::
 
-## Section 1: Iterables and Iterators
+## 1. Iterables and Iterators
 
 Understand objects that can be looped over and the mechanism that produces one item at a time.
 
@@ -71,12 +72,12 @@ Understand objects that can be looped over and the mechanism that produces one i
 An iterator is a bookmark moving through a book one page at a time.
 :::
 
-### Mental model
+### What this means
 
 An iterable can provide an iterator; an iterator remembers where it is in a sequence of
 values.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -86,11 +87,11 @@ print(next(numbers))
 print(next(numbers))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `numbers = iter([10, 20, 30])` — read this line slowly and ask what value or action it creates.
-2. `print(next(numbers))` — read this line slowly and ask what value or action it creates.
-3. `print(next(numbers))` — read this line slowly and ask what value or action it creates.
+1. `numbers = iter([10, 20, 30])` — identify the value, name, or action on this line.
+2. `print(next(numbers))` — identify the value, name, or action on this line.
+3. `print(next(numbers))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -106,7 +107,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -132,7 +133,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -180,7 +181,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -196,7 +197,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Generators
+## 2. Generators
 
 Write functions that yield values lazily instead of returning a complete collection.
 
@@ -206,11 +207,11 @@ Write functions that yield values lazily instead of returning a complete collect
 A generator is a vending machine: it gives one item when asked, not the whole warehouse.
 :::
 
-### Mental model
+### What this means
 
 A generator produces values one at a time, pausing between yields.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -224,13 +225,13 @@ for number in countdown(3):
     print(number)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def countdown(start):` — read this line slowly and ask what value or action it creates.
-2. `while start > 0:` — read this line slowly and ask what value or action it creates.
-3. `yield start` — read this line slowly and ask what value or action it creates.
-4. `start -= 1` — read this line slowly and ask what value or action it creates.
-5. `for number in countdown(3):` — read this line slowly and ask what value or action it creates.
+1. `def countdown(start):` — identify the value, name, or action on this line.
+2. `while start > 0:` — identify the value, name, or action on this line.
+3. `yield start` — identify the value, name, or action on this line.
+4. `start -= 1` — identify the value, name, or action on this line.
+5. `for number in countdown(3):` — identify the value, name, or action on this line.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -247,7 +248,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -273,7 +274,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -321,7 +322,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -340,7 +341,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

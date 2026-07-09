@@ -11,7 +11,7 @@ Define classes, create objects, store attributes, write methods, and use self.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,18 +36,19 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Classes and Objects** — Define a new kind of object and create instances from it.
-- Section 2: **Attributes and Methods** — Store object data in attributes and object behavior in methods.
-- Section 3: **__init__ and self** — Initialize each object with its own starting data.
+- **1. Classes and Objects** — Define a new kind of object and create instances from it.
+- **2. Attributes and Methods** — Store object data in attributes and object behavior in methods.
+- **3. __init__ and self** — Initialize each object with its own starting data.
 
-<!-- mermaid-visual-model -->
-## Visual model
+## Classes, objects, and attributes
 
-::: {.visual-model}
+::: {.concept-diagram}
 A class describes a kind of object. Each object has its own attributes, and
 methods use `self` to work with that particular object.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart LR
   class["class Student<br/>blueprint"] --> ada["object<br/>ada"]
   class --> grace["object<br/>grace"]
@@ -60,7 +61,7 @@ flowchart LR
 If `self` feels mysterious, read it as "this specific object."
 :::
 
-## Section 1: Classes and Objects
+## 1. Classes and Objects
 
 Define a new kind of object and create instances from it.
 
@@ -70,11 +71,11 @@ Define a new kind of object and create instances from it.
 A class is a cookie cutter, and objects are the individual cookies.
 :::
 
-### Mental model
+### What this means
 
 A class is a blueprint; an object is one concrete instance built from that blueprint.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -86,12 +87,12 @@ fido = Dog()
 print(type(fido))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `class Dog:` — read this line slowly and ask what value or action it creates.
-2. `pass` — read this line slowly and ask what value or action it creates.
-3. `fido = Dog()` — read this line slowly and ask what value or action it creates.
-4. `print(type(fido))` — read this line slowly and ask what value or action it creates.
+1. `class Dog:` — identify the value, name, or action on this line.
+2. `pass` — identify the value, name, or action on this line.
+3. `fido = Dog()` — identify the value, name, or action on this line.
+4. `print(type(fido))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -107,7 +108,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -132,7 +133,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -180,7 +181,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -196,7 +197,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Attributes and Methods
+## 2. Attributes and Methods
 
 Store object data in attributes and object behavior in methods.
 
@@ -206,11 +207,11 @@ Store object data in attributes and object behavior in methods.
 Attributes are facts on an ID card; methods are actions the person can perform.
 :::
 
-### Mental model
+### What this means
 
 Attributes describe what an object knows; methods describe what it can do.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -225,13 +226,13 @@ counter = Counter()
 counter.show()
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `class Counter:` — read this line slowly and ask what value or action it creates.
-2. `value = 0` — read this line slowly and ask what value or action it creates.
-3. `def show(self):` — read this line slowly and ask what value or action it creates.
-4. `print(self.value)` — read this line slowly and ask what value or action it creates.
-5. `counter = Counter()` — read this line slowly and ask what value or action it creates.
+1. `class Counter:` — identify the value, name, or action on this line.
+2. `value = 0` — identify the value, name, or action on this line.
+3. `def show(self):` — identify the value, name, or action on this line.
+4. `print(self.value)` — identify the value, name, or action on this line.
+5. `counter = Counter()` — identify the value, name, or action on this line.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -248,7 +249,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -273,7 +274,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -321,7 +322,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -337,7 +338,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: __init__ and self
+## 3. __init__ and self
 
 Initialize each object with its own starting data.
 
@@ -348,11 +349,11 @@ __init__ is the sign-up form each new club member fills out; self is the individ
 member's record.
 :::
 
-### Mental model
+### What this means
 
 __init__ runs when a new object is created; self refers to that object.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -365,13 +366,13 @@ student = Student("Ada")
 print(student.name)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `class Student:` — read this line slowly and ask what value or action it creates.
-2. `def __init__(self, name):` — read this line slowly and ask what value or action it creates.
-3. `self.name = name` — read this line slowly and ask what value or action it creates.
-4. `student = Student("Ada")` — read this line slowly and ask what value or action it creates.
-5. `print(student.name)` — read this line slowly and ask what value or action it creates.
+1. `class Student:` — identify the value, name, or action on this line.
+2. `def __init__(self, name):` — identify the value, name, or action on this line.
+3. `self.name = name` — identify the value, name, or action on this line.
+4. `student = Student("Ada")` — identify the value, name, or action on this line.
+5. `print(student.name)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -387,7 +388,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -412,7 +413,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -460,7 +461,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -479,7 +480,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

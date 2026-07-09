@@ -5,50 +5,29 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Store, access, slice, update, copy, and loop over ordered mutable collections.
+A single variable can store one value. Real programs often need a group of
+values: many scores, many names, many tasks, many measurements. A **list** stores
+multiple values in one ordered container.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+Lists are one of the first data structures worth mastering because they combine
+several core ideas:
 
-::: {.questions}
-### Questions
+- order: items have positions;
+- mutability: the list can change;
+- iteration: loops can visit each item;
+- indexing and slicing: code can pick one item or a smaller list.
 
-By the end of this lesson, you should be able to answer:
+## How lists store ordered items
 
-- How do the sections in **Lists** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
-:::
-
-::: {.learning-objectives}
-### Learning objectives
-
-You will practice how to:
-
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 4 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
-
-## Lesson map
-
-- Section 1: **Lists** — Store ordered collections that can grow and change.
-- Section 2: **List Indexing and Slicing** — Access one list item or a smaller list by position.
-- Section 3: **List Methods** — Use common list methods such as append, remove, sort, and pop.
-- Section 4: **List Copying and Aliasing** — Understand when two names refer to the same list and how to make copies.
-
-<!-- mermaid-visual-model -->
-## Visual model
-
-::: {.visual-model}
+::: {.concept-diagram}
 A list is one object that stores items in order. Names can point to that same
 list, or to a separate copy.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart LR
   tasks["name<br/>tasks"] --> list["list object<br/>index 0: 'predict'<br/>index 1: 'practice'<br/>index 2: 'reflect'"]
   alias["name<br/>alias"] --> list
@@ -60,25 +39,21 @@ This diagram explains why aliasing can surprise beginners: two names can point t
 one mutable list object.
 :::
 
-## Section 1: Lists
+## 1. Creating, reading, and changing lists
 
-Store ordered collections that can grow and change.
+A list is written with square brackets. Items are separated by commas.
 
-::: {.analogy}
-### Analogy for this section
+```python
+scores = [10, 8, 9]
+names = ["Ada", "Grace", "Katherine"]
+```
 
-A list is a row of numbered lockers. You can open locker 0, replace what is inside, or
-add another locker at the end.
-:::
+A list can hold any type of value, but beginner programs are usually easier to
+understand when one list contains one kind of thing.
 
-### Mental model
+### First example
 
-A list is a mutable ordered container; order matters and items can be replaced, added,
-or removed.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+Predict the final printed list before running the code.
 
 ```python
 tasks = ["read", "practice"]
@@ -87,110 +62,90 @@ tasks[0] = "predict"
 print(tasks)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `tasks = ["read", "practice"]` — read this line slowly and ask what value or action it creates.
-2. `tasks.append("reflect")` — read this line slowly and ask what value or action it creates.
-3. `tasks[0] = "predict"` — read this line slowly and ask what value or action it creates.
-4. `print(tasks)` — read this line slowly and ask what value or action it creates.
+1. `tasks = ["read", "practice"]`
+   - Python creates a list with two strings.
+   - Index `0` contains `"read"`; index `1` contains `"practice"`.
+2. `tasks.append("reflect")`
+   - `.append(...)` adds a new item to the end of the existing list.
+   - The list is now `["read", "practice", "reflect"]`.
+3. `tasks[0] = "predict"`
+   - Index `0` is replaced.
+   - The list is now `["predict", "practice", "reflect"]`.
+4. `print(tasks)`
+   - Python displays the whole list.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Indexes and length
 
-### Challenge
+```python
+colors = ["red", "green", "blue"]
+print(colors[0])      # red
+print(colors[2])      # blue
+print(len(colors))    # 3
+```
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
+`len(colors)` is `3`, but the last index is `2`. This is a common beginner
+surprise: indexes start at `0`, so a list of length `3` has indexes `0`, `1`,
+and `2`.
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-Using an index that does not exist raises IndexError. Check len(items) before reaching
-past the end.
+**Mistake: reaching past the end.**
+
+```python
+colors = ["red", "green", "blue"]
+print(colors[3])
+```
+
+This raises `IndexError`. The last valid index is `len(colors) - 1`, which is
+`2` here.
 :::
 
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "data-structures-lists",
-  "title": "Lists checkpoint",
+  "id": "lists-basics-checkpoint",
+  "title": "List basics checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Lists?",
+      "id": "first-index",
+      "prompt": "What is the first valid index of a Python list?",
       "options": [
-        "A list is a mutable ordered container; order matters and items can be replaced, added, or removed.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "0",
+        "1",
+        "-0",
+        "len(list)"
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A list is a mutable ordered container; order matters and items can be replaced, added, or removed."
+      "explanation": "Python indexes start at 0."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "append-effect",
+      "prompt": "What does tasks.append(\"reflect\") do?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Adds \"reflect\" to the end of the existing list.",
+        "Creates a new string named tasks.",
+        "Deletes the first item.",
+        "Sorts the list alphabetically."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A list is a row of numbered lockers. You can open locker 0, replace what is inside, or add another locker at the end."
+      "explanation": "append mutates the list by adding one item at the end."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "last-index",
+      "prompt": "If len(colors) is 3, what is the last valid positive index?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "3",
+        "2",
+        "1",
+        "0"
       ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "answer_index": 1,
+      "explanation": "A length-3 list has indexes 0, 1, and 2."
     }
   ]
 }
@@ -198,415 +153,206 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: List Indexing and Slicing
+## 2. List methods and loops
 
-Access one list item or a smaller list by position.
+A **method** is an action attached to a value. List methods change or inspect a
+list.
 
-::: {.analogy}
-### Analogy for this section
+| Method | Meaning | Example |
+| --- | --- | --- |
+| `.append(item)` | add item to the end | `tasks.append("review")` |
+| `.remove(item)` | remove first matching item | `tasks.remove("read")` |
+| `.pop()` | remove and return the last item | `last = tasks.pop()` |
+| `.sort()` | sort the list in place | `scores.sort()` |
 
-Indexing is pointing to one book on a shelf; slicing is taking a section of neighboring
-books.
-:::
+### First example
 
-### Mental model
+```python
+scores = [70, 90, 80]
+scores.append(100)
+scores.sort()
 
-Indexing selects one item; slicing copies a range of items into a new list.
+for score in scores:
+    print(score)
+```
 
-### Tiny example
+### Step-by-step explanation
 
-Predict what will happen before you run the code.
+1. `scores = [70, 90, 80]` creates a list.
+2. `scores.append(100)` changes that same list by adding `100` at the end.
+3. `scores.sort()` changes the list order to `[70, 80, 90, 100]`.
+4. `for score in scores:` visits each score one at a time.
+5. The indented `print(score)` runs once per score.
+
+### Method return values
+
+Some list methods change the list and return `None`. This mistake is common:
+
+```python
+scores = [70, 90, 80]
+sorted_scores = scores.sort()
+print(sorted_scores)
+```
+
+This prints `None` because `.sort()` changes `scores` in place. If you want a
+new sorted list, use `sorted(...)`:
+
+```python
+scores = [70, 90, 80]
+sorted_scores = sorted(scores)
+print(sorted_scores)
+```
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "lists-methods-loops-checkpoint",
+  "title": "List methods and loops checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "sort-return",
+      "prompt": "What does scores.sort() return?",
+      "options": [
+        "None",
+        "A new sorted list",
+        "The largest score",
+        "A string"
+      ],
+      "answer_index": 0,
+      "explanation": "list.sort() changes the list in place and returns None."
+    },
+    {
+      "id": "loop-over-list",
+      "prompt": "What does for score in scores: do?",
+      "options": [
+        "Runs the indented block once for each score.",
+        "Runs the block only for the first score.",
+        "Deletes each score.",
+        "Creates a dictionary."
+      ],
+      "answer_index": 0,
+      "explanation": "A for loop visits each list item in order."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## 3. Slicing, copying, and aliasing
+
+A **slice** creates a smaller list from part of another list.
 
 ```python
 letters = ["a", "b", "c", "d"]
-print(letters[0])
-print(letters[-1])
 print(letters[1:3])
 ```
 
-### Walkthrough
+The result is `["b", "c"]`. The start index `1` is included. The stop index `3`
+is not included.
 
-1. `letters = ["a", "b", "c", "d"]` — read this line slowly and ask what value or action it creates.
-2. `print(letters[0])` — read this line slowly and ask what value or action it creates.
-3. `print(letters[-1])` — read this line slowly and ask what value or action it creates.
-4. `print(letters[1:3])` — read this line slowly and ask what value or action it creates.
+### Why stop is not included
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+Think of the slice as cutting between items:
 
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-The stop position in a slice is excluded. items[1:3] returns positions 1 and 2, not 3.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "data-structures-list-indexing-slicing",
-  "title": "List Indexing and Slicing checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
-    {
-      "id": "main-idea",
-      "prompt": "Which statement best describes List Indexing and Slicing?",
-      "options": [
-        "Indexing selects one item; slicing copies a range of items into a new list.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
-      ],
-      "answer_index": 0,
-      "explanation": "The key idea is: Indexing selects one item; slicing copies a range of items into a new list."
-    },
-    {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
-      "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
-      ],
-      "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Indexing is pointing to one book on a shelf; slicing is taking a section of neighboring books."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
-    }
-  ]
-}
-</script>
-
-{{< include ../_includes/ojs-quiz.qmd >}}
-
-## Section 3: List Methods
-
-Use common list methods such as append, remove, sort, and pop.
-
-::: {.analogy}
-### Analogy for this section
-
-List methods are tools hanging on the list itself: append adds, sort orders, pop removes
-and returns.
-:::
-
-### Mental model
-
-Methods are actions attached to objects; list methods change or inspect a list.
-
-### Tiny example
-
-Predict what will happen before you run the code.
-
-```python
-numbers = [3, 1, 2]
-numbers.sort()
-last = numbers.pop()
-print(numbers)
-print(last)
+```text
+indexes:    0     1     2     3
+items:    "a"   "b"   "c"   "d"
+cut:     |     |     |     |     |
+              start       stop
 ```
 
-### Walkthrough
+`letters[1:3]` starts at index `1` and stops before index `3`.
 
-1. `numbers = [3, 1, 2]` — read this line slowly and ask what value or action it creates.
-2. `numbers.sort()` — read this line slowly and ask what value or action it creates.
-3. `last = numbers.pop()` — read this line slowly and ask what value or action it creates.
-4. `print(numbers)` — read this line slowly and ask what value or action it creates.
-5. `print(last)` — read this line slowly and ask what value or action it creates.
-
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Some methods change the list in place and return None. Do not write numbers =
-numbers.sort().
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "data-structures-list-methods",
-  "title": "List Methods checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
-    {
-      "id": "main-idea",
-      "prompt": "Which statement best describes List Methods?",
-      "options": [
-        "Methods are actions attached to objects; list methods change or inspect a list.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
-      ],
-      "answer_index": 0,
-      "explanation": "The key idea is: Methods are actions attached to objects; list methods change or inspect a list."
-    },
-    {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
-      "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
-      ],
-      "answer_index": 0,
-      "explanation": "The analogy in this lesson is: List methods are tools hanging on the list itself: append adds, sort orders, pop removes and returns."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
-    }
-  ]
-}
-</script>
-
-{{< include ../_includes/ojs-quiz.qmd >}}
-
-## Section 4: List Copying and Aliasing
-
-Understand when two names refer to the same list and how to make copies.
-
-::: {.analogy}
-### Analogy for this section
-
-Aliasing is two people holding strings tied to the same balloon: moving one string moves
-the same balloon.
-:::
-
-### Mental model
-
-Aliasing happens when multiple names point to one mutable object.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+### Aliasing: two names, one list
 
 ```python
-original = ["a", "b"]
+original = ["read", "practice"]
 alias = original
+alias.append("reflect")
+print(original)
+```
+
+This prints `["read", "practice", "reflect"]`. `alias` and `original` are two
+names for the same list.
+
+If you need a separate list, copy it:
+
+```python
+original = ["read", "practice"]
 copy = original.copy()
-alias.append("c")
+copy.append("reflect")
 print(original)
 print(copy)
 ```
 
-### Walkthrough
-
-1. `original = ["a", "b"]` — read this line slowly and ask what value or action it creates.
-2. `alias = original` — read this line slowly and ask what value or action it creates.
-3. `copy = original.copy()` — read this line slowly and ask what value or action it creates.
-4. `alias.append("c")` — read this line slowly and ask what value or action it creates.
-5. `print(original)` — read this line slowly and ask what value or action it creates.
-6. Continue the same process for the remaining lines, one line at a time.
-
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
 ### Common mistakes
 
 ::: {.debugging-corner}
-Assigning one list to another name does not copy the list. Use .copy() or list slicing
-when you need a separate list.
+**Mistake: expecting assignment to copy a list.**
+
+`alias = original` does not copy the list. It adds another name for the same list
+object. Use `.copy()` or a slice `original[:]` for a shallow copy.
 :::
 
-When you get stuck, use this debugging routine:
+### Practice
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
+In Colab, create a shopping list and practice one operation at a time:
 
-### Section checkpoint
+```python
+shopping = ["rice", "beans", "apples"]
+shopping.append("tea")
+shopping.remove("beans")
+print(shopping[:2])
+```
 
-This quiz checks the ideas in this section before you move on.
+Before each line, predict the exact list.
+
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "data-structures-list-copying-aliasing",
-  "title": "List Copying and Aliasing checkpoint",
+  "id": "lists-copying-checkpoint",
+  "title": "Slicing and copying checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes List Copying and Aliasing?",
+      "id": "slice-stop",
+      "prompt": "What does letters[1:3] include?",
       "options": [
-        "Aliasing happens when multiple names point to one mutable object.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "Indexes 1 and 2, but not 3.",
+        "Indexes 1, 2, and 3.",
+        "Only index 3.",
+        "All indexes except 1 and 3."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Aliasing happens when multiple names point to one mutable object."
+      "explanation": "The stop index in a slice is excluded."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "alias-effect",
+      "prompt": "What does alias = original do for a list?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "It creates another name for the same list.",
+        "It always makes a deep copy.",
+        "It freezes the original list.",
+        "It removes all items."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Aliasing is two people holding strings tied to the same balloon: moving one string moves the same balloon."
+      "explanation": "Assignment does not copy a list object; it creates another reference to it."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "copy-method",
+      "prompt": "Which expression makes a shallow copy of a list?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "original.copy()",
+        "alias = original",
+        "len(original)",
+        "original.append()"
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": ".copy() creates a separate shallow copy of the list."
     }
   ]
 }
@@ -614,39 +360,18 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
-
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
-
-## Instructor note
-
-<details class="instructor">
-<summary>Teaching notes</summary>
-
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
-
-</details>
-
 ## Key points
 
 ::: {.key-points}
-- **Lists**: A list is a mutable ordered container; order matters and items can be replaced, added,
-or removed.
-- **List Indexing and Slicing**: Indexing selects one item; slicing copies a range of items into a new list.
-- **List Methods**: Methods are actions attached to objects; list methods change or inspect a list.
-- **List Copying and Aliasing**: Aliasing happens when multiple names point to one mutable object.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- Lists store ordered collections of values.
+- Indexes start at `0`; the last index is `len(items) - 1`.
+- Lists are mutable: methods and item assignment can change them.
+- A `for` loop can process each list item.
+- Slices use `start:stop`, where stop is not included.
+- Assignment creates an alias, not a copy.
 :::
 
 ## References
 
-- Python data structures tutorial: https://docs.python.org/3/tutorial/datastructures.html
-- Built-in types: https://docs.python.org/3/library/stdtypes.html
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Python Tutorial: lists: https://docs.python.org/3/tutorial/introduction.html#lists
+- Python Tutorial: more on lists: https://docs.python.org/3/tutorial/datastructures.html#more-on-lists

@@ -5,45 +5,75 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Use this template when adding a new atomic lesson. One lesson should teach one
-central topic, not a bundle of loosely related topics.
+Open with the learner's problem, not the vocabulary. Explain when a beginner
+would need this concept and what task becomes easier after learning it.
 
 ::: {.questions}
-### Questions
+### Questions this lesson should answer
 
-- What problem does this concept help learners solve?
-- What should learners predict, run, and explain?
-- Which mistake should they debug first?
+- What practical problem does this concept solve?
+- What should learners predict before running code?
+- What should learners inspect when output or an error surprises them?
 :::
 
 ::: {.learning-objectives}
 ### Learning objectives
 
-By the end, learners should be able to explain, read, write, modify, and debug a
-small example for the topic.
+By the end, learners should be able to explain, read, write, modify, quiz, and
+debug a small example for the topic.
 :::
 
-::: {.analogy}
-### Analogy
+## What the concept means
 
-Start with an everyday comparison before formal vocabulary.
-:::
+Introduce the vocabulary in plain language. Use an analogy only if it clarifies
+the code that appears next. Avoid generic filler; connect every sentence to a
+concrete example.
 
-## Tiny example
+## First example
+
+Ask learners to predict the output before running.
 
 ```python
 print("Hello, Python!")
 ```
 
-## Challenge
+## Step-by-step explanation
+
+Explain every line in beginner language:
+
+1. What value, name, or action appears on this line?
+2. What does Python do first?
+3. What changes after the line runs?
+4. What output, returned value, or error should the learner expect?
+
+## Try changing one thing
 
 ::: {.challenge}
-Ask learners to change one thing, predict the result, and explain what changed.
+Ask learners to change exactly one part, predict the result, run the code, and
+explain the difference in one sentence.
 :::
 
-## Checkpoint quiz
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the example into Colab, Jupyter, or a `.py` file.
+2. Mark the one part you plan to change.
+3. Write a prediction.
+4. Run the changed code.
+5. Compare the result with the prediction.
+
+</details>
+
+## Common mistake and fix
+
+::: {.debugging-corner}
+Show broken code, the likely error or unexpected output, and a small repair.
+Explain why the repair works.
+:::
+
+## Check your understanding
 
 Every lesson must include a browser-side OJS quiz. If the same quiz should also
 appear in notebooks, store it in `src/fcpython/quiz_banks.py` and render it with
@@ -58,14 +88,16 @@ an import cell that uses `#| echo: false`.
 # print(example_quiz().to_json_script())
 ```
 
-## Debugging corner
+## Practice
 
-Show broken code, the likely error, and a debugging routine.
+Provide a short practice task with one or two variations. Prefer small edits over
+large blank-page exercises.
 
 ## Key points
 
 ::: {.key-points}
-- Keep lessons atomic.
-- Use analogies, examples, challenges, OJS quizzes, and references.
-- Make mistakes visible and teachable.
+- State the concept in one sentence.
+- Include one concrete example and one explained mistake.
+- Use OJS quizzes as checkpoints before moving on.
+- Keep examples beginner-safe: one idea at a time.
 :::

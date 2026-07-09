@@ -11,7 +11,7 @@ Understand tensors and where PyTorch and TensorFlow/Keras fit.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,11 +36,11 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Tensors** — Understand tensors as multi-dimensional numerical arrays used in deep learning.
-- Section 2: **PyTorch Overview** — Understand where PyTorch fits for tensors, neural networks, and research workflows.
-- Section 3: **TensorFlow and Keras Overview** — Understand TensorFlow/Keras as tools for building and training neural networks.
+- **1. Tensors** — Understand tensors as multi-dimensional numerical arrays used in deep learning.
+- **2. PyTorch Overview** — Understand where PyTorch fits for tensors, neural networks, and research workflows.
+- **3. TensorFlow and Keras Overview** — Understand TensorFlow/Keras as tools for building and training neural networks.
 
-## Section 1: Tensors
+## 1. Tensors
 
 Understand tensors as multi-dimensional numerical arrays used in deep learning.
 
@@ -51,11 +51,11 @@ A tensor is a stack of grids: one number, a row, a table, or a cube of numbers d
 on dimensions.
 :::
 
-### Mental model
+### What this means
 
 A tensor generalizes scalars, vectors, and matrices to more dimensions.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -66,11 +66,11 @@ image_batch = np.zeros((10, 28, 28))
 print(image_batch.shape)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `import numpy as np` — read this line slowly and ask what value or action it creates.
-2. `image_batch = np.zeros((10, 28, 28))` — read this line slowly and ask what value or action it creates.
-3. `print(image_batch.shape)` — read this line slowly and ask what value or action it creates.
+1. `import numpy as np` — identify the value, name, or action on this line.
+2. `image_batch = np.zeros((10, 28, 28))` — identify the value, name, or action on this line.
+3. `print(image_batch.shape)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -86,7 +86,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -111,7 +111,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -159,7 +159,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -175,7 +175,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: PyTorch Overview
+## 2. PyTorch Overview
 
 Understand where PyTorch fits for tensors, neural networks, and research workflows.
 
@@ -185,11 +185,11 @@ Understand where PyTorch fits for tensors, neural networks, and research workflo
 PyTorch is a workshop for building trainable machines from tensor parts.
 :::
 
-### Mental model
+### What this means
 
 PyTorch provides tensor computation and automatic differentiation for deep learning.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -200,11 +200,11 @@ x = torch.tensor([1.0, 2.0, 3.0])
 print(x * 2)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `import torch` — read this line slowly and ask what value or action it creates.
-2. `x = torch.tensor([1.0, 2.0, 3.0])` — read this line slowly and ask what value or action it creates.
-3. `print(x * 2)` — read this line slowly and ask what value or action it creates.
+1. `import torch` — identify the value, name, or action on this line.
+2. `x = torch.tensor([1.0, 2.0, 3.0])` — identify the value, name, or action on this line.
+3. `print(x * 2)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -220,7 +220,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -246,7 +246,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -294,7 +294,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -310,7 +310,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: TensorFlow and Keras Overview
+## 3. TensorFlow and Keras Overview
 
 Understand TensorFlow/Keras as tools for building and training neural networks.
 
@@ -321,11 +321,11 @@ Keras is like modular building blocks for neural networks: stack layers, choose 
 rules, fit data.
 :::
 
-### Mental model
+### What this means
 
 Keras provides a high-level model-building interface on top of TensorFlow.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -336,11 +336,11 @@ model = tf.keras.Sequential([tf.keras.layers.Dense(1)])
 print(model)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `import tensorflow as tf` — read this line slowly and ask what value or action it creates.
-2. `model = tf.keras.Sequential([tf.keras.layers.Dense(1)])` — read this line slowly and ask what value or action it creates.
-3. `print(model)` — read this line slowly and ask what value or action it creates.
+1. `import tensorflow as tf` — identify the value, name, or action on this line.
+2. `model = tf.keras.Sequential([tf.keras.layers.Dense(1)])` — identify the value, name, or action on this line.
+3. `print(model)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -356,7 +356,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -382,7 +382,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -430,7 +430,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -449,7 +449,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

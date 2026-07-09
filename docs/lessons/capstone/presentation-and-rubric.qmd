@@ -11,7 +11,7 @@ Present the project story and evaluate it with visible criteria.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,10 +36,10 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Presenting Your Work** — Tell a clear story about the problem, method, result, and limitation.
-- Section 2: **Capstone Rubric** — Evaluate a capstone with criteria for correctness, clarity, testing, reproducibility, and communication.
+- **1. Presenting Your Work** — Tell a clear story about the problem, method, result, and limitation.
+- **2. Capstone Rubric** — Evaluate a capstone with criteria for correctness, clarity, testing, reproducibility, and communication.
 
-## Section 1: Presenting Your Work
+## 1. Presenting Your Work
 
 Tell a clear story about the problem, method, result, and limitation.
 
@@ -50,11 +50,11 @@ Presenting is being a tour guide: choose a route, point out landmarks, and expla
 they matter.
 :::
 
-### Mental model
+### What this means
 
 A presentation translates technical work into a sequence an audience can follow.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -63,10 +63,10 @@ story = ["problem", "approach", "demo", "result", "limitation", "next step"]
 print(" -> ".join(story))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `story = ["problem", "approach", "demo", "result", "limitation", "next s...` — read this line slowly and ask what value or action it creates.
-2. `print(" -> ".join(story))` — read this line slowly and ask what value or action it creates.
+1. `story = ["problem", "approach", "demo", "result", "limitation", "next s...` — identify the value, name, or action on this line.
+2. `print(" -> ".join(story))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -82,7 +82,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -108,7 +108,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -156,7 +156,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -172,7 +172,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Capstone Rubric
+## 2. Capstone Rubric
 
 Evaluate a capstone with criteria for correctness, clarity, testing, reproducibility, and communication.
 
@@ -182,11 +182,11 @@ Evaluate a capstone with criteria for correctness, clarity, testing, reproducibi
 A rubric is a score sheet for a performance: it helps everyone know what quality means.
 :::
 
-### Mental model
+### What this means
 
 A rubric makes expectations visible before and after project work.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -195,10 +195,10 @@ rubric = {"works": 4, "tests": 3, "readme": 4, "presentation": 3}
 print(sum(rubric.values()))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `rubric = {"works": 4, "tests": 3, "readme": 4, "presentation": 3}` — read this line slowly and ask what value or action it creates.
-2. `print(sum(rubric.values()))` — read this line slowly and ask what value or action it creates.
+1. `rubric = {"works": 4, "tests": 3, "readme": 4, "presentation": 3}` — identify the value, name, or action on this line.
+2. `print(sum(rubric.values()))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -214,7 +214,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -239,7 +239,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -287,7 +287,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -306,7 +306,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

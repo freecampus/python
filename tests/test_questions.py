@@ -122,7 +122,50 @@ def test_all_lesson_quiz_payloads_are_valid_json() -> None:
         assert parsed["questions"], path
 
 
-def test_selected_lessons_include_mermaid_visual_models() -> None:
+def test_lessons_do_not_use_generic_generated_scaffold() -> None:
+    forbidden_phrases = tuple(
+        phrase.casefold()
+        for phrase in (
+            "Mental model",
+            "mental model",
+            "Tiny example",
+            "tiny example",
+            "Walkthrough",
+            "read this line slowly",
+            "building one mental model",
+            "Visual model",
+            "visual model",
+            "visual-model",
+            "mermaid-visual-model",
+        )
+    )
+    hits = []
+    for path in _lesson_pages():
+        text = path.read_text().casefold()
+        for phrase in forbidden_phrases:
+            if phrase in text:
+                hits.append(f"{path}: {phrase}")
+
+    assert hits == []
+
+
+def test_lessons_use_clean_numbered_section_headings() -> None:
+    old_section_patterns = (
+        re.compile(r"^#{2,4} Section \d+:", flags=re.MULTILINE),
+        re.compile(r"^- Section \d+:", flags=re.MULTILINE),
+        re.compile(r"^#{2,4} Section checkpoint$", flags=re.MULTILINE),
+    )
+    hits = []
+    for path in _lesson_pages():
+        text = path.read_text()
+        for pattern in old_section_patterns:
+            if pattern.search(text):
+                hits.append(f"{path}: {pattern.pattern}")
+
+    assert hits == []
+
+
+def test_selected_lessons_include_mermaid_diagrams() -> None:
     expected = {
         Path("docs/lessons/core-python/values-variables-types.qmd"),
         Path("docs/lessons/core-python/booleans-and-conditionals.qmd"),
@@ -159,3 +202,15 @@ def test_mermaid_blocks_are_not_empty() -> None:
     assert len(blocks) >= 10
     for path, block in blocks:
         assert block.strip(), path
+
+
+def test_mermaid_blocks_are_rendered_not_echoed_as_code() -> None:
+    missing_options = []
+    for path in _lesson_pages():
+        text = path.read_text()
+        for block in re.findall(r"```\{mermaid\}\n(.*?)\n```", text, flags=re.DOTALL):
+            lines = block.splitlines()
+            if lines[:2] != ["%%| echo: false", "%%| eval: true"]:
+                missing_options.append(str(path))
+
+    assert missing_options == []

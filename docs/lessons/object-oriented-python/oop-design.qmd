@@ -11,7 +11,7 @@ Choose composition, inheritance, or simpler functions based on the relationship 
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,18 +36,19 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Composition** — Build objects out of other objects.
-- Section 2: **Inheritance** — Reuse and specialize behavior with parent and child classes.
-- Section 3: **When Not to Use Classes** — Choose simple functions or data structures when classes add no clarity.
+- **1. Composition** — Build objects out of other objects.
+- **2. Inheritance** — Reuse and specialize behavior with parent and child classes.
+- **3. When Not to Use Classes** — Choose simple functions or data structures when classes add no clarity.
 
-<!-- mermaid-visual-model -->
-## Visual model
+## How objects can collaborate
 
-::: {.visual-model}
+::: {.concept-diagram}
 Composition and inheritance answer different design questions: does one object
 **have** another object, or **is** it a specialized kind of another object?
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 classDiagram
   class Car
   class Engine
@@ -60,7 +61,7 @@ classDiagram
 Prefer the relationship that makes the program easiest to explain and test.
 :::
 
-## Section 1: Composition
+## 1. Composition
 
 Build objects out of other objects.
 
@@ -71,11 +72,11 @@ Composition is a bicycle made of wheels, frame, chain, and brakes: each part has
 inside the whole.
 :::
 
-### Mental model
+### What this means
 
 Composition models has-a relationships by placing one object inside another.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -92,13 +93,13 @@ car = Car()
 car.engine.start()
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `class Engine:` — read this line slowly and ask what value or action it creates.
-2. `def start(self):` — read this line slowly and ask what value or action it creates.
-3. `print("engine on")` — read this line slowly and ask what value or action it creates.
-4. `class Car:` — read this line slowly and ask what value or action it creates.
-5. `def __init__(self):` — read this line slowly and ask what value or action it creates.
+1. `class Engine:` — identify the value, name, or action on this line.
+2. `def start(self):` — identify the value, name, or action on this line.
+3. `print("engine on")` — identify the value, name, or action on this line.
+4. `class Car:` — identify the value, name, or action on this line.
+5. `def __init__(self):` — identify the value, name, or action on this line.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -115,7 +116,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -140,7 +141,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -188,7 +189,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -204,7 +205,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Inheritance
+## 2. Inheritance
 
 Reuse and specialize behavior with parent and child classes.
 
@@ -215,11 +216,11 @@ Inheritance is like a school form: all students share common fields, while excha
 students may add extra fields.
 :::
 
-### Mental model
+### What this means
 
 Inheritance models is-a relationships where a child class specializes a parent class.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -235,13 +236,13 @@ class Cat(Animal):
 Cat().speak()
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `class Animal:` — read this line slowly and ask what value or action it creates.
-2. `def speak(self):` — read this line slowly and ask what value or action it creates.
-3. `print("sound")` — read this line slowly and ask what value or action it creates.
-4. `class Cat(Animal):` — read this line slowly and ask what value or action it creates.
-5. `def speak(self):` — read this line slowly and ask what value or action it creates.
+1. `class Animal:` — identify the value, name, or action on this line.
+2. `def speak(self):` — identify the value, name, or action on this line.
+3. `print("sound")` — identify the value, name, or action on this line.
+4. `class Cat(Animal):` — identify the value, name, or action on this line.
+5. `def speak(self):` — identify the value, name, or action on this line.
 6. Continue the same process for the remaining lines, one line at a time.
 
 After running the example, compare the actual output with your prediction. If
@@ -258,7 +259,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -284,7 +285,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -332,7 +333,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -348,7 +349,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: When Not to Use Classes
+## 3. When Not to Use Classes
 
 Choose simple functions or data structures when classes add no clarity.
 
@@ -358,12 +359,12 @@ Choose simple functions or data structures when classes add no clarity.
 A class can be a backpack, but you do not need a backpack to carry one sticky note.
 :::
 
-### Mental model
+### What this means
 
 Classes are useful when state and behavior stay together; otherwise they can hide simple
 ideas.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -374,11 +375,11 @@ def calculate_total(prices):
 print(calculate_total([3, 4, 5]))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def calculate_total(prices):` — read this line slowly and ask what value or action it creates.
-2. `return sum(prices)` — read this line slowly and ask what value or action it creates.
-3. `print(calculate_total([3, 4, 5]))` — read this line slowly and ask what value or action it creates.
+1. `def calculate_total(prices):` — identify the value, name, or action on this line.
+2. `return sum(prices)` — identify the value, name, or action on this line.
+3. `print(calculate_total([3, 4, 5]))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -394,7 +395,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -420,7 +421,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -468,7 +469,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -487,7 +488,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

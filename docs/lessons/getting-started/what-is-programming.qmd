@@ -5,66 +5,59 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Understand programs, Python, interpreters, and the beginner learning loop.
+Before learning Python syntax, it helps to know what you are asking the computer
+to do. Programming is not magic and it is not memorizing hundreds of commands.
+Programming is writing clear instructions that a computer can follow.
 
-Beginners often try to learn Python as a list of commands. This lesson teaches one idea
-at a time: what problem it solves, how to recognize it in code, how to practice it, and
-how to debug a common mistake. Treat the code examples as small experiments, not as text
-to memorize.
+A computer is powerful, but very literal. If a recipe says "add sugar" but does
+not say how much, a human cook may guess. Python will not guess. Python follows
+exactly what you wrote.
 
-::: {.questions}
-### Questions
+## The basic idea
 
-By the end of this lesson, you should be able to answer:
+A **program** is a set of instructions. Python is one language for writing those
+instructions. The **Python interpreter** reads Python code, follows it step by
+step, and reports output or errors.
 
-- What problem does **What Is Programming?** help me solve?
-- What words or symbols should I recognize in a small example?
-- What should I check first when the example does not behave as expected?
+## How Python runs instructions
+
+::: {.concept-diagram}
+The interpreter is the tool that turns your Python text into action.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  learner["You write code"] --> file["Python instructions<br/>print('Hello')"]
+  file --> interpreter["Python interpreter"]
+  interpreter --> output["Output<br/>Hello"]
+  interpreter --> error["or error message<br/>if an instruction is unclear"]
+```
+
+When something goes wrong, the interpreter gives clues. Your job is to read the
+clue, make one small change, and try again.
 :::
 
-::: {.learning-objectives}
-### Learning objectives
+## Vocabulary in plain language
 
-You will practice how to:
+| Word | Beginner-friendly meaning |
+| --- | --- |
+| Program | Instructions written for a computer. |
+| Code | The text of those instructions. |
+| Python | A programming language with readable syntax. |
+| Interpreter | The program that runs Python code. |
+| Syntax | The spelling and grammar rules of a programming language. |
+| Output | What the program displays or produces. |
+| Error | Feedback that Python could not continue as written. |
 
-- explain the main idea in everyday language;
-- read a short example line by line;
-- predict the result before running the code;
-- make one safe variation of the example;
-- debug one common beginner mistake.
-:::
+You do not need to memorize this table immediately. Keep it nearby and return to
+it when the words appear in later lessons.
 
-::: {.analogy}
-### Analogy
+## First example
 
-Programming is like giving instructions to a very literal kitchen assistant: it follows
-exactly what you wrote, not what you meant.
-:::
-
-## Vocabulary
-
-- **program** — a word you should be able to explain after this lesson.
-- **instruction** — a word you should be able to explain after this lesson.
-- **interpreter** — a word you should be able to explain after this lesson.
-- **syntax** — a word you should be able to explain after this lesson.
-- **output** — a word you should be able to explain after this lesson.
-
-## Mental model
-
-A program is a precise recipe written for a computer; Python is one language for writing
-those recipes.
-
-A useful mental model has three parts:
-
-1. **Name the thing.** Say what concept you are using.
-2. **Name the input.** Identify the values, files, objects, or settings involved.
-3. **Name the result.** Explain what changes, what is returned, or what is printed.
-
-## Tiny example
-
-Predict what will happen before you run the code.
+Predict the output before running the code.
 
 ```python
 print("Make tea")
@@ -72,124 +65,129 @@ print("Add honey")
 print("Share with a friend")
 ```
 
-## Walkthrough
+## Step-by-step explanation
 
-1. `print("Make tea")` — read this line slowly and ask what value or action it creates.
-2. `print("Add honey")` — read this line slowly and ask what value or action it creates.
-3. `print("Share with a friend")` — read this line slowly and ask what value or action it creates.
+1. `print("Make tea")`
+   - `print` is a built-in Python function.
+   - The parentheses contain the value we want to display.
+   - The quotes create a string, which is text.
+   - Python displays `Make tea`.
+2. `print("Add honey")`
+   - Python moves to the next line.
+   - It displays `Add honey` on a new line.
+3. `print("Share with a friend")`
+   - Python displays the third string.
+   - The program then ends because there are no more instructions.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+The output is:
 
-## Worked example: read, predict, modify
+```text
+Make tea
+Add honey
+Share with a friend
+```
 
-Use this routine with every example in the course:
+## Try changing one thing
+
+Change exactly one string and run again:
+
+```python
+print("Make coffee")
+print("Add honey")
+print("Share with a friend")
+```
+
+What changed? Only the first output line. This is the learning loop you will use
+throughout the course: predict, run, compare, and explain.
+
+## A common first error
+
+Broken code:
+
+```python
+print("Make tea)
+```
+
+The opening quote has no matching closing quote. Python cannot tell where the
+text ends, so it raises a syntax error. Fix it by closing the string:
+
+```python
+print("Make tea")
+```
+
+::: {.debugging-corner}
+When an error appears, do not delete everything. Read the message, find the line,
+look for one small mismatch, and run again.
+:::
+
+## The beginner learning loop
+
+Use this routine for every example in the course:
 
 | Step | What to do | Why it helps |
 | --- | --- | --- |
-| Read | Point to each name, value, and operator. | Slows the code down enough to understand it. |
-| Predict | Write what you think will happen. | Builds a testable mental model. |
+| Read | Point to names, values, and symbols. | Slows the code down. |
+| Predict | Write what you expect before running. | Makes your thinking visible. |
 | Run | Execute the smallest complete example. | Lets Python give evidence. |
-| Explain | Say what happened in plain language. | Converts recognition into understanding. |
-| Modify | Change one small thing and run again. | Shows which part caused which result. |
+| Explain | Say what happened in plain language. | Turns output into understanding. |
+| Modify | Change one small part and run again. | Shows cause and effect. |
+| Debug | Read the clue and change one thing. | Builds confidence with errors. |
 
-## Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-## Common mistakes
-
-::: {.debugging-corner}
-Beginners often think errors mean they are bad at programming. Errors are feedback from
-a literal machine, not a personal judgment.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-## Checkpoint quiz
-
-::: {.quiz-box}
-Answer these questions before moving on. The quiz runs with Quarto OJS in the
-browser, so it does not need a Python kernel during website rendering.
-:::
+## Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "getting-started-what-is-programming",
-  "title": "What Is Programming? checkpoint",
+  "id": "what-is-programming-checkpoint",
+  "title": "What is programming? checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes What Is Programming??",
+      "id": "program-meaning",
+      "prompt": "What is a program?",
       "options": [
-        "A program is a precise recipe written for a computer; Python is one language for writing those recipes.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "A set of instructions written for a computer.",
+        "Only a finished app sold online.",
+        "A random collection of words.",
+        "A file that cannot have errors."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A program is a precise recipe written for a computer; Python is one language for writing those recipes."
+      "explanation": "A program is instructions the computer can follow."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "interpreter-job",
+      "prompt": "What is the job of the Python interpreter?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Read and run Python code step by step.",
+        "Guess what the learner meant.",
+        "Automatically fix every bug.",
+        "Only display web pages."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Programming is like giving instructions to a very literal kitchen assistant: it follows exactly what you wrote, not what you meant."
+      "explanation": "The interpreter runs the instructions and reports output or errors."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "print-output",
+      "prompt": "What does print(\"Hello\") display?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Hello",
+        "\"Hello\" with quotes always",
+        "print",
+        "Nothing"
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
+      "explanation": "The quotes mark text in the code; print displays the text value."
     },
     {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "id": "best-learning-loop",
+      "prompt": "What is the best beginner practice routine?",
       "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
+        "Predict, run, compare, explain, and change one thing.",
+        "Memorize commands without running code.",
+        "Avoid errors by never experimenting.",
+        "Paste large programs before learning small ones."
       ],
       "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Small experiments help you see cause and effect."
     }
   ]
 }
@@ -197,39 +195,27 @@ browser, so it does not need a Python kernel during website rendering.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
+## Practice
 
-Open a blank notebook at https://colab.new, copy the tiny example, and run three small
-variations. You can also use a local Jupyter notebook or VS Code.
-Keep one cell for the original example, one cell for your prediction, and one
-cell for your modified version.
+Open <https://colab.new> and copy the first example into a code cell. Then make
+three small versions:
 
-## Instructor note
-
-<details class="instructor">
-<summary>Teaching notes</summary>
-
-- Ask learners to predict before execution; do not skip this step.
-- Invite one learner to explain the analogy and another to explain the code.
-- When an error appears, model calm traceback reading instead of immediately fixing it.
-- If time is short, keep the tiny example and quiz; move the challenge to homework.
-
-</details>
+1. print three steps for making a sandwich;
+2. print three lines that introduce yourself;
+3. intentionally remove one closing quote, run the cell, then fix it.
 
 ## Key points
 
 ::: {.key-points}
-- A program is a precise recipe written for a computer; Python is one language for writing those recipes.
-- Small examples are more useful than large copied programs when a concept is new.
-- Prediction, execution, explanation, and one small modification form the core practice loop.
-- Debugging starts by reading clues and changing one thing at a time.
+- A program is a precise set of instructions.
+- Python is a programming language; the interpreter runs Python code.
+- `print(...)` displays output.
+- Strings are text surrounded by quotes.
+- Errors are feedback, not failure.
+- Learn by predicting, running, explaining, modifying, and debugging.
 :::
 
 ## References
 
 - Python Tutorial: https://docs.python.org/3/tutorial/
-- Google Colab overview: https://colab.research.google.com/notebooks/basic_features_overview.ipynb
-- Jupyter documentation: https://docs.jupyter.org/
-- VS Code Python tutorial: https://code.visualstudio.com/docs/python/python-tutorial
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Google Colab: https://colab.new

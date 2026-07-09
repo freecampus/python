@@ -11,7 +11,7 @@ Move from question to dataset and load tabular data with pandas.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,17 +36,18 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Data Science Workflow** — Follow a repeatable path from question to communication.
-- Section 2: **Loading Data with pandas** — Load CSV and similar tabular data into DataFrames.
+- **1. Data Science Workflow** — Follow a repeatable path from question to communication.
+- **2. Loading Data with pandas** — Load CSV and similar tabular data into DataFrames.
 
-<!-- mermaid-visual-model -->
-## Visual model
+## The data science workflow at a glance
 
-::: {.visual-model}
+::: {.concept-diagram}
 Data science is an iterative workflow. New questions often appear after you
 inspect or clean the data.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart LR
   question["Ask question"] --> load["Load data"]
   load --> inspect["Inspect structure"]
@@ -59,7 +60,7 @@ flowchart LR
 Do not skip the question and inspection steps; they shape every later choice.
 :::
 
-## Section 1: Data Science Workflow
+## 1. Data Science Workflow
 
 Follow a repeatable path from question to communication.
 
@@ -69,11 +70,11 @@ Follow a repeatable path from question to communication.
 A workflow is a recipe card for inquiry: ingredients, steps, checks, and serving notes.
 :::
 
-### Mental model
+### What this means
 
 A workflow keeps analysis organized and honest from initial question to final claim.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -83,11 +84,11 @@ steps = ["load", "inspect", "clean", "analyze", "communicate"]
 print(question, steps)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `question = "Which category has the highest average score?"` — read this line slowly and ask what value or action it creates.
-2. `steps = ["load", "inspect", "clean", "analyze", "communicate"]` — read this line slowly and ask what value or action it creates.
-3. `print(question, steps)` — read this line slowly and ask what value or action it creates.
+1. `question = "Which category has the highest average score?"` — identify the value, name, or action on this line.
+2. `steps = ["load", "inspect", "clean", "analyze", "communicate"]` — identify the value, name, or action on this line.
+3. `print(question, steps)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -103,7 +104,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -129,7 +130,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -177,7 +178,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -193,7 +194,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Loading Data with pandas
+## 2. Loading Data with pandas
 
 Load CSV and similar tabular data into DataFrames.
 
@@ -203,11 +204,11 @@ Load CSV and similar tabular data into DataFrames.
 A DataFrame is like a spreadsheet with Python superpowers.
 :::
 
-### Mental model
+### What this means
 
 A DataFrame is a labeled table with rows and columns.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -218,11 +219,11 @@ df = pd.read_csv("data.csv")
 print(df.head())
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `import pandas as pd` — read this line slowly and ask what value or action it creates.
-2. `df = pd.read_csv("data.csv")` — read this line slowly and ask what value or action it creates.
-3. `print(df.head())` — read this line slowly and ask what value or action it creates.
+1. `import pandas as pd` — identify the value, name, or action on this line.
+2. `df = pd.read_csv("data.csv")` — identify the value, name, or action on this line.
+3. `print(df.head())` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -238,7 +239,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -264,7 +265,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -312,7 +313,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -331,7 +332,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

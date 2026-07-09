@@ -29,7 +29,7 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 ├── docs/                    # Quarto website
 │   ├── index.qmd            # Course home
 │   ├── _quarto.yml          # Site navigation/config
-│   ├── styles.css           # Course callouts, quizzes, visual model styling
+│   ├── styles.css           # Course callouts, quizzes, diagram styling
 │   └── lessons/             # Course chapters and lessons
 ├── notebooks/               # Jupyter/Colab examples
 ├── src/fcpython/            # Reusable quiz and widget helpers
@@ -49,7 +49,16 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   the shared OJS include.
 - Prefer analogies, small examples, debugging corners, hidden solution paths,
   and references over long abstract explanations.
-- Use Mermaid diagrams selectively for concepts that need a visual mental model
+- Do not use generic "Mental model", "Tiny example", or vague "Walkthrough"
+  sections. Prefer concrete headings such as "The problem this lesson solves",
+  "First example", "Step-by-step explanation", "Common mistake", and "Check your
+  understanding".
+- Explain examples line by line for a learner with zero programming experience:
+  say what value/name/action appears, what Python does, what changes, and what
+  output or error to expect.
+- Use clean numbered lesson sections such as `## 1. Strings are text values`,
+  not generated-sounding headings such as `## Section 1: Strings`.
+- Use Mermaid diagrams selectively for concepts that need a visual explanation
   such as variables, conditionals, loops, functions, lists, dictionaries,
   tracebacks, environments, OOP, decorators, and ML workflows.
 - Keep examples beginner-safe: one idea at a time, explicit prediction prompts,
@@ -79,11 +88,21 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 - Mermaid diagrams should use fenced blocks like:
 
   ````markdown
+  ::: {.concept-diagram} Short explanation of what the diagram illustrates.
+
   ```{mermaid}
+  %%| echo: false
+  %%| eval: true
   flowchart LR
     A[Input] --> B[Process] --> C[Output]
   ```
+
+  :::
   ````
+
+  The `%%|` options are required because Quarto execution is disabled globally;
+  without them, diagrams render as visible flowchart source code instead of
+  browser-rendered Mermaid diagrams.
 
 ## Quiz/widget helpers
 
@@ -94,7 +113,7 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   `<script type="application/json" class="fcpython-ojs-quiz-config">` blocks
   plus the shared OJS include.
 - Tests in `tests/test_questions.py` verify quiz JSON, OJS presence, and
-  selected Mermaid visual models.
+  selected Mermaid diagrams.
 
 ## Development commands
 

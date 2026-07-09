@@ -11,7 +11,7 @@ Use assertions, pytest, and edge cases to check behavior.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,11 +36,11 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Assertions** — Use assert statements to document and check assumptions while learning and testing.
-- Section 2: **pytest** — Write and run automated tests with pytest.
-- Section 3: **Edge Cases** — Choose tests for boundaries, empty inputs, and unusual but valid situations.
+- **1. Assertions** — Use assert statements to document and check assumptions while learning and testing.
+- **2. pytest** — Write and run automated tests with pytest.
+- **3. Edge Cases** — Choose tests for boundaries, empty inputs, and unusual but valid situations.
 
-## Section 1: Assertions
+## 1. Assertions
 
 Use assert statements to document and check assumptions while learning and testing.
 
@@ -50,11 +50,11 @@ Use assert statements to document and check assumptions while learning and testi
 An assertion is a checkpoint gate: if the rule is false, the gate stops you immediately.
 :::
 
-### Mental model
+### What this means
 
 An assertion says a condition should be true at this point in the program.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -63,10 +63,10 @@ total = 2 + 3
 assert total == 5
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `total = 2 + 3` — read this line slowly and ask what value or action it creates.
-2. `assert total == 5` — read this line slowly and ask what value or action it creates.
+1. `total = 2 + 3` — identify the value, name, or action on this line.
+2. `assert total == 5` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -82,7 +82,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -108,7 +108,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -156,7 +156,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -172,7 +172,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: pytest
+## 2. pytest
 
 Write and run automated tests with pytest.
 
@@ -183,11 +183,11 @@ pytest is a tireless practice partner: it repeats your checks every time you cha
 code.
 :::
 
-### Mental model
+### What this means
 
 pytest discovers test functions and reports which expectations pass or fail.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -199,12 +199,12 @@ def test_add():
     assert add(2, 3) == 5
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def add(a, b):` — read this line slowly and ask what value or action it creates.
-2. `return a + b` — read this line slowly and ask what value or action it creates.
-3. `def test_add():` — read this line slowly and ask what value or action it creates.
-4. `assert add(2, 3) == 5` — read this line slowly and ask what value or action it creates.
+1. `def add(a, b):` — identify the value, name, or action on this line.
+2. `return a + b` — identify the value, name, or action on this line.
+3. `def test_add():` — identify the value, name, or action on this line.
+4. `assert add(2, 3) == 5` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -220,7 +220,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -246,7 +246,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -294,7 +294,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -310,7 +310,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: Edge Cases
+## 3. Edge Cases
 
 Choose tests for boundaries, empty inputs, and unusual but valid situations.
 
@@ -321,11 +321,11 @@ Edge cases are the corners of a tablecloth: if the corners are secure, the middl
 usually easier.
 :::
 
-### Mental model
+### What this means
 
 An edge case is an input near a boundary where assumptions often break.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -338,13 +338,13 @@ def first(items):
 assert first([]) is None
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def first(items):` — read this line slowly and ask what value or action it creates.
-2. `if not items:` — read this line slowly and ask what value or action it creates.
-3. `return None` — read this line slowly and ask what value or action it creates.
-4. `return items[0]` — read this line slowly and ask what value or action it creates.
-5. `assert first([]) is None` — read this line slowly and ask what value or action it creates.
+1. `def first(items):` — identify the value, name, or action on this line.
+2. `if not items:` — identify the value, name, or action on this line.
+3. `return None` — identify the value, name, or action on this line.
+4. `return items[0]` — identify the value, name, or action on this line.
+5. `assert first([]) is None` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -360,7 +360,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -385,7 +385,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -433,7 +433,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -452,7 +452,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

@@ -11,7 +11,7 @@ Split data, fit a first model, evaluate predictions, and recognize overfitting.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,19 +36,20 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Train/Test Split** — Separate data for learning from data for honest evaluation.
-- Section 2: **First Model with scikit-learn** — Fit a simple model and make predictions using scikit-learn's estimator pattern.
-- Section 3: **Evaluating Models** — Use metrics to compare predictions with known answers.
-- Section 4: **Overfitting and Underfitting** — Recognize when a model memorizes too much or learns too little.
+- **1. Train/Test Split** — Separate data for learning from data for honest evaluation.
+- **2. First Model with scikit-learn** — Fit a simple model and make predictions using scikit-learn's estimator pattern.
+- **3. Evaluating Models** — Use metrics to compare predictions with known answers.
+- **4. Overfitting and Underfitting** — Recognize when a model memorizes too much or learns too little.
 
-<!-- mermaid-visual-model -->
-## Visual model
+## How model training flows
 
-::: {.visual-model}
+::: {.concept-diagram}
 A basic supervised machine-learning workflow separates examples used for
 learning from examples used for evaluation.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart LR
   data["labeled dataset"] --> split["train/test split"]
   split --> train["training data"]
@@ -64,7 +65,7 @@ If evaluation uses examples the model already trained on, the score can be too
 optimistic.
 :::
 
-## Section 1: Train/Test Split
+## 1. Train/Test Split
 
 Separate data for learning from data for honest evaluation.
 
@@ -75,12 +76,12 @@ A test set is a closed-book exam: the student should not see the exact questions
 practice.
 :::
 
-### Mental model
+### What this means
 
 A train/test split holds back examples so performance is measured on data the model did
 not train on.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -92,12 +93,12 @@ y = [2, 4, 6, 8]
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `from sklearn.model_selection import train_test_split` — read this line slowly and ask what value or action it creates.
-2. `X = [[1], [2], [3], [4]]` — read this line slowly and ask what value or action it creates.
-3. `y = [2, 4, 6, 8]` — read this line slowly and ask what value or action it creates.
-4. `X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)` — read this line slowly and ask what value or action it creates.
+1. `from sklearn.model_selection import train_test_split` — identify the value, name, or action on this line.
+2. `X = [[1], [2], [3], [4]]` — identify the value, name, or action on this line.
+3. `y = [2, 4, 6, 8]` — identify the value, name, or action on this line.
+4. `X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -113,7 +114,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -138,7 +139,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -186,7 +187,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -202,7 +203,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: First Model with scikit-learn
+## 2. First Model with scikit-learn
 
 Fit a simple model and make predictions using scikit-learn's estimator pattern.
 
@@ -212,11 +213,11 @@ Fit a simple model and make predictions using scikit-learn's estimator pattern.
 The estimator pattern is like coaching: fit is practice, predict is game day.
 :::
 
-### Mental model
+### What this means
 
 scikit-learn models usually use fit to learn and predict to produce outputs.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -228,12 +229,12 @@ model.fit([[1], [2], [3]], [2, 4, 6])
 print(model.predict([[4]]))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `from sklearn.linear_model import LinearRegression` — read this line slowly and ask what value or action it creates.
-2. `model = LinearRegression()` — read this line slowly and ask what value or action it creates.
-3. `model.fit([[1], [2], [3]], [2, 4, 6])` — read this line slowly and ask what value or action it creates.
-4. `print(model.predict([[4]]))` — read this line slowly and ask what value or action it creates.
+1. `from sklearn.linear_model import LinearRegression` — identify the value, name, or action on this line.
+2. `model = LinearRegression()` — identify the value, name, or action on this line.
+3. `model.fit([[1], [2], [3]], [2, 4, 6])` — identify the value, name, or action on this line.
+4. `print(model.predict([[4]]))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -249,7 +250,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -275,7 +276,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -323,7 +324,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -339,7 +340,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: Evaluating Models
+## 3. Evaluating Models
 
 Use metrics to compare predictions with known answers.
 
@@ -350,11 +351,11 @@ Metrics are scorecards: they summarize performance but do not tell the whole sto
 alone.
 :::
 
-### Mental model
+### What this means
 
 Evaluation measures how well predictions match labels on held-out data.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -366,12 +367,12 @@ y_pred = [12, 18, 33]
 print(mean_absolute_error(y_true, y_pred))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `from sklearn.metrics import mean_absolute_error` — read this line slowly and ask what value or action it creates.
-2. `y_true = [10, 20, 30]` — read this line slowly and ask what value or action it creates.
-3. `y_pred = [12, 18, 33]` — read this line slowly and ask what value or action it creates.
-4. `print(mean_absolute_error(y_true, y_pred))` — read this line slowly and ask what value or action it creates.
+1. `from sklearn.metrics import mean_absolute_error` — identify the value, name, or action on this line.
+2. `y_true = [10, 20, 30]` — identify the value, name, or action on this line.
+3. `y_pred = [12, 18, 33]` — identify the value, name, or action on this line.
+4. `print(mean_absolute_error(y_true, y_pred))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -387,7 +388,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -413,7 +414,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -461,7 +462,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -477,7 +478,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 4: Overfitting and Underfitting
+## 4. Overfitting and Underfitting
 
 Recognize when a model memorizes too much or learns too little.
 
@@ -487,11 +488,11 @@ Recognize when a model memorizes too much or learns too little.
 Overfitting is memorizing the practice answers; underfitting is not studying enough.
 :::
 
-### Mental model
+### What this means
 
 Overfitting fits training data too closely; underfitting misses important patterns.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -501,11 +502,11 @@ test_score = 0.60
 print("possible overfitting", training_score - test_score)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `training_score = 0.99` — read this line slowly and ask what value or action it creates.
-2. `test_score = 0.60` — read this line slowly and ask what value or action it creates.
-3. `print("possible overfitting", training_score - test_score)` — read this line slowly and ask what value or action it creates.
+1. `training_score = 0.99` — identify the value, name, or action on this line.
+2. `test_score = 0.60` — identify the value, name, or action on this line.
+3. `print("possible overfitting", training_score - test_score)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -521,7 +522,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -547,7 +548,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -595,7 +596,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -614,7 +615,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

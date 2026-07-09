@@ -11,7 +11,7 @@ Protect capstone behavior with tests and explain the project clearly.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,10 +36,10 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Testing Your Project** — Add practical tests that protect the main behavior of your capstone.
-- Section 2: **Writing a README** — Explain what your project does, how to run it, and how to understand the results.
+- **1. Testing Your Project** — Add practical tests that protect the main behavior of your capstone.
+- **2. Writing a README** — Explain what your project does, how to run it, and how to understand the results.
 
-## Section 1: Testing Your Project
+## 1. Testing Your Project
 
 Add practical tests that protect the main behavior of your capstone.
 
@@ -50,11 +50,11 @@ Tests are guardrails on a bridge: they do not move the project forward, but they
 from falling.
 :::
 
-### Mental model
+### What this means
 
 Project tests capture examples of correct behavior so changes can be made safely.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -65,11 +65,11 @@ def normalize_name(name):
 assert normalize_name(" ada ") == "Ada"
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def normalize_name(name):` — read this line slowly and ask what value or action it creates.
-2. `return name.strip().title()` — read this line slowly and ask what value or action it creates.
-3. `assert normalize_name(" ada ") == "Ada"` — read this line slowly and ask what value or action it creates.
+1. `def normalize_name(name):` — identify the value, name, or action on this line.
+2. `return name.strip().title()` — identify the value, name, or action on this line.
+3. `assert normalize_name(" ada ") == "Ada"` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -85,7 +85,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -110,7 +110,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -158,7 +158,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -174,7 +174,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Writing a README
+## 2. Writing a README
 
 Explain what your project does, how to run it, and how to understand the results.
 
@@ -185,11 +185,11 @@ A README is a museum label: it gives enough context for visitors to appreciate w
 are seeing.
 :::
 
-### Mental model
+### What this means
 
 A README is the front door to your project for future you and other people.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -203,13 +203,13 @@ Short explanation.
 `python main.py`
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `# Project Title` — read this line slowly and ask what value or action it creates.
-2. `## What it does` — read this line slowly and ask what value or action it creates.
-3. `Short explanation.` — read this line slowly and ask what value or action it creates.
-4. `## How to run` — read this line slowly and ask what value or action it creates.
-5. ``python main.py`` — read this line slowly and ask what value or action it creates.
+1. `# Project Title` — identify the value, name, or action on this line.
+2. `## What it does` — identify the value, name, or action on this line.
+3. `Short explanation.` — identify the value, name, or action on this line.
+4. `## How to run` — identify the value, name, or action on this line.
+5. ``python main.py`` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -225,7 +225,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -250,7 +250,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -298,7 +298,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -317,7 +317,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

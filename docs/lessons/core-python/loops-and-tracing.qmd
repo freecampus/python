@@ -5,50 +5,36 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Repeat work with for and while loops, control loop flow, and trace changing values.
+Computers are especially good at repetition. If you can write instructions for
+one item, a loop can repeat those instructions for many items. Loops help you
+print every name in a list, add many numbers, search for a match, or keep asking
+until valid input appears.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+The hard part for beginners is not typing `for` or `while`; it is tracking what
+changes each time the loop repeats. This lesson teaches loops together with
+**tracing**, the habit of writing down values as the program runs.
 
-::: {.questions}
-### Questions
+## Learning goals
 
-By the end of this lesson, you should be able to answer:
+By the end, you should be able to:
 
-- How do the sections in **Loops and Tracing** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
-:::
+- write a `for` loop over a list;
+- write a `while` loop with a clear stopping rule;
+- explain the loop variable and the loop body;
+- use `break` and `continue` intentionally;
+- make a trace table to debug loop behavior.
 
-::: {.learning-objectives}
-### Learning objectives
+## How loops repeat work
 
-You will practice how to:
-
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 4 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
-
-## Lesson map
-
-- Section 1: **For Loops** — Repeat an action once for each item in a collection.
-- Section 2: **While Loops** — Repeat while a condition remains true and stop safely.
-- Section 3: **Loop Control** — Use break, continue, and clear stopping rules inside loops.
-- Section 4: **Tracing Code** — Predict program behavior by tracking values line by line.
-
-<!-- mermaid-visual-model -->
-## Visual model
-
-::: {.visual-model}
+::: {.concept-diagram}
 A loop is a repeated path. The important debugging question is: what changes each
 time around the loop?
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart TD
   start([Start loop]) --> check{"Another item<br/>or condition true?"}
   check -- Yes --> bind["Set loop variable<br/>or inspect condition"]
@@ -61,133 +47,149 @@ flowchart TD
 Use a trace table beside this diagram: one row for each trip through the loop.
 :::
 
-## Section 1: For Loops
+## 1. `for` loops repeat once per item
 
-Repeat an action once for each item in a collection.
+A `for` loop is best when you already have a collection of items and want to do
+something with each item.
 
-::: {.analogy}
-### Analogy for this section
+```python
+for item in collection:
+    do_something_with(item)
+```
 
-A for loop is like handing papers to every student in a row: do the same action for each
-person.
-:::
+Read this as: "for each item in this collection, run the indented block."
 
-### Mental model
+### First example
 
-A for loop visits items one at a time and runs the same block for each item.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+Predict the output before running the code.
 
 ```python
 names = ["Ada", "Grace", "Katherine"]
+
 for name in names:
     print(f"Hello, {name}")
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `names = ["Ada", "Grace", "Katherine"]` — read this line slowly and ask what value or action it creates.
-2. `for name in names:` — read this line slowly and ask what value or action it creates.
-3. `print(f"Hello, {name}")` — read this line slowly and ask what value or action it creates.
+1. `names = ["Ada", "Grace", "Katherine"]`
+   - Python creates a list of three strings.
+2. `for name in names:`
+   - Python starts the loop.
+   - On the first trip, `name` refers to `"Ada"`.
+3. `print(f"Hello, {name}")`
+   - The indented line is the loop body.
+   - It prints `Hello, Ada` on the first trip.
+4. Python goes back to the top of the loop.
+   - On the second trip, `name` refers to `"Grace"`.
+   - On the third trip, `name` refers to `"Katherine"`.
+5. After the last item, the loop ends.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Trace table
 
-### Challenge
+| Trip through loop | `name` value | Printed line |
+| --- | --- | --- |
+| 1 | `"Ada"` | `Hello, Ada` |
+| 2 | `"Grace"` | `Hello, Grace` |
+| 3 | `"Katherine"` | `Hello, Katherine` |
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+A trace table makes an invisible process visible.
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+### Building a total
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+Many loops update a value each time:
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
+```python
+scores = [10, 8, 9]
+total = 0
 
-</details>
+for score in scores:
+    total = total + score
+
+print(total)
+```
+
+The variable `total` starts at `0`. Each trip through the loop replaces `total`
+with a bigger value.
+
+| Trip | `score` | old `total` | new `total` |
+| --- | --- | --- | --- |
+| start | — | — | `0` |
+| 1 | `10` | `0` | `10` |
+| 2 | `8` | `10` | `18` |
+| 3 | `9` | `18` | `27` |
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-The loop variable changes on each iteration. Do not assume it keeps the first value.
+**Mistake: forgetting to indent the loop body.**
+
+```python
+for name in names:
+print(name)
+```
+
+The `print` line must be indented so Python knows it belongs inside the loop.
 :::
 
-When you get stuck, use this debugging routine:
+::: {.debugging-corner}
+**Mistake: resetting the total inside the loop.**
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
+```python
+scores = [10, 8, 9]
+for score in scores:
+    total = 0
+    total = total + score
+print(total)
+```
 
-### Section checkpoint
+This prints only the last score because `total` becomes `0` on every trip. Put
+`total = 0` before the loop.
+:::
 
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-for-loops",
-  "title": "For Loops checkpoint",
+  "id": "for-loops-checkpoint",
+  "title": "For loops checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes For Loops?",
+      "id": "loop-variable",
+      "prompt": "In for name in names:, what happens to name?",
       "options": [
-        "A for loop visits items one at a time and runs the same block for each item.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "It refers to one item from names on each trip through the loop.",
+        "It always refers to the first item only.",
+        "It becomes the entire list permanently.",
+        "It must be named item."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A for loop visits items one at a time and runs the same block for each item."
+      "explanation": "The loop variable is updated to the next item each time through the loop."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "total-start",
+      "prompt": "Where should total = 0 go when adding all numbers in a list?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Before the loop starts.",
+        "Inside the loop as the first indented line.",
+        "After the final print only.",
+        "It is never needed."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A for loop is like handing papers to every student in a row: do the same action for each person."
+      "explanation": "The total should be initialized once before the loop, not reset every trip."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "trace-purpose",
+      "prompt": "What is the purpose of a trace table?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "To record changing values step by step.",
+        "To make code run without errors automatically.",
+        "To replace all tests.",
+        "To hide output from the user."
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Tracing makes the repeated steps visible."
     }
   ]
 }
@@ -195,138 +197,101 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: While Loops
+## 2. `while` loops repeat while a condition is true
 
-Repeat while a condition remains true and stop safely.
+A `while` loop is best when you do not know ahead of time how many repetitions
+you need. It keeps running while a condition remains true.
 
-::: {.analogy}
-### Analogy for this section
+```python
+while condition:
+    body
+```
 
-A while loop is like filling a glass until it reaches a line: check the condition before
-each pour.
-:::
+A safe `while` loop usually has three parts:
 
-### Mental model
+1. a starting value;
+2. a condition that can eventually become false;
+3. an update inside the loop.
 
-A while loop keeps going until its condition becomes false.
+### First example
 
-### Tiny example
+```python
+count = 3
 
-Predict what will happen before you run the code.
+while count > 0:
+    print(count)
+    count = count - 1
+
+print("Go!")
+```
+
+### Step-by-step explanation
+
+1. `count = 3`
+   - The loop starts with `count` equal to `3`.
+2. `while count > 0:`
+   - Python asks: "Is count greater than 0?"
+   - If yes, the indented block runs.
+3. `print(count)`
+   - The current value is displayed.
+4. `count = count - 1`
+   - This update is the stopping progress. It moves `count` closer to `0`.
+5. When `count` becomes `0`, `count > 0` is false and the loop stops.
+6. Python continues after the loop and prints `Go!`.
+
+### Trace table
+
+| Check | `count > 0` | Printed | New `count` |
+| --- | --- | --- | --- |
+| 1 | `True` | `3` | `2` |
+| 2 | `True` | `2` | `1` |
+| 3 | `True` | `1` | `0` |
+| 4 | `False` | loop stops | — |
+
+### Infinite loops
+
+An **infinite loop** happens when the condition never becomes false.
 
 ```python
 count = 3
 while count > 0:
     print(count)
-    count = count - 1
-print("go")
 ```
 
-### Walkthrough
+This never changes `count`, so `count > 0` stays true forever. In notebooks,
+you may need to interrupt or stop the cell.
 
-1. `count = 3` — read this line slowly and ask what value or action it creates.
-2. `while count > 0:` — read this line slowly and ask what value or action it creates.
-3. `print(count)` — read this line slowly and ask what value or action it creates.
-4. `count = count - 1` — read this line slowly and ask what value or action it creates.
-5. `print("go")` — read this line slowly and ask what value or action it creates.
-
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Forgetting to update the condition can create an infinite loop. Make the stopping rule
-visible.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-while-loops",
-  "title": "While Loops checkpoint",
+  "id": "while-loops-checkpoint",
+  "title": "While loops checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes While Loops?",
+      "id": "while-condition",
+      "prompt": "When does a while loop stop?",
       "options": [
-        "A while loop keeps going until its condition becomes false.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "When its condition becomes false.",
+        "After exactly one trip.",
+        "Only when print() is called.",
+        "When the variable name changes spelling."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A while loop keeps going until its condition becomes false."
+      "explanation": "A while loop repeats while the condition is true and stops when it is false."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "infinite-loop",
+      "prompt": "What is a common cause of an infinite while loop?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "The loop condition never becomes false.",
+        "The loop has one print statement.",
+        "The starting value is an integer.",
+        "The code is inside a notebook."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A while loop is like filling a glass until it reaches a line: check the condition before each pour."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Without an update that moves toward stopping, the condition may stay true forever."
     }
   ]
 }
@@ -334,277 +299,82 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: Loop Control
+## 3. `break` and `continue`
 
-Use break, continue, and clear stopping rules inside loops.
+Sometimes a loop needs extra control:
 
-::: {.analogy}
-### Analogy for this section
+- `break` exits the loop immediately;
+- `continue` skips the rest of the current trip and starts the next trip.
 
-Loop control is like a teacher pausing a line: skip one step, stop early, or continue
-normally depending on what happens.
-:::
+Use them sparingly. If you use them, explain why.
 
-### Mental model
-
-Loop control changes the normal path through a loop when a special situation appears.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+### First example: stop when found
 
 ```python
-for number in range(1, 6):
-    if number == 3:
-        continue
-    if number == 5:
+names = ["Ada", "Grace", "Katherine"]
+
+for name in names:
+    if name == "Grace":
+        print("Found Grace!")
         break
-    print(number)
 ```
 
-### Walkthrough
+Python checks names in order. When `name` is `"Grace"`, it prints the message
+and `break` stops the loop. `"Katherine"` is never checked.
 
-1. `for number in range(1, 6):` — read this line slowly and ask what value or action it creates.
-2. `if number == 3:` — read this line slowly and ask what value or action it creates.
-3. `continue` — read this line slowly and ask what value or action it creates.
-4. `if number == 5:` — read this line slowly and ask what value or action it creates.
-5. `break` — read this line slowly and ask what value or action it creates.
-6. Continue the same process for the remaining lines, one line at a time.
-
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Using break too early can hide later data. Explain the reason for early exit with clear
-variable names or comments.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "core-python-loop-control",
-  "title": "Loop Control checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
-    {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Loop Control?",
-      "options": [
-        "Loop control changes the normal path through a loop when a special situation appears.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
-      ],
-      "answer_index": 0,
-      "explanation": "The key idea is: Loop control changes the normal path through a loop when a special situation appears."
-    },
-    {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
-      "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
-      ],
-      "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Loop control is like a teacher pausing a line: skip one step, stop early, or continue normally depending on what happens."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
-    }
-  ]
-}
-</script>
-
-{{< include ../_includes/ojs-quiz.qmd >}}
-
-## Section 4: Tracing Code
-
-Predict program behavior by tracking values line by line.
-
-::: {.analogy}
-### Analogy for this section
-
-Tracing is like following a package through a delivery route: note where it starts, each
-stop, and where it ends.
-:::
-
-### Mental model
-
-Tracing means writing down how variables change as Python executes each line.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+### First example: skip one item
 
 ```python
-total = 0
-for number in [2, 4, 6]:
-    total = total + number
-    print(total)
+scores = [10, -1, 8]
+
+for score in scores:
+    if score < 0:
+        continue
+    print(score)
 ```
 
-### Walkthrough
-
-1. `total = 0` — read this line slowly and ask what value or action it creates.
-2. `for number in [2, 4, 6]:` — read this line slowly and ask what value or action it creates.
-3. `total = total + number` — read this line slowly and ask what value or action it creates.
-4. `print(total)` — read this line slowly and ask what value or action it creates.
-
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
+The negative score is skipped. The loop still continues with later items.
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-Skipping lines when tracing causes wrong predictions. Move one line at a time like
-Python does.
+**Mistake: using `break` when you meant `continue`.**
+
+If one bad item should be skipped, use `continue`. If the whole search should
+stop, use `break`.
 :::
 
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "core-python-tracing-code",
-  "title": "Tracing Code checkpoint",
+  "id": "loop-control-checkpoint",
+  "title": "Loop control checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Tracing Code?",
+      "id": "break-meaning",
+      "prompt": "What does break do inside a loop?",
       "options": [
-        "Tracing means writing down how variables change as Python executes each line.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "It exits the loop immediately.",
+        "It skips only the current item and continues.",
+        "It converts strings to integers.",
+        "It repeats the previous line."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Tracing means writing down how variables change as Python executes each line."
+      "explanation": "break stops the loop completely."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "continue-meaning",
+      "prompt": "What does continue do inside a loop?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "It skips the rest of the current trip and moves to the next trip.",
+        "It stops the entire program.",
+        "It creates a list.",
+        "It changes a for loop into a while loop."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Tracing is like following a package through a delivery route: note where it starts, each stop, and where it ends."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "continue keeps the loop going but skips the remaining body for the current item."
     }
   ]
 }
@@ -612,37 +382,84 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
+## 4. Tracing loops when they surprise you
 
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
+When a loop produces an unexpected result, do not guess randomly. Trace it.
 
-## Instructor note
+### Debugging routine
 
-<details class="instructor">
-<summary>Teaching notes</summary>
+1. Write down the variables that change.
+2. Make a table with one row per loop trip.
+3. Fill in values before and after the loop body.
+4. Check whether the stopping condition eventually becomes false.
+5. Add temporary `print()` calls if the table is hard to fill.
 
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
+### Practice example
 
-</details>
+```python
+numbers = [2, 4, 6]
+total = 0
+
+for number in numbers:
+    total = total + number
+    print("number:", number, "total:", total)
+
+print("final:", total)
+```
+
+Temporary prints are like a flashlight. They help you see what the loop is doing.
+After you understand the program, you can remove them.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "loop-tracing-checkpoint",
+  "title": "Tracing checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "changing-values",
+      "prompt": "When tracing a loop, what should you write down first?",
+      "options": [
+        "The variables that change during the loop.",
+        "Every Python keyword alphabetically.",
+        "Only the final answer.",
+        "The colors in your editor."
+      ],
+      "answer_index": 0,
+      "explanation": "Tracing is useful because it tracks how values change step by step."
+    },
+    {
+      "id": "temporary-print",
+      "prompt": "Why might you add temporary print() calls while debugging a loop?",
+      "options": [
+        "To see values during each trip through the loop.",
+        "To make the loop faster.",
+        "To permanently change the algorithm.",
+        "To avoid reading the code."
+      ],
+      "answer_index": 0,
+      "explanation": "Temporary prints reveal what Python is doing while the loop runs."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
 
 ## Key points
 
 ::: {.key-points}
-- **For Loops**: A for loop visits items one at a time and runs the same block for each item.
-- **While Loops**: A while loop keeps going until its condition becomes false.
-- **Loop Control**: Loop control changes the normal path through a loop when a special situation appears.
-- **Tracing Code**: Tracing means writing down how variables change as Python executes each line.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- A `for` loop repeats once for each item in a collection.
+- A `while` loop repeats while a condition is true.
+- Indentation defines the loop body.
+- Values that change inside a loop should be traced carefully.
+- `break` exits a loop; `continue` skips to the next trip.
+- Trace tables are one of the best beginner debugging tools.
 :::
 
 ## References
 
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Built-in types: https://docs.python.org/3/library/stdtypes.html
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Python Tutorial: `for`, `range`, `break`, and `continue`: https://docs.python.org/3/tutorial/controlflow.html
+- Python Tutorial: data structures: https://docs.python.org/3/tutorial/datastructures.html

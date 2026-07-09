@@ -5,189 +5,155 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Run Python in a browser and learn the notebook workflow without installing software.
+You can learn Python before installing anything on your computer. Google Colab
+runs notebooks in the browser, which makes it a friendly place to practice code,
+write notes, see output, and share work.
 
-Beginners often try to learn Python as a list of commands. This lesson teaches one idea
-at a time: what problem it solves, how to recognize it in code, how to practice it, and
-how to debug a common mistake. Treat the code examples as small experiments, not as text
-to memorize.
+Colab is especially useful at the beginning because it removes setup problems.
+You can focus on code first, then later learn local tools such as VS Code and
+Jupyter.
 
-::: {.questions}
-### Questions
+## What a notebook is
 
-By the end of this lesson, you should be able to answer:
+A notebook is a document made of **cells**. A cell can contain code or notes.
+When you run a code cell, Python executes that cell and shows the output below
+it.
 
-- What problem does **Google Colab** help me solve?
-- What words or symbols should I recognize in a small example?
-- What should I check first when the example does not behave as expected?
+## How notebook cells run
+
+::: {.concept-diagram}
+A notebook keeps code, output, and explanation close together.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  notebook["Notebook"] --> markdown["Text/Markdown cell<br/>explain the idea"]
+  notebook --> code["Code cell<br/>name = 'Ada'"]
+  code --> runtime["Runtime<br/>Python process"]
+  runtime --> output["Output under the cell<br/>Welcome, Ada!"]
+```
+
+The runtime remembers values from cells that have already run. If results become
+confusing, restart the runtime and run cells from top to bottom.
 :::
 
-::: {.learning-objectives}
-### Learning objectives
+## Vocabulary in plain language
 
-You will practice how to:
+| Word | Beginner-friendly meaning |
+| --- | --- |
+| Notebook | A document containing notes, code cells, and output. |
+| Cell | One editable block in a notebook. |
+| Code cell | A cell that Python can run. |
+| Markdown cell | A cell for formatted notes, headings, and explanations. |
+| Runtime | The Python session connected to the notebook. |
+| Output | What appears below a code cell after it runs. |
 
-- explain the main idea in everyday language;
-- read a short example line by line;
-- predict the result before running the code;
-- make one safe variation of the example;
-- debug one common beginner mistake.
-:::
+## First notebook exercise
 
-::: {.analogy}
-### Analogy
-
-Colab is like a school science bench already stocked with tools: you can start
-experimenting before buying equipment.
-:::
-
-## Vocabulary
-
-- **notebook** — a word you should be able to explain after this lesson.
-- **cell** — a word you should be able to explain after this lesson.
-- **runtime** — a word you should be able to explain after this lesson.
-- **output** — a word you should be able to explain after this lesson.
-- **save a copy** — a word you should be able to explain after this lesson.
-
-## Mental model
-
-Colab runs Python code cells on a remote computer and shows the result directly under
-each cell.
-
-A useful mental model has three parts:
-
-1. **Name the thing.** Say what concept you are using.
-2. **Name the input.** Identify the values, files, objects, or settings involved.
-3. **Name the result.** Explain what changes, what is returned, or what is printed.
-
-## Tiny example
-
-Predict what will happen before you run the code.
+Open <https://colab.new>. Create or use the first code cell and run:
 
 ```python
 name = "Ada"
 print(f"Welcome, {name}!")
 ```
 
-## Walkthrough
+## Step-by-step explanation
 
-1. `name = "Ada"` — read this line slowly and ask what value or action it creates.
-2. `print(f"Welcome, {name}!")` — read this line slowly and ask what value or action it creates.
+1. `name = "Ada"`
+   - Python creates the string `"Ada"`.
+   - The name `name` now refers to that string.
+2. `print(f"Welcome, {name}!")`
+   - The `f` creates an f-string.
+   - `{name}` is replaced with the value `"Ada"`.
+   - The output is `Welcome, Ada!`.
+3. The output appears below the code cell.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+## Cell order matters
 
-## Worked example: read, predict, modify
+A notebook can be run out of order. That is powerful, but it can also confuse
+beginners.
 
-Use this routine with every example in the course:
+Try this in two separate code cells.
 
-| Step | What to do | Why it helps |
-| --- | --- | --- |
-| Read | Point to each name, value, and operator. | Slows the code down enough to understand it. |
-| Predict | Write what you think will happen. | Builds a testable mental model. |
-| Run | Execute the smallest complete example. | Lets Python give evidence. |
-| Explain | Say what happened in plain language. | Converts recognition into understanding. |
-| Modify | Change one small thing and run again. | Shows which part caused which result. |
+Cell 1:
 
-## Challenge
+```python
+name = "Ada"
+```
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+Cell 2:
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+```python
+print(name)
+```
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-## Common mistakes
+If you run Cell 2 before Cell 1, Python raises `NameError` because `name` does
+not exist yet. Run Cell 1 first, then Cell 2.
 
 ::: {.debugging-corner}
-Running cells out of order can make the notebook state confusing. Restart and run from
-the top when results stop making sense.
+If notebook output stops making sense, restart the runtime and run all cells from
+the top. This clears old hidden state.
 :::
 
-When you get stuck, use this debugging routine:
+## Notes and code together
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
+Add a Markdown cell above your code and write:
 
-## Checkpoint quiz
+```markdown
+## Greeting experiment
 
-::: {.quiz-box}
-Answer these questions before moving on. The quiz runs with Quarto OJS in the
-browser, so it does not need a Python kernel during website rendering.
-:::
+Prediction: the code will print a welcome message for Ada.
+```
+
+Good notebooks explain the purpose of the code, not just the final answer. Use
+notes for predictions, observations, and questions.
+
+## Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "getting-started-google-colab",
-  "title": "Google Colab checkpoint",
+  "id": "colab-basics-checkpoint",
+  "title": "Colab basics checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Google Colab?",
+      "id": "notebook-meaning",
+      "prompt": "What is a notebook?",
       "options": [
-        "Colab runs Python code cells on a remote computer and shows the result directly under each cell.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "A document with cells for notes, code, and output.",
+        "Only a Python package installer.",
+        "A folder that cannot run code.",
+        "A terminal command only."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Colab runs Python code cells on a remote computer and shows the result directly under each cell."
+      "explanation": "Notebooks combine explanation, executable code, and results."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "runtime-meaning",
+      "prompt": "What is the runtime in a Colab notebook?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "The Python session connected to the notebook.",
+        "A Markdown heading.",
+        "The name of every variable.",
+        "A saved image only."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Colab is like a school science bench already stocked with tools: you can start experimenting before buying equipment."
+      "explanation": "The runtime runs code and remembers values created by cells."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "output-location",
+      "prompt": "Where does output from a code cell usually appear?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Below the cell after it runs.",
+        "Only in a separate email.",
+        "Inside the browser address bar.",
+        "Nowhere, because notebooks hide all output."
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Notebook output appears near the code that produced it."
     }
   ]
 }
@@ -195,39 +161,92 @@ browser, so it does not need a Python kernel during website rendering.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
+## Practice routine in Colab
 
-Open https://colab.new, create a code cell, run the example, then use File > Save a copy
-in Drive. You can also use a local Jupyter notebook or VS Code.
-Keep one cell for the original example, one cell for your prediction, and one
-cell for your modified version.
+Use this three-cell pattern for course exercises:
 
-## Instructor note
+1. **Prediction cell**: write what you expect in a Markdown cell.
+2. **Original code cell**: run the lesson example unchanged.
+3. **Experiment cell**: copy the code and change one thing.
 
-<details class="instructor">
-<summary>Teaching notes</summary>
+Example experiment:
 
-- Ask learners to predict before execution; do not skip this step.
-- Invite one learner to explain the analogy and another to explain the code.
-- When an error appears, model calm traceback reading instead of immediately fixing it.
-- If time is short, keep the tiny example and quiz; move the challenge to homework.
+```python
+name = "Grace"
+print(f"Welcome, {name}!")
+```
 
-</details>
+## Common Colab problems and fixes
+
+| Problem | What to try first |
+| --- | --- |
+| `NameError` for a value defined earlier | Run the earlier cell, or restart and run from top. |
+| Output looks old | Run the current cell again. |
+| Too much output | Stop or interrupt the running cell. |
+| Notebook is not saved | Save a copy in your own Drive or download a copy. |
+
+## Check your understanding again
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "colab-workflow-checkpoint",
+  "title": "Colab workflow checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "cell-order",
+      "prompt": "Why can running cells out of order cause NameError?",
+      "options": [
+        "A later cell may use a name before the earlier cell creates it.",
+        "Colab cannot run strings.",
+        "Markdown cells delete variables.",
+        "Python refuses all notebooks with two cells."
+      ],
+      "answer_index": 0,
+      "explanation": "Names exist only after the cell that creates them has run in the current runtime."
+    },
+    {
+      "id": "restart-run-all",
+      "prompt": "What should you try when notebook state becomes confusing?",
+      "options": [
+        "Restart the runtime and run cells from the top.",
+        "Delete every code example.",
+        "Change many cells at once.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Restarting clears old state and running top-to-bottom rebuilds it predictably."
+    },
+    {
+      "id": "markdown-use",
+      "prompt": "What is a good use for Markdown cells?",
+      "options": [
+        "Predictions, explanations, headings, and observations.",
+        "Only storing secret passwords.",
+        "Replacing all Python code.",
+        "Installing the interpreter."
+      ],
+      "answer_index": 0,
+      "explanation": "Markdown cells help learners explain what code is doing."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
 
 ## Key points
 
 ::: {.key-points}
-- Colab runs Python code cells on a remote computer and shows the result directly under each cell.
-- Small examples are more useful than large copied programs when a concept is new.
-- Prediction, execution, explanation, and one small modification form the core practice loop.
-- Debugging starts by reading clues and changing one thing at a time.
+- Colab lets you run Python in a browser.
+- A notebook contains code cells, note cells, and output.
+- The runtime remembers values from cells that have run.
+- Running cells out of order can cause confusing results.
+- Restarting and running from top is a reliable notebook debugging habit.
 :::
 
 ## References
 
-- Google Colab overview: https://colab.research.google.com/notebooks/basic_features_overview.ipynb
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Jupyter documentation: https://docs.jupyter.org/
-- VS Code Python tutorial: https://code.visualstudio.com/docs/python/python-tutorial
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Google Colab: https://colab.new
+- Colab overview: https://colab.research.google.com/
+- Markdown guide: https://www.markdownguide.org/basic-syntax/

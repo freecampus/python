@@ -11,7 +11,7 @@ Store unique values, test membership, and compare groups with set operations.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,10 +36,10 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Sets** — Store unique unordered values and test membership quickly.
-- Section 2: **Set Operations** — Combine sets with union, intersection, difference, and symmetric difference.
+- **1. Sets** — Store unique unordered values and test membership quickly.
+- **2. Set Operations** — Combine sets with union, intersection, difference, and symmetric difference.
 
-## Section 1: Sets
+## 1. Sets
 
 Store unique unordered values and test membership quickly.
 
@@ -50,11 +50,11 @@ A set is like a guest list at the door: each name appears once, and membership m
 more than position.
 :::
 
-### Mental model
+### What this means
 
 A set keeps one copy of each value and ignores order.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -64,11 +64,11 @@ print(names)
 print("Ada" in names)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `names = {"Ada", "Grace", "Ada"}` — read this line slowly and ask what value or action it creates.
-2. `print(names)` — read this line slowly and ask what value or action it creates.
-3. `print("Ada" in names)` — read this line slowly and ask what value or action it creates.
+1. `names = {"Ada", "Grace", "Ada"}` — identify the value, name, or action on this line.
+2. `print(names)` — identify the value, name, or action on this line.
+3. `print("Ada" in names)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -84,7 +84,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -109,7 +109,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -157,7 +157,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -173,7 +173,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Set Operations
+## 2. Set Operations
 
 Combine sets with union, intersection, difference, and symmetric difference.
 
@@ -184,11 +184,11 @@ Set operations are like comparing club rosters: who is in either club, both club
 only one club?
 :::
 
-### Mental model
+### What this means
 
 Set operations answer questions about overlap and difference.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -200,13 +200,13 @@ print(python & data)
 print(python - data)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `python = {"Ada", "Grace", "Linus"}` — read this line slowly and ask what value or action it creates.
-2. `data = {"Grace", "Katherine"}` — read this line slowly and ask what value or action it creates.
-3. `print(python | data)` — read this line slowly and ask what value or action it creates.
-4. `print(python & data)` — read this line slowly and ask what value or action it creates.
-5. `print(python - data)` — read this line slowly and ask what value or action it creates.
+1. `python = {"Ada", "Grace", "Linus"}` — identify the value, name, or action on this line.
+2. `data = {"Grace", "Katherine"}` — identify the value, name, or action on this line.
+3. `print(python | data)` — identify the value, name, or action on this line.
+4. `print(python & data)` — identify the value, name, or action on this line.
+5. `print(python - data)` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -222,7 +222,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -247,7 +247,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -295,7 +295,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -314,7 +314,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

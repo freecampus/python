@@ -5,48 +5,36 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Read tracebacks and recognize common beginner error patterns.
+Every programmer sees error messages. Beginners often read a traceback as a wall
+of red text, but it is actually a structured report. Python is telling you where
+it stopped, what kind of problem it found, and which clue to inspect first.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+An error message is not a judgment about you. It is feedback from the Python
+interpreter: "I followed your instructions until this point, and here is why I
+could not continue."
 
-::: {.questions}
-### Questions
+## Tiny vocabulary
 
-By the end of this lesson, you should be able to answer:
+| Word | Beginner-friendly meaning |
+| --- | --- |
+| Program | The instructions you wrote. |
+| Interpreter | The tool that reads and runs Python code. |
+| Exception | Python's formal word for many runtime errors. |
+| Traceback | The multi-line report Python prints after many errors. |
+| Frame | One step in the traceback, often with file, line, function, and code. |
+| Error type | The label at the end, such as `TypeError` or `NameError`. |
 
-- How do the sections in **Error Messages** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
-:::
+## How to read a traceback
 
-::: {.learning-objectives}
-### Learning objectives
-
-You will practice how to:
-
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 2 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
-
-## Lesson map
-
-- Section 1: **Reading Tracebacks** — Use Python error messages to find the error type, file, line, and clue text.
-- Section 2: **Common Errors** — Recognize frequent beginner errors and the first debugging question for each.
-
-<!-- mermaid-visual-model -->
-## Visual model
-
-::: {.visual-model}
+::: {.concept-diagram}
 A traceback is easier to read when you use the same order every time: bottom
 clue, location, suspicious expression, small experiment.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart TD
   red["Python prints red traceback"] --> bottom["Read the bottom line<br/>error type + message"]
   bottom --> location["Find file and line number"]
@@ -58,264 +46,235 @@ flowchart TD
 Do not start by rewriting the whole program. Start by extracting one clue.
 :::
 
-## Section 1: Reading Tracebacks
+## 1. Reading a traceback slowly
 
-Use Python error messages to find the error type, file, line, and clue text.
+Consider this program:
 
-::: {.analogy}
-### Analogy for this section
+```python
+# average.py
 
-A traceback is like a GPS route to the crash site: start at the bottom for the error
-type, then follow the listed locations.
-:::
+def average(values):
+    total = sum(values)
+    return total / len(values)
 
-### Mental model
+scores = [10, 8, "9", 7]
+print(average(scores))
+```
 
-A traceback is a stack of clues showing where Python was when it failed.
+The list contains one string, `"9"`, mixed with integers. When Python tries to
+sum the list, it cannot add an integer and a string.
 
-### Tiny example
+A traceback may look like this:
 
-Predict what will happen before you run the code.
+```text
+Traceback (most recent call last):
+  File "average.py", line 7, in <module>
+    print(average(scores))
+  File "average.py", line 4, in average
+    total = sum(values)
+TypeError: unsupported operand type(s) for +: 'int' and 'str'
+```
+
+### The two most useful places to look
+
+1. **Look at the last line first.**
+   - `TypeError` is the error type.
+   - The message says Python tried to use `+` with an `int` and a `str`.
+2. **Look for a file and line number you recognize.**
+   - `File "average.py", line 4, in average` points to the line where Python
+     discovered the problem.
+   - The line is `total = sum(values)`.
+
+The line number is not always the original cause. Here, the cause is earlier:
+`"9"` was put into the list as text. But the traceback still gives an excellent
+place to start investigating.
+
+### What to inspect next
+
+Ask small questions:
+
+- What is the error type?
+- Which line was Python running?
+- Which values were involved?
+- Are the types what I expected?
+
+A helpful temporary print would be:
+
+```python
+print(scores)
+print([type(score) for score in scores])
+```
+
+This reveals that one item is a string.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "traceback-reading-checkpoint",
+  "title": "Reading tracebacks checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "last-line",
+      "prompt": "When reading a traceback, what should a beginner inspect first?",
+      "options": [
+        "The last line, because it names the error type and message.",
+        "Only the first red line.",
+        "The editor theme.",
+        "Every installed package."
+      ],
+      "answer_index": 0,
+      "explanation": "The last line usually gives the most compact clue: error type plus message."
+    },
+    {
+      "id": "line-number",
+      "prompt": "What does a traceback line number usually tell you?",
+      "options": [
+        "Where Python was running when it discovered the problem.",
+        "The only line that could possibly be wrong.",
+        "How many times the program ran.",
+        "The Python version."
+      ],
+      "answer_index": 0,
+      "explanation": "The line number is the best starting point, though the cause can be earlier."
+    },
+    {
+      "id": "typeerror-clue",
+      "prompt": "In TypeError: unsupported operand type(s) for +: 'int' and 'str', what should you check?",
+      "options": [
+        "The types of the values being added.",
+        "Only indentation.",
+        "Whether the file has a README.",
+        "The order of import statements only."
+      ],
+      "answer_index": 0,
+      "explanation": "TypeError often means an operation received a value of the wrong type."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## 2. Common beginner errors
+
+Different error types point to different first checks.
+
+| Error type | Beginner meaning | First thing to check |
+| --- | --- | --- |
+| `SyntaxError` | Python could not understand the code structure. | Missing colon, quote, parenthesis, or invalid `=` use. |
+| `IndentationError` | A block is not indented the way Python expects. | Lines after `if`, `for`, `while`, `def`, or `class`. |
+| `NameError` | Python does not know this name. | Spelling, assignment order, and scope. |
+| `TypeError` | A value is the wrong kind for this operation. | Use `type(...)` and check conversions. |
+| `ValueError` | The type is acceptable, but this specific value is not. | Bad conversion such as `int("twelve")`. |
+| `IndexError` | A list/string index is outside the valid range. | `len(...)` and the index being used. |
+| `KeyError` | A dictionary key is missing. | `dict.keys()`, spelling, and `.get(...)`. |
+| `AttributeError` | This value does not have the method/attribute used. | Type of the value and method spelling. |
+
+### Examples and fixes
+
+#### `NameError`
+
+Broken code:
+
+```python
+print(total)
+total = 10
+```
+
+Python reads top to bottom. At the first line, `total` does not exist yet. Fix:
+
+```python
+total = 10
+print(total)
+```
+
+#### `TypeError`
+
+Broken code:
+
+```python
+total = "2" + 3
+```
+
+`"2"` is text and `3` is an integer. Decide what you mean:
+
+```python
+print(int("2") + 3)   # arithmetic: 5
+print("2" + "3")      # text joining: 23
+```
+
+#### `IndexError`
+
+Broken code:
 
 ```python
 numbers = [1, 2, 3]
 print(numbers[5])
 ```
 
-### Walkthrough
+The list has length `3`, so valid indexes are `0`, `1`, and `2`. Fix by using a
+valid index or by checking the length first.
 
-1. `numbers = [1, 2, 3]` — read this line slowly and ask what value or action it creates.
-2. `print(numbers[5])` — read this line slowly and ask what value or action it creates.
+#### `KeyError`
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Do not read only the first red line. The last line usually names the error type and the
-main clue.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "debugging-reading-tracebacks",
-  "title": "Reading Tracebacks checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
-    {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Reading Tracebacks?",
-      "options": [
-        "A traceback is a stack of clues showing where Python was when it failed.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
-      ],
-      "answer_index": 0,
-      "explanation": "The key idea is: A traceback is a stack of clues showing where Python was when it failed."
-    },
-    {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
-      "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
-      ],
-      "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A traceback is like a GPS route to the crash site: start at the bottom for the error type, then follow the listed locations."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
-    }
-  ]
-}
-</script>
-
-{{< include ../_includes/ojs-quiz.qmd >}}
-
-## Section 2: Common Errors
-
-Recognize frequent beginner errors and the first debugging question for each.
-
-::: {.analogy}
-### Analogy for this section
-
-Common errors are like common road signs: once you know the sign, you know what to check
-first.
-:::
-
-### Mental model
-
-Common errors have recognizable patterns, such as NameError, TypeError, IndexError, and
-SyntaxError.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+Broken code:
 
 ```python
-total = "2" + 3
+person = {"name": "Ada"}
+print(person["email"])
 ```
 
-### Walkthrough
+The key `"email"` is missing. Fix with a check or `.get()`:
 
-1. `total = "2" + 3` — read this line slowly and ask what value or action it creates.
+```python
+print(person.get("email", "No email saved"))
+```
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Different error types need different questions. A TypeError is not fixed the same way as
-a NameError.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "debugging-common-errors",
-  "title": "Common Errors checkpoint",
+  "id": "common-errors-checkpoint",
+  "title": "Common beginner errors checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Common Errors?",
+      "id": "nameerror-meaning",
+      "prompt": "What does NameError usually mean?",
       "options": [
-        "Common errors have recognizable patterns, such as NameError, TypeError, IndexError, and SyntaxError.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "Python does not know the name you used.",
+        "A list index is too large.",
+        "A dictionary key is missing.",
+        "The program finished successfully."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Common errors have recognizable patterns, such as NameError, TypeError, IndexError, and SyntaxError."
+      "explanation": "NameError points to spelling, assignment order, or scope."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "indexerror-meaning",
+      "prompt": "What should you check first for IndexError?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "The length of the sequence and the index being used.",
+        "Only whether the value is a dictionary.",
+        "Whether the function has a return statement.",
+        "The file extension."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Common errors are like common road signs: once you know the sign, you know what to check first."
+      "explanation": "IndexError means an index is outside the valid range."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "keyerror-meaning",
+      "prompt": "What should you check first for KeyError?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Whether the requested key exists in the dictionary.",
+        "Whether a loop has enough spaces.",
+        "Whether a string has quotes.",
+        "Whether Python is installed."
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "KeyError means dictionary lookup could not find the key."
     }
   ]
 }
@@ -323,36 +282,121 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
+## 3. A calm debugging routine
 
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
+When you see an error, use the same routine every time.
 
-## Instructor note
+### The five-step routine
 
-<details class="instructor">
-<summary>Teaching notes</summary>
+1. **Read the last line.** What is the error type and message?
+2. **Find your file and line.** Which line was Python running?
+3. **Inspect values and types.** What are the names on that line? What do they
+   contain?
+4. **Make one small change.** Do not rewrite the whole program.
+5. **Run again and compare.** Did the error move, disappear, or change type?
 
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
+### First example
 
-</details>
+Broken code:
+
+```python
+price = input("Price: ")
+quantity = input("Quantity: ")
+total = price * quantity
+print(total)
+```
+
+Likely error:
+
+```text
+TypeError: can't multiply sequence by non-int of type 'str'
+```
+
+Apply the routine:
+
+1. Last line says `TypeError`: wrong kind of value for multiplication.
+2. The suspicious line is `total = price * quantity`.
+3. `input()` returns strings, so both names hold text.
+4. Convert to numbers:
+
+```python
+price = float(input("Price: "))
+quantity = int(input("Quantity: "))
+total = price * quantity
+print(total)
+```
+
+### A good debugging sentence
+
+After fixing an error, write one sentence:
+
+> The error happened because `input()` returned text; converting `price` and
+> `quantity` before multiplication made the operation numeric.
+
+If you can explain the fix, you are learning—not just guessing.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "debugging-routine-checkpoint",
+  "title": "Debugging routine checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "one-change",
+      "prompt": "Why should you change one thing at a time while debugging?",
+      "options": [
+        "So you can tell which change affected the result.",
+        "So Python ignores all errors.",
+        "So the file becomes shorter automatically.",
+        "So variables become global."
+      ],
+      "answer_index": 0,
+      "explanation": "Small changes make cause and effect visible."
+    },
+    {
+      "id": "input-type-debug",
+      "prompt": "If code multiplies two input() results and raises TypeError, what is a likely issue?",
+      "options": [
+        "input() returned strings that need conversion.",
+        "print() returned too many values.",
+        "The if statement needs an else.",
+        "The file name is too short."
+      ],
+      "answer_index": 0,
+      "explanation": "input() always returns text, so arithmetic often needs int() or float()."
+    },
+    {
+      "id": "explain-fix",
+      "prompt": "What is a good habit after fixing an error?",
+      "options": [
+        "Write one sentence explaining the cause and the fix.",
+        "Delete the original code immediately.",
+        "Change several unrelated lines.",
+        "Assume the same fix works everywhere."
+      ],
+      "answer_index": 0,
+      "explanation": "Explaining the fix turns debugging into learning."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
 
 ## Key points
 
 ::: {.key-points}
-- **Reading Tracebacks**: A traceback is a stack of clues showing where Python was when it failed.
-- **Common Errors**: Common errors have recognizable patterns, such as NameError, TypeError, IndexError, and
-SyntaxError.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- A traceback is a structured clue report, not a personal failure.
+- Start with the last line: it names the error type and message.
+- Then find a file and line number you recognize.
+- The reported line is where Python noticed the problem; the cause may be earlier.
+- Check values and types before making large changes.
+- Change one thing at a time and run again.
 :::
 
 ## References
 
-- Python errors tutorial: https://docs.python.org/3/tutorial/errors.html
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Python Tutorial: errors and exceptions: https://docs.python.org/3/tutorial/errors.html
+- Python built-in exceptions: https://docs.python.org/3/library/exceptions.html

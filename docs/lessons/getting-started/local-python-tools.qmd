@@ -5,61 +5,55 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Install Python and use VS Code, Jupyter, and the terminal as one local learning toolkit.
+Colab is a great starting point, but eventually you will want Python on your own
+computer. Local tools let you save projects in folders, run scripts from files,
+use an editor, install packages, and work without depending on a browser session.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+This lesson introduces four tools as one workflow:
 
-::: {.questions}
-### Questions
+1. **Python interpreter**: runs your code.
+2. **Terminal**: lets you type commands.
+3. **VS Code**: helps you edit and run project files.
+4. **Jupyter**: gives notebook-style exploration on your computer.
 
-By the end of this lesson, you should be able to answer:
+## How local Python tools work together
 
-- How do the sections in **Local Python Tools** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
+::: {.concept-diagram}
+Local Python work connects files, commands, an interpreter, and output.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  editor["VS Code<br/>edit hello.py"] --> file["hello.py"]
+  terminal["Terminal<br/>python hello.py"] --> interpreter["Python interpreter"]
+  file --> interpreter
+  interpreter --> output["Output or traceback"]
+  interpreter --> packages["Packages via pip"]
+  notebook["Jupyter notebook"] --> interpreter
+```
+
+The same interpreter can run a `.py` script, support VS Code, and power a
+Jupyter notebook.
 :::
 
-::: {.learning-objectives}
-### Learning objectives
+## 1. Install Python and verify it
 
-You will practice how to:
+Installing Python means adding the interpreter to your computer. The safest
+beginner habit is to verify installation before doing anything else.
 
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 4 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
+Common install paths:
 
-## Lesson map
+- Windows: install from <https://www.python.org/downloads/> and enable the option
+  that adds Python to PATH if the installer offers it.
+- macOS: install from <https://www.python.org/downloads/> or with your preferred
+  package manager.
+- Linux: use your distribution's package manager or Python from
+  <https://www.python.org/downloads/>.
 
-- Section 1: **Install Python** — Install Python locally and verify the correct interpreter and package installer are available.
-- Section 2: **VS Code** — Use VS Code as a beginner-friendly editor for Python projects.
-- Section 3: **Jupyter** — Use Jupyter notebooks for exploration, notes, code, output, and plots.
-- Section 4: **Terminal Basics** — Use the terminal to navigate folders, run commands, and start Python scripts.
-
-## Section 1: Install Python
-
-Install Python locally and verify the correct interpreter and package installer are available.
-
-::: {.analogy}
-### Analogy for this section
-
-Installing Python is like putting a translator on your own laptop instead of borrowing
-one online.
-:::
-
-### Mental model
-
-A local Python installation gives your computer its own interpreter so scripts can run
-outside the browser.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+After installation, open a terminal and try these commands:
 
 ```bash
 python --version
@@ -67,109 +61,69 @@ python -m pip --version
 python -c "print('Python works')"
 ```
 
-### Walkthrough
+On some systems the command may be `python3` instead of `python`. On Windows,
+`py` may also be available.
 
-1. `python --version` — read this line slowly and ask what value or action it creates.
-2. `python -m pip --version` — read this line slowly and ask what value or action it creates.
-3. `python -c "print('Python works')"` — read this line slowly and ask what value or action it creates.
+### Step-by-step explanation
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
+1. `python --version`
+   - Asks the command named `python` to report its version.
+   - If this works, the terminal can find Python.
+2. `python -m pip --version`
+   - Runs `pip`, the Python package installer, through the same interpreter.
+   - This avoids accidentally using a different `pip`.
+3. `python -c "print('Python works')"`
+   - Runs a tiny Python program directly from the command line.
+   - If it prints `Python works`, the interpreter can execute code.
 
 ::: {.debugging-corner}
-Installing multiple Python versions can make commands point to different interpreters.
-Always verify with python --version and python -c.
+If `python` is not found, try `python3 --version` or `py --version`. If one of
+those works, use that command consistently in your practice notes.
 :::
 
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "getting-started-install-python",
+  "id": "local-install-checkpoint",
   "title": "Install Python checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Install Python?",
+      "id": "version-command",
+      "prompt": "What is the purpose of python --version?",
       "options": [
-        "A local Python installation gives your computer its own interpreter so scripts can run outside the browser.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "Check that the terminal can find Python and report its version.",
+        "Create a new notebook.",
+        "Format a Python file.",
+        "Delete old packages."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A local Python installation gives your computer its own interpreter so scripts can run outside the browser."
+      "explanation": "The version check confirms that a Python command is available."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "module-pip",
+      "prompt": "Why use python -m pip instead of only pip?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "It runs pip with the same interpreter named by python.",
+        "It prevents all errors automatically.",
+        "It only works in Colab.",
+        "It turns scripts into notebooks."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Installing Python is like putting a translator on your own laptop instead of borrowing one online."
+      "explanation": "python -m pip reduces confusion when multiple Python installations exist."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "alternative-command",
+      "prompt": "If python is not found, what is a reasonable next check?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Try python3 --version or py --version.",
+        "Delete the project folder.",
+        "Run print without Python.",
+        "Change all file names."
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Different systems expose Python through different command names."
     }
   ]
 }
@@ -177,133 +131,143 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: VS Code
+## 2. Terminal basics
 
-Use VS Code as a beginner-friendly editor for Python projects.
+A terminal is a place to type commands. You do not need to master every command.
+For this course, start with a small set.
 
-::: {.analogy}
-### Analogy for this section
+| Command | Meaning |
+| --- | --- |
+| `pwd` | show the current folder on macOS/Linux |
+| `cd folder_name` | move into a folder |
+| `ls` | list files on macOS/Linux |
+| `dir` | list files on Windows |
+| `python file.py` | run a Python script |
 
-VS Code is like a tidy study desk with a notebook, calculator, file cabinet, and
-magnifying glass in one place.
-:::
-
-### Mental model
-
-VS Code helps you edit files, run programs, inspect folders, and debug from one
-workspace.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+Create a file named `hello.py` with this code:
 
 ```python
-print("Save this as hello.py")
-print("Run it from VS Code")
+print("Hello from a file")
 ```
 
-### Walkthrough
+Then run it from the folder that contains the file:
 
-1. `print("Save this as hello.py")` — read this line slowly and ask what value or action it creates.
-2. `print("Run it from VS Code")` — read this line slowly and ask what value or action it creates.
+```bash
+python hello.py
+```
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Common mistake: wrong folder
 
-### Challenge
+If you see a message like "file not found", Python may be working in a different
+folder from the one containing your file. Check your current folder and list the
+files there.
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Opening a single file instead of the project folder can hide imports, terminals, and
-settings. Open the folder that contains the project.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "getting-started-vscode",
+  "id": "terminal-basics-checkpoint",
+  "title": "Terminal basics checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "run-script",
+      "prompt": "What does python hello.py do?",
+      "options": [
+        "Runs the Python file named hello.py.",
+        "Opens a website only.",
+        "Creates a Markdown cell.",
+        "Installs VS Code."
+      ],
+      "answer_index": 0,
+      "explanation": "The command asks Python to execute the script file."
+    },
+    {
+      "id": "wrong-folder",
+      "prompt": "If Python says hello.py is not found, what should you check first?",
+      "options": [
+        "Whether the terminal is in the folder containing hello.py.",
+        "Whether strings can use quotes.",
+        "Whether print has an f-string.",
+        "Whether the file has a quiz."
+      ],
+      "answer_index": 0,
+      "explanation": "File-not-found errors often mean the current folder is not the file's folder."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## 3. VS Code as your editor
+
+VS Code is an editor for writing and organizing files. A good beginner setup is:
+
+1. Open a project folder, not just a single file.
+2. Install the Python extension if VS Code suggests it.
+3. Select the interpreter that matches your terminal command.
+4. Save files before running them.
+5. Use the integrated terminal to run `python file.py`.
+
+### First VS Code script
+
+Create a file named `hello.py`:
+
+```python
+name = "Ada"
+print(f"Hello, {name}!")
+```
+
+Run it from VS Code's terminal:
+
+```bash
+python hello.py
+```
+
+### Why use files?
+
+A `.py` file is good for code you want to keep, rerun, test, and share. A
+notebook is good for exploration and explanation. You will use both in this
+course.
+
+::: {.debugging-corner}
+If VS Code says a package is missing but the terminal can import it, VS Code may
+be using a different interpreter. Re-select the interpreter and run the check
+command again.
+:::
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "vscode-basics-checkpoint",
   "title": "VS Code checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes VS Code?",
+      "id": "open-folder",
+      "prompt": "Why open a project folder in VS Code?",
       "options": [
-        "VS Code helps you edit files, run programs, inspect folders, and debug from one workspace.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "So files, terminal, and interpreter settings stay connected.",
+        "So Python no longer needs syntax.",
+        "So notebooks cannot run.",
+        "So code executes without saving."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: VS Code helps you edit files, run programs, inspect folders, and debug from one workspace."
+      "explanation": "Folder-based work makes project structure easier to manage."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "interpreter-mismatch",
+      "prompt": "If VS Code and the terminal disagree about installed packages, what should you check?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Which Python interpreter VS Code selected.",
+        "Whether comments have periods.",
+        "Only the keyboard layout.",
+        "The number of blank lines."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: VS Code is like a tidy study desk with a notebook, calculator, file cabinet, and magnifying glass in one place."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Different interpreters can have different installed packages."
     }
   ]
 }
@@ -311,134 +275,66 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: Jupyter
+## 4. Jupyter notebooks locally
 
-Use Jupyter notebooks for exploration, notes, code, output, and plots.
+Jupyter lets you run notebooks on your own computer. A notebook is helpful when
+you want to mix code, notes, output, and plots.
 
-::: {.analogy}
-### Analogy for this section
+A common beginner setup is:
 
-A notebook is like a lab journal where each experiment sits next to its observation.
-:::
-
-### Mental model
-
-Jupyter notebooks mix explanation and executable code in small cells, which supports
-prediction and experimentation.
-
-### Tiny example
-
-Predict what will happen before you run the code.
-
-```python
-temperature_c = 21
-temperature_f = temperature_c * 9 / 5 + 32
-temperature_f
+```bash
+python -m pip install notebook
+python -m notebook
 ```
 
-### Walkthrough
+This installs and starts the classic notebook interface. Some learners prefer
+JupyterLab; the core idea is the same: code runs in cells, and output appears
+near the code.
 
-1. `temperature_c = 21` — read this line slowly and ask what value or action it creates.
-2. `temperature_f = temperature_c * 9 / 5 + 32` — read this line slowly and ask what value or action it creates.
-3. `temperature_f` — read this line slowly and ask what value or action it creates.
+### Notebook vs script
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+| Use a notebook when... | Use a `.py` file when... |
+| --- | --- |
+| you are exploring data | you want a reusable program |
+| you want notes beside output | you want tests and command-line runs |
+| you are learning a concept interactively | you are packaging or sharing code |
 
-### Challenge
+### Common mistake: hidden notebook state
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+Just like Colab, a local notebook remembers values from previously run cells.
+When confused, restart the kernel and run cells from top to bottom.
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-A notebook remembers variables from previous cells. If you are unsure about state,
-restart the kernel and run all cells top to bottom.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "getting-started-jupyter",
+  "id": "jupyter-basics-checkpoint",
   "title": "Jupyter checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Jupyter?",
+      "id": "notebook-use",
+      "prompt": "When is a notebook especially useful?",
       "options": [
-        "Jupyter notebooks mix explanation and executable code in small cells, which supports prediction and experimentation.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "When exploring ideas with notes, code, output, and plots together.",
+        "Only when deleting files.",
+        "Only when code has no output.",
+        "Never for beginners."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Jupyter notebooks mix explanation and executable code in small cells, which supports prediction and experimentation."
+      "explanation": "Notebooks are useful for interactive exploration and explanation."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "kernel-restart",
+      "prompt": "What is a good fix when local notebook state becomes confusing?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Restart the kernel and run cells from top to bottom.",
+        "Rename every variable randomly.",
+        "Install a second editor immediately.",
+        "Stop using print forever."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A notebook is like a lab journal where each experiment sits next to its observation."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Restarting clears old state and makes execution order predictable."
     }
   ]
 }
@@ -446,179 +342,34 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 4: Terminal Basics
+## Practice: prove your local setup works
 
-Use the terminal to navigate folders, run commands, and start Python scripts.
+Create a folder named `python-practice`. Inside it, create `hello.py`:
 
-::: {.analogy}
-### Analogy for this section
-
-The terminal is like the address bar for your computer: you type where to go and what
-action to perform.
-:::
-
-### Mental model
-
-The terminal is a text interface for asking your operating system to do precise tasks.
-
-### Tiny example
-
-Predict what will happen before you run the code.
-
-```bash
-pwd
-ls
-python hello.py
+```python
+name = "Ada"
+print(f"Local Python works for {name}!")
 ```
 
-### Walkthrough
+Then verify three paths:
 
-1. `pwd` — read this line slowly and ask what value or action it creates.
-2. `ls` — read this line slowly and ask what value or action it creates.
-3. `python hello.py` — read this line slowly and ask what value or action it creates.
-
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Running a command from the wrong folder causes file-not-found errors. Check pwd before
-assuming the file is missing.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "getting-started-terminal-basics",
-  "title": "Terminal Basics checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
-    {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Terminal Basics?",
-      "options": [
-        "The terminal is a text interface for asking your operating system to do precise tasks.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
-      ],
-      "answer_index": 0,
-      "explanation": "The key idea is: The terminal is a text interface for asking your operating system to do precise tasks."
-    },
-    {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
-      "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
-      ],
-      "answer_index": 0,
-      "explanation": "The analogy in this lesson is: The terminal is like the address bar for your computer: you type where to go and what action to perform."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
-    }
-  ]
-}
-</script>
-
-{{< include ../_includes/ojs-quiz.qmd >}}
-
-## Notebook and Colab practice
-
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
-
-## Instructor note
-
-<details class="instructor">
-<summary>Teaching notes</summary>
-
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
-
-</details>
+1. Run the file from the terminal.
+2. Open the folder in VS Code and run it again.
+3. Start Jupyter and run the same two lines in a notebook cell.
 
 ## Key points
 
 ::: {.key-points}
-- **Install Python**: A local Python installation gives your computer its own interpreter so scripts can run
-outside the browser.
-- **VS Code**: VS Code helps you edit files, run programs, inspect folders, and debug from one
-workspace.
-- **Jupyter**: Jupyter notebooks mix explanation and executable code in small cells, which supports
-prediction and experimentation.
-- **Terminal Basics**: The terminal is a text interface for asking your operating system to do precise tasks.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- Local Python lets your computer run scripts outside the browser.
+- Verify with `python --version` and `python -m pip --version`.
+- The terminal runs commands; VS Code edits project files; Jupyter runs notebooks.
+- Use `python -m pip ...` so pip belongs to the interpreter you are using.
+- When tools disagree, check which interpreter each tool selected.
 :::
 
 ## References
 
 - Python downloads: https://www.python.org/downloads/
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Google Colab overview: https://colab.research.google.com/notebooks/basic_features_overview.ipynb
-- Jupyter documentation: https://docs.jupyter.org/
+- Python installation docs: https://docs.python.org/3/using/index.html
 - VS Code Python tutorial: https://code.visualstudio.com/docs/python/python-tutorial
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
-- Command line crash course: https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Environment_setup/Command_line
+- Jupyter documentation: https://docs.jupyter.org/

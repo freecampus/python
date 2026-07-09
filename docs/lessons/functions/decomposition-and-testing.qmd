@@ -11,7 +11,7 @@ Break problems into functions and protect behavior with focused tests.
 
 This lesson combines related subtopics that belong together in one learning
 conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+need to jump between separate pages while building one clear explanation.
 
 ::: {.questions}
 ### Questions
@@ -36,10 +36,10 @@ You will practice how to:
 
 ## Lesson map
 
-- Section 1: **Decomposition** — Break a larger problem into smaller named functions.
-- Section 2: **Testing Functions** — Check function behavior with examples and assertions.
+- **1. Decomposition** — Break a larger problem into smaller named functions.
+- **2. Testing Functions** — Check function behavior with examples and assertions.
 
-## Section 1: Decomposition
+## 1. Decomposition
 
 Break a larger problem into smaller named functions.
 
@@ -50,11 +50,11 @@ Decomposition is like planning a trip: choose destination, book travel, pack, an
 in instead of saying only travel.
 :::
 
-### Mental model
+### What this means
 
 Decomposition reduces complexity by solving one small responsibility at a time.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -68,13 +68,13 @@ def format_price(price):
 print(format_price(add_tax(10)))
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def add_tax(price):` — read this line slowly and ask what value or action it creates.
-2. `return price * 1.08` — read this line slowly and ask what value or action it creates.
-3. `def format_price(price):` — read this line slowly and ask what value or action it creates.
-4. `return f"${price:.2f}"` — read this line slowly and ask what value or action it creates.
-5. `print(format_price(add_tax(10)))` — read this line slowly and ask what value or action it creates.
+1. `def add_tax(price):` — identify the value, name, or action on this line.
+2. `return price * 1.08` — identify the value, name, or action on this line.
+3. `def format_price(price):` — identify the value, name, or action on this line.
+4. `return f"${price:.2f}"` — identify the value, name, or action on this line.
+5. `print(format_price(add_tax(10)))` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -90,7 +90,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -115,7 +115,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -163,7 +163,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -179,7 +179,7 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Testing Functions
+## 2. Testing Functions
 
 Check function behavior with examples and assertions.
 
@@ -190,11 +190,11 @@ A test is like a measuring cup: it tells you whether the recipe produced the amo
 expected.
 :::
 
-### Mental model
+### What this means
 
 A test is executable evidence that a function behaves as expected for a chosen case.
 
-### Tiny example
+### First example
 
 Predict what will happen before you run the code.
 
@@ -206,12 +206,12 @@ assert add(2, 3) == 5
 assert add(-1, 1) == 0
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def add(a, b):` — read this line slowly and ask what value or action it creates.
-2. `return a + b` — read this line slowly and ask what value or action it creates.
-3. `assert add(2, 3) == 5` — read this line slowly and ask what value or action it creates.
-4. `assert add(-1, 1) == 0` — read this line slowly and ask what value or action it creates.
+1. `def add(a, b):` — identify the value, name, or action on this line.
+2. `return a + b` — identify the value, name, or action on this line.
+3. `assert add(2, 3) == 5` — identify the value, name, or action on this line.
+4. `assert add(-1, 1) == 0` — identify the value, name, or action on this line.
 
 After running the example, compare the actual output with your prediction. If
 they differ, do not erase your prediction. The difference is the part that can
@@ -227,7 +227,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
+1. Copy the first example into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -252,7 +252,7 @@ When you get stuck, use this debugging routine:
 4. Change one thing.
 5. Run again and record what changed.
 
-### Section checkpoint
+### Check your understanding
 
 This quiz checks the ideas in this section before you move on.
 
@@ -300,7 +300,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
+      "prompt": "How should you practice after the first example works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -319,7 +319,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
+first example, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

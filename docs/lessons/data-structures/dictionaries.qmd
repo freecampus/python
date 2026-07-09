@@ -1,53 +1,33 @@
 ---
 title: "Dictionaries"
-description: "Use key-value mappings for lookup, looping, counting, grouping, and simple records."
+description: "Store, loop over, and use key-value pairs for lookup, counting, grouping, and records."
 execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Use key-value mappings for lookup, looping, counting, grouping, and simple records.
+Lists are good when position matters: first item, second item, third item. But
+many programs need lookup by a meaningful label: a person's name, a product ID,
+a column name, or a setting. A **dictionary** stores key-value pairs so you can
+ask for a value by key.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+A dictionary is useful when your question sounds like:
 
-::: {.questions}
-### Questions
+- "What is Ada's score?"
+- "How many times have we seen this word?"
+- "What email address belongs to this user?"
+- "What settings did the user choose?"
 
-By the end of this lesson, you should be able to answer:
+## How dictionary lookup works
 
-- How do the sections in **Dictionaries** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
-:::
-
-::: {.learning-objectives}
-### Learning objectives
-
-You will practice how to:
-
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 3 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
-
-## Lesson map
-
-- Section 1: **Dictionaries** — Store key-value pairs for fast lookup by meaningful labels.
-- Section 2: **Dictionary Looping** — Loop through dictionary keys, values, and key-value pairs.
-- Section 3: **Dictionary Patterns** — Use dictionaries for counting, grouping, and simple records.
-
-<!-- mermaid-visual-model -->
-## Visual model
-
-::: {.visual-model}
+::: {.concept-diagram}
 A dictionary is a lookup table. You provide a key; Python returns the value stored
 under that key.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart LR
   key1["key<br/>'name'"] --> value1["value<br/>'Ada'"]
   key2["key<br/>'role'"] --> value2["value<br/>'programmer'"]
@@ -60,23 +40,21 @@ When a `KeyError` appears, compare the key you asked for with the keys actually
 inside the dictionary.
 :::
 
-## Section 1: Dictionaries
+## 1. Key-value pairs
 
-Store key-value pairs for fast lookup by meaningful labels.
+A dictionary is written with curly braces. Each pair has a key, a colon, and a
+value.
 
-::: {.analogy}
-### Analogy for this section
+```python
+person = {"name": "Ada", "role": "programmer"}
+```
 
-A dictionary is like a real dictionary: look up a word and get its definition.
-:::
+Read this as: the key `"name"` maps to the value `"Ada"`; the key `"role"`
+maps to the value `"programmer"`.
 
-### Mental model
+### First example
 
-A dictionary maps unique keys to values.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+Predict the two printed outputs before running the code.
 
 ```python
 person = {"name": "Ada", "role": "programmer"}
@@ -85,109 +63,86 @@ person["language"] = "Python"
 print(person)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `person = {"name": "Ada", "role": "programmer"}` — read this line slowly and ask what value or action it creates.
-2. `print(person["name"])` — read this line slowly and ask what value or action it creates.
-3. `person["language"] = "Python"` — read this line slowly and ask what value or action it creates.
-4. `print(person)` — read this line slowly and ask what value or action it creates.
+1. `person = {"name": "Ada", "role": "programmer"}`
+   - Python creates a dictionary with two key-value pairs.
+2. `person["name"]`
+   - Python looks for the key `"name"`.
+   - It returns the value `"Ada"`.
+3. `person["language"] = "Python"`
+   - This adds a new key-value pair.
+   - If the key already existed, it would replace the old value.
+4. `print(person)` displays the dictionary.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Keys must be unique
 
-### Challenge
+A dictionary cannot keep two different values for the same key:
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+```python
+scores = {"Ada": 90, "Ada": 95}
+print(scores)
+```
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
+The later value wins, so the dictionary contains only `{"Ada": 95}`.
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-Looking up a missing key raises KeyError. Use in or .get() when a key may be absent.
+**Mistake: asking for a key that is not there.**
+
+```python
+person = {"name": "Ada"}
+print(person["email"])
+```
+
+This raises `KeyError`. Python is telling you: "I looked for this key and did
+not find it."
 :::
 
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "data-structures-dictionaries",
-  "title": "Dictionaries checkpoint",
+  "id": "dictionaries-basics-checkpoint",
+  "title": "Dictionary basics checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Dictionaries?",
+      "id": "lookup-name",
+      "prompt": "What does person[\"name\"] do?",
       "options": [
-        "A dictionary maps unique keys to values.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "Looks up the value stored under the key \"name\".",
+        "Returns the first item by position.",
+        "Deletes the key \"name\".",
+        "Converts the dictionary to a string."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A dictionary maps unique keys to values."
+      "explanation": "Dictionary square-bracket lookup uses a key, not a numeric position."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "unique-keys",
+      "prompt": "What happens if the same key appears twice in a dictionary literal?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "The later value for that key wins.",
+        "Both values are stored under the same key.",
+        "Python always raises SyntaxError.",
+        "The key becomes a list automatically."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A dictionary is like a real dictionary: look up a word and get its definition."
+      "explanation": "A dictionary stores one value per key."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "missing-key",
+      "prompt": "What error usually appears when you directly access a missing dictionary key?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "KeyError",
+        "IndexError",
+        "NameError",
+        "IndentationError"
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "KeyError means Python could not find the requested key."
     }
   ]
 }
@@ -195,134 +150,82 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Dictionary Looping
+## 2. Safe lookup and dictionary loops
 
-Loop through dictionary keys, values, and key-value pairs.
+When a key might be missing, check before direct lookup.
 
-::: {.analogy}
-### Analogy for this section
+```python
+person = {"name": "Ada"}
 
-Looping through a dictionary is like reading a contact list: you can read names, phone
-numbers, or both together.
-:::
+if "email" in person:
+    print(person["email"])
+else:
+    print("No email saved yet.")
+```
 
-### Mental model
+You can also use `.get()` to provide a default value:
 
-Dictionary loops let you inspect labels and values in a mapping.
+```python
+email = person.get("email", "No email saved yet.")
+print(email)
+```
 
-### Tiny example
-
-Predict what will happen before you run the code.
+### Looping through a dictionary
 
 ```python
 scores = {"Ada": 95, "Grace": 98}
+
 for name, score in scores.items():
     print(f"{name}: {score}")
 ```
 
-### Walkthrough
+`.items()` gives key-value pairs. In this example, each pair is unpacked into
+`name` and `score`.
 
-1. `scores = {"Ada": 95, "Grace": 98}` — read this line slowly and ask what value or action it creates.
-2. `for name, score in scores.items():` — read this line slowly and ask what value or action it creates.
-3. `print(f"{name}: {score}")` — read this line slowly and ask what value or action it creates.
+Other common loops:
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+```python
+for name in scores:
+    print(name)              # keys
 
-### Challenge
+for score in scores.values():
+    print(score)             # values
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+for name, score in scores.items():
+    print(name, score)       # key and value together
+```
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
-
-### Common mistakes
-
-::: {.debugging-corner}
-Looping over a dictionary directly gives keys, not values. Use .items() when you need
-both.
-:::
-
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "data-structures-dictionary-looping",
-  "title": "Dictionary Looping checkpoint",
+  "id": "dictionaries-lookup-looping-checkpoint",
+  "title": "Lookup and looping checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Dictionary Looping?",
+      "id": "get-default",
+      "prompt": "What does person.get(\"email\", \"none\") do if email is missing?",
       "options": [
-        "Dictionary loops let you inspect labels and values in a mapping.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "Returns \"none\" instead of raising KeyError.",
+        "Creates a syntax error.",
+        "Deletes the dictionary.",
+        "Returns the key \"email\"."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Dictionary loops let you inspect labels and values in a mapping."
+      "explanation": ".get(key, default) returns the default when the key is absent."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "items-loop",
+      "prompt": "What does scores.items() provide in a loop?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Key-value pairs.",
+        "Only values.",
+        "Only numeric indexes.",
+        "A sorted copy every time."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Looping through a dictionary is like reading a contact list: you can read names, phone numbers, or both together."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": ".items() is used when you need both the key and the value."
     }
   ]
 }
@@ -330,174 +233,145 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: Dictionary Patterns
+## 3. Counting, grouping, and records
 
-Use dictionaries for counting, grouping, and simple records.
+Dictionaries shine when you update values by key.
 
-::: {.analogy}
-### Analogy for this section
-
-A counting dictionary is a scoreboard: each key has a score that changes as events
-happen.
-:::
-
-### Mental model
-
-Dictionaries shine when you need to update a value associated with a label.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+### Counting words
 
 ```python
+words = ["red", "blue", "red", "green", "blue", "red"]
 counts = {}
-for letter in "banana":
-    counts[letter] = counts.get(letter, 0) + 1
+
+for word in words:
+    if word not in counts:
+        counts[word] = 0
+    counts[word] = counts[word] + 1
+
 print(counts)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `counts = {}` — read this line slowly and ask what value or action it creates.
-2. `for letter in "banana":` — read this line slowly and ask what value or action it creates.
-3. `counts[letter] = counts.get(letter, 0) + 1` — read this line slowly and ask what value or action it creates.
-4. `print(counts)` — read this line slowly and ask what value or action it creates.
+- `counts = {}` starts with an empty dictionary.
+- The loop visits one word at a time.
+- If a word is not yet a key, the code creates it with count `0`.
+- Then the count increases by `1`.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+The final result is `{"red": 3, "blue": 2, "green": 1}`.
 
-### Challenge
+### Using dictionaries as records
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+A dictionary can represent one record:
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+```python
+student = {
+    "name": "Ada",
+    "score": 95,
+    "passed": True,
+}
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+print(f"{student['name']} scored {student['score']}.")
+```
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
+This is common in data science because one row of data often has named fields.
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-Starting from an empty dictionary requires a default value before adding 1. .get(key, 0)
-is a common pattern.
+**Mistake: trying to update a count before the key exists.**
+
+```python
+counts = {}
+counts["red"] = counts["red"] + 1
+```
+
+The lookup `counts["red"]` fails because the key has not been created yet. Check
+with `if "red" not in counts`, or use `.get()`:
+
+```python
+counts["red"] = counts.get("red", 0) + 1
+```
 :::
 
-When you get stuck, use this debugging routine:
+### Practice
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
+In Colab, count letters in a short word:
 
-### Section checkpoint
+```python
+word = "banana"
+counts = {}
 
-This quiz checks the ideas in this section before you move on.
+for letter in word:
+    counts[letter] = counts.get(letter, 0) + 1
+
+print(counts)
+```
+
+Before running, predict which letter has the largest count.
+
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "data-structures-dictionary-patterns",
-  "title": "Dictionary Patterns checkpoint",
+  "id": "dictionaries-patterns-checkpoint",
+  "title": "Dictionary patterns checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Dictionary Patterns?",
+      "id": "counter-start",
+      "prompt": "Why does the counting example create counts[word] = 0 before adding 1?",
       "options": [
-        "Dictionaries shine when you need to update a value associated with a label.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "Because the key must exist before direct lookup can read its old value.",
+        "Because dictionaries can only store zeros.",
+        "Because loops require every value to start as a string.",
+        "Because print() needs it."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Dictionaries shine when you need to update a value associated with a label."
+      "explanation": "You cannot read counts[word] until that key exists."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "record-use",
+      "prompt": "Why is a dictionary useful as a student record?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "It stores named fields such as name, score, and passed.",
+        "It only stores values by numeric position.",
+        "It prevents any value from changing.",
+        "It automatically writes a file."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A counting dictionary is a scoreboard: each key has a score that changes as events happen."
+      "explanation": "Record-like dictionaries connect meaningful field names to values."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "get-count",
+      "prompt": "What does counts.get(letter, 0) + 1 accomplish?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "Uses the old count if present, otherwise starts from 0, then adds 1.",
+        "Always returns 0.",
+        "Deletes missing letters.",
+        "Sorts all dictionary keys."
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": ".get() is a compact way to handle a missing key while counting."
     }
   ]
 }
 </script>
 
 {{< include ../_includes/ojs-quiz.qmd >}}
-
-## Notebook and Colab practice
-
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
-
-## Instructor note
-
-<details class="instructor">
-<summary>Teaching notes</summary>
-
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
-
-</details>
 
 ## Key points
 
 ::: {.key-points}
-- **Dictionaries**: A dictionary maps unique keys to values.
-- **Dictionary Looping**: Dictionary loops let you inspect labels and values in a mapping.
-- **Dictionary Patterns**: Dictionaries shine when you need to update a value associated with a label.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- Dictionaries map keys to values.
+- Keys are used for lookup and must be unique.
+- A missing key raises `KeyError` when accessed with square brackets.
+- Use `in` or `.get()` when a key may be absent.
+- `.items()` is useful when you need both key and value in a loop.
+- Dictionaries are useful for records, counters, grouping, and settings.
 :::
 
 ## References
 
-- Python data structures tutorial: https://docs.python.org/3/tutorial/datastructures.html
-- Built-in types: https://docs.python.org/3/library/stdtypes.html
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Python Tutorial: dictionaries: https://docs.python.org/3/tutorial/datastructures.html#dictionaries
+- Python standard types: mapping types: https://docs.python.org/3/library/stdtypes.html#mapping-types-dict

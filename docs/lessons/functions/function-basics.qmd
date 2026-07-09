@@ -5,50 +5,25 @@ execute:
   echo: true
 ---
 
-## Why this matters
+## The problem this lesson solves
 
-Define functions, pass arguments, return results, and understand scope.
+As programs grow, repeated code becomes hard to read and easy to break. A
+**function** gives a name to a reusable block of code. Instead of copying the
+same steps in many places, you define the steps once and call the function when
+you need them.
 
-This lesson combines related subtopics that belong together in one learning
-conversation. You will still pause for a quiz after each section, but you do not
-need to jump between separate pages while building one mental model.
+Functions also help you think clearly: each function should answer a small
+question or perform a small task.
 
-::: {.questions}
-### Questions
+## How a function call works
 
-By the end of this lesson, you should be able to answer:
-
-- How do the sections in **Function Basics** fit together?
-- Which small example demonstrates each section?
-- Which debugging clue should I check first for each section?
-:::
-
-::: {.learning-objectives}
-### Learning objectives
-
-You will practice how to:
-
-- explain the shared concept for this lesson;
-- use each section as one step in a larger workflow;
-- complete 4 short section quizzes before moving on;
-- connect examples, mistakes, and debugging routines.
-:::
-
-## Lesson map
-
-- Section 1: **Defining and Calling Functions** — Create named reusable blocks with def and call them when needed.
-- Section 2: **Parameters and Arguments** — Pass information into functions using parameters and arguments.
-- Section 3: **Return Values** — Send a result from a function back to the caller.
-- Section 4: **Scope** — Understand where variable names can be used.
-
-<!-- mermaid-visual-model -->
-## Visual model
-
-::: {.visual-model}
+::: {.concept-diagram}
 A function call moves information into a named block of code and may send one
 result back to the caller.
 
 ```{mermaid}
+%%| echo: false
+%%| eval: true
 flowchart LR
   caller["caller code"] -- arguments --> params["parameters<br/>inside function"]
   params --> body["function body"]
@@ -60,134 +35,104 @@ Read every function by asking: what arguments go in, what local names are used,
 and what value comes back?
 :::
 
-## Section 1: Defining and Calling Functions
+## 1. Defining and calling functions
 
-Create named reusable blocks with def and call them when needed.
+A function definition starts with `def`:
 
-::: {.analogy}
-### Analogy for this section
+```python
+def greet():
+    print("Hello!")
+```
 
-Defining a function is writing a recipe card; calling it is using the recipe to cook.
-:::
+This teaches Python a new action named `greet`. It does not run the action yet.
+To run it, call the function with parentheses:
 
-### Mental model
+```python
+greet()
+```
 
-A function definition teaches Python a new action; a function call asks Python to
-perform that action.
+### First example
 
-### Tiny example
-
-Predict what will happen before you run the code.
+Predict when `Hello!` will print.
 
 ```python
 def greet():
     print("Hello!")
 
+print("Before")
 greet()
+print("After")
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def greet():` — read this line slowly and ask what value or action it creates.
-2. `print("Hello!")` — read this line slowly and ask what value or action it creates.
-3. `greet()` — read this line slowly and ask what value or action it creates.
-
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
-
-### Challenge
-
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
+1. `def greet():`
+   - Python records the function definition.
+   - The indented body belongs to the function.
+   - The body does not run yet.
+2. `print("Before")`
+   - Python prints `Before`.
+3. `greet()`
+   - Parentheses mean "call this function now".
+   - Python jumps into the function body and runs `print("Hello!")`.
+4. `print("After")`
+   - After the function call finishes, Python continues with the next line.
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-Defining a function does not run it. Add parentheses after the function name to call it.
+**Mistake: defining a function but never calling it.**
+
+```python
+def greet():
+    print("Hello!")
+```
+
+Nothing prints because the function is only defined. Add `greet()` to call it.
 :::
 
-When you get stuck, use this debugging routine:
+::: {.debugging-corner}
+**Mistake: forgetting parentheses.**
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
+```python
+print(greet)
+```
 
-### Section checkpoint
+This displays information about the function object. Use `greet()` to run the
+function.
+:::
 
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-defining-calling-functions",
-  "title": "Defining and Calling Functions checkpoint",
+  "id": "function-def-call-checkpoint",
+  "title": "Defining and calling functions checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Defining and Calling Functions?",
+      "id": "definition-runs",
+      "prompt": "What happens when Python reads def greet():?",
       "options": [
-        "A function definition teaches Python a new action; a function call asks Python to perform that action.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "It records the function definition but does not run the body yet.",
+        "It immediately prints everything inside the function.",
+        "It deletes the name greet.",
+        "It converts greet to a string."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: A function definition teaches Python a new action; a function call asks Python to perform that action."
+      "explanation": "A function body runs when the function is called, not when it is defined."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "call-syntax",
+      "prompt": "Which code calls the function greet?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "greet()",
+        "greet",
+        "def greet():",
+        "print(def greet)"
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Defining a function is writing a recipe card; calling it is using the recipe to cook."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Parentheses after the function name call the function."
     }
   ]
 }
@@ -195,135 +140,116 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 2: Parameters and Arguments
+## 2. Parameters and arguments
 
-Pass information into functions using parameters and arguments.
+A **parameter** is a name in the function definition. An **argument** is the
+actual value supplied when the function is called.
 
-::: {.analogy}
-### Analogy for this section
+Think of a function as a form:
 
-Parameters are blanks on a form; arguments are the values you write into those blanks.
-:::
+- the parameter is the blank line on the form;
+- the argument is what you write in the blank.
 
-### Mental model
-
-Parameters are names in a function definition; arguments are actual values supplied in a
-call.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+### First example
 
 ```python
 def greet(name):
     print(f"Hello, {name}!")
 
 greet("Ada")
+greet("Grace")
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def greet(name):` — read this line slowly and ask what value or action it creates.
-2. `print(f"Hello, {name}!")` — read this line slowly and ask what value or action it creates.
-3. `greet("Ada")` — read this line slowly and ask what value or action it creates.
+1. `def greet(name):`
+   - The function needs one piece of information.
+   - Inside the function, that information will be called `name`.
+2. `greet("Ada")`
+   - The argument is `"Ada"`.
+   - During this call, `name` refers to `"Ada"`.
+   - The function prints `Hello, Ada!`.
+3. `greet("Grace")`
+   - This is a separate call.
+   - During this call, `name` refers to `"Grace"`.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### Multiple parameters
 
-### Challenge
+```python
+def describe_pet(name, animal):
+    print(f"{name} is a {animal}.")
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+describe_pet("Milo", "cat")
+```
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+Arguments are matched to parameters by position unless you use keyword
+arguments:
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+```python
+describe_pet(animal="dog", name="Rex")
+```
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
+Keyword arguments can make calls easier to read.
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-A missing required argument raises TypeError. Count the blanks in the function
-definition.
+**Mistake: passing the wrong number of arguments.**
+
+```python
+def greet(name):
+    print(f"Hello, {name}!")
+
+greet()
+```
+
+Python raises `TypeError` because `greet` expected one argument and received
+zero.
 :::
 
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-parameters-arguments",
-  "title": "Parameters and Arguments checkpoint",
+  "id": "function-parameters-checkpoint",
+  "title": "Parameters and arguments checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Parameters and Arguments?",
+      "id": "parameter-meaning",
+      "prompt": "In def greet(name):, what is name?",
       "options": [
-        "Parameters are names in a function definition; arguments are actual values supplied in a call.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "A parameter: a local name for an input value.",
+        "An argument already fixed to Ada.",
+        "The function's return value.",
+        "A Python keyword."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Parameters are names in a function definition; arguments are actual values supplied in a call."
+      "explanation": "Parameters are names listed in the function definition."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "argument-meaning",
+      "prompt": "In greet(\"Ada\"), what is \"Ada\"?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "An argument",
+        "A parameter",
+        "A return statement",
+        "A scope error"
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Parameters are blanks on a form; arguments are the values you write into those blanks."
+      "explanation": "Arguments are actual values supplied during a call."
     },
     {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
+      "id": "wrong-number",
+      "prompt": "What error type often appears when a function gets the wrong number of arguments?",
       "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
+        "TypeError",
+        "KeyError",
+        "IndexError",
+        "IndentationError"
       ],
       "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "Python raises TypeError for many function-call shape problems."
     }
   ]
 }
@@ -331,137 +257,96 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 3: Return Values
+## 3. Return values
 
-Send a result from a function back to the caller.
+`print()` displays a value for a human. `return` sends a value back to the code
+that called the function.
 
-::: {.analogy}
-### Analogy for this section
+This difference is one of the most important function ideas.
 
-A return value is like a receipt from a machine: after the machine finishes, it gives
-you something to use later.
-:::
-
-### Mental model
-
-return hands one value back to the code that called the function.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+### First example
 
 ```python
-def double(number):
-    return number * 2
+def add(a, b):
+    total = a + b
+    return total
 
-result = double(5)
+result = add(2, 3)
 print(result)
 ```
 
-### Walkthrough
+### Step-by-step explanation
 
-1. `def double(number):` — read this line slowly and ask what value or action it creates.
-2. `return number * 2` — read this line slowly and ask what value or action it creates.
-3. `result = double(5)` — read this line slowly and ask what value or action it creates.
-4. `print(result)` — read this line slowly and ask what value or action it creates.
+1. `def add(a, b):` defines a function with two parameters.
+2. `result = add(2, 3)` calls the function.
+3. Inside the function, `a` is `2` and `b` is `3`.
+4. `total = a + b` creates `5`.
+5. `return total` sends `5` back to the caller.
+6. `result = ...` stores that returned value in `result`.
+7. `print(result)` displays `5`.
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+### `return` stops the function
 
-### Challenge
+```python
+def sign(number):
+    if number > 0:
+        return "positive"
+    if number < 0:
+        return "negative"
+    return "zero"
+```
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
-
-<details class="solution">
-<summary>Show one possible solution path</summary>
-
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
-
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
-
-</details>
+Once Python reaches a `return`, the function ends. Later lines in the function
+body do not run for that call.
 
 ### Common mistakes
 
 ::: {.debugging-corner}
-print() displays a value, but return gives a value back to the program. They are not the
-same job.
+**Mistake: printing instead of returning.**
+
+```python
+def add(a, b):
+    print(a + b)
+
+result = add(2, 3)
+print(result)
+```
+
+The first print displays `5`, but `result` is `None` because the function did
+not return a value. Use `return a + b` when the caller needs the result.
 :::
 
-When you get stuck, use this debugging routine:
-
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-return-values",
-  "title": "Return Values checkpoint",
+  "id": "function-returns-checkpoint",
+  "title": "Return values checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Return Values?",
+      "id": "return-job",
+      "prompt": "What is the job of return inside a function?",
       "options": [
-        "return hands one value back to the code that called the function.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "Send a value back to the caller and end the function call.",
+        "Display text on the screen only.",
+        "Create a global variable automatically.",
+        "Start a loop."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: return hands one value back to the code that called the function."
+      "explanation": "return provides the function's result to the calling code."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "print-vs-return",
+      "prompt": "If a function only prints a value and has no return, what does it return by default?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "None",
+        "The printed text",
+        "0",
+        "True"
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: A return value is like a receipt from a machine: after the machine finishes, it gives you something to use later."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "A function with no explicit return value returns None."
     }
   ]
 }
@@ -469,142 +354,92 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Section 4: Scope
+## 4. Scope
 
-Understand where variable names can be used.
+**Scope** describes where a variable name can be used. Names created inside a
+function are usually **local** to that function.
 
-::: {.analogy}
-### Analogy for this section
-
-Scope is like rooms in a building: a note on your desk is easy to see in your room, but
-not in every room.
-:::
-
-### Mental model
-
-Scope is the region of code where a name is visible.
-
-### Tiny example
-
-Predict what will happen before you run the code.
+### First example
 
 ```python
-message = "outside"
+def calculate_total(price, quantity):
+    total = price * quantity
+    return total
 
-def show():
-    message = "inside"
-    print(message)
-
-show()
-print(message)
+print(calculate_total(4, 3))
 ```
 
-### Walkthrough
+Inside the function, `price`, `quantity`, and `total` are local names. They exist
+for the function call. Code outside the function should use the returned value,
+not reach inside for `total`.
 
-1. `message = "outside"` — read this line slowly and ask what value or action it creates.
-2. `def show():` — read this line slowly and ask what value or action it creates.
-3. `message = "inside"` — read this line slowly and ask what value or action it creates.
-4. `print(message)` — read this line slowly and ask what value or action it creates.
-5. `show()` — read this line slowly and ask what value or action it creates.
-6. Continue the same process for the remaining lines, one line at a time.
+### Common mistake
 
-After running the example, compare the actual output with your prediction. If
-they differ, do not erase your prediction. The difference is the part that can
-teach you the most.
+```python
+def calculate_total(price, quantity):
+    total = price * quantity
+    return total
 
-### Challenge
+calculate_total(4, 3)
+print(total)
+```
 
-::: {.challenge}
-Change one input value, predict the new output, run the code, and explain the difference
-in one sentence.
-:::
+This raises `NameError` because `total` was created inside the function. Fix it
+by storing the returned value:
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+```python
+final_total = calculate_total(4, 3)
+print(final_total)
+```
 
-1. Copy the tiny example into Colab, Jupyter, or a `.py` file.
-2. Mark the line you plan to change.
-3. Write a one-sentence prediction.
-4. Run the changed code.
-5. If the result surprises you, restore the original and change a smaller part.
+### Practice
 
-The goal is not to find the only correct answer. The goal is to create a small
-experiment where you can explain cause and effect.
+In Colab, write and test a small function:
 
-</details>
+```python
+def dollars_to_cents(dollars):
+    return dollars * 100
 
-### Common mistakes
+print(dollars_to_cents(5))
+```
 
-::: {.debugging-corner}
-A local variable inside a function is not automatically available outside it. Return
-values you need later.
-:::
+Then modify one thing at a time:
 
-When you get stuck, use this debugging routine:
+1. Change the argument from `5` to `12`.
+2. Store the result in a variable before printing.
+3. Add a second parameter for extra cents.
 
-1. Read the last line of the error message or inspect the unexpected output.
-2. Find the smallest line of code that could be responsible.
-3. Print or inspect the value and type at that point.
-4. Change one thing.
-5. Run again and record what changed.
-
-### Section checkpoint
-
-This quiz checks the ideas in this section before you move on.
+### Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-scope",
+  "id": "function-scope-checkpoint",
   "title": "Scope checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "main-idea",
-      "prompt": "Which statement best describes Scope?",
+      "id": "local-name",
+      "prompt": "Where can you normally use a variable created inside a function?",
       "options": [
-        "Scope is the region of code where a name is visible.",
-        "It is mainly about memorizing every Python command before writing code.",
-        "It is a topic you can safely skip because later tools replace it.",
-        "It is only useful after you already know advanced programming."
+        "Inside that function call.",
+        "Anywhere in any future program automatically.",
+        "Only inside comments.",
+        "Only in dictionary keys."
       ],
       "answer_index": 0,
-      "explanation": "The key idea is: Scope is the region of code where a name is visible."
+      "explanation": "Names created inside a function are local unless explicitly returned or otherwise shared."
     },
     {
-      "id": "analogy",
-      "prompt": "What is the purpose of the analogy in this lesson?",
+      "id": "store-return",
+      "prompt": "How should outside code use a value calculated inside a function?",
       "options": [
-        "To connect a new programming idea to an everyday experience.",
-        "To replace practice with memorization.",
-        "To prove that programming is only for experts.",
-        "To avoid reading and running code examples."
+        "Return it and store the returned value.",
+        "Print a local variable name directly outside the function.",
+        "Depend on Python guessing the name.",
+        "Use indentation only."
       ],
       "answer_index": 0,
-      "explanation": "The analogy in this lesson is: Scope is like rooms in a building: a note on your desk is easy to see in your room, but not in every room."
-    },
-    {
-      "id": "debugging-habit",
-      "prompt": "What is the best first debugging habit for this topic?",
-      "options": [
-        "Read the message or output carefully and change one thing at a time.",
-        "Delete the whole program immediately.",
-        "Change many lines before running again.",
-        "Assume Python is random."
-      ],
-      "answer_index": 0,
-      "explanation": "Small experiments make cause and effect visible."
-    },
-    {
-      "id": "practice-habit",
-      "prompt": "How should you practice after the tiny example works?",
-      "options": [
-        "Make one small variation, predict the result, run it, and explain what changed.",
-        "Copy a large project without reading it.",
-        "Skip practice and rely on recognition.",
-        "Only read the final key points."
-      ],
-      "answer_index": 0,
-      "explanation": "Prediction plus small variation builds durable understanding."
+      "explanation": "The clean pattern is to return the value, then assign it outside."
     }
   ]
 }
@@ -612,39 +447,18 @@ This quiz checks the ideas in this section before you move on.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Notebook and Colab practice
-
-Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-tiny example, predict the result, run it, answer the section quiz, and then move
-to the next section. This is better than copying the entire page at once.
-
-## Instructor note
-
-<details class="instructor">
-<summary>Teaching notes</summary>
-
-- Treat each section as a short teaching episode.
-- Pause for the section quiz before introducing the next section.
-- Ask learners to compare sections: what stayed the same, and what changed?
-- If time is short, teach the first two sections live and assign the rest as practice.
-
-</details>
-
 ## Key points
 
 ::: {.key-points}
-- **Defining and Calling Functions**: A function definition teaches Python a new action; a function call asks Python to
-perform that action.
-- **Parameters and Arguments**: Parameters are names in a function definition; arguments are actual values supplied in a
-call.
-- **Return Values**: return hands one value back to the code that called the function.
-- **Scope**: Scope is the region of code where a name is visible.
-- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+- `def` defines a function; parentheses call it.
+- Defining a function does not run its body.
+- Parameters are names in the definition; arguments are values in the call.
+- `return` sends a result back to the caller.
+- `print()` displays; it does not return a useful value by itself.
+- Local variables created inside a function are not automatically available outside.
 :::
 
 ## References
 
-- Defining functions: https://docs.python.org/3/tutorial/controlflow.html#defining-functions
-- Python Tutorial: https://docs.python.org/3/tutorial/
-- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
-- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- Python Tutorial: defining functions: https://docs.python.org/3/tutorial/controlflow.html#defining-functions
+- Python Tutorial: more on functions: https://docs.python.org/3/tutorial/controlflow.html#more-on-defining-functions
