@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Before running this, predict the value of `total` and the type of each named value.
 
@@ -55,7 +55,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - `price = 12.50` attaches the name `price` to a floating-point number.
 - `quantity = 2` attaches the name `quantity` to an integer.
@@ -67,7 +67,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Change `price = 12.50` to `price = "12.50"`. Now the value is text, not a number, and multiplication or addition may behave differently. This is why `type()` is a powerful inspection tool for beginners.
@@ -76,7 +76,7 @@ Change `price = 12.50` to `price = "12.50"`. Now the value is text, not a number
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -86,7 +86,7 @@ Suggested first move: Change `price = 12.50` to `price = "12.50"`.
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 Do not read `score = score + 1` as a math equation. Read it as a three-step action: look up the old score, add one, and attach the name `score` to the new value. If Python says `NameError`, it means the name had no value yet at the moment Python tried to look it up.
@@ -96,7 +96,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 In Colab, build a tiny receipt with `price`, `quantity`, `subtotal`, `tax`, and `total`. Print both the value and the type after each calculation. Then quote one number on purpose and explain the error or changed behavior.
 

@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Predict the error type before running, then read the traceback from bottom to top.
 
@@ -52,7 +52,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The list has three items, so its valid positive indexes are `0`, `1`, and `2`.
 - `scores[3]` asks for a fourth item that does not exist.
@@ -63,7 +63,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Change the index to `2` and run again. The program now succeeds, which confirms that the bug was the position, not the list itself.
@@ -72,7 +72,7 @@ Change the index to `2` and run again. The program now succeeds, which confirms 
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -82,7 +82,7 @@ Suggested first move: Change the index to `2` and run again.
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 Do not rewrite the whole program after seeing a traceback. First underline four clues: error type, error message, line number, and the smallest expression on that line. Then make one change and rerun.
@@ -92,7 +92,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 Create one `NameError`, one `TypeError`, one `IndexError`, and one `KeyError` in Colab. For each, write a one-sentence diagnosis before fixing it.
 
@@ -398,8 +398,7 @@ When you see an error, use the same routine every time.
 4. **Make one small change.** Do not rewrite the whole program.
 5. **Run again and compare.** Did the error move, disappear, or change type?
 
-### First example
-
+### Example 1
 Broken code:
 
 ```python

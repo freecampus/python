@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Predict the final value of `total`, then trace each loop trip.
 
@@ -57,7 +57,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - Before the loop, `total` is `0`, which means the accumulator starts empty.
 - On the first trip, `score` is `4`, so `total` becomes `4`.
@@ -69,7 +69,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Move `total = 0` inside the loop and run again. The total will keep resetting, which is a common accumulator bug. This shows why the position of a line can matter as much as the line itself.
@@ -78,7 +78,7 @@ Move `total = 0` inside the loop and run again. The total will keep resetting, w
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -88,7 +88,7 @@ Suggested first move: Move `total = 0` inside the loop and run again.
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 For `while` loops, the common danger is forgetting to update the value that controls the loop. If a cell keeps running, stop it safely, then ask: which condition is supposed to become false, and where does the code change that value?
@@ -98,7 +98,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 In Colab, total a list of prices, count how many are above 10, and search for the first price above 100. Use a small trace table before running each version.
 
@@ -168,8 +168,7 @@ for item in collection:
 
 Read this as: "for each item in this collection, run the indented block."
 
-### First example
-
+### Example 1
 Predict the output before running the code.
 
 ```python
@@ -322,8 +321,7 @@ A safe `while` loop usually has three parts:
 2. a condition that can eventually become false;
 3. an update inside the loop.
 
-### First example
-
+### Example 2
 ```python
 count = 3
 
@@ -417,8 +415,7 @@ Sometimes a loop needs extra control:
 
 Use them sparingly. If you use them, explain why.
 
-### First example: stop when found
-
+### Example 3: Stop when found
 ```python
 names = ["Ada", "Grace", "Katherine"]
 
@@ -431,8 +428,7 @@ for name in names:
 Python checks names in order. When `name` is `"Grace"`, it prints the message
 and `break` stops the loop. `"Katherine"` is never checked.
 
-### First example: skip one item
-
+### Example 4: Skip one item
 ```python
 scores = [10, -1, 8]
 

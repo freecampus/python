@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 The safest first local check is to ask Python which version is running and where it is installed.
 
@@ -52,7 +52,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The first command asks the selected Python interpreter to report its version.
 - The second command runs a tiny Python program from the terminal.
@@ -63,7 +63,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 If your system uses `python3` instead of `python`, run the same commands with `python3`. The important idea is not the exact command name; it is checking that the interpreter you are using is the one you intended.
@@ -72,7 +72,7 @@ If your system uses `python3` instead of `python`, run the same commands with `p
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -82,7 +82,7 @@ Suggested first move: If your system uses `python3` instead of `python`, run the
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 A very common mistake is installing a package with one Python and running code with another. Prefer `python -m pip install package_name` because it tells the same interpreter that will run your code to install the package.
@@ -92,7 +92,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 Open VS Code, create `hello.py`, write one `print` statement, run it from the VS Code terminal, and compare the interpreter path with the one selected in the VS Code status bar.
 

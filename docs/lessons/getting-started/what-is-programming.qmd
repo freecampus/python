@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Start with a program that only talks. Before running it, predict how many lines of output you will see and in what order.
 
@@ -53,7 +53,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The first line calls `print`, so Python displays the text between the quotes.
 - The second line is independent of the first; Python simply moves down to the next instruction.
@@ -64,7 +64,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Change only the second line to `print("Add coffee")`. The first and third output lines should stay exactly the same. This tiny change proves that you can isolate one instruction and observe one effect.
@@ -73,7 +73,7 @@ Change only the second line to `print("Add coffee")`. The first and third output
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -83,7 +83,7 @@ Suggested first move: Change only the second line to `print("Add coffee")`.
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 The most common first mistake is a missing quote or parenthesis. When that happens, read the error as Python saying, 'I could not understand the grammar here.' Check the line mentioned in the message, then look one character to the left and right for an unmatched quote, parenthesis, or bracket.
@@ -93,7 +93,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 In Colab, write three `print` lines for a task you know well: making breakfast, packing a bag, or starting a video call. Then intentionally break one quote, run the cell, read the error type, and fix only that one character.
 
@@ -159,8 +159,7 @@ clue, make one small change, and try again.
 You do not need to memorize this table immediately. Keep it nearby and return to
 it when the words appear in later lessons.
 
-## First example
-
+## Example 1
 Predict the output before running the code.
 
 ```python
@@ -301,7 +300,7 @@ Use this routine for every example in the course:
 
 ## Practice
 
-Open <https://colab.new> and copy the first example into a code cell. Then make
+Open <https://colab.new> and copy Example 1 into a code cell. Then make
 three small versions:
 
 1. print three steps for making a sandwich;

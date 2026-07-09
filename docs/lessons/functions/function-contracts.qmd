@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Read the contract before reading the body, then predict what the function should return.
 
@@ -55,7 +55,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The name `add_tax` says the purpose in a verb phrase.
 - The type hints say both inputs should be numbers that may contain decimals.
@@ -67,7 +67,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Call `add_tax(100, 7)` and notice the result is much too large. The type is still allowed, but the meaning violates the contract. This is why examples and assumptions matter.
@@ -76,7 +76,7 @@ Call `add_tax(100, 7)` and notice the result is much too large. The type is stil
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -86,7 +86,7 @@ Suggested first move: Call `add_tax(100, 7)` and notice the result is much too l
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 Type hints do not convert values. If `price` is the string `"100"`, the annotation `price: float` will not magically turn it into a float at runtime. Convert and validate data before calling the function.
@@ -96,7 +96,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 Add a docstring and type hints to three simple functions: one that formats a name, one that computes an average, and one that checks whether a score passes.
 
@@ -156,8 +156,7 @@ before they open it.
 A docstring is the first string inside a function and explains its purpose to humans and
 tools.
 
-### First example
-
+### Example 1
 Predict what will happen before you run the code.
 
 ```python
@@ -186,7 +185,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -259,7 +258,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -288,8 +287,7 @@ plug it in.
 
 Type hints document expected value types and help tools catch mistakes before runtime.
 
-### First example
-
+### Example 2
 Predict what will happen before you run the code.
 
 ```python
@@ -319,7 +317,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -393,7 +391,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -412,7 +410,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-first example, predict the result, run it, answer the section quiz, and then move
+Example 1, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

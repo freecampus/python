@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Predict what happens when the same dictionary is read, updated, and safely queried.
 
@@ -54,7 +54,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The dictionary starts with two keys: `name` and `score`.
 - The update line looks up the old score, adds one, and stores the new score under the same key.
@@ -66,7 +66,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Replace `.get("city", "unknown")` with `student["city"]`. The error is not random; Python is saying that key does not exist in the dictionary at that moment.
@@ -75,7 +75,7 @@ Replace `.get("city", "unknown")` with `student["city"]`. The error is not rando
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -85,7 +85,7 @@ Suggested first move: Replace `.get("city", "unknown")` with `student["city"]`.
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 Beginners often use a list when they really need lookup by name. If you keep asking 'where is the item with this label?', a dictionary is usually clearer. When a `KeyError` appears, print `student.keys()` or check `'city' in student` before reading the value.
@@ -95,7 +95,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 In Colab, build a profile dictionary with name, city, and favorite topic. Update one value, add one new key, loop through `.items()`, and print a friendly summary.
 
@@ -158,8 +158,7 @@ person = {"name": "Ada", "role": "programmer"}
 Read this as: the key `"name"` maps to the value `"Ada"`; the key `"role"`
 maps to the value `"programmer"`.
 
-### First example
-
+### Example 1
 Predict the two printed outputs before running the code.
 
 ```python

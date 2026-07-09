@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Use two cells to see the difference between the notebook order on the page and the order Python actually ran.
 
@@ -55,7 +55,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - When the first assignment runs, the name `name` points to the text `Ada`.
 - The first `print` displays the current value, so it displays `Ada`.
@@ -67,7 +67,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Run only the last `print(name)` in a fresh runtime. You should get a `NameError` because the runtime has forgotten previous work. Then run the assignment cell first and try again.
@@ -76,7 +76,7 @@ Run only the last `print(name)` in a fresh runtime. You should get a `NameError`
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -86,7 +86,7 @@ Suggested first move: Run only the last `print(name)` in a fresh runtime.
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 A common notebook mistake is hidden state: a cell works because you ran another cell earlier, but the page does not make that dependency obvious. If output feels impossible, choose Runtime > Restart runtime, then run cells from top to bottom. That turns the notebook back into an honest story.
@@ -96,7 +96,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 Create three cells: a Markdown prediction, a code cell with two assignments and prints, and a Markdown reflection. Save a copy of the notebook, restart the runtime, and confirm that the notebook still works when run from the top.
 

@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Read the workflow as fit, predict, evaluate.
 
@@ -59,7 +59,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The split separates practice data from exam data.
 - `fit` lets the model learn patterns from the training examples.
@@ -71,7 +71,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Evaluate on `X_train` and compare the score with `X_test`. A very high training score with a lower test score can signal overfitting.
@@ -80,7 +80,7 @@ Evaluate on `X_train` and compare the score with `X_test`. A very high training 
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -90,7 +90,7 @@ Suggested first move: Evaluate on `X_train` and compare the score with `X_test`.
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 Do not tune decisions by repeatedly peeking at the test set. The test set should stay as honest as possible. Also choose metrics based on consequences; accuracy can hide serious failure when classes are imbalanced.
@@ -100,7 +100,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 Train a simple classifier or regressor in Colab, print one metric, inspect a few predictions, and write whether the metric is enough to trust the model.
 
@@ -186,8 +186,7 @@ practice.
 A train/test split holds back examples so performance is measured on data the model did
 not train on.
 
-### First example
-
+### Example 1
 Predict what will happen before you run the code.
 
 ```python
@@ -219,7 +218,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -292,7 +291,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -320,8 +319,7 @@ The estimator pattern is like coaching: fit is practice, predict is game day.
 
 scikit-learn models usually use fit to learn and predict to produce outputs.
 
-### First example
-
+### Example 2
 Predict what will happen before you run the code.
 
 ```python
@@ -353,7 +351,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -427,7 +425,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -456,8 +454,7 @@ alone.
 
 Evaluation measures how well predictions match labels on held-out data.
 
-### First example
-
+### Example 3
 Predict what will happen before you run the code.
 
 ```python
@@ -489,7 +486,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -563,7 +560,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -591,8 +588,7 @@ Overfitting is memorizing the practice answers; underfitting is not studying eno
 
 Overfitting fits training data too closely; underfitting misses important patterns.
 
-### First example
-
+### Example 4
 Predict what will happen before you run the code.
 
 ```python
@@ -621,7 +617,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -695,7 +691,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -714,7 +710,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-first example, predict the result, run it, answer the section quiz, and then move
+Example 1, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

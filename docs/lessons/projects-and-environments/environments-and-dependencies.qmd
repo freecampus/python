@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Read these commands as a reproducible setup story, not as magic terminal incantations.
 
@@ -53,7 +53,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The first command creates a local environment folder for this project.
 - The second command installs a package using the selected Python interpreter.
@@ -64,7 +64,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 After installing a package, run `python -c "import pandas; print(pandas.__version__)"`. This verifies that the same interpreter can import the package.
@@ -73,7 +73,7 @@ After installing a package, run `python -c "import pandas; print(pandas.__versio
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -83,7 +83,7 @@ Suggested first move: After installing a package, run `python -c "import pandas;
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 The most common environment bug is using one Python to install and another Python to run. Always check the interpreter path in VS Code, Jupyter, and the terminal. Recording dependencies is part of the project, not an optional cleanup step.
@@ -93,7 +93,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 Create a tiny environment, install one library, verify the import, record dependencies, and write down the exact commands another learner would need to repeat your setup.
 
@@ -174,8 +174,7 @@ into another's.
 
 A virtual environment gives one project its own installed packages.
 
-### First example
-
+### Example 1
 Predict what will happen before you run the code.
 
 ```bash
@@ -204,7 +203,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -278,7 +277,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -306,8 +305,7 @@ Installing a package is borrowing a specialized tool from a community workshop.
 
 Packages extend Python with code written by other people.
 
-### First example
-
+### Example 2
 Predict what will happen before you run the code.
 
 ```bash
@@ -334,7 +332,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -407,7 +405,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -436,8 +434,7 @@ place.
 
 pyproject.toml records project metadata, dependencies, and tool configuration.
 
-### First example
-
+### Example 3
 Predict what will happen before you run the code.
 
 ```toml
@@ -468,7 +465,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -541,7 +538,7 @@ This quiz checks the ideas in this section before you move on.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -560,7 +557,7 @@ This quiz checks the ideas in this section before you move on.
 ## Notebook and Colab practice
 
 Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
-first example, predict the result, run it, answer the section quiz, and then move
+Example 1, predict the result, run it, answer the section quiz, and then move
 to the next section. This is better than copying the entire page at once.
 
 ## Instructor note

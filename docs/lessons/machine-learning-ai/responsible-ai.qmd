@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Read this checklist as questions to ask before sharing a model.
 
@@ -58,7 +58,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The first question checks data origin and privacy.
 - The second question focuses on people affected by errors.
@@ -70,7 +70,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Add a project-specific question, such as whether student data can be uploaded to a third-party tool. Responsible AI checklists should fit the context.
@@ -79,7 +79,7 @@ Add a project-specific question, such as whether student data can be uploaded to
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -89,7 +89,7 @@ Suggested first move: Add a project-specific question, such as whether student d
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 Do not treat benchmark scores as the whole story. A model can score well on a test set and still be unfair, privacy-invasive, brittle, or inappropriate for a real decision.
@@ -99,7 +99,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 Choose a toy AI project and write a five-question risk checklist covering data, users, errors, privacy, and human review.
 
@@ -166,8 +166,7 @@ A useful explanation has three parts:
 2. **Name the input.** Identify the values, files, objects, or settings involved.
 3. **Name the result.** Explain what changes, what is returned, or what is printed.
 
-## First example
-
+## Example 1
 Predict what will happen before you run the code.
 
 ```python
@@ -208,7 +207,7 @@ in one sentence.
 <details class="solution">
 <summary>Show one possible solution path</summary>
 
-1. Copy the first example into Colab, Jupyter, or a `.py` file.
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
 2. Mark the line you plan to change.
 3. Write a one-sentence prediction.
 4. Run the changed code.
@@ -285,7 +284,7 @@ browser, so it does not need a Python kernel during website rendering.
     },
     {
       "id": "practice-habit",
-      "prompt": "How should you practice after the first example works?",
+      "prompt": "How should you practice after Example 1 works?",
       "options": [
         "Make one small variation, predict the result, run it, and explain what changed.",
         "Copy a large project without reading it.",
@@ -303,7 +302,7 @@ browser, so it does not need a Python kernel during website rendering.
 
 ## Notebook and Colab practice
 
-Open a blank notebook at https://colab.new, copy the first example, and run three small
+Open a blank notebook at https://colab.new, copy Example 1, and run three small
 variations. You can also use a local Jupyter notebook or VS Code.
 Keep one cell for the original example, one cell for your prediction, and one
 cell for your modified version.
@@ -316,7 +315,7 @@ cell for your modified version.
 - Ask learners to predict before execution; do not skip this step.
 - Invite one learner to explain the analogy and another to explain the code.
 - When an error appears, model calm traceback reading instead of immediately fixing it.
-- If time is short, keep the first example and quiz; move the challenge to homework.
+- If time is short, keep Example 1 and quiz; move the challenge to homework.
 
 </details>
 

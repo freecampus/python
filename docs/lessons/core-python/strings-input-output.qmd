@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Predict the exact message, including spaces and punctuation.
 
@@ -54,7 +54,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - The first line stores the text `Maya` under the name `name`.
 - The second line stores the integer `8` under the name `score`.
@@ -66,7 +66,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Remove the `f` before the string and run again. The braces will print literally. This small experiment shows that the `f` is not decoration; it changes how Python interprets the string.
@@ -75,7 +75,7 @@ Remove the `f` before the string and run again. The braces will print literally.
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -85,7 +85,7 @@ Suggested first move: Remove the `f` before the string and run again.
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 The classic beginner bug is adding input directly to a number. `input()` returns a string, so `age = input(...)` gives you text. If you need arithmetic, convert intentionally with `int(age)` or `float(age)` and be ready to handle invalid input later.
@@ -95,7 +95,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 In Colab, ask for a learner's name and favorite topic. Print a two-sentence welcome message using an f-string. Then ask for a number, convert it, add one, and print the result.
 
@@ -164,8 +164,7 @@ message = "Hello"
 The quotation marks tell Python: "treat this as text". The quotes are not part
 of the text displayed to the user; they are the boundary markers in your code.
 
-### First example
-
+### Example 1
 Before running this code, predict the four printed lines.
 
 ```python
@@ -322,8 +321,7 @@ print(f"Hello, {name}!")
 When Python runs the first line, it pauses and waits. Whatever the user types is
 returned as a string and assigned to `name`.
 
-### First example
-
+### Example 2
 Try this in Google Colab or a local notebook. In Colab, use the play button on
 the left side of the code cell.
 

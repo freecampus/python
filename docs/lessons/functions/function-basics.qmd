@@ -39,7 +39,7 @@ Open the Colab notebook from the button above, find this section, and run each
 cell in order. Keep a small note beside the notebook with three columns:
 **prediction**, **actual result**, and **what changed**.
 
-### 1. Run the starting example
+### Example 1.1
 
 Predict the returned value and notice that the function body does not run until the call happens.
 
@@ -56,7 +56,7 @@ Run the cell once without editing it. If the result is different from your
 prediction, leave the prediction visible and write one sentence about the
 difference. That sentence is more useful than a perfect first guess.
 
-### 2. Read the example slowly
+### Explain Example 1.1
 
 - `def double(number):` defines a function and creates the parameter name `number`.
 - The indented body is stored as the function's instructions; it does not run yet.
@@ -68,7 +68,7 @@ Now explain the example out loud or in a Markdown cell. Use short sentences:
 If you cannot explain a line yet, run only the lines above it and inspect the
 values that exist at that moment.
 
-### 3. Make one controlled change
+### Challenge 1.1
 
 ::: {.callout-note title="Challenge"}
 Replace `return result` with `print(result)` and inspect `answer`. It will be `None`, because printing shows a value to a person while returning gives a value back to the program.
@@ -77,7 +77,7 @@ Replace `return result` with `print(result)` and inspect `answer`. It will be `N
 <details class="solution">
 <summary>Show a safe way to approach the challenge</summary>
 
-1. Copy the starting example into a new Colab cell.
+1. Copy Example 1.1 into a new Colab cell.
 2. Change exactly one value, name, condition, or line.
 3. Write the expected output before running the cell.
 4. Run the cell and compare the actual result with your prediction.
@@ -87,7 +87,7 @@ Suggested first move: Replace `return result` with `print(result)` and inspect `
 
 </details>
 
-### 4. Debug one realistic mistake
+### Debugging checkpoint 1.1
 
 ::: {.callout-warning title="Debugging checkpoint"}
 If you get a wrong-argument-count error, compare the parameters in the definition with the arguments in the call. If you get `NameError` outside the function, remember that local names created inside the function do not automatically exist outside it.
@@ -97,7 +97,7 @@ Do not debug by rewriting the whole example. Read the error type or surprising
 output, inspect the closest value with `print(...)` or `type(...)`, then change
 one thing. This is the same routine you will use in larger projects.
 
-### 5. Build a tiny variation
+### Apply it
 
 Write `celsius_to_fahrenheit(celsius)`, call it with three values, print the returned results, and then write one sentence explaining why `return` is better than `print` for a converter.
 
@@ -159,8 +159,7 @@ To run it, call the function with parentheses:
 greet()
 ```
 
-### First example
-
+### Example 1
 Predict when `Hello!` will print.
 
 ```python
@@ -258,8 +257,7 @@ Think of a function as a form:
 - the parameter is the blank line on the form;
 - the argument is what you write in the blank.
 
-### First example
-
+### Example 2
 ```python
 def greet(name):
     print(f"Hello, {name}!")
@@ -372,8 +370,7 @@ that called the function.
 
 This difference is one of the most important function ideas.
 
-### First example
-
+### Example 3
 ```python
 def add(a, b):
     total = a + b
@@ -467,8 +464,7 @@ not return a value. Use `return a + b` when the caller needs the result.
 **Scope** describes where a variable name can be used. Names created inside a
 function are usually **local** to that function.
 
-### First example
-
+### Example 4
 ```python
 def calculate_total(price, quantity):
     total = price * quantity
