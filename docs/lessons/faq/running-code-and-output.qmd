@@ -1,0 +1,492 @@
+---
+title: "Running Code and Understanding Output"
+description: "Diagnose missing output, stale notebook state, and confusion between display, print, and return."
+execute:
+  echo: true
+categories: [faq, notebooks, beginner]
+order: 263
+colab_notebook: "notebooks/lessons/faq/running-code-and-output.ipynb"
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Use visible evidence to diagnose missing or surprising output in scripts and notebooks.
+- **Practice in:** Google Colab, Jupyter, or VS Code
+:::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- Why can correct code run without printing anything?
+- How are displaying, printing, and returning a value different?
+- Why can notebook cells produce old or surprising results?
+- When does restarting the runtime provide useful evidence?
+
+## Objectives
+
+- Run a small program and identify its calculation and output actions.
+- Explain the difference between a value, displayed output, printed output, and
+  a returned value.
+- Check notebook execution order before changing working code.
+- Restart a runtime safely, then rerun cells from top to bottom.
+
+## Hands-on episode: Make a calculation visible
+
+Suppose you are calculating the price of two notebooks. The cell finishes, but
+nothing appears below it. Start with the smallest version of that situation.
+
+### Example 1.1
+
+Predict whether this cell will show `6` before running it.
+
+```python
+notebook_price = 3
+total = notebook_price * 2
+```
+
+The cell runs successfully and stores `6` in `total`, but a Python script shows
+no output. A notebook also shows nothing because its final line is an assignment,
+not a bare expression.
+
+### Explain Example 1.1
+
+- `notebook_price = 3` gives the name `notebook_price` the integer value `3`.
+- `total = notebook_price * 2` reads that value, multiplies it by `2`, and gives
+  the result `6` the name `total`.
+- Neither line asks Python to communicate a result to the learner.
+- The calculation succeeded even though the result is not visible yet.
+
+Add one deliberate output action:
+
+```python
+notebook_price = 3
+total = notebook_price * 2
+print(total)
+```
+
+The third line reads the value stored under `total` and prints `6`.
+
+### Challenge 1.1
+
+::: {.callout-note title="Challenge"}
+Change the quantity from `2` to `4`. Before running the cell, write the value
+you expect `print(total)` to show. Run it and explain which line caused the
+result to change.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+```python
+notebook_price = 3
+total = notebook_price * 4
+print(total)
+```
+
+The output is `12`. Only the multiplier changed, so the printed total changed
+from two groups of `3` to four groups of `3`.
+
+</details>
+
+### Debugging checkpoint 1.1
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not assume that invisible output means the calculation failed. Inspect the
+last line that ran. Does it calculate or assign a value, or does it deliberately
+display or print that value?
+:::
+
+Create a four-part note:
+
+- **Symptom:** the cell finishes without visible output.
+- **Clue:** the last line is an assignment.
+- **Change:** add `print(total)`.
+- **Result:** the stored value becomes visible.
+
+## Key points
+
+- A successful calculation does not automatically produce visible output.
+- `print(...)` is an action that sends a readable representation to the output.
+- Notebook state depends on which cells ran and in what order.
+- Restarting is useful only when followed by a top-to-bottom run and inspection.
+<!-- fcpython-lab: end -->
+
+## 1. Why did nothing print?
+
+**Symptom:** Python finishes without an error, but the terminal or notebook does
+not show the result you expected.
+
+**Likely reason:** the code created or changed a value without performing an
+output action. Python does not print every intermediate value in a script.
+
+Compare these two scripts:
+
+```python
+message = "Course ready"
+```
+
+```python
+message = "Course ready"
+print(message)
+```
+
+Both scripts store text under `message`. Only the second script asks `print` to
+send the text to standard output, which is normally visible in the terminal or
+notebook output area.
+
+### Inspect before changing code
+
+Ask these questions in order:
+
+1. Did the line run, or did execution stop earlier with an error?
+2. Does the code contain `print(...)`, a display call, or another output action?
+3. Is that action inside a condition or loop that never runs?
+4. Is the output going somewhere else, such as a file?
+
+Temporary markers can show how far execution gets:
+
+```python
+print("before calculation")
+total = 4 * 5
+print("after calculation")
+print(total)
+```
+
+Use specific markers while debugging, then remove them when they are no longer
+helpful. A row of identical `print("here")` calls does not tell you which point
+the program reached.
+
+::: {.callout-note title="Try it"}
+Remove `print(total)` but leave the two markers. Predict the visible lines, run
+the code, and explain why the calculation still occurs.
+:::
+
+## 2. Why does a notebook display some values without `print`?
+
+An interactive notebook normally displays the value of the **last bare
+expression** in a cell.
+
+```python
+subtotal = 8 + 2
+subtotal
+```
+
+The last line asks Python to evaluate the name `subtotal`. Colab or Jupyter then
+displays the resulting value, `10`.
+
+Move another expression below it:
+
+```python
+subtotal = 8 + 2
+subtotal
+"cell finished"
+```
+
+The notebook displays only:
+
+```text
+'cell finished'
+```
+
+The value `subtotal` was still read, but it was not the cell's final expression.
+Use `print` when each value needs deliberate visible output:
+
+```python
+subtotal = 8 + 2
+print(subtotal)
+print("cell finished")
+```
+
+Expected output:
+
+```text
+10
+cell finished
+```
+
+::: {.callout-tip title="Script or notebook?"}
+A bare expression such as `subtotal` can be displayed by a notebook interface.
+The same line in a `.py` script normally produces no visible output. A
+`print(subtotal)` call is explicit in both environments.
+:::
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-visible-output",
+  "title": "Visible output checkpoint",
+  "instructions": "Predict what becomes visible, then check your work.",
+  "questions": [
+    {
+      "id": "assignment-only",
+      "prompt": "A script contains only total = 4 + 5. What normally appears in the terminal?",
+      "options": [
+        "Nothing, because the assignment stores a value without printing it.",
+        "9, because scripts display every assigned value.",
+        "total, because Python prints variable names.",
+        "A NameError, because total is new."
+      ],
+      "answer_index": 0,
+      "explanation": "The assignment creates the name total and stores 9, but it does not perform an output action."
+    },
+    {
+      "id": "last-expression",
+      "prompt": "In a notebook cell, why can a bare name on the final line become visible?",
+      "options": [
+        "The notebook interface displays the value of the cell's last bare expression.",
+        "Every Python assignment secretly calls print.",
+        "The name is converted into an error.",
+        "Python saves the value to a text file."
+      ],
+      "answer_index": 0,
+      "explanation": "Notebook interfaces commonly display the final expression's representation even when the code does not call print."
+    },
+    {
+      "id": "explicit-print",
+      "prompt": "When is print(...) the clearest choice?",
+      "options": [
+        "When the program should deliberately produce visible text or values.",
+        "Whenever a value should be stored without output.",
+        "Only when Python raises an error.",
+        "Only on the final line of a notebook."
+      ],
+      "answer_index": 0,
+      "explanation": "print makes the output action explicit and works in both scripts and notebook cells."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## 3. What is the difference between printing and returning?
+
+A function can calculate a value, print a value, return a value, or combine
+those actions. Printing and returning solve different problems.
+
+This function prints a total:
+
+```python
+def show_total(price, quantity):
+    total = price * quantity
+    print(total)
+
+result = show_total(3, 2)
+print("Stored result:", result)
+```
+
+Expected output:
+
+```text
+6
+Stored result: None
+```
+
+Line by line:
+
+1. `def show_total(price, quantity):` defines a function with two parameter
+   names.
+2. `total = price * quantity` calculates a local value when the function runs.
+3. `print(total)` makes that value visible, but does not send it back to the
+   caller.
+4. The function reaches its end without `return`, so Python returns `None`.
+5. `result` therefore stores `None`, even though `6` appeared earlier.
+
+Return the value when later code needs to use it:
+
+```python
+def calculate_total(price, quantity):
+    total = price * quantity
+    return total
+
+result = calculate_total(3, 2)
+print("Stored result:", result)
+```
+
+Now the output is `Stored result: 6`. The `return` statement ends the function
+call and sends the value of `total` back to the assignment.
+
+::: {.callout-note title="Try it"}
+Predict the result of `calculate_total(3, 4) + 1`, then run it. Replace `return
+total` with `print(total)` and run the expression again. Read the resulting
+error as evidence about which version provides a usable value.
+:::
+
+For a full introduction to function results, continue with
+[Function Basics](../functions/function-basics.qmd).
+
+## 4. Why did a notebook use an old value?
+
+Notebook cells share a running Python process called a **runtime** or **kernel**.
+That process remembers names created by every cell that has run. The visual
+order on the page does not guarantee the execution order.
+
+Imagine these two cells:
+
+```python
+# Cell A
+price = 5
+```
+
+```python
+# Cell B
+print(price * 2)
+```
+
+If you run Cell A and then Cell B, the output is `10`. Now edit Cell A so it says
+`price = 8` but do not run it. Running Cell B still prints `10`, because the
+runtime remembers the last executed assignment, `price = 5`. Editing text does
+not execute it.
+
+### Inspect execution state
+
+- Look at each cell's execution indicator or number.
+- Run the cell that assigns the suspicious name.
+- Run its dependent cell again.
+- If the history is unclear, restart and run all cells from top to bottom.
+
+::: {.concept-diagram}
+A notebook uses execution order, not simply the order of cells on the page.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  edit["Edit Cell A<br/>price = 8"] --> text["Cell text changes"]
+  text -. "not run yet" .-> old["Runtime still stores<br/>price = 5"]
+  run["Run Cell A"] --> new["Runtime stores<br/>price = 8"]
+  new --> output["Run Cell B<br/>prints 16"]
+```
+
+:::
+
+## 5. When should I restart the runtime?
+
+Restart when you need a clean test of whether the notebook works from the
+beginning. Common clues include:
+
+- a name exists even though its assignment cell no longer exists;
+- output depends on a cell you cannot identify;
+- cells were run repeatedly and out of order;
+- an import or installed package behaves differently from a fresh session; or
+- you want to confirm that another learner can run the notebook top to bottom.
+
+A restart deletes values stored in memory. It does **not** repair code, save
+unsaved edits, or automatically rerun setup cells.
+
+### Safe restart routine
+
+1. Save the notebook.
+2. Restart the runtime or kernel.
+3. Run all cells from the top.
+4. Stop at the first error or surprising result.
+5. Inspect that cell and the cells it depends on.
+
+::: {.callout-warning title="Common mistake"}
+Restarting repeatedly without running the setup cells can create more
+`NameError` messages. After a restart, imports, assignments, file uploads, and
+function definitions must run again before later cells can use them.
+:::
+
+For a fuller introduction to cells and runtimes, continue with
+[Google Colab](../getting-started/google-colab.qmd). To learn how to interpret a
+traceback encountered during this routine, use
+[Error Messages](../debugging/error-messages.qmd).
+
+## Practice: diagnose the evidence
+
+Run these cells in order:
+
+```python
+tax_rate = 0.10
+```
+
+```python
+price = 20
+final_price = price + price * tax_rate
+final_price
+```
+
+Then complete three controlled experiments:
+
+1. Change `tax_rate` to `0.20` without running its cell. Predict what the second
+   cell will display.
+2. Run the tax cell and then the price cell. Explain why the output changes.
+3. Restart the runtime and run only the price cell. Use the error to identify
+   which state is missing.
+
+<details class="solution">
+<summary>Show one possible explanation</summary>
+
+1. The second cell still displays `22.0` because editing the first cell did not
+   change the runtime's stored `tax_rate`.
+2. After the first cell runs, the stored rate becomes `0.20`, so the second cell
+   displays `24.0`.
+3. After a restart, `tax_rate` does not exist. The price cell raises `NameError`
+   until the setup cell runs again.
+
+</details>
+
+## Check your troubleshooting routine
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-notebook-state",
+  "title": "Notebook state checkpoint",
+  "instructions": "Choose the explanation supported by the evidence.",
+  "questions": [
+    {
+      "id": "edited-not-run",
+      "prompt": "You edit price = 5 to price = 8 but do not run that cell. A later cell still uses 5. Why?",
+      "options": [
+        "Editing changed the cell text, but the runtime still stores the last executed value.",
+        "Python variables can never change.",
+        "The print function always subtracts 3.",
+        "The notebook permanently saved 5 in the source code."
+      ],
+      "answer_index": 0,
+      "explanation": "Notebook state changes when a cell executes, not merely when its text is edited."
+    },
+    {
+      "id": "after-restart",
+      "prompt": "What must happen after a runtime restart?",
+      "options": [
+        "Run required imports, definitions, and assignments again from the top.",
+        "Assume all old names are still in memory.",
+        "Delete every code cell.",
+        "Install Python inside each cell."
+      ],
+      "answer_index": 0,
+      "explanation": "A restart clears in-memory state, so the notebook must recreate the state its later cells need."
+    },
+    {
+      "id": "clean-test",
+      "prompt": "What does restart and run all help you test?",
+      "options": [
+        "Whether the notebook can rebuild its required state in top-to-bottom order.",
+        "Whether every calculation should be printed automatically.",
+        "Whether editing a cell executes it.",
+        "Whether errors disappear without code changes."
+      ],
+      "answer_index": 0,
+      "explanation": "A clean run reveals hidden dependencies on state created by an earlier, out-of-order session."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Key points to carry forward
+
+::: {.callout-tip title="Key points"}
+- Calculation and visible output are separate actions.
+- A notebook may display its last expression, while a script normally will not.
+- `print` communicates a value; `return` gives a value back to the caller.
+- Editing a notebook cell does not update runtime state until that cell runs.
+- Restart and run all is a controlled test, not a substitute for reading the
+  first clue.
+:::

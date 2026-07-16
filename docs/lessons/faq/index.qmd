@@ -1,0 +1,157 @@
+---
+title: "FAQ and Common Issues"
+description: "Find a familiar symptom, inspect one clue, and test a small fix without guessing."
+execute:
+  echo: true
+categories: [faq, debugging, beginner]
+order: 261
+colab_notebook: "notebooks/lessons/faq/index.ipynb"
+---
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## How to use this chapter hands-on
+
+Use this chapter when Python does something surprising and you are not sure
+which lesson can help. Begin with the words that describe what you see, such as
+"unexpected keyword argument," "nothing printed," "this name is undefined,"
+or "Python will not add these values."
+
+Do not apply every suggested fix at once. Open the Colab notebook, copy the
+small example that best matches the symptom, and follow this routine:
+
+1. Find the symptom that resembles the problem.
+2. Predict one likely cause before applying a fix.
+3. Run the smallest example and inspect the evidence.
+4. Change one thing, then run the example again.
+5. Explain what the result showed in one sentence.
+
+By the end of a lesson, keep one small troubleshooting note with four parts:
+**symptom**, **clue**, **change**, and **result**. That note becomes a reusable
+debugging tool for future projects.
+<!-- fcpython-chapter-lab: end -->
+
+## Find your question
+
+Choose the page whose questions sound most like your current problem.
+
+- [Unexpected Keyword Arguments in Classes](unexpected-keyword-arguments-in-classes.qmd)
+  - Why did my class reject a keyword argument?
+  - How do class calls connect to `__init__`?
+  - Why must an instance method begin with `self`?
+  - How do positional and keyword arguments reach parameters?
+- [Running Code and Understanding Output](running-code-and-output.qmd)
+  - Why did nothing print?
+  - Why can a notebook give an old or surprising result?
+  - What is the difference between displaying, printing, and returning a value?
+  - When should I restart the runtime?
+- [Names, Values, and Types](names-values-and-types.qmd)
+  - Why is my variable undefined?
+  - Why did assigning or changing a name produce an unexpected value?
+  - Why does `input()` return text?
+  - Why can Python not combine a string and a number?
+
+::: {.callout-tip title="Search with the symptom"}
+Search for the words Python showed you and describe what happened, not only
+what you hoped would happen. For example, search for `unexpected keyword
+argument level`, `NameError undefined name`, or `input returns text` rather
+than `my code is broken`.
+:::
+
+## Questions answered elsewhere
+
+This FAQ provides short diagnostic paths. Use the main lessons when you need a
+complete explanation and more practice.
+
+| If you need help with... | Continue with... |
+| --- | --- |
+| A traceback or named exception | [Error Messages](../debugging/error-messages.qmd) |
+| Inspecting a program while it runs | [Debugging Tools](../debugging/debugging-tools.qmd) |
+| Making a small example to share | [Minimal Reproducible Examples](../debugging/minimal-reproducible-examples.qmd) |
+| Classes, instances, methods, and `self` | [Object-Oriented Basics](../object-oriented-python/oop-basics.qmd) |
+| Variables and Python types | [Values, Variables, and Types](../core-python/values-variables-types.qmd) |
+| Text input and printed output | [Strings, Input, and Output](../core-python/strings-input-output.qmd) |
+| Colab cells and runtimes | [Google Colab](../getting-started/google-colab.qmd) |
+
+[Return to the full lesson path](../index.qmd) when the immediate problem is
+solved.
+
+## Choose the next useful step
+
+::: {.quiz-box}
+Use the evidence in each situation to choose one small diagnostic step.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-overview",
+  "title": "FAQ troubleshooting checkpoint",
+  "instructions": "Choose the next small step, then check your work.",
+  "questions": [
+    {
+      "id": "nothing-visible",
+      "prompt": "A script runs without an error, but you see no output. What should you inspect first?",
+      "options": [
+        "Check whether the script reaches a print call or another output action.",
+        "Reinstall Python immediately.",
+        "Change every variable name.",
+        "Delete the script and start over."
+      ],
+      "answer_index": 0,
+      "explanation": "A successful calculation can remain invisible. First check whether the program performs an output action."
+    },
+    {
+      "id": "name-error",
+      "prompt": "Python reports NameError for total_price. What is a useful first check?",
+      "options": [
+        "Check the spelling and whether total_price was assigned before this line ran.",
+        "Convert every value to text.",
+        "Add a loop around the program.",
+        "Ignore the exact name in the message."
+      ],
+      "answer_index": 0,
+      "explanation": "NameError means Python cannot find that name at that moment, so spelling and execution order are strong first clues."
+    },
+    {
+      "id": "one-change",
+      "prompt": "Why should you change one thing before running the code again?",
+      "options": [
+        "The new result gives clearer evidence about whether that change mattered.",
+        "Python only permits one edit per file.",
+        "It guarantees that the first guess is correct.",
+        "It prevents all future errors."
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled change keeps cause and effect visible, even when the first guess is not the answer."
+    },
+    {
+      "id": "unexpected-keyword",
+      "prompt": "A class reports an unexpected keyword argument named level. What should you compare first?",
+      "options": [
+        "Compare level in the call with the parameters accepted by __init__.",
+        "Convert every attribute to a list.",
+        "Remove self from the initializer.",
+        "Add **kwargs without inspecting the class."
+      ],
+      "answer_index": 0,
+      "explanation": "The error reports a mismatch between a supplied keyword and the active callable signature."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Keep the FAQ useful
+
+When you encounter a repeated question that is not covered here, record:
+
+- the exact symptom or error message;
+- the smallest code that shows it;
+- the clue that identified the cause;
+- the smallest change that fixed it; and
+- the lesson that explains the underlying concept.
+
+Questions with the same theme can become a cohesive FAQ lesson. A single
+question that already has a full course lesson should become a short link rather
+than duplicated material.

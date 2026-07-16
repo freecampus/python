@@ -1,0 +1,902 @@
+---
+title: "Unexpected Keyword Arguments in Classes"
+description: "Understand class constructors, methods, self, and argument binding to fix unexpected keyword errors."
+execute:
+  echo: true
+categories: [faq, object-oriented-python, debugging, beginner]
+order: 262
+colab_notebook: "notebooks/lessons/faq/unexpected-keyword-arguments-in-classes.ipynb"
+---
+::: {.lesson-meta}
+- **Level:** Beginner moving into classes
+- **Estimated time:** 50–65 minutes
+- **You will learn:** Trace how Python matches class and method arguments, then fix unexpected keyword and missing-`self` errors.
+- **Practice in:** Google Colab, Jupyter, or VS Code
+:::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What does `got an unexpected keyword argument` mean?
+- How does calling a class connect to its `__init__` method?
+- What is the difference between a function, method, parameter, and argument?
+- Why must an instance method normally begin with `self`?
+- How can a function signature reveal the smallest useful fix?
+
+## Objectives
+
+- Read the last line of an argument-related `TypeError` as a matching problem.
+- Match positional and keyword arguments to the parameters in a definition.
+- Explain which object `self` refers to during a method call.
+- Distinguish an unknown keyword from the related errors caused by missing
+  `self`.
+- Inspect and test a class signature before changing several lines.
+
+## Hands-on episode: Repair a class call
+
+Imagine a course project that creates a workshop with a title and level. The
+call supplies both pieces of information, but the class accepts only one.
+
+### Example 1.1
+
+Before running the code, compare the keywords in the final line with the
+parameters on the `__init__` line. Predict which keyword Python will reject.
+
+```python
+class Workshop:
+    def __init__(self, title):
+        self.title = title
+
+workshop = Workshop(title="Python", level="beginner")
+```
+
+Python reports:
+
+```text
+TypeError: Workshop.__init__() got an unexpected keyword argument 'level'
+```
+
+### Explain Example 1.1
+
+- `class Workshop:` defines a new class named `Workshop`.
+- `def __init__(self, title):` defines how a new workshop is initialized. Its
+  caller-supplied parameter is `title`.
+- `self.title = title` stores the supplied title on the new instance.
+- `Workshop(...)` asks Python to create a workshop instance and initialize it.
+- Python supplies the new instance to `self` automatically.
+- The call supplies `title`, which matches the definition, and `level`, which
+  does not. Python stops before the assignment to `workshop` completes.
+
+### Challenge 1.1
+
+::: {.callout-note title="Challenge"}
+Add `level` to the initializer and store it as `self.level`. Predict what the
+two print calls below will show, then run the repaired class.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+```python
+class Workshop:
+    def __init__(self, title, level):
+        self.title = title
+        self.level = level
+
+workshop = Workshop(title="Python", level="beginner")
+print(workshop.title)
+print(workshop.level)
+```
+
+The outputs are `Python` and `beginner`. Adding the parameter allows Python to
+match the keyword. Adding `self.level = level` keeps that value on the instance
+so later code can use it.
+
+</details>
+
+### Debugging checkpoint 1.1
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not add every rejected keyword to the class automatically. First ask whether
+the call contains the wrong name or the class genuinely needs that information.
+The smallest correct fix may be changing the call rather than expanding the
+class.
+:::
+
+Record four clues:
+
+- **Symptom:** `level` is an unexpected keyword.
+- **Definition:** `__init__` declares `self` and `title`.
+- **Call:** the caller supplies `title` and `level`.
+- **Decision:** this workshop should keep a level, so declare and store it.
+
+## Key points
+
+- An unexpected keyword does not match any accepted parameter name.
+- A class call commonly sends its arguments to `__init__`.
+- Python supplies the current instance to an instance method automatically.
+- Missing `self` can produce several related argument errors, not always the
+  exact words `unexpected keyword argument`.
+- Compare the call with the definition before choosing a fix.
+<!-- fcpython-lab: end -->
+
+## 1. What does the error actually mean?
+
+The error is a `TypeError` because Python found a mismatch between a callable's
+definition and the arguments used to call it.
+
+Focus on the final part:
+
+```text
+got an unexpected keyword argument 'level'
+```
+
+This says:
+
+1. The call used the keyword `level`.
+2. Python inspected the callable's accepted parameters.
+3. No parameter with that exact name could receive the value.
+
+"Unexpected" describes the function signature, not the programmer. Python is
+reporting that the call and definition do not currently agree.
+
+### Start with the named callable
+
+The full message often identifies where Python tried to send the argument:
+
+```text
+Workshop.__init__()
+```
+
+The dot indicates that `__init__` belongs to `Workshop`. Search for that class
+and method definition before searching the entire project.
+
+::: {.callout-tip title="Use the exact rejected name"}
+Copy `level` directly from the message. Look for it in both the call and the
+definition. This avoids overlooking a small difference such as `level`,
+`levels`, or `Level`.
+:::
+
+## 2. How do classes and instances reach `__init__`?
+
+A **class** defines a kind of object. An **instance** is one object created from
+that class.
+
+```python
+class Workshop:
+    def __init__(self, title, level):
+        self.title = title
+        self.level = level
+
+python_basics = Workshop("Python Basics", "beginner")
+data_lab = Workshop("Data Lab", "intermediate")
+```
+
+`Workshop` is the class. `python_basics` and `data_lab` refer to two separate
+instances. Each instance stores its own `title` and `level` attributes.
+
+When Python evaluates this call:
+
+```python
+Workshop("Python Basics", "beginner")
+```
+
+it performs these beginner-relevant steps:
+
+1. Create a new `Workshop` instance.
+2. Call `Workshop.__init__` to initialize that instance.
+3. Pass the new instance automatically as the first argument.
+4. Match the caller's remaining arguments to `title` and `level`.
+5. Return the initialized instance from the class call.
+
+`__init__` is commonly called a constructor in everyday Python teaching. More
+precisely, it initializes an instance after Python creates it. That distinction
+becomes useful later, but it does not change this debugging routine.
+
+::: {.concept-diagram}
+The class call supplies two visible arguments. Python adds the new instance for
+`self` before it calls `__init__`.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  call["Workshop(title='Python',<br/>level='beginner')"] --> create["Python creates<br/>a Workshop instance"]
+  create --> bind["Call __init__"]
+  instance["automatic<br/>new instance"] --> self["self"]
+  title_value["'Python'"] --> title["title"]
+  level_value["'beginner'"] --> level["level"]
+  self --> bind
+  title --> bind
+  level --> bind
+  bind --> attributes["self.title and self.level<br/>are stored"]
+```
+
+:::
+
+### Attributes belong to an instance
+
+These assignments use two different meanings of `title` and `level`:
+
+```python
+self.title = title
+self.level = level
+```
+
+- `title` on the right is the parameter value received by this call.
+- `self.title` on the left is an attribute stored on this instance.
+- `level` on the right is another parameter value.
+- `self.level` on the left keeps that value after `__init__` finishes.
+
+Without the attribute assignment, the parameter exists only while the method is
+running.
+
+## 3. How are functions and methods related?
+
+A **function** is a named block of reusable code:
+
+```python
+def make_label(title, level):
+    return f"{title} ({level})"
+
+print(make_label("Python", "beginner"))
+```
+
+A **method** is a function defined inside a class:
+
+```python
+class Workshop:
+    def __init__(self, title, level):
+        self.title = title
+        self.level = level
+
+    def make_label(self):
+        return f"{self.title} ({self.level})"
+
+workshop = Workshop("Python", "beginner")
+print(workshop.make_label())
+```
+
+The method can work with the particular instance through `self`. Here,
+`self.title` and `self.level` mean the attributes of the `workshop` instance
+that received the method call.
+
+### A bound method receives the instance automatically
+
+These two calls express the same operation:
+
+```python
+workshop.make_label()
+Workshop.make_label(workshop)
+```
+
+The first form is normal application code. Python looks up `make_label` on the
+class and binds `workshop` to the method as its first argument. The second form
+makes that normally automatic argument visible.
+
+This is why an instance method needs a first parameter for the instance.
+
+## 4. What is `self`, and why must it come first?
+
+`self` is the conventional name for the instance currently receiving a method
+call.
+
+```python
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+    def increment(self, amount):
+        self.value = self.value + amount
+```
+
+In this call:
+
+```python
+counter = Counter()
+counter.increment(2)
+```
+
+Python binds:
+
+- `counter` to `self` automatically; and
+- the visible argument `2` to `amount`.
+
+After the method finishes, `counter.value` is `2`.
+
+`self` is not a reserved Python keyword. A different parameter name can work,
+but using `self` is a strong convention that makes Python code recognizable to
+other developers. Put it first in ordinary instance methods.
+
+### Do all functions inside a class receive `self`?
+
+Ordinary instance methods do. Python also provides `@classmethod`, whose first
+parameter is conventionally named `cls`, and `@staticmethod`, which receives no
+automatic instance or class argument.
+
+Do not omit `self` accidentally to make an instance method static. If a utility
+truly belongs with a class but does not use an instance, mark that choice
+explicitly:
+
+```python
+class Temperature:
+    @staticmethod
+    def celsius_to_fahrenheit(value):
+        return value * 9 / 5 + 32
+
+print(Temperature.celsius_to_fahrenheit(value=20))
+```
+
+For beginner class designs, start with ordinary instance methods and `self`.
+Use a plain function when the behavior does not need object state and does not
+naturally belong to a class.
+
+### What happens when `self` is missing?
+
+Consider this broken initializer:
+
+```python
+class BrokenWorkshop:
+    def __init__(title, level):
+        title.level = level
+
+workshop = BrokenWorkshop(title="Python", level="beginner")
+```
+
+A common Python result is:
+
+```text
+TypeError: BrokenWorkshop.__init__() got multiple values for argument 'title'
+```
+
+Why `multiple values` instead of `unexpected keyword`?
+
+1. Python automatically sends the new instance as the first positional
+   argument.
+2. Because the method forgot `self`, the first declared parameter is `title`.
+3. The automatic instance is therefore matched to `title`.
+4. The call also explicitly supplies `title="Python"`.
+5. Python now has two values competing for the same parameter.
+
+The repair is:
+
+```python
+class Workshop:
+    def __init__(self, title, level):
+        self.title = title
+        self.level = level
+```
+
+Missing `self` belongs to the same family of argument-binding problems, but the
+exact error depends on the parameter names and how the method is called. You may
+see:
+
+- `got multiple values for argument ...`;
+- `takes ... positional arguments but ... were given`; or
+- `got an unexpected keyword argument ...`.
+
+::: {.callout-warning title="Do not repair only the error wording"}
+Adding, removing, or renaming a keyword until the message disappears can leave
+the class with the wrong design. First make sure every instance method has
+`self`, then compare the remaining parameters with the caller-supplied
+arguments.
+:::
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-class-self-binding",
+  "title": "Classes, methods, and self checkpoint",
+  "instructions": "Trace the automatic instance argument before choosing an answer.",
+  "questions": [
+    {
+      "id": "class-instance",
+      "prompt": "Which statement correctly distinguishes a class from an instance?",
+      "options": [
+        "A class defines a kind of object; an instance is one object created from it.",
+        "A class is one stored value; an instance is always a function.",
+        "A class is an error message; an instance repairs it.",
+        "A class and an instance are two names for every integer."
+      ],
+      "answer_index": 0,
+      "explanation": "The class supplies the definition, while each created instance can hold its own attribute values."
+    },
+    {
+      "id": "automatic-self",
+      "prompt": "In workshop.make_label(), how does the method receive workshop?",
+      "options": [
+        "Python binds workshop to the method's first parameter, conventionally named self.",
+        "The method searches every variable in the file.",
+        "The method converts workshop into a keyword string.",
+        "Python does not provide the instance to a method."
+      ],
+      "answer_index": 0,
+      "explanation": "Access through an instance creates a bound method, so the instance is supplied automatically."
+    },
+    {
+      "id": "missing-self-error",
+      "prompt": "Why can a missing self produce 'multiple values for argument' instead of 'unexpected keyword argument'?",
+      "options": [
+        "The automatic instance and an explicit keyword can both be matched to the first declared parameter.",
+        "Python randomly chooses an error message.",
+        "Every class call duplicates all strings.",
+        "Keyword arguments are forbidden in classes."
+      ],
+      "answer_index": 0,
+      "explanation": "Without self, the automatic instance occupies the parameter that the caller may also name explicitly."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## 5. How do positional and keyword arguments match parameters?
+
+A **parameter** is a name in a function or method definition. An **argument** is
+a value supplied in a call.
+
+```python
+def make_label(title, level="beginner"):
+    return f"{title} ({level})"
+```
+
+This definition has two parameters:
+
+- `title` is required because it has no default value.
+- `level` is optional because its default is `"beginner"`.
+
+The same matching rules apply to methods after Python handles the automatic
+instance argument.
+
+### Positional arguments use order
+
+```python
+make_label("Python", "intermediate")
+```
+
+Python matches the first value to `title` and the second to `level`.
+
+### Keyword arguments use names
+
+```python
+make_label(title="Python", level="intermediate")
+```
+
+Python matches each value to the parameter with that exact name. Keyword
+arguments make many calls easier to read and allow the supplied keywords to
+appear in a different order:
+
+```python
+make_label(level="intermediate", title="Python")
+```
+
+### Positional and keyword arguments can be mixed carefully
+
+```python
+make_label("Python", level="intermediate")
+```
+
+Positional arguments must appear before keyword arguments in a call. A parameter
+must not receive two values:
+
+```python
+make_label("Python", title="Data Science")
+```
+
+This raises:
+
+```text
+TypeError: make_label() got multiple values for argument 'title'
+```
+
+### Compare the common messages
+
+| Message fragment | Matching problem | First check |
+| --- | --- | --- |
+| `unexpected keyword argument 'level'` | No accepted parameter is named `level`. | Compare spelling and the definition. |
+| `missing 1 required positional argument: 'title'` | No value reached required parameter `title`. | Supply it or decide whether it needs a default. |
+| `got multiple values for argument 'title'` | Two arguments both reached `title`. | Check mixed arguments and missing `self`. |
+| `takes 2 positional arguments but 3 were given` | More positional values arrived than parameters can receive. | Remember the automatic instance for methods. |
+
+## 6. What are the correct fixes for an unexpected keyword?
+
+There is no single repair. Choose the one that matches the program's meaning.
+
+### Fix A: Correct a misspelled keyword
+
+```python
+workshop = Workshop(titel="Python", level="beginner")
+```
+
+If the parameter is named `title`, change `titel` to `title`. Spelling,
+capitalization, and underscores must match exactly.
+
+### Fix B: Remove an argument that does not belong
+
+If the class should store only a title, the call is wrong:
+
+```python
+class Workshop:
+    def __init__(self, title):
+        self.title = title
+
+workshop = Workshop(title="Python")
+```
+
+Do not expand the class merely because one caller supplied unrelated data.
+
+### Fix C: Declare and store required data
+
+If every workshop has a level, add both the parameter and attribute:
+
+```python
+class Workshop:
+    def __init__(self, title, level):
+        self.title = title
+        self.level = level
+```
+
+Adding only `self.level = level` without declaring `level` does not work because
+the method would have no local value named `level`.
+
+### Fix D: Provide a sensible default for optional data
+
+```python
+class Workshop:
+    def __init__(self, title, level="beginner"):
+        self.title = title
+        self.level = level
+
+intro = Workshop(title="Python")
+advanced = Workshop(title="Decorators", level="advanced")
+```
+
+The default lets a caller omit `level`, while an explicit keyword can override
+it.
+
+### Fix E: Add `self` to an instance method
+
+```python
+class Workshop:
+    def describe(self, prefix):
+        return f"{prefix}: {self.title}"
+```
+
+After `self` receives the instance, `prefix` can correctly receive the visible
+argument:
+
+```python
+print(workshop.describe(prefix="Course"))
+```
+
+### Do not use `**kwargs` as a universal patch
+
+This version accepts any keyword:
+
+```python
+class Workshop:
+    def __init__(self, title, **kwargs):
+        self.title = title
+```
+
+It also silently accepts a typo such as `levle="beginner"` unless the method
+validates `kwargs`. That can move the bug farther from its cause. Use `**kwargs`
+when the design genuinely needs to collect or forward flexible named arguments,
+not merely to hide a useful error.
+
+## 7. How can I inspect what a class accepts?
+
+The most reliable comparison uses the running code, not memory.
+
+### Read the definition
+
+Find `class Workshop`, then inspect `def __init__(...)` and the method named in
+the traceback. Write the declared parameter names beside the supplied keyword
+names.
+
+### Ask Python for the signature
+
+The standard-library `inspect` module can display accepted parameters:
+
+```python
+from inspect import signature
+
+class Workshop:
+    def __init__(self, title, level="beginner"):
+        self.title = title
+        self.level = level
+
+    def describe(self, prefix="Workshop"):
+        return f"{prefix}: {self.title}"
+
+workshop = Workshop("Python")
+
+print(signature(Workshop))
+print(signature(Workshop.__init__))
+print(signature(workshop.describe))
+```
+
+Expected output resembles:
+
+```text
+(title, level='beginner')
+(self, title, level='beginner')
+(prefix='Workshop')
+```
+
+The class signature shows what callers normally supply. The unbound
+`Workshop.__init__` signature includes `self`. The bound
+`workshop.describe` signature omits the already supplied instance.
+
+`help(Workshop)` and editor parameter hints can also reveal a signature. For a
+third-party class, compare documentation with the version installed in the
+current environment.
+
+### Rerun a changed class in notebooks
+
+Editing a class cell does not replace the class in a running Colab or Jupyter
+runtime until that cell executes again.
+
+If the displayed definition includes `level` but the running class still
+rejects it:
+
+1. Run the class-definition cell again.
+2. Recreate the instance.
+3. Run the failing call again.
+4. If execution history is unclear, restart and run all cells from the top.
+
+See [Running Code and Understanding Output](running-code-and-output.qmd) for a
+longer explanation of notebook state.
+
+## 8. Where can a hidden constructor signature come from?
+
+Sometimes the accepted parameters are generated or inherited rather than
+written directly beside the failing call.
+
+### Dataclasses generate `__init__`
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Workshop:
+    title: str
+    level: str = "beginner"
+```
+
+The annotated field names become accepted constructor parameters:
+
+```python
+workshop = Workshop(title="Python", level="intermediate")
+```
+
+`Workshop(title="Python", difficulty="easy")` raises an unexpected keyword
+error because there is no field named `difficulty`. Add a real field or use the
+correct existing name. Continue with [Dataclasses](../object-oriented-python/dataclasses.qmd)
+for deeper practice.
+
+### A child class may replace its parent's initializer
+
+```python
+class Course:
+    def __init__(self, title):
+        self.title = title
+
+class OnlineCourse(Course):
+    def __init__(self, url):
+        self.url = url
+```
+
+This call rejects `title`:
+
+```python
+course = OnlineCourse(title="Python", url="https://example.com")
+```
+
+`OnlineCourse.__init__` currently accepts only `url`. If an online course needs
+both values, declare both and initialize the parent part deliberately:
+
+```python
+class OnlineCourse(Course):
+    def __init__(self, title, url):
+        super().__init__(title)
+        self.url = url
+```
+
+Inheritance is a later topic, but the immediate debugging habit is the same:
+inspect the initializer that Python actually calls. See
+[Object-Oriented Design](../object-oriented-python/oop-design.qmd) when you are
+ready to study parent and child classes.
+
+## 9. A repeatable debugging routine
+
+Use this routine for constructors, methods, ordinary functions, dataclasses,
+and library APIs.
+
+1. **Read the last traceback line.** Record the callable and rejected keyword.
+2. **Find the call.** List every positional and keyword argument supplied.
+3. **Find the active definition.** Inspect `__init__` or the named method.
+4. **Account for the automatic instance.** An instance method normally begins
+   with `self`, which Python supplies.
+5. **Match values to parameters.** Use order for positional arguments and exact
+   names for keyword arguments.
+6. **Choose a meaning-based fix.** Correct a typo, change the call, declare real
+   data, add a default, or restore `self`.
+7. **Rerun the definition if needed.** Notebook state may still contain an older
+   class.
+8. **Change one thing and test again.** A different error is new evidence, not a
+   reason to change several unrelated lines.
+
+::: {.callout-note title="Make the problem small"}
+Copy only the class definition and one failing call into a fresh cell. Replace
+large data with short strings. If the small version works, restore one removed
+piece at a time until the mismatch returns.
+:::
+
+For a complete method of preparing code to share, use
+[Minimal Reproducible Examples](../debugging/minimal-reproducible-examples.qmd).
+
+## Practice: diagnose three class calls
+
+For each case, predict the message family, name the mismatch, and make the
+smallest meaningful repair.
+
+### Case A: a spelling mismatch
+
+```python
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+student = Student(student_name="Maya")
+```
+
+### Case B: a missing instance parameter
+
+```python
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+    def greeting(name):
+        return f"Hello, {name}!"
+
+student = Student("Maya")
+student.greeting(name="Maya")
+```
+
+### Case C: an optional value
+
+```python
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+student = Student(name="Maya", active=True)
+```
+
+<details class="solution">
+<summary>Show one possible repair for each case</summary>
+
+**Case A:** The class accepts `name`, not `student_name`. Use the accepted name:
+
+```python
+student = Student(name="Maya")
+```
+
+**Case B:** The method needs `self` before the caller-supplied `name` parameter:
+
+```python
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+    def greeting(self, name):
+        return f"Hello, {name}!"
+
+student = Student("Maya")
+print(student.greeting(name="Maya"))
+```
+
+**Case C:** If every student has an active status and `True` is a useful default,
+declare and store it:
+
+```python
+class Student:
+    def __init__(self, name, active=True):
+        self.name = name
+        self.active = active
+
+student = Student(name="Maya", active=True)
+```
+
+If active status does not belong in this class, remove it from the call instead.
+
+</details>
+
+## Check your debugging decisions
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-unexpected-keyword-debugging",
+  "title": "Unexpected keyword debugging checkpoint",
+  "instructions": "Choose the smallest fix supported by the evidence.",
+  "questions": [
+    {
+      "id": "unknown-keyword",
+      "prompt": "Workshop.__init__(self, title) receives Workshop(title=\"Python\", level=\"beginner\"). Why is level unexpected?",
+      "options": [
+        "The definition has no parameter named level.",
+        "Classes cannot receive strings.",
+        "Keyword arguments work only with print.",
+        "self must be supplied explicitly in the call."
+      ],
+      "answer_index": 0,
+      "explanation": "Caller-supplied keyword names must match accepted parameters unless the callable deliberately collects flexible keywords."
+    },
+    {
+      "id": "parameter-argument",
+      "prompt": "In def greeting(self, name), what is name?",
+      "options": [
+        "A parameter that can receive an argument when the method is called.",
+        "An automatically created class.",
+        "The instance supplied to self.",
+        "An error type."
+      ],
+      "answer_index": 0,
+      "explanation": "Parameters appear in definitions; arguments are the values supplied by calls."
+    },
+    {
+      "id": "kwargs-patch",
+      "prompt": "Why is adding **kwargs usually a poor first repair for a misspelled keyword?",
+      "options": [
+        "It can accept and hide the typo instead of correcting the call or definition.",
+        "It forces every argument to become positional.",
+        "It removes self from every method.",
+        "It prevents classes from creating instances."
+      ],
+      "answer_index": 0,
+      "explanation": "Flexible keyword collection is useful for deliberate designs, but it can hide mistakes when added only to silence an error."
+    },
+    {
+      "id": "notebook-old-class",
+      "prompt": "You added level to a class cell, but the runtime still rejects it. What should you check next?",
+      "options": [
+        "Run the changed class-definition cell and recreate the instance.",
+        "Rename every attribute in the notebook.",
+        "Convert level to a list.",
+        "Add **kwargs to every method."
+      ],
+      "answer_index": 0,
+      "explanation": "Notebook edits do not change the running class until the definition executes again."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+## Key points to carry forward
+
+::: {.callout-tip title="Key points"}
+- `unexpected keyword argument` means a supplied keyword name is not accepted by
+  the active callable signature.
+- Calling a class normally initializes a new instance through `__init__`.
+- A method is a function defined in a class, and an instance method receives the
+  current instance through its first parameter, conventionally `self`.
+- Positional arguments match by order; keyword arguments match by exact name.
+- Missing `self` may produce `multiple values`, a positional-argument count
+  error, or an unexpected-keyword error depending on the call.
+- Fix the meaning of the mismatch instead of merely silencing the message.
+- Inspect the active signature and rerun class definitions in notebooks before
+  making broad changes.
+:::
+
+Continue with [Object-Oriented Basics](../object-oriented-python/oop-basics.qmd)
+to practice classes, instances, attributes, methods, and `self` in a broader
+lesson. Use [Error Messages](../debugging/error-messages.qmd) to study traceback
+reading in more detail.
