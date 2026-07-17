@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Diagnose undefined names, unexpected assignments, text input, and mixed-type operations.">
+
+<title>Names, Values, and Types – FreeCampus Python</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../lessons/faq/running-code-and-output.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-4a0610749eeff5ab924a4729b5181608.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-de927ec96a2411cf822331f71755f83e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-4a0610749eeff5ab924a4729b5181608.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-864d789aa8754b185bda5a5be2e662a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-313e1438bcee39275a33491792d8ca95.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-864d789aa8754b185bda5a5be2e662a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script type="module" src="../../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="../../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">FreeCampus Python</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../lessons/index.html"> 
+<span class="menu-text">Learn</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../lessons/faq/index.html" aria-current="page"> 
+<span class="menu-text">FAQ</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../lessons/capstone/index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../lessons/debugging/error-messages.html"> 
+<span class="menu-text">Debugging</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/freecampus/python"> <i class="bi bi-github" role="img" aria-label="GitHub repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">Names, Values, and Types</h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../lessons/faq/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FAQ and Common Issues</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../lessons/faq/unexpected-keyword-arguments-in-classes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unexpected Keyword Arguments in Classes</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../lessons/faq/running-code-and-output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Running Code and Understanding Output</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../lessons/faq/names-values-and-types.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Names, Values, and Types</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#short-answer" id="toc-short-answer" class="nav-link active" data-scroll-target="#short-answer">Short answer</a></li>
+  <li><a href="#why-is-my-variable-undefined" id="toc-why-is-my-variable-undefined" class="nav-link" data-scroll-target="#why-is-my-variable-undefined">Why is my variable undefined?</a>
+  <ul class="collapse">
+  <li><a href="#check-spelling-and-capitalization" id="toc-check-spelling-and-capitalization" class="nav-link" data-scroll-target="#check-spelling-and-capitalization">Check spelling and capitalization</a></li>
+  <li><a href="#check-assignment-order" id="toc-check-assignment-order" class="nav-link" data-scroll-target="#check-assignment-order">Check assignment order</a></li>
+  <li><a href="#check-where-the-name-was-created" id="toc-check-where-the-name-was-created" class="nav-link" data-scroll-target="#check-where-the-name-was-created">Check where the name was created</a></li>
+  </ul></li>
+  <li><a href="#why-did-assigning-one-name-produce-an-unexpected-value" id="toc-why-did-assigning-one-name-produce-an-unexpected-value" class="nav-link" data-scroll-target="#why-did-assigning-one-name-produce-an-unexpected-value">Why did assigning one name produce an unexpected value?</a>
+  <ul class="collapse">
+  <li><a href="#mutable-values-need-one-extra-check" id="toc-mutable-values-need-one-extra-check" class="nav-link" data-scroll-target="#mutable-values-need-one-extra-check">Mutable values need one extra check</a></li>
+  </ul></li>
+  <li><a href="#quick-check-names-and-assignments" id="toc-quick-check-names-and-assignments" class="nav-link" data-scroll-target="#quick-check-names-and-assignments">Quick check: names and assignments</a></li>
+  <li><a href="#why-does-input-return-text" id="toc-why-does-input-return-text" class="nav-link" data-scroll-target="#why-does-input-return-text">Why does <code>input()</code> return text?</a>
+  <ul class="collapse">
+  <li><a href="#read-the-conversion-line-slowly" id="toc-read-the-conversion-line-slowly" class="nav-link" data-scroll-target="#read-the-conversion-line-slowly">Read the conversion line slowly</a></li>
+  </ul></li>
+  <li><a href="#why-can-python-not-combine-a-string-and-a-number" id="toc-why-can-python-not-combine-a-string-and-a-number" class="nav-link" data-scroll-target="#why-can-python-not-combine-a-string-and-a-number">Why can Python not combine a string and a number?</a>
+  <ul class="collapse">
+  <li><a href="#inspect-before-converting" id="toc-inspect-before-converting" class="nav-link" data-scroll-target="#inspect-before-converting">Inspect before converting</a></li>
+  </ul></li>
+  <li><a href="#try-an-order-total-in-colab" id="toc-try-an-order-total-in-colab" class="nav-link" data-scroll-target="#try-an-order-total-in-colab">Try an order total in Colab</a></li>
+  <li><a href="#quick-check-types-and-conversions" id="toc-quick-check-types-and-conversions" class="nav-link" data-scroll-target="#quick-check-types-and-conversions">Quick check: types and conversions</a></li>
+  <li><a href="#a-compact-checklist" id="toc-a-compact-checklist" class="nav-link" data-scroll-target="#a-compact-checklist">A compact checklist</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/freecampus/python/edit/main/lessons/faq/names-values-and-types.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/freecampus/python/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Names, Values, and Types</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">faq</div>
+    <div class="quarto-category">variables</div>
+    <div class="quarto-category">types</div>
+    <div class="quarto-category">beginner</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Diagnose undefined names, unexpected assignments, text input, and mixed-type operations.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="fc-colab-launch">
+<p><a href="https://colab.research.google.com/github/freecampus/python/blob/gh-pages/notebooks/lessons/faq/names-values-and-types.ipynb" class="btn btn-primary" target="_blank" rel="noopener">Open this lesson in Google Colab</a></p>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Want to try the code?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Want to try the code?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This FAQ can be read as a standalone article. The <strong>Open in Colab</strong> button above opens an optional notebook if you want to run the examples, inspect each type, and work through the fixes step by step.</p>
+</div>
+</div>
+<!-- fcpython-faq-post: start -->
+<p>Many beginner errors become less mysterious when you ask two concrete questions: which name is Python reading, and what type of value does that name refer to right now?</p>
+<section id="short-answer" class="level2">
+<h2 class="anchored" data-anchor-id="short-answer">Short answer</h2>
+<p>A <code>NameError</code> means the requested name is unavailable at that moment. Check its exact spelling, whether its assignment ran first, and whether it was created in a different scope.</p>
+<p>A <code>TypeError</code> involving text and numbers means the operation received types that do not work together. Remember that <code>input()</code> returns text. Inspect with <code>type(...)</code>, decide whether the program means arithmetic or text joining, and then convert deliberately.</p>
+</section>
+<section id="why-is-my-variable-undefined" class="level2">
+<h2 class="anchored" data-anchor-id="why-is-my-variable-undefined">Why is my variable undefined?</h2>
+<p><strong>Symptom:</strong> Python reports a message like:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb1-1"><a href="#cb1-1"></a>NameError: name 'total_price' is not defined</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Likely reason:</strong> when Python reached that line, it could not find the exact name <code>total_price</code> in an available scope.</p>
+<p>Start with three checks.</p>
+<section id="check-spelling-and-capitalization" class="level3">
+<h3 class="anchored" data-anchor-id="check-spelling-and-capitalization">Check spelling and capitalization</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a>total_price <span class="op">=</span> <span class="dv">15</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="bu">print</span>(total_prcie)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The assignment creates <code>total_price</code>, but the next line asks for <code>total_prcie</code>. Those spellings are different.</p>
+<p>Capital letters also matter:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a>course <span class="op">=</span> <span class="st">"Python"</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="bu">print</span>(Course)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>course</code> and <code>Course</code> are different names. A useful repair changes the use to match the assignment:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a>course <span class="op">=</span> <span class="st">"Python"</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="bu">print</span>(course)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="check-assignment-order" class="level3">
+<h3 class="anchored" data-anchor-id="check-assignment-order">Check assignment order</h3>
+<p>Python normally runs a script from top to bottom:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="bu">print</span>(score)</span>
+<span id="cb5-2"><a href="#cb5-2"></a>score <span class="op">=</span> <span class="dv">10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>print</code> call happens before <code>score</code> receives a value, so it raises <code>NameError</code>. Put the assignment before the use:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a>score <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="bu">print</span>(score)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In a notebook, also check whether the assignment cell actually ran. Text on the page does not create a name until Python executes that cell. See <a href="../../lessons/faq/running-code-and-output.html">Running Code and Understanding Output</a> for a clean runtime test.</p>
+</section>
+<section id="check-where-the-name-was-created" class="level3">
+<h3 class="anchored" data-anchor-id="check-where-the-name-was-created">Check where the name was created</h3>
+<p>A name created inside a function is usually local to that function:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">def</span> calculate_total():</span>
+<span id="cb7-2"><a href="#cb7-2"></a>    total <span class="op">=</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">6</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>    <span class="bu">print</span>(total)</span>
+<span id="cb7-4"><a href="#cb7-4"></a></span>
+<span id="cb7-5"><a href="#cb7-5"></a>calculate_total()</span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="bu">print</span>(total)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The function prints <code>10</code>. The final line then raises <code>NameError</code> because the local name <code>total</code> is not available outside the function.</p>
+<p>Return a result when outside code needs it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">def</span> calculate_total():</span>
+<span id="cb8-2"><a href="#cb8-2"></a>    total <span class="op">=</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">6</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>    <span class="cf">return</span> total</span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a>result <span class="op">=</span> calculate_total()</span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Read the exact name">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Read the exact name
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Copy the missing name directly from the last line of the traceback. Then search upward for the assignment or definition you expected to create it. The error is evidence about the program’s current state, not a judgment about the learner.</p>
+</div>
+</div>
+<p>For more traceback practice, continue with <a href="../../lessons/debugging/error-messages.html">Error Messages</a>.</p>
+</section>
+</section>
+<section id="why-did-assigning-one-name-produce-an-unexpected-value" class="level2">
+<h2 class="anchored" data-anchor-id="why-did-assigning-one-name-produce-an-unexpected-value">Why did assigning one name produce an unexpected value?</h2>
+<p>Assignment evaluates the right side first, then makes the name on the left refer to that resulting value.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a>score <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>saved_score <span class="op">=</span> score</span>
+<span id="cb9-3"><a href="#cb9-3"></a>score <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="bu">print</span>(score)</span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="bu">print</span>(saved_score)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Predict both output lines before running. The output is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb10-1"><a href="#cb10-1"></a>12</span>
+<span id="cb10-2"><a href="#cb10-2"></a>10</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Line by line:</p>
+<ol type="1">
+<li><code>score = 10</code> makes <code>score</code> refer to the integer <code>10</code>.</li>
+<li><code>saved_score = score</code> reads the current value of <code>score</code>, then makes <code>saved_score</code> refer to that same integer value.</li>
+<li><code>score = 12</code> reassigns <code>score</code> so it now refers to the integer <code>12</code>.</li>
+<li>That reassignment does not rerun the earlier assignment to <code>saved_score</code>.</li>
+</ol>
+<p>The statement <code>saved_score = score</code> is not a spreadsheet formula that keeps watching <code>score</code>. Python executes it once when that line runs.</p>
+<div class="concept-diagram">
+<p>Reassignment moves one name to a new value; it does not replay earlier lines.</p>
+<div class="cell" data-eval="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  score1["score"] --&gt; ten["10"]
+  saved["saved_score"] --&gt; ten
+  reassign["score = 12"] --&gt; score2["score"]
+  score2 --&gt; twelve["12"]
+  saved --&gt; ten
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<section id="mutable-values-need-one-extra-check" class="level3">
+<h3 class="anchored" data-anchor-id="mutable-values-need-one-extra-check">Mutable values need one extra check</h3>
+<p>Lists can be changed in place. Two names can refer to the same list:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1"></a>original <span class="op">=</span> [<span class="dv">2</span>, <span class="dv">4</span>]</span>
+<span id="cb11-2"><a href="#cb11-2"></a>backup <span class="op">=</span> original</span>
+<span id="cb11-3"><a href="#cb11-3"></a>original.append(<span class="dv">6</span>)</span>
+<span id="cb11-4"><a href="#cb11-4"></a></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="bu">print</span>(original)</span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="bu">print</span>(backup)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Both lines print <code>[2, 4, 6]</code>. The assignment <code>backup = original</code> did not create a second list. It gave the existing list another name. The <code>append</code> method then changed that one shared list.</p>
+<p>Create a shallow copy when two independent one-level lists are intended:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a>original <span class="op">=</span> [<span class="dv">2</span>, <span class="dv">4</span>]</span>
+<span id="cb12-2"><a href="#cb12-2"></a>backup <span class="op">=</span> original.copy()</span>
+<span id="cb12-3"><a href="#cb12-3"></a>original.append(<span class="dv">6</span>)</span>
+<span id="cb12-4"><a href="#cb12-4"></a></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="bu">print</span>(original)</span>
+<span id="cb12-6"><a href="#cb12-6"></a><span class="bu">print</span>(backup)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now <code>original</code> prints <code>[2, 4, 6]</code>, while <code>backup</code> prints <code>[2, 4]</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Try it">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Try it
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Predict the two outputs for <code>colors = ["blue"]</code>, <code>saved = colors</code>, and <code>colors.append("green")</code>. Then replace <code>saved = colors</code> with <code>saved = colors.copy()</code> and compare the evidence.</p>
+</div>
+</div>
+<p>For deeper practice with mutation and copying, use <a href="../../lessons/data-structures/lists.html">Lists</a>.</p>
+</section>
+</section>
+<section id="quick-check-names-and-assignments" class="level2">
+<h2 class="anchored" data-anchor-id="quick-check-names-and-assignments">Quick check: names and assignments</h2>
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-names-and-assignment",
+  "title": "Names and assignment checkpoint",
+  "instructions": "Trace each line before choosing an answer.",
+  "questions": [
+    {
+      "id": "name-error-first-check",
+      "prompt": "Python reports NameError for final_score. What should you inspect first?",
+      "options": [
+        "The exact spelling and whether an assignment ran before this use.",
+        "Whether every number can be converted to a list.",
+        "Whether print should be replaced by input.",
+        "Whether the program has enough comments."
+      ],
+      "answer_index": 0,
+      "explanation": "NameError says that exact name is unavailable now, so spelling and execution order are direct clues."
+    },
+    {
+      "id": "integer-reassignment",
+      "prompt": "After score = 10, saved = score, and score = 12, what value does saved refer to?",
+      "options": [
+        "10",
+        "12",
+        "None",
+        "The text score"
+      ],
+      "answer_index": 0,
+      "explanation": "saved received the value read when its assignment ran; reassigning score does not rerun that line."
+    },
+    {
+      "id": "shared-list",
+      "prompt": "Why does backup change after backup = original and original.append(6)?",
+      "options": [
+        "Both names refer to the same mutable list.",
+        "append changes every list in the program.",
+        "Assignment always makes two independent copies.",
+        "The integer 6 renames backup."
+      ],
+      "answer_index": 0,
+      "explanation": "A plain assignment gives the same list another name; append mutates that shared list."
+    }
+  ]
+}
+</script>
+<div class="cell" data-eval="true">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb13" data-startfrom="1" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1"></a>{</span>
+<span id="cb13-2"><a href="#cb13-2"></a>  <span class="kw">const</span> scripts <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(</span>
+<span id="cb13-3"><a href="#cb13-3"></a>    <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"script.fcpython-ojs-quiz-config"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4"></a>  )<span class="op">;</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a>  <span class="kw">const</span> script <span class="op">=</span> scripts<span class="op">.</span><span class="fu">find</span>(</span>
+<span id="cb13-6"><a href="#cb13-6"></a>    (node) <span class="kw">=&gt;</span> node<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">fcpythonRendered</span> <span class="op">!==</span> <span class="st">"true"</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a>  )<span class="op">;</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a></span>
+<span id="cb13-9"><a href="#cb13-9"></a>  <span class="cf">if</span> (<span class="op">!</span>script) {</span>
+<span id="cb13-10"><a href="#cb13-10"></a>    <span class="cf">return</span> <span class="fu">html</span><span class="vs">`&lt;div class="fcpython-quiz fcpython-quiz-warning"&gt;</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="vs">      Quiz configuration was not found.</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a><span class="vs">    &lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb13-13"><a href="#cb13-13"></a>  }</span>
+<span id="cb13-14"><a href="#cb13-14"></a></span>
+<span id="cb13-15"><a href="#cb13-15"></a>  script<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">fcpythonRendered</span> <span class="op">=</span> <span class="st">"true"</span><span class="op">;</span></span>
+<span id="cb13-16"><a href="#cb13-16"></a>  <span class="kw">const</span> quiz <span class="op">=</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(script<span class="op">.</span><span class="at">textContent</span>)<span class="op">;</span></span>
+<span id="cb13-17"><a href="#cb13-17"></a>  <span class="kw">const</span> container <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div class="fcpython-quiz"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb13-18"><a href="#cb13-18"></a>  <span class="kw">const</span> title <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"h3"</span>)<span class="op">;</span></span>
+<span id="cb13-19"><a href="#cb13-19"></a>  title<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> quiz<span class="op">.</span><span class="at">title</span><span class="op">;</span></span>
+<span id="cb13-20"><a href="#cb13-20"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(title)<span class="op">;</span></span>
+<span id="cb13-21"><a href="#cb13-21"></a></span>
+<span id="cb13-22"><a href="#cb13-22"></a>  <span class="kw">const</span> instructions <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb13-23"><a href="#cb13-23"></a>  instructions<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> quiz<span class="op">.</span><span class="at">instructions</span><span class="op">;</span></span>
+<span id="cb13-24"><a href="#cb13-24"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(instructions)<span class="op">;</span></span>
+<span id="cb13-25"><a href="#cb13-25"></a></span>
+<span id="cb13-26"><a href="#cb13-26"></a>  <span class="kw">const</span> feedbackNodes <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb13-27"><a href="#cb13-27"></a></span>
+<span id="cb13-28"><a href="#cb13-28"></a>  quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="fu">forEach</span>((question<span class="op">,</span> questionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb13-29"><a href="#cb13-29"></a>    <span class="kw">const</span> fieldset <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"fieldset"</span>)<span class="op">;</span></span>
+<span id="cb13-30"><a href="#cb13-30"></a>    fieldset<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-question"</span><span class="op">;</span></span>
+<span id="cb13-31"><a href="#cb13-31"></a></span>
+<span id="cb13-32"><a href="#cb13-32"></a>    <span class="kw">const</span> legend <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"legend"</span>)<span class="op">;</span></span>
+<span id="cb13-33"><a href="#cb13-33"></a>    legend<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>questionIndex <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="vs">. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">prompt</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb13-34"><a href="#cb13-34"></a>    fieldset<span class="op">.</span><span class="fu">appendChild</span>(legend)<span class="op">;</span></span>
+<span id="cb13-35"><a href="#cb13-35"></a></span>
+<span id="cb13-36"><a href="#cb13-36"></a>    question<span class="op">.</span><span class="at">options</span><span class="op">.</span><span class="fu">forEach</span>((option<span class="op">,</span> optionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb13-37"><a href="#cb13-37"></a>      <span class="kw">const</span> label <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"label"</span>)<span class="op">;</span></span>
+<span id="cb13-38"><a href="#cb13-38"></a>      label<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-option"</span><span class="op">;</span></span>
+<span id="cb13-39"><a href="#cb13-39"></a></span>
+<span id="cb13-40"><a href="#cb13-40"></a>      <span class="kw">const</span> input <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"input"</span>)<span class="op">;</span></span>
+<span id="cb13-41"><a href="#cb13-41"></a>      input<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"radio"</span><span class="op">;</span></span>
+<span id="cb13-42"><a href="#cb13-42"></a>      input<span class="op">.</span><span class="at">name</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">-</span><span class="sc">${</span>question<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb13-43"><a href="#cb13-43"></a>      input<span class="op">.</span><span class="at">value</span> <span class="op">=</span> <span class="bu">String</span>(optionIndex)<span class="op">;</span></span>
+<span id="cb13-44"><a href="#cb13-44"></a></span>
+<span id="cb13-45"><a href="#cb13-45"></a>      <span class="kw">const</span> text <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"span"</span>)<span class="op">;</span></span>
+<span id="cb13-46"><a href="#cb13-46"></a>      text<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> option<span class="op">;</span></span>
+<span id="cb13-47"><a href="#cb13-47"></a></span>
+<span id="cb13-48"><a href="#cb13-48"></a>      label<span class="op">.</span><span class="fu">appendChild</span>(input)<span class="op">;</span></span>
+<span id="cb13-49"><a href="#cb13-49"></a>      label<span class="op">.</span><span class="fu">appendChild</span>(text)<span class="op">;</span></span>
+<span id="cb13-50"><a href="#cb13-50"></a>      fieldset<span class="op">.</span><span class="fu">appendChild</span>(label)<span class="op">;</span></span>
+<span id="cb13-51"><a href="#cb13-51"></a>    })<span class="op">;</span></span>
+<span id="cb13-52"><a href="#cb13-52"></a></span>
+<span id="cb13-53"><a href="#cb13-53"></a>    <span class="kw">const</span> feedback <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb13-54"><a href="#cb13-54"></a>    feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb13-55"><a href="#cb13-55"></a>    feedback<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"aria-live"</span><span class="op">,</span> <span class="st">"polite"</span>)<span class="op">;</span></span>
+<span id="cb13-56"><a href="#cb13-56"></a>    feedbackNodes<span class="op">.</span><span class="fu">push</span>(feedback)<span class="op">;</span></span>
+<span id="cb13-57"><a href="#cb13-57"></a>    fieldset<span class="op">.</span><span class="fu">appendChild</span>(feedback)<span class="op">;</span></span>
+<span id="cb13-58"><a href="#cb13-58"></a>    container<span class="op">.</span><span class="fu">appendChild</span>(fieldset)<span class="op">;</span></span>
+<span id="cb13-59"><a href="#cb13-59"></a>  })<span class="op">;</span></span>
+<span id="cb13-60"><a href="#cb13-60"></a></span>
+<span id="cb13-61"><a href="#cb13-61"></a>  <span class="kw">const</span> actions <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb13-62"><a href="#cb13-62"></a>  actions<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-actions"</span><span class="op">;</span></span>
+<span id="cb13-63"><a href="#cb13-63"></a></span>
+<span id="cb13-64"><a href="#cb13-64"></a>  <span class="kw">const</span> check <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"button"</span>)<span class="op">;</span></span>
+<span id="cb13-65"><a href="#cb13-65"></a>  check<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"button"</span><span class="op">;</span></span>
+<span id="cb13-66"><a href="#cb13-66"></a>  check<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Check answers"</span><span class="op">;</span></span>
+<span id="cb13-67"><a href="#cb13-67"></a></span>
+<span id="cb13-68"><a href="#cb13-68"></a>  <span class="kw">const</span> reset <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"button"</span>)<span class="op">;</span></span>
+<span id="cb13-69"><a href="#cb13-69"></a>  reset<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"button"</span><span class="op">;</span></span>
+<span id="cb13-70"><a href="#cb13-70"></a>  reset<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Reset"</span><span class="op">;</span></span>
+<span id="cb13-71"><a href="#cb13-71"></a></span>
+<span id="cb13-72"><a href="#cb13-72"></a>  <span class="kw">const</span> score <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb13-73"><a href="#cb13-73"></a>  score<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-score"</span><span class="op">;</span></span>
+<span id="cb13-74"><a href="#cb13-74"></a>  score<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"aria-live"</span><span class="op">,</span> <span class="st">"polite"</span>)<span class="op">;</span></span>
+<span id="cb13-75"><a href="#cb13-75"></a></span>
+<span id="cb13-76"><a href="#cb13-76"></a>  check<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb13-77"><a href="#cb13-77"></a>    <span class="kw">let</span> correctCount <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb13-78"><a href="#cb13-78"></a></span>
+<span id="cb13-79"><a href="#cb13-79"></a>    quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="fu">forEach</span>((question<span class="op">,</span> questionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb13-80"><a href="#cb13-80"></a>      <span class="kw">const</span> selected <span class="op">=</span> container<span class="op">.</span><span class="fu">querySelector</span>(</span>
+<span id="cb13-81"><a href="#cb13-81"></a>        <span class="vs">`input[name="</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">-</span><span class="sc">${</span>question<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">"]:checked`</span></span>
+<span id="cb13-82"><a href="#cb13-82"></a>      )<span class="op">;</span></span>
+<span id="cb13-83"><a href="#cb13-83"></a>      <span class="kw">const</span> feedback <span class="op">=</span> feedbackNodes[questionIndex]<span class="op">;</span></span>
+<span id="cb13-84"><a href="#cb13-84"></a></span>
+<span id="cb13-85"><a href="#cb13-85"></a>      <span class="cf">if</span> (<span class="op">!</span>selected) {</span>
+<span id="cb13-86"><a href="#cb13-86"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Choose an answer before checking."</span><span class="op">;</span></span>
+<span id="cb13-87"><a href="#cb13-87"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb13-88"><a href="#cb13-88"></a>        <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb13-89"><a href="#cb13-89"></a>      }</span>
+<span id="cb13-90"><a href="#cb13-90"></a></span>
+<span id="cb13-91"><a href="#cb13-91"></a>      <span class="kw">const</span> selectedIndex <span class="op">=</span> <span class="bu">Number</span>(selected<span class="op">.</span><span class="at">value</span>)<span class="op">;</span></span>
+<span id="cb13-92"><a href="#cb13-92"></a>      <span class="cf">if</span> (selectedIndex <span class="op">===</span> question<span class="op">.</span><span class="at">answer_index</span>) {</span>
+<span id="cb13-93"><a href="#cb13-93"></a>        correctCount <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb13-94"><a href="#cb13-94"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`✅ Correct. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">explanation</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb13-95"><a href="#cb13-95"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback is-correct"</span><span class="op">;</span></span>
+<span id="cb13-96"><a href="#cb13-96"></a>      } <span class="cf">else</span> {</span>
+<span id="cb13-97"><a href="#cb13-97"></a>        <span class="kw">const</span> answer <span class="op">=</span> question<span class="op">.</span><span class="at">options</span>[question<span class="op">.</span><span class="at">answer_index</span>]<span class="op">;</span></span>
+<span id="cb13-98"><a href="#cb13-98"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`❌ Not yet. Correct answer: </span><span class="sc">${</span>answer<span class="sc">}</span><span class="vs">. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">explanation</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb13-99"><a href="#cb13-99"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback is-incorrect"</span><span class="op">;</span></span>
+<span id="cb13-100"><a href="#cb13-100"></a>      }</span>
+<span id="cb13-101"><a href="#cb13-101"></a>    })<span class="op">;</span></span>
+<span id="cb13-102"><a href="#cb13-102"></a></span>
+<span id="cb13-103"><a href="#cb13-103"></a>    score<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`Score: </span><span class="sc">${</span>correctCount<span class="sc">}</span><span class="vs">/</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="at">length</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb13-104"><a href="#cb13-104"></a>  })<span class="op">;</span></span>
+<span id="cb13-105"><a href="#cb13-105"></a></span>
+<span id="cb13-106"><a href="#cb13-106"></a>  reset<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb13-107"><a href="#cb13-107"></a>    container<span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"input[type='radio']"</span>)<span class="op">.</span><span class="fu">forEach</span>((input) <span class="kw">=&gt;</span> {</span>
+<span id="cb13-108"><a href="#cb13-108"></a>      input<span class="op">.</span><span class="at">checked</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb13-109"><a href="#cb13-109"></a>    })<span class="op">;</span></span>
+<span id="cb13-110"><a href="#cb13-110"></a>    feedbackNodes<span class="op">.</span><span class="fu">forEach</span>((feedback) <span class="kw">=&gt;</span> {</span>
+<span id="cb13-111"><a href="#cb13-111"></a>      feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb13-112"><a href="#cb13-112"></a>      feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb13-113"><a href="#cb13-113"></a>    })<span class="op">;</span></span>
+<span id="cb13-114"><a href="#cb13-114"></a>    score<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb13-115"><a href="#cb13-115"></a>  })<span class="op">;</span></span>
+<span id="cb13-116"><a href="#cb13-116"></a></span>
+<span id="cb13-117"><a href="#cb13-117"></a>  actions<span class="op">.</span><span class="fu">appendChild</span>(check)<span class="op">;</span></span>
+<span id="cb13-118"><a href="#cb13-118"></a>  actions<span class="op">.</span><span class="fu">appendChild</span>(reset)<span class="op">;</span></span>
+<span id="cb13-119"><a href="#cb13-119"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(actions)<span class="op">;</span></span>
+<span id="cb13-120"><a href="#cb13-120"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(score)<span class="op">;</span></span>
+<span id="cb13-121"><a href="#cb13-121"></a>  <span class="cf">return</span> container<span class="op">;</span></span>
+<span id="cb13-122"><a href="#cb13-122"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-1" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</section>
+<section id="why-does-input-return-text" class="level2">
+<h2 class="anchored" data-anchor-id="why-does-input-return-text">Why does <code>input()</code> return text?</h2>
+<p>Keyboard input arrives as characters. Python cannot know whether <code>12</code> means an age, part of an address, an identifier with leading zeroes, or text that should be joined with other text. Therefore, <code>input()</code> returns a string.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1"></a>quantity_text <span class="op">=</span> <span class="bu">input</span>(<span class="st">"How many notebooks? "</span>)</span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="bu">print</span>(quantity_text)</span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="bu">print</span>(<span class="bu">type</span>(quantity_text))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If the learner types <code>3</code>, the type output is still <code>&lt;class 'str'&gt;</code>.</p>
+<p>Convert at the point where the program needs a number:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1"></a>quantity_text <span class="op">=</span> <span class="bu">input</span>(<span class="st">"How many notebooks? "</span>)</span>
+<span id="cb15-2"><a href="#cb15-2"></a>quantity <span class="op">=</span> <span class="bu">int</span>(quantity_text)</span>
+<span id="cb15-3"><a href="#cb15-3"></a>total <span class="op">=</span> quantity <span class="op">*</span> <span class="dv">4</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="bu">print</span>(<span class="st">"Total:"</span>, total)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If the learner types <code>3</code>, the program prints <code>Total: 12</code>.</p>
+<section id="read-the-conversion-line-slowly" class="level3">
+<h3 class="anchored" data-anchor-id="read-the-conversion-line-slowly">Read the conversion line slowly</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1"></a>quantity <span class="op">=</span> <span class="bu">int</span>(quantity_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li>Python reads the string stored under <code>quantity_text</code>.</li>
+<li><code>int(...)</code> attempts to create an integer with the same whole-number meaning.</li>
+<li>The assignment gives that new integer the name <code>quantity</code>.</li>
+<li>The original string still exists under <code>quantity_text</code>.</li>
+</ol>
+<p>Not every string describes an integer:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1"></a><span class="bu">int</span>(<span class="st">"three"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This raises <code>ValueError</code>. The operation accepts strings, but this particular string cannot be interpreted as a base-ten integer.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Common mistake">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Common mistake
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Do not convert every input automatically. A name, email address, phone number, or postal code is usually text even when it contains digits. Convert only when the program needs numeric behavior such as arithmetic or numeric comparison.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="why-can-python-not-combine-a-string-and-a-number" class="level2">
+<h2 class="anchored" data-anchor-id="why-can-python-not-combine-a-string-and-a-number">Why can Python not combine a string and a number?</h2>
+<p>The <code>+</code> symbol has more than one meaning:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1"></a><span class="bu">print</span>(<span class="dv">2</span> <span class="op">+</span> <span class="dv">3</span>)</span>
+<span id="cb18-2"><a href="#cb18-2"></a><span class="bu">print</span>(<span class="st">"Py"</span> <span class="op">+</span> <span class="st">"thon"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first call performs integer addition and prints <code>5</code>. The second performs string concatenation and prints <code>Python</code>.</p>
+<p>This expression is ambiguous, so Python rejects it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1"></a>attempts <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="bu">print</span>(<span class="st">"Attempts: "</span> <span class="op">+</span> attempts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Should the program add numerically or join text? Decide the intended result, then write that decision explicitly.</p>
+<p>For a message, let <code>print</code> handle multiple values:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1"></a>attempts <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a><span class="bu">print</span>(<span class="st">"Attempts:"</span>, attempts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Or convert the number for text concatenation:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1"></a>attempts <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a>message <span class="op">=</span> <span class="st">"Attempts: "</span> <span class="op">+</span> <span class="bu">str</span>(attempts)</span>
+<span id="cb21-3"><a href="#cb21-3"></a><span class="bu">print</span>(message)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For arithmetic, convert digit text to a number:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1"></a>attempts_text <span class="op">=</span> <span class="st">"3"</span></span>
+<span id="cb22-2"><a href="#cb22-2"></a>next_attempt <span class="op">=</span> <span class="bu">int</span>(attempts_text) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb22-3"><a href="#cb22-3"></a><span class="bu">print</span>(next_attempt)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="inspect-before-converting" class="level3">
+<h3 class="anchored" data-anchor-id="inspect-before-converting">Inspect before converting</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1"></a>value <span class="op">=</span> <span class="st">"3"</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a><span class="bu">print</span>(value)</span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="bu">print</span>(<span class="bu">type</span>(value))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>print(value)</code> shows content. <code>print(type(value))</code> shows the value’s type. Both clues matter: <code>"3"</code> and <code>"three"</code> are strings, but only one can be converted with <code>int(...)</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Try it">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Try it
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Fix <code>price_text = "5"</code> and <code>total = price_text + 2</code> in two different ways: first produce the number <code>7</code>, then produce the text <code>"52"</code>. Explain why the correct conversion depends on the intended result.</p>
+</div>
+</div>
+<details class="solution">
+<summary>
+Show two intentional solutions
+</summary>
+<p>For arithmetic:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1"></a>price_text <span class="op">=</span> <span class="st">"5"</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a>total <span class="op">=</span> <span class="bu">int</span>(price_text) <span class="op">+</span> <span class="dv">2</span></span>
+<span id="cb24-3"><a href="#cb24-3"></a><span class="bu">print</span>(total)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For text joining:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1"></a>price_text <span class="op">=</span> <span class="st">"5"</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a>combined_text <span class="op">=</span> price_text <span class="op">+</span> <span class="bu">str</span>(<span class="dv">2</span>)</span>
+<span id="cb25-3"><a href="#cb25-3"></a><span class="bu">print</span>(combined_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first output is the integer <code>7</code>. The second output is the string <code>"52"</code>.</p>
+</details>
+<p>For deeper instruction about these types, continue with <a href="../../lessons/core-python/values-variables-types.html">Values, Variables, and Types</a> and <a href="../../lessons/core-python/strings-input-output.html">Strings, Input, and Output</a>.</p>
+</section>
+</section>
+<section id="try-an-order-total-in-colab" class="level2">
+<h2 class="anchored" data-anchor-id="try-an-order-total-in-colab">Try an order total in Colab</h2>
+<p>Start with fixed text so the experiment can be repeated without typing:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1"></a>quantity_text <span class="op">=</span> <span class="st">"3"</span></span>
+<span id="cb26-2"><a href="#cb26-2"></a>price <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb26-3"><a href="#cb26-3"></a></span>
+<span id="cb26-4"><a href="#cb26-4"></a><span class="bu">print</span>(<span class="bu">type</span>(quantity_text))</span>
+<span id="cb26-5"><a href="#cb26-5"></a>quantity <span class="op">=</span> <span class="bu">int</span>(quantity_text)</span>
+<span id="cb26-6"><a href="#cb26-6"></a>total <span class="op">=</span> quantity <span class="op">*</span> price</span>
+<span id="cb26-7"><a href="#cb26-7"></a><span class="bu">print</span>(<span class="st">"Order total:"</span>, total)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Then complete these changes one at a time:</p>
+<ol type="1">
+<li>Predict the two visible output lines.</li>
+<li>Change <code>quantity_text</code> to <code>"5"</code> and predict the new total.</li>
+<li>Change it to <code>"five"</code>, run the code, and identify the error type and line.</li>
+<li>Restore a digit string before replacing the fixed value with <code>input(...)</code>.</li>
+</ol>
+<p>Keep the broken version long enough to record the symptom, clue, change, and result. A carefully explained error is useful practice.</p>
+</section>
+<section id="quick-check-types-and-conversions" class="level2">
+<h2 class="anchored" data-anchor-id="quick-check-types-and-conversions">Quick check: types and conversions</h2>
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-input-and-types",
+  "title": "Input and types checkpoint",
+  "instructions": "Choose the operation that matches the intended result.",
+  "questions": [
+    {
+      "id": "input-type",
+      "prompt": "A learner types 12 in response to input(...). What type is returned?",
+      "options": [
+        "str",
+        "int",
+        "float",
+        "bool"
+      ],
+      "answer_index": 0,
+      "explanation": "input returns the typed characters as a string; the program must choose any needed conversion."
+    },
+    {
+      "id": "numeric-intention",
+      "prompt": "The text value \"5\" should be added numerically to 2. Which expression produces 7?",
+      "options": [
+        "int(\"5\") + 2",
+        "\"5\" + str(2)",
+        "str(\"5\") + \"2\"",
+        "type(\"5\") + 2"
+      ],
+      "answer_index": 0,
+      "explanation": "int converts the digit string to a number before integer addition occurs."
+    },
+    {
+      "id": "inspect-type",
+      "prompt": "Why use type(value) while investigating a TypeError?",
+      "options": [
+        "It reveals the kind of value an operation actually received.",
+        "It converts every value to the correct type.",
+        "It automatically repairs the failing line.",
+        "It prints every name in the program."
+      ],
+      "answer_index": 0,
+      "explanation": "The actual type is evidence that helps you choose whether and how to convert."
+    }
+  ]
+}
+</script>
+<div class="cell" data-eval="true">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb27" data-startfrom="1" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript"><span id="cb27-1"><a href="#cb27-1"></a>{</span>
+<span id="cb27-2"><a href="#cb27-2"></a>  <span class="kw">const</span> scripts <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(</span>
+<span id="cb27-3"><a href="#cb27-3"></a>    <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"script.fcpython-ojs-quiz-config"</span>)</span>
+<span id="cb27-4"><a href="#cb27-4"></a>  )<span class="op">;</span></span>
+<span id="cb27-5"><a href="#cb27-5"></a>  <span class="kw">const</span> script <span class="op">=</span> scripts<span class="op">.</span><span class="fu">find</span>(</span>
+<span id="cb27-6"><a href="#cb27-6"></a>    (node) <span class="kw">=&gt;</span> node<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">fcpythonRendered</span> <span class="op">!==</span> <span class="st">"true"</span></span>
+<span id="cb27-7"><a href="#cb27-7"></a>  )<span class="op">;</span></span>
+<span id="cb27-8"><a href="#cb27-8"></a></span>
+<span id="cb27-9"><a href="#cb27-9"></a>  <span class="cf">if</span> (<span class="op">!</span>script) {</span>
+<span id="cb27-10"><a href="#cb27-10"></a>    <span class="cf">return</span> <span class="fu">html</span><span class="vs">`&lt;div class="fcpython-quiz fcpython-quiz-warning"&gt;</span></span>
+<span id="cb27-11"><a href="#cb27-11"></a><span class="vs">      Quiz configuration was not found.</span></span>
+<span id="cb27-12"><a href="#cb27-12"></a><span class="vs">    &lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb27-13"><a href="#cb27-13"></a>  }</span>
+<span id="cb27-14"><a href="#cb27-14"></a></span>
+<span id="cb27-15"><a href="#cb27-15"></a>  script<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">fcpythonRendered</span> <span class="op">=</span> <span class="st">"true"</span><span class="op">;</span></span>
+<span id="cb27-16"><a href="#cb27-16"></a>  <span class="kw">const</span> quiz <span class="op">=</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(script<span class="op">.</span><span class="at">textContent</span>)<span class="op">;</span></span>
+<span id="cb27-17"><a href="#cb27-17"></a>  <span class="kw">const</span> container <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div class="fcpython-quiz"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb27-18"><a href="#cb27-18"></a>  <span class="kw">const</span> title <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"h3"</span>)<span class="op">;</span></span>
+<span id="cb27-19"><a href="#cb27-19"></a>  title<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> quiz<span class="op">.</span><span class="at">title</span><span class="op">;</span></span>
+<span id="cb27-20"><a href="#cb27-20"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(title)<span class="op">;</span></span>
+<span id="cb27-21"><a href="#cb27-21"></a></span>
+<span id="cb27-22"><a href="#cb27-22"></a>  <span class="kw">const</span> instructions <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb27-23"><a href="#cb27-23"></a>  instructions<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> quiz<span class="op">.</span><span class="at">instructions</span><span class="op">;</span></span>
+<span id="cb27-24"><a href="#cb27-24"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(instructions)<span class="op">;</span></span>
+<span id="cb27-25"><a href="#cb27-25"></a></span>
+<span id="cb27-26"><a href="#cb27-26"></a>  <span class="kw">const</span> feedbackNodes <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb27-27"><a href="#cb27-27"></a></span>
+<span id="cb27-28"><a href="#cb27-28"></a>  quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="fu">forEach</span>((question<span class="op">,</span> questionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb27-29"><a href="#cb27-29"></a>    <span class="kw">const</span> fieldset <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"fieldset"</span>)<span class="op">;</span></span>
+<span id="cb27-30"><a href="#cb27-30"></a>    fieldset<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-question"</span><span class="op">;</span></span>
+<span id="cb27-31"><a href="#cb27-31"></a></span>
+<span id="cb27-32"><a href="#cb27-32"></a>    <span class="kw">const</span> legend <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"legend"</span>)<span class="op">;</span></span>
+<span id="cb27-33"><a href="#cb27-33"></a>    legend<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>questionIndex <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="vs">. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">prompt</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb27-34"><a href="#cb27-34"></a>    fieldset<span class="op">.</span><span class="fu">appendChild</span>(legend)<span class="op">;</span></span>
+<span id="cb27-35"><a href="#cb27-35"></a></span>
+<span id="cb27-36"><a href="#cb27-36"></a>    question<span class="op">.</span><span class="at">options</span><span class="op">.</span><span class="fu">forEach</span>((option<span class="op">,</span> optionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb27-37"><a href="#cb27-37"></a>      <span class="kw">const</span> label <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"label"</span>)<span class="op">;</span></span>
+<span id="cb27-38"><a href="#cb27-38"></a>      label<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-option"</span><span class="op">;</span></span>
+<span id="cb27-39"><a href="#cb27-39"></a></span>
+<span id="cb27-40"><a href="#cb27-40"></a>      <span class="kw">const</span> input <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"input"</span>)<span class="op">;</span></span>
+<span id="cb27-41"><a href="#cb27-41"></a>      input<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"radio"</span><span class="op">;</span></span>
+<span id="cb27-42"><a href="#cb27-42"></a>      input<span class="op">.</span><span class="at">name</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">-</span><span class="sc">${</span>question<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb27-43"><a href="#cb27-43"></a>      input<span class="op">.</span><span class="at">value</span> <span class="op">=</span> <span class="bu">String</span>(optionIndex)<span class="op">;</span></span>
+<span id="cb27-44"><a href="#cb27-44"></a></span>
+<span id="cb27-45"><a href="#cb27-45"></a>      <span class="kw">const</span> text <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"span"</span>)<span class="op">;</span></span>
+<span id="cb27-46"><a href="#cb27-46"></a>      text<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> option<span class="op">;</span></span>
+<span id="cb27-47"><a href="#cb27-47"></a></span>
+<span id="cb27-48"><a href="#cb27-48"></a>      label<span class="op">.</span><span class="fu">appendChild</span>(input)<span class="op">;</span></span>
+<span id="cb27-49"><a href="#cb27-49"></a>      label<span class="op">.</span><span class="fu">appendChild</span>(text)<span class="op">;</span></span>
+<span id="cb27-50"><a href="#cb27-50"></a>      fieldset<span class="op">.</span><span class="fu">appendChild</span>(label)<span class="op">;</span></span>
+<span id="cb27-51"><a href="#cb27-51"></a>    })<span class="op">;</span></span>
+<span id="cb27-52"><a href="#cb27-52"></a></span>
+<span id="cb27-53"><a href="#cb27-53"></a>    <span class="kw">const</span> feedback <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb27-54"><a href="#cb27-54"></a>    feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb27-55"><a href="#cb27-55"></a>    feedback<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"aria-live"</span><span class="op">,</span> <span class="st">"polite"</span>)<span class="op">;</span></span>
+<span id="cb27-56"><a href="#cb27-56"></a>    feedbackNodes<span class="op">.</span><span class="fu">push</span>(feedback)<span class="op">;</span></span>
+<span id="cb27-57"><a href="#cb27-57"></a>    fieldset<span class="op">.</span><span class="fu">appendChild</span>(feedback)<span class="op">;</span></span>
+<span id="cb27-58"><a href="#cb27-58"></a>    container<span class="op">.</span><span class="fu">appendChild</span>(fieldset)<span class="op">;</span></span>
+<span id="cb27-59"><a href="#cb27-59"></a>  })<span class="op">;</span></span>
+<span id="cb27-60"><a href="#cb27-60"></a></span>
+<span id="cb27-61"><a href="#cb27-61"></a>  <span class="kw">const</span> actions <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb27-62"><a href="#cb27-62"></a>  actions<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-actions"</span><span class="op">;</span></span>
+<span id="cb27-63"><a href="#cb27-63"></a></span>
+<span id="cb27-64"><a href="#cb27-64"></a>  <span class="kw">const</span> check <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"button"</span>)<span class="op">;</span></span>
+<span id="cb27-65"><a href="#cb27-65"></a>  check<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"button"</span><span class="op">;</span></span>
+<span id="cb27-66"><a href="#cb27-66"></a>  check<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Check answers"</span><span class="op">;</span></span>
+<span id="cb27-67"><a href="#cb27-67"></a></span>
+<span id="cb27-68"><a href="#cb27-68"></a>  <span class="kw">const</span> reset <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"button"</span>)<span class="op">;</span></span>
+<span id="cb27-69"><a href="#cb27-69"></a>  reset<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"button"</span><span class="op">;</span></span>
+<span id="cb27-70"><a href="#cb27-70"></a>  reset<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Reset"</span><span class="op">;</span></span>
+<span id="cb27-71"><a href="#cb27-71"></a></span>
+<span id="cb27-72"><a href="#cb27-72"></a>  <span class="kw">const</span> score <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb27-73"><a href="#cb27-73"></a>  score<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-score"</span><span class="op">;</span></span>
+<span id="cb27-74"><a href="#cb27-74"></a>  score<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"aria-live"</span><span class="op">,</span> <span class="st">"polite"</span>)<span class="op">;</span></span>
+<span id="cb27-75"><a href="#cb27-75"></a></span>
+<span id="cb27-76"><a href="#cb27-76"></a>  check<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb27-77"><a href="#cb27-77"></a>    <span class="kw">let</span> correctCount <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb27-78"><a href="#cb27-78"></a></span>
+<span id="cb27-79"><a href="#cb27-79"></a>    quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="fu">forEach</span>((question<span class="op">,</span> questionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb27-80"><a href="#cb27-80"></a>      <span class="kw">const</span> selected <span class="op">=</span> container<span class="op">.</span><span class="fu">querySelector</span>(</span>
+<span id="cb27-81"><a href="#cb27-81"></a>        <span class="vs">`input[name="</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">-</span><span class="sc">${</span>question<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">"]:checked`</span></span>
+<span id="cb27-82"><a href="#cb27-82"></a>      )<span class="op">;</span></span>
+<span id="cb27-83"><a href="#cb27-83"></a>      <span class="kw">const</span> feedback <span class="op">=</span> feedbackNodes[questionIndex]<span class="op">;</span></span>
+<span id="cb27-84"><a href="#cb27-84"></a></span>
+<span id="cb27-85"><a href="#cb27-85"></a>      <span class="cf">if</span> (<span class="op">!</span>selected) {</span>
+<span id="cb27-86"><a href="#cb27-86"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Choose an answer before checking."</span><span class="op">;</span></span>
+<span id="cb27-87"><a href="#cb27-87"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb27-88"><a href="#cb27-88"></a>        <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb27-89"><a href="#cb27-89"></a>      }</span>
+<span id="cb27-90"><a href="#cb27-90"></a></span>
+<span id="cb27-91"><a href="#cb27-91"></a>      <span class="kw">const</span> selectedIndex <span class="op">=</span> <span class="bu">Number</span>(selected<span class="op">.</span><span class="at">value</span>)<span class="op">;</span></span>
+<span id="cb27-92"><a href="#cb27-92"></a>      <span class="cf">if</span> (selectedIndex <span class="op">===</span> question<span class="op">.</span><span class="at">answer_index</span>) {</span>
+<span id="cb27-93"><a href="#cb27-93"></a>        correctCount <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb27-94"><a href="#cb27-94"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`✅ Correct. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">explanation</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb27-95"><a href="#cb27-95"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback is-correct"</span><span class="op">;</span></span>
+<span id="cb27-96"><a href="#cb27-96"></a>      } <span class="cf">else</span> {</span>
+<span id="cb27-97"><a href="#cb27-97"></a>        <span class="kw">const</span> answer <span class="op">=</span> question<span class="op">.</span><span class="at">options</span>[question<span class="op">.</span><span class="at">answer_index</span>]<span class="op">;</span></span>
+<span id="cb27-98"><a href="#cb27-98"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`❌ Not yet. Correct answer: </span><span class="sc">${</span>answer<span class="sc">}</span><span class="vs">. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">explanation</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb27-99"><a href="#cb27-99"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback is-incorrect"</span><span class="op">;</span></span>
+<span id="cb27-100"><a href="#cb27-100"></a>      }</span>
+<span id="cb27-101"><a href="#cb27-101"></a>    })<span class="op">;</span></span>
+<span id="cb27-102"><a href="#cb27-102"></a></span>
+<span id="cb27-103"><a href="#cb27-103"></a>    score<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`Score: </span><span class="sc">${</span>correctCount<span class="sc">}</span><span class="vs">/</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="at">length</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb27-104"><a href="#cb27-104"></a>  })<span class="op">;</span></span>
+<span id="cb27-105"><a href="#cb27-105"></a></span>
+<span id="cb27-106"><a href="#cb27-106"></a>  reset<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb27-107"><a href="#cb27-107"></a>    container<span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"input[type='radio']"</span>)<span class="op">.</span><span class="fu">forEach</span>((input) <span class="kw">=&gt;</span> {</span>
+<span id="cb27-108"><a href="#cb27-108"></a>      input<span class="op">.</span><span class="at">checked</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb27-109"><a href="#cb27-109"></a>    })<span class="op">;</span></span>
+<span id="cb27-110"><a href="#cb27-110"></a>    feedbackNodes<span class="op">.</span><span class="fu">forEach</span>((feedback) <span class="kw">=&gt;</span> {</span>
+<span id="cb27-111"><a href="#cb27-111"></a>      feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb27-112"><a href="#cb27-112"></a>      feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb27-113"><a href="#cb27-113"></a>    })<span class="op">;</span></span>
+<span id="cb27-114"><a href="#cb27-114"></a>    score<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb27-115"><a href="#cb27-115"></a>  })<span class="op">;</span></span>
+<span id="cb27-116"><a href="#cb27-116"></a></span>
+<span id="cb27-117"><a href="#cb27-117"></a>  actions<span class="op">.</span><span class="fu">appendChild</span>(check)<span class="op">;</span></span>
+<span id="cb27-118"><a href="#cb27-118"></a>  actions<span class="op">.</span><span class="fu">appendChild</span>(reset)<span class="op">;</span></span>
+<span id="cb27-119"><a href="#cb27-119"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(actions)<span class="op">;</span></span>
+<span id="cb27-120"><a href="#cb27-120"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(score)<span class="op">;</span></span>
+<span id="cb27-121"><a href="#cb27-121"></a>  <span class="cf">return</span> container<span class="op">;</span></span>
+<span id="cb27-122"><a href="#cb27-122"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-2" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</section>
+<section id="a-compact-checklist" class="level2">
+<h2 class="anchored" data-anchor-id="a-compact-checklist">A compact checklist</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key points">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Key points
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Read the exact missing name in a <code>NameError</code>, then check spelling, order, and scope.</li>
+<li>Assignment records a value at the moment the line runs; it is not a live formula.</li>
+<li>A plain assignment can give a mutable list a second name rather than copying it.</li>
+<li><code>input()</code> returns text because Python cannot infer what typed characters mean.</li>
+<li>Inspect the value and its type, decide the intended operation, and only then choose a conversion.</li>
+</ul>
+</div>
+</div>
+<!-- fcpython-faq-post: end -->
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6IntcbiAgY29uc3Qgc2NyaXB0cyA9IEFycmF5LmZyb20oXG4gICAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbChcInNjcmlwdC5mY3B5dGhvbi1vanMtcXVpei1jb25maWdcIilcbiAgKTtcbiAgY29uc3Qgc2NyaXB0ID0gc2NyaXB0cy5maW5kKFxuICAgIChub2RlKSA9PiBub2RlLmRhdGFzZXQuZmNweXRob25SZW5kZXJlZCAhPT0gXCJ0cnVlXCJcbiAgKTtcblxuICBpZiAoIXNjcmlwdCkge1xuICAgIHJldHVybiBodG1sYDxkaXYgY2xhc3M9XCJmY3B5dGhvbi1xdWl6IGZjcHl0aG9uLXF1aXotd2FybmluZ1wiPlxuICAgICAgUXVpeiBjb25maWd1cmF0aW9uIHdhcyBub3QgZm91bmQuXG4gICAgPC9kaXY+YDtcbiAgfVxuXG4gIHNjcmlwdC5kYXRhc2V0LmZjcHl0aG9uUmVuZGVyZWQgPSBcInRydWVcIjtcbiAgY29uc3QgcXVpeiA9IEpTT04ucGFyc2Uoc2NyaXB0LnRleHRDb250ZW50KTtcbiAgY29uc3QgY29udGFpbmVyID0gaHRtbGA8ZGl2IGNsYXNzPVwiZmNweXRob24tcXVpelwiPjwvZGl2PmA7XG4gIGNvbnN0IHRpdGxlID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImgzXCIpO1xuICB0aXRsZS50ZXh0Q29udGVudCA9IHF1aXoudGl0bGU7XG4gIGNvbnRhaW5lci5hcHBlbmRDaGlsZCh0aXRsZSk7XG5cbiAgY29uc3QgaW5zdHJ1Y3Rpb25zID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInBcIik7XG4gIGluc3RydWN0aW9ucy50ZXh0Q29udGVudCA9IHF1aXouaW5zdHJ1Y3Rpb25zO1xuICBjb250YWluZXIuYXBwZW5kQ2hpbGQoaW5zdHJ1Y3Rpb25zKTtcblxuICBjb25zdCBmZWVkYmFja05vZGVzID0gW107XG5cbiAgcXVpei5xdWVzdGlvbnMuZm9yRWFjaCgocXVlc3Rpb24sIHF1ZXN0aW9uSW5kZXgpID0+IHtcbiAgICBjb25zdCBmaWVsZHNldCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJmaWVsZHNldFwiKTtcbiAgICBmaWVsZHNldC5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotcXVlc3Rpb25cIjtcblxuICAgIGNvbnN0IGxlZ2VuZCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJsZWdlbmRcIik7XG4gICAgbGVnZW5kLnRleHRDb250ZW50ID0gYCR7cXVlc3Rpb25JbmRleCArIDF9LiAke3F1ZXN0aW9uLnByb21wdH1gO1xuICAgIGZpZWxkc2V0LmFwcGVuZENoaWxkKGxlZ2VuZCk7XG5cbiAgICBxdWVzdGlvbi5vcHRpb25zLmZvckVhY2goKG9wdGlvbiwgb3B0aW9uSW5kZXgpID0+IHtcbiAgICAgIGNvbnN0IGxhYmVsID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImxhYmVsXCIpO1xuICAgICAgbGFiZWwuY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LW9wdGlvblwiO1xuXG4gICAgICBjb25zdCBpbnB1dCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJpbnB1dFwiKTtcbiAgICAgIGlucHV0LnR5cGUgPSBcInJhZGlvXCI7XG4gICAgICBpbnB1dC5uYW1lID0gYCR7cXVpei5pZH0tJHtxdWVzdGlvbi5pZH1gO1xuICAgICAgaW5wdXQudmFsdWUgPSBTdHJpbmcob3B0aW9uSW5kZXgpO1xuXG4gICAgICBjb25zdCB0ZXh0ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInNwYW5cIik7XG4gICAgICB0ZXh0LnRleHRDb250ZW50ID0gb3B0aW9uO1xuXG4gICAgICBsYWJlbC5hcHBlbmRDaGlsZChpbnB1dCk7XG4gICAgICBsYWJlbC5hcHBlbmRDaGlsZCh0ZXh0KTtcbiAgICAgIGZpZWxkc2V0LmFwcGVuZENoaWxkKGxhYmVsKTtcbiAgICB9KTtcblxuICAgIGNvbnN0IGZlZWRiYWNrID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInBcIik7XG4gICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgZmVlZGJhY2suc2V0QXR0cmlidXRlKFwiYXJpYS1saXZlXCIsIFwicG9saXRlXCIpO1xuICAgIGZlZWRiYWNrTm9kZXMucHVzaChmZWVkYmFjayk7XG4gICAgZmllbGRzZXQuYXBwZW5kQ2hpbGQoZmVlZGJhY2spO1xuICAgIGNvbnRhaW5lci5hcHBlbmRDaGlsZChmaWVsZHNldCk7XG4gIH0pO1xuXG4gIGNvbnN0IGFjdGlvbnMgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiZGl2XCIpO1xuICBhY3Rpb25zLmNsYXNzTmFtZSA9IFwiZmNweXRob24tcXVpei1hY3Rpb25zXCI7XG5cbiAgY29uc3QgY2hlY2sgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiYnV0dG9uXCIpO1xuICBjaGVjay50eXBlID0gXCJidXR0b25cIjtcbiAgY2hlY2sudGV4dENvbnRlbnQgPSBcIkNoZWNrIGFuc3dlcnNcIjtcblxuICBjb25zdCByZXNldCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJidXR0b25cIik7XG4gIHJlc2V0LnR5cGUgPSBcImJ1dHRvblwiO1xuICByZXNldC50ZXh0Q29udGVudCA9IFwiUmVzZXRcIjtcblxuICBjb25zdCBzY29yZSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJwXCIpO1xuICBzY29yZS5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotc2NvcmVcIjtcbiAgc2NvcmUuc2V0QXR0cmlidXRlKFwiYXJpYS1saXZlXCIsIFwicG9saXRlXCIpO1xuXG4gIGNoZWNrLmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7XG4gICAgbGV0IGNvcnJlY3RDb3VudCA9IDA7XG5cbiAgICBxdWl6LnF1ZXN0aW9ucy5mb3JFYWNoKChxdWVzdGlvbiwgcXVlc3Rpb25JbmRleCkgPT4ge1xuICAgICAgY29uc3Qgc2VsZWN0ZWQgPSBjb250YWluZXIucXVlcnlTZWxlY3RvcihcbiAgICAgICAgYGlucHV0W25hbWU9XCIke3F1aXouaWR9LSR7cXVlc3Rpb24uaWR9XCJdOmNoZWNrZWRgXG4gICAgICApO1xuICAgICAgY29uc3QgZmVlZGJhY2sgPSBmZWVkYmFja05vZGVzW3F1ZXN0aW9uSW5kZXhdO1xuXG4gICAgICBpZiAoIXNlbGVjdGVkKSB7XG4gICAgICAgIGZlZWRiYWNrLnRleHRDb250ZW50ID0gXCJDaG9vc2UgYW4gYW5zd2VyIGJlZm9yZSBjaGVja2luZy5cIjtcbiAgICAgICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgICAgIHJldHVybjtcbiAgICAgIH1cblxuICAgICAgY29uc3Qgc2VsZWN0ZWRJbmRleCA9IE51bWJlcihzZWxlY3RlZC52YWx1ZSk7XG4gICAgICBpZiAoc2VsZWN0ZWRJbmRleCA9PT0gcXVlc3Rpb24uYW5zd2VyX2luZGV4KSB7XG4gICAgICAgIGNvcnJlY3RDb3VudCArPSAxO1xuICAgICAgICBmZWVkYmFjay50ZXh0Q29udGVudCA9IGDinIUgQ29ycmVjdC4gJHtxdWVzdGlvbi5leHBsYW5hdGlvbn1gO1xuICAgICAgICBmZWVkYmFjay5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotZmVlZGJhY2sgaXMtY29ycmVjdFwiO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgY29uc3QgYW5zd2VyID0gcXVlc3Rpb24ub3B0aW9uc1txdWVzdGlvbi5hbnN3ZXJfaW5kZXhdO1xuICAgICAgICBmZWVkYmFjay50ZXh0Q29udGVudCA9IGDinYwgTm90IHlldC4gQ29ycmVjdCBhbnN3ZXI6ICR7YW5zd2VyfS4gJHtxdWVzdGlvbi5leHBsYW5hdGlvbn1gO1xuICAgICAgICBmZWVkYmFjay5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotZmVlZGJhY2sgaXMtaW5jb3JyZWN0XCI7XG4gICAgICB9XG4gICAgfSk7XG5cbiAgICBzY29yZS50ZXh0Q29udGVudCA9IGBTY29yZTogJHtjb3JyZWN0Q291bnR9LyR7cXVpei5xdWVzdGlvbnMubGVuZ3RofWA7XG4gIH0pO1xuXG4gIHJlc2V0LmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7XG4gICAgY29udGFpbmVyLnF1ZXJ5U2VsZWN0b3JBbGwoXCJpbnB1dFt0eXBlPSdyYWRpbyddXCIpLmZvckVhY2goKGlucHV0KSA9PiB7XG4gICAgICBpbnB1dC5jaGVja2VkID0gZmFsc2U7XG4gICAgfSk7XG4gICAgZmVlZGJhY2tOb2Rlcy5mb3JFYWNoKChmZWVkYmFjaykgPT4ge1xuICAgICAgZmVlZGJhY2sudGV4dENvbnRlbnQgPSBcIlwiO1xuICAgICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgfSk7XG4gICAgc2NvcmUudGV4dENvbnRlbnQgPSBcIlwiO1xuICB9KTtcblxuICBhY3Rpb25zLmFwcGVuZENoaWxkKGNoZWNrKTtcbiAgYWN0aW9ucy5hcHBlbmRDaGlsZChyZXNldCk7XG4gIGNvbnRhaW5lci5hcHBlbmRDaGlsZChhY3Rpb25zKTtcbiAgY29udGFpbmVyLmFwcGVuZENoaWxkKHNjb3JlKTtcbiAgcmV0dXJuIGNvbnRhaW5lcjtcbn1cbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMiIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6IntcbiAgY29uc3Qgc2NyaXB0cyA9IEFycmF5LmZyb20oXG4gICAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbChcInNjcmlwdC5mY3B5dGhvbi1vanMtcXVpei1jb25maWdcIilcbiAgKTtcbiAgY29uc3Qgc2NyaXB0ID0gc2NyaXB0cy5maW5kKFxuICAgIChub2RlKSA9PiBub2RlLmRhdGFzZXQuZmNweXRob25SZW5kZXJlZCAhPT0gXCJ0cnVlXCJcbiAgKTtcblxuICBpZiAoIXNjcmlwdCkge1xuICAgIHJldHVybiBodG1sYDxkaXYgY2xhc3M9XCJmY3B5dGhvbi1xdWl6IGZjcHl0aG9uLXF1aXotd2FybmluZ1wiPlxuICAgICAgUXVpeiBjb25maWd1cmF0aW9uIHdhcyBub3QgZm91bmQuXG4gICAgPC9kaXY+YDtcbiAgfVxuXG4gIHNjcmlwdC5kYXRhc2V0LmZjcHl0aG9uUmVuZGVyZWQgPSBcInRydWVcIjtcbiAgY29uc3QgcXVpeiA9IEpTT04ucGFyc2Uoc2NyaXB0LnRleHRDb250ZW50KTtcbiAgY29uc3QgY29udGFpbmVyID0gaHRtbGA8ZGl2IGNsYXNzPVwiZmNweXRob24tcXVpelwiPjwvZGl2PmA7XG4gIGNvbnN0IHRpdGxlID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImgzXCIpO1xuICB0aXRsZS50ZXh0Q29udGVudCA9IHF1aXoudGl0bGU7XG4gIGNvbnRhaW5lci5hcHBlbmRDaGlsZCh0aXRsZSk7XG5cbiAgY29uc3QgaW5zdHJ1Y3Rpb25zID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInBcIik7XG4gIGluc3RydWN0aW9ucy50ZXh0Q29udGVudCA9IHF1aXouaW5zdHJ1Y3Rpb25zO1xuICBjb250YWluZXIuYXBwZW5kQ2hpbGQoaW5zdHJ1Y3Rpb25zKTtcblxuICBjb25zdCBmZWVkYmFja05vZGVzID0gW107XG5cbiAgcXVpei5xdWVzdGlvbnMuZm9yRWFjaCgocXVlc3Rpb24sIHF1ZXN0aW9uSW5kZXgpID0+IHtcbiAgICBjb25zdCBmaWVsZHNldCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJmaWVsZHNldFwiKTtcbiAgICBmaWVsZHNldC5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotcXVlc3Rpb25cIjtcblxuICAgIGNvbnN0IGxlZ2VuZCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJsZWdlbmRcIik7XG4gICAgbGVnZW5kLnRleHRDb250ZW50ID0gYCR7cXVlc3Rpb25JbmRleCArIDF9LiAke3F1ZXN0aW9uLnByb21wdH1gO1xuICAgIGZpZWxkc2V0LmFwcGVuZENoaWxkKGxlZ2VuZCk7XG5cbiAgICBxdWVzdGlvbi5vcHRpb25zLmZvckVhY2goKG9wdGlvbiwgb3B0aW9uSW5kZXgpID0+IHtcbiAgICAgIGNvbnN0IGxhYmVsID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImxhYmVsXCIpO1xuICAgICAgbGFiZWwuY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LW9wdGlvblwiO1xuXG4gICAgICBjb25zdCBpbnB1dCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJpbnB1dFwiKTtcbiAgICAgIGlucHV0LnR5cGUgPSBcInJhZGlvXCI7XG4gICAgICBpbnB1dC5uYW1lID0gYCR7cXVpei5pZH0tJHtxdWVzdGlvbi5pZH1gO1xuICAgICAgaW5wdXQudmFsdWUgPSBTdHJpbmcob3B0aW9uSW5kZXgpO1xuXG4gICAgICBjb25zdCB0ZXh0ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInNwYW5cIik7XG4gICAgICB0ZXh0LnRleHRDb250ZW50ID0gb3B0aW9uO1xuXG4gICAgICBsYWJlbC5hcHBlbmRDaGlsZChpbnB1dCk7XG4gICAgICBsYWJlbC5hcHBlbmRDaGlsZCh0ZXh0KTtcbiAgICAgIGZpZWxkc2V0LmFwcGVuZENoaWxkKGxhYmVsKTtcbiAgICB9KTtcblxuICAgIGNvbnN0IGZlZWRiYWNrID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInBcIik7XG4gICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgZmVlZGJhY2suc2V0QXR0cmlidXRlKFwiYXJpYS1saXZlXCIsIFwicG9saXRlXCIpO1xuICAgIGZlZWRiYWNrTm9kZXMucHVzaChmZWVkYmFjayk7XG4gICAgZmllbGRzZXQuYXBwZW5kQ2hpbGQoZmVlZGJhY2spO1xuICAgIGNvbnRhaW5lci5hcHBlbmRDaGlsZChmaWVsZHNldCk7XG4gIH0pO1xuXG4gIGNvbnN0IGFjdGlvbnMgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiZGl2XCIpO1xuICBhY3Rpb25zLmNsYXNzTmFtZSA9IFwiZmNweXRob24tcXVpei1hY3Rpb25zXCI7XG5cbiAgY29uc3QgY2hlY2sgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiYnV0dG9uXCIpO1xuICBjaGVjay50eXBlID0gXCJidXR0b25cIjtcbiAgY2hlY2sudGV4dENvbnRlbnQgPSBcIkNoZWNrIGFuc3dlcnNcIjtcblxuICBjb25zdCByZXNldCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJidXR0b25cIik7XG4gIHJlc2V0LnR5cGUgPSBcImJ1dHRvblwiO1xuICByZXNldC50ZXh0Q29udGVudCA9IFwiUmVzZXRcIjtcblxuICBjb25zdCBzY29yZSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJwXCIpO1xuICBzY29yZS5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotc2NvcmVcIjtcbiAgc2NvcmUuc2V0QXR0cmlidXRlKFwiYXJpYS1saXZlXCIsIFwicG9saXRlXCIpO1xuXG4gIGNoZWNrLmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7XG4gICAgbGV0IGNvcnJlY3RDb3VudCA9IDA7XG5cbiAgICBxdWl6LnF1ZXN0aW9ucy5mb3JFYWNoKChxdWVzdGlvbiwgcXVlc3Rpb25JbmRleCkgPT4ge1xuICAgICAgY29uc3Qgc2VsZWN0ZWQgPSBjb250YWluZXIucXVlcnlTZWxlY3RvcihcbiAgICAgICAgYGlucHV0W25hbWU9XCIke3F1aXouaWR9LSR7cXVlc3Rpb24uaWR9XCJdOmNoZWNrZWRgXG4gICAgICApO1xuICAgICAgY29uc3QgZmVlZGJhY2sgPSBmZWVkYmFja05vZGVzW3F1ZXN0aW9uSW5kZXhdO1xuXG4gICAgICBpZiAoIXNlbGVjdGVkKSB7XG4gICAgICAgIGZlZWRiYWNrLnRleHRDb250ZW50ID0gXCJDaG9vc2UgYW4gYW5zd2VyIGJlZm9yZSBjaGVja2luZy5cIjtcbiAgICAgICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgICAgIHJldHVybjtcbiAgICAgIH1cblxuICAgICAgY29uc3Qgc2VsZWN0ZWRJbmRleCA9IE51bWJlcihzZWxlY3RlZC52YWx1ZSk7XG4gICAgICBpZiAoc2VsZWN0ZWRJbmRleCA9PT0gcXVlc3Rpb24uYW5zd2VyX2luZGV4KSB7XG4gICAgICAgIGNvcnJlY3RDb3VudCArPSAxO1xuICAgICAgICBmZWVkYmFjay50ZXh0Q29udGVudCA9IGDinIUgQ29ycmVjdC4gJHtxdWVzdGlvbi5leHBsYW5hdGlvbn1gO1xuICAgICAgICBmZWVkYmFjay5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotZmVlZGJhY2sgaXMtY29ycmVjdFwiO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgY29uc3QgYW5zd2VyID0gcXVlc3Rpb24ub3B0aW9uc1txdWVzdGlvbi5hbnN3ZXJfaW5kZXhdO1xuICAgICAgICBmZWVkYmFjay50ZXh0Q29udGVudCA9IGDinYwgTm90IHlldC4gQ29ycmVjdCBhbnN3ZXI6ICR7YW5zd2VyfS4gJHtxdWVzdGlvbi5leHBsYW5hdGlvbn1gO1xuICAgICAgICBmZWVkYmFjay5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotZmVlZGJhY2sgaXMtaW5jb3JyZWN0XCI7XG4gICAgICB9XG4gICAgfSk7XG5cbiAgICBzY29yZS50ZXh0Q29udGVudCA9IGBTY29yZTogJHtjb3JyZWN0Q291bnR9LyR7cXVpei5xdWVzdGlvbnMubGVuZ3RofWA7XG4gIH0pO1xuXG4gIHJlc2V0LmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7XG4gICAgY29udGFpbmVyLnF1ZXJ5U2VsZWN0b3JBbGwoXCJpbnB1dFt0eXBlPSdyYWRpbyddXCIpLmZvckVhY2goKGlucHV0KSA9PiB7XG4gICAgICBpbnB1dC5jaGVja2VkID0gZmFsc2U7XG4gICAgfSk7XG4gICAgZmVlZGJhY2tOb2Rlcy5mb3JFYWNoKChmZWVkYmFjaykgPT4ge1xuICAgICAgZmVlZGJhY2sudGV4dENvbnRlbnQgPSBcIlwiO1xuICAgICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgfSk7XG4gICAgc2NvcmUudGV4dENvbnRlbnQgPSBcIlwiO1xuICB9KTtcblxuICBhY3Rpb25zLmFwcGVuZENoaWxkKGNoZWNrKTtcbiAgYWN0aW9ucy5hcHBlbmRDaGlsZChyZXNldCk7XG4gIGNvbnRhaW5lci5hcHBlbmRDaGlsZChhY3Rpb25zKTtcbiAgY29udGFpbmVyLmFwcGVuZENoaWxkKHNjb3JlKTtcbiAgcmV0dXJuIGNvbnRhaW5lcjtcbn1cbiJ9XX0=
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../../lessons/faq";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "../..";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/freecampus\.github\.io\/python\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../lessons/faq/running-code-and-output.html" class="pagination-link" aria-label="Running Code and Understanding Output">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Running Code and Understanding Output</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>FreeCampus Python — learn by building, explaining, and debugging.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/freecampus/python/edit/main/lessons/faq/names-values-and-types.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/freecampus/python/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://github.com/freecampus/python">
+<p>GitHub</p>
+</a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

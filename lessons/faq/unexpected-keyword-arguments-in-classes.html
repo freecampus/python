@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Understand class constructors, methods, self, and argument binding to fix unexpected keyword errors.">
+
+<title>Unexpected Keyword Arguments in Classes – FreeCampus Python</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../lessons/faq/running-code-and-output.html" rel="next">
+<link href="../../lessons/faq/index.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-4a0610749eeff5ab924a4729b5181608.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-de927ec96a2411cf822331f71755f83e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-4a0610749eeff5ab924a4729b5181608.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-864d789aa8754b185bda5a5be2e662a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-313e1438bcee39275a33491792d8ca95.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-864d789aa8754b185bda5a5be2e662a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script type="module" src="../../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="../../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">FreeCampus Python</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../lessons/index.html"> 
+<span class="menu-text">Learn</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../lessons/faq/index.html" aria-current="page"> 
+<span class="menu-text">FAQ</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../lessons/capstone/index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../lessons/debugging/error-messages.html"> 
+<span class="menu-text">Debugging</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/freecampus/python"> <i class="bi bi-github" role="img" aria-label="GitHub repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">Unexpected Keyword Arguments in Classes</h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../lessons/faq/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FAQ and Common Issues</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../lessons/faq/unexpected-keyword-arguments-in-classes.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Unexpected Keyword Arguments in Classes</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../lessons/faq/running-code-and-output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Running Code and Understanding Output</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../lessons/faq/names-values-and-types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Names, Values, and Types</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#short-answer" id="toc-short-answer" class="nav-link active" data-scroll-target="#short-answer">Short answer</a></li>
+  <li><a href="#what-does-the-error-actually-mean" id="toc-what-does-the-error-actually-mean" class="nav-link" data-scroll-target="#what-does-the-error-actually-mean">What does the error actually mean?</a>
+  <ul class="collapse">
+  <li><a href="#start-with-the-named-callable" id="toc-start-with-the-named-callable" class="nav-link" data-scroll-target="#start-with-the-named-callable">Start with the named callable</a></li>
+  </ul></li>
+  <li><a href="#how-do-classes-and-instances-reach-__init__" id="toc-how-do-classes-and-instances-reach-__init__" class="nav-link" data-scroll-target="#how-do-classes-and-instances-reach-__init__">How do classes and instances reach <code>__init__</code>?</a>
+  <ul class="collapse">
+  <li><a href="#attributes-belong-to-an-instance" id="toc-attributes-belong-to-an-instance" class="nav-link" data-scroll-target="#attributes-belong-to-an-instance">Attributes belong to an instance</a></li>
+  </ul></li>
+  <li><a href="#how-are-functions-and-methods-related" id="toc-how-are-functions-and-methods-related" class="nav-link" data-scroll-target="#how-are-functions-and-methods-related">How are functions and methods related?</a>
+  <ul class="collapse">
+  <li><a href="#a-bound-method-receives-the-instance-automatically" id="toc-a-bound-method-receives-the-instance-automatically" class="nav-link" data-scroll-target="#a-bound-method-receives-the-instance-automatically">A bound method receives the instance automatically</a></li>
+  </ul></li>
+  <li><a href="#what-is-self-and-why-must-it-come-first" id="toc-what-is-self-and-why-must-it-come-first" class="nav-link" data-scroll-target="#what-is-self-and-why-must-it-come-first">What is <code>self</code>, and why must it come first?</a>
+  <ul class="collapse">
+  <li><a href="#do-all-functions-inside-a-class-receive-self" id="toc-do-all-functions-inside-a-class-receive-self" class="nav-link" data-scroll-target="#do-all-functions-inside-a-class-receive-self">Do all functions inside a class receive <code>self</code>?</a></li>
+  <li><a href="#what-happens-when-self-is-missing" id="toc-what-happens-when-self-is-missing" class="nav-link" data-scroll-target="#what-happens-when-self-is-missing">What happens when <code>self</code> is missing?</a></li>
+  <li><a href="#quick-check-self-and-method-binding" id="toc-quick-check-self-and-method-binding" class="nav-link" data-scroll-target="#quick-check-self-and-method-binding">Quick check: <code>self</code> and method binding</a></li>
+  </ul></li>
+  <li><a href="#how-do-positional-and-keyword-arguments-match-parameters" id="toc-how-do-positional-and-keyword-arguments-match-parameters" class="nav-link" data-scroll-target="#how-do-positional-and-keyword-arguments-match-parameters">How do positional and keyword arguments match parameters?</a>
+  <ul class="collapse">
+  <li><a href="#positional-arguments-use-order" id="toc-positional-arguments-use-order" class="nav-link" data-scroll-target="#positional-arguments-use-order">Positional arguments use order</a></li>
+  <li><a href="#keyword-arguments-use-names" id="toc-keyword-arguments-use-names" class="nav-link" data-scroll-target="#keyword-arguments-use-names">Keyword arguments use names</a></li>
+  <li><a href="#positional-and-keyword-arguments-can-be-mixed-carefully" id="toc-positional-and-keyword-arguments-can-be-mixed-carefully" class="nav-link" data-scroll-target="#positional-and-keyword-arguments-can-be-mixed-carefully">Positional and keyword arguments can be mixed carefully</a></li>
+  <li><a href="#compare-the-common-messages" id="toc-compare-the-common-messages" class="nav-link" data-scroll-target="#compare-the-common-messages">Compare the common messages</a></li>
+  </ul></li>
+  <li><a href="#which-fix-matches-the-program" id="toc-which-fix-matches-the-program" class="nav-link" data-scroll-target="#which-fix-matches-the-program">Which fix matches the program?</a>
+  <ul class="collapse">
+  <li><a href="#fix-a-correct-a-misspelled-keyword" id="toc-fix-a-correct-a-misspelled-keyword" class="nav-link" data-scroll-target="#fix-a-correct-a-misspelled-keyword">Fix A: Correct a misspelled keyword</a></li>
+  <li><a href="#fix-b-remove-an-argument-that-does-not-belong" id="toc-fix-b-remove-an-argument-that-does-not-belong" class="nav-link" data-scroll-target="#fix-b-remove-an-argument-that-does-not-belong">Fix B: Remove an argument that does not belong</a></li>
+  <li><a href="#fix-c-declare-and-store-required-data" id="toc-fix-c-declare-and-store-required-data" class="nav-link" data-scroll-target="#fix-c-declare-and-store-required-data">Fix C: Declare and store required data</a></li>
+  <li><a href="#fix-d-provide-a-sensible-default-for-optional-data" id="toc-fix-d-provide-a-sensible-default-for-optional-data" class="nav-link" data-scroll-target="#fix-d-provide-a-sensible-default-for-optional-data">Fix D: Provide a sensible default for optional data</a></li>
+  <li><a href="#fix-e-add-self-to-an-instance-method" id="toc-fix-e-add-self-to-an-instance-method" class="nav-link" data-scroll-target="#fix-e-add-self-to-an-instance-method">Fix E: Add <code>self</code> to an instance method</a></li>
+  <li><a href="#do-not-use-kwargs-as-a-universal-patch" id="toc-do-not-use-kwargs-as-a-universal-patch" class="nav-link" data-scroll-target="#do-not-use-kwargs-as-a-universal-patch">Do not use <code>**kwargs</code> as a universal patch</a></li>
+  </ul></li>
+  <li><a href="#how-can-i-inspect-what-a-class-accepts" id="toc-how-can-i-inspect-what-a-class-accepts" class="nav-link" data-scroll-target="#how-can-i-inspect-what-a-class-accepts">How can I inspect what a class accepts?</a>
+  <ul class="collapse">
+  <li><a href="#read-the-definition" id="toc-read-the-definition" class="nav-link" data-scroll-target="#read-the-definition">Read the definition</a></li>
+  <li><a href="#ask-python-for-the-signature" id="toc-ask-python-for-the-signature" class="nav-link" data-scroll-target="#ask-python-for-the-signature">Ask Python for the signature</a></li>
+  <li><a href="#rerun-a-changed-class-in-notebooks" id="toc-rerun-a-changed-class-in-notebooks" class="nav-link" data-scroll-target="#rerun-a-changed-class-in-notebooks">Rerun a changed class in notebooks</a></li>
+  </ul></li>
+  <li><a href="#where-can-a-hidden-constructor-signature-come-from" id="toc-where-can-a-hidden-constructor-signature-come-from" class="nav-link" data-scroll-target="#where-can-a-hidden-constructor-signature-come-from">Where can a hidden constructor signature come from?</a>
+  <ul class="collapse">
+  <li><a href="#dataclasses-generate-__init__" id="toc-dataclasses-generate-__init__" class="nav-link" data-scroll-target="#dataclasses-generate-__init__">Dataclasses generate <code>__init__</code></a></li>
+  <li><a href="#a-child-class-may-replace-its-parents-initializer" id="toc-a-child-class-may-replace-its-parents-initializer" class="nav-link" data-scroll-target="#a-child-class-may-replace-its-parents-initializer">A child class may replace its parent’s initializer</a></li>
+  </ul></li>
+  <li><a href="#a-repeatable-debugging-routine" id="toc-a-repeatable-debugging-routine" class="nav-link" data-scroll-target="#a-repeatable-debugging-routine">A repeatable debugging routine</a></li>
+  <li><a href="#try-three-diagnoses-in-colab" id="toc-try-three-diagnoses-in-colab" class="nav-link" data-scroll-target="#try-three-diagnoses-in-colab">Try three diagnoses in Colab</a>
+  <ul class="collapse">
+  <li><a href="#case-a-a-spelling-mismatch" id="toc-case-a-a-spelling-mismatch" class="nav-link" data-scroll-target="#case-a-a-spelling-mismatch">Case A: a spelling mismatch</a></li>
+  <li><a href="#case-b-a-missing-instance-parameter" id="toc-case-b-a-missing-instance-parameter" class="nav-link" data-scroll-target="#case-b-a-missing-instance-parameter">Case B: a missing instance parameter</a></li>
+  <li><a href="#case-c-an-optional-value" id="toc-case-c-an-optional-value" class="nav-link" data-scroll-target="#case-c-an-optional-value">Case C: an optional value</a></li>
+  </ul></li>
+  <li><a href="#check-the-diagnosis" id="toc-check-the-diagnosis" class="nav-link" data-scroll-target="#check-the-diagnosis">Check the diagnosis</a></li>
+  <li><a href="#a-compact-checklist" id="toc-a-compact-checklist" class="nav-link" data-scroll-target="#a-compact-checklist">A compact checklist</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/freecampus/python/edit/main/lessons/faq/unexpected-keyword-arguments-in-classes.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/freecampus/python/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Unexpected Keyword Arguments in Classes</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">faq</div>
+    <div class="quarto-category">object-oriented-python</div>
+    <div class="quarto-category">debugging</div>
+    <div class="quarto-category">beginner</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Understand class constructors, methods, self, and argument binding to fix unexpected keyword errors.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="fc-colab-launch">
+<p><a href="https://colab.research.google.com/github/freecampus/python/blob/gh-pages/notebooks/lessons/faq/unexpected-keyword-arguments-in-classes.ipynb" class="btn btn-primary" target="_blank" rel="noopener">Open this lesson in Google Colab</a></p>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Want to run the examples?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Want to run the examples?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This FAQ is designed to work as a standalone article. The <strong>Open in Colab</strong> button above opens an optional notebook where you can run the examples one at a time, inspect the errors, and try each repair.</p>
+</div>
+</div>
+<!-- fcpython-faq-post: start -->
+<p>A class call can look perfectly readable and still fail because one supplied keyword does not match the active method signature. The error is small, but it reveals how classes, methods, <code>self</code>, parameters, and arguments fit together.</p>
+<section id="short-answer" class="level2">
+<h2 class="anchored" data-anchor-id="short-answer">Short answer</h2>
+<p><code>got an unexpected keyword argument 'level'</code> means the call supplied a named argument, <code>level</code>, but the function or method Python called has no parameter with that exact name. Compare the call with the active definition. Correct a typo, remove data that does not belong, or declare and store a real parameter.</p>
+<p>For ordinary instance methods, also verify that <code>self</code> is the first parameter. A missing <code>self</code> changes how every visible argument is matched and may produce this error or a related message such as <code>got multiple values for argument</code>.</p>
+</section>
+<section id="what-does-the-error-actually-mean" class="level2">
+<h2 class="anchored" data-anchor-id="what-does-the-error-actually-mean">What does the error actually mean?</h2>
+<p>The error is a <code>TypeError</code> because Python found a mismatch between a callable’s definition and the arguments used to call it.</p>
+<p>Focus on the final part:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb1-1"><a href="#cb1-1"></a>got an unexpected keyword argument 'level'</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This says:</p>
+<ol type="1">
+<li>The call used the keyword <code>level</code>.</li>
+<li>Python inspected the callable’s accepted parameters.</li>
+<li>No parameter with that exact name could receive the value.</li>
+</ol>
+<p>“Unexpected” describes the function signature, not the programmer. Python is reporting that the call and definition do not currently agree.</p>
+<section id="start-with-the-named-callable" class="level3">
+<h3 class="anchored" data-anchor-id="start-with-the-named-callable">Start with the named callable</h3>
+<p>The full message often identifies where Python tried to send the argument:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb2-1"><a href="#cb2-1"></a>Workshop.__init__()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The dot indicates that <code>__init__</code> belongs to <code>Workshop</code>. Search for that class and method definition before searching the entire project.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Use the exact rejected name">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Use the exact rejected name
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Copy <code>level</code> directly from the message. Look for it in both the call and the definition. This avoids overlooking a small difference such as <code>level</code>, <code>levels</code>, or <code>Level</code>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="how-do-classes-and-instances-reach-__init__" class="level2">
+<h2 class="anchored" data-anchor-id="how-do-classes-and-instances-reach-__init__">How do classes and instances reach <code>__init__</code>?</h2>
+<p>A <strong>class</strong> defines a kind of object. An <strong>instance</strong> is one object created from that class.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb3-2"><a href="#cb3-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title, level):</span>
+<span id="cb3-3"><a href="#cb3-3"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb3-4"><a href="#cb3-4"></a>        <span class="va">self</span>.level <span class="op">=</span> level</span>
+<span id="cb3-5"><a href="#cb3-5"></a></span>
+<span id="cb3-6"><a href="#cb3-6"></a>python_basics <span class="op">=</span> Workshop(<span class="st">"Python Basics"</span>, <span class="st">"beginner"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7"></a>data_lab <span class="op">=</span> Workshop(<span class="st">"Data Lab"</span>, <span class="st">"intermediate"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>Workshop</code> is the class. <code>python_basics</code> and <code>data_lab</code> refer to two separate instances. Each instance stores its own <code>title</code> and <code>level</code> attributes.</p>
+<p>When Python evaluates this call:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a>Workshop(<span class="st">"Python Basics"</span>, <span class="st">"beginner"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>it performs these beginner-relevant steps:</p>
+<ol type="1">
+<li>Create a new <code>Workshop</code> instance.</li>
+<li>Call <code>Workshop.__init__</code> to initialize that instance.</li>
+<li>Pass the new instance automatically as the first argument.</li>
+<li>Match the caller’s remaining arguments to <code>title</code> and <code>level</code>.</li>
+<li>Return the initialized instance from the class call.</li>
+</ol>
+<p><code>__init__</code> is commonly called a constructor in everyday Python teaching. More precisely, it initializes an instance after Python creates it. That distinction becomes useful later, but it does not change this debugging routine.</p>
+<div class="concept-diagram">
+<p>The class call supplies two visible arguments. Python adds the new instance for <code>self</code> before it calls <code>__init__</code>.</p>
+<div class="cell" data-eval="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  call["Workshop(title='Python',&lt;br/&gt;level='beginner')"] --&gt; create["Python creates&lt;br/&gt;a Workshop instance"]
+  create --&gt; bind["Call __init__"]
+  instance["automatic&lt;br/&gt;new instance"] --&gt; self["self"]
+  title_value["'Python'"] --&gt; title["title"]
+  level_value["'beginner'"] --&gt; level["level"]
+  self --&gt; bind
+  title --&gt; bind
+  level --&gt; bind
+  bind --&gt; attributes["self.title and self.level&lt;br/&gt;are stored"]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<section id="attributes-belong-to-an-instance" class="level3">
+<h3 class="anchored" data-anchor-id="attributes-belong-to-an-instance">Attributes belong to an instance</h3>
+<p>These assignments use two different meanings of <code>title</code> and <code>level</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="va">self</span>.level <span class="op">=</span> level</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>title</code> on the right is the parameter value received by this call.</li>
+<li><code>self.title</code> on the left is an attribute stored on this instance.</li>
+<li><code>level</code> on the right is another parameter value.</li>
+<li><code>self.level</code> on the left keeps that value after <code>__init__</code> finishes.</li>
+</ul>
+<p>Without the attribute assignment, the parameter exists only while the method is running.</p>
+</section>
+</section>
+<section id="how-are-functions-and-methods-related" class="level2">
+<h2 class="anchored" data-anchor-id="how-are-functions-and-methods-related">How are functions and methods related?</h2>
+<p>A <strong>function</strong> is a named block of reusable code:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">def</span> make_label(title, level):</span>
+<span id="cb6-2"><a href="#cb6-2"></a>    <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>title<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>level<span class="sc">}</span><span class="ss">)"</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="bu">print</span>(make_label(<span class="st">"Python"</span>, <span class="st">"beginner"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A <strong>method</strong> is a function defined inside a class:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb7-2"><a href="#cb7-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title, level):</span>
+<span id="cb7-3"><a href="#cb7-3"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb7-4"><a href="#cb7-4"></a>        <span class="va">self</span>.level <span class="op">=</span> level</span>
+<span id="cb7-5"><a href="#cb7-5"></a></span>
+<span id="cb7-6"><a href="#cb7-6"></a>    <span class="kw">def</span> make_label(<span class="va">self</span>):</span>
+<span id="cb7-7"><a href="#cb7-7"></a>        <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>title<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>level<span class="sc">}</span><span class="ss">)"</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a></span>
+<span id="cb7-9"><a href="#cb7-9"></a>workshop <span class="op">=</span> Workshop(<span class="st">"Python"</span>, <span class="st">"beginner"</span>)</span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="bu">print</span>(workshop.make_label())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The method can work with the particular instance through <code>self</code>. Here, <code>self.title</code> and <code>self.level</code> mean the attributes of the <code>workshop</code> instance that received the method call.</p>
+<section id="a-bound-method-receives-the-instance-automatically" class="level3">
+<h3 class="anchored" data-anchor-id="a-bound-method-receives-the-instance-automatically">A bound method receives the instance automatically</h3>
+<p>These two calls express the same operation:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a>workshop.make_label()</span>
+<span id="cb8-2"><a href="#cb8-2"></a>Workshop.make_label(workshop)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first form is normal application code. Python looks up <code>make_label</code> on the class and binds <code>workshop</code> to the method as its first argument. The second form makes that normally automatic argument visible.</p>
+<p>This is why an instance method needs a first parameter for the instance.</p>
+</section>
+</section>
+<section id="what-is-self-and-why-must-it-come-first" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-self-and-why-must-it-come-first">What is <code>self</code>, and why must it come first?</h2>
+<p><code>self</code> is the conventional name for the instance currently receiving a method call.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">class</span> Counter:</span>
+<span id="cb9-2"><a href="#cb9-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb9-3"><a href="#cb9-3"></a>        <span class="va">self</span>.value <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a></span>
+<span id="cb9-5"><a href="#cb9-5"></a>    <span class="kw">def</span> increment(<span class="va">self</span>, amount):</span>
+<span id="cb9-6"><a href="#cb9-6"></a>        <span class="va">self</span>.value <span class="op">=</span> <span class="va">self</span>.value <span class="op">+</span> amount</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In this call:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1"></a>counter <span class="op">=</span> Counter()</span>
+<span id="cb10-2"><a href="#cb10-2"></a>counter.increment(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Python binds:</p>
+<ul>
+<li><code>counter</code> to <code>self</code> automatically; and</li>
+<li>the visible argument <code>2</code> to <code>amount</code>.</li>
+</ul>
+<p>After the method finishes, <code>counter.value</code> is <code>2</code>.</p>
+<p><code>self</code> is not a reserved Python keyword. A different parameter name can work, but using <code>self</code> is a strong convention that makes Python code recognizable to other developers. Put it first in ordinary instance methods.</p>
+<section id="do-all-functions-inside-a-class-receive-self" class="level3">
+<h3 class="anchored" data-anchor-id="do-all-functions-inside-a-class-receive-self">Do all functions inside a class receive <code>self</code>?</h3>
+<p>Ordinary instance methods do. Python also provides <code>@classmethod</code>, whose first parameter is conventionally named <code>cls</code>, and <code>@staticmethod</code>, which receives no automatic instance or class argument.</p>
+<p>Do not omit <code>self</code> accidentally to make an instance method static. If a utility truly belongs with a class but does not use an instance, mark that choice explicitly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">class</span> Temperature:</span>
+<span id="cb11-2"><a href="#cb11-2"></a>    <span class="at">@staticmethod</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a>    <span class="kw">def</span> celsius_to_fahrenheit(value):</span>
+<span id="cb11-4"><a href="#cb11-4"></a>        <span class="cf">return</span> value <span class="op">*</span> <span class="dv">9</span> <span class="op">/</span> <span class="dv">5</span> <span class="op">+</span> <span class="dv">32</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="bu">print</span>(Temperature.celsius_to_fahrenheit(value<span class="op">=</span><span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For beginner class designs, start with ordinary instance methods and <code>self</code>. Use a plain function when the behavior does not need object state and does not naturally belong to a class.</p>
+</section>
+<section id="what-happens-when-self-is-missing" class="level3">
+<h3 class="anchored" data-anchor-id="what-happens-when-self-is-missing">What happens when <code>self</code> is missing?</h3>
+<p>Consider this broken initializer:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">class</span> BrokenWorkshop:</span>
+<span id="cb12-2"><a href="#cb12-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(title, level):</span>
+<span id="cb12-3"><a href="#cb12-3"></a>        title.level <span class="op">=</span> level</span>
+<span id="cb12-4"><a href="#cb12-4"></a></span>
+<span id="cb12-5"><a href="#cb12-5"></a>workshop <span class="op">=</span> BrokenWorkshop(title<span class="op">=</span><span class="st">"Python"</span>, level<span class="op">=</span><span class="st">"beginner"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A common Python result is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb13-1"><a href="#cb13-1"></a>TypeError: BrokenWorkshop.__init__() got multiple values for argument 'title'</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Why <code>multiple values</code> instead of <code>unexpected keyword</code>?</p>
+<ol type="1">
+<li>Python automatically sends the new instance as the first positional argument.</li>
+<li>Because the method forgot <code>self</code>, the first declared parameter is <code>title</code>.</li>
+<li>The automatic instance is therefore matched to <code>title</code>.</li>
+<li>The call also explicitly supplies <code>title="Python"</code>.</li>
+<li>Python now has two values competing for the same parameter.</li>
+</ol>
+<p>The repair is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb14-2"><a href="#cb14-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title, level):</span>
+<span id="cb14-3"><a href="#cb14-3"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb14-4"><a href="#cb14-4"></a>        <span class="va">self</span>.level <span class="op">=</span> level</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Missing <code>self</code> belongs to the same family of argument-binding problems, but the exact error depends on the parameter names and how the method is called. You may see:</p>
+<ul>
+<li><code>got multiple values for argument ...</code>;</li>
+<li><code>takes ... positional arguments but ... were given</code>; or</li>
+<li><code>got an unexpected keyword argument ...</code>.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled" title="Do not repair only the error wording">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Do not repair only the error wording
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Adding, removing, or renaming a keyword until the message disappears can leave the class with the wrong design. First make sure every instance method has <code>self</code>, then compare the remaining parameters with the caller-supplied arguments.</p>
+</div>
+</div>
+</section>
+<section id="quick-check-self-and-method-binding" class="level3">
+<h3 class="anchored" data-anchor-id="quick-check-self-and-method-binding">Quick check: <code>self</code> and method binding</h3>
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-class-self-binding",
+  "title": "Classes, methods, and self checkpoint",
+  "instructions": "Trace the automatic instance argument before choosing an answer.",
+  "questions": [
+    {
+      "id": "class-instance",
+      "prompt": "Which statement correctly distinguishes a class from an instance?",
+      "options": [
+        "A class defines a kind of object; an instance is one object created from it.",
+        "A class is one stored value; an instance is always a function.",
+        "A class is an error message; an instance repairs it.",
+        "A class and an instance are two names for every integer."
+      ],
+      "answer_index": 0,
+      "explanation": "The class supplies the definition, while each created instance can hold its own attribute values."
+    },
+    {
+      "id": "automatic-self",
+      "prompt": "In workshop.make_label(), how does the method receive workshop?",
+      "options": [
+        "Python binds workshop to the method's first parameter, conventionally named self.",
+        "The method searches every variable in the file.",
+        "The method converts workshop into a keyword string.",
+        "Python does not provide the instance to a method."
+      ],
+      "answer_index": 0,
+      "explanation": "Access through an instance creates a bound method, so the instance is supplied automatically."
+    },
+    {
+      "id": "missing-self-error",
+      "prompt": "Why can a missing self produce 'multiple values for argument' instead of 'unexpected keyword argument'?",
+      "options": [
+        "The automatic instance and an explicit keyword can both be matched to the first declared parameter.",
+        "Python randomly chooses an error message.",
+        "Every class call duplicates all strings.",
+        "Keyword arguments are forbidden in classes."
+      ],
+      "answer_index": 0,
+      "explanation": "Without self, the automatic instance occupies the parameter that the caller may also name explicitly."
+    }
+  ]
+}
+</script>
+<div class="cell" data-eval="true">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb15" data-startfrom="1" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript"><span id="cb15-1"><a href="#cb15-1"></a>{</span>
+<span id="cb15-2"><a href="#cb15-2"></a>  <span class="kw">const</span> scripts <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(</span>
+<span id="cb15-3"><a href="#cb15-3"></a>    <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"script.fcpython-ojs-quiz-config"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4"></a>  )<span class="op">;</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a>  <span class="kw">const</span> script <span class="op">=</span> scripts<span class="op">.</span><span class="fu">find</span>(</span>
+<span id="cb15-6"><a href="#cb15-6"></a>    (node) <span class="kw">=&gt;</span> node<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">fcpythonRendered</span> <span class="op">!==</span> <span class="st">"true"</span></span>
+<span id="cb15-7"><a href="#cb15-7"></a>  )<span class="op">;</span></span>
+<span id="cb15-8"><a href="#cb15-8"></a></span>
+<span id="cb15-9"><a href="#cb15-9"></a>  <span class="cf">if</span> (<span class="op">!</span>script) {</span>
+<span id="cb15-10"><a href="#cb15-10"></a>    <span class="cf">return</span> <span class="fu">html</span><span class="vs">`&lt;div class="fcpython-quiz fcpython-quiz-warning"&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11"></a><span class="vs">      Quiz configuration was not found.</span></span>
+<span id="cb15-12"><a href="#cb15-12"></a><span class="vs">    &lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb15-13"><a href="#cb15-13"></a>  }</span>
+<span id="cb15-14"><a href="#cb15-14"></a></span>
+<span id="cb15-15"><a href="#cb15-15"></a>  script<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">fcpythonRendered</span> <span class="op">=</span> <span class="st">"true"</span><span class="op">;</span></span>
+<span id="cb15-16"><a href="#cb15-16"></a>  <span class="kw">const</span> quiz <span class="op">=</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(script<span class="op">.</span><span class="at">textContent</span>)<span class="op">;</span></span>
+<span id="cb15-17"><a href="#cb15-17"></a>  <span class="kw">const</span> container <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div class="fcpython-quiz"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb15-18"><a href="#cb15-18"></a>  <span class="kw">const</span> title <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"h3"</span>)<span class="op">;</span></span>
+<span id="cb15-19"><a href="#cb15-19"></a>  title<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> quiz<span class="op">.</span><span class="at">title</span><span class="op">;</span></span>
+<span id="cb15-20"><a href="#cb15-20"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(title)<span class="op">;</span></span>
+<span id="cb15-21"><a href="#cb15-21"></a></span>
+<span id="cb15-22"><a href="#cb15-22"></a>  <span class="kw">const</span> instructions <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb15-23"><a href="#cb15-23"></a>  instructions<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> quiz<span class="op">.</span><span class="at">instructions</span><span class="op">;</span></span>
+<span id="cb15-24"><a href="#cb15-24"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(instructions)<span class="op">;</span></span>
+<span id="cb15-25"><a href="#cb15-25"></a></span>
+<span id="cb15-26"><a href="#cb15-26"></a>  <span class="kw">const</span> feedbackNodes <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb15-27"><a href="#cb15-27"></a></span>
+<span id="cb15-28"><a href="#cb15-28"></a>  quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="fu">forEach</span>((question<span class="op">,</span> questionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb15-29"><a href="#cb15-29"></a>    <span class="kw">const</span> fieldset <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"fieldset"</span>)<span class="op">;</span></span>
+<span id="cb15-30"><a href="#cb15-30"></a>    fieldset<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-question"</span><span class="op">;</span></span>
+<span id="cb15-31"><a href="#cb15-31"></a></span>
+<span id="cb15-32"><a href="#cb15-32"></a>    <span class="kw">const</span> legend <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"legend"</span>)<span class="op">;</span></span>
+<span id="cb15-33"><a href="#cb15-33"></a>    legend<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>questionIndex <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="vs">. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">prompt</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb15-34"><a href="#cb15-34"></a>    fieldset<span class="op">.</span><span class="fu">appendChild</span>(legend)<span class="op">;</span></span>
+<span id="cb15-35"><a href="#cb15-35"></a></span>
+<span id="cb15-36"><a href="#cb15-36"></a>    question<span class="op">.</span><span class="at">options</span><span class="op">.</span><span class="fu">forEach</span>((option<span class="op">,</span> optionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb15-37"><a href="#cb15-37"></a>      <span class="kw">const</span> label <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"label"</span>)<span class="op">;</span></span>
+<span id="cb15-38"><a href="#cb15-38"></a>      label<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-option"</span><span class="op">;</span></span>
+<span id="cb15-39"><a href="#cb15-39"></a></span>
+<span id="cb15-40"><a href="#cb15-40"></a>      <span class="kw">const</span> input <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"input"</span>)<span class="op">;</span></span>
+<span id="cb15-41"><a href="#cb15-41"></a>      input<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"radio"</span><span class="op">;</span></span>
+<span id="cb15-42"><a href="#cb15-42"></a>      input<span class="op">.</span><span class="at">name</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">-</span><span class="sc">${</span>question<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb15-43"><a href="#cb15-43"></a>      input<span class="op">.</span><span class="at">value</span> <span class="op">=</span> <span class="bu">String</span>(optionIndex)<span class="op">;</span></span>
+<span id="cb15-44"><a href="#cb15-44"></a></span>
+<span id="cb15-45"><a href="#cb15-45"></a>      <span class="kw">const</span> text <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"span"</span>)<span class="op">;</span></span>
+<span id="cb15-46"><a href="#cb15-46"></a>      text<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> option<span class="op">;</span></span>
+<span id="cb15-47"><a href="#cb15-47"></a></span>
+<span id="cb15-48"><a href="#cb15-48"></a>      label<span class="op">.</span><span class="fu">appendChild</span>(input)<span class="op">;</span></span>
+<span id="cb15-49"><a href="#cb15-49"></a>      label<span class="op">.</span><span class="fu">appendChild</span>(text)<span class="op">;</span></span>
+<span id="cb15-50"><a href="#cb15-50"></a>      fieldset<span class="op">.</span><span class="fu">appendChild</span>(label)<span class="op">;</span></span>
+<span id="cb15-51"><a href="#cb15-51"></a>    })<span class="op">;</span></span>
+<span id="cb15-52"><a href="#cb15-52"></a></span>
+<span id="cb15-53"><a href="#cb15-53"></a>    <span class="kw">const</span> feedback <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb15-54"><a href="#cb15-54"></a>    feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb15-55"><a href="#cb15-55"></a>    feedback<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"aria-live"</span><span class="op">,</span> <span class="st">"polite"</span>)<span class="op">;</span></span>
+<span id="cb15-56"><a href="#cb15-56"></a>    feedbackNodes<span class="op">.</span><span class="fu">push</span>(feedback)<span class="op">;</span></span>
+<span id="cb15-57"><a href="#cb15-57"></a>    fieldset<span class="op">.</span><span class="fu">appendChild</span>(feedback)<span class="op">;</span></span>
+<span id="cb15-58"><a href="#cb15-58"></a>    container<span class="op">.</span><span class="fu">appendChild</span>(fieldset)<span class="op">;</span></span>
+<span id="cb15-59"><a href="#cb15-59"></a>  })<span class="op">;</span></span>
+<span id="cb15-60"><a href="#cb15-60"></a></span>
+<span id="cb15-61"><a href="#cb15-61"></a>  <span class="kw">const</span> actions <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb15-62"><a href="#cb15-62"></a>  actions<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-actions"</span><span class="op">;</span></span>
+<span id="cb15-63"><a href="#cb15-63"></a></span>
+<span id="cb15-64"><a href="#cb15-64"></a>  <span class="kw">const</span> check <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"button"</span>)<span class="op">;</span></span>
+<span id="cb15-65"><a href="#cb15-65"></a>  check<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"button"</span><span class="op">;</span></span>
+<span id="cb15-66"><a href="#cb15-66"></a>  check<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Check answers"</span><span class="op">;</span></span>
+<span id="cb15-67"><a href="#cb15-67"></a></span>
+<span id="cb15-68"><a href="#cb15-68"></a>  <span class="kw">const</span> reset <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"button"</span>)<span class="op">;</span></span>
+<span id="cb15-69"><a href="#cb15-69"></a>  reset<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"button"</span><span class="op">;</span></span>
+<span id="cb15-70"><a href="#cb15-70"></a>  reset<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Reset"</span><span class="op">;</span></span>
+<span id="cb15-71"><a href="#cb15-71"></a></span>
+<span id="cb15-72"><a href="#cb15-72"></a>  <span class="kw">const</span> score <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb15-73"><a href="#cb15-73"></a>  score<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-score"</span><span class="op">;</span></span>
+<span id="cb15-74"><a href="#cb15-74"></a>  score<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"aria-live"</span><span class="op">,</span> <span class="st">"polite"</span>)<span class="op">;</span></span>
+<span id="cb15-75"><a href="#cb15-75"></a></span>
+<span id="cb15-76"><a href="#cb15-76"></a>  check<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb15-77"><a href="#cb15-77"></a>    <span class="kw">let</span> correctCount <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb15-78"><a href="#cb15-78"></a></span>
+<span id="cb15-79"><a href="#cb15-79"></a>    quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="fu">forEach</span>((question<span class="op">,</span> questionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb15-80"><a href="#cb15-80"></a>      <span class="kw">const</span> selected <span class="op">=</span> container<span class="op">.</span><span class="fu">querySelector</span>(</span>
+<span id="cb15-81"><a href="#cb15-81"></a>        <span class="vs">`input[name="</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">-</span><span class="sc">${</span>question<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">"]:checked`</span></span>
+<span id="cb15-82"><a href="#cb15-82"></a>      )<span class="op">;</span></span>
+<span id="cb15-83"><a href="#cb15-83"></a>      <span class="kw">const</span> feedback <span class="op">=</span> feedbackNodes[questionIndex]<span class="op">;</span></span>
+<span id="cb15-84"><a href="#cb15-84"></a></span>
+<span id="cb15-85"><a href="#cb15-85"></a>      <span class="cf">if</span> (<span class="op">!</span>selected) {</span>
+<span id="cb15-86"><a href="#cb15-86"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Choose an answer before checking."</span><span class="op">;</span></span>
+<span id="cb15-87"><a href="#cb15-87"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb15-88"><a href="#cb15-88"></a>        <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb15-89"><a href="#cb15-89"></a>      }</span>
+<span id="cb15-90"><a href="#cb15-90"></a></span>
+<span id="cb15-91"><a href="#cb15-91"></a>      <span class="kw">const</span> selectedIndex <span class="op">=</span> <span class="bu">Number</span>(selected<span class="op">.</span><span class="at">value</span>)<span class="op">;</span></span>
+<span id="cb15-92"><a href="#cb15-92"></a>      <span class="cf">if</span> (selectedIndex <span class="op">===</span> question<span class="op">.</span><span class="at">answer_index</span>) {</span>
+<span id="cb15-93"><a href="#cb15-93"></a>        correctCount <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb15-94"><a href="#cb15-94"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`✅ Correct. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">explanation</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb15-95"><a href="#cb15-95"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback is-correct"</span><span class="op">;</span></span>
+<span id="cb15-96"><a href="#cb15-96"></a>      } <span class="cf">else</span> {</span>
+<span id="cb15-97"><a href="#cb15-97"></a>        <span class="kw">const</span> answer <span class="op">=</span> question<span class="op">.</span><span class="at">options</span>[question<span class="op">.</span><span class="at">answer_index</span>]<span class="op">;</span></span>
+<span id="cb15-98"><a href="#cb15-98"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`❌ Not yet. Correct answer: </span><span class="sc">${</span>answer<span class="sc">}</span><span class="vs">. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">explanation</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb15-99"><a href="#cb15-99"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback is-incorrect"</span><span class="op">;</span></span>
+<span id="cb15-100"><a href="#cb15-100"></a>      }</span>
+<span id="cb15-101"><a href="#cb15-101"></a>    })<span class="op">;</span></span>
+<span id="cb15-102"><a href="#cb15-102"></a></span>
+<span id="cb15-103"><a href="#cb15-103"></a>    score<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`Score: </span><span class="sc">${</span>correctCount<span class="sc">}</span><span class="vs">/</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="at">length</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb15-104"><a href="#cb15-104"></a>  })<span class="op">;</span></span>
+<span id="cb15-105"><a href="#cb15-105"></a></span>
+<span id="cb15-106"><a href="#cb15-106"></a>  reset<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb15-107"><a href="#cb15-107"></a>    container<span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"input[type='radio']"</span>)<span class="op">.</span><span class="fu">forEach</span>((input) <span class="kw">=&gt;</span> {</span>
+<span id="cb15-108"><a href="#cb15-108"></a>      input<span class="op">.</span><span class="at">checked</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb15-109"><a href="#cb15-109"></a>    })<span class="op">;</span></span>
+<span id="cb15-110"><a href="#cb15-110"></a>    feedbackNodes<span class="op">.</span><span class="fu">forEach</span>((feedback) <span class="kw">=&gt;</span> {</span>
+<span id="cb15-111"><a href="#cb15-111"></a>      feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb15-112"><a href="#cb15-112"></a>      feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb15-113"><a href="#cb15-113"></a>    })<span class="op">;</span></span>
+<span id="cb15-114"><a href="#cb15-114"></a>    score<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb15-115"><a href="#cb15-115"></a>  })<span class="op">;</span></span>
+<span id="cb15-116"><a href="#cb15-116"></a></span>
+<span id="cb15-117"><a href="#cb15-117"></a>  actions<span class="op">.</span><span class="fu">appendChild</span>(check)<span class="op">;</span></span>
+<span id="cb15-118"><a href="#cb15-118"></a>  actions<span class="op">.</span><span class="fu">appendChild</span>(reset)<span class="op">;</span></span>
+<span id="cb15-119"><a href="#cb15-119"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(actions)<span class="op">;</span></span>
+<span id="cb15-120"><a href="#cb15-120"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(score)<span class="op">;</span></span>
+<span id="cb15-121"><a href="#cb15-121"></a>  <span class="cf">return</span> container<span class="op">;</span></span>
+<span id="cb15-122"><a href="#cb15-122"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-1" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="how-do-positional-and-keyword-arguments-match-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="how-do-positional-and-keyword-arguments-match-parameters">How do positional and keyword arguments match parameters?</h2>
+<p>A <strong>parameter</strong> is a name in a function or method definition. An <strong>argument</strong> is a value supplied in a call.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw">def</span> make_label(title, level<span class="op">=</span><span class="st">"beginner"</span>):</span>
+<span id="cb16-2"><a href="#cb16-2"></a>    <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>title<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>level<span class="sc">}</span><span class="ss">)"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This definition has two parameters:</p>
+<ul>
+<li><code>title</code> is required because it has no default value.</li>
+<li><code>level</code> is optional because its default is <code>"beginner"</code>.</li>
+</ul>
+<p>The same matching rules apply to methods after Python handles the automatic instance argument.</p>
+<section id="positional-arguments-use-order" class="level3">
+<h3 class="anchored" data-anchor-id="positional-arguments-use-order">Positional arguments use order</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1"></a>make_label(<span class="st">"Python"</span>, <span class="st">"intermediate"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Python matches the first value to <code>title</code> and the second to <code>level</code>.</p>
+</section>
+<section id="keyword-arguments-use-names" class="level3">
+<h3 class="anchored" data-anchor-id="keyword-arguments-use-names">Keyword arguments use names</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1"></a>make_label(title<span class="op">=</span><span class="st">"Python"</span>, level<span class="op">=</span><span class="st">"intermediate"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Python matches each value to the parameter with that exact name. Keyword arguments make many calls easier to read and allow the supplied keywords to appear in a different order:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1"></a>make_label(level<span class="op">=</span><span class="st">"intermediate"</span>, title<span class="op">=</span><span class="st">"Python"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="positional-and-keyword-arguments-can-be-mixed-carefully" class="level3">
+<h3 class="anchored" data-anchor-id="positional-and-keyword-arguments-can-be-mixed-carefully">Positional and keyword arguments can be mixed carefully</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1"></a>make_label(<span class="st">"Python"</span>, level<span class="op">=</span><span class="st">"intermediate"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Positional arguments must appear before keyword arguments in a call. A parameter must not receive two values:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1"></a>make_label(<span class="st">"Python"</span>, title<span class="op">=</span><span class="st">"Data Science"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This raises:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb22-1"><a href="#cb22-1"></a>TypeError: make_label() got multiple values for argument 'title'</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="compare-the-common-messages" class="level3">
+<h3 class="anchored" data-anchor-id="compare-the-common-messages">Compare the common messages</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Message fragment</th>
+<th>Matching problem</th>
+<th>First check</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>unexpected keyword argument 'level'</code></td>
+<td>No accepted parameter is named <code>level</code>.</td>
+<td>Compare spelling and the definition.</td>
+</tr>
+<tr class="even">
+<td><code>missing 1 required positional argument: 'title'</code></td>
+<td>No value reached required parameter <code>title</code>.</td>
+<td>Supply it or decide whether it needs a default.</td>
+</tr>
+<tr class="odd">
+<td><code>got multiple values for argument 'title'</code></td>
+<td>Two arguments both reached <code>title</code>.</td>
+<td>Check mixed arguments and missing <code>self</code>.</td>
+</tr>
+<tr class="even">
+<td><code>takes 2 positional arguments but 3 were given</code></td>
+<td>More positional values arrived than parameters can receive.</td>
+<td>Remember the automatic instance for methods.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="which-fix-matches-the-program" class="level2">
+<h2 class="anchored" data-anchor-id="which-fix-matches-the-program">Which fix matches the program?</h2>
+<p>There is no single repair. Choose the one that matches the program’s meaning.</p>
+<section id="fix-a-correct-a-misspelled-keyword" class="level3">
+<h3 class="anchored" data-anchor-id="fix-a-correct-a-misspelled-keyword">Fix A: Correct a misspelled keyword</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1"></a>workshop <span class="op">=</span> Workshop(titel<span class="op">=</span><span class="st">"Python"</span>, level<span class="op">=</span><span class="st">"beginner"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If the parameter is named <code>title</code>, change <code>titel</code> to <code>title</code>. Spelling, capitalization, and underscores must match exactly.</p>
+</section>
+<section id="fix-b-remove-an-argument-that-does-not-belong" class="level3">
+<h3 class="anchored" data-anchor-id="fix-b-remove-an-argument-that-does-not-belong">Fix B: Remove an argument that does not belong</h3>
+<p>If the class should store only a title, the call is wrong:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb24-2"><a href="#cb24-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title):</span>
+<span id="cb24-3"><a href="#cb24-3"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb24-4"><a href="#cb24-4"></a></span>
+<span id="cb24-5"><a href="#cb24-5"></a>workshop <span class="op">=</span> Workshop(title<span class="op">=</span><span class="st">"Python"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Do not expand the class merely because one caller supplied unrelated data.</p>
+</section>
+<section id="fix-c-declare-and-store-required-data" class="level3">
+<h3 class="anchored" data-anchor-id="fix-c-declare-and-store-required-data">Fix C: Declare and store required data</h3>
+<p>If every workshop has a level, add both the parameter and attribute:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb25-2"><a href="#cb25-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title, level):</span>
+<span id="cb25-3"><a href="#cb25-3"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb25-4"><a href="#cb25-4"></a>        <span class="va">self</span>.level <span class="op">=</span> level</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Adding only <code>self.level = level</code> without declaring <code>level</code> does not work because the method would have no local value named <code>level</code>.</p>
+</section>
+<section id="fix-d-provide-a-sensible-default-for-optional-data" class="level3">
+<h3 class="anchored" data-anchor-id="fix-d-provide-a-sensible-default-for-optional-data">Fix D: Provide a sensible default for optional data</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb26-2"><a href="#cb26-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title, level<span class="op">=</span><span class="st">"beginner"</span>):</span>
+<span id="cb26-3"><a href="#cb26-3"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb26-4"><a href="#cb26-4"></a>        <span class="va">self</span>.level <span class="op">=</span> level</span>
+<span id="cb26-5"><a href="#cb26-5"></a></span>
+<span id="cb26-6"><a href="#cb26-6"></a>intro <span class="op">=</span> Workshop(title<span class="op">=</span><span class="st">"Python"</span>)</span>
+<span id="cb26-7"><a href="#cb26-7"></a>advanced <span class="op">=</span> Workshop(title<span class="op">=</span><span class="st">"Decorators"</span>, level<span class="op">=</span><span class="st">"advanced"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The default lets a caller omit <code>level</code>, while an explicit keyword can override it.</p>
+</section>
+<section id="fix-e-add-self-to-an-instance-method" class="level3">
+<h3 class="anchored" data-anchor-id="fix-e-add-self-to-an-instance-method">Fix E: Add <code>self</code> to an instance method</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb27-2"><a href="#cb27-2"></a>    <span class="kw">def</span> describe(<span class="va">self</span>, prefix):</span>
+<span id="cb27-3"><a href="#cb27-3"></a>        <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>prefix<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>title<span class="sc">}</span><span class="ss">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>After <code>self</code> receives the instance, <code>prefix</code> can correctly receive the visible argument:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1"></a><span class="bu">print</span>(workshop.describe(prefix<span class="op">=</span><span class="st">"Course"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="do-not-use-kwargs-as-a-universal-patch" class="level3">
+<h3 class="anchored" data-anchor-id="do-not-use-kwargs-as-a-universal-patch">Do not use <code>**kwargs</code> as a universal patch</h3>
+<p>This version accepts any keyword:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb29-2"><a href="#cb29-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title, <span class="op">**</span>kwargs):</span>
+<span id="cb29-3"><a href="#cb29-3"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It also silently accepts a typo such as <code>levle="beginner"</code> unless the method validates <code>kwargs</code>. That can move the bug farther from its cause. Use <code>**kwargs</code> when the design genuinely needs to collect or forward flexible named arguments, not merely to hide a useful error.</p>
+</section>
+</section>
+<section id="how-can-i-inspect-what-a-class-accepts" class="level2">
+<h2 class="anchored" data-anchor-id="how-can-i-inspect-what-a-class-accepts">How can I inspect what a class accepts?</h2>
+<p>The most reliable comparison uses the running code, not memory.</p>
+<section id="read-the-definition" class="level3">
+<h3 class="anchored" data-anchor-id="read-the-definition">Read the definition</h3>
+<p>Find <code>class Workshop</code>, then inspect <code>def __init__(...)</code> and the method named in the traceback. Write the declared parameter names beside the supplied keyword names.</p>
+</section>
+<section id="ask-python-for-the-signature" class="level3">
+<h3 class="anchored" data-anchor-id="ask-python-for-the-signature">Ask Python for the signature</h3>
+<p>The standard-library <code>inspect</code> module can display accepted parameters:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1"></a><span class="im">from</span> inspect <span class="im">import</span> signature</span>
+<span id="cb30-2"><a href="#cb30-2"></a></span>
+<span id="cb30-3"><a href="#cb30-3"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb30-4"><a href="#cb30-4"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title, level<span class="op">=</span><span class="st">"beginner"</span>):</span>
+<span id="cb30-5"><a href="#cb30-5"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb30-6"><a href="#cb30-6"></a>        <span class="va">self</span>.level <span class="op">=</span> level</span>
+<span id="cb30-7"><a href="#cb30-7"></a></span>
+<span id="cb30-8"><a href="#cb30-8"></a>    <span class="kw">def</span> describe(<span class="va">self</span>, prefix<span class="op">=</span><span class="st">"Workshop"</span>):</span>
+<span id="cb30-9"><a href="#cb30-9"></a>        <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>prefix<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>title<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb30-10"><a href="#cb30-10"></a></span>
+<span id="cb30-11"><a href="#cb30-11"></a>workshop <span class="op">=</span> Workshop(<span class="st">"Python"</span>)</span>
+<span id="cb30-12"><a href="#cb30-12"></a></span>
+<span id="cb30-13"><a href="#cb30-13"></a><span class="bu">print</span>(signature(Workshop))</span>
+<span id="cb30-14"><a href="#cb30-14"></a><span class="bu">print</span>(signature(Workshop.<span class="fu">__init__</span>))</span>
+<span id="cb30-15"><a href="#cb30-15"></a><span class="bu">print</span>(signature(workshop.describe))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Expected output resembles:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb31-1"><a href="#cb31-1"></a>(title, level='beginner')</span>
+<span id="cb31-2"><a href="#cb31-2"></a>(self, title, level='beginner')</span>
+<span id="cb31-3"><a href="#cb31-3"></a>(prefix='Workshop')</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The class signature shows what callers normally supply. The unbound <code>Workshop.__init__</code> signature includes <code>self</code>. The bound <code>workshop.describe</code> signature omits the already supplied instance.</p>
+<p><code>help(Workshop)</code> and editor parameter hints can also reveal a signature. For a third-party class, compare documentation with the version installed in the current environment.</p>
+</section>
+<section id="rerun-a-changed-class-in-notebooks" class="level3">
+<h3 class="anchored" data-anchor-id="rerun-a-changed-class-in-notebooks">Rerun a changed class in notebooks</h3>
+<p>Editing a class cell does not replace the class in a running Colab or Jupyter runtime until that cell executes again.</p>
+<p>If the displayed definition includes <code>level</code> but the running class still rejects it:</p>
+<ol type="1">
+<li>Run the class-definition cell again.</li>
+<li>Recreate the instance.</li>
+<li>Run the failing call again.</li>
+<li>If execution history is unclear, restart and run all cells from the top.</li>
+</ol>
+<p>See <a href="../../lessons/faq/running-code-and-output.html">Running Code and Understanding Output</a> for a longer explanation of notebook state.</p>
+</section>
+</section>
+<section id="where-can-a-hidden-constructor-signature-come-from" class="level2">
+<h2 class="anchored" data-anchor-id="where-can-a-hidden-constructor-signature-come-from">Where can a hidden constructor signature come from?</h2>
+<p>Sometimes the accepted parameters are generated or inherited rather than written directly beside the failing call.</p>
+<section id="dataclasses-generate-__init__" class="level3">
+<h3 class="anchored" data-anchor-id="dataclasses-generate-__init__">Dataclasses generate <code>__init__</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb32-2"><a href="#cb32-2"></a></span>
+<span id="cb32-3"><a href="#cb32-3"></a><span class="at">@dataclass</span></span>
+<span id="cb32-4"><a href="#cb32-4"></a><span class="kw">class</span> Workshop:</span>
+<span id="cb32-5"><a href="#cb32-5"></a>    title: <span class="bu">str</span></span>
+<span id="cb32-6"><a href="#cb32-6"></a>    level: <span class="bu">str</span> <span class="op">=</span> <span class="st">"beginner"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The annotated field names become accepted constructor parameters:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1"></a>workshop <span class="op">=</span> Workshop(title<span class="op">=</span><span class="st">"Python"</span>, level<span class="op">=</span><span class="st">"intermediate"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>Workshop(title="Python", difficulty="easy")</code> raises an unexpected keyword error because there is no field named <code>difficulty</code>. Add a real field or use the correct existing name. Continue with <a href="../../lessons/object-oriented-python/dataclasses.html">Dataclasses</a> for deeper practice.</p>
+</section>
+<section id="a-child-class-may-replace-its-parents-initializer" class="level3">
+<h3 class="anchored" data-anchor-id="a-child-class-may-replace-its-parents-initializer">A child class may replace its parent’s initializer</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1"></a><span class="kw">class</span> Course:</span>
+<span id="cb34-2"><a href="#cb34-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title):</span>
+<span id="cb34-3"><a href="#cb34-3"></a>        <span class="va">self</span>.title <span class="op">=</span> title</span>
+<span id="cb34-4"><a href="#cb34-4"></a></span>
+<span id="cb34-5"><a href="#cb34-5"></a><span class="kw">class</span> OnlineCourse(Course):</span>
+<span id="cb34-6"><a href="#cb34-6"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, url):</span>
+<span id="cb34-7"><a href="#cb34-7"></a>        <span class="va">self</span>.url <span class="op">=</span> url</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This call rejects <code>title</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1"></a>course <span class="op">=</span> OnlineCourse(title<span class="op">=</span><span class="st">"Python"</span>, url<span class="op">=</span><span class="st">"https://example.com"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>OnlineCourse.__init__</code> currently accepts only <code>url</code>. If an online course needs both values, declare both and initialize the parent part deliberately:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1"></a><span class="kw">class</span> OnlineCourse(Course):</span>
+<span id="cb36-2"><a href="#cb36-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, title, url):</span>
+<span id="cb36-3"><a href="#cb36-3"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(title)</span>
+<span id="cb36-4"><a href="#cb36-4"></a>        <span class="va">self</span>.url <span class="op">=</span> url</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Inheritance is a later topic, but the immediate debugging habit is the same: inspect the initializer that Python actually calls. See <a href="../../lessons/object-oriented-python/oop-design.html">Object-Oriented Design</a> when you are ready to study parent and child classes.</p>
+</section>
+</section>
+<section id="a-repeatable-debugging-routine" class="level2">
+<h2 class="anchored" data-anchor-id="a-repeatable-debugging-routine">A repeatable debugging routine</h2>
+<p>Use this routine for constructors, methods, ordinary functions, dataclasses, and library APIs.</p>
+<ol type="1">
+<li><strong>Read the last traceback line.</strong> Record the callable and rejected keyword.</li>
+<li><strong>Find the call.</strong> List every positional and keyword argument supplied.</li>
+<li><strong>Find the active definition.</strong> Inspect <code>__init__</code> or the named method.</li>
+<li><strong>Account for the automatic instance.</strong> An instance method normally begins with <code>self</code>, which Python supplies.</li>
+<li><strong>Match values to parameters.</strong> Use order for positional arguments and exact names for keyword arguments.</li>
+<li><strong>Choose a meaning-based fix.</strong> Correct a typo, change the call, declare real data, add a default, or restore <code>self</code>.</li>
+<li><strong>Rerun the definition if needed.</strong> Notebook state may still contain an older class.</li>
+<li><strong>Change one thing and test again.</strong> A different error is new evidence, not a reason to change several unrelated lines.</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Make the problem small">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Make the problem small
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Copy only the class definition and one failing call into a fresh cell. Replace large data with short strings. If the small version works, restore one removed piece at a time until the mismatch returns.</p>
+</div>
+</div>
+<p>For a complete method of preparing code to share, use <a href="../../lessons/debugging/minimal-reproducible-examples.html">Minimal Reproducible Examples</a>.</p>
+</section>
+<section id="try-three-diagnoses-in-colab" class="level2">
+<h2 class="anchored" data-anchor-id="try-three-diagnoses-in-colab">Try three diagnoses in Colab</h2>
+<p>For each case, predict the message family, name the mismatch, and make the smallest meaningful repair.</p>
+<section id="case-a-a-spelling-mismatch" class="level3">
+<h3 class="anchored" data-anchor-id="case-a-a-spelling-mismatch">Case A: a spelling mismatch</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1"></a><span class="kw">class</span> Student:</span>
+<span id="cb37-2"><a href="#cb37-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name):</span>
+<span id="cb37-3"><a href="#cb37-3"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb37-4"><a href="#cb37-4"></a></span>
+<span id="cb37-5"><a href="#cb37-5"></a>student <span class="op">=</span> Student(student_name<span class="op">=</span><span class="st">"Maya"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="case-b-a-missing-instance-parameter" class="level3">
+<h3 class="anchored" data-anchor-id="case-b-a-missing-instance-parameter">Case B: a missing instance parameter</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1"></a><span class="kw">class</span> Student:</span>
+<span id="cb38-2"><a href="#cb38-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name):</span>
+<span id="cb38-3"><a href="#cb38-3"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb38-4"><a href="#cb38-4"></a></span>
+<span id="cb38-5"><a href="#cb38-5"></a>    <span class="kw">def</span> greeting(name):</span>
+<span id="cb38-6"><a href="#cb38-6"></a>        <span class="cf">return</span> <span class="ss">f"Hello, </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">!"</span></span>
+<span id="cb38-7"><a href="#cb38-7"></a></span>
+<span id="cb38-8"><a href="#cb38-8"></a>student <span class="op">=</span> Student(<span class="st">"Maya"</span>)</span>
+<span id="cb38-9"><a href="#cb38-9"></a>student.greeting(name<span class="op">=</span><span class="st">"Maya"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="case-c-an-optional-value" class="level3">
+<h3 class="anchored" data-anchor-id="case-c-an-optional-value">Case C: an optional value</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1"></a><span class="kw">class</span> Student:</span>
+<span id="cb39-2"><a href="#cb39-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name):</span>
+<span id="cb39-3"><a href="#cb39-3"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb39-4"><a href="#cb39-4"></a></span>
+<span id="cb39-5"><a href="#cb39-5"></a>student <span class="op">=</span> Student(name<span class="op">=</span><span class="st">"Maya"</span>, active<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="solution">
+<summary>
+Show one possible repair for each case
+</summary>
+<p><strong>Case A:</strong> The class accepts <code>name</code>, not <code>student_name</code>. Use the accepted name:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1"></a>student <span class="op">=</span> Student(name<span class="op">=</span><span class="st">"Maya"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Case B:</strong> The method needs <code>self</code> before the caller-supplied <code>name</code> parameter:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1"></a><span class="kw">class</span> Student:</span>
+<span id="cb41-2"><a href="#cb41-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name):</span>
+<span id="cb41-3"><a href="#cb41-3"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb41-4"><a href="#cb41-4"></a></span>
+<span id="cb41-5"><a href="#cb41-5"></a>    <span class="kw">def</span> greeting(<span class="va">self</span>, name):</span>
+<span id="cb41-6"><a href="#cb41-6"></a>        <span class="cf">return</span> <span class="ss">f"Hello, </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">!"</span></span>
+<span id="cb41-7"><a href="#cb41-7"></a></span>
+<span id="cb41-8"><a href="#cb41-8"></a>student <span class="op">=</span> Student(<span class="st">"Maya"</span>)</span>
+<span id="cb41-9"><a href="#cb41-9"></a><span class="bu">print</span>(student.greeting(name<span class="op">=</span><span class="st">"Maya"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Case C:</strong> If every student has an active status and <code>True</code> is a useful default, declare and store it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1"></a><span class="kw">class</span> Student:</span>
+<span id="cb42-2"><a href="#cb42-2"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name, active<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb42-3"><a href="#cb42-3"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb42-4"><a href="#cb42-4"></a>        <span class="va">self</span>.active <span class="op">=</span> active</span>
+<span id="cb42-5"><a href="#cb42-5"></a></span>
+<span id="cb42-6"><a href="#cb42-6"></a>student <span class="op">=</span> Student(name<span class="op">=</span><span class="st">"Maya"</span>, active<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If active status does not belong in this class, remove it from the call instead.</p>
+</details>
+</section>
+</section>
+<section id="check-the-diagnosis" class="level2">
+<h2 class="anchored" data-anchor-id="check-the-diagnosis">Check the diagnosis</h2>
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-unexpected-keyword-debugging",
+  "title": "Unexpected keyword debugging checkpoint",
+  "instructions": "Choose the smallest fix supported by the evidence.",
+  "questions": [
+    {
+      "id": "unknown-keyword",
+      "prompt": "Workshop.__init__(self, title) receives Workshop(title=\"Python\", level=\"beginner\"). Why is level unexpected?",
+      "options": [
+        "The definition has no parameter named level.",
+        "Classes cannot receive strings.",
+        "Keyword arguments work only with print.",
+        "self must be supplied explicitly in the call."
+      ],
+      "answer_index": 0,
+      "explanation": "Caller-supplied keyword names must match accepted parameters unless the callable deliberately collects flexible keywords."
+    },
+    {
+      "id": "parameter-argument",
+      "prompt": "In def greeting(self, name), what is name?",
+      "options": [
+        "A parameter that can receive an argument when the method is called.",
+        "An automatically created class.",
+        "The instance supplied to self.",
+        "An error type."
+      ],
+      "answer_index": 0,
+      "explanation": "Parameters appear in definitions; arguments are the values supplied by calls."
+    },
+    {
+      "id": "kwargs-patch",
+      "prompt": "Why is adding **kwargs usually a poor first repair for a misspelled keyword?",
+      "options": [
+        "It can accept and hide the typo instead of correcting the call or definition.",
+        "It forces every argument to become positional.",
+        "It removes self from every method.",
+        "It prevents classes from creating instances."
+      ],
+      "answer_index": 0,
+      "explanation": "Flexible keyword collection is useful for deliberate designs, but it can hide mistakes when added only to silence an error."
+    },
+    {
+      "id": "notebook-old-class",
+      "prompt": "You added level to a class cell, but the runtime still rejects it. What should you check next?",
+      "options": [
+        "Run the changed class-definition cell and recreate the instance.",
+        "Rename every attribute in the notebook.",
+        "Convert level to a list.",
+        "Add **kwargs to every method."
+      ],
+      "answer_index": 0,
+      "explanation": "Notebook edits do not change the running class until the definition executes again."
+    }
+  ]
+}
+</script>
+<div class="cell" data-eval="true">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb43" data-startfrom="1" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript"><span id="cb43-1"><a href="#cb43-1"></a>{</span>
+<span id="cb43-2"><a href="#cb43-2"></a>  <span class="kw">const</span> scripts <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(</span>
+<span id="cb43-3"><a href="#cb43-3"></a>    <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"script.fcpython-ojs-quiz-config"</span>)</span>
+<span id="cb43-4"><a href="#cb43-4"></a>  )<span class="op">;</span></span>
+<span id="cb43-5"><a href="#cb43-5"></a>  <span class="kw">const</span> script <span class="op">=</span> scripts<span class="op">.</span><span class="fu">find</span>(</span>
+<span id="cb43-6"><a href="#cb43-6"></a>    (node) <span class="kw">=&gt;</span> node<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">fcpythonRendered</span> <span class="op">!==</span> <span class="st">"true"</span></span>
+<span id="cb43-7"><a href="#cb43-7"></a>  )<span class="op">;</span></span>
+<span id="cb43-8"><a href="#cb43-8"></a></span>
+<span id="cb43-9"><a href="#cb43-9"></a>  <span class="cf">if</span> (<span class="op">!</span>script) {</span>
+<span id="cb43-10"><a href="#cb43-10"></a>    <span class="cf">return</span> <span class="fu">html</span><span class="vs">`&lt;div class="fcpython-quiz fcpython-quiz-warning"&gt;</span></span>
+<span id="cb43-11"><a href="#cb43-11"></a><span class="vs">      Quiz configuration was not found.</span></span>
+<span id="cb43-12"><a href="#cb43-12"></a><span class="vs">    &lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb43-13"><a href="#cb43-13"></a>  }</span>
+<span id="cb43-14"><a href="#cb43-14"></a></span>
+<span id="cb43-15"><a href="#cb43-15"></a>  script<span class="op">.</span><span class="at">dataset</span><span class="op">.</span><span class="at">fcpythonRendered</span> <span class="op">=</span> <span class="st">"true"</span><span class="op">;</span></span>
+<span id="cb43-16"><a href="#cb43-16"></a>  <span class="kw">const</span> quiz <span class="op">=</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(script<span class="op">.</span><span class="at">textContent</span>)<span class="op">;</span></span>
+<span id="cb43-17"><a href="#cb43-17"></a>  <span class="kw">const</span> container <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div class="fcpython-quiz"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb43-18"><a href="#cb43-18"></a>  <span class="kw">const</span> title <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"h3"</span>)<span class="op">;</span></span>
+<span id="cb43-19"><a href="#cb43-19"></a>  title<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> quiz<span class="op">.</span><span class="at">title</span><span class="op">;</span></span>
+<span id="cb43-20"><a href="#cb43-20"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(title)<span class="op">;</span></span>
+<span id="cb43-21"><a href="#cb43-21"></a></span>
+<span id="cb43-22"><a href="#cb43-22"></a>  <span class="kw">const</span> instructions <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb43-23"><a href="#cb43-23"></a>  instructions<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> quiz<span class="op">.</span><span class="at">instructions</span><span class="op">;</span></span>
+<span id="cb43-24"><a href="#cb43-24"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(instructions)<span class="op">;</span></span>
+<span id="cb43-25"><a href="#cb43-25"></a></span>
+<span id="cb43-26"><a href="#cb43-26"></a>  <span class="kw">const</span> feedbackNodes <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb43-27"><a href="#cb43-27"></a></span>
+<span id="cb43-28"><a href="#cb43-28"></a>  quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="fu">forEach</span>((question<span class="op">,</span> questionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb43-29"><a href="#cb43-29"></a>    <span class="kw">const</span> fieldset <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"fieldset"</span>)<span class="op">;</span></span>
+<span id="cb43-30"><a href="#cb43-30"></a>    fieldset<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-question"</span><span class="op">;</span></span>
+<span id="cb43-31"><a href="#cb43-31"></a></span>
+<span id="cb43-32"><a href="#cb43-32"></a>    <span class="kw">const</span> legend <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"legend"</span>)<span class="op">;</span></span>
+<span id="cb43-33"><a href="#cb43-33"></a>    legend<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>questionIndex <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="vs">. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">prompt</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb43-34"><a href="#cb43-34"></a>    fieldset<span class="op">.</span><span class="fu">appendChild</span>(legend)<span class="op">;</span></span>
+<span id="cb43-35"><a href="#cb43-35"></a></span>
+<span id="cb43-36"><a href="#cb43-36"></a>    question<span class="op">.</span><span class="at">options</span><span class="op">.</span><span class="fu">forEach</span>((option<span class="op">,</span> optionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb43-37"><a href="#cb43-37"></a>      <span class="kw">const</span> label <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"label"</span>)<span class="op">;</span></span>
+<span id="cb43-38"><a href="#cb43-38"></a>      label<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-option"</span><span class="op">;</span></span>
+<span id="cb43-39"><a href="#cb43-39"></a></span>
+<span id="cb43-40"><a href="#cb43-40"></a>      <span class="kw">const</span> input <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"input"</span>)<span class="op">;</span></span>
+<span id="cb43-41"><a href="#cb43-41"></a>      input<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"radio"</span><span class="op">;</span></span>
+<span id="cb43-42"><a href="#cb43-42"></a>      input<span class="op">.</span><span class="at">name</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">-</span><span class="sc">${</span>question<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb43-43"><a href="#cb43-43"></a>      input<span class="op">.</span><span class="at">value</span> <span class="op">=</span> <span class="bu">String</span>(optionIndex)<span class="op">;</span></span>
+<span id="cb43-44"><a href="#cb43-44"></a></span>
+<span id="cb43-45"><a href="#cb43-45"></a>      <span class="kw">const</span> text <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"span"</span>)<span class="op">;</span></span>
+<span id="cb43-46"><a href="#cb43-46"></a>      text<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> option<span class="op">;</span></span>
+<span id="cb43-47"><a href="#cb43-47"></a></span>
+<span id="cb43-48"><a href="#cb43-48"></a>      label<span class="op">.</span><span class="fu">appendChild</span>(input)<span class="op">;</span></span>
+<span id="cb43-49"><a href="#cb43-49"></a>      label<span class="op">.</span><span class="fu">appendChild</span>(text)<span class="op">;</span></span>
+<span id="cb43-50"><a href="#cb43-50"></a>      fieldset<span class="op">.</span><span class="fu">appendChild</span>(label)<span class="op">;</span></span>
+<span id="cb43-51"><a href="#cb43-51"></a>    })<span class="op">;</span></span>
+<span id="cb43-52"><a href="#cb43-52"></a></span>
+<span id="cb43-53"><a href="#cb43-53"></a>    <span class="kw">const</span> feedback <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb43-54"><a href="#cb43-54"></a>    feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb43-55"><a href="#cb43-55"></a>    feedback<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"aria-live"</span><span class="op">,</span> <span class="st">"polite"</span>)<span class="op">;</span></span>
+<span id="cb43-56"><a href="#cb43-56"></a>    feedbackNodes<span class="op">.</span><span class="fu">push</span>(feedback)<span class="op">;</span></span>
+<span id="cb43-57"><a href="#cb43-57"></a>    fieldset<span class="op">.</span><span class="fu">appendChild</span>(feedback)<span class="op">;</span></span>
+<span id="cb43-58"><a href="#cb43-58"></a>    container<span class="op">.</span><span class="fu">appendChild</span>(fieldset)<span class="op">;</span></span>
+<span id="cb43-59"><a href="#cb43-59"></a>  })<span class="op">;</span></span>
+<span id="cb43-60"><a href="#cb43-60"></a></span>
+<span id="cb43-61"><a href="#cb43-61"></a>  <span class="kw">const</span> actions <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb43-62"><a href="#cb43-62"></a>  actions<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-actions"</span><span class="op">;</span></span>
+<span id="cb43-63"><a href="#cb43-63"></a></span>
+<span id="cb43-64"><a href="#cb43-64"></a>  <span class="kw">const</span> check <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"button"</span>)<span class="op">;</span></span>
+<span id="cb43-65"><a href="#cb43-65"></a>  check<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"button"</span><span class="op">;</span></span>
+<span id="cb43-66"><a href="#cb43-66"></a>  check<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Check answers"</span><span class="op">;</span></span>
+<span id="cb43-67"><a href="#cb43-67"></a></span>
+<span id="cb43-68"><a href="#cb43-68"></a>  <span class="kw">const</span> reset <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"button"</span>)<span class="op">;</span></span>
+<span id="cb43-69"><a href="#cb43-69"></a>  reset<span class="op">.</span><span class="at">type</span> <span class="op">=</span> <span class="st">"button"</span><span class="op">;</span></span>
+<span id="cb43-70"><a href="#cb43-70"></a>  reset<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Reset"</span><span class="op">;</span></span>
+<span id="cb43-71"><a href="#cb43-71"></a></span>
+<span id="cb43-72"><a href="#cb43-72"></a>  <span class="kw">const</span> score <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"p"</span>)<span class="op">;</span></span>
+<span id="cb43-73"><a href="#cb43-73"></a>  score<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-score"</span><span class="op">;</span></span>
+<span id="cb43-74"><a href="#cb43-74"></a>  score<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"aria-live"</span><span class="op">,</span> <span class="st">"polite"</span>)<span class="op">;</span></span>
+<span id="cb43-75"><a href="#cb43-75"></a></span>
+<span id="cb43-76"><a href="#cb43-76"></a>  check<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb43-77"><a href="#cb43-77"></a>    <span class="kw">let</span> correctCount <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb43-78"><a href="#cb43-78"></a></span>
+<span id="cb43-79"><a href="#cb43-79"></a>    quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="fu">forEach</span>((question<span class="op">,</span> questionIndex) <span class="kw">=&gt;</span> {</span>
+<span id="cb43-80"><a href="#cb43-80"></a>      <span class="kw">const</span> selected <span class="op">=</span> container<span class="op">.</span><span class="fu">querySelector</span>(</span>
+<span id="cb43-81"><a href="#cb43-81"></a>        <span class="vs">`input[name="</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">-</span><span class="sc">${</span>question<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">"]:checked`</span></span>
+<span id="cb43-82"><a href="#cb43-82"></a>      )<span class="op">;</span></span>
+<span id="cb43-83"><a href="#cb43-83"></a>      <span class="kw">const</span> feedback <span class="op">=</span> feedbackNodes[questionIndex]<span class="op">;</span></span>
+<span id="cb43-84"><a href="#cb43-84"></a></span>
+<span id="cb43-85"><a href="#cb43-85"></a>      <span class="cf">if</span> (<span class="op">!</span>selected) {</span>
+<span id="cb43-86"><a href="#cb43-86"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">"Choose an answer before checking."</span><span class="op">;</span></span>
+<span id="cb43-87"><a href="#cb43-87"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb43-88"><a href="#cb43-88"></a>        <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb43-89"><a href="#cb43-89"></a>      }</span>
+<span id="cb43-90"><a href="#cb43-90"></a></span>
+<span id="cb43-91"><a href="#cb43-91"></a>      <span class="kw">const</span> selectedIndex <span class="op">=</span> <span class="bu">Number</span>(selected<span class="op">.</span><span class="at">value</span>)<span class="op">;</span></span>
+<span id="cb43-92"><a href="#cb43-92"></a>      <span class="cf">if</span> (selectedIndex <span class="op">===</span> question<span class="op">.</span><span class="at">answer_index</span>) {</span>
+<span id="cb43-93"><a href="#cb43-93"></a>        correctCount <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb43-94"><a href="#cb43-94"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`✅ Correct. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">explanation</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb43-95"><a href="#cb43-95"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback is-correct"</span><span class="op">;</span></span>
+<span id="cb43-96"><a href="#cb43-96"></a>      } <span class="cf">else</span> {</span>
+<span id="cb43-97"><a href="#cb43-97"></a>        <span class="kw">const</span> answer <span class="op">=</span> question<span class="op">.</span><span class="at">options</span>[question<span class="op">.</span><span class="at">answer_index</span>]<span class="op">;</span></span>
+<span id="cb43-98"><a href="#cb43-98"></a>        feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`❌ Not yet. Correct answer: </span><span class="sc">${</span>answer<span class="sc">}</span><span class="vs">. </span><span class="sc">${</span>question<span class="op">.</span><span class="at">explanation</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb43-99"><a href="#cb43-99"></a>        feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback is-incorrect"</span><span class="op">;</span></span>
+<span id="cb43-100"><a href="#cb43-100"></a>      }</span>
+<span id="cb43-101"><a href="#cb43-101"></a>    })<span class="op">;</span></span>
+<span id="cb43-102"><a href="#cb43-102"></a></span>
+<span id="cb43-103"><a href="#cb43-103"></a>    score<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="vs">`Score: </span><span class="sc">${</span>correctCount<span class="sc">}</span><span class="vs">/</span><span class="sc">${</span>quiz<span class="op">.</span><span class="at">questions</span><span class="op">.</span><span class="at">length</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb43-104"><a href="#cb43-104"></a>  })<span class="op">;</span></span>
+<span id="cb43-105"><a href="#cb43-105"></a></span>
+<span id="cb43-106"><a href="#cb43-106"></a>  reset<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"click"</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb43-107"><a href="#cb43-107"></a>    container<span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"input[type='radio']"</span>)<span class="op">.</span><span class="fu">forEach</span>((input) <span class="kw">=&gt;</span> {</span>
+<span id="cb43-108"><a href="#cb43-108"></a>      input<span class="op">.</span><span class="at">checked</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb43-109"><a href="#cb43-109"></a>    })<span class="op">;</span></span>
+<span id="cb43-110"><a href="#cb43-110"></a>    feedbackNodes<span class="op">.</span><span class="fu">forEach</span>((feedback) <span class="kw">=&gt;</span> {</span>
+<span id="cb43-111"><a href="#cb43-111"></a>      feedback<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb43-112"><a href="#cb43-112"></a>      feedback<span class="op">.</span><span class="at">className</span> <span class="op">=</span> <span class="st">"fcpython-quiz-feedback"</span><span class="op">;</span></span>
+<span id="cb43-113"><a href="#cb43-113"></a>    })<span class="op">;</span></span>
+<span id="cb43-114"><a href="#cb43-114"></a>    score<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb43-115"><a href="#cb43-115"></a>  })<span class="op">;</span></span>
+<span id="cb43-116"><a href="#cb43-116"></a></span>
+<span id="cb43-117"><a href="#cb43-117"></a>  actions<span class="op">.</span><span class="fu">appendChild</span>(check)<span class="op">;</span></span>
+<span id="cb43-118"><a href="#cb43-118"></a>  actions<span class="op">.</span><span class="fu">appendChild</span>(reset)<span class="op">;</span></span>
+<span id="cb43-119"><a href="#cb43-119"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(actions)<span class="op">;</span></span>
+<span id="cb43-120"><a href="#cb43-120"></a>  container<span class="op">.</span><span class="fu">appendChild</span>(score)<span class="op">;</span></span>
+<span id="cb43-121"><a href="#cb43-121"></a>  <span class="cf">return</span> container<span class="op">;</span></span>
+<span id="cb43-122"><a href="#cb43-122"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-2" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</section>
+<section id="a-compact-checklist" class="level2">
+<h2 class="anchored" data-anchor-id="a-compact-checklist">A compact checklist</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key points">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Key points
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><code>unexpected keyword argument</code> means a supplied keyword name is not accepted by the active callable signature.</li>
+<li>Calling a class normally initializes a new instance through <code>__init__</code>.</li>
+<li>A method is a function defined in a class, and an instance method receives the current instance through its first parameter, conventionally <code>self</code>.</li>
+<li>Positional arguments match by order; keyword arguments match by exact name.</li>
+<li>Missing <code>self</code> may produce <code>multiple values</code>, a positional-argument count error, or an unexpected-keyword error depending on the call.</li>
+<li>Fix the meaning of the mismatch instead of merely silencing the message.</li>
+<li>Inspect the active signature and rerun class definitions in notebooks before making broad changes.</li>
+</ul>
+</div>
+</div>
+<p>Continue with <a href="../../lessons/object-oriented-python/oop-basics.html">Object-Oriented Basics</a> to practice classes, instances, attributes, methods, and <code>self</code> in a broader lesson. Use <a href="../../lessons/debugging/error-messages.html">Error Messages</a> to study traceback reading in more detail. <!-- fcpython-faq-post: end --></p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6IntcbiAgY29uc3Qgc2NyaXB0cyA9IEFycmF5LmZyb20oXG4gICAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbChcInNjcmlwdC5mY3B5dGhvbi1vanMtcXVpei1jb25maWdcIilcbiAgKTtcbiAgY29uc3Qgc2NyaXB0ID0gc2NyaXB0cy5maW5kKFxuICAgIChub2RlKSA9PiBub2RlLmRhdGFzZXQuZmNweXRob25SZW5kZXJlZCAhPT0gXCJ0cnVlXCJcbiAgKTtcblxuICBpZiAoIXNjcmlwdCkge1xuICAgIHJldHVybiBodG1sYDxkaXYgY2xhc3M9XCJmY3B5dGhvbi1xdWl6IGZjcHl0aG9uLXF1aXotd2FybmluZ1wiPlxuICAgICAgUXVpeiBjb25maWd1cmF0aW9uIHdhcyBub3QgZm91bmQuXG4gICAgPC9kaXY+YDtcbiAgfVxuXG4gIHNjcmlwdC5kYXRhc2V0LmZjcHl0aG9uUmVuZGVyZWQgPSBcInRydWVcIjtcbiAgY29uc3QgcXVpeiA9IEpTT04ucGFyc2Uoc2NyaXB0LnRleHRDb250ZW50KTtcbiAgY29uc3QgY29udGFpbmVyID0gaHRtbGA8ZGl2IGNsYXNzPVwiZmNweXRob24tcXVpelwiPjwvZGl2PmA7XG4gIGNvbnN0IHRpdGxlID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImgzXCIpO1xuICB0aXRsZS50ZXh0Q29udGVudCA9IHF1aXoudGl0bGU7XG4gIGNvbnRhaW5lci5hcHBlbmRDaGlsZCh0aXRsZSk7XG5cbiAgY29uc3QgaW5zdHJ1Y3Rpb25zID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInBcIik7XG4gIGluc3RydWN0aW9ucy50ZXh0Q29udGVudCA9IHF1aXouaW5zdHJ1Y3Rpb25zO1xuICBjb250YWluZXIuYXBwZW5kQ2hpbGQoaW5zdHJ1Y3Rpb25zKTtcblxuICBjb25zdCBmZWVkYmFja05vZGVzID0gW107XG5cbiAgcXVpei5xdWVzdGlvbnMuZm9yRWFjaCgocXVlc3Rpb24sIHF1ZXN0aW9uSW5kZXgpID0+IHtcbiAgICBjb25zdCBmaWVsZHNldCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJmaWVsZHNldFwiKTtcbiAgICBmaWVsZHNldC5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotcXVlc3Rpb25cIjtcblxuICAgIGNvbnN0IGxlZ2VuZCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJsZWdlbmRcIik7XG4gICAgbGVnZW5kLnRleHRDb250ZW50ID0gYCR7cXVlc3Rpb25JbmRleCArIDF9LiAke3F1ZXN0aW9uLnByb21wdH1gO1xuICAgIGZpZWxkc2V0LmFwcGVuZENoaWxkKGxlZ2VuZCk7XG5cbiAgICBxdWVzdGlvbi5vcHRpb25zLmZvckVhY2goKG9wdGlvbiwgb3B0aW9uSW5kZXgpID0+IHtcbiAgICAgIGNvbnN0IGxhYmVsID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImxhYmVsXCIpO1xuICAgICAgbGFiZWwuY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LW9wdGlvblwiO1xuXG4gICAgICBjb25zdCBpbnB1dCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJpbnB1dFwiKTtcbiAgICAgIGlucHV0LnR5cGUgPSBcInJhZGlvXCI7XG4gICAgICBpbnB1dC5uYW1lID0gYCR7cXVpei5pZH0tJHtxdWVzdGlvbi5pZH1gO1xuICAgICAgaW5wdXQudmFsdWUgPSBTdHJpbmcob3B0aW9uSW5kZXgpO1xuXG4gICAgICBjb25zdCB0ZXh0ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInNwYW5cIik7XG4gICAgICB0ZXh0LnRleHRDb250ZW50ID0gb3B0aW9uO1xuXG4gICAgICBsYWJlbC5hcHBlbmRDaGlsZChpbnB1dCk7XG4gICAgICBsYWJlbC5hcHBlbmRDaGlsZCh0ZXh0KTtcbiAgICAgIGZpZWxkc2V0LmFwcGVuZENoaWxkKGxhYmVsKTtcbiAgICB9KTtcblxuICAgIGNvbnN0IGZlZWRiYWNrID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInBcIik7XG4gICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgZmVlZGJhY2suc2V0QXR0cmlidXRlKFwiYXJpYS1saXZlXCIsIFwicG9saXRlXCIpO1xuICAgIGZlZWRiYWNrTm9kZXMucHVzaChmZWVkYmFjayk7XG4gICAgZmllbGRzZXQuYXBwZW5kQ2hpbGQoZmVlZGJhY2spO1xuICAgIGNvbnRhaW5lci5hcHBlbmRDaGlsZChmaWVsZHNldCk7XG4gIH0pO1xuXG4gIGNvbnN0IGFjdGlvbnMgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiZGl2XCIpO1xuICBhY3Rpb25zLmNsYXNzTmFtZSA9IFwiZmNweXRob24tcXVpei1hY3Rpb25zXCI7XG5cbiAgY29uc3QgY2hlY2sgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiYnV0dG9uXCIpO1xuICBjaGVjay50eXBlID0gXCJidXR0b25cIjtcbiAgY2hlY2sudGV4dENvbnRlbnQgPSBcIkNoZWNrIGFuc3dlcnNcIjtcblxuICBjb25zdCByZXNldCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJidXR0b25cIik7XG4gIHJlc2V0LnR5cGUgPSBcImJ1dHRvblwiO1xuICByZXNldC50ZXh0Q29udGVudCA9IFwiUmVzZXRcIjtcblxuICBjb25zdCBzY29yZSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJwXCIpO1xuICBzY29yZS5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotc2NvcmVcIjtcbiAgc2NvcmUuc2V0QXR0cmlidXRlKFwiYXJpYS1saXZlXCIsIFwicG9saXRlXCIpO1xuXG4gIGNoZWNrLmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7XG4gICAgbGV0IGNvcnJlY3RDb3VudCA9IDA7XG5cbiAgICBxdWl6LnF1ZXN0aW9ucy5mb3JFYWNoKChxdWVzdGlvbiwgcXVlc3Rpb25JbmRleCkgPT4ge1xuICAgICAgY29uc3Qgc2VsZWN0ZWQgPSBjb250YWluZXIucXVlcnlTZWxlY3RvcihcbiAgICAgICAgYGlucHV0W25hbWU9XCIke3F1aXouaWR9LSR7cXVlc3Rpb24uaWR9XCJdOmNoZWNrZWRgXG4gICAgICApO1xuICAgICAgY29uc3QgZmVlZGJhY2sgPSBmZWVkYmFja05vZGVzW3F1ZXN0aW9uSW5kZXhdO1xuXG4gICAgICBpZiAoIXNlbGVjdGVkKSB7XG4gICAgICAgIGZlZWRiYWNrLnRleHRDb250ZW50ID0gXCJDaG9vc2UgYW4gYW5zd2VyIGJlZm9yZSBjaGVja2luZy5cIjtcbiAgICAgICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgICAgIHJldHVybjtcbiAgICAgIH1cblxuICAgICAgY29uc3Qgc2VsZWN0ZWRJbmRleCA9IE51bWJlcihzZWxlY3RlZC52YWx1ZSk7XG4gICAgICBpZiAoc2VsZWN0ZWRJbmRleCA9PT0gcXVlc3Rpb24uYW5zd2VyX2luZGV4KSB7XG4gICAgICAgIGNvcnJlY3RDb3VudCArPSAxO1xuICAgICAgICBmZWVkYmFjay50ZXh0Q29udGVudCA9IGDinIUgQ29ycmVjdC4gJHtxdWVzdGlvbi5leHBsYW5hdGlvbn1gO1xuICAgICAgICBmZWVkYmFjay5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotZmVlZGJhY2sgaXMtY29ycmVjdFwiO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgY29uc3QgYW5zd2VyID0gcXVlc3Rpb24ub3B0aW9uc1txdWVzdGlvbi5hbnN3ZXJfaW5kZXhdO1xuICAgICAgICBmZWVkYmFjay50ZXh0Q29udGVudCA9IGDinYwgTm90IHlldC4gQ29ycmVjdCBhbnN3ZXI6ICR7YW5zd2VyfS4gJHtxdWVzdGlvbi5leHBsYW5hdGlvbn1gO1xuICAgICAgICBmZWVkYmFjay5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotZmVlZGJhY2sgaXMtaW5jb3JyZWN0XCI7XG4gICAgICB9XG4gICAgfSk7XG5cbiAgICBzY29yZS50ZXh0Q29udGVudCA9IGBTY29yZTogJHtjb3JyZWN0Q291bnR9LyR7cXVpei5xdWVzdGlvbnMubGVuZ3RofWA7XG4gIH0pO1xuXG4gIHJlc2V0LmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7XG4gICAgY29udGFpbmVyLnF1ZXJ5U2VsZWN0b3JBbGwoXCJpbnB1dFt0eXBlPSdyYWRpbyddXCIpLmZvckVhY2goKGlucHV0KSA9PiB7XG4gICAgICBpbnB1dC5jaGVja2VkID0gZmFsc2U7XG4gICAgfSk7XG4gICAgZmVlZGJhY2tOb2Rlcy5mb3JFYWNoKChmZWVkYmFjaykgPT4ge1xuICAgICAgZmVlZGJhY2sudGV4dENvbnRlbnQgPSBcIlwiO1xuICAgICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgfSk7XG4gICAgc2NvcmUudGV4dENvbnRlbnQgPSBcIlwiO1xuICB9KTtcblxuICBhY3Rpb25zLmFwcGVuZENoaWxkKGNoZWNrKTtcbiAgYWN0aW9ucy5hcHBlbmRDaGlsZChyZXNldCk7XG4gIGNvbnRhaW5lci5hcHBlbmRDaGlsZChhY3Rpb25zKTtcbiAgY29udGFpbmVyLmFwcGVuZENoaWxkKHNjb3JlKTtcbiAgcmV0dXJuIGNvbnRhaW5lcjtcbn1cbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMiIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6IntcbiAgY29uc3Qgc2NyaXB0cyA9IEFycmF5LmZyb20oXG4gICAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbChcInNjcmlwdC5mY3B5dGhvbi1vanMtcXVpei1jb25maWdcIilcbiAgKTtcbiAgY29uc3Qgc2NyaXB0ID0gc2NyaXB0cy5maW5kKFxuICAgIChub2RlKSA9PiBub2RlLmRhdGFzZXQuZmNweXRob25SZW5kZXJlZCAhPT0gXCJ0cnVlXCJcbiAgKTtcblxuICBpZiAoIXNjcmlwdCkge1xuICAgIHJldHVybiBodG1sYDxkaXYgY2xhc3M9XCJmY3B5dGhvbi1xdWl6IGZjcHl0aG9uLXF1aXotd2FybmluZ1wiPlxuICAgICAgUXVpeiBjb25maWd1cmF0aW9uIHdhcyBub3QgZm91bmQuXG4gICAgPC9kaXY+YDtcbiAgfVxuXG4gIHNjcmlwdC5kYXRhc2V0LmZjcHl0aG9uUmVuZGVyZWQgPSBcInRydWVcIjtcbiAgY29uc3QgcXVpeiA9IEpTT04ucGFyc2Uoc2NyaXB0LnRleHRDb250ZW50KTtcbiAgY29uc3QgY29udGFpbmVyID0gaHRtbGA8ZGl2IGNsYXNzPVwiZmNweXRob24tcXVpelwiPjwvZGl2PmA7XG4gIGNvbnN0IHRpdGxlID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImgzXCIpO1xuICB0aXRsZS50ZXh0Q29udGVudCA9IHF1aXoudGl0bGU7XG4gIGNvbnRhaW5lci5hcHBlbmRDaGlsZCh0aXRsZSk7XG5cbiAgY29uc3QgaW5zdHJ1Y3Rpb25zID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInBcIik7XG4gIGluc3RydWN0aW9ucy50ZXh0Q29udGVudCA9IHF1aXouaW5zdHJ1Y3Rpb25zO1xuICBjb250YWluZXIuYXBwZW5kQ2hpbGQoaW5zdHJ1Y3Rpb25zKTtcblxuICBjb25zdCBmZWVkYmFja05vZGVzID0gW107XG5cbiAgcXVpei5xdWVzdGlvbnMuZm9yRWFjaCgocXVlc3Rpb24sIHF1ZXN0aW9uSW5kZXgpID0+IHtcbiAgICBjb25zdCBmaWVsZHNldCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJmaWVsZHNldFwiKTtcbiAgICBmaWVsZHNldC5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotcXVlc3Rpb25cIjtcblxuICAgIGNvbnN0IGxlZ2VuZCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJsZWdlbmRcIik7XG4gICAgbGVnZW5kLnRleHRDb250ZW50ID0gYCR7cXVlc3Rpb25JbmRleCArIDF9LiAke3F1ZXN0aW9uLnByb21wdH1gO1xuICAgIGZpZWxkc2V0LmFwcGVuZENoaWxkKGxlZ2VuZCk7XG5cbiAgICBxdWVzdGlvbi5vcHRpb25zLmZvckVhY2goKG9wdGlvbiwgb3B0aW9uSW5kZXgpID0+IHtcbiAgICAgIGNvbnN0IGxhYmVsID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImxhYmVsXCIpO1xuICAgICAgbGFiZWwuY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LW9wdGlvblwiO1xuXG4gICAgICBjb25zdCBpbnB1dCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJpbnB1dFwiKTtcbiAgICAgIGlucHV0LnR5cGUgPSBcInJhZGlvXCI7XG4gICAgICBpbnB1dC5uYW1lID0gYCR7cXVpei5pZH0tJHtxdWVzdGlvbi5pZH1gO1xuICAgICAgaW5wdXQudmFsdWUgPSBTdHJpbmcob3B0aW9uSW5kZXgpO1xuXG4gICAgICBjb25zdCB0ZXh0ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInNwYW5cIik7XG4gICAgICB0ZXh0LnRleHRDb250ZW50ID0gb3B0aW9uO1xuXG4gICAgICBsYWJlbC5hcHBlbmRDaGlsZChpbnB1dCk7XG4gICAgICBsYWJlbC5hcHBlbmRDaGlsZCh0ZXh0KTtcbiAgICAgIGZpZWxkc2V0LmFwcGVuZENoaWxkKGxhYmVsKTtcbiAgICB9KTtcblxuICAgIGNvbnN0IGZlZWRiYWNrID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInBcIik7XG4gICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgZmVlZGJhY2suc2V0QXR0cmlidXRlKFwiYXJpYS1saXZlXCIsIFwicG9saXRlXCIpO1xuICAgIGZlZWRiYWNrTm9kZXMucHVzaChmZWVkYmFjayk7XG4gICAgZmllbGRzZXQuYXBwZW5kQ2hpbGQoZmVlZGJhY2spO1xuICAgIGNvbnRhaW5lci5hcHBlbmRDaGlsZChmaWVsZHNldCk7XG4gIH0pO1xuXG4gIGNvbnN0IGFjdGlvbnMgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiZGl2XCIpO1xuICBhY3Rpb25zLmNsYXNzTmFtZSA9IFwiZmNweXRob24tcXVpei1hY3Rpb25zXCI7XG5cbiAgY29uc3QgY2hlY2sgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiYnV0dG9uXCIpO1xuICBjaGVjay50eXBlID0gXCJidXR0b25cIjtcbiAgY2hlY2sudGV4dENvbnRlbnQgPSBcIkNoZWNrIGFuc3dlcnNcIjtcblxuICBjb25zdCByZXNldCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJidXR0b25cIik7XG4gIHJlc2V0LnR5cGUgPSBcImJ1dHRvblwiO1xuICByZXNldC50ZXh0Q29udGVudCA9IFwiUmVzZXRcIjtcblxuICBjb25zdCBzY29yZSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJwXCIpO1xuICBzY29yZS5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotc2NvcmVcIjtcbiAgc2NvcmUuc2V0QXR0cmlidXRlKFwiYXJpYS1saXZlXCIsIFwicG9saXRlXCIpO1xuXG4gIGNoZWNrLmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7XG4gICAgbGV0IGNvcnJlY3RDb3VudCA9IDA7XG5cbiAgICBxdWl6LnF1ZXN0aW9ucy5mb3JFYWNoKChxdWVzdGlvbiwgcXVlc3Rpb25JbmRleCkgPT4ge1xuICAgICAgY29uc3Qgc2VsZWN0ZWQgPSBjb250YWluZXIucXVlcnlTZWxlY3RvcihcbiAgICAgICAgYGlucHV0W25hbWU9XCIke3F1aXouaWR9LSR7cXVlc3Rpb24uaWR9XCJdOmNoZWNrZWRgXG4gICAgICApO1xuICAgICAgY29uc3QgZmVlZGJhY2sgPSBmZWVkYmFja05vZGVzW3F1ZXN0aW9uSW5kZXhdO1xuXG4gICAgICBpZiAoIXNlbGVjdGVkKSB7XG4gICAgICAgIGZlZWRiYWNrLnRleHRDb250ZW50ID0gXCJDaG9vc2UgYW4gYW5zd2VyIGJlZm9yZSBjaGVja2luZy5cIjtcbiAgICAgICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgICAgIHJldHVybjtcbiAgICAgIH1cblxuICAgICAgY29uc3Qgc2VsZWN0ZWRJbmRleCA9IE51bWJlcihzZWxlY3RlZC52YWx1ZSk7XG4gICAgICBpZiAoc2VsZWN0ZWRJbmRleCA9PT0gcXVlc3Rpb24uYW5zd2VyX2luZGV4KSB7XG4gICAgICAgIGNvcnJlY3RDb3VudCArPSAxO1xuICAgICAgICBmZWVkYmFjay50ZXh0Q29udGVudCA9IGDinIUgQ29ycmVjdC4gJHtxdWVzdGlvbi5leHBsYW5hdGlvbn1gO1xuICAgICAgICBmZWVkYmFjay5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotZmVlZGJhY2sgaXMtY29ycmVjdFwiO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgY29uc3QgYW5zd2VyID0gcXVlc3Rpb24ub3B0aW9uc1txdWVzdGlvbi5hbnN3ZXJfaW5kZXhdO1xuICAgICAgICBmZWVkYmFjay50ZXh0Q29udGVudCA9IGDinYwgTm90IHlldC4gQ29ycmVjdCBhbnN3ZXI6ICR7YW5zd2VyfS4gJHtxdWVzdGlvbi5leHBsYW5hdGlvbn1gO1xuICAgICAgICBmZWVkYmFjay5jbGFzc05hbWUgPSBcImZjcHl0aG9uLXF1aXotZmVlZGJhY2sgaXMtaW5jb3JyZWN0XCI7XG4gICAgICB9XG4gICAgfSk7XG5cbiAgICBzY29yZS50ZXh0Q29udGVudCA9IGBTY29yZTogJHtjb3JyZWN0Q291bnR9LyR7cXVpei5xdWVzdGlvbnMubGVuZ3RofWA7XG4gIH0pO1xuXG4gIHJlc2V0LmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCAoKSA9PiB7XG4gICAgY29udGFpbmVyLnF1ZXJ5U2VsZWN0b3JBbGwoXCJpbnB1dFt0eXBlPSdyYWRpbyddXCIpLmZvckVhY2goKGlucHV0KSA9PiB7XG4gICAgICBpbnB1dC5jaGVja2VkID0gZmFsc2U7XG4gICAgfSk7XG4gICAgZmVlZGJhY2tOb2Rlcy5mb3JFYWNoKChmZWVkYmFjaykgPT4ge1xuICAgICAgZmVlZGJhY2sudGV4dENvbnRlbnQgPSBcIlwiO1xuICAgICAgZmVlZGJhY2suY2xhc3NOYW1lID0gXCJmY3B5dGhvbi1xdWl6LWZlZWRiYWNrXCI7XG4gICAgfSk7XG4gICAgc2NvcmUudGV4dENvbnRlbnQgPSBcIlwiO1xuICB9KTtcblxuICBhY3Rpb25zLmFwcGVuZENoaWxkKGNoZWNrKTtcbiAgYWN0aW9ucy5hcHBlbmRDaGlsZChyZXNldCk7XG4gIGNvbnRhaW5lci5hcHBlbmRDaGlsZChhY3Rpb25zKTtcbiAgY29udGFpbmVyLmFwcGVuZENoaWxkKHNjb3JlKTtcbiAgcmV0dXJuIGNvbnRhaW5lcjtcbn1cbiJ9XX0=
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../../lessons/faq";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "../..";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/freecampus\.github\.io\/python\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../lessons/faq/index.html" class="pagination-link" aria-label="FAQ and Common Issues">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">FAQ and Common Issues</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../lessons/faq/running-code-and-output.html" class="pagination-link" aria-label="Running Code and Understanding Output">
+        <span class="nav-page-text">Running Code and Understanding Output</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>FreeCampus Python — learn by building, explaining, and debugging.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/freecampus/python/edit/main/lessons/faq/unexpected-keyword-arguments-in-classes.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/freecampus/python/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://github.com/freecampus/python">
+<p>GitHub</p>
+</a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
