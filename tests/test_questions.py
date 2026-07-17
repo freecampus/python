@@ -110,7 +110,12 @@ def _lesson_pages() -> list[Path]:
 
 def _content_lesson_pages() -> list[Path]:
     skipped = {"index.qmd", "learner-profiles.qmd", "instructor-notes.qmd"}
-    return [path for path in _lesson_pages() if path.name not in skipped]
+    return [
+        path
+        for path in _lesson_pages()
+        # FAQ entries are short standalone articles, not structured lessons.
+        if path.name not in skipped and "faq" not in path.parts
+    ]
 
 
 def _front_matter(path: Path) -> str:

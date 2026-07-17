@@ -6,6 +6,9 @@ execute:
 categories: [faq, debugging, beginner]
 order: 261
 colab_notebook: "notebooks/lessons/faq/index.ipynb"
+page-layout: full
+toc: false
+body-classes: faq-hub
 ---
 {{< include ../_includes/colab-link.qmd >}}
 
@@ -37,21 +40,34 @@ practice.
 
 Choose the article whose questions sound most like your current problem.
 
-- [Unexpected Keyword Arguments in Classes](unexpected-keyword-arguments-in-classes.qmd)
-  - Why did my class reject a keyword argument?
-  - How do class calls connect to `__init__`?
-  - Why must an instance method begin with `self`?
-  - How do positional and keyword arguments reach parameters?
-- [Running Code and Understanding Output](running-code-and-output.qmd)
-  - Why did nothing print?
-  - Why can a notebook give an old or surprising result?
-  - What is the difference between displaying, printing, and returning a value?
-  - When should I restart the runtime?
-- [Names, Values, and Types](names-values-and-types.qmd)
-  - Why is my variable undefined?
-  - Why did assigning or changing a name produce an unexpected value?
-  - Why does `input()` return text?
-  - Why can Python not combine a string and a number?
+::: {.course-grid}
+::: {.course-card}
+### [Unexpected keyword arguments](unexpected-keyword-arguments-in-classes.qmd)
+
+Understand why a class rejected a keyword, how calls reach `__init__`, and why
+instance methods begin with `self`.
+
+[Read the article](unexpected-keyword-arguments-in-classes.qmd){.card-link}
+:::
+
+::: {.course-card}
+### [Running code and output](running-code-and-output.qmd)
+
+Find out why nothing printed, why a notebook can show an old result, and when
+to restart the runtime.
+
+[Read the article](running-code-and-output.qmd){.card-link}
+:::
+
+::: {.course-card}
+### [Names, values, and types](names-values-and-types.qmd)
+
+Debug undefined variables, surprising assignments, text from `input()`, and
+operations that combine incompatible types.
+
+[Read the article](names-values-and-types.qmd){.card-link}
+:::
+:::
 
 ::: {.callout-tip title="Search with the symptom"}
 Search for the words Python showed you and describe what happened, not only
