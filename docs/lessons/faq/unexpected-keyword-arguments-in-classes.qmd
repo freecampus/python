@@ -7,122 +7,31 @@ categories: [faq, object-oriented-python, debugging, beginner]
 order: 262
 colab_notebook: "notebooks/lessons/faq/unexpected-keyword-arguments-in-classes.ipynb"
 ---
-::: {.lesson-meta}
-- **Level:** Beginner moving into classes
-- **Estimated time:** 50–65 minutes
-- **You will learn:** Trace how Python matches class and method arguments, then fix unexpected keyword and missing-`self` errors.
-- **Practice in:** Google Colab, Jupyter, or VS Code
-:::
-
 {{< include ../_includes/colab-link.qmd >}}
 
-<!-- fcpython-lab: start -->
-## Questions
-
-- What does `got an unexpected keyword argument` mean?
-- How does calling a class connect to its `__init__` method?
-- What is the difference between a function, method, parameter, and argument?
-- Why must an instance method normally begin with `self`?
-- How can a function signature reveal the smallest useful fix?
-
-## Objectives
-
-- Read the last line of an argument-related `TypeError` as a matching problem.
-- Match positional and keyword arguments to the parameters in a definition.
-- Explain which object `self` refers to during a method call.
-- Distinguish an unknown keyword from the related errors caused by missing
-  `self`.
-- Inspect and test a class signature before changing several lines.
-
-## Hands-on episode: Repair a class call
-
-Imagine a course project that creates a workshop with a title and level. The
-call supplies both pieces of information, but the class accepts only one.
-
-### Example 1.1
-
-Before running the code, compare the keywords in the final line with the
-parameters on the `__init__` line. Predict which keyword Python will reject.
-
-```python
-class Workshop:
-    def __init__(self, title):
-        self.title = title
-
-workshop = Workshop(title="Python", level="beginner")
-```
-
-Python reports:
-
-```text
-TypeError: Workshop.__init__() got an unexpected keyword argument 'level'
-```
-
-### Explain Example 1.1
-
-- `class Workshop:` defines a new class named `Workshop`.
-- `def __init__(self, title):` defines how a new workshop is initialized. Its
-  caller-supplied parameter is `title`.
-- `self.title = title` stores the supplied title on the new instance.
-- `Workshop(...)` asks Python to create a workshop instance and initialize it.
-- Python supplies the new instance to `self` automatically.
-- The call supplies `title`, which matches the definition, and `level`, which
-  does not. Python stops before the assignment to `workshop` completes.
-
-### Challenge 1.1
-
-::: {.callout-note title="Challenge"}
-Add `level` to the initializer and store it as `self.level`. Predict what the
-two print calls below will show, then run the repaired class.
+::: {.callout-tip title="Want to run the examples?"}
+This FAQ is designed to work as a standalone article. The **Open in Colab**
+button above opens an optional notebook where you can run the examples one at a
+time, inspect the errors, and try each repair.
 :::
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+<!-- fcpython-faq-post: start -->
+A class call can look perfectly readable and still fail because one supplied
+keyword does not match the active method signature. The error is small, but it
+reveals how classes, methods, `self`, parameters, and arguments fit together.
 
-```python
-class Workshop:
-    def __init__(self, title, level):
-        self.title = title
-        self.level = level
+## Short answer
 
-workshop = Workshop(title="Python", level="beginner")
-print(workshop.title)
-print(workshop.level)
-```
+`got an unexpected keyword argument 'level'` means the call supplied a named
+argument, `level`, but the function or method Python called has no parameter
+with that exact name. Compare the call with the active definition. Correct a
+typo, remove data that does not belong, or declare and store a real parameter.
 
-The outputs are `Python` and `beginner`. Adding the parameter allows Python to
-match the keyword. Adding `self.level = level` keeps that value on the instance
-so later code can use it.
+For ordinary instance methods, also verify that `self` is the first parameter.
+A missing `self` changes how every visible argument is matched and may produce
+this error or a related message such as `got multiple values for argument`.
 
-</details>
-
-### Debugging checkpoint 1.1
-
-::: {.callout-warning title="Debugging checkpoint"}
-Do not add every rejected keyword to the class automatically. First ask whether
-the call contains the wrong name or the class genuinely needs that information.
-The smallest correct fix may be changing the call rather than expanding the
-class.
-:::
-
-Record four clues:
-
-- **Symptom:** `level` is an unexpected keyword.
-- **Definition:** `__init__` declares `self` and `title`.
-- **Call:** the caller supplies `title` and `level`.
-- **Decision:** this workshop should keep a level, so declare and store it.
-
-## Key points
-
-- An unexpected keyword does not match any accepted parameter name.
-- A class call commonly sends its arguments to `__init__`.
-- Python supplies the current instance to an instance method automatically.
-- Missing `self` can produce several related argument errors, not always the
-  exact words `unexpected keyword argument`.
-- Compare the call with the definition before choosing a fix.
-<!-- fcpython-lab: end -->
-
-## 1. What does the error actually mean?
+## What does the error actually mean?
 
 The error is a `TypeError` because Python found a mismatch between a callable's
 definition and the arguments used to call it.
@@ -159,7 +68,7 @@ definition. This avoids overlooking a small difference such as `level`,
 `levels`, or `Level`.
 :::
 
-## 2. How do classes and instances reach `__init__`?
+## How do classes and instances reach `__init__`?
 
 A **class** defines a kind of object. An **instance** is one object created from
 that class.
@@ -233,7 +142,7 @@ self.level = level
 Without the attribute assignment, the parameter exists only while the method is
 running.
 
-## 3. How are functions and methods related?
+## How are functions and methods related?
 
 A **function** is a named block of reusable code:
 
@@ -278,7 +187,7 @@ makes that normally automatic argument visible.
 
 This is why an instance method needs a first parameter for the instance.
 
-## 4. What is `self`, and why must it come first?
+## What is `self`, and why must it come first?
 
 `self` is the conventional name for the instance currently receiving a method
 call.
@@ -384,7 +293,7 @@ the class with the wrong design. First make sure every instance method has
 arguments.
 :::
 
-### Check your understanding
+### Quick check: `self` and method binding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
@@ -434,7 +343,7 @@ arguments.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## 5. How do positional and keyword arguments match parameters?
+## How do positional and keyword arguments match parameters?
 
 A **parameter** is a name in a function or method definition. An **argument** is
 a value supplied in a call.
@@ -502,7 +411,7 @@ TypeError: make_label() got multiple values for argument 'title'
 | `got multiple values for argument 'title'` | Two arguments both reached `title`. | Check mixed arguments and missing `self`. |
 | `takes 2 positional arguments but 3 were given` | More positional values arrived than parameters can receive. | Remember the automatic instance for methods. |
 
-## 6. What are the correct fixes for an unexpected keyword?
+## Which fix matches the program?
 
 There is no single repair. Choose the one that matches the program's meaning.
 
@@ -588,7 +497,7 @@ validates `kwargs`. That can move the bug farther from its cause. Use `**kwargs`
 when the design genuinely needs to collect or forward flexible named arguments,
 not merely to hide a useful error.
 
-## 7. How can I inspect what a class accepts?
+## How can I inspect what a class accepts?
 
 The most reliable comparison uses the running code, not memory.
 
@@ -652,7 +561,7 @@ rejects it:
 See [Running Code and Understanding Output](running-code-and-output.qmd) for a
 longer explanation of notebook state.
 
-## 8. Where can a hidden constructor signature come from?
+## Where can a hidden constructor signature come from?
 
 Sometimes the accepted parameters are generated or inherited rather than
 written directly beside the failing call.
@@ -712,7 +621,7 @@ inspect the initializer that Python actually calls. See
 [Object-Oriented Design](../object-oriented-python/oop-design.qmd) when you are
 ready to study parent and child classes.
 
-## 9. A repeatable debugging routine
+## A repeatable debugging routine
 
 Use this routine for constructors, methods, ordinary functions, dataclasses,
 and library APIs.
@@ -740,7 +649,7 @@ piece at a time until the mismatch returns.
 For a complete method of preparing code to share, use
 [Minimal Reproducible Examples](../debugging/minimal-reproducible-examples.qmd).
 
-## Practice: diagnose three class calls
+## Try three diagnoses in Colab
 
 For each case, predict the message family, name the mismatch, and make the
 smallest meaningful repair.
@@ -818,7 +727,7 @@ If active status does not belong in this class, remove it from the call instead.
 
 </details>
 
-## Check your debugging decisions
+## Check the diagnosis
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
@@ -880,7 +789,7 @@ If active status does not belong in this class, remove it from the call instead.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Key points to carry forward
+## A compact checklist
 
 ::: {.callout-tip title="Key points"}
 - `unexpected keyword argument` means a supplied keyword name is not accepted by
@@ -900,3 +809,4 @@ Continue with [Object-Oriented Basics](../object-oriented-python/oop-basics.qmd)
 to practice classes, instances, attributes, methods, and `self` in a broader
 lesson. Use [Error Messages](../debugging/error-messages.qmd) to study traceback
 reading in more detail.
+<!-- fcpython-faq-post: end -->

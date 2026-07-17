@@ -7,120 +7,31 @@ categories: [faq, variables, types, beginner]
 order: 264
 colab_notebook: "notebooks/lessons/faq/names-values-and-types.ipynb"
 ---
-::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 40–55 minutes
-- **You will learn:** Inspect names and types to explain common assignment, input, and conversion problems.
-- **Practice in:** Google Colab, Jupyter, or VS Code
-:::
-
 {{< include ../_includes/colab-link.qmd >}}
 
-<!-- fcpython-lab: start -->
-## Questions
-
-- Why does Python say that a variable is not defined?
-- What happens when one name is assigned the value of another name?
-- Why does `input()` produce text even when the learner types digits?
-- How should you fix an operation that receives the wrong type of value?
-
-## Objectives
-
-- Use a `NameError` message to check spelling and execution order.
-- Trace assignments without treating a variable as a permanent labeled box.
-- Inspect a value with `type(...)` before choosing a conversion.
-- Convert user input at the point where the program requires a number.
-
-## Hands-on episode: Turn typed digits into a number
-
-A learner enters `12` and expects Python to add `3`, but Python reports a
-`TypeError`. Reproduce the cause with a fixed value before involving interactive
-input.
-
-### Example 1.1
-
-Predict the error type and identify the two values involved before running.
-
-```python
-typed_age = "12"
-next_age = typed_age + 1
-print(next_age)
-```
-
-Python stops on the second line with a `TypeError`. The quotes make `"12"` a
-string. The value `1` is an integer. The `+` operation cannot add those two
-different kinds of values.
-
-### Explain Example 1.1
-
-- `typed_age = "12"` gives `typed_age` a text value containing two digit
-  characters.
-- `next_age = typed_age + 1` asks `+` to combine a string and an integer.
-- Python does not guess whether the program intends text joining or arithmetic.
-- The assignment to `next_age` never completes because the operation raises an
-  error first.
-- `print(next_age)` does not run.
-
-Inspect the evidence and convert deliberately:
-
-```python
-typed_age = "12"
-print(type(typed_age))
-age = int(typed_age)
-next_age = age + 1
-print(next_age)
-```
-
-The first output is `<class 'str'>`. The second is `13`.
-
-### Challenge 1.1
-
-::: {.callout-note title="Challenge"}
-Change `typed_age` to `"20"`. Predict both printed lines, run the code, and
-explain exactly where the value changes from text into an integer.
+::: {.callout-tip title="Want to try the code?"}
+This FAQ can be read as a standalone article. The **Open in Colab** button above
+opens an optional notebook if you want to run the examples, inspect each type,
+and work through the fixes step by step.
 :::
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+<!-- fcpython-faq-post: start -->
+Many beginner errors become less mysterious when you ask two concrete
+questions: which name is Python reading, and what type of value does that name
+refer to right now?
 
-```python
-typed_age = "20"
-print(type(typed_age))
-age = int(typed_age)
-next_age = age + 1
-print(next_age)
-```
+## Short answer
 
-The type line still reports `str` because `typed_age` stores text. The call
-`int(typed_age)` creates the integer `20`, which is assigned to `age`. Adding
-`1` then creates `21`.
+A `NameError` means the requested name is unavailable at that moment. Check its
+exact spelling, whether its assignment ran first, and whether it was created in
+a different scope.
 
-</details>
+A `TypeError` involving text and numbers means the operation received types that
+do not work together. Remember that `input()` returns text. Inspect with
+`type(...)`, decide whether the program means arithmetic or text joining, and
+then convert deliberately.
 
-### Debugging checkpoint 1.1
-
-::: {.callout-warning title="Debugging checkpoint"}
-Do not add `str(...)` or `int(...)` only to silence a `TypeError`. First decide
-what the operation means. A total usually needs numbers; a display message
-usually needs text or comma-separated `print` arguments.
-:::
-
-Record the investigation:
-
-- **Symptom:** `+` raises `TypeError`.
-- **Clue:** `type(typed_age)` is `str` while `type(1)` is `int`.
-- **Change:** convert the digit string once with `int(...)`.
-- **Result:** numeric addition produces `13`.
-
-## Key points
-
-- `NameError` means a requested name is unavailable at that moment.
-- Assignment makes a name refer to a value; it does not create a live formula.
-- `input()` always returns a string.
-- Inspect types and decide the intended operation before converting values.
-<!-- fcpython-lab: end -->
-
-## 1. Why is my variable undefined?
+## Why is my variable undefined?
 
 **Symptom:** Python reports a message like:
 
@@ -216,7 +127,7 @@ evidence about the program's current state, not a judgment about the learner.
 For more traceback practice, continue with
 [Error Messages](../debugging/error-messages.qmd).
 
-## 2. Why did assigning one name produce an unexpected value?
+## Why did assigning one name produce an unexpected value?
 
 Assignment evaluates the right side first, then makes the name on the left refer
 to that resulting value.
@@ -303,7 +214,7 @@ colors.copy()` and compare the evidence.
 For deeper practice with mutation and copying, use
 [Lists](../data-structures/lists.qmd).
 
-## Check names and assignments
+## Quick check: names and assignments
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
@@ -353,7 +264,7 @@ For deeper practice with mutation and copying, use
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## 3. Why does `input()` return text?
+## Why does `input()` return text?
 
 Keyboard input arrives as characters. Python cannot know whether `12` means an
 age, part of an address, an identifier with leading zeroes, or text that should
@@ -404,7 +315,7 @@ or postal code is usually text even when it contains digits. Convert only when
 the program needs numeric behavior such as arithmetic or numeric comparison.
 :::
 
-## 4. Why can Python not combine a string and a number?
+## Why can Python not combine a string and a number?
 
 The `+` symbol has more than one meaning:
 
@@ -494,7 +405,7 @@ For deeper instruction about these types, continue with
 [Values, Variables, and Types](../core-python/values-variables-types.qmd) and
 [Strings, Input, and Output](../core-python/strings-input-output.qmd).
 
-## Practice: build a small order total
+## Try an order total in Colab
 
 Start with fixed text so the experiment can be repeated without typing:
 
@@ -518,7 +429,7 @@ Then complete these changes one at a time:
 Keep the broken version long enough to record the symptom, clue, change, and
 result. A carefully explained error is useful practice.
 
-## Check types and conversions
+## Quick check: types and conversions
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
@@ -568,7 +479,7 @@ result. A carefully explained error is useful practice.
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Key points to carry forward
+## A compact checklist
 
 ::: {.callout-tip title="Key points"}
 - Read the exact missing name in a `NameError`, then check spelling, order, and
@@ -581,3 +492,4 @@ result. A carefully explained error is useful practice.
 - Inspect the value and its type, decide the intended operation, and only then
   choose a conversion.
 :::
+<!-- fcpython-faq-post: end -->

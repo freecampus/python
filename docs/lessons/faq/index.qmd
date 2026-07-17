@@ -10,15 +10,16 @@ colab_notebook: "notebooks/lessons/faq/index.ipynb"
 {{< include ../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## How to use this chapter hands-on
+## How to use this FAQ
 
 Use this chapter when Python does something surprising and you are not sure
-which lesson can help. Begin with the words that describe what you see, such as
+which article can help. Begin with the words that describe what you see, such as
 "unexpected keyword argument," "nothing printed," "this name is undefined,"
 or "Python will not add these values."
 
-Do not apply every suggested fix at once. Open the Colab notebook, copy the
-small example that best matches the symptom, and follow this routine:
+Each FAQ page is a standalone article: start with the short answer, then read as
+much of the explanation as you need. If you want to experiment, use its **Open
+in Colab** link and follow this optional routine:
 
 1. Find the symptom that resembles the problem.
 2. Predict one likely cause before applying a fix.
@@ -26,14 +27,15 @@ small example that best matches the symptom, and follow this routine:
 4. Change one thing, then run the example again.
 5. Explain what the result showed in one sentence.
 
-By the end of a lesson, keep one small troubleshooting note with four parts:
-**symptom**, **clue**, **change**, and **result**. That note becomes a reusable
-debugging tool for future projects.
+While experimenting, keep one small troubleshooting note with four parts:
+**symptom**, **clue**, **change**, and **result**. You can stop when the article
+answers your question or continue into the linked course lessons for structured
+practice.
 <!-- fcpython-chapter-lab: end -->
 
 ## Find your question
 
-Choose the page whose questions sound most like your current problem.
+Choose the article whose questions sound most like your current problem.
 
 - [Unexpected Keyword Arguments in Classes](unexpected-keyword-arguments-in-classes.qmd)
   - Why did my class reject a keyword argument?
@@ -152,6 +154,6 @@ When you encounter a repeated question that is not covered here, record:
 - the smallest change that fixed it; and
 - the lesson that explains the underlying concept.
 
-Questions with the same theme can become a cohesive FAQ lesson. A single
+Questions with the same theme can become a cohesive FAQ article. A single
 question that already has a full course lesson should become a short link rather
 than duplicated material.

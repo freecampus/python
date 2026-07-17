@@ -7,113 +7,31 @@ categories: [faq, notebooks, beginner]
 order: 263
 colab_notebook: "notebooks/lessons/faq/running-code-and-output.ipynb"
 ---
-::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Use visible evidence to diagnose missing or surprising output in scripts and notebooks.
-- **Practice in:** Google Colab, Jupyter, or VS Code
-:::
-
 {{< include ../_includes/colab-link.qmd >}}
 
-<!-- fcpython-lab: start -->
-## Questions
-
-- Why can correct code run without printing anything?
-- How are displaying, printing, and returning a value different?
-- Why can notebook cells produce old or surprising results?
-- When does restarting the runtime provide useful evidence?
-
-## Objectives
-
-- Run a small program and identify its calculation and output actions.
-- Explain the difference between a value, displayed output, printed output, and
-  a returned value.
-- Check notebook execution order before changing working code.
-- Restart a runtime safely, then rerun cells from top to bottom.
-
-## Hands-on episode: Make a calculation visible
-
-Suppose you are calculating the price of two notebooks. The cell finishes, but
-nothing appears below it. Start with the smallest version of that situation.
-
-### Example 1.1
-
-Predict whether this cell will show `6` before running it.
-
-```python
-notebook_price = 3
-total = notebook_price * 2
-```
-
-The cell runs successfully and stores `6` in `total`, but a Python script shows
-no output. A notebook also shows nothing because its final line is an assignment,
-not a bare expression.
-
-### Explain Example 1.1
-
-- `notebook_price = 3` gives the name `notebook_price` the integer value `3`.
-- `total = notebook_price * 2` reads that value, multiplies it by `2`, and gives
-  the result `6` the name `total`.
-- Neither line asks Python to communicate a result to the learner.
-- The calculation succeeded even though the result is not visible yet.
-
-Add one deliberate output action:
-
-```python
-notebook_price = 3
-total = notebook_price * 2
-print(total)
-```
-
-The third line reads the value stored under `total` and prints `6`.
-
-### Challenge 1.1
-
-::: {.callout-note title="Challenge"}
-Change the quantity from `2` to `4`. Before running the cell, write the value
-you expect `print(total)` to show. Run it and explain which line caused the
-result to change.
+::: {.callout-tip title="Want to try the code?"}
+You can read this FAQ as a standalone article. Use the **Open in Colab** button
+above if you want an optional notebook for running each snippet, changing one
+line, and comparing the result with your prediction.
 :::
 
-<details class="solution">
-<summary>Show one possible solution path</summary>
+<!-- fcpython-faq-post: start -->
+Code can finish without showing a value, and a notebook can use state that is
+not obvious from the order of cells on the page. Both situations become easier
+to diagnose when you separate calculation, output, and runtime state.
 
-```python
-notebook_price = 3
-total = notebook_price * 4
-print(total)
-```
+## Short answer
 
-The output is `12`. Only the multiplier changed, so the printed total changed
-from two groups of `3` to four groups of `3`.
+Python does not automatically print every value it calculates. Use
+`print(...)` when a script should deliberately show something. A notebook may
+display its final bare expression, but that behavior is supplied by the
+notebook interface and is not the same as printing.
 
-</details>
+When a notebook shows an old or surprising result, check which definition or
+assignment cell last ran. Editing a cell does not update the runtime until that
+cell executes again.
 
-### Debugging checkpoint 1.1
-
-::: {.callout-warning title="Debugging checkpoint"}
-Do not assume that invisible output means the calculation failed. Inspect the
-last line that ran. Does it calculate or assign a value, or does it deliberately
-display or print that value?
-:::
-
-Create a four-part note:
-
-- **Symptom:** the cell finishes without visible output.
-- **Clue:** the last line is an assignment.
-- **Change:** add `print(total)`.
-- **Result:** the stored value becomes visible.
-
-## Key points
-
-- A successful calculation does not automatically produce visible output.
-- `print(...)` is an action that sends a readable representation to the output.
-- Notebook state depends on which cells ran and in what order.
-- Restarting is useful only when followed by a top-to-bottom run and inspection.
-<!-- fcpython-lab: end -->
-
-## 1. Why did nothing print?
+## Why did nothing print?
 
 **Symptom:** Python finishes without an error, but the terminal or notebook does
 not show the result you expected.
@@ -163,7 +81,7 @@ Remove `print(total)` but leave the two markers. Predict the visible lines, run
 the code, and explain why the calculation still occurs.
 :::
 
-## 2. Why does a notebook display some values without `print`?
+## Why does a notebook display some values without `print`?
 
 An interactive notebook normally displays the value of the **last bare
 expression** in a cell.
@@ -212,7 +130,7 @@ The same line in a `.py` script normally produces no visible output. A
 `print(subtotal)` call is explicit in both environments.
 :::
 
-### Check your understanding
+### Quick check: visible output
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
@@ -262,7 +180,7 @@ The same line in a `.py` script normally produces no visible output. A
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## 3. What is the difference between printing and returning?
+## What is the difference between printing and returning?
 
 A function can calculate a value, print a value, return a value, or combine
 those actions. Printing and returning solve different problems.
@@ -318,7 +236,7 @@ error as evidence about which version provides a usable value.
 For a full introduction to function results, continue with
 [Function Basics](../functions/function-basics.qmd).
 
-## 4. Why did a notebook use an old value?
+## Why did a notebook use an old value?
 
 Notebook cells share a running Python process called a **runtime** or **kernel**.
 That process remembers names created by every cell that has run. The visual
@@ -363,7 +281,7 @@ flowchart LR
 
 :::
 
-## 5. When should I restart the runtime?
+## When should I restart the runtime?
 
 Restart when you need a clean test of whether the notebook works from the
 beginning. Common clues include:
@@ -396,7 +314,7 @@ For a fuller introduction to cells and runtimes, continue with
 traceback encountered during this routine, use
 [Error Messages](../debugging/error-messages.qmd).
 
-## Practice: diagnose the evidence
+## Try the state changes in Colab
 
 Run these cells in order:
 
@@ -430,7 +348,7 @@ Then complete three controlled experiments:
 
 </details>
 
-## Check your troubleshooting routine
+## Quick check: notebook state
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
@@ -480,7 +398,7 @@ Then complete three controlled experiments:
 
 {{< include ../_includes/ojs-quiz.qmd >}}
 
-## Key points to carry forward
+## A compact checklist
 
 ::: {.callout-tip title="Key points"}
 - Calculation and visible output are separate actions.
@@ -490,3 +408,4 @@ Then complete three controlled experiments:
 - Restart and run all is a controlled test, not a substitute for reading the
   first clue.
 :::
+<!-- fcpython-faq-post: end -->
