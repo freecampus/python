@@ -8,37 +8,30 @@ order: 261
 colab_notebook: "notebooks/lessons/faq/index.ipynb"
 page-layout: full
 toc: false
-body-classes: faq-hub
+body-classes: "faq-hub faq-article"
 ---
 {{< include ../_includes/colab-link.qmd >}}
-
-<!-- fcpython-chapter-lab: start -->
-## How to use this FAQ
-
-Use this chapter when Python does something surprising and you are not sure
-which article can help. Begin with the words that describe what you see, such as
-"unexpected keyword argument," "nothing printed," "this name is undefined,"
-or "Python will not add these values."
-
-Each FAQ page is a standalone article: start with the short answer, then read as
-much of the explanation as you need. If you want to experiment, use its **Open
-in Colab** link and follow this optional routine:
-
-1. Find the symptom that resembles the problem.
-2. Predict one likely cause before applying a fix.
-3. Run the smallest example and inspect the evidence.
-4. Change one thing, then run the example again.
-5. Explain what the result showed in one sentence.
-
-While experimenting, keep one small troubleshooting note with four parts:
-**symptom**, **clue**, **change**, and **result**. You can stop when the article
-answers your question or continue into the linked course lessons for structured
-practice.
-<!-- fcpython-chapter-lab: end -->
 
 ## Find your question
 
 Choose the article whose questions sound most like your current problem.
+
+::: {.fc-faq-search-panel}
+```{=html}
+<label for="fc-faq-search">Describe the symptom or error</label>
+<div class="fc-faq-search-wrap">
+  <span aria-hidden="true">⌕</span>
+  <input
+    id="fc-faq-search"
+    type="search"
+    placeholder="Try “keyword argument”, “nothing printed”, or “undefined”"
+    autocomplete="off"
+    data-fc-faq-search
+  >
+</div>
+<p class="fc-faq-search-count" data-fc-faq-count aria-live="polite">3 answers</p>
+```
+:::
 
 ::: {.course-grid}
 ::: {.course-card}
@@ -69,12 +62,42 @@ operations that combine incompatible types.
 :::
 :::
 
+::: {.fc-empty-state data-fc-faq-empty="" hidden=""}
+### No answer matches those words yet
+
+Try a shorter symptom, or use the site search for a lesson covering the topic.
+:::
+
 ::: {.callout-tip title="Search with the symptom"}
 Search for the words Python showed you and describe what happened, not only
 what you hoped would happen. For example, search for `unexpected keyword
 argument level`, `NameError undefined name`, or `input returns text` rather
 than `my code is broken`.
 :::
+
+<!-- fcpython-chapter-lab: start -->
+## How to use this FAQ
+
+Use this chapter when Python does something surprising and you are not sure
+which article can help. Begin with the words that describe what you see, such as
+"unexpected keyword argument," "nothing printed," "this name is undefined,"
+or "Python will not add these values."
+
+Each FAQ page is a standalone article: start with the short answer, then read as
+much of the explanation as you need. If you want to experiment, use its **Open
+in Colab** link and follow this optional routine:
+
+1. Find the symptom that resembles the problem.
+2. Predict one likely cause before applying a fix.
+3. Run the smallest example and inspect the evidence.
+4. Change one thing, then run the example again.
+5. Explain what the result showed in one sentence.
+
+While experimenting, keep one small troubleshooting note with four parts:
+**symptom**, **clue**, **change**, and **result**. You can stop when the article
+answers your question or continue into the linked course lessons for structured
+practice.
+<!-- fcpython-chapter-lab: end -->
 
 ## Questions answered elsewhere
 

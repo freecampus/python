@@ -1,0 +1,70 @@
+<header
+  id="title-block-header"
+  class="quarto-title-block default fc-learning-header"
+>
+  <div class="fc-title-context" aria-live="polite">
+    <span class="fc-title-context-label" data-fc-context
+      >FreeCampus Python</span
+    >
+    <span class="fc-title-position" data-fc-position></span>
+  </div>
+
+  <div class="fc-title-layout">
+    <div class="fc-title-copy">
+      $if(title)$
+      <h1 class="title">$title$</h1>
+      $endif$ $if(hide-description)$ $elseif(description)$
+      <div class="description">$description$</div>
+      $endif$
+
+      <div class="fc-title-chips" data-fc-title-chips>
+        $if(categories)$ $for(categories)$
+        <span class="fc-title-chip">$categories$</span>
+        $endfor$ $endif$
+      </div>
+    </div>
+
+    $if(colab_notebook)$
+    <div class="fc-title-actions">
+      <a
+        class="btn btn-primary fc-title-colab"
+        href="https://colab.research.google.com/github/freecampus/python/blob/gh-pages/$colab_notebook$"
+        target="_blank"
+        rel="noopener"
+      >
+        <span aria-hidden="true">↗</span>
+        Open in Colab
+      </a>
+      <button
+        class="fc-complete-button"
+        type="button"
+        data-fc-complete
+        aria-pressed="false"
+        hidden
+      >
+        <span class="fc-complete-icon" aria-hidden="true">✓</span>
+        <span data-fc-complete-label>Mark lesson complete</span>
+      </button>
+    </div>
+    $endif$
+  </div>
+
+  <div class="fc-lesson-progress" data-fc-lesson-progress hidden>
+    <div class="fc-progress-copy">
+      <span data-fc-progress-label>Course progress</span>
+      <span data-fc-progress-value>0%</span>
+    </div>
+    <div
+      class="fc-progress-track"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      data-fc-progress-track
+    >
+      <span data-fc-progress-bar></span>
+    </div>
+  </div>
+
+  $title-metadata.html()$
+</header>

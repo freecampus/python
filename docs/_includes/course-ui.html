@@ -1,0 +1,464 @@
+<script>
+  (() => {
+    "use strict";
+
+    const progressKey = "fcpython.progress.v1";
+    const lastLessonKey = "fcpython.last-lesson.v1";
+
+    const chapterStages = {
+      "getting-started": "start",
+      "core-python": "foundations",
+      "data-structures": "foundations",
+      functions: "foundations",
+      debugging: "build",
+      "files-and-data": "build",
+      "projects-and-environments": "build",
+      "code-quality": "build",
+      "object-oriented-python": "deeper",
+      "advanced-python-patterns": "deeper",
+      "scientific-python": "data",
+      "data-science": "data",
+      "machine-learning-ai": "data",
+      capstone: "project",
+      faq: "support",
+    };
+
+    const stageLabels = {
+      start: "Start here",
+      foundations: "Foundations",
+      build: "Build with Python",
+      deeper: "Go deeper",
+      data: "Data and AI",
+      project: "Final project",
+      support: "Quick help",
+    };
+
+    const chapterLessonCounts = {
+      "getting-started": 3,
+      "core-python": 5,
+      "data-structures": 5,
+      functions: 3,
+      debugging: 3,
+      faq: 3,
+      "files-and-data": 3,
+      "projects-and-environments": 4,
+      "code-quality": 4,
+      "object-oriented-python": 3,
+      "advanced-python-patterns": 5,
+      "scientific-python": 5,
+      "data-science": 5,
+      "machine-learning-ai": 5,
+      capstone: 3,
+    };
+
+    const catalogSupplementalTerms = {
+      faq: "unexpected keyword arguments classes running code output names values types NameError input",
+      capstone: "project selection planning testing README presentation rubric",
+    };
+
+    const courseLessonTotal = Object.entries(chapterLessonCounts)
+      .filter(([slug]) => slug !== "faq")
+      .reduce((total, [, count]) => total + count, 0);
+
+    function readJson(key, fallback) {
+      try {
+        return JSON.parse(window.localStorage.getItem(key)) || fallback;
+      } catch (_error) {
+        return fallback;
+      }
+    }
+
+    function writeJson(key, value) {
+      try {
+        window.localStorage.setItem(key, JSON.stringify(value));
+      } catch (_error) {
+        // The learning experience remains usable when storage is unavailable.
+      }
+    }
+
+    function pageKey(value = window.location.href) {
+      const url = new URL(value, window.location.href);
+      const marker = url.pathname.indexOf("/lessons/");
+
+      if (marker === -1) {
+        return "home";
+      }
+
+      return url.pathname
+        .slice(marker + 1)
+        .replace(/\.(html|qmd)$/, "")
+        .replace(/\/index$/, "")
+        .replace(/\/$/, "");
+    }
+
+    function siteBasePath() {
+      const pathname = window.location.pathname;
+      const marker = pathname.indexOf("/lessons/");
+
+      if (marker !== -1) {
+        return pathname.slice(0, marker + 1);
+      }
+
+      return pathname.replace(/[^/]*$/, "");
+    }
+
+    function hrefForKey(key) {
+      return `${siteBasePath()}${key}.html`;
+    }
+
+    function chapterSlug(key) {
+      return key.split("/")[1] || "";
+    }
+
+    function isLessonKey(key) {
+      return key.startsWith("lessons/") && key.split("/").length >= 3;
+    }
+
+    const progress = readJson(progressKey, {});
+    const currentKey = pageKey();
+    const sidebar = document.querySelector("#quarto-sidebar");
+    const lessonMeta = document.querySelector(".lesson-meta");
+    const isFaq =
+      currentKey === "lessons/faq" || currentKey.startsWith("lessons/faq/");
+    const isTrackable = Boolean(lessonMeta) && !isFaq;
+
+    function currentChapter() {
+      const active = sidebar?.querySelector("a.sidebar-link.active");
+      const group = active?.closest("ul.sidebar-section");
+      const groupRoot = group?.closest("li.sidebar-item-section");
+      const label = groupRoot?.querySelector(
+        ":scope > .sidebar-item-container .menu-text",
+      )?.textContent;
+      const links = group
+        ? [...group.querySelectorAll("a.sidebar-link[href]")]
+        : [...(sidebar?.querySelectorAll("a.sidebar-link[href]") || [])];
+      const lessonLinks = links.filter((link) =>
+        isLessonKey(pageKey(link.href)),
+      );
+      const position = lessonLinks.findIndex(
+        (link) => pageKey(link.href) === currentKey,
+      );
+
+      return {
+        label:
+          label?.trim() ||
+          document.querySelector(".nav-link.active")?.textContent.trim(),
+        lessonLinks,
+        position,
+      };
+    }
+
+    function enrichTitle() {
+      const context = document.querySelector("[data-fc-context]");
+      const position = document.querySelector("[data-fc-position]");
+      const chips = document.querySelector("[data-fc-title-chips]");
+      const chapter = currentChapter();
+
+      if (context) {
+        if (isFaq) {
+          context.textContent = "Python FAQ";
+        } else if (currentKey === "lessons") {
+          context.textContent = "Python curriculum";
+        } else if (isTrackable) {
+          context.textContent = chapter.label || "Python course";
+        } else if (currentKey.startsWith("lessons/")) {
+          context.textContent = "Course guide";
+        }
+      }
+
+      if (position && isTrackable && chapter.position >= 0) {
+        position.textContent = `Lesson ${chapter.position + 1} of ${
+          chapter.lessonLinks.length
+        }`;
+      }
+
+      chips?.querySelectorAll(".fc-title-chip").forEach((chip) => {
+        chip.textContent = chip.textContent
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      });
+    }
+
+    function paintSidebarCompletion() {
+      if (!sidebar) {
+        return;
+      }
+
+      sidebar.querySelectorAll("a.sidebar-link[href]").forEach((link) => {
+        link.classList.toggle(
+          "fc-is-complete",
+          Boolean(progress[pageKey(link.href)]),
+        );
+      });
+    }
+
+    function focusLessonNavigation() {
+      if (!sidebar || !isTrackable) {
+        return;
+      }
+
+      document.body.classList.add("fc-lesson-page");
+      const active = sidebar.querySelector("a.sidebar-link.active");
+      const activeSection = active?.closest("li.sidebar-item-section");
+      if (!activeSection) {
+        return;
+      }
+      const rootItems = sidebar.querySelectorAll(
+        ".sidebar-menu-container > ul > li.sidebar-item",
+      );
+      rootItems.forEach((item) => {
+        if (item !== activeSection) {
+          item.hidden = true;
+        }
+      });
+    }
+
+    function updateProgressHeader() {
+      const root = document.querySelector("[data-fc-lesson-progress]");
+      const button = document.querySelector("[data-fc-complete]");
+
+      if (!isTrackable || !root || !button) {
+        return;
+      }
+
+      const completed = Math.min(
+        courseLessonTotal,
+        Object.keys(progress).filter(
+          (key) =>
+            progress[key] &&
+            isLessonKey(key) &&
+            !key.startsWith("lessons/faq/"),
+        ).length,
+      );
+      const percent = Math.round((completed / courseLessonTotal) * 100);
+      const isComplete = Boolean(progress[currentKey]);
+      const label = button.querySelector("[data-fc-complete-label]");
+      const track = root.querySelector("[data-fc-progress-track]");
+
+      root.hidden = false;
+      button.hidden = false;
+      button.setAttribute("aria-pressed", String(isComplete));
+      button.classList.toggle("is-complete", isComplete);
+      if (label) {
+        label.textContent = isComplete
+          ? "Lesson complete"
+          : "Mark lesson complete";
+      }
+
+      root.querySelector(
+        "[data-fc-progress-label]",
+      ).textContent = `${completed} of ${courseLessonTotal} lessons complete`;
+      root.querySelector(
+        "[data-fc-progress-value]",
+      ).textContent = `${percent}%`;
+      root.querySelector("[data-fc-progress-bar]").style.width = `${percent}%`;
+      track?.setAttribute("aria-valuenow", String(percent));
+    }
+
+    function setupCompletionButton() {
+      const button = document.querySelector("[data-fc-complete]");
+      if (!button || !isTrackable) {
+        return;
+      }
+
+      button.addEventListener("click", () => {
+        if (progress[currentKey]) {
+          delete progress[currentKey];
+        } else {
+          progress[currentKey] = true;
+        }
+        writeJson(progressKey, progress);
+        paintSidebarCompletion();
+        updateProgressHeader();
+      });
+    }
+
+    function rememberCurrentLesson() {
+      if (!isTrackable) {
+        return;
+      }
+
+      writeJson(lastLessonKey, {
+        key: currentKey,
+        title:
+          document.querySelector("h1.title")?.textContent.trim() ||
+          document.title,
+      });
+    }
+
+    function setupResumePanel() {
+      const panel = document.querySelector("[data-fc-resume]");
+      const lastLesson = readJson(lastLessonKey, null);
+      if (!panel || !lastLesson?.key) {
+        return;
+      }
+
+      panel.querySelector("[data-fc-resume-title]").textContent =
+        lastLesson.title;
+      panel.querySelector("[data-fc-resume-link]").href = hrefForKey(
+        lastLesson.key,
+      );
+      panel.hidden = false;
+    }
+
+    function setupCatalog() {
+      const catalog = document.querySelector("[data-fc-catalog]");
+      if (!catalog) {
+        return;
+      }
+
+      const search = document.querySelector("[data-fc-catalog-search]");
+      const buttons = [...document.querySelectorAll("[data-fc-stage]")];
+      const cards = [...catalog.querySelectorAll(".fc-catalog-card")];
+      const count = document.querySelector("[data-fc-catalog-count]");
+      const empty = document.querySelector("[data-fc-catalog-empty]");
+      const sidebarLinks = [
+        ...(sidebar?.querySelectorAll("a.sidebar-link[href]") || []),
+      ];
+      const searchTextByCard = new Map();
+      let stage = "all";
+
+      cards.forEach((card) => {
+        const key = pageKey(card.dataset.coursePath);
+        const slug = chapterSlug(key);
+        const total = chapterLessonCounts[slug] || 0;
+        const completed = Object.keys(progress).filter(
+          (savedKey) => progress[savedKey] && savedKey.startsWith(`${key}/`),
+        ).length;
+        const percent = total ? Math.round((completed / total) * 100) : 0;
+        const bar = card.querySelector("[data-fc-card-progress-bar]");
+        const value = card.querySelector("[data-fc-card-progress-value]");
+        const chapterLink = sidebarLinks.find(
+          (link) => pageKey(link.href) === key,
+        );
+        const chapterSection = chapterLink?.closest("li.sidebar-item-section");
+
+        searchTextByCard.set(
+          card,
+          [
+            card.textContent,
+            chapterSection?.textContent,
+            catalogSupplementalTerms[slug],
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase(),
+        );
+
+        card.dataset.stage = chapterStages[slug] || "all";
+        const stageLabel = card.querySelector("[data-fc-card-stage]");
+        if (stageLabel) {
+          stageLabel.textContent =
+            stageLabels[card.dataset.stage] || "Learning path";
+        }
+        if (bar) {
+          bar.style.width = `${percent}%`;
+        }
+        if (value) {
+          value.textContent =
+            slug === "faq"
+              ? `${total} quick answers`
+              : `${completed}/${total} complete`;
+        }
+        if (slug === "faq") {
+          bar?.parentElement?.setAttribute("hidden", "");
+        }
+      });
+
+      const applyFilters = () => {
+        const query = search?.value.trim().toLowerCase() || "";
+        let visible = 0;
+
+        cards.forEach((card) => {
+          const searchText = searchTextByCard.get(card) || "";
+          const matchesText = !query || searchText.includes(query);
+          const matchesStage = stage === "all" || card.dataset.stage === stage;
+          const show = matchesText && matchesStage;
+          card.hidden = !show;
+          if (show) {
+            visible += 1;
+          }
+        });
+
+        if (count) {
+          count.textContent = `${visible} ${visible === 1 ? "path" : "paths"}`;
+        }
+        if (empty) {
+          empty.hidden = visible !== 0;
+        }
+      };
+
+      search?.addEventListener("input", applyFilters);
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          stage = button.dataset.fcStage;
+          buttons.forEach((item) => {
+            const selected = item === button;
+            item.classList.toggle("is-active", selected);
+            item.setAttribute("aria-pressed", String(selected));
+          });
+          applyFilters();
+        });
+      });
+
+      applyFilters();
+    }
+
+    function setupFaqSearch() {
+      const search = document.querySelector("[data-fc-faq-search]");
+      const cards = [...document.querySelectorAll(".faq-hub .course-card")];
+      const count = document.querySelector("[data-fc-faq-count]");
+      const empty = document.querySelector("[data-fc-faq-empty]");
+      if (!search || !cards.length) {
+        return;
+      }
+
+      const applySearch = () => {
+        const query = search.value.trim().toLowerCase();
+        let visible = 0;
+        cards.forEach((card) => {
+          const show = !query || card.textContent.toLowerCase().includes(query);
+          card.hidden = !show;
+          if (show) {
+            visible += 1;
+          }
+        });
+        if (count) {
+          count.textContent = `${visible} ${
+            visible === 1 ? "answer" : "answers"
+          }`;
+        }
+        if (empty) {
+          empty.hidden = visible !== 0;
+        }
+      };
+
+      search.addEventListener("input", applySearch);
+      applySearch();
+    }
+
+    function restoreSectionNavigationState() {
+      if (!currentKey.startsWith("lessons/faq")) {
+        return;
+      }
+
+      const faqLink = [
+        ...document.querySelectorAll(".navbar-nav a.nav-link[href]"),
+      ].find((link) => pageKey(link.href) === "lessons/faq");
+      faqLink?.classList.add("active");
+      faqLink?.setAttribute("aria-current", "page");
+    }
+
+    enrichTitle();
+    restoreSectionNavigationState();
+    focusLessonNavigation();
+    paintSidebarCompletion();
+    updateProgressHeader();
+    setupCompletionButton();
+    rememberCurrentLesson();
+    setupResumePanel();
+    setupCatalog();
+    setupFaqSearch();
+  })();
+</script>

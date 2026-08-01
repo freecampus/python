@@ -9,21 +9,20 @@ body-classes: landing-page
 ---
 
 ::: {.hero}
+::: {.hero-copy}
 ::: {.hero-kicker}
 Beginner-first Python course
 :::
 
-# Learn Python from zero
+# Learn Python by making things work
 
-Build practical confidence with short explanations, runnable examples, quizzes,
-debugging practice, diagrams, notebooks, and projects. Start in the browser with
-Google Colab, then grow into VS Code, Jupyter, testing, data science, and AI
-libraries.
+Build practical confidence with focused explanations, runnable examples,
+quizzes, debugging practice, and projects. Begin in the browser, then grow into
+real tools, data science, and AI.
 
 ::: {.hero-actions}
-[Start the course](lessons/getting-started/what-is-programming.qmd){.btn .btn-primary .btn-lg}
-[View the lesson path](lessons/index.qmd){.btn .btn-outline-primary .btn-lg}
-[Debug Python errors](lessons/debugging/error-messages.qmd){.btn .btn-outline-secondary .btn-lg}
+[Start learning](lessons/getting-started/what-is-programming.qmd){.btn .btn-primary .btn-lg}
+[Explore every path](lessons/index.qmd){.btn .btn-outline-primary .btn-lg}
 :::
 
 ::: {.hero-stats}
@@ -38,10 +37,45 @@ learning pages
 :::
 
 ::: {.hero-stat}
-**OJS**
-interactive quizzes
+**Free**
+in Colab
 :::
 :::
+:::
+
+::: {.hero-demo aria-label="A small Python example and its output"}
+```{=html}
+<div class="fc-demo-window">
+  <div class="fc-demo-toolbar">
+    <span class="fc-demo-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span>hello_python.py</span>
+    <span class="fc-demo-status"><i aria-hidden="true"></i> Ready</span>
+  </div>
+  <pre><code><span class="fc-code-muted"># Change the name, then run it</span>
+<span class="fc-code-name">learner</span> = <span class="fc-code-string">"Ada"</span>
+<span class="fc-code-function">print</span>(<span class="fc-code-string">f"Hello, {learner}!"</span>)</code></pre>
+  <div class="fc-demo-output">
+    <span>Output</span>
+    <strong>Hello, Ada!</strong>
+  </div>
+</div>
+
+<div class="fc-demo-loop" aria-label="The FreeCampus learning loop">
+  <span>1 · Predict</span>
+  <span>2 · Run</span>
+  <span>3 · Explain</span>
+  <span>4 · Modify</span>
+</div>
+```
+:::
+:::
+
+::: {.fc-resume-panel data-fc-resume="" hidden=""}
+<div>
+  <span class="fc-resume-eyebrow">Continue where you stopped</span>
+  <strong data-fc-resume-title>Your last lesson</strong>
+</div>
+[Resume lesson](lessons/index.qmd){.btn .btn-primary data-fc-resume-link=""}
 :::
 
 ::: {.course-grid .audience-grid}
@@ -83,13 +117,14 @@ usable.
 
 Each lesson follows a practical beginner loop:
 
-1. read the purpose of the concept;
-2. predict what a small example will do;
-3. run it in Colab, Jupyter, VS Code, or the terminal;
-4. answer one or more quick quizzes;
-5. explain the result in everyday language;
-6. change one small thing;
-7. debug using clues instead of guessing.
+::: {.learning-loop}
+1. **Understand** why the idea matters.
+2. **Predict** what a small example will do.
+3. **Run** it in Colab, Jupyter, VS Code, or the terminal.
+4. **Explain** the result in everyday language.
+5. **Modify** one small thing and predict again.
+6. **Debug** using evidence instead of guessing.
+:::
 
 ::: {.course-grid}
 ::: {.course-card}

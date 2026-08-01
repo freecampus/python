@@ -9,11 +9,71 @@ colab_notebook: "notebooks/lessons/index.ipynb"
 page-layout: full
 toc: false
 body-classes: course-hub
+listing:
+  - id: course-catalog
+    contents: "*/index.qmd"
+    sort: "order"
+    template: _listings/course-card.ejs.md
+    fields: [title, description, order]
+    filter-ui: false
+    sort-ui: false
 ---
 {{< include _includes/colab-link.qmd >}}
 
+## Choose a learning path
+
+If you are new to programming, follow the lessons in order. If you already know
+some Python, use the quizzes, debugging corners, and challenges to decide where
+to start.
+
+::: {.callout-tip title="Key idea"}
+Programming is not memorizing every command. Programming is learning how to
+break a problem into small steps, run experiments, read feedback, and improve.
+:::
+
+::: {.fc-catalog-tools}
+```{=html}
+<div class="fc-catalog-search-wrap">
+  <span aria-hidden="true">⌕</span>
+  <label class="visually-hidden" for="fc-catalog-search">Search the course</label>
+  <input
+    id="fc-catalog-search"
+    type="search"
+    placeholder="Search topics, tools, or outcomes..."
+    autocomplete="off"
+    data-fc-catalog-search
+  >
+</div>
+
+<div class="fc-stage-filters" role="group" aria-label="Filter by learning stage">
+  <button class="is-active" type="button" data-fc-stage="all" aria-pressed="true">All paths</button>
+  <button type="button" data-fc-stage="start" aria-pressed="false">Start here</button>
+  <button type="button" data-fc-stage="foundations" aria-pressed="false">Foundations</button>
+  <button type="button" data-fc-stage="build" aria-pressed="false">Build</button>
+  <button type="button" data-fc-stage="deeper" aria-pressed="false">Go deeper</button>
+  <button type="button" data-fc-stage="data" aria-pressed="false">Data & AI</button>
+  <button type="button" data-fc-stage="project" aria-pressed="false">Project</button>
+  <button type="button" data-fc-stage="support" aria-pressed="false">Quick help</button>
+</div>
+
+<div class="fc-catalog-summary" aria-live="polite">
+  <span data-fc-catalog-count>15 paths</span>
+  <span>Your progress stays in this browser.</span>
+</div>
+```
+:::
+
+::: {#course-catalog .fc-course-catalog data-fc-catalog=""}
+:::
+
+::: {.fc-empty-state data-fc-catalog-empty="" hidden=""}
+### No path matches that search
+
+Try a broader word such as `files`, `data`, `testing`, or `beginner`.
+:::
+
 <!-- fcpython-chapter-lab: start -->
-## How to use this chapter hands-on
+## A practical study routine
 
 This chapter is about **the full course path**. Do not read it like a reference manual.
 Use it as a sequence of short labs. For each lesson, open the Colab notebook
@@ -29,189 +89,6 @@ If time is short, study one lesson deeply instead of skimming all of them.
 A deeply understood example is one you can run again, explain in plain
 language, modify safely, and debug when it breaks.
 <!-- fcpython-chapter-lab: end -->
-
-
-## How to use this course
-
-If you are new to programming, follow the lessons in order. If you already know
-some Python, use the quizzes, debugging corners, and challenges to decide where
-to start.
-
-::: {.callout-tip title="Key idea"}
-Programming is not memorizing every command. Programming is learning how to
-break a problem into small steps, run experiments, read feedback, and improve.
-:::
-
-## Course map
-
-::: {.course-grid}
-
-::: {.course-card}
-### 1. [Getting Started](getting-started/index.qmd)
-
-Set up your learning environment and understand how Python runs before memorizing syntax.
-
-- [What Is Programming?](getting-started/what-is-programming.qmd)
-- [Google Colab](getting-started/google-colab.qmd)
-- [Local Python Tools](getting-started/local-python-tools.qmd)
-:::
-
-::: {.course-card}
-### 2. [Core Python](core-python/index.qmd)
-
-Learn the small building blocks that almost every Python program uses: values, names, decisions, and repetition.
-
-- [Values, Variables, and Types](core-python/values-variables-types.qmd)
-- [Strings, Input, and Output](core-python/strings-input-output.qmd)
-- [Booleans and Conditionals](core-python/booleans-and-conditionals.qmd)
-- [Indentation in Python](core-python/indentation.qmd)
-- [Loops and Tracing](core-python/loops-and-tracing.qmd)
-:::
-
-::: {.course-card}
-### 3. [Data Structures](data-structures/index.qmd)
-
-Store, organize, search, and transform many values with the right container for the job.
-
-- [Lists](data-structures/lists.qmd)
-- [Tuples](data-structures/tuples.qmd)
-- [Dictionaries](data-structures/dictionaries.qmd)
-- [Sets](data-structures/sets.qmd)
-- [Nested Data](data-structures/nested-data.qmd)
-:::
-
-::: {.course-card}
-### 4. [Functions](functions/index.qmd)
-
-Package useful steps behind names so code can be reused, tested, and explained.
-
-- [Function Basics](functions/function-basics.qmd)
-- [Function Contracts](functions/function-contracts.qmd)
-- [Decomposition and Testing](functions/decomposition-and-testing.qmd)
-:::
-
-::: {.course-card}
-### 5. [Debugging](debugging/index.qmd)
-
-Read errors calmly, inspect state, and make small experiments instead of guessing.
-
-- [Error Messages](debugging/error-messages.qmd)
-- [Debugging Tools](debugging/debugging-tools.qmd)
-- [Minimal Reproducible Examples](debugging/minimal-reproducible-examples.qmd)
-:::
-
-::: {.course-card}
-### 6. [FAQ and Common Issues](faq/index.qmd)
-
-Find a familiar symptom, inspect one clue, and test a small fix without guessing.
-
-- [Unexpected Keyword Arguments in Classes](faq/unexpected-keyword-arguments-in-classes.qmd)
-- [Running Code and Understanding Output](faq/running-code-and-output.qmd)
-- [Names, Values, and Types](faq/names-values-and-types.qmd)
-:::
-
-::: {.course-card}
-### 7. [Files and Data](files-and-data/index.qmd)
-
-Read, write, validate, and recover from problems when programs interact with data outside memory.
-
-- [Paths and Text Files](files-and-data/paths-and-text-files.qmd)
-- [Structured Files](files-and-data/structured-files.qmd)
-- [Exceptions and Validation](files-and-data/exceptions-and-validation.qmd)
-:::
-
-::: {.course-card}
-### 8. [Projects and Environments](projects-and-environments/index.qmd)
-
-Organize code into files, install dependencies safely, and run programs as small projects.
-
-- [Modules and Packages](projects-and-environments/modules-and-packages.qmd)
-- [Environments and Dependencies](projects-and-environments/environments-and-dependencies.qmd)
-- [Command-Line Programs](projects-and-environments/command-line-programs.qmd)
-- [Project Layout](projects-and-environments/project-layout.qmd)
-:::
-
-::: {.course-card}
-### 9. [Code Quality](code-quality/index.qmd)
-
-Make code trustworthy with tests, style, formatting, linting, types, and automation.
-
-- [Testing with pytest](code-quality/testing-with-pytest.qmd)
-- [Style, Formatting, and Linting](code-quality/style-formatting-and-linting.qmd)
-- [Type Checking](code-quality/type-checking.qmd)
-- [Pre-commit and CI](code-quality/pre-commit-and-ci.qmd)
-:::
-
-::: {.course-card}
-### 10. [Object-Oriented Python](object-oriented-python/index.qmd)
-
-Use classes when data and behavior belong together, while avoiding unnecessary complexity.
-
-- [Object-Oriented Basics](object-oriented-python/oop-basics.qmd)
-- [Dataclasses](object-oriented-python/dataclasses.qmd)
-- [Object-Oriented Design](object-oriented-python/oop-design.qmd)
-:::
-
-::: {.course-card}
-### 11. [Advanced Python Patterns](advanced-python-patterns/index.qmd)
-
-Learn powerful Python patterns one at a time after core concepts are stable.
-
-- [Comprehensions](advanced-python-patterns/comprehensions.qmd)
-- [Iterables and Generators](advanced-python-patterns/iterables-and-generators.qmd)
-- [Decorators](advanced-python-patterns/decorators.qmd)
-- [Context Managers](advanced-python-patterns/context-managers.qmd)
-- [Logging and Configuration](advanced-python-patterns/logging-and-configuration.qmd)
-:::
-
-::: {.course-card}
-### 12. [Scientific Python](scientific-python/index.qmd)
-
-Use Python's scientific stack for arrays, simulation, plotting, symbolic math, and numerical methods.
-
-- [NumPy](scientific-python/numpy.qmd)
-- [Random Simulation](scientific-python/random-simulation.qmd)
-- [Matplotlib Basics](scientific-python/matplotlib-basics.qmd)
-- [SymPy Symbolic Math](scientific-python/sympy-symbolic-math.qmd)
-- [SciPy Overview](scientific-python/scipy-overview.qmd)
-:::
-
-::: {.course-card}
-### 13. [Data Science](data-science/index.qmd)
-
-Turn questions and datasets into cleaned, analyzed, visualized, and communicated results.
-
-- [Workflow and Loading Data](data-science/workflow-and-loading.qmd)
-- [Inspecting, Selecting, and Cleaning](data-science/inspecting-selecting-cleaning.qmd)
-- [Grouping and Statistics](data-science/grouping-and-statistics.qmd)
-- [Visualization with seaborn](data-science/visualization-with-seaborn.qmd)
-- [Communicating Results](data-science/communicating-results.qmd)
-:::
-
-::: {.course-card}
-### 14. [Machine Learning and AI](machine-learning-ai/index.qmd)
-
-Understand AI vocabulary, train simple models, evaluate them responsibly, and know where major libraries fit.
-
-- [Concepts and Datasets](machine-learning-ai/concepts-and-datasets.qmd)
-- [Training and Evaluation](machine-learning-ai/training-and-evaluation.qmd)
-- [Deep Learning Libraries](machine-learning-ai/deep-learning-libraries.qmd)
-- [Transformers Overview](machine-learning-ai/transformers-overview.qmd)
-- [Responsible AI](machine-learning-ai/responsible-ai.qmd)
-:::
-
-::: {.course-card}
-### 15. [Capstone](capstone/index.qmd)
-
-Plan, build, test, document, and present a beginner-friendly Python project that integrates the course.
-
-- [Project Selection and Planning](capstone/project-selection-and-planning.qmd)
-- [Testing and README](capstone/testing-and-readme.qmd)
-- [Presentation and Rubric](capstone/presentation-and-rubric.qmd)
-:::
-
-
-:::
 
 ## Lesson pattern
 

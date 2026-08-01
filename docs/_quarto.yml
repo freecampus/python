@@ -13,6 +13,8 @@ website:
   reader-mode: true
   bread-crumbs: false
   navbar:
+    logo: assets/freecampus-mark.svg
+    logo-alt: FreeCampus Python
     search: true
     collapse-below: lg
     left:
@@ -154,10 +156,20 @@ website:
 
 format:
   html:
+    brand: _brand.yml
     theme:
       light: [cosmo, theme-light.scss]
       dark: [darkly, theme-dark.scss]
-    css: styles.css
+    css:
+      - styles.css
+      - components/learning-shell.css
+      - components/landing.css
+      - components/catalog-faq.css
+      - components/responsive.css
+    template-partials:
+      - _partials/title-block.html
+    include-after-body:
+      - _includes/course-ui.html
     toc: true
     toc-title: On this page
     toc-depth: 3
