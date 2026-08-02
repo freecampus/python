@@ -1,0 +1,189 @@
+---
+title: "Debugging Checkpoint"
+aliases:
+  - "/lessons/debugging/checkpoint.html"
+description: "Use traceback evidence and controlled experiments to repair a small broken program."
+checkpoint_id: "debugging"
+assessment_type: module-checkpoint
+assessment_version: 1
+required_for_completion: true
+completion_label: "Required checkpoint"
+passing_score: 3
+categories: [python-foundations, debugging, checkpoint]
+order: 265
+colab_notebook: "notebooks/lessons/debugging/checkpoint.ipynb"
+---
+
+::: {.lesson-meta .checkpoint-meta}
+- **Level:** Foundations checkpoint
+- **Estimated time:** 35–45 minutes
+- **Outcome assessed:** Read an error, inspect state, reduce the failure, and verify one controlled fix.
+- **Completion rule:** Score at least 3/4, complete the practical task, then record completion below.
+:::
+
+{{< include ../../../_includes/colab-link.qmd >}}
+
+## The task this checkpoint assesses
+
+This checkpoint combines a short knowledge check with one practical artifact.
+Use your lesson notebooks while reviewing, but complete the final attempt without
+copying a finished solution.
+
+## 1. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-debugging-checkpoint",
+  "title": "Debugging knowledge check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "traceback-first-step",
+      "prompt": "What should you identify first in a Python traceback?",
+      "options": [
+        "The exception type, message, and relevant line.",
+        "A random line to rewrite.",
+        "The editor's font size.",
+        "A package to reinstall immediately."
+      ],
+      "answer_index": 0,
+      "explanation": "The exception type, message, and line provide evidence about what Python could not do."
+    },
+    {
+      "id": "inspect-state",
+      "prompt": "Why add a focused print statement or breakpoint?",
+      "options": [
+        "To inspect a value at the point where behavior changes.",
+        "To make the program permanently longer.",
+        "To hide the original error.",
+        "To replace every test."
+      ],
+      "answer_index": 0,
+      "explanation": "Inspecting state tests a specific explanation instead of changing code by guesswork."
+    },
+    {
+      "id": "mre-purpose",
+      "prompt": "What does a minimal reproducible example preserve?",
+      "options": [
+        "The smallest code and data that still show the problem.",
+        "Every feature in the original project.",
+        "Only the expected output.",
+        "A screenshot without executable code."
+      ],
+      "answer_index": 0,
+      "explanation": "Removing unrelated parts makes the cause easier to isolate while keeping the failure reproducible."
+    },
+    {
+      "id": "controlled-fix",
+      "prompt": "After forming a debugging hypothesis, what should you do next?",
+      "options": [
+        "Change one relevant thing and rerun the smallest example.",
+        "Rewrite the entire program before running it.",
+        "Ignore the actual output.",
+        "Delete the traceback."
+      ],
+      "answer_index": 0,
+      "explanation": "One controlled change lets you compare evidence and decide whether the hypothesis was supported."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
+
+::: {.callout-note title="Checkpoint threshold"}
+Aim for at least **3 of 4** correct. Review the linked module lessons and reset
+the quiz if you need another attempt. The score is formative and stays in this
+browser; recording completion is an honest self-assessment.
+:::
+
+## 2. Complete the practical task
+
+The program below is intended to print the total study time, but it fails:
+
+```python
+sessions = [
+    {"topic": "loops", "minutes": 25},
+    {"topic": "functions", "minutes": "20"},
+]
+
+total = 0
+for session in sessions:
+    total = total + session["minute"]
+
+print(f"Total minutes: {total}")
+```
+
+Debug it without rewriting everything:
+
+1. run it and record the exception type, message, and relevant line;
+2. inspect one `session` value;
+3. reduce the problem to the smallest expression that still fails;
+4. state one hypothesis and change one thing;
+5. rerun, record the next evidence, and repeat if needed;
+6. verify that the final output is `Total minutes: 45`.
+
+Keep both the first failing version and the repaired version in your notebook.
+
+### Evidence to keep
+
+- The original traceback evidence.
+- At least one inspected value.
+- A minimal expression that reproduces each distinct problem.
+- A written hypothesis before each change.
+- A repaired program with the expected output.
+- One sentence explaining why changing many lines at once would weaken the evidence.
+
+::: {.callout-tip collapse="true" title="Compare with one possible solution"}
+There are two separate problems. First, the dictionaries use the key
+`"minutes"`, not `"minute"`. After fixing the key, the second record still stores
+`"20"` as text. Convert it to an integer in the data or at the calculation
+boundary.
+
+```python
+sessions = [
+    {"topic": "loops", "minutes": 25},
+    {"topic": "functions", "minutes": "20"},
+]
+
+total = 0
+for session in sessions:
+    total = total + int(session["minutes"])
+
+print(f"Total minutes: {total}")
+```
+
+Useful minimal expressions are `sessions[0]["minute"]` for the missing-key
+failure and `25 + "20"` for the incompatible-type failure. Treating them
+separately makes each fix explainable.
+:::
+
+## 3. Decide whether the outcome is demonstrated
+
+Record this checkpoint only when all four statements are true:
+
+- [ ] I scored at least 3/4 on the knowledge check.
+- [ ] My practical task runs from top to bottom.
+- [ ] I kept the requested prediction, output, and explanation evidence.
+- [ ] I can make one new change without copying the solution.
+
+## 4. Record checkpoint completion
+
+This button stores a self-reported completion marker in this browser. It is not
+a graded submission or verified certificate evidence.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-checkpoint-action>
+  <button class="fc-complete-button" type="button" data-fc-checkpoint-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-checkpoint-complete-label>Record checkpoint complete</span>
+  </button>
+  <p data-fc-checkpoint-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- A checkpoint asks you to produce evidence, not merely recognize an answer.
+- Review is expected; record completion only after the practical outcome works.
+- Keep the notebook because it becomes useful evidence for the final project.

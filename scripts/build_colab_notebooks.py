@@ -1,8 +1,9 @@
-"""Build Google Colab notebooks from Quarto lesson sources.
+"""Build Google Colab notebooks from canonical Quarto course sources.
 
 The QMD files are the source of truth for the website. This script creates
-matching ``.ipynb`` files under ``docs/_site/notebooks/lessons`` so published
-pages can link to Colab notebooks on the ``gh-pages`` branch.
+matching ``.ipynb`` files at the explicit paths in their front matter. Notebook
+paths remain independent of source paths so course reorganization does not break
+published Colab links on the ``gh-pages`` branch.
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-SOURCE_ROOT = Path("docs/lessons")
+SOURCE_ROOT = Path("docs")
 OUTPUT_ROOT = Path("docs/_site/notebooks/lessons")
 
 
@@ -25,10 +26,19 @@ class FrontMatter:
 
 
 def notebook_path_for(source: Path, source_root: Path = SOURCE_ROOT) -> Path:
-    """Return the notebook path relative to ``docs/_site`` for a QMD file."""
-    return Path("notebooks/lessons") / source.relative_to(source_root).with_suffix(
-        ".ipynb"
-    )
+    """Return the front-matter notebook path relative to ``docs/_site``.
+
+    ``legacy_colab_notebook`` keeps a compatibility notebook available without
+    adding a Colab action to the canonical website page.
+    """
+    del source_root  # Retained for compatibility with existing callers.
+    text = source.read_text()
+    for field in ("colab_notebook", "legacy_colab_notebook"):
+        match = re.search(rf'^{field}:\s*["\']?([^"\'\n]+)["\']?\s*$', text, flags=re.M)
+        if match:
+            return Path(match.group(1).strip())
+    msg = f"QMD page has no Colab notebook metadata: {source}"
+    raise ValueError(msg)
 
 
 def parse_front_matter(text: str, fallback_title: str) -> FrontMatter:
@@ -48,11 +58,16 @@ def parse_front_matter(text: str, fallback_title: str) -> FrontMatter:
 
 
 def public_qmd_files(source_root: Path = SOURCE_ROOT) -> list[Path]:
-    """List public QMD lesson pages that should become notebooks."""
+    """List canonical public QMD pages that declare notebook output."""
     return sorted(
         path
         for path in source_root.rglob("*.qmd")
-        if "_includes" not in path.parts and path.name != "_lesson-template.qmd"
+        if not any(part.startswith("_") for part in path.relative_to(source_root).parts)
+        and re.search(
+            r"^(?:colab_notebook|legacy_colab_notebook):",
+            path.read_text(),
+            flags=re.M,
+        )
     )
 
 

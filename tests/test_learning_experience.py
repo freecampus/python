@@ -159,13 +159,39 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
 
     expected = {
         path
-        for path in Path("docs/lessons").glob("*/*.qmd")
-        if path.name != "index.qmd"
-        and path.parent.name not in {"faq", "capstone", "_includes"}
-        and _front_matter(path).get("lesson_id")
+        for path in Path("docs/courses").rglob("*.qmd")
+        if _front_matter(path).get("lesson_id")
     }
     assert owned_paths == expected
     assert len(lesson_ids) == 53
+
+
+def test_course_source_migration_preserves_legacy_public_urls() -> None:
+    assert not Path("docs/lessons").exists()
+
+    public_pages = []
+    aliases: set[str] = set()
+    for root in (Path("docs/courses"), Path("docs/resources")):
+        for path in root.rglob("*.qmd"):
+            front_matter = _front_matter(path)
+            notebook = front_matter.get("colab_notebook")
+            if not notebook:
+                continue
+
+            public_pages.append(path)
+            page_aliases = front_matter.get("aliases", [])
+            expected_alias = (
+                f"/{notebook.removeprefix('notebooks/').removesuffix('.ipynb')}.html"
+            )
+            assert page_aliases == [expected_alias], path
+            assert expected_alias not in aliases, path
+            aliases.add(expected_alias)
+
+    course_catalog = _front_matter(Path("docs/courses/index.qmd"))
+    assert course_catalog["aliases"] == ["/lessons/index.html"]
+    assert course_catalog["legacy_colab_notebook"] == "notebooks/lessons/index.ipynb"
+    assert len(public_pages) == 82
+    assert len(aliases) == 82
 
 
 def test_course_homes_and_sidebars_match_catalog() -> None:
@@ -324,8 +350,8 @@ def test_lesson_metadata_remains_visible() -> None:
 
 
 def test_faq_is_search_first_and_sidebar_free() -> None:
-    faq_index = Path("docs/lessons/faq/index.qmd").read_text()
-    faq_metadata = Path("docs/lessons/faq/_metadata.yml").read_text()
+    faq_index = Path("docs/resources/faq/index.qmd").read_text()
+    faq_metadata = Path("docs/resources/faq/_metadata.yml").read_text()
 
     assert faq_index.index("## Find your question") < faq_index.index(
         "## How to use this FAQ"

@@ -31,9 +31,11 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 │   ├── index.qmd            # Portfolio home
 │   ├── _quarto.yml          # Site navigation/config
 │   ├── styles.css           # Course callouts, quizzes, diagram styling
-│   ├── courses/             # Course catalog and course home pages
+│   ├── courses/             # Course homes and course-owned lesson modules
 │   ├── pathways/            # Cross-course prerequisite guidance
-│   └── lessons/             # Shared canonical lesson sources
+│   ├── resources/           # Shared FAQ, guidance, and project toolkit
+│   ├── _includes/           # Shared OJS and Colab includes
+│   └── _templates/          # Authoring templates
 ├── notebooks/               # Jupyter/Colab examples
 ├── src/fcpython/            # Reusable quiz and widget helpers
 ├── tests/                   # pytest tests for helpers and docs structure
@@ -102,28 +104,35 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 
 - Site config lives in `docs/_quarto.yml`; update sidebar navigation whenever
   adding, removing, or renaming lesson pages.
-- Shared OJS renderer: `docs/lessons/_includes/ojs-quiz.qmd`.
-- Shared Colab launch link: `docs/lessons/_includes/colab-link.qmd`.
-- For root lesson pages, include with:
+- Shared OJS renderer: `docs/_includes/ojs-quiz.qmd`.
+- Shared Colab launch link: `docs/_includes/colab-link.qmd`.
+- For course module pages under `docs/courses/<course>/<module>/`, include with:
 
   ```markdown
-  {{< include _includes/ojs-quiz.qmd >}}
-  {{< include _includes/colab-link.qmd >}}
+  {{< include ../../../_includes/ojs-quiz.qmd >}}
+  {{< include ../../../_includes/colab-link.qmd >}}
   ```
 
-- For chapter lesson pages one directory below `docs/lessons`, include with:
+- For pages under `docs/resources/<resource>/`, include with:
 
   ```markdown
-  {{< include ../_includes/ojs-quiz.qmd >}}
-  {{< include ../_includes/colab-link.qmd >}}
+  {{< include ../../_includes/ojs-quiz.qmd >}}
+  {{< include ../../_includes/colab-link.qmd >}}
   ```
+
+- Calculate the relative include path from the page location rather than copying
+  one of these examples into a different directory depth.
 
 - Quarto execution is disabled globally with `execute.eval: false`. Avoid adding
   executable Python chunks that require a kernel during docs builds.
-- QMD lesson files are the source of truth. `scripts/build_colab_notebooks.py`
-  generates matching notebooks under `docs/_site/notebooks/lessons/` after the
-  Quarto render step, and Colab links point at those generated notebooks on the
-  `gh-pages` branch.
+- QMD files under `docs/courses/` and `docs/resources/` are the source of truth.
+  `scripts/build_colab_notebooks.py` uses each page's explicit `colab_notebook`
+  path to generate notebooks under `docs/_site/notebooks/lessons/` after the
+  Quarto render step. The legacy notebook namespace is intentionally independent
+  of the canonical source layout so existing Colab links on the `gh-pages`
+  branch remain valid.
+- When moving a published page, keep its stable IDs and `colab_notebook` path,
+  and add a Quarto `aliases` entry for its previous HTML URL.
 - If a notebook or example imports from `fcpython`, keep setup/import cells
   hidden in rendered teaching material with `#| echo: false` when appropriate.
 - Mermaid diagrams should use fenced blocks like:
@@ -204,6 +213,7 @@ Do not commit generated or local artifacts such as:
 - `.cache/`
 - `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`
 - `build/`, `dist/`, `*.egg-info/`
-- `docs/lessons/**/*_files/`
+- `docs/courses/**/*_files/`
+- `docs/resources/**/*_files/`
 
 Use `makim clean.tmp` or an equivalent safe cleanup before handing off work.

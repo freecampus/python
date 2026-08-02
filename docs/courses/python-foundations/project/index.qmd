@@ -1,0 +1,259 @@
+---
+title: "Python Foundations Project"
+aliases:
+  - "/lessons/foundations-project/index.html"
+description: "Build and explain a small study tracker using the complete Foundations skill set."
+project_id: "python-foundations-project"
+assessment_type: course-project
+assessment_version: 1
+rubric_version: 1
+required_for_completion: true
+completion_label: "Required project"
+categories: [python-foundations, project, assessment]
+order: 270
+colab_notebook: "notebooks/lessons/foundations-project/index.ipynb"
+---
+
+::: {.lesson-meta .project-meta}
+- **Level:** Foundations project
+- **Estimated time:** 4–7 hours
+- **Outcome assessed:** Plan, build, explain, test, and debug a small Python program.
+- **Completion rule:** Meet every required row in rubric version 1, then record the self-assessment below.
+:::
+
+{{< include ../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## How to use this project lab
+
+Build the project in small milestones. At each milestone, predict an example
+result, run the program, explain what changed, and keep one useful piece of
+evidence. Use the generated Colab notebook or a local Python file.
+
+The required project is deliberately small. The goal is not to impress someone
+with many features. The goal is to prove that you can understand, modify, and
+debug every important line.
+<!-- fcpython-chapter-lab: end -->
+
+## 1. The project brief
+
+Build a **personal study tracker**. A learner should be able to record short
+study sessions and receive a useful summary.
+
+Your program must:
+
+1. represent each session with a topic and a positive number of minutes;
+2. keep multiple sessions in an appropriate collection;
+3. add a new session from values supplied by the learner;
+4. reject an empty topic or a non-positive minutes value with a clear message;
+5. report total minutes and totals grouped by topic;
+6. use at least three focused functions with parameters, return values,
+   docstrings, and type hints;
+7. demonstrate one focused check for each calculation function;
+8. include one debugging record showing an error, evidence, hypothesis, change,
+   and verified result.
+
+You may use only the Python standard library. File storage, graphical interfaces,
+web frameworks, and third-party packages are optional extensions and do not
+affect completion.
+
+::: {.callout-tip title="Keep the first version small"}
+Start with three sample sessions in the notebook. Make the calculations work
+before adding interactive input. A complete small program is better evidence
+than an unfinished large one.
+:::
+
+## 2. Define the data and expected behavior
+
+Begin with data whose results you can calculate by hand:
+
+```python
+sessions = [
+    {"topic": "loops", "minutes": 25},
+    {"topic": "lists", "minutes": 20},
+    {"topic": "loops", "minutes": 15},
+]
+```
+
+For this data, write down these predictions before coding:
+
+- total minutes: `60`;
+- minutes for `loops`: `40`;
+- minutes for `lists`: `20`;
+- unique topic count: `2`.
+
+Use the predictions as acceptance examples. If the program reports something
+else, preserve the output and investigate the difference.
+
+## 3. Build in four milestones
+
+### Milestone 1: Calculate the total
+
+Write a function that receives the session list and returns the total minutes.
+Check it with both the sample data and an empty list.
+
+### Milestone 2: Group by topic
+
+Write a function that returns a dictionary mapping each topic to its total
+minutes. Predict the dictionary before running the function.
+
+### Milestone 3: Validate and add one session
+
+Write a function that receives a topic and minutes. It should return a new
+session dictionary only when the topic is not empty and minutes is positive.
+Use a conditional to produce a clear message for invalid input.
+
+### Milestone 4: Present one readable summary
+
+Write a function that creates a multi-line summary. Keep calculations separate
+from `print` so they can be checked independently.
+
+A possible function boundary is shown below. You may improve the names, but keep
+each responsibility focused.
+
+```python
+def total_minutes(sessions: list[dict]) -> int:
+    """Return the total minutes across all sessions."""
+    ...
+
+
+def minutes_by_topic(sessions: list[dict]) -> dict[str, int]:
+    """Return total minutes grouped by topic."""
+    ...
+
+
+def make_session(topic: str, minutes: int) -> dict | None:
+    """Return a valid session, or None when the values are invalid."""
+    ...
+
+
+def format_summary(sessions: list[dict]) -> str:
+    """Return a readable multi-line summary."""
+    ...
+```
+
+## 4. Keep project evidence
+
+Your project submission folder or notebook should contain:
+
+- the working program;
+- the four hand-calculated predictions;
+- at least three focused `assert` checks;
+- example output for a valid session and two invalid inputs;
+- a line-by-line explanation of one calculation function;
+- one controlled modification, with prediction and result;
+- one debugging record;
+- a short limitations and next-steps note.
+
+::: {.callout-note title="A useful debugging record"}
+Write five short lines: **error or unexpected result**, **evidence inspected**,
+**hypothesis**, **one change**, and **result after rerunning**. Do not replace the
+original evidence with the repaired output.
+:::
+
+## 5. Check project readiness
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "python-foundations-project-readiness",
+  "title": "Foundations project readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "project-scope",
+      "prompt": "Which project scope best fits Python Foundations?",
+      "options": [
+        "A small program using course concepts that can be explained line by line.",
+        "A production web platform with authentication and payments.",
+        "A project copied from a tutorial without changes.",
+        "A program that depends on unexplained advanced libraries."
+      ],
+      "answer_index": 0,
+      "explanation": "A small explainable program provides stronger Foundations evidence than a large project built from unfamiliar parts."
+    },
+    {
+      "id": "project-evidence",
+      "prompt": "Which evidence should remain with the finished project?",
+      "options": [
+        "Only a screenshot of the final output.",
+        "Working code, example runs, checks, explanations, and debugging notes.",
+        "Only the original project idea.",
+        "A claim that the program worked once."
+      ],
+      "answer_index": 1,
+      "explanation": "Multiple forms of evidence show that the learner can run, explain, modify, check, and debug the project."
+    },
+    {
+      "id": "rubric-use",
+      "prompt": "What should you do when one required rubric row is still 'Not yet'?",
+      "options": [
+        "Record the project complete anyway.",
+        "Hide that part of the project.",
+        "Revise the project and collect new evidence for that row.",
+        "Add unrelated features instead."
+      ],
+      "answer_index": 2,
+      "explanation": "The completion threshold requires evidence for every required row, so revise the specific gap before recording."
+    },
+    {
+      "id": "local-recognition",
+      "prompt": "What does the project's browser completion marker prove?",
+      "options": [
+        "It is a verified academic credential.",
+        "It is a self-reported local record, not independently verified evidence.",
+        "It permanently submits the project to an instructor.",
+        "It creates a public certificate ID."
+      ],
+      "answer_index": 1,
+      "explanation": "The static site stores local progress for the learner's convenience; it does not verify identity or assess evidence."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Apply rubric version 1
+
+Every row is required. Record the project complete only when every row reaches
+**Meets the requirement**. The Strong evidence column suggests improvements but
+is not required.
+
+| Criterion | Not yet | Meets the requirement | Strong evidence |
+|---|---|---|---|
+| Working behavior | The program does not run from top to bottom or gives incorrect required summaries. | The program runs and produces the predicted total and per-topic results. | It also handles additional valid datasets and explains boundary cases. |
+| Values and control flow | Important values or branches cannot be explained. | Names, types, conditions, indentation, and loops are used correctly and explained. | Predictions cover both valid and invalid paths. |
+| Data structures | Containers are copied without a clear reason or used incorrectly. | A list stores sessions, dictionaries name session fields and grouped totals, and container choices are explained. | The learner compares at least one reasonable alternative. |
+| Function design | Logic remains one large block or functions only print hidden results. | At least three focused functions use parameters, return values, docstrings, and type hints. | Functions compose cleanly without duplicated calculations. |
+| Checks and debugging | There is no reproducible evidence beyond one successful run. | At least three focused checks and one complete debugging record are included. | Checks cover empty or invalid input and the debugging example is reduced. |
+| Explanation and modification | The learner cannot explain a calculation or safely change it. | One function is explained line by line and one controlled modification is predicted and verified. | Limitations and a realistic next step are connected to evidence. |
+
+## 7. Record the project self-assessment
+
+Before using the button, keep the completed rubric with your project and confirm:
+
+- [ ] every required behavior works from a fresh top-to-bottom run;
+- [ ] every rubric row reaches Meets the requirement;
+- [ ] the evidence listed above remains visible;
+- [ ] the work and explanations are your own.
+
+This record is stored only in this browser. It is not a submission, instructor
+grade, identity check, or verifiable certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-project-action>
+  <button class="fc-complete-button" type="button" data-fc-project-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-project-complete-label>Record project complete</span>
+  </button>
+  <p data-fc-project-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The project integrates Foundations skills without requiring advanced tools.
+- Predictions, checks, explanations, and debugging evidence matter as much as the
+  final output.
+- The rubric is versioned so future curriculum changes do not silently redefine
+  this completion record.

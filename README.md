@@ -15,19 +15,19 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 - Python Foundations:
   [`docs/courses/python-foundations/index.qmd`](docs/courses/python-foundations/index.qmd)
 - Python Foundations project and rubric:
-  [`docs/lessons/foundations-project/index.qmd`](docs/lessons/foundations-project/index.qmd)
+  [`docs/courses/python-foundations/project/index.qmd`](docs/courses/python-foundations/project/index.qmd)
 - First lesson:
-  [`docs/lessons/getting-started/what-is-programming.qmd`](docs/lessons/getting-started/what-is-programming.qmd)
+  [`docs/courses/python-foundations/getting-started/what-is-programming.qmd`](docs/courses/python-foundations/getting-started/what-is-programming.qmd)
 - Google Colab:
-  [`docs/lessons/getting-started/google-colab.qmd`](docs/lessons/getting-started/google-colab.qmd)
+  [`docs/courses/python-foundations/getting-started/google-colab.qmd`](docs/courses/python-foundations/getting-started/google-colab.qmd)
 - Lists lesson:
-  [`docs/lessons/data-structures/lists.qmd`](docs/lessons/data-structures/lists.qmd)
+  [`docs/courses/python-foundations/data-structures/lists.qmd`](docs/courses/python-foundations/data-structures/lists.qmd)
 - Debugging reference:
-  [`docs/lessons/debugging/error-messages.qmd`](docs/lessons/debugging/error-messages.qmd)
+  [`docs/courses/python-foundations/debugging/error-messages.qmd`](docs/courses/python-foundations/debugging/error-messages.qmd)
 - Learner profiles:
-  [`docs/lessons/learner-profiles.qmd`](docs/lessons/learner-profiles.qmd)
+  [`docs/resources/learner-profiles.qmd`](docs/resources/learner-profiles.qmd)
 - Instructor notes:
-  [`docs/lessons/instructor-notes.qmd`](docs/lessons/instructor-notes.qmd)
+  [`docs/resources/instructor-notes.qmd`](docs/resources/instructor-notes.qmd)
 - Practice immediately in Colab: <https://colab.new>
 - Quiz notebook example:
   [`notebooks/03_values_variables_types_quiz.ipynb`](notebooks/03_values_variables_types_quiz.ipynb)
@@ -55,6 +55,11 @@ Lessons are cohesive rather than microscopic. A page can contain multiple
 section-level OJS quizzes so students review one idea before moving to the next.
 Reusable notebook quizzes live in `src/fcpython` and can be rendered with
 ipywidgets in Jupyter or Google Colab.
+
+Canonical teaching sources live with their owning course under `docs/courses/`.
+Cross-course material such as the FAQ and project toolkit lives under
+`docs/resources/`. Published `/lessons/...` pages and `notebooks/lessons/...`
+Colab URLs remain available as compatibility paths.
 
 ### Python Foundations completion
 
@@ -95,9 +100,11 @@ makim docs.preview
 ├── docs/
 │   ├── index.qmd
 │   ├── _quarto.yml
-│   ├── courses/
+│   ├── courses/             # Course homes and course-owned modules
 │   ├── pathways/
-│   └── lessons/
+│   ├── resources/           # Shared FAQ, guidance, and project toolkit
+│   ├── _includes/           # Shared OJS and Colab includes
+│   └── _templates/          # Authoring templates
 ├── notebooks/
 ├── src/fcpython/
 └── tests/

@@ -25,7 +25,9 @@
 
     function pageKey(value = window.location.href) {
       const url = new URL(value, window.location.href);
-      const match = url.pathname.match(/\/(lessons|courses|pathways)\//);
+      const match = url.pathname.match(
+        /\/(lessons|courses|resources|pathways)\//,
+      );
 
       if (!match) {
         return "home";
@@ -40,7 +42,7 @@
 
     function siteBasePath() {
       const pathname = window.location.pathname;
-      const match = pathname.match(/\/(lessons|courses|pathways)\//);
+      const match = pathname.match(/\/(lessons|courses|resources|pathways)\//);
 
       if (match) {
         return pathname.slice(0, match.index + 1);
@@ -54,33 +56,41 @@
     }
 
     function isLessonKey(key) {
-      return (
-        key.startsWith("lessons/") &&
-        key.split("/").length >= 3 &&
-        !isCheckpointKey(key)
-      );
+      const parts = key.split("/");
+      const legacyLesson = parts[0] === "lessons" && parts.length >= 3;
+      const courseLesson = parts[0] === "courses" && parts.length >= 4;
+      return (legacyLesson || courseLesson) && !isCheckpointKey(key);
     }
 
     function isCheckpointKey(key) {
-      return key.startsWith("lessons/") && key.endsWith("/checkpoint");
+      return (
+        (key.startsWith("lessons/") || key.startsWith("courses/")) &&
+        key.endsWith("/checkpoint")
+      );
     }
 
     function checkpointIdFromKey(key) {
       if (!isCheckpointKey(key)) {
         return "";
       }
-      return key.split("/")[1] || "";
+      return key.split("/").at(-2) || "";
     }
 
     function isProjectKey(key) {
-      return key.startsWith("lessons/") && key.endsWith("-project");
+      return (
+        key === "lessons/foundations-project" ||
+        (key.startsWith("courses/") && key.endsWith("/project"))
+      );
     }
 
     function lessonIdFromKey(key) {
       if (!isLessonKey(key)) {
         return "";
       }
-      return key.split("/").slice(1).join(".");
+      const parts = key.split("/");
+      return parts[0] === "courses"
+        ? parts.slice(2).join(".")
+        : parts.slice(1).join(".");
     }
 
     function emptyProgress() {
@@ -108,7 +118,10 @@
     const lessonId =
       titleBlock?.dataset.fcLessonId || lessonIdFromKey(currentKey);
     const isFaq =
-      currentKey === "lessons/faq" || currentKey.startsWith("lessons/faq/");
+      currentKey === "resources/faq" ||
+      currentKey.startsWith("resources/faq/") ||
+      currentKey === "lessons/faq" ||
+      currentKey.startsWith("lessons/faq/");
     const isTrackable = Boolean(
       lessonMeta &&
         courseId &&
@@ -290,7 +303,12 @@
       courseLessonLinks().forEach((link) => {
         const key = pageKey(link.href);
         const id = lessonIdFromKey(key);
-        if (legacy[key] && id && !state.completed_lessons[id]) {
+        const legacyKey = `lessons/${id.replaceAll(".", "/")}`;
+        if (
+          (legacy[key] || legacy[legacyKey]) &&
+          id &&
+          !state.completed_lessons[id]
+        ) {
           state.completed_lessons[id] = "migrated-from-v1";
           changed = true;
         }
@@ -332,7 +350,7 @@
       if (context) {
         if (isFaq) {
           context.textContent = "Python FAQ";
-        } else if (courseTitle && currentKey.startsWith("lessons/")) {
+        } else if (courseTitle && (isTrackable || checkpointId || projectId)) {
           context.textContent = courseTitle;
         } else if (courseId && currentKey.startsWith("courses/")) {
           context.textContent = "FreeCampus course";
@@ -340,7 +358,7 @@
           context.textContent = "Python course portfolio";
         } else if (currentKey === "pathways") {
           context.textContent = "Choose your pathway";
-        } else if (currentKey.startsWith("lessons/")) {
+        } else if (currentKey.startsWith("resources/")) {
           context.textContent = "Shared learning resource";
         }
       }
@@ -762,7 +780,7 @@
           ".navbar-nav a.nav-link[href], .navbar-nav a.dropdown-item[href]",
         ),
       ];
-      const targetKey = isFaq ? "lessons/faq" : courseHome;
+      const targetKey = isFaq ? "resources/faq" : courseHome;
       if (!targetKey) {
         return;
       }

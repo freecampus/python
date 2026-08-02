@@ -18,6 +18,10 @@ from fcpython.quiz_banks import (
 )
 from fcpython.widgets import quiz_summary, show_quiz
 
+FOUNDATIONS_ROOT = Path("docs/courses/python-foundations")
+INTERMEDIATE_ROOT = Path("docs/courses/intermediate-python")
+DATA_ML_ROOT = Path("docs/courses/data-science-ml")
+
 
 def _load_notebook_builder() -> ModuleType:
     spec = importlib.util.spec_from_file_location(
@@ -90,7 +94,7 @@ def test_show_quiz_returns_widget_container() -> None:
 
 
 def test_lesson_ojs_quiz_config_matches_quiz_bank() -> None:
-    lesson = Path("docs/lessons/core-python/values-variables-types.qmd").read_text()
+    lesson = (FOUNDATIONS_ROOT / "core-python/values-variables-types.qmd").read_text()
     match = re.search(
         r'<script type="application/json" class="fcpython-ojs-quiz-config">'
         r"\n(.*?)\n"
@@ -128,18 +132,20 @@ def test_foundations_assessment_pages_match_quiz_banks() -> None:
 
     assert len(quizzes) == len(expected_modules) == 5
     for module, quiz in zip(expected_modules, quizzes, strict=True):
-        path = Path("docs/lessons") / module / "checkpoint.qmd"
+        path = FOUNDATIONS_ROOT / module / "checkpoint.qmd"
         assert _first_quiz_payload(path) == quiz.to_dict()
 
-    project = Path("docs/lessons/foundations-project/index.qmd")
+    project = FOUNDATIONS_ROOT / "project/index.qmd"
     assert _first_quiz_payload(project) == python_foundations_project_quiz().to_dict()
 
 
 def _lesson_pages() -> list[Path]:
+    roots = (Path("docs/courses"), Path("docs/resources"))
     return sorted(
         path
-        for path in Path("docs/lessons").rglob("*.qmd")
-        if "_includes" not in path.parts and path.name != "_lesson-template.qmd"
+        for root in roots
+        for path in root.rglob("*.qmd")
+        if re.search(r"^colab_notebook:", _front_matter(path), flags=re.MULTILINE)
     )
 
 
@@ -173,7 +179,7 @@ def test_all_lessons_include_ojs_quiz() -> None:
 
 
 def test_all_lessons_include_colab_launch_link() -> None:
-    include = Path("docs/lessons/_includes/colab-link.qmd").read_text()
+    include = Path("docs/_includes/colab-link.qmd").read_text()
     assert "colab.research.google.com/github/freecampus/python/blob/gh-pages" in include
     assert "{{< meta colab_notebook >}}" in include
 
@@ -313,18 +319,21 @@ def test_lesson_front_matter_supports_future_listings() -> None:
     assert missing == []
 
 
-def test_colab_notebook_paths_match_lesson_paths() -> None:
-    mismatches = []
+def test_colab_notebook_paths_preserve_unique_public_urls() -> None:
+    paths: set[Path] = set()
+    invalid = []
     for path in _lesson_pages():
-        expected = notebook_builder.notebook_path_for(path).as_posix()
-        if f'colab_notebook: "{expected}"' not in _front_matter(path):
-            mismatches.append(str(path))
+        notebook_path = notebook_builder.notebook_path_for(path)
+        if notebook_path.parts[:2] != ("notebooks", "lessons"):
+            invalid.append(str(path))
+        assert notebook_path not in paths, path
+        paths.add(notebook_path)
 
-    assert mismatches == []
+    assert invalid == []
 
 
 def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
-    path = Path("docs/lessons/core-python/values-variables-types.qmd")
+    path = FOUNDATIONS_ROOT / "core-python/values-variables-types.qmd"
     notebook = notebook_builder.qmd_to_notebook(path)
     code_sources = [
         "".join(cell["source"])
@@ -340,7 +349,9 @@ def test_build_colab_notebooks_writes_expected_files(tmp_path: Path) -> None:
     written = notebook_builder.build_notebooks(output_root=tmp_path)
     expected = tmp_path / "core-python/values-variables-types.ipynb"
 
+    assert len(written) == 83
     assert expected in written
+    assert tmp_path / "index.ipynb" in written
     payload = json.loads(expected.read_text())
     assert payload["nbformat"] == 4
     assert any(cell["cell_type"] == "code" for cell in payload["cells"])
@@ -391,18 +402,17 @@ def test_lessons_use_clean_numbered_section_headings() -> None:
 
 def test_selected_lessons_include_mermaid_diagrams() -> None:
     expected = {
-        Path("docs/lessons/core-python/values-variables-types.qmd"),
-        Path("docs/lessons/core-python/booleans-and-conditionals.qmd"),
-        Path("docs/lessons/core-python/loops-and-tracing.qmd"),
-        Path("docs/lessons/functions/function-basics.qmd"),
-        Path("docs/lessons/data-structures/lists.qmd"),
-        Path("docs/lessons/data-structures/dictionaries.qmd"),
-        Path("docs/lessons/data-structures/nested-data.qmd"),
-        Path("docs/lessons/debugging/error-messages.qmd"),
-        Path(
-            "docs/lessons/projects-and-environments/environments-and-dependencies.qmd"
-        ),
-        Path("docs/lessons/machine-learning-ai/training-and-evaluation.qmd"),
+        FOUNDATIONS_ROOT / "core-python/values-variables-types.qmd",
+        FOUNDATIONS_ROOT / "core-python/booleans-and-conditionals.qmd",
+        FOUNDATIONS_ROOT / "core-python/loops-and-tracing.qmd",
+        FOUNDATIONS_ROOT / "functions/function-basics.qmd",
+        FOUNDATIONS_ROOT / "data-structures/lists.qmd",
+        FOUNDATIONS_ROOT / "data-structures/dictionaries.qmd",
+        FOUNDATIONS_ROOT / "data-structures/nested-data.qmd",
+        FOUNDATIONS_ROOT / "debugging/error-messages.qmd",
+        INTERMEDIATE_ROOT
+        / "projects-and-environments/environments-and-dependencies.qmd",
+        DATA_ML_ROOT / "machine-learning-ai/training-and-evaluation.qmd",
     }
 
     missing = [

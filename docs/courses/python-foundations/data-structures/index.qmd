@@ -1,0 +1,97 @@
+---
+title: "Data Structures"
+aliases:
+  - "/lessons/data-structures/index.html"
+description: "Store, organize, search, and transform many values with the right container for the job."
+execute:
+  echo: true
+categories: [data-structures, beginner]
+order: 130
+colab_notebook: "notebooks/lessons/data-structures/index.ipynb"
+---
+{{< include ../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## How to use this chapter hands-on
+
+This chapter is about **Data Structures**. Do not read it like a reference manual.
+Use it as a sequence of short labs. For each lesson, open the Colab notebook
+from the button above, run Example 1, write a prediction, and then
+change one small part of the code.
+
+By the end of the chapter, you should have one small artifact: a notebook, a
+script, a trace table, or a project note. The artifact should show one working
+example, one controlled variation, and one error or surprising result that you
+investigated calmly.
+
+If time is short, study one lesson deeply instead of skimming all of them.
+A deeply understood example is one you can run again, explain in plain
+language, modify safely, and debug when it breaks.
+<!-- fcpython-chapter-lab: end -->
+
+
+## Why this chapter matters
+
+Store, organize, search, and transform many values with the right container for the job.
+
+Lessons are now grouped by coherent learner topics. A page may contain multiple
+short quizzes when the page has multiple sections, so students can check one
+idea before moving to the next.
+
+::: {.callout-note title="Guiding questions"}
+- Which lessons belong in this chapter?
+- What should I review before moving on?
+- How do the lesson sections build one practical skill?
+:::
+
+## Lesson path
+
+- [Lists](lists.qmd) — Store, access, slice, update, copy, and loop over ordered mutable collections. **Required lesson.**
+- [Tuples](tuples.qmd) — Use immutable ordered records and unpack their values clearly. **Required lesson.**
+- [Dictionaries](dictionaries.qmd) — Use key-value mappings for lookup, looping, counting, grouping, and simple records. **Required lesson.**
+- [Sets](sets.qmd) — Store unique values, test membership, and compare groups with set operations. **Required lesson.**
+- [Nested Data](nested-data.qmd) — Represent structured information with containers inside containers. **Required lesson.**
+
+[Complete the required Data Structures checkpoint](checkpoint.qmd){.btn .btn-outline-primary}
+
+## Preview quiz
+
+::: {.quiz-box}
+Use this short preview quiz before starting the module. It does not replace the required outcome checkpoint above.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-structures-overview",
+  "title": "Data Structures overview checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "chapter-purpose",
+      "prompt": "What is the purpose of the Data Structures chapter?",
+      "options": [
+        "Store, organize, search, and transform many values with the right container for the job.",
+        "To memorize disconnected commands",
+        "To skip practice",
+        "To avoid debugging"
+      ],
+      "answer_index": 0,
+      "explanation": "Store, organize, search, and transform many values with the right container for the job."
+    },
+    {
+      "id": "study-flow",
+      "prompt": "Why can a lesson contain multiple quizzes?",
+      "options": [
+        "Each quiz checks one section before the next section builds on it.",
+        "Quizzes replace examples.",
+        "Multiple quizzes mean the topic is unrelated.",
+        "Quizzes should only appear at the end of the course."
+      ],
+      "answer_index": 0,
+      "explanation": "Section-level quizzes help learners review while the idea is still fresh."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}

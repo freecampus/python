@@ -1,0 +1,591 @@
+---
+title: "Debugging Tools"
+aliases:
+  - "/lessons/debugging/debugging-tools.html"
+lesson_id: "debugging.debugging-tools"
+lesson_order: 20
+required_for_completion: true
+completion_label: "Required lesson"
+description: "Use print debugging, VS Code breakpoints, and pdb to inspect running programs."
+execute:
+  echo: true
+categories: [debugging, beginner]
+order: 250
+colab_notebook: "notebooks/lessons/debugging/debugging-tools.ipynb"
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Use print debugging, VS Code breakpoints, and pdb to inspect running programs.
+- **Practice in:** Colab, VS Code, and the terminal
+:::
+
+{{< include ../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Debugging Tools** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **debugging tools** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Debugging Tools
+
+Debugging is controlled observation. You choose a place to inspect, run the program to that place, compare actual values with expected values, and then change one thing.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### Example 1.1
+
+Use print debugging to reveal a type problem before it causes confusion later.
+
+```python
+price = "10"
+print("price:", price, type(price))
+total = int(price) * 2
+print(total)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### Explain Example 1.1
+
+- The first line stores text, not a number, because of the quotes.
+- The temporary print shows both the value and its type, which is the clue.
+- `int(price)` converts the string before multiplication, so the final result is numeric.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### Challenge 1.1
+
+::: {.callout-note title="Challenge"}
+Remove `int(...)` and predict whether Python repeats the text, multiplies numerically, or raises an error. Then run it and explain the evidence.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy Example 1.1 into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Remove `int(...)` and predict whether Python repeats the text, multiplies numerically, or raises an error.
+
+</details>
+
+### Debugging checkpoint 1.1
+
+::: {.callout-warning title="Debugging checkpoint"}
+Printing too much creates noise. Print the smallest useful value, include a label, and remove the temporary print after learning from it. In VS Code, avoid stepping into library code at first; stay inside the code you wrote.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### Apply it
+
+Use the same bug three ways: inspect it with `print`, pause on it with a VS Code breakpoint, and step through it with `pdb`. Write which tool felt clearest and why.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
+
+## Why this matters
+
+Use print debugging, VS Code breakpoints, and pdb to inspect running programs.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one clear explanation.
+
+::: {.callout-note title="Guiding questions"}
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Debugging Tools** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.callout-note title="Learning objectives"}
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 3 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- **1. Print Debugging** — Inspect variable values and types with small temporary print statements.
+- **2. Breakpoints in VS Code** — Pause code in VS Code and inspect values step by step.
+- **3. pdb Basics** — Use Python's built-in debugger from the terminal.
+
+## 1. Print Debugging
+
+Inspect variable values and types with small temporary print statements.
+
+::: {.callout-tip title="Analogy"}
+Print statements are sticky notes along a route: they show what happened at each
+checkpoint.
+:::
+
+### What this means
+
+Print debugging adds temporary observations so you can see what the program knows at a
+point in time.
+
+### Example 1
+Predict what will happen before you run the code.
+
+```python
+price = "10"
+print("price:", price, type(price))
+total = int(price) * 2
+print(total)
+```
+
+### Step-by-step explanation
+
+1. `price = "10"` — pause here and say what this line reads, creates, changes, or displays.
+2. `print("price:", price, type(price))` — pause here and say what this line reads, creates, changes, or displays.
+3. `total = int(price) * 2` — pause here and say what this line reads, creates, changes, or displays.
+4. `print(total)` — pause here and say what this line reads, creates, changes, or displays.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.callout-note title="Practice"}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+Too many print statements create noise. Print the smallest useful value, then remove or
+replace with logging later.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Check your understanding
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "debugging-print-debugging",
+  "title": "Print Debugging checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Print Debugging?",
+      "options": [
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: Print debugging adds temporary observations so you can see what the program knows at a point in time."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: Print statements are sticky notes along a route: they show what happened at each checkpoint."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after Example 1 works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
+
+## 2. Breakpoints in VS Code
+
+Pause code in VS Code and inspect values step by step.
+
+::: {.callout-tip title="Analogy"}
+A breakpoint is a pause button on a movie: stop at the interesting scene and look around
+before continuing.
+:::
+
+### What this means
+
+A breakpoint tells the debugger to pause before a chosen line so you can inspect program
+state.
+
+### Example 2
+Predict what will happen before you run the code.
+
+```python
+def total(prices):
+    result = 0
+    for price in prices:
+        result += price
+    return result
+
+print(total([2, 3, 4]))
+```
+
+### Step-by-step explanation
+
+1. `def total(prices):` — pause here and say what this line reads, creates, changes, or displays.
+2. `result = 0` — pause here and say what this line reads, creates, changes, or displays.
+3. `for price in prices:` — pause here and say what this line reads, creates, changes, or displays.
+4. `result += price` — pause here and say what this line reads, creates, changes, or displays.
+5. `return result` — pause here and say what this line reads, creates, changes, or displays.
+6. Continue the same process for the remaining lines, one line at a time.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.callout-note title="Practice"}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+Place the breakpoint before the suspicious line, not after all important values have
+already changed.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Check your understanding
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "debugging-breakpoints-vscode",
+  "title": "Breakpoints in VS Code checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Breakpoints in VS Code?",
+      "options": [
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A breakpoint is a pause button on a movie: stop at the interesting scene and look around before continuing."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after Example 1 works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
+
+## 3. pdb Basics
+
+Use Python's built-in debugger from the terminal.
+
+::: {.callout-tip title="Analogy"}
+pdb is a flashlight for terminal programs: small, built in, and useful when the room is
+dark.
+:::
+
+### What this means
+
+pdb lets you pause and inspect Python programs without a graphical editor.
+
+### Example 3
+Predict what will happen before you run the code.
+
+```bash
+python -m pdb script.py
+# commands to try inside pdb: n, s, p variable, c, q
+```
+
+### Step-by-step explanation
+
+1. `python -m pdb script.py` — pause here and say what this line reads, creates, changes, or displays.
+2. `# commands to try inside pdb: n, s, p variable, c, q` — pause here and say what this line reads, creates, changes, or displays.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.callout-note title="Practice"}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+pdb commands are typed at the debugger prompt, not inside your Python file unless you
+deliberately add a breakpoint().
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Check your understanding
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "debugging-pdb-basics",
+  "title": "pdb Basics checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes pdb Basics?",
+      "options": [
+        "pdb lets you pause and inspect Python programs without a graphical editor.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: pdb lets you pause and inspect Python programs without a graphical editor."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: pdb is a flashlight for terminal programs: small, built in, and useful when the room is dark."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after Example 1 works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+Example 1, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- **Print Debugging**: Print debugging adds temporary observations so you can see what the program knows at a
+point in time.
+- **Breakpoints in VS Code**: A breakpoint tells the debugger to pause before a chosen line so you can inspect program
+state.
+- **pdb Basics**: pdb lets you pause and inspect Python programs without a graphical editor.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- Python errors tutorial: https://docs.python.org/3/tutorial/errors.html
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/
+- VS Code Python tutorial: https://code.visualstudio.com/docs/python/python-tutorial
+- pdb documentation: https://docs.python.org/3/library/pdb.html

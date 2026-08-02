@@ -45,50 +45,50 @@ courses:
       checkpoints:
         - id: getting-started
           title: Getting Started Checkpoint
-          path: lessons/getting-started/checkpoint.qmd
+          path: courses/python-foundations/getting-started/checkpoint.qmd
           required: true
         - id: core-python
           title: Core Python Checkpoint
-          path: lessons/core-python/checkpoint.qmd
+          path: courses/python-foundations/core-python/checkpoint.qmd
           required: true
         - id: data-structures
           title: Data Structures Checkpoint
-          path: lessons/data-structures/checkpoint.qmd
+          path: courses/python-foundations/data-structures/checkpoint.qmd
           required: true
         - id: functions
           title: Functions Checkpoint
-          path: lessons/functions/checkpoint.qmd
+          path: courses/python-foundations/functions/checkpoint.qmd
           required: true
         - id: debugging
           title: Debugging Checkpoint
-          path: lessons/debugging/checkpoint.qmd
+          path: courses/python-foundations/debugging/checkpoint.qmd
           required: true
       project:
         id: python-foundations-project
         title: Python Foundations Project
-        path: lessons/foundations-project/index.qmd
+        path: courses/python-foundations/project/index.qmd
         required: true
         rubric_version: 1
     modules:
       - id: getting-started
         title: Getting Started
-        directory: lessons/getting-started
+        directory: courses/python-foundations/getting-started
         lesson_count: 3
       - id: core-python
         title: Core Python
-        directory: lessons/core-python
+        directory: courses/python-foundations/core-python
         lesson_count: 5
       - id: data-structures
         title: Data Structures
-        directory: lessons/data-structures
+        directory: courses/python-foundations/data-structures
         lesson_count: 5
       - id: functions
         title: Functions
-        directory: lessons/functions
+        directory: courses/python-foundations/functions
         lesson_count: 3
       - id: debugging
         title: Debugging
-        directory: lessons/debugging
+        directory: courses/python-foundations/debugging
         lesson_count: 3
 
   - id: intermediate-python
@@ -107,19 +107,19 @@ courses:
     modules:
       - id: files-and-data
         title: Files and Data
-        directory: lessons/files-and-data
+        directory: courses/intermediate-python/files-and-data
         lesson_count: 3
       - id: projects-and-environments
         title: Projects and Environments
-        directory: lessons/projects-and-environments
+        directory: courses/intermediate-python/projects-and-environments
         lesson_count: 4
       - id: code-quality
         title: Code Quality
-        directory: lessons/code-quality
+        directory: courses/intermediate-python/code-quality
         lesson_count: 4
       - id: object-oriented-python
         title: Object-Oriented Python
-        directory: lessons/object-oriented-python
+        directory: courses/intermediate-python/object-oriented-python
         lesson_count: 3
 
   - id: advanced-python
@@ -138,7 +138,7 @@ courses:
     modules:
       - id: advanced-python-patterns
         title: Advanced Python Patterns
-        directory: lessons/advanced-python-patterns
+        directory: courses/advanced-python/advanced-python-patterns
         lesson_count: 5
 
   - id: scientific-python
@@ -157,7 +157,7 @@ courses:
     modules:
       - id: scientific-python
         title: Scientific Python
-        directory: lessons/scientific-python
+        directory: courses/scientific-python/scientific-python
         lesson_count: 5
 
   - id: data-science-ml
@@ -176,9 +176,9 @@ courses:
     modules:
       - id: data-science
         title: Data Science
-        directory: lessons/data-science
+        directory: courses/data-science-ml/data-science
         lesson_count: 5
       - id: machine-learning-ai
         title: Machine Learning and AI
-        directory: lessons/machine-learning-ai
+        directory: courses/data-science-ml/machine-learning-ai
         lesson_count: 5

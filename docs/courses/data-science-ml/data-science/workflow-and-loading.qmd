@@ -1,0 +1,469 @@
+---
+title: "Workflow and Loading Data"
+aliases:
+  - "/lessons/data-science/workflow-and-loading.html"
+lesson_id: "data-science.workflow-and-loading"
+lesson_order: 10
+description: "Move from question to dataset and load tabular data with pandas."
+execute:
+  echo: true
+categories: [data-science]
+order: 580
+colab_notebook: "notebooks/lessons/data-science/workflow-and-loading.ipynb"
+---
+::: {.lesson-meta}
+- **Level:** Beginner to intermediate
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Move from question to dataset and load tabular data with pandas.
+- **Practice in:** Jupyter or Google Colab
+:::
+
+{{< include ../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Workflow and Loading Data** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **data science workflow and loading data** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Workflow and Loading Data
+
+A data workflow moves from question to data loading, inspection, cleaning, analysis, visualization, and communication. In pandas, rows are observations and columns are variables.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### Example 1.1
+
+Predict the shape and column names after loading this tiny table.
+
+```python
+import pandas as pd
+
+data = pd.DataFrame({
+"name": ["Ada", "Grace"],
+"score": [9, 8],
+})
+print(data.shape)
+print(data.head())
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### Explain Example 1.1
+
+- The DataFrame has two rows because there are two learners.
+- It has two columns: `name` and `score`.
+- `.shape` reports row count and column count.
+- `.head()` displays the first rows so you can inspect before analyzing.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### Challenge 1.1
+
+::: {.callout-note title="Challenge"}
+Add a third learner and run `.shape` again. The first number changes because the number of observations changed.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy Example 1.1 into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Add a third learner and run `.shape` again.
+
+</details>
+
+### Debugging checkpoint 1.1
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not skip inspection after loading. File paths, headers, missing values, and data types often differ from what you expected. Start every dataset by checking shape, columns, head, and types.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### Apply it
+
+Load or create a small DataFrame in Colab. Write one question about it, inspect it with `.shape`, `.head()`, and `.dtypes`, then say whether the data can answer your question.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
+
+## Why this matters
+
+Move from question to dataset and load tabular data with pandas.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one clear explanation.
+
+::: {.callout-note title="Guiding questions"}
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Workflow and Loading Data** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.callout-note title="Learning objectives"}
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 2 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- **1. Data Science Workflow** — Follow a repeatable path from question to communication.
+- **2. Loading Data with pandas** — Load CSV and similar tabular data into DataFrames.
+
+## The data science workflow at a glance
+
+::: {.concept-diagram}
+Data science is an iterative workflow. New questions often appear after you
+inspect or clean the data.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  question["Ask question"] --> load["Load data"]
+  load --> inspect["Inspect structure"]
+  inspect --> clean["Clean data"]
+  clean --> analyze["Analyze"]
+  analyze --> communicate["Communicate result"]
+  communicate -. revise .-> question
+```
+
+Do not skip the question and inspection steps; they shape every later choice.
+:::
+
+## 1. Data Science Workflow
+
+Follow a repeatable path from question to communication.
+
+::: {.callout-tip title="Analogy"}
+A workflow is a recipe card for inquiry: ingredients, steps, checks, and serving notes.
+:::
+
+### What this means
+
+A workflow keeps analysis organized and honest from initial question to final claim.
+
+### Example 1
+Predict what will happen before you run the code.
+
+```python
+question = "Which category has the highest average score?"
+steps = ["load", "inspect", "clean", "analyze", "communicate"]
+print(question, steps)
+```
+
+### Step-by-step explanation
+
+1. `question = "Which category has the highest average score?"` — pause here and say what this line reads, creates, changes, or displays.
+2. `steps = ["load", "inspect", "clean", "analyze", "communicate"]` — pause here and say what this line reads, creates, changes, or displays.
+3. `print(question, steps)` — pause here and say what this line reads, creates, changes, or displays.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.callout-note title="Practice"}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+Starting with a chart before defining the question can lead to attractive but unfocused
+analysis.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Check your understanding
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-science-data-science-workflow",
+  "title": "Data Science Workflow checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Data Science Workflow?",
+      "options": [
+        "A workflow keeps analysis organized and honest from initial question to final claim.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A workflow keeps analysis organized and honest from initial question to final claim."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A workflow is a recipe card for inquiry: ingredients, steps, checks, and serving notes."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after Example 1 works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
+
+## 2. Loading Data with pandas
+
+Load CSV and similar tabular data into DataFrames.
+
+::: {.callout-tip title="Analogy"}
+A DataFrame is like a spreadsheet with Python superpowers.
+:::
+
+### What this means
+
+A DataFrame is a labeled table with rows and columns.
+
+### Example 2
+Predict what will happen before you run the code.
+
+```python
+import pandas as pd
+
+df = pd.read_csv("data.csv")
+print(df.head())
+```
+
+### Step-by-step explanation
+
+1. `import pandas as pd` — pause here and say what this line reads, creates, changes, or displays.
+2. `df = pd.read_csv("data.csv")` — pause here and say what this line reads, creates, changes, or displays.
+3. `print(df.head())` — pause here and say what this line reads, creates, changes, or displays.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.callout-note title="Practice"}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+File paths and column names are common first failures. Print the path and df.columns
+when loading data.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Check your understanding
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-science-loading-data-with-pandas",
+  "title": "Loading Data with pandas checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Loading Data with pandas?",
+      "options": [
+        "A DataFrame is a labeled table with rows and columns.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A DataFrame is a labeled table with rows and columns."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A DataFrame is like a spreadsheet with Python superpowers."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after Example 1 works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+Example 1, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- **Data Science Workflow**: A workflow keeps analysis organized and honest from initial question to final claim.
+- **Loading Data with pandas**: A DataFrame is a labeled table with rows and columns.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- pandas documentation: https://pandas.pydata.org/docs/
+- seaborn documentation: https://seaborn.pydata.org/
+- Matplotlib documentation: https://matplotlib.org/stable/
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

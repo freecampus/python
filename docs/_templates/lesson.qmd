@@ -1,0 +1,172 @@
+---
+title: Lesson Template
+description: Standard structure for FreeCampus Python lessons.
+execute:
+  echo: true
+categories: [course]
+order: 9990
+colab_notebook: "notebooks/lessons/_lesson-template.ipynb"
+---
+
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 20–30 minutes
+- **You will learn:** Replace this with the concrete learner outcome.
+- **Practice in:** Google Colab, Jupyter, or VS Code
+:::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What practical problem does this lesson help learners solve?
+- What should learners predict before running the first code cell?
+- What common mistake should learners be able to debug?
+
+## Objectives
+
+- Run a complete starter example in Colab.
+- Explain each line in beginner-friendly language.
+- Change one thing and compare prediction with output.
+- Record one debugging clue from an error or surprising result.
+
+## Hands-on episode: Replace with the lesson title
+
+Start with the smallest useful task. Introduce vocabulary only when the learner
+needs it to understand the task.
+
+### Example 1.1
+
+Ask learners to predict the output first.
+
+```python
+print("Replace this with the smallest useful example.")
+```
+
+### Explain Example 1.1
+
+Explain what each line reads, creates, changes, returns, displays, or raises.
+Then ask the learner to change exactly one part and compare the result.
+
+### Challenge 1.1
+
+::: {.callout-note title="Challenge"}
+Change one value, name, condition, or line. Predict the output before running.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1.1 into a new Colab cell.
+2. Change one thing.
+3. Run the cell.
+4. Compare the result with the prediction.
+
+</details>
+
+### Debugging checkpoint 1.1
+
+Show a realistic beginner mistake and model a calm debugging routine: read the
+error, inspect the closest value and type, change one thing, and run again.
+
+## Key points
+
+- Runnable examples teach better than definitions alone.
+- Predictions make learner thinking visible.
+- Small changes make cause and effect clear.
+<!-- fcpython-lab: end -->
+
+## The problem this lesson solves
+
+Open with the learner's problem, not the vocabulary. Explain when a beginner
+would need this concept and what task becomes easier after learning it.
+
+::: {.callout-note title="Guiding questions"}
+### Questions this lesson should answer
+
+- What practical problem does this concept solve?
+- What should learners predict before running code?
+- What should learners inspect when output or an error surprises them?
+:::
+
+::: {.callout-note title="Learning objectives"}
+By the end, learners should be able to explain, read, write, modify, quiz, and
+debug a small example for the topic.
+:::
+
+## What the concept means
+
+Introduce the vocabulary in plain language. Use an analogy only if it clarifies
+the code that appears next. Avoid generic filler; connect every sentence to a
+concrete example.
+
+## Example 1
+Ask learners to predict the output before running.
+
+```python
+print("Hello, Python!")
+```
+
+## Step-by-step explanation
+
+Explain every line in beginner language:
+
+1. What value, name, or action appears on this line?
+2. What does Python do first?
+3. What changes after the line runs?
+4. What output, returned value, or error should the learner expect?
+
+## Try changing one thing
+
+::: {.callout-note title="Practice"}
+Ask learners to change exactly one part, predict the result, run the code, and
+explain the difference in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy the example into Colab, Jupyter, or a `.py` file.
+2. Mark the one part you plan to change.
+3. Write a prediction.
+4. Run the changed code.
+5. Compare the result with the prediction.
+
+</details>
+
+## Common mistake and fix
+
+::: {.callout-warning title="Common mistake"}
+Show broken code, the likely error or unexpected output, and a small repair.
+Explain why the repair works.
+:::
+
+## Check your understanding
+
+Every lesson must include a browser-side OJS quiz. If the same quiz should also
+appear in notebooks, store it in `src/fcpython/quiz_banks.py` and render it with
+an import cell that uses `#| echo: false`.
+
+```python
+# In a notebook/Quarto cell, keep setup hidden with:
+#| echo: false
+#| eval: false
+#| output: asis
+# from fcpython.quiz_banks import example_quiz
+# print(example_quiz().to_json_script())
+```
+
+## Practice
+
+Provide a short practice task with one or two variations. Prefer small edits over
+large blank-page exercises.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- State the concept in one sentence.
+- Include one concrete example and one explained mistake.
+- Use OJS quizzes as checkpoints before moving on.
+- Keep examples beginner-safe: one idea at a time.
+:::

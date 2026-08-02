@@ -1,0 +1,497 @@
+---
+title: "Names, Values, and Types"
+aliases:
+  - "/lessons/faq/names-values-and-types.html"
+description: "Diagnose undefined names, unexpected assignments, text input, and mixed-type operations."
+execute:
+  echo: true
+categories: [faq, variables, types, beginner]
+order: 264
+colab_notebook: "notebooks/lessons/faq/names-values-and-types.ipynb"
+---
+{{< include ../../_includes/colab-link.qmd >}}
+
+::: {.callout-tip title="Want to try the code?"}
+This FAQ can be read as a standalone article. The **Open in Colab** button above
+opens an optional notebook if you want to run the examples, inspect each type,
+and work through the fixes step by step.
+:::
+
+<!-- fcpython-faq-post: start -->
+Many beginner errors become less mysterious when you ask two concrete
+questions: which name is Python reading, and what type of value does that name
+refer to right now?
+
+## Short answer
+
+A `NameError` means the requested name is unavailable at that moment. Check its
+exact spelling, whether its assignment ran first, and whether it was created in
+a different scope.
+
+A `TypeError` involving text and numbers means the operation received types that
+do not work together. Remember that `input()` returns text. Inspect with
+`type(...)`, decide whether the program means arithmetic or text joining, and
+then convert deliberately.
+
+## Why is my variable undefined?
+
+**Symptom:** Python reports a message like:
+
+```text
+NameError: name 'total_price' is not defined
+```
+
+**Likely reason:** when Python reached that line, it could not find the exact
+name `total_price` in an available scope.
+
+Start with three checks.
+
+### Check spelling and capitalization
+
+```python
+total_price = 15
+print(total_prcie)
+```
+
+The assignment creates `total_price`, but the next line asks for `total_prcie`.
+Those spellings are different.
+
+Capital letters also matter:
+
+```python
+course = "Python"
+print(Course)
+```
+
+`course` and `Course` are different names. A useful repair changes the use to
+match the assignment:
+
+```python
+course = "Python"
+print(course)
+```
+
+### Check assignment order
+
+Python normally runs a script from top to bottom:
+
+```python
+print(score)
+score = 10
+```
+
+The `print` call happens before `score` receives a value, so it raises
+`NameError`. Put the assignment before the use:
+
+```python
+score = 10
+print(score)
+```
+
+In a notebook, also check whether the assignment cell actually ran. Text on the
+page does not create a name until Python executes that cell. See
+[Running Code and Understanding Output](running-code-and-output.qmd) for a clean
+runtime test.
+
+### Check where the name was created
+
+A name created inside a function is usually local to that function:
+
+```python
+def calculate_total():
+    total = 4 + 6
+    print(total)
+
+calculate_total()
+print(total)
+```
+
+The function prints `10`. The final line then raises `NameError` because the
+local name `total` is not available outside the function.
+
+Return a result when outside code needs it:
+
+```python
+def calculate_total():
+    total = 4 + 6
+    return total
+
+result = calculate_total()
+print(result)
+```
+
+::: {.callout-tip title="Read the exact name"}
+Copy the missing name directly from the last line of the traceback. Then search
+upward for the assignment or definition you expected to create it. The error is
+evidence about the program's current state, not a judgment about the learner.
+:::
+
+For more traceback practice, continue with
+[Error Messages](../../courses/python-foundations/debugging/error-messages.qmd).
+
+## Why did assigning one name produce an unexpected value?
+
+Assignment evaluates the right side first, then makes the name on the left refer
+to that resulting value.
+
+```python
+score = 10
+saved_score = score
+score = 12
+
+print(score)
+print(saved_score)
+```
+
+Predict both output lines before running. The output is:
+
+```text
+12
+10
+```
+
+Line by line:
+
+1. `score = 10` makes `score` refer to the integer `10`.
+2. `saved_score = score` reads the current value of `score`, then makes
+   `saved_score` refer to that same integer value.
+3. `score = 12` reassigns `score` so it now refers to the integer `12`.
+4. That reassignment does not rerun the earlier assignment to `saved_score`.
+
+The statement `saved_score = score` is not a spreadsheet formula that keeps
+watching `score`. Python executes it once when that line runs.
+
+::: {.concept-diagram}
+Reassignment moves one name to a new value; it does not replay earlier lines.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  score1["score"] --> ten["10"]
+  saved["saved_score"] --> ten
+  reassign["score = 12"] --> score2["score"]
+  score2 --> twelve["12"]
+  saved --> ten
+```
+
+:::
+
+### Mutable values need one extra check
+
+Lists can be changed in place. Two names can refer to the same list:
+
+```python
+original = [2, 4]
+backup = original
+original.append(6)
+
+print(original)
+print(backup)
+```
+
+Both lines print `[2, 4, 6]`. The assignment `backup = original` did not create
+a second list. It gave the existing list another name. The `append` method then
+changed that one shared list.
+
+Create a shallow copy when two independent one-level lists are intended:
+
+```python
+original = [2, 4]
+backup = original.copy()
+original.append(6)
+
+print(original)
+print(backup)
+```
+
+Now `original` prints `[2, 4, 6]`, while `backup` prints `[2, 4]`.
+
+::: {.callout-note title="Try it"}
+Predict the two outputs for `colors = ["blue"]`, `saved = colors`, and
+`colors.append("green")`. Then replace `saved = colors` with `saved =
+colors.copy()` and compare the evidence.
+:::
+
+For deeper practice with mutation and copying, use
+[Lists](../../courses/python-foundations/data-structures/lists.qmd).
+
+## Quick check: names and assignments
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-names-and-assignment",
+  "title": "Names and assignment checkpoint",
+  "instructions": "Trace each line before choosing an answer.",
+  "questions": [
+    {
+      "id": "name-error-first-check",
+      "prompt": "Python reports NameError for final_score. What should you inspect first?",
+      "options": [
+        "The exact spelling and whether an assignment ran before this use.",
+        "Whether every number can be converted to a list.",
+        "Whether print should be replaced by input.",
+        "Whether the program has enough comments."
+      ],
+      "answer_index": 0,
+      "explanation": "NameError says that exact name is unavailable now, so spelling and execution order are direct clues."
+    },
+    {
+      "id": "integer-reassignment",
+      "prompt": "After score = 10, saved = score, and score = 12, what value does saved refer to?",
+      "options": [
+        "10",
+        "12",
+        "None",
+        "The text score"
+      ],
+      "answer_index": 0,
+      "explanation": "saved received the value read when its assignment ran; reassigning score does not rerun that line."
+    },
+    {
+      "id": "shared-list",
+      "prompt": "Why does backup change after backup = original and original.append(6)?",
+      "options": [
+        "Both names refer to the same mutable list.",
+        "append changes every list in the program.",
+        "Assignment always makes two independent copies.",
+        "The integer 6 renames backup."
+      ],
+      "answer_index": 0,
+      "explanation": "A plain assignment gives the same list another name; append mutates that shared list."
+    }
+  ]
+}
+</script>
+
+{{< include ../../_includes/ojs-quiz.qmd >}}
+
+## Why does `input()` return text?
+
+Keyboard input arrives as characters. Python cannot know whether `12` means an
+age, part of an address, an identifier with leading zeroes, or text that should
+be joined with other text. Therefore, `input()` returns a string.
+
+```python
+quantity_text = input("How many notebooks? ")
+print(quantity_text)
+print(type(quantity_text))
+```
+
+If the learner types `3`, the type output is still `<class 'str'>`.
+
+Convert at the point where the program needs a number:
+
+```python
+quantity_text = input("How many notebooks? ")
+quantity = int(quantity_text)
+total = quantity * 4
+print("Total:", total)
+```
+
+If the learner types `3`, the program prints `Total: 12`.
+
+### Read the conversion line slowly
+
+```python
+quantity = int(quantity_text)
+```
+
+1. Python reads the string stored under `quantity_text`.
+2. `int(...)` attempts to create an integer with the same whole-number meaning.
+3. The assignment gives that new integer the name `quantity`.
+4. The original string still exists under `quantity_text`.
+
+Not every string describes an integer:
+
+```python
+int("three")
+```
+
+This raises `ValueError`. The operation accepts strings, but this particular
+string cannot be interpreted as a base-ten integer.
+
+::: {.callout-warning title="Common mistake"}
+Do not convert every input automatically. A name, email address, phone number,
+or postal code is usually text even when it contains digits. Convert only when
+the program needs numeric behavior such as arithmetic or numeric comparison.
+:::
+
+## Why can Python not combine a string and a number?
+
+The `+` symbol has more than one meaning:
+
+```python
+print(2 + 3)
+print("Py" + "thon")
+```
+
+The first call performs integer addition and prints `5`. The second performs
+string concatenation and prints `Python`.
+
+This expression is ambiguous, so Python rejects it:
+
+```python
+attempts = 3
+print("Attempts: " + attempts)
+```
+
+Should the program add numerically or join text? Decide the intended result,
+then write that decision explicitly.
+
+For a message, let `print` handle multiple values:
+
+```python
+attempts = 3
+print("Attempts:", attempts)
+```
+
+Or convert the number for text concatenation:
+
+```python
+attempts = 3
+message = "Attempts: " + str(attempts)
+print(message)
+```
+
+For arithmetic, convert digit text to a number:
+
+```python
+attempts_text = "3"
+next_attempt = int(attempts_text) + 1
+print(next_attempt)
+```
+
+### Inspect before converting
+
+```python
+value = "3"
+print(value)
+print(type(value))
+```
+
+`print(value)` shows content. `print(type(value))` shows the value's type. Both
+clues matter: `"3"` and `"three"` are strings, but only one can be converted
+with `int(...)`.
+
+::: {.callout-note title="Try it"}
+Fix `price_text = "5"` and `total = price_text + 2` in two different ways:
+first produce the number `7`, then produce the text `"52"`. Explain why the
+correct conversion depends on the intended result.
+:::
+
+<details class="solution">
+<summary>Show two intentional solutions</summary>
+
+For arithmetic:
+
+```python
+price_text = "5"
+total = int(price_text) + 2
+print(total)
+```
+
+For text joining:
+
+```python
+price_text = "5"
+combined_text = price_text + str(2)
+print(combined_text)
+```
+
+The first output is the integer `7`. The second output is the string `"52"`.
+
+</details>
+
+For deeper instruction about these types, continue with
+[Values, Variables, and Types](../../courses/python-foundations/core-python/values-variables-types.qmd) and
+[Strings, Input, and Output](../../courses/python-foundations/core-python/strings-input-output.qmd).
+
+## Try an order total in Colab
+
+Start with fixed text so the experiment can be repeated without typing:
+
+```python
+quantity_text = "3"
+price = 4
+
+print(type(quantity_text))
+quantity = int(quantity_text)
+total = quantity * price
+print("Order total:", total)
+```
+
+Then complete these changes one at a time:
+
+1. Predict the two visible output lines.
+2. Change `quantity_text` to `"5"` and predict the new total.
+3. Change it to `"five"`, run the code, and identify the error type and line.
+4. Restore a digit string before replacing the fixed value with `input(...)`.
+
+Keep the broken version long enough to record the symptom, clue, change, and
+result. A carefully explained error is useful practice.
+
+## Quick check: types and conversions
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "faq-input-and-types",
+  "title": "Input and types checkpoint",
+  "instructions": "Choose the operation that matches the intended result.",
+  "questions": [
+    {
+      "id": "input-type",
+      "prompt": "A learner types 12 in response to input(...). What type is returned?",
+      "options": [
+        "str",
+        "int",
+        "float",
+        "bool"
+      ],
+      "answer_index": 0,
+      "explanation": "input returns the typed characters as a string; the program must choose any needed conversion."
+    },
+    {
+      "id": "numeric-intention",
+      "prompt": "The text value \"5\" should be added numerically to 2. Which expression produces 7?",
+      "options": [
+        "int(\"5\") + 2",
+        "\"5\" + str(2)",
+        "str(\"5\") + \"2\"",
+        "type(\"5\") + 2"
+      ],
+      "answer_index": 0,
+      "explanation": "int converts the digit string to a number before integer addition occurs."
+    },
+    {
+      "id": "inspect-type",
+      "prompt": "Why use type(value) while investigating a TypeError?",
+      "options": [
+        "It reveals the kind of value an operation actually received.",
+        "It converts every value to the correct type.",
+        "It automatically repairs the failing line.",
+        "It prints every name in the program."
+      ],
+      "answer_index": 0,
+      "explanation": "The actual type is evidence that helps you choose whether and how to convert."
+    }
+  ]
+}
+</script>
+
+{{< include ../../_includes/ojs-quiz.qmd >}}
+
+## A compact checklist
+
+::: {.callout-tip title="Key points"}
+- Read the exact missing name in a `NameError`, then check spelling, order, and
+  scope.
+- Assignment records a value at the moment the line runs; it is not a live
+  formula.
+- A plain assignment can give a mutable list a second name rather than copying
+  it.
+- `input()` returns text because Python cannot infer what typed characters mean.
+- Inspect the value and its type, decide the intended operation, and only then
+  choose a conversion.
+:::
+<!-- fcpython-faq-post: end -->

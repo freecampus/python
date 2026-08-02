@@ -1,0 +1,190 @@
+---
+title: "Functions Checkpoint"
+aliases:
+  - "/lessons/functions/checkpoint.html"
+description: "Decompose a small calculation into documented functions with focused checks."
+checkpoint_id: "functions"
+assessment_type: module-checkpoint
+assessment_version: 1
+required_for_completion: true
+completion_label: "Required checkpoint"
+passing_score: 3
+categories: [python-foundations, functions, checkpoint]
+order: 225
+colab_notebook: "notebooks/lessons/functions/checkpoint.ipynb"
+---
+
+::: {.lesson-meta .checkpoint-meta}
+- **Level:** Foundations checkpoint
+- **Estimated time:** 40–50 minutes
+- **Outcome assessed:** Define, call, explain, and test focused functions with clear contracts.
+- **Completion rule:** Score at least 3/4, complete the practical task, then record completion below.
+:::
+
+{{< include ../../../_includes/colab-link.qmd >}}
+
+## The task this checkpoint assesses
+
+This checkpoint combines a short knowledge check with one practical artifact.
+Use your lesson notebooks while reviewing, but complete the final attempt without
+copying a finished solution.
+
+## 1. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-functions-checkpoint",
+  "title": "Functions knowledge check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "return-purpose",
+      "prompt": "Why does a function return a value?",
+      "options": [
+        "So its result can be stored or used by other code.",
+        "So Python prints every local variable.",
+        "So the function can avoid having a name.",
+        "So arguments become comments."
+      ],
+      "answer_index": 0,
+      "explanation": "A returned value crosses the function boundary and can be assigned, compared, printed, or passed elsewhere."
+    },
+    {
+      "id": "parameter-argument",
+      "prompt": "In greet('Mina'), what is 'Mina'?",
+      "options": [
+        "A return statement",
+        "An argument",
+        "A function name",
+        "A type hint"
+      ],
+      "answer_index": 1,
+      "explanation": "The call supplies the argument 'Mina' to a parameter."
+    },
+    {
+      "id": "contract-purpose",
+      "prompt": "What should a useful function contract explain?",
+      "options": [
+        "Expected inputs, returned result, and important behavior.",
+        "Only the author's name.",
+        "Every value ever used by the program.",
+        "The color of the editor theme."
+      ],
+      "answer_index": 0,
+      "explanation": "A contract helps callers understand how to use the function and what result to expect."
+    },
+    {
+      "id": "focused-test",
+      "prompt": "What makes a first function test useful?",
+      "options": [
+        "It checks one stated behavior with a known input and result.",
+        "It depends on many unrelated functions.",
+        "It prints output without checking it.",
+        "It changes the function while running."
+      ],
+      "answer_index": 0,
+      "explanation": "A focused example makes failures easier to understand and connect to the function's contract."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
+
+::: {.callout-note title="Checkpoint threshold"}
+Aim for at least **3 of 4** correct. Review the linked module lessons and reset
+the quiz if you need another attempt. The score is formative and stays in this
+browser; recording completion is an honest self-assessment.
+:::
+
+## 2. Complete the practical task
+
+Turn this repeated study-summary logic into small functions:
+
+```python
+minutes = [25, 20, 15]
+total = sum(minutes)
+average = total / len(minutes)
+print(f"Total: {total}; average: {average}")
+```
+
+Create:
+
+1. `total_minutes(minutes)` that returns the total;
+2. `average_minutes(minutes)` that returns the average and uses
+   `total_minutes`;
+3. `format_summary(minutes)` that returns the finished message.
+
+Give each function a short docstring and type hints. Add at least two focused
+`assert` checks with inputs whose results you can calculate by hand. Keep
+printing outside the calculation functions.
+
+### Evidence to keep
+
+- Three focused functions with parameters and returned values.
+- A docstring and type hints for each function.
+- One function calling another instead of duplicating the total calculation.
+- At least two passing `assert` checks.
+- An explanation of the difference between returning and printing.
+
+::: {.callout-tip collapse="true" title="Compare with one possible solution"}
+One possible solution is:
+
+```python
+def total_minutes(minutes: list[int]) -> int:
+    """Return the total number of study minutes."""
+    return sum(minutes)
+
+
+def average_minutes(minutes: list[int]) -> float:
+    """Return the average study-session length."""
+    return total_minutes(minutes) / len(minutes)
+
+
+def format_summary(minutes: list[int]) -> str:
+    """Return a readable study summary."""
+    total = total_minutes(minutes)
+    average = average_minutes(minutes)
+    return f"Total: {total}; average: {average}"
+
+
+assert total_minutes([10, 20]) == 30
+assert average_minutes([10, 20]) == 15
+
+print(format_summary([25, 20, 15]))
+```
+
+The first two functions calculate and return values. The final function combines
+those values into text. Only the last line decides to display the returned
+summary.
+:::
+
+## 3. Decide whether the outcome is demonstrated
+
+Record this checkpoint only when all four statements are true:
+
+- [ ] I scored at least 3/4 on the knowledge check.
+- [ ] My practical task runs from top to bottom.
+- [ ] I kept the requested prediction, output, and explanation evidence.
+- [ ] I can make one new change without copying the solution.
+
+## 4. Record checkpoint completion
+
+This button stores a self-reported completion marker in this browser. It is not
+a graded submission or verified certificate evidence.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-checkpoint-action>
+  <button class="fc-complete-button" type="button" data-fc-checkpoint-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-checkpoint-complete-label>Record checkpoint complete</span>
+  </button>
+  <p data-fc-checkpoint-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- A checkpoint asks you to produce evidence, not merely recognize an answer.
+- Review is expected; record completion only after the practical outcome works.
+- Keep the notebook because it becomes useful evidence for the final project.
