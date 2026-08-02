@@ -52,8 +52,7 @@ from pathlib import Path
 
 path = Path("hello.txt")
 with path.open("w") as file:
-file.write("Hello
-")
+    file.write("Hello\n")
 
 print(path.read_text())
 ```

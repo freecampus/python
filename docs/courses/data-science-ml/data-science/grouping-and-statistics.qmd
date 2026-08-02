@@ -50,10 +50,12 @@ Predict the mean score for each group before running.
 ```python
 import pandas as pd
 
-data = pd.DataFrame({
-"group": ["A", "A", "B"],
-"score": [8, 10, 7],
-})
+data = pd.DataFrame(
+    {
+        "group": ["A", "A", "B"],
+        "score": [8, 10, 7],
+    }
+)
 print(data.groupby("group")["score"].agg(["count", "mean"]))
 ```
 

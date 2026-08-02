@@ -54,8 +54,8 @@ random.seed(42)
 heads = 0
 trials = 1000
 for _ in range(trials):
-if random.choice(["H", "T"]) == "H":
-heads = heads + 1
+    if random.choice(["H", "T"]) == "H":
+        heads = heads + 1
 print(heads / trials)
 ```
 

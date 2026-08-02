@@ -52,8 +52,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Task:
-title: str
-done: bool = False
+    title: str
+    done: bool = False
 
 task = Task("Practice lists")
 print(task)

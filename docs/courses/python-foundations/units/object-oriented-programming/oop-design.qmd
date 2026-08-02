@@ -49,15 +49,15 @@ Read this as composition: a report uses a formatter instead of becoming every po
 
 ```python
 class TextFormatter:
-def format(self, title, value):
-return f"{title}: {value}"
+    def format(self, title, value):
+        return f"{title}: {value}"
 
 class Report:
-def __init__(self, formatter):
-self.formatter = formatter
+    def __init__(self, formatter):
+        self.formatter = formatter
 
-def line(self, title, value):
-return self.formatter.format(title, value)
+    def line(self, title, value):
+        return self.formatter.format(title, value)
 ```
 
 Run the cell once without editing it. If the result is different from your

@@ -51,8 +51,7 @@ Predict what file will be created and what text will be read back.
 from pathlib import Path
 
 path = Path("notes.txt")
-path.write_text("Practice one idea at a time.
-")
+path.write_text("Practice one idea at a time.\n")
 message = path.read_text()
 print(message)
 ```

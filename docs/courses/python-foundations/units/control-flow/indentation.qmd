@@ -224,6 +224,8 @@ Read it as a map:
 
 Broken code:
 
+<!-- fcpython-intentional-invalid-python -->
+
 ```python
 ready = True
 
@@ -246,6 +248,8 @@ if ready:
 ### Common issue: a block that is accidentally empty
 
 Broken code:
+
+<!-- fcpython-intentional-invalid-python -->
 
 ```python
 ready = True
@@ -309,6 +313,8 @@ Each body is indented under its own header:
 ### Common issue: `else` indented under `if` body
 
 Broken code:
+
+<!-- fcpython-intentional-invalid-python -->
 
 ```python
 temperature = 18
@@ -660,6 +666,8 @@ print(greet("Ada"))
 
 The function body is:
 
+<!-- fcpython-intentional-invalid-python -->
+
 ```python
     message = f"Hello, {name}!"
     return message
@@ -674,6 +682,8 @@ print(greet("Ada"))
 ### Common issue: function body is not indented
 
 Broken code:
+
+<!-- fcpython-intentional-invalid-python -->
 
 ```python
 def greet(name):
@@ -959,6 +969,8 @@ Inside a class, method definitions usually line up with each other. If
 
 Broken code:
 
+<!-- fcpython-intentional-invalid-python -->
+
 ```python
 class Counter:
     def __init__(self):
@@ -1016,6 +1028,8 @@ like several spaces in your editor.
 
 Broken code, with inconsistent whitespace:
 
+<!-- fcpython-intentional-invalid-python -->
+
 ```python
 if True:
     print("four spaces")
@@ -1040,6 +1054,8 @@ start of the line and press Space four times.
 ### Common issue: indentation width changes inside the same block
 
 Broken code:
+
+<!-- fcpython-intentional-invalid-python -->
 
 ```python
 if True:
@@ -1184,6 +1200,8 @@ runs lines at the wrong time.
 
 Broken code:
 
+<!-- fcpython-intentional-invalid-python -->
+
 ```python
 class StudyLog:
     def __init__(self):
@@ -1263,6 +1281,8 @@ Good habits:
 - Fix indentation before debugging values, conditions, or algorithms.
 
 Avoid this style:
+
+<!-- fcpython-intentional-invalid-python -->
 
 ```python
 if True:

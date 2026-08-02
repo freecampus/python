@@ -50,10 +50,12 @@ Predict the shape and column names after loading this tiny table.
 ```python
 import pandas as pd
 
-data = pd.DataFrame({
-"name": ["Ada", "Grace"],
-"score": [9, 8],
-})
+data = pd.DataFrame(
+    {
+        "name": ["Ada", "Grace"],
+        "score": [9, 8],
+    }
+)
 print(data.shape)
 print(data.head())
 ```

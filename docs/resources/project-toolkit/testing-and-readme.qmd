@@ -47,10 +47,10 @@ Read the test and README line as two forms of the same promise.
 
 ```python
 def weekly_total(minutes):
-return sum(minutes)
+    return sum(minutes)
 
 def test_weekly_total():
-assert weekly_total([10, 20, 30]) == 60
+    assert weekly_total([10, 20, 30]) == 60
 ```
 
 Run the cell once without editing it. If the result is different from your

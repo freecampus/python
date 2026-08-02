@@ -49,10 +49,10 @@ Read the assertion as a sentence: normalizing this name should produce that resu
 
 ```python
 def normalize_name(name):
-return name.strip().title()
+    return name.strip().title()
 
 def test_normalize_name():
-assert normalize_name(" ada ") == "Ada"
+    assert normalize_name(" ada ") == "Ada"
 ```
 
 Run the cell once without editing it. If the result is different from your

@@ -50,7 +50,7 @@ Imagine this helper function lives in `temperature.py`; the script imports it an
 ```python
 # temperature.py
 def c_to_f(celsius):
-return celsius * 9 / 5 + 32
+    return celsius * 9 / 5 + 32
 
 # app.py
 from temperature import c_to_f

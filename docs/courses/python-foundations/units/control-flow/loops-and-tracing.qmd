@@ -52,7 +52,7 @@ scores = [4, 5, 3]
 total = 0
 
 for score in scores:
-total = total + score
+    total = total + score
 
 print(total)
 ```
@@ -235,6 +235,8 @@ with a bigger value.
 
 ::: {.callout-warning title="Common mistake"}
 **Mistake: forgetting to indent the loop body.**
+
+<!-- fcpython-intentional-invalid-python -->
 
 ```python
 for name in names:

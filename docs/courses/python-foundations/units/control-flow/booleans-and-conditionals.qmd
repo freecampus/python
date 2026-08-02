@@ -51,11 +51,11 @@ Predict which message appears for this score and explain which comparison made t
 score = 82
 
 if score >= 90:
-print("Excellent")
+    print("Excellent")
 elif score >= 70:
-print("Passed")
+    print("Passed")
 else:
-print("Review and try again")
+    print("Review and try again")
 ```
 
 Run the cell once without editing it. If the result is different from your
@@ -249,6 +249,8 @@ print(not has_ticket)
 ::: {.callout-warning title="Common mistake"}
 **Mistake: using `=` when you meant `==`.**
 
+<!-- fcpython-intentional-invalid-python -->
+
 ```python
 if score = 10:
     print("perfect")
@@ -381,6 +383,8 @@ elif score >= 70:
 ::: {.callout-warning title="Common mistake"}
 **Mistake: forgetting the colon.**
 
+<!-- fcpython-intentional-invalid-python -->
+
 ```python
 if score >= 70
     print("passing")
@@ -397,6 +401,8 @@ if score >= 70:
 
 ::: {.callout-warning title="Common mistake"}
 **Mistake: inconsistent indentation.**
+
+<!-- fcpython-intentional-invalid-python -->
 
 ```python
 if score >= 70:

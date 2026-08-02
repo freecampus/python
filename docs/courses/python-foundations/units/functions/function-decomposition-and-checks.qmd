@@ -49,10 +49,10 @@ Compare the function body with the assertion and read the assertion as a sentenc
 
 ```python
 def subtotal(prices):
-total = 0
-for price in prices:
-total = total + price
-return total
+    total = 0
+    for price in prices:
+        total = total + price
+    return total
 
 assert subtotal([2, 3, 5]) == 10
 ```

@@ -106,6 +106,10 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   tracebacks, environments, OOP, decorators, and ML workflows.
 - Keep examples beginner-safe: one idea at a time, explicit prediction prompts,
   and small modifications.
+- Keep Python fences syntactically valid and use four spaces per indentation
+  level. When a deliberately broken example teaches a syntax or indentation
+  mistake, place `<!-- fcpython-intentional-invalid-python -->` immediately
+  before its fence so automated checks can distinguish it from an accident.
 - Treat each lesson as a hands-on lab, not as a reference note. Start from a
   concrete task, give questions/objectives, run code, explain the output, ask
   learners to change one thing, include a challenge/solution path, and finish

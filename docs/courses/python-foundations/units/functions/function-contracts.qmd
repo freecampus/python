@@ -49,8 +49,8 @@ Read the contract before reading the body, then predict what the function should
 
 ```python
 def add_tax(price: float, tax_rate: float) -> float:
-"""Return price after applying tax_rate as a decimal."""
-return price * (1 + tax_rate)
+    """Return price after applying tax_rate as a decimal."""
+    return price * (1 + tax_rate)
 
 print(add_tax(100, 0.07))
 ```

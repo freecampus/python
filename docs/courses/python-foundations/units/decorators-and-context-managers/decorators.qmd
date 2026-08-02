@@ -49,15 +49,16 @@ Read the manual wrapper idea before focusing on the `@` syntax.
 
 ```python
 def announce(func):
-def wrapper():
-print("Starting")
-func()
-print("Done")
-return wrapper
+    def wrapper():
+        print("Starting")
+        func()
+        print("Done")
+
+    return wrapper
 
 @announce
 def greet():
-print("Hello")
+    print("Hello")
 
 greet()
 ```

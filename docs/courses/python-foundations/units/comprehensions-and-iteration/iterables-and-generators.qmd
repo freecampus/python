@@ -49,13 +49,13 @@ Predict when each value is produced, not only what values appear.
 
 ```python
 def countdown(start):
-current = start
-while current > 0:
-yield current
-current = current - 1
+    current = start
+    while current > 0:
+        yield current
+        current = current - 1
 
 for number in countdown(3):
-print(number)
+    print(number)
 ```
 
 Run the cell once without editing it. If the result is different from your

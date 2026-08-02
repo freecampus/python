@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import ast
 import html
 import importlib.util
+import io
 import json
 import re
 import sys
+import tokenize
 from pathlib import Path
 from types import ModuleType
 
@@ -213,6 +216,83 @@ def test_all_lesson_quiz_payloads_are_valid_json() -> None:
         parsed = json.loads(html.unescape(payload))
         assert parsed["id"], path
         assert parsed["questions"], path
+
+
+INTENTIONAL_INVALID_PYTHON = "<!-- fcpython-intentional-invalid-python -->"
+PYTHON_FENCE = re.compile(
+    rf"(?P<marker>{re.escape(INTENTIONAL_INVALID_PYTHON)}\s*)?"
+    r"^```(?:python|\{python[^}\n]*\})[ \t]*\n(?P<source>.*?)^```\s*$",
+    flags=re.DOTALL | re.MULTILINE,
+)
+
+
+def _indentation_issues(source: str) -> list[str]:
+    issues = []
+    for number, line in enumerate(source.splitlines(), start=1):
+        if not line.strip():
+            continue
+        prefix = line[: len(line) - len(line.lstrip(" \t"))]
+        if "\t" in prefix:
+            issues.append(f"line {number} starts with a tab")
+        elif len(prefix) % 4:
+            issues.append(f"line {number} uses {len(prefix)} leading spaces")
+
+    depth = 0
+    tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+    try:
+        for token in tokens:
+            if token.type in {
+                tokenize.NL,
+                tokenize.NEWLINE,
+                tokenize.INDENT,
+                tokenize.DEDENT,
+                tokenize.ENDMARKER,
+            }:
+                continue
+            if token.start[1] == 0 and depth and token.string not in "]})":
+                issues.append(f"line {token.start[0]} has an unindented continuation")
+            if token.string in "[({":
+                depth += 1
+            elif token.string in "]})":
+                depth = max(0, depth - 1)
+    except (IndentationError, tokenize.TokenError):
+        # Syntax validation reports malformed examples more clearly below.
+        pass
+    return issues
+
+
+def test_python_fences_are_valid_or_explicitly_intentional() -> None:
+    failures = []
+    marker_count = 0
+    matched_markers = 0
+
+    for path in sorted(Path("docs").rglob("*.qmd")):
+        text = path.read_text()
+        marker_count += text.count(INTENTIONAL_INVALID_PYTHON)
+        for match in PYTHON_FENCE.finditer(text):
+            source = match.group("source")
+            intentional = match.group("marker") is not None
+            matched_markers += int(intentional)
+            line = text.count("\n", 0, match.start("source")) + 1
+            indentation_issues = _indentation_issues(source)
+
+            try:
+                ast.parse(source, filename=f"{path}:{line}")
+            except SyntaxError as error:
+                if not intentional:
+                    failures.append(f"{path}:{line}: {error.msg}")
+            else:
+                if intentional and not indentation_issues:
+                    failures.append(
+                        f"{path}:{line}: unnecessary intentional-error marker"
+                    )
+                elif not intentional:
+                    failures.extend(
+                        f"{path}:{line}: {issue}" for issue in indentation_issues
+                    )
+
+    assert matched_markers == marker_count
+    assert failures == []
 
 
 def test_lessons_do_not_use_generic_generated_scaffold() -> None:

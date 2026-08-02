@@ -50,10 +50,10 @@ Predict which inputs become numbers and which ones need a helpful message.
 ```python
 text = "12"
 try:
-age = int(text)
-print(age + 1)
+    age = int(text)
+    print(age + 1)
 except ValueError:
-print("Please enter a whole number.")
+    print("Please enter a whole number.")
 ```
 
 Run the cell once without editing it. If the result is different from your
