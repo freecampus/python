@@ -19,7 +19,6 @@ from fcpython.quiz_banks import (
 from fcpython.widgets import quiz_summary, show_quiz
 
 FOUNDATIONS_ROOT = Path("docs/courses/python-foundations")
-INTERMEDIATE_ROOT = Path("docs/courses/intermediate-python")
 DATA_ML_ROOT = Path("docs/courses/data-science-ml")
 
 
@@ -410,7 +409,7 @@ def test_selected_lessons_include_mermaid_diagrams() -> None:
         FOUNDATIONS_ROOT / "data-structures/dictionaries.qmd",
         FOUNDATIONS_ROOT / "data-structures/nested-data.qmd",
         FOUNDATIONS_ROOT / "debugging/error-messages.qmd",
-        INTERMEDIATE_ROOT
+        FOUNDATIONS_ROOT
         / "projects-and-environments/environments-and-dependencies.qmd",
         DATA_ML_ROOT / "machine-learning-ai/training-and-evaluation.qmd",
     }

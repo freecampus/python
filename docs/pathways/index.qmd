@@ -22,11 +22,14 @@ the common entry point for both pathways and assumes no programming experience.
 ## Software-development pathway
 
 1. [Python Foundations](../courses/python-foundations/index.qmd)
-2. [Intermediate Python: Building Reliable Applications](../courses/intermediate-python/index.qmd)
-3. [Advanced Python Engineering](../courses/advanced-python/index.qmd)
+2. [Intermediate Python: Applied Problem Solving](../courses/intermediate-python/index.qmd) — curriculum TBD
+3. [Advanced Python: Complex Problem Solving](../courses/advanced-python/index.qmd) — curriculum TBD
 
-Choose this route to build scripts, command-line applications, tested projects,
-libraries, and maintainable Python systems.
+Choose this route to apply Python to progressively less guided problems, then
+solve complex problems with meaningful correctness, performance, and design
+constraints. While those two applied courses are being designed, use
+[Extended Foundations](../courses/python-foundations/index.qmd#extended-foundations)
+to strengthen files, environments, testing, OOP, and Python patterns.
 
 ## Scientific and data pathway
 
@@ -47,8 +50,8 @@ than a gate.
 %%| eval: true
 flowchart LR
   F[Python Foundations]
-  I[Intermediate Python:<br/>Reliable Applications]
-  A[Advanced Python Engineering]
+  I[Intermediate Python:<br/>Applied Problem Solving · TBD]
+  A[Advanced Python:<br/>Complex Problem Solving · TBD]
   S[Scientific Computing<br/>with Python]
   M[Data Science and Machine Learning<br/>with Python]
   F --> I --> A
@@ -62,8 +65,9 @@ flowchart LR
 
 | If you can already... | Consider starting with... |
 |---|---|
-| Write small programs with conditions, loops, collections, and functions | Intermediate Python or Scientific Computing |
-| Organize projects, use environments, test code, and work with classes | Advanced Python Engineering |
+| Write small programs with conditions, loops, collections, and functions | Extended Foundations or Scientific Computing |
+| Independently parse, model, test, and explain unfamiliar small problems | Intermediate Python when its curriculum is published |
+| Compare algorithms and handle state, scale, or performance constraints | Advanced Python when its curriculum is published |
 | Use NumPy arrays, make plots, and explain a numerical experiment | Data Science and Machine Learning |
 | Recognize some syntax but cannot yet explain or debug it confidently | Python Foundations |
 

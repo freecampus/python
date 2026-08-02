@@ -34,12 +34,15 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 
 ## Course portfolio
 
-1. **Python Foundations**: 18 required lessons, one optional local-tools lesson,
-   five practical module checkpoints, and a rubric-scored study-tracker project.
-2. **Intermediate Python: Building Reliable Applications**: files, projects,
-   environments, code quality, and object-oriented Python.
-3. **Advanced Python Engineering**: advanced patterns now, with deeper typing,
-   concurrency, performance, and API design planned.
+1. **Python Foundations**: 18 required lessons, five practical module
+   checkpoints, a rubric-scored project, and 20 optional lessons covering local
+   tools, files, environments, code quality, OOP, and Python patterns.
+2. **Intermediate Python: Applied Problem Solving**: a challenge-based course
+   focused on parsing, modeling, testing, refactoring, and explaining unfamiliar
+   problems; curriculum TBD.
+3. **Advanced Python: Complex Problem Solving**: a planned course focused on
+   multi-stage problems, search, constraints, performance, architecture, and
+   trade-offs; curriculum TBD.
 4. **Scientific Computing with Python**: NumPy, simulation, Matplotlib, SymPy,
    and SciPy, with a larger applied curriculum in development.
 5. **Data Science and Machine Learning with Python**: pandas, seaborn, model

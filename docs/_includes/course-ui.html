@@ -6,6 +6,23 @@
     const legacyProgressKey = "fcpython.progress.v1";
     const lastLessonKey = "fcpython.last-lesson.v2";
     const legacyLastLessonKey = "fcpython.last-lesson.v1";
+    const courseOwnershipMigrations = [
+      {
+        from: "intermediate-python",
+        to: "python-foundations",
+        modulePrefixes: [
+          "files-and-data.",
+          "projects-and-environments.",
+          "code-quality.",
+          "object-oriented-python.",
+        ],
+      },
+      {
+        from: "advanced-python",
+        to: "python-foundations",
+        modulePrefixes: ["advanced-python-patterns."],
+      },
+    ];
 
     function readJson(key, fallback) {
       try {
@@ -169,7 +186,21 @@
     }
 
     function isOptionalSidebarLink(link) {
-      return link.textContent.toLowerCase().includes("optional");
+      if (link.textContent.toLowerCase().includes("optional")) {
+        return true;
+      }
+
+      let section = link.closest("li.sidebar-item-section");
+      while (section && sidebar?.contains(section)) {
+        const label = section
+          .querySelector(":scope > .sidebar-item-container .menu-text")
+          ?.textContent.toLowerCase();
+        if (label?.includes("optional")) {
+          return true;
+        }
+        section = section.parentElement?.closest("li.sidebar-item-section");
+      }
+      return false;
     }
 
     function courseLessonLinks({ requiredOnly = false } = {}) {
@@ -289,6 +320,93 @@
         checkpointTotal: checkpointIds.length,
         projectCompleted: Boolean(projectCompleted),
       };
+    }
+
+    function ownershipMigrationForLesson(id) {
+      return courseOwnershipMigrations.find((migration) =>
+        migration.modulePrefixes.some((prefix) => id?.startsWith(prefix)),
+      );
+    }
+
+    function relocatedLessonKey(id) {
+      return `courses/python-foundations/${id.replaceAll(".", "/")}`;
+    }
+
+    function migrateCourseOwnership() {
+      let changed = false;
+      let target = null;
+
+      courseOwnershipMigrations.forEach((migration) => {
+        const source = courseState(migration.from);
+        if (!source) {
+          return;
+        }
+        let sourceChanged = false;
+
+        Object.entries(source.completed_lessons).forEach(([id, recordedAt]) => {
+          if (
+            !migration.modulePrefixes.some((prefix) => id.startsWith(prefix))
+          ) {
+            return;
+          }
+          target = target || courseState(migration.to, true);
+          target.completed_lessons[id] ||= recordedAt;
+          delete source.completed_lessons[id];
+          sourceChanged = true;
+          changed = true;
+        });
+
+        if (sourceChanged) {
+          source.completion_status = "in_progress";
+          source.completed_at = null;
+          source.updated_at = new Date().toISOString();
+        }
+      });
+
+      if (changed && target) {
+        target.updated_at = new Date().toISOString();
+        writeJson(progressKey, progress);
+      }
+    }
+
+    function migrateLastLessonOwnership() {
+      const saved = readJson(lastLessonKey, null);
+      if (!saved?.courses) {
+        return;
+      }
+
+      let changed = false;
+      const relocate = (lesson) => {
+        const migration = ownershipMigrationForLesson(lesson?.lesson_id);
+        if (!migration) {
+          return lesson;
+        }
+        changed = true;
+        return {
+          ...lesson,
+          key: relocatedLessonKey(lesson.lesson_id),
+          course_id: migration.to,
+        };
+      };
+
+      const previousGlobal = saved.global;
+      saved.global = relocate(saved.global);
+      const globalRelocated = saved.global !== previousGlobal;
+      courseOwnershipMigrations.forEach((migration) => {
+        const previous = saved.courses[migration.from];
+        const relocated = relocate(previous);
+        if (relocated !== previous) {
+          saved.courses[migration.to] ||= relocated;
+          delete saved.courses[migration.from];
+        }
+      });
+      if (globalRelocated) {
+        saved.courses["python-foundations"] = saved.global;
+      }
+
+      if (changed) {
+        writeJson(lastLessonKey, saved);
+      }
     }
 
     function migrateLegacyProgress() {
@@ -676,16 +794,22 @@
       cards.forEach((card) => {
         const id = card.dataset.courseId;
         const snapshot = completionSnapshot(card, id);
+        const curriculumTbd =
+          card.dataset.courseStatus === "in-development" &&
+          snapshot.total === 0;
         const percent = snapshot.total
           ? Math.round((snapshot.completed / snapshot.total) * 100)
           : 0;
         const bar = card.querySelector("[data-fc-card-progress-bar]");
         const value = card.querySelector("[data-fc-card-progress-value]");
+        bar?.parentElement?.toggleAttribute("hidden", curriculumTbd);
         if (bar) {
           bar.style.width = `${percent}%`;
         }
         if (value) {
-          value.textContent = snapshot.structured
+          value.textContent = curriculumTbd
+            ? "Curriculum TBD"
+            : snapshot.structured
             ? `${snapshot.completed}/${snapshot.total} requirements`
             : `${snapshot.completed}/${snapshot.total} complete`;
         }
@@ -796,6 +920,8 @@
         ?.classList.add("active");
     }
 
+    migrateCourseOwnership();
+    migrateLastLessonOwnership();
     migrateLegacyProgress();
     if (syncCourseCompletionState()) {
       writeJson(progressKey, progress);

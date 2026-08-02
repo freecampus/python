@@ -1,3 +1,4 @@
+import json
 import re
 import subprocess
 from pathlib import Path
@@ -37,6 +38,19 @@ def _sidebar_paths(contents: list[Any]) -> list[str]:
     return paths
 
 
+def _sidebar_section(contents: list[Any], title: str) -> dict[str, Any]:
+    for item in contents:
+        if not isinstance(item, dict):
+            continue
+        if item.get("section") == title:
+            return item
+        try:
+            return _sidebar_section(item.get("contents", []), title)
+        except LookupError:
+            continue
+    raise LookupError(title)
+
+
 def test_quarto_uses_branded_learning_components() -> None:
     quarto = Path("docs/_quarto.yml").read_text()
 
@@ -73,6 +87,10 @@ def test_lesson_header_exposes_course_and_progress_identity() -> None:
     assert "completionSnapshot" in course_ui
     assert "setupCheckpointButton" in course_ui
     assert "setupProjectButton" in course_ui
+    assert "migrateCourseOwnership" in course_ui
+    assert "migrateLastLessonOwnership" in course_ui
+    assert "isOptionalSidebarLink" in course_ui
+    assert 'label?.includes("optional")' in course_ui
     assert "chapterLessonCounts" not in course_ui
 
 
@@ -89,6 +107,7 @@ def test_course_catalog_is_generated_and_filterable() -> None:
     assert "data-course-id" in template
     assert "data-course-keywords" in template
     assert "setupCatalog" in course_ui
+    assert "Curriculum TBD" in course_ui
 
 
 def test_course_catalog_has_valid_acyclic_prerequisites() -> None:
@@ -179,19 +198,34 @@ def test_course_source_migration_preserves_legacy_public_urls() -> None:
                 continue
 
             public_pages.append(path)
-            page_aliases = front_matter.get("aliases", [])
-            expected_alias = (
+            page_aliases = set(front_matter.get("aliases", []))
+            legacy_alias = (
                 f"/{notebook.removeprefix('notebooks/').removesuffix('.ipynb')}.html"
             )
-            assert page_aliases == [expected_alias], path
-            assert expected_alias not in aliases, path
-            aliases.add(expected_alias)
+            expected_aliases = {legacy_alias}
+            foundations_root = Path("docs/courses/python-foundations")
+            if path.is_relative_to(foundations_root):
+                relative = path.relative_to(foundations_root)
+                previous_owner = {
+                    "files-and-data": "intermediate-python",
+                    "projects-and-environments": "intermediate-python",
+                    "code-quality": "intermediate-python",
+                    "object-oriented-python": "intermediate-python",
+                    "advanced-python-patterns": "advanced-python",
+                }.get(relative.parts[0])
+                if previous_owner:
+                    previous_path = relative.with_suffix(".html").as_posix()
+                    expected_aliases.add(f"/courses/{previous_owner}/{previous_path}")
+
+            assert page_aliases == expected_aliases, path
+            assert aliases.isdisjoint(page_aliases), path
+            aliases.update(page_aliases)
 
     course_catalog = _front_matter(Path("docs/courses/index.qmd"))
     assert course_catalog["aliases"] == ["/lessons/index.html"]
     assert course_catalog["legacy_colab_notebook"] == "notebooks/lessons/index.ipynb"
     assert len(public_pages) == 82
-    assert len(aliases) == 82
+    assert len(aliases) == 106
 
 
 def test_course_homes_and_sidebars_match_catalog() -> None:
@@ -207,8 +241,6 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
         home = Path("docs") / course["home"]
         front_matter = _front_matter(home)
         sidebar = sidebars[course["title"]]
-        expected_paths = [course["home"]]
-
         assert home.exists()
         assert front_matter["course_id"] == course["id"]
         assert front_matter["lesson_count"] == course["lesson_count"]
@@ -224,9 +256,20 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
         assert "Practice setup:" in home_text
         assert "assessment" in home_text.lower()
         assert "certificate" in home_text.lower()
-        assert "data-fc-course-overview" in home_text
-        progress_total = course.get("required_lesson_count", course["lesson_count"])
-        assert f'data-course-total="{progress_total}"' in home_text
+        if course["lesson_count"]:
+            assert "data-fc-course-overview" in home_text
+            progress_total = course.get("required_lesson_count", course["lesson_count"])
+            assert f'data-course-total="{progress_total}"' in home_text
+        else:
+            assert course["status"] == "in-development"
+            assert "Curriculum TBD" in home_text
+            assert "data-fc-course-overview" not in home_text
+
+        sidebar_paths = _sidebar_paths(sidebar["contents"])
+        assert sidebar_paths[0] == course["home"]
+        assert len(sidebar_paths) == len(set(sidebar_paths))
+        expected_paths = {course["home"]}
+        previous_module_position = 0
 
         checkpoints_by_module = {
             checkpoint["id"]: checkpoint
@@ -237,11 +280,7 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
             directory = Path(module["directory"])
             module_root = Path("docs") / directory
             module_home = module_root / "index.qmd"
-            module_navigation = next(
-                item
-                for item in sidebar["contents"]
-                if isinstance(item, dict) and item.get("section") == module["title"]
-            )
+            module_navigation = _sidebar_section(sidebar["contents"], module["title"])
             pages = sorted(
                 (
                     path
@@ -255,16 +294,23 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
                 "href": (directory / "index.qmd").as_posix(),
                 "text": "Overview",
             }
-            expected_paths.append((directory / "index.qmd").as_posix())
-            expected_paths.extend(path.relative_to("docs").as_posix() for path in pages)
+            module_paths = [(directory / "index.qmd").as_posix()]
+            module_paths.extend(path.relative_to("docs").as_posix() for path in pages)
             if module["id"] in checkpoints_by_module:
-                expected_paths.append(checkpoints_by_module[module["id"]]["path"])
+                module_paths.append(checkpoints_by_module[module["id"]]["path"])
+            module_position = sidebar_paths.index(module_paths[0])
+            assert module_position > previous_module_position
+            assert sidebar_paths[
+                module_position : module_position + len(module_paths)
+            ] == (module_paths)
+            previous_module_position = module_position
+            expected_paths.update(module_paths)
 
         project = course.get("completion", {}).get("project")
         if project:
-            expected_paths.append(project["path"])
+            expected_paths.add(project["path"])
 
-        assert _sidebar_paths(sidebar["contents"]) == expected_paths
+        assert set(sidebar_paths) == expected_paths
 
 
 def test_project_toolkit_starts_with_an_overview() -> None:
@@ -297,7 +343,7 @@ def test_foundations_has_versioned_completion_requirements() -> None:
     assert completion["rule_version"] == 1
     assert completion["recognition"] == "local-self-reported"
     assert len(required) == foundations["required_lesson_count"] == 18
-    assert len(optional) == foundations["optional_lesson_count"] == 1
+    assert len(optional) == foundations["optional_lesson_count"] == 20
     assert required.isdisjoint(optional)
 
     metadata_by_id = {}
@@ -319,7 +365,11 @@ def test_foundations_has_versioned_completion_requirements() -> None:
     checkpoints = completion["checkpoints"]
     assert len(checkpoints) == 5
     assert {checkpoint["id"] for checkpoint in checkpoints} == {
-        module["id"] for module in foundations["modules"]
+        "getting-started",
+        "core-python",
+        "data-structures",
+        "functions",
+        "debugging",
     }
     for checkpoint in checkpoints:
         path = Path("docs") / checkpoint["path"]
@@ -339,6 +389,146 @@ def test_foundations_has_versioned_completion_requirements() -> None:
     assert project_front_matter["required_for_completion"] is True
     assert "| Criterion | Not yet | Meets the requirement |" in project_text
     assert "not a submission" in project_text.lower()
+
+
+def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None:
+    courses = _yaml(Path("docs/courses/_catalog.yml"))["courses"]
+    by_id = {course["id"]: course for course in courses}
+    foundations = by_id["python-foundations"]
+    intermediate = by_id["intermediate-python"]
+    advanced = by_id["advanced-python"]
+
+    assert foundations["lesson_count"] == 38
+    assert {module["id"] for module in foundations["modules"]} >= {
+        "files-and-data",
+        "projects-and-environments",
+        "code-quality",
+        "object-oriented-python",
+        "advanced-python-patterns",
+    }
+    assert intermediate["title"] == "Intermediate Python: Applied Problem Solving"
+    assert advanced["title"] == "Advanced Python: Complex Problem Solving"
+    assert not Path("docs/courses/intermediate-python/files-and-data").exists()
+    assert not Path("docs/courses/advanced-python/advanced-python-patterns").exists()
+    for course in (intermediate, advanced):
+        assert course["status"] == "in-development"
+        assert course["lesson_count"] == 0
+        assert course["modules"] == []
+        assert course["estimated_effort"] == "TBD"
+
+    intermediate_home = Path("docs/courses/intermediate-python/index.qmd").read_text()
+    advanced_home = Path("docs/courses/advanced-python/index.qmd").read_text()
+    assert "progressively harder problems" in intermediate_home
+    assert "Planned challenge format" in intermediate_home
+    assert re.search(r"complex problems under\s+real\s+constraints", advanced_home)
+    assert "Planned challenge format" in advanced_home
+
+
+def test_retired_course_progress_moves_to_foundations() -> None:
+    progress = {
+        "schema_version": 2,
+        "courses": {
+            "python-foundations": {
+                "completed_lessons": {
+                    "core-python.values-variables-types": "foundation-original"
+                }
+            },
+            "intermediate-python": {
+                "completed_lessons": {
+                    "files-and-data.paths-and-text-files": "from-intermediate",
+                    "future-problems.challenge-one": "keep-for-future",
+                }
+            },
+            "advanced-python": {
+                "completed_lessons": {
+                    "advanced-python-patterns.decorators": "from-advanced"
+                }
+            },
+        },
+    }
+    last_lesson = {
+        "schema_version": 2,
+        "global": {
+            "key": "courses/advanced-python/advanced-python-patterns/decorators",
+            "course_id": "advanced-python",
+            "lesson_id": "advanced-python-patterns.decorators",
+            "title": "Decorators",
+        },
+        "courses": {
+            "intermediate-python": {
+                "key": (
+                    "courses/intermediate-python/files-and-data/paths-and-text-files"
+                ),
+                "course_id": "intermediate-python",
+                "lesson_id": "files-and-data.paths-and-text-files",
+                "title": "Paths and Text Files",
+            },
+            "advanced-python": {
+                "key": "courses/advanced-python/advanced-python-patterns/decorators",
+                "course_id": "advanced-python",
+                "lesson_id": "advanced-python-patterns.decorators",
+                "title": "Decorators",
+            },
+        },
+    }
+    storage = {
+        "fcpython.progress.v2": json.dumps(progress),
+        "fcpython.last-lesson.v2": json.dumps(last_lesson),
+    }
+    course_ui = Path("docs/_includes/course-ui.html").read_text()
+    script = course_ui.split("<script>", 1)[1].rsplit("</script>", 1)[0]
+    harness = f"""
+const storage = new Map(Object.entries({json.dumps(storage)}));
+global.window = {{
+  location: {{
+    href: "https://freecampus.github.io/python/courses/index.html",
+    pathname: "/python/courses/index.html",
+  }},
+  localStorage: {{
+    getItem: (key) => storage.has(key) ? storage.get(key) : null,
+    setItem: (key, value) => storage.set(key, value),
+  }},
+}};
+global.document = {{
+  querySelector: () => null,
+  querySelectorAll: () => [],
+  body: {{ classList: {{ add: () => {{}} }} }},
+  title: "FreeCampus Python",
+}};
+{script}
+process.stdout.write(JSON.stringify({{
+  progress: JSON.parse(storage.get("fcpython.progress.v2")),
+  lastLesson: JSON.parse(storage.get("fcpython.last-lesson.v2")),
+}}));
+"""
+    result = subprocess.run(
+        ["node"], input=harness, text=True, capture_output=True, check=True
+    )
+    migrated = json.loads(result.stdout)
+    courses = migrated["progress"]["courses"]
+    foundation_lessons = courses["python-foundations"]["completed_lessons"]
+
+    assert foundation_lessons["core-python.values-variables-types"] == (
+        "foundation-original"
+    )
+    assert foundation_lessons["files-and-data.paths-and-text-files"] == (
+        "from-intermediate"
+    )
+    assert foundation_lessons["advanced-python-patterns.decorators"] == (
+        "from-advanced"
+    )
+    assert courses["intermediate-python"]["completed_lessons"] == {
+        "future-problems.challenge-one": "keep-for-future"
+    }
+    assert courses["advanced-python"]["completed_lessons"] == {}
+
+    migrated_last = migrated["lastLesson"]
+    assert migrated_last["global"]["course_id"] == "python-foundations"
+    assert migrated_last["global"]["key"] == (
+        "courses/python-foundations/advanced-python-patterns/decorators"
+    )
+    assert set(migrated_last["courses"]) == {"python-foundations"}
+    assert migrated_last["courses"]["python-foundations"] == migrated_last["global"]
 
 
 def test_navbar_links_every_course() -> None:

@@ -1,18 +1,18 @@
 ---
-title: "Intermediate Python: Building Reliable Applications"
-description: Turn small scripts into organized, tested, maintainable Python applications.
-categories: [intermediate-python, software-development]
+title: "Intermediate Python: Applied Problem Solving"
+description: Apply Python foundations to unfamiliar, progressively harder problems through original challenge-based projects.
+categories: [intermediate-python, problem-solving]
 course_id: intermediate-python
-course_title: "Intermediate Python: Building Reliable Applications"
+course_title: "Intermediate Python: Applied Problem Solving"
 course_home: courses/intermediate-python
 course_order: 20
 course_level: Intermediate
-course_status: available
-course_status_label: Available
+course_status: in-development
+course_status_label: "TBD · curriculum redesign"
 course_pathway: software
-course_keywords: "files csv json exceptions argparse environments packages pytest ruff mypy pre-commit ci classes dataclasses oop"
-lesson_count: 14
-estimated_effort: 14–20 hours
+course_keywords: "applied problem solving parsing modeling decomposition algorithms testing refactoring explanation challenges"
+lesson_count: 0
+estimated_effort: TBD
 prerequisite_label: Python Foundations
 page-layout: full
 toc: false
@@ -21,79 +21,66 @@ body-classes: "course-home course-intermediate"
 
 ::: {.lesson-meta}
 - **Level:** Intermediate
-- **Estimated effort:** 14–20 hours
+- **Estimated effort:** TBD
 - **Prerequisite:** Python Foundations
-- **Status:** Available; certificate planned
+- **Status:** Curriculum redesign in progress; certificate planned
 :::
 
-::: {.callout-important title="Prerequisite"}
-Complete [Python Foundations](../python-foundations/index.qmd), or be comfortable
-with conditions, loops, collections, functions, and basic debugging.
+::: {.callout-warning title="Curriculum TBD"}
+This course is being redesigned around **using Python to solve unfamiliar
+problems**. The former topic-based modules now live in
+[Extended Foundations](../python-foundations/index.qmd#extended-foundations),
+where learners can study the language features and development tools they teach.
+No Intermediate lessons or completion requirements are published yet.
 :::
-
-```{=html}
-<div class="fc-course-overview" data-fc-course-overview data-course-id="intermediate-python" data-course-total="14">
-  <div><strong data-fc-course-progress-value>0%</strong><span>course progress</span></div>
-  <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
-    <span data-fc-course-progress-bar></span>
-  </div>
-  <span data-fc-course-progress-label>0 of 14 lessons complete</span>
-</div>
-```
 
 ## Before you start
 
-- **Designed for:** learners who can write small Python programs and want to
-  turn them into reliable applications.
-- **You are ready when:** you can use conditions, loops, collections, functions,
-  imports, and tracebacks without needing those ideas retaught.
-- **Practice setup:** use the generated Colab notebooks for most examples. A
-  local Python environment and terminal are recommended for environments,
-  packages, pre-commit, and command-line projects.
+- **Designed for:** learners who know Python's foundational tools and want to
+  combine them without being told which feature to use.
+- **You will be ready when:** you can write and debug small programs with
+  collections and functions. Files, tests, environments, and classes from
+  Extended Foundations will be recommended when a challenge needs them.
+- **Practice setup:** the planned challenges will run in Colab or locally and
+  will include example inputs, tests, and space to compare solutions.
 
-## What you will be able to do
+## Planned learning promise
 
-- read and validate text, CSV, and JSON data;
-- organize modules, packages, environments, dependencies, and project layouts;
-- build command-line programs;
-- test with pytest and automate formatting, linting, typing, and CI;
-- use classes and dataclasses when they make a design clearer;
-- deliver a tested application with useful documentation.
+Intermediate will be defined by the work learners perform, not by a list of
+supposedly intermediate syntax. Learners will practice how to:
 
-## Course modules
+- turn a written problem and sample input into explicit requirements;
+- parse input and choose useful data structures;
+- decompose a solution into small functions and testable steps;
+- build a simple correct solution before refactoring it;
+- compare alternative models or algorithms;
+- explain why a solution works, where it fails, and what it costs;
+- debug unfamiliar cases using evidence rather than hints about which Python
+  feature to use.
 
-::: {.course-grid}
-::: {.course-card}
-### 1. [Files and Data](files-and-data/index.qmd)
+## Planned challenge format
 
-Work safely with paths, external data, exceptions, and validation.
-:::
+Each original challenge will follow the same applied cycle:
 
-::: {.course-card}
-### 2. [Projects and Environments](projects-and-environments/index.qmd)
+1. **Understand:** restate the problem, constraints, inputs, and outputs.
+2. **Model:** select representations and write small examples by hand.
+3. **Solve:** implement a clear baseline without premature optimization.
+4. **Validate:** convert examples and edge cases into tests.
+5. **Improve:** refactor, compare approaches, and inspect complexity.
+6. **Explain:** document the reasoning and one important trade-off.
 
-Turn scripts into repeatable projects with dependencies and command-line entry points.
-:::
+Possible themes include delivery-log parsing, grid navigation, inventory
+reconciliation, scheduling, text transformations, and small simulations. The
+problems will be original while using the progressive challenge style that makes
+puzzle-based practice effective.
 
-::: {.course-card}
-### 3. [Code Quality](code-quality/index.qmd)
+## Assessment and certificate status
 
-Use tests, Ruff, type checking, pre-commit, and CI to protect behavior.
-:::
+The future assessment should measure complete problem-solving evidence: a
+working solution, tests, explanation, controlled refactoring, and reflection on
+trade-offs. Thresholds, a final applied project, curriculum version, and
+certificate requirements remain TBD. Nothing on this page currently represents
+a completed or verified credential.
 
-::: {.course-card}
-### 4. [Object-Oriented Python](object-oriented-python/index.qmd)
-
-Model data and behavior with classes, dataclasses, composition, and inheritance.
-:::
-:::
-
-## Practice, completion, and next step
-
-Lessons combine runnable examples, small modifications, debugging practice,
-Colab notebooks, and formative quizzes. An application capstone and certificate
-assessment are planned. Current lesson progress remains useful practice evidence
-but is not yet a verified credential.
-
-[Start with Files and Data](files-and-data/paths-and-text-files.qmd){.btn .btn-primary data-fc-course-resume="intermediate-python"}
-[Continue to Advanced Python](../advanced-python/index.qmd){.btn .btn-outline-primary}
+[Strengthen your foundations](../python-foundations/index.qmd#extended-foundations){.btn .btn-primary}
+[View the software pathway](../../pathways/index.qmd){.btn .btn-outline-primary}

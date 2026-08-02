@@ -1,18 +1,18 @@
 ---
-title: Advanced Python Engineering
-description: Use Python's deeper protocols and advanced features deliberately in maintainable systems.
-categories: [advanced-python, software-development]
+title: "Advanced Python: Complex Problem Solving"
+description: Use the full Python toolkit to solve complex, constrained problems and justify engineering trade-offs.
+categories: [advanced-python, complex-problem-solving]
 course_id: advanced-python
-course_title: Advanced Python Engineering
+course_title: "Advanced Python: Complex Problem Solving"
 course_home: courses/advanced-python
 course_order: 30
 course_level: Advanced
 course_status: in-development
-course_status_label: In development
+course_status_label: "TBD · curriculum redesign"
 course_pathway: software
-course_keywords: "comprehensions generators iterators decorators context managers logging configuration typing protocols asyncio concurrency performance"
-lesson_count: 5
-estimated_effort: 5–8 hours of current material
+course_keywords: "complex problem solving graphs search constraints simulation performance optimization architecture concurrency tradeoffs"
+lesson_count: 0
+estimated_effort: TBD
 prerequisite_label: Intermediate Python
 page-layout: full
 toc: false
@@ -21,74 +21,66 @@ body-classes: "course-home course-advanced"
 
 ::: {.lesson-meta}
 - **Level:** Advanced
-- **Estimated effort:** 5–8 hours of current material
-- **Prerequisite:** Intermediate Python
-- **Status:** In development; certificate planned
+- **Estimated effort:** TBD
+- **Prerequisite:** Intermediate Python: Applied Problem Solving
+- **Status:** Curriculum redesign in progress; certificate planned
 :::
 
-::: {.callout-warning title="Course in development"}
-The current lessons are ready to study, but the complete engineering curriculum,
-capstone, assessment, and certificate are not finished yet.
+::: {.callout-warning title="Curriculum TBD"}
+This course is being redesigned around **solving complex problems under real
+constraints**. Python patterns such as generators, decorators, context managers,
+logging, and configuration now live in
+[Extended Foundations](../python-foundations/index.qmd#extended-foundations).
+No Advanced lessons or completion requirements are published yet.
 :::
-
-::: {.callout-important title="Prerequisite"}
-Complete [Intermediate Python](../intermediate-python/index.qmd) before relying on
-the abstractions in this course.
-:::
-
-```{=html}
-<div class="fc-course-overview" data-fc-course-overview data-course-id="advanced-python" data-course-total="5">
-  <div><strong data-fc-course-progress-value>0%</strong><span>current material</span></div>
-  <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
-    <span data-fc-course-progress-bar></span>
-  </div>
-  <span data-fc-course-progress-label>0 of 5 current lessons complete</span>
-</div>
-```
 
 ## Before you start
 
-- **Designed for:** Python developers who want to understand protocols and use
-  advanced features without sacrificing maintainability.
-- **You are ready when:** you can structure, test, type-check, and debug a small
-  multi-file application.
-- **Practice setup:** use Colab for focused examples and a local Python
-  environment for packages, logging, configuration, profiling, and the planned
-  engineering project.
+- **Designed for:** experienced Python learners who can independently model,
+  implement, test, and explain multi-step solutions.
+- **You will be ready when:** you have completed the planned Intermediate
+  problem-solving course or can already compare solutions and justify their
+  correctness and complexity.
+- **Practice setup:** future challenges will use local Python projects when
+  profiling, concurrency, multi-file design, or larger test suites matter.
 
-## What the current lessons teach
+## Planned learning promise
 
-- write clear comprehensions for lists, dictionaries, and sets;
-- reason about iteration and produce values lazily with generators;
-- add behavior with decorators and manage resources with context managers;
-- use logging and configuration without mixing settings into program logic.
+Advanced will mean handling greater problem and system complexity—not merely
+using uncommon syntax. Learners will practice how to:
 
-## Current module
+- model multi-stage state transitions and simulations;
+- traverse graphs and select appropriate search strategies;
+- solve constraint and optimization problems;
+- profile bottlenecks and improve performance without losing correctness;
+- manage memory, streaming data, concurrency, or asynchronous work when the
+  constraints require it;
+- split a complex solution across components with explicit contracts;
+- compare architectures and algorithms using evidence;
+- communicate limitations, risks, and engineering trade-offs.
 
-::: {.course-grid}
-::: {.course-card}
-### [Advanced Python Patterns](advanced-python-patterns/index.qmd)
+## Planned challenge format
 
-Study comprehensions, iterables, generators, decorators, context managers,
-logging, and configuration.
-:::
-:::
+Advanced challenges will combine several concerns in one sustained problem:
 
-## Planned expansion
+1. identify invariants, constraints, and failure modes;
+2. implement and test a trustworthy baseline;
+3. introduce scale, state, performance, or concurrency constraints;
+4. measure behavior rather than guessing;
+5. redesign only the parts supported by evidence;
+6. defend the final solution and document alternatives.
 
-- Python's data model and protocols;
-- advanced typing and generics;
-- threads, processes, and `asyncio`;
-- profiling and performance;
-- library/API design and packaging;
-- an engineering capstone.
+Potential themes include route planning, dependency resolution, event-driven
+simulations, resource allocation, streaming pipelines, miniature interpreters,
+and concurrent task coordination.
 
-## Practice, assessment, and next step
+## Assessment and certificate status
 
-The current lessons include runnable examples, Colab notebooks, and formative
-quizzes. They count toward local progress, but they do not yet form a completed
-course assessment. Study them now, then revisit this page as the engineering
-capstone and completion requirements are published.
+The future assessment should require a complex working solution, reproducible
+tests and measurements, an architectural explanation, and a defense of major
+trade-offs. Thresholds, the final challenge, curriculum version, and certificate
+requirements remain TBD. Nothing on this page currently represents a completed
+or verified credential.
 
-[Study the current module](advanced-python-patterns/comprehensions.qmd){.btn .btn-primary data-fc-course-resume="advanced-python"}
-[Compare all pathways](../../pathways/index.qmd){.btn .btn-outline-primary}
+[Review extended foundations](../python-foundations/index.qmd#extended-foundations){.btn .btn-primary}
+[View the software pathway](../../pathways/index.qmd){.btn .btn-outline-primary}

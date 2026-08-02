@@ -1,6 +1,6 @@
 ---
 title: Python Foundations
-description: Start with zero programming experience and learn to write, explain, modify, and debug small Python programs.
+description: Start with zero programming experience, learn Python's essential language and tooling, and build reliable small programs.
 categories: [python-foundations, beginner]
 course_id: python-foundations
 course_title: Python Foundations
@@ -10,9 +10,10 @@ course_level: Beginner
 course_status: available
 course_status_label: Available
 course_pathway: both
-course_keywords: "beginner colab vscode jupyter values variables strings conditions loops lists dictionaries sets functions debugging"
-lesson_count: 19
+course_keywords: "beginner colab vscode jupyter values variables strings conditions loops collections functions debugging files environments testing typing oop generators decorators"
+lesson_count: 38
 required_lesson_count: 18
+optional_lesson_count: 20
 required_lesson_ids:
   - getting-started.what-is-programming
   - getting-started.google-colab
@@ -34,7 +35,7 @@ required_lesson_ids:
   - debugging.minimal-reproducible-examples
 checkpoint_ids: [getting-started, core-python, data-structures, functions, debugging]
 project_required: true
-estimated_effort: 18–25 hours
+estimated_effort: 18–25 core hours; extensions self-paced
 prerequisite_label: None
 page-layout: full
 toc: false
@@ -43,7 +44,7 @@ body-classes: "course-home course-foundations"
 
 ::: {.lesson-meta}
 - **Level:** Beginner
-- **Estimated effort:** 18–25 hours
+- **Estimated effort:** 18–25 core hours; optional extensions are self-paced
 - **Prerequisite:** None
 - **Status:** Available; certificate planned
 :::
@@ -94,9 +95,14 @@ without installing software, then move to local tools when you are ready.
 - work with values, text, decisions, loops, and reusable functions;
 - choose lists, tuples, dictionaries, sets, and nested data appropriately;
 - read tracebacks, inspect program state, and reduce a bug to a useful example;
-- build and explain a small working Python project.
+- build and explain a small working Python project;
+- optionally continue into files, environments, testing, typing, OOP, and
+  reusable Python patterns before starting a problem-solving course.
 
-## Course modules
+## Core curriculum
+
+These five modules and their checkpoints define Foundations curriculum version
+1. Complete them in order if you are working toward the local completion record.
 
 ::: {.course-grid}
 ::: {.course-card}
@@ -135,6 +141,47 @@ Three required lessons and one checkpoint.
 :::
 :::
 
+## Extended foundations
+
+The following modules were previously labeled Intermediate or Advanced because
+they introduce more specialized Python features. They are now optional
+Foundations extensions: they deepen your command of the language and its tools,
+but they do not change the version 1 completion rule.
+
+::: {.course-grid}
+::: {.course-card}
+### 6. [Files and Data](files-and-data/index.qmd)
+
+Work safely with paths, external data, exceptions, and validation.
+:::
+
+::: {.course-card}
+### 7. [Projects and Environments](projects-and-environments/index.qmd)
+
+Organize scripts into repeatable projects with dependencies and command-line
+entry points.
+:::
+
+::: {.course-card}
+### 8. [Code Quality](code-quality/index.qmd)
+
+Use tests, formatting, linting, typing, pre-commit, and CI to protect behavior.
+:::
+
+::: {.course-card}
+### 9. [Object-Oriented Python](object-oriented-python/index.qmd)
+
+Model data and behavior with classes, dataclasses, composition, and inheritance.
+:::
+
+::: {.course-card}
+### 10. [Advanced Python Patterns](advanced-python-patterns/index.qmd)
+
+Practice comprehensions, generators, decorators, context managers, logging, and
+configuration as reusable parts of your Python foundation.
+:::
+:::
+
 ## Completion requirements and assessment
 
 Python Foundations curriculum version 1 is locally complete when you have:
@@ -145,9 +192,10 @@ Python Foundations curriculum version 1 is locally complete when you have:
 3. built the required [Python Foundations Project](project/index.qmd)
    and self-assessed every rubric row as **Meets the requirement**.
 
-[Local Python Tools](getting-started/local-python-tools.qmd) is the
-one optional lesson. Completing it is useful but does not change course status.
-Lesson quizzes remain formative and do not have a stored grade.
+[Local Python Tools](getting-started/local-python-tools.qmd) and all 19 lessons
+in Extended Foundations are optional. Completing them is useful preparation for
+later applied courses, but they do not change the curriculum version 1 course
+status. Lesson quizzes remain formative and do not have a stored grade.
 
 ::: {.callout-important title="Local completion is not a verified certificate"}
 The completion dashboard is a private, self-reported browser record. It does not
@@ -160,7 +208,10 @@ certificate. A verifiable certificate remains planned as a separate service.
 Every lesson provides runnable examples, practice prompts, a Colab notebook,
 and formative quizzes. Each module then asks you to combine those skills in a
 practical checkpoint. The final project integrates all five module outcomes.
+Extended Foundations can then be studied in any order according to the tools a
+learner wants to practice more deeply.
 
 [Start the first lesson](getting-started/what-is-programming.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
+[Explore extended foundations](files-and-data/index.qmd){.btn .btn-outline-primary}
 [Open the Foundations project](project/index.qmd){.btn .btn-outline-primary}
 [View both pathways](../../pathways/index.qmd){.btn .btn-outline-primary}

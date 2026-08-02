@@ -2,7 +2,7 @@
 title: "Instructor Notes"
 aliases:
   - "/lessons/instructor-notes.html"
-description: "Teach the course with active learning, beginner safety, and calm debugging."
+description: "Teach the course portfolio with active learning, beginner safety, applied problem solving, and calm debugging."
 execute:
   echo: true
 categories: [course]
@@ -14,7 +14,7 @@ colab_notebook: "notebooks/lessons/instructor-notes.ipynb"
 <!-- fcpython-chapter-lab: start -->
 ## How to use this chapter hands-on
 
-This chapter is about **teaching the course**. Do not read it like a reference manual.
+This chapter is about **teaching the course portfolio**. Do not read it like a reference manual.
 Use it as a sequence of short labs. For each lesson, open the Colab notebook
 from the button above, run Example 1, write a prediction, and then
 change one small part of the code.
@@ -33,7 +33,7 @@ language, modify safely, and debug when it breaks.
 ## Why this matters
 
 Beginner programming lessons fail when learners only watch someone type. This
-course should be taught as active practice: short explanations, short examples,
+portfolio should be taught as active practice: short explanations, short examples,
 frequent predictions, small challenges, and calm debugging.
 
 ::: {.callout-note title="Guiding questions"}
@@ -61,7 +61,21 @@ Use this cycle repeatedly:
 This active-learning rhythm is inspired by The Carpentries lesson style:
 predictable episodes, setup checks, short challenges, and instructor-facing
 notes. The goal is not to copy their lessons, but to apply the same teaching
-wisdom to this Python course.
+wisdom across this Python course portfolio.
+
+### Change the teaching mode as learners progress
+
+- In **Foundations**, name and demonstrate the language or tool being learned,
+  then ask learners to predict, modify, and debug it.
+- In the planned **Intermediate** course, present an unfamiliar problem without
+  naming the feature to use. Ask learners to parse, model, solve, test, refactor,
+  and explain.
+- In the planned **Advanced** course, add state, scale, performance, architecture,
+  or concurrency constraints and require evidence for each trade-off.
+
+Do not label a lesson advanced merely because it teaches decorators, generators,
+context managers, typing, or OOP. Those remain parts of a strong Python
+foundation; learner level is determined by problem complexity and independence.
 
 ## Setup verification script
 

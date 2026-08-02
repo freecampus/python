@@ -9,10 +9,10 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 19
+    lesson_count: 38
     required_lesson_count: 18
-    optional_lesson_count: 1
-    estimated_effort: 18–25 hours
+    optional_lesson_count: 20
+    estimated_effort: 18–25 core hours; extensions self-paced
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
@@ -42,6 +42,25 @@ courses:
         - debugging.minimal-reproducible-examples
       optional_lesson_ids:
         - getting-started.local-python-tools
+        - files-and-data.paths-and-text-files
+        - files-and-data.structured-files
+        - files-and-data.exceptions-and-validation
+        - projects-and-environments.modules-and-packages
+        - projects-and-environments.environments-and-dependencies
+        - projects-and-environments.command-line-programs
+        - projects-and-environments.project-layout
+        - code-quality.testing-with-pytest
+        - code-quality.style-formatting-and-linting
+        - code-quality.type-checking
+        - code-quality.pre-commit-and-ci
+        - object-oriented-python.oop-basics
+        - object-oriented-python.dataclasses
+        - object-oriented-python.oop-design
+        - advanced-python-patterns.comprehensions
+        - advanced-python-patterns.iterables-and-generators
+        - advanced-python-patterns.decorators
+        - advanced-python-patterns.context-managers
+        - advanced-python-patterns.logging-and-configuration
       checkpoints:
         - id: getting-started
           title: Getting Started Checkpoint
@@ -90,56 +109,56 @@ courses:
         title: Debugging
         directory: courses/python-foundations/debugging
         lesson_count: 3
+      - id: files-and-data
+        title: Files and Data
+        directory: courses/python-foundations/files-and-data
+        lesson_count: 3
+      - id: projects-and-environments
+        title: Projects and Environments
+        directory: courses/python-foundations/projects-and-environments
+        lesson_count: 4
+      - id: code-quality
+        title: Code Quality
+        directory: courses/python-foundations/code-quality
+        lesson_count: 4
+      - id: object-oriented-python
+        title: Object-Oriented Python
+        directory: courses/python-foundations/object-oriented-python
+        lesson_count: 3
+      - id: advanced-python-patterns
+        title: Advanced Python Patterns
+        directory: courses/python-foundations/advanced-python-patterns
+        lesson_count: 5
 
   - id: intermediate-python
-    title: "Intermediate Python: Building Reliable Applications"
+    title: "Intermediate Python: Applied Problem Solving"
     short_title: Intermediate
     order: 20
     level: Intermediate
-    status: available
+    status: in-development
     pathway: software
-    lesson_count: 14
-    estimated_effort: 14–20 hours
+    lesson_count: 0
+    estimated_effort: TBD
     home: courses/intermediate-python/index.qmd
     prerequisite_ids: [python-foundations]
     recommended_ids: []
     certificate_status: planned
-    modules:
-      - id: files-and-data
-        title: Files and Data
-        directory: courses/intermediate-python/files-and-data
-        lesson_count: 3
-      - id: projects-and-environments
-        title: Projects and Environments
-        directory: courses/intermediate-python/projects-and-environments
-        lesson_count: 4
-      - id: code-quality
-        title: Code Quality
-        directory: courses/intermediate-python/code-quality
-        lesson_count: 4
-      - id: object-oriented-python
-        title: Object-Oriented Python
-        directory: courses/intermediate-python/object-oriented-python
-        lesson_count: 3
+    modules: []
 
   - id: advanced-python
-    title: Advanced Python Engineering
+    title: "Advanced Python: Complex Problem Solving"
     short_title: Advanced
     order: 30
     level: Advanced
     status: in-development
     pathway: software
-    lesson_count: 5
-    estimated_effort: 5–8 hours of current material
+    lesson_count: 0
+    estimated_effort: TBD
     home: courses/advanced-python/index.qmd
     prerequisite_ids: [intermediate-python]
     recommended_ids: []
     certificate_status: planned
-    modules:
-      - id: advanced-python-patterns
-        title: Advanced Python Patterns
-        directory: courses/advanced-python/advanced-python-patterns
-        lesson_count: 5
+    modules: []
 
   - id: scientific-python
     title: Scientific Computing with Python

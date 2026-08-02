@@ -60,6 +60,16 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   verified certificate evidence.
 - Keep existing lesson and generated Colab URLs stable unless a dedicated
   redirect and progress-migration change is planned and tested.
+- Classify course level by problem complexity and learner independence, not by
+  whether a Python feature looks unusual. Foundations owns the language,
+  essential tooling, OOP, and reusable Python patterns.
+- Design Intermediate around original applied challenges where learners parse,
+  model, decompose, test, refactor, and explain unfamiliar problems. Design
+  Advanced around complex state, search, constraints, performance, architecture,
+  concurrency, and defensible trade-offs.
+- Keep Intermediate and Advanced marked TBD until they have problem-driven
+  lessons, assessments, and completion rules; do not repopulate them with a
+  topic checklist taken from Foundations.
 - Keep lessons **cohesive, not microscopic**. A topic like lists should be one
   rich page with sections, not four tiny pages.
 - Multiple OJS quizzes inside one lesson are encouraged when the page has

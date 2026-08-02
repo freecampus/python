@@ -30,7 +30,7 @@ website:
           - href: courses/intermediate-python/index.qmd
             text: Intermediate Python
           - href: courses/advanced-python/index.qmd
-            text: Advanced Python Engineering
+            text: Advanced Python
           - href: courses/scientific-python/index.qmd
             text: Scientific Computing
           - href: courses/data-science-ml/index.qmd
@@ -52,62 +52,105 @@ website:
       contents:
         - href: courses/python-foundations/index.qmd
           text: Overview
-        - section: Getting Started
+        - section: Core curriculum
           contents:
-            - href: courses/python-foundations/getting-started/index.qmd
-              text: Overview
-            - courses/python-foundations/getting-started/what-is-programming.qmd
-            - courses/python-foundations/getting-started/google-colab.qmd
-            - href: courses/python-foundations/getting-started/local-python-tools.qmd
-              text: Local Python Tools · optional
-            - href: courses/python-foundations/getting-started/checkpoint.qmd
-              text: Getting Started checkpoint · required
-        - section: Core Python
+            - section: Getting Started
+              contents:
+                - href: courses/python-foundations/getting-started/index.qmd
+                  text: Overview
+                - courses/python-foundations/getting-started/what-is-programming.qmd
+                - courses/python-foundations/getting-started/google-colab.qmd
+                - href: courses/python-foundations/getting-started/local-python-tools.qmd
+                  text: Local Python Tools · optional
+                - href: courses/python-foundations/getting-started/checkpoint.qmd
+                  text: Getting Started checkpoint · required
+            - section: Core Python
+              contents:
+                - href: courses/python-foundations/core-python/index.qmd
+                  text: Overview
+                - courses/python-foundations/core-python/values-variables-types.qmd
+                - courses/python-foundations/core-python/strings-input-output.qmd
+                - courses/python-foundations/core-python/booleans-and-conditionals.qmd
+                - courses/python-foundations/core-python/indentation.qmd
+                - courses/python-foundations/core-python/loops-and-tracing.qmd
+                - href: courses/python-foundations/core-python/checkpoint.qmd
+                  text: Core Python checkpoint · required
+            - section: Data Structures
+              contents:
+                - href: courses/python-foundations/data-structures/index.qmd
+                  text: Overview
+                - courses/python-foundations/data-structures/lists.qmd
+                - courses/python-foundations/data-structures/tuples.qmd
+                - courses/python-foundations/data-structures/dictionaries.qmd
+                - courses/python-foundations/data-structures/sets.qmd
+                - courses/python-foundations/data-structures/nested-data.qmd
+                - href: courses/python-foundations/data-structures/checkpoint.qmd
+                  text: Data Structures checkpoint · required
+            - section: Functions
+              contents:
+                - href: courses/python-foundations/functions/index.qmd
+                  text: Overview
+                - courses/python-foundations/functions/function-basics.qmd
+                - courses/python-foundations/functions/function-contracts.qmd
+                - courses/python-foundations/functions/decomposition-and-testing.qmd
+                - href: courses/python-foundations/functions/checkpoint.qmd
+                  text: Functions checkpoint · required
+            - section: Debugging
+              contents:
+                - href: courses/python-foundations/debugging/index.qmd
+                  text: Overview
+                - courses/python-foundations/debugging/error-messages.qmd
+                - courses/python-foundations/debugging/debugging-tools.qmd
+                - courses/python-foundations/debugging/minimal-reproducible-examples.qmd
+                - href: courses/python-foundations/debugging/checkpoint.qmd
+                  text: Debugging checkpoint · required
+            - section: Finish Python Foundations
+              contents:
+                - href: courses/python-foundations/project/index.qmd
+                  text: Foundations project · required
+        - section: Extended foundations · optional
           contents:
-            - href: courses/python-foundations/core-python/index.qmd
-              text: Overview
-            - courses/python-foundations/core-python/values-variables-types.qmd
-            - courses/python-foundations/core-python/strings-input-output.qmd
-            - courses/python-foundations/core-python/booleans-and-conditionals.qmd
-            - courses/python-foundations/core-python/indentation.qmd
-            - courses/python-foundations/core-python/loops-and-tracing.qmd
-            - href: courses/python-foundations/core-python/checkpoint.qmd
-              text: Core Python checkpoint · required
-        - section: Data Structures
-          contents:
-            - href: courses/python-foundations/data-structures/index.qmd
-              text: Overview
-            - courses/python-foundations/data-structures/lists.qmd
-            - courses/python-foundations/data-structures/tuples.qmd
-            - courses/python-foundations/data-structures/dictionaries.qmd
-            - courses/python-foundations/data-structures/sets.qmd
-            - courses/python-foundations/data-structures/nested-data.qmd
-            - href: courses/python-foundations/data-structures/checkpoint.qmd
-              text: Data Structures checkpoint · required
-        - section: Functions
-          contents:
-            - href: courses/python-foundations/functions/index.qmd
-              text: Overview
-            - courses/python-foundations/functions/function-basics.qmd
-            - courses/python-foundations/functions/function-contracts.qmd
-            - courses/python-foundations/functions/decomposition-and-testing.qmd
-            - href: courses/python-foundations/functions/checkpoint.qmd
-              text: Functions checkpoint · required
-        - section: Debugging
-          contents:
-            - href: courses/python-foundations/debugging/index.qmd
-              text: Overview
-            - courses/python-foundations/debugging/error-messages.qmd
-            - courses/python-foundations/debugging/debugging-tools.qmd
-            - courses/python-foundations/debugging/minimal-reproducible-examples.qmd
-            - href: courses/python-foundations/debugging/checkpoint.qmd
-              text: Debugging checkpoint · required
-        - section: Finish Python Foundations
-          contents:
-            - href: courses/python-foundations/project/index.qmd
-              text: Foundations project · required
+            - section: Files and Data
+              contents:
+                - href: courses/python-foundations/files-and-data/index.qmd
+                  text: Overview
+                - courses/python-foundations/files-and-data/paths-and-text-files.qmd
+                - courses/python-foundations/files-and-data/structured-files.qmd
+                - courses/python-foundations/files-and-data/exceptions-and-validation.qmd
+            - section: Projects and Environments
+              contents:
+                - href: courses/python-foundations/projects-and-environments/index.qmd
+                  text: Overview
+                - courses/python-foundations/projects-and-environments/modules-and-packages.qmd
+                - courses/python-foundations/projects-and-environments/environments-and-dependencies.qmd
+                - courses/python-foundations/projects-and-environments/command-line-programs.qmd
+                - courses/python-foundations/projects-and-environments/project-layout.qmd
+            - section: Code Quality
+              contents:
+                - href: courses/python-foundations/code-quality/index.qmd
+                  text: Overview
+                - courses/python-foundations/code-quality/testing-with-pytest.qmd
+                - courses/python-foundations/code-quality/style-formatting-and-linting.qmd
+                - courses/python-foundations/code-quality/type-checking.qmd
+                - courses/python-foundations/code-quality/pre-commit-and-ci.qmd
+            - section: Object-Oriented Python
+              contents:
+                - href: courses/python-foundations/object-oriented-python/index.qmd
+                  text: Overview
+                - courses/python-foundations/object-oriented-python/oop-basics.qmd
+                - courses/python-foundations/object-oriented-python/dataclasses.qmd
+                - courses/python-foundations/object-oriented-python/oop-design.qmd
+            - section: Advanced Python Patterns
+              contents:
+                - href: courses/python-foundations/advanced-python-patterns/index.qmd
+                  text: Overview
+                - courses/python-foundations/advanced-python-patterns/comprehensions.qmd
+                - courses/python-foundations/advanced-python-patterns/iterables-and-generators.qmd
+                - courses/python-foundations/advanced-python-patterns/decorators.qmd
+                - courses/python-foundations/advanced-python-patterns/context-managers.qmd
+                - courses/python-foundations/advanced-python-patterns/logging-and-configuration.qmd
 
-    - title: "Intermediate Python: Building Reliable Applications"
+    - title: "Intermediate Python: Applied Problem Solving"
       style: floating
       border: false
       search: true
@@ -115,38 +158,8 @@ website:
       contents:
         - href: courses/intermediate-python/index.qmd
           text: Overview
-        - section: Files and Data
-          contents:
-            - href: courses/intermediate-python/files-and-data/index.qmd
-              text: Overview
-            - courses/intermediate-python/files-and-data/paths-and-text-files.qmd
-            - courses/intermediate-python/files-and-data/structured-files.qmd
-            - courses/intermediate-python/files-and-data/exceptions-and-validation.qmd
-        - section: Projects and Environments
-          contents:
-            - href: courses/intermediate-python/projects-and-environments/index.qmd
-              text: Overview
-            - courses/intermediate-python/projects-and-environments/modules-and-packages.qmd
-            - courses/intermediate-python/projects-and-environments/environments-and-dependencies.qmd
-            - courses/intermediate-python/projects-and-environments/command-line-programs.qmd
-            - courses/intermediate-python/projects-and-environments/project-layout.qmd
-        - section: Code Quality
-          contents:
-            - href: courses/intermediate-python/code-quality/index.qmd
-              text: Overview
-            - courses/intermediate-python/code-quality/testing-with-pytest.qmd
-            - courses/intermediate-python/code-quality/style-formatting-and-linting.qmd
-            - courses/intermediate-python/code-quality/type-checking.qmd
-            - courses/intermediate-python/code-quality/pre-commit-and-ci.qmd
-        - section: Object-Oriented Python
-          contents:
-            - href: courses/intermediate-python/object-oriented-python/index.qmd
-              text: Overview
-            - courses/intermediate-python/object-oriented-python/oop-basics.qmd
-            - courses/intermediate-python/object-oriented-python/dataclasses.qmd
-            - courses/intermediate-python/object-oriented-python/oop-design.qmd
 
-    - title: Advanced Python Engineering
+    - title: "Advanced Python: Complex Problem Solving"
       style: floating
       border: false
       search: true
@@ -154,15 +167,6 @@ website:
       contents:
         - href: courses/advanced-python/index.qmd
           text: Overview
-        - section: Advanced Python Patterns
-          contents:
-            - href: courses/advanced-python/advanced-python-patterns/index.qmd
-              text: Overview
-            - courses/advanced-python/advanced-python-patterns/comprehensions.qmd
-            - courses/advanced-python/advanced-python-patterns/iterables-and-generators.qmd
-            - courses/advanced-python/advanced-python-patterns/decorators.qmd
-            - courses/advanced-python/advanced-python-patterns/context-managers.qmd
-            - courses/advanced-python/advanced-python-patterns/logging-and-configuration.qmd
 
     - title: Scientific Computing with Python
       style: floating

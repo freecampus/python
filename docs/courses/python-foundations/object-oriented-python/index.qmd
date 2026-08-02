@@ -1,0 +1,94 @@
+---
+title: "Object-Oriented Python Overview"
+aliases:
+  - "/lessons/object-oriented-python/index.html"
+  - "/courses/intermediate-python/object-oriented-python/index.html"
+description: "Use classes when data and behavior belong together, while avoiding unnecessary complexity."
+execute:
+  echo: true
+categories: [object-oriented-python]
+order: 410
+colab_notebook: "notebooks/lessons/object-oriented-python/index.ipynb"
+---
+{{< include ../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## How to use this chapter hands-on
+
+This chapter is about **Object-Oriented Python**. Do not read it like a reference manual.
+Use it as a sequence of short labs. For each lesson, open the Colab notebook
+from the button above, run Example 1, write a prediction, and then
+change one small part of the code.
+
+By the end of the chapter, you should have one small artifact: a notebook, a
+script, a trace table, or a project note. The artifact should show one working
+example, one controlled variation, and one error or surprising result that you
+investigated calmly.
+
+If time is short, study one lesson deeply instead of skimming all of them.
+A deeply understood example is one you can run again, explain in plain
+language, modify safely, and debug when it breaks.
+<!-- fcpython-chapter-lab: end -->
+
+
+## Why this chapter matters
+
+Use classes when data and behavior belong together, while avoiding unnecessary complexity.
+
+Lessons are now grouped by coherent learner topics. A page may contain multiple
+short quizzes when the page has multiple sections, so students can check one
+idea before moving to the next.
+
+::: {.callout-note title="Guiding questions"}
+- Which lessons belong in this chapter?
+- What should I review before moving on?
+- How do the lesson sections build one practical skill?
+:::
+
+## Lesson path
+
+- [Object-Oriented Basics](oop-basics.qmd) — Define classes, create objects, store attributes, write methods, and use self.
+- [Dataclasses](dataclasses.qmd) — Create simple data-focused classes with less boilerplate.
+- [Object-Oriented Design](oop-design.qmd) — Choose composition, inheritance, or simpler functions based on the relationship you need.
+
+## Chapter checkpoint
+
+::: {.quiz-box}
+Use this short checkpoint before starting the chapter.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "object-oriented-python-overview",
+  "title": "Object-Oriented Python overview checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "chapter-purpose",
+      "prompt": "What is the purpose of the Object-Oriented Python chapter?",
+      "options": [
+        "Use classes when data and behavior belong together, while avoiding unnecessary complexity.",
+        "To memorize disconnected commands",
+        "To skip practice",
+        "To avoid debugging"
+      ],
+      "answer_index": 0,
+      "explanation": "Use classes when data and behavior belong together, while avoiding unnecessary complexity."
+    },
+    {
+      "id": "study-flow",
+      "prompt": "Why can a lesson contain multiple quizzes?",
+      "options": [
+        "Each quiz checks one section before the next section builds on it.",
+        "Quizzes replace examples.",
+        "Multiple quizzes mean the topic is unrelated.",
+        "Quizzes should only appear at the end of the course."
+      ],
+      "answer_index": 0,
+      "explanation": "Section-level quizzes help learners review while the idea is still fresh."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../_includes/ojs-quiz.qmd >}}
