@@ -75,8 +75,9 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   rich page with sections, not four tiny pages.
 - Multiple OJS quizzes inside one lesson are encouraged when the page has
   multiple sections. Use them as checkpoints before the next section.
-- Every public lesson/chapter/support page should include an OJS quiz config and
-  the shared OJS include.
+- Every public content lesson, challenge, and support page should include an OJS
+  quiz config and the shared OJS include. Unit Overview pages are orientation
+  pages and should not include a quiz.
 - Every public lesson/chapter/support page should include the shared Colab
   launch include so learners can open the generated notebook immediately.
 - Content lesson pages should start with a compact `.lesson-meta` block that

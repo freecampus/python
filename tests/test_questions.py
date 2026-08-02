@@ -192,14 +192,20 @@ def _content_lesson_pages() -> list[Path]:
     ]
 
 
+def _is_foundations_unit_overview(path: Path) -> bool:
+    return path.name == "index.qmd" and path.parent.parent == FOUNDATIONS_ROOT / "units"
+
+
 def _front_matter(path: Path) -> str:
     text = path.read_text()
     return text.split("---", 2)[1] if text.startswith("---") else ""
 
 
-def test_all_lessons_include_ojs_quiz() -> None:
+def test_assessable_pages_include_ojs_quiz() -> None:
     missing = []
     for path in _lesson_pages():
+        if _is_foundations_unit_overview(path):
+            continue
         text = path.read_text()
         has_config = 'class="fcpython-ojs-quiz-config"' in text
         has_ojs_include = "ojs-quiz.qmd" in text
@@ -207,6 +213,16 @@ def test_all_lessons_include_ojs_quiz() -> None:
             missing.append(str(path))
 
     assert missing == []
+
+
+def test_foundations_unit_overviews_do_not_include_quizzes() -> None:
+    overview_pages = sorted(FOUNDATIONS_ROOT.glob("units/*/index.qmd"))
+
+    assert len(overview_pages) == 24
+    for path in overview_pages:
+        text = path.read_text()
+        assert 'class="fcpython-ojs-quiz-config"' not in text, path
+        assert "ojs-quiz.qmd" not in text, path
 
 
 def test_all_lessons_include_colab_launch_link() -> None:
