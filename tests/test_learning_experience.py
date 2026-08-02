@@ -214,6 +214,10 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
         assert front_matter["lesson_count"] == course["lesson_count"]
         assert front_matter["course_status"] == course["status"]
         assert front_matter["estimated_effort"] == course["estimated_effort"]
+        assert sidebar["contents"][0] == {
+            "href": course["home"],
+            "text": "Overview",
+        }
 
         home_text = home.read_text()
         assert "## Before you start" in home_text
@@ -232,6 +236,12 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
         for module in course["modules"]:
             directory = Path(module["directory"])
             module_root = Path("docs") / directory
+            module_home = module_root / "index.qmd"
+            module_navigation = next(
+                item
+                for item in sidebar["contents"]
+                if isinstance(item, dict) and item.get("section") == module["title"]
+            )
             pages = sorted(
                 (
                     path
@@ -240,6 +250,11 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
                 ),
                 key=lambda path: _front_matter(path)["lesson_order"],
             )
+            assert _front_matter(module_home)["title"] == f"{module['title']} Overview"
+            assert module_navigation["contents"][0] == {
+                "href": (directory / "index.qmd").as_posix(),
+                "text": "Overview",
+            }
             expected_paths.append((directory / "index.qmd").as_posix())
             expected_paths.extend(path.relative_to("docs").as_posix() for path in pages)
             if module["id"] in checkpoints_by_module:
@@ -250,6 +265,23 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
             expected_paths.append(project["path"])
 
         assert _sidebar_paths(sidebar["contents"]) == expected_paths
+
+
+def test_project_toolkit_starts_with_an_overview() -> None:
+    quarto = _yaml(Path("docs/_quarto.yml"))
+    sidebar = next(
+        item
+        for item in quarto["website"]["sidebar"]
+        if item["title"] == "Project Toolkit"
+    )
+
+    assert sidebar["contents"][0] == {
+        "href": "resources/project-toolkit/index.qmd",
+        "text": "Overview",
+    }
+    assert _front_matter(Path("docs/resources/project-toolkit/index.qmd"))["title"] == (
+        "Project Toolkit Overview"
+    )
 
 
 def test_foundations_has_versioned_completion_requirements() -> None:

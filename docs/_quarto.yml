@@ -50,10 +50,12 @@ website:
       search: true
       collapse-level: 1
       contents:
-        - courses/python-foundations/index.qmd
+        - href: courses/python-foundations/index.qmd
+          text: Overview
         - section: Getting Started
           contents:
-            - courses/python-foundations/getting-started/index.qmd
+            - href: courses/python-foundations/getting-started/index.qmd
+              text: Overview
             - courses/python-foundations/getting-started/what-is-programming.qmd
             - courses/python-foundations/getting-started/google-colab.qmd
             - href: courses/python-foundations/getting-started/local-python-tools.qmd
@@ -62,7 +64,8 @@ website:
               text: Getting Started checkpoint · required
         - section: Core Python
           contents:
-            - courses/python-foundations/core-python/index.qmd
+            - href: courses/python-foundations/core-python/index.qmd
+              text: Overview
             - courses/python-foundations/core-python/values-variables-types.qmd
             - courses/python-foundations/core-python/strings-input-output.qmd
             - courses/python-foundations/core-python/booleans-and-conditionals.qmd
@@ -72,7 +75,8 @@ website:
               text: Core Python checkpoint · required
         - section: Data Structures
           contents:
-            - courses/python-foundations/data-structures/index.qmd
+            - href: courses/python-foundations/data-structures/index.qmd
+              text: Overview
             - courses/python-foundations/data-structures/lists.qmd
             - courses/python-foundations/data-structures/tuples.qmd
             - courses/python-foundations/data-structures/dictionaries.qmd
@@ -82,7 +86,8 @@ website:
               text: Data Structures checkpoint · required
         - section: Functions
           contents:
-            - courses/python-foundations/functions/index.qmd
+            - href: courses/python-foundations/functions/index.qmd
+              text: Overview
             - courses/python-foundations/functions/function-basics.qmd
             - courses/python-foundations/functions/function-contracts.qmd
             - courses/python-foundations/functions/decomposition-and-testing.qmd
@@ -90,7 +95,8 @@ website:
               text: Functions checkpoint · required
         - section: Debugging
           contents:
-            - courses/python-foundations/debugging/index.qmd
+            - href: courses/python-foundations/debugging/index.qmd
+              text: Overview
             - courses/python-foundations/debugging/error-messages.qmd
             - courses/python-foundations/debugging/debugging-tools.qmd
             - courses/python-foundations/debugging/minimal-reproducible-examples.qmd
@@ -107,30 +113,35 @@ website:
       search: true
       collapse-level: 1
       contents:
-        - courses/intermediate-python/index.qmd
+        - href: courses/intermediate-python/index.qmd
+          text: Overview
         - section: Files and Data
           contents:
-            - courses/intermediate-python/files-and-data/index.qmd
+            - href: courses/intermediate-python/files-and-data/index.qmd
+              text: Overview
             - courses/intermediate-python/files-and-data/paths-and-text-files.qmd
             - courses/intermediate-python/files-and-data/structured-files.qmd
             - courses/intermediate-python/files-and-data/exceptions-and-validation.qmd
         - section: Projects and Environments
           contents:
-            - courses/intermediate-python/projects-and-environments/index.qmd
+            - href: courses/intermediate-python/projects-and-environments/index.qmd
+              text: Overview
             - courses/intermediate-python/projects-and-environments/modules-and-packages.qmd
             - courses/intermediate-python/projects-and-environments/environments-and-dependencies.qmd
             - courses/intermediate-python/projects-and-environments/command-line-programs.qmd
             - courses/intermediate-python/projects-and-environments/project-layout.qmd
         - section: Code Quality
           contents:
-            - courses/intermediate-python/code-quality/index.qmd
+            - href: courses/intermediate-python/code-quality/index.qmd
+              text: Overview
             - courses/intermediate-python/code-quality/testing-with-pytest.qmd
             - courses/intermediate-python/code-quality/style-formatting-and-linting.qmd
             - courses/intermediate-python/code-quality/type-checking.qmd
             - courses/intermediate-python/code-quality/pre-commit-and-ci.qmd
         - section: Object-Oriented Python
           contents:
-            - courses/intermediate-python/object-oriented-python/index.qmd
+            - href: courses/intermediate-python/object-oriented-python/index.qmd
+              text: Overview
             - courses/intermediate-python/object-oriented-python/oop-basics.qmd
             - courses/intermediate-python/object-oriented-python/dataclasses.qmd
             - courses/intermediate-python/object-oriented-python/oop-design.qmd
@@ -141,10 +152,12 @@ website:
       search: true
       collapse-level: 1
       contents:
-        - courses/advanced-python/index.qmd
+        - href: courses/advanced-python/index.qmd
+          text: Overview
         - section: Advanced Python Patterns
           contents:
-            - courses/advanced-python/advanced-python-patterns/index.qmd
+            - href: courses/advanced-python/advanced-python-patterns/index.qmd
+              text: Overview
             - courses/advanced-python/advanced-python-patterns/comprehensions.qmd
             - courses/advanced-python/advanced-python-patterns/iterables-and-generators.qmd
             - courses/advanced-python/advanced-python-patterns/decorators.qmd
@@ -157,10 +170,12 @@ website:
       search: true
       collapse-level: 1
       contents:
-        - courses/scientific-python/index.qmd
+        - href: courses/scientific-python/index.qmd
+          text: Overview
         - section: Scientific Python
           contents:
-            - courses/scientific-python/scientific-python/index.qmd
+            - href: courses/scientific-python/scientific-python/index.qmd
+              text: Overview
             - courses/scientific-python/scientific-python/numpy.qmd
             - courses/scientific-python/scientific-python/random-simulation.qmd
             - courses/scientific-python/scientific-python/matplotlib-basics.qmd
@@ -173,10 +188,12 @@ website:
       search: true
       collapse-level: 1
       contents:
-        - courses/data-science-ml/index.qmd
+        - href: courses/data-science-ml/index.qmd
+          text: Overview
         - section: Data Science
           contents:
-            - courses/data-science-ml/data-science/index.qmd
+            - href: courses/data-science-ml/data-science/index.qmd
+              text: Overview
             - courses/data-science-ml/data-science/workflow-and-loading.qmd
             - courses/data-science-ml/data-science/inspecting-selecting-cleaning.qmd
             - courses/data-science-ml/data-science/grouping-and-statistics.qmd
@@ -184,7 +201,8 @@ website:
             - courses/data-science-ml/data-science/communicating-results.qmd
         - section: Machine Learning and AI
           contents:
-            - courses/data-science-ml/machine-learning-ai/index.qmd
+            - href: courses/data-science-ml/machine-learning-ai/index.qmd
+              text: Overview
             - courses/data-science-ml/machine-learning-ai/concepts-and-datasets.qmd
             - courses/data-science-ml/machine-learning-ai/training-and-evaluation.qmd
             - courses/data-science-ml/machine-learning-ai/deep-learning-libraries.qmd
@@ -195,7 +213,8 @@ website:
       style: floating
       border: false
       contents:
-        - resources/project-toolkit/index.qmd
+        - href: resources/project-toolkit/index.qmd
+          text: Overview
         - resources/project-toolkit/project-selection-and-planning.qmd
         - resources/project-toolkit/testing-and-readme.qmd
         - resources/project-toolkit/presentation-and-rubric.qmd
