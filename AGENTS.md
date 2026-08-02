@@ -4,9 +4,10 @@ Guidance for AI agents and maintainers working in this repository.
 
 ## Repository purpose
 
-FreeCampus Python is a beginner-first Python course for learners with low or
-zero programming experience. The course is a Quarto website with supporting
-Python helpers for reusable quizzes and notebook widgets.
+FreeCampus Python is a beginner-first portfolio of connected Python courses for
+learners ranging from zero programming experience to advanced, scientific, and
+machine-learning work. The portfolio is a Quarto website with supporting Python
+helpers for reusable quizzes and notebook widgets.
 
 The teaching goal is **zero to practical project confidence**: students should
 predict, run, explain, modify, quiz, and debug small examples before moving on.
@@ -27,10 +28,12 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 ```text
 .
 ├── docs/                    # Quarto website
-│   ├── index.qmd            # Course home
+│   ├── index.qmd            # Portfolio home
 │   ├── _quarto.yml          # Site navigation/config
 │   ├── styles.css           # Course callouts, quizzes, diagram styling
-│   └── lessons/             # Course chapters and lessons
+│   ├── courses/             # Course catalog and course home pages
+│   ├── pathways/            # Cross-course prerequisite guidance
+│   └── lessons/             # Shared canonical lesson sources
 ├── notebooks/               # Jupyter/Colab examples
 ├── src/fcpython/            # Reusable quiz and widget helpers
 ├── tests/                   # pytest tests for helpers and docs structure
@@ -41,6 +44,20 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 
 ## Course design rules
 
+- Treat `docs/courses/_catalog.yml` as the canonical course/module ownership
+  manifest. Every teaching lesson belongs to exactly one course; shared FAQ,
+  teaching, and project resources do not count toward course completion.
+- Keep `course_id`, `module_id`, and `lesson_id` stable when titles or URLs
+  change. Course prerequisites must point to existing course IDs and remain
+  acyclic.
+- Keep `checkpoint_id`, `project_id`, curriculum versions, and rubric versions
+  stable once learners can record completion against them. Encode completion
+  rules in the course manifest rather than inferring them from page titles.
+- Distinguish required and optional material in metadata and visible navigation.
+  Browser progress and self-assessment are local learner conveniences, not
+  verified certificate evidence.
+- Keep existing lesson and generated Colab URLs stable unless a dedicated
+  redirect and progress-migration change is planned and tested.
 - Keep lessons **cohesive, not microscopic**. A topic like lists should be one
   rich page with sections, not four tiny pages.
 - Multiple OJS quizzes inside one lesson are encouraged when the page has

@@ -1,0 +1,184 @@
+schema_version: 1
+curriculum_version: 1
+
+courses:
+  - id: python-foundations
+    title: Python Foundations
+    short_title: Foundations
+    order: 10
+    level: Beginner
+    status: available
+    pathway: both
+    lesson_count: 19
+    required_lesson_count: 18
+    optional_lesson_count: 1
+    estimated_effort: 18–25 hours
+    home: courses/python-foundations/index.qmd
+    prerequisite_ids: []
+    recommended_ids: []
+    certificate_status: planned
+    completion:
+      curriculum_version: 1
+      rule_version: 1
+      recognition: local-self-reported
+      required_lesson_ids:
+        - getting-started.what-is-programming
+        - getting-started.google-colab
+        - core-python.values-variables-types
+        - core-python.strings-input-output
+        - core-python.booleans-and-conditionals
+        - core-python.indentation
+        - core-python.loops-and-tracing
+        - data-structures.lists
+        - data-structures.tuples
+        - data-structures.dictionaries
+        - data-structures.sets
+        - data-structures.nested-data
+        - functions.function-basics
+        - functions.function-contracts
+        - functions.decomposition-and-testing
+        - debugging.error-messages
+        - debugging.debugging-tools
+        - debugging.minimal-reproducible-examples
+      optional_lesson_ids:
+        - getting-started.local-python-tools
+      checkpoints:
+        - id: getting-started
+          title: Getting Started Checkpoint
+          path: lessons/getting-started/checkpoint.qmd
+          required: true
+        - id: core-python
+          title: Core Python Checkpoint
+          path: lessons/core-python/checkpoint.qmd
+          required: true
+        - id: data-structures
+          title: Data Structures Checkpoint
+          path: lessons/data-structures/checkpoint.qmd
+          required: true
+        - id: functions
+          title: Functions Checkpoint
+          path: lessons/functions/checkpoint.qmd
+          required: true
+        - id: debugging
+          title: Debugging Checkpoint
+          path: lessons/debugging/checkpoint.qmd
+          required: true
+      project:
+        id: python-foundations-project
+        title: Python Foundations Project
+        path: lessons/foundations-project/index.qmd
+        required: true
+        rubric_version: 1
+    modules:
+      - id: getting-started
+        title: Getting Started
+        directory: lessons/getting-started
+        lesson_count: 3
+      - id: core-python
+        title: Core Python
+        directory: lessons/core-python
+        lesson_count: 5
+      - id: data-structures
+        title: Data Structures
+        directory: lessons/data-structures
+        lesson_count: 5
+      - id: functions
+        title: Functions
+        directory: lessons/functions
+        lesson_count: 3
+      - id: debugging
+        title: Debugging
+        directory: lessons/debugging
+        lesson_count: 3
+
+  - id: intermediate-python
+    title: "Intermediate Python: Building Reliable Applications"
+    short_title: Intermediate
+    order: 20
+    level: Intermediate
+    status: available
+    pathway: software
+    lesson_count: 14
+    estimated_effort: 14–20 hours
+    home: courses/intermediate-python/index.qmd
+    prerequisite_ids: [python-foundations]
+    recommended_ids: []
+    certificate_status: planned
+    modules:
+      - id: files-and-data
+        title: Files and Data
+        directory: lessons/files-and-data
+        lesson_count: 3
+      - id: projects-and-environments
+        title: Projects and Environments
+        directory: lessons/projects-and-environments
+        lesson_count: 4
+      - id: code-quality
+        title: Code Quality
+        directory: lessons/code-quality
+        lesson_count: 4
+      - id: object-oriented-python
+        title: Object-Oriented Python
+        directory: lessons/object-oriented-python
+        lesson_count: 3
+
+  - id: advanced-python
+    title: Advanced Python Engineering
+    short_title: Advanced
+    order: 30
+    level: Advanced
+    status: in-development
+    pathway: software
+    lesson_count: 5
+    estimated_effort: 5–8 hours of current material
+    home: courses/advanced-python/index.qmd
+    prerequisite_ids: [intermediate-python]
+    recommended_ids: []
+    certificate_status: planned
+    modules:
+      - id: advanced-python-patterns
+        title: Advanced Python Patterns
+        directory: lessons/advanced-python-patterns
+        lesson_count: 5
+
+  - id: scientific-python
+    title: Scientific Computing with Python
+    short_title: Scientific
+    order: 40
+    level: Intermediate
+    status: in-development
+    pathway: scientific
+    lesson_count: 5
+    estimated_effort: 5–8 hours of current material
+    home: courses/scientific-python/index.qmd
+    prerequisite_ids: [python-foundations]
+    recommended_ids: [intermediate-python]
+    certificate_status: planned
+    modules:
+      - id: scientific-python
+        title: Scientific Python
+        directory: lessons/scientific-python
+        lesson_count: 5
+
+  - id: data-science-ml
+    title: Data Science and Machine Learning with Python
+    short_title: Data & ML
+    order: 50
+    level: Intermediate
+    status: in-development
+    pathway: scientific
+    lesson_count: 10
+    estimated_effort: 10–16 hours of current material
+    home: courses/data-science-ml/index.qmd
+    prerequisite_ids: [scientific-python]
+    recommended_ids: [intermediate-python]
+    certificate_status: planned
+    modules:
+      - id: data-science
+        title: Data Science
+        directory: lessons/data-science
+        lesson_count: 5
+      - id: machine-learning-ai
+        title: Machine Learning and AI
+        directory: lessons/machine-learning-ai
+        lesson_count: 5

@@ -1,0 +1,166 @@
+---
+title: Python Foundations
+description: Start with zero programming experience and learn to write, explain, modify, and debug small Python programs.
+categories: [python-foundations, beginner]
+course_id: python-foundations
+course_title: Python Foundations
+course_home: courses/python-foundations
+course_order: 10
+course_level: Beginner
+course_status: available
+course_status_label: Available
+course_pathway: both
+course_keywords: "beginner colab vscode jupyter values variables strings conditions loops lists dictionaries sets functions debugging"
+lesson_count: 19
+required_lesson_count: 18
+required_lesson_ids:
+  - getting-started.what-is-programming
+  - getting-started.google-colab
+  - core-python.values-variables-types
+  - core-python.strings-input-output
+  - core-python.booleans-and-conditionals
+  - core-python.indentation
+  - core-python.loops-and-tracing
+  - data-structures.lists
+  - data-structures.tuples
+  - data-structures.dictionaries
+  - data-structures.sets
+  - data-structures.nested-data
+  - functions.function-basics
+  - functions.function-contracts
+  - functions.decomposition-and-testing
+  - debugging.error-messages
+  - debugging.debugging-tools
+  - debugging.minimal-reproducible-examples
+checkpoint_ids: [getting-started, core-python, data-structures, functions, debugging]
+project_required: true
+estimated_effort: 18–25 hours
+prerequisite_label: None
+page-layout: full
+toc: false
+body-classes: "course-home course-foundations"
+---
+
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated effort:** 18–25 hours
+- **Prerequisite:** None
+- **Status:** Available; certificate planned
+:::
+
+::: {.fc-course-intro}
+::: {.callout-tip title="Start here if programming is new to you"}
+This course assumes no programming experience. You can begin in Google Colab
+without installing software, then move to local tools when you are ready.
+:::
+
+```{=html}
+<div
+  class="fc-course-overview fc-completion-overview"
+  data-fc-course-overview
+  data-course-id="python-foundations"
+  data-course-total="18"
+  data-course-required-ids="getting-started.what-is-programming getting-started.google-colab core-python.values-variables-types core-python.strings-input-output core-python.booleans-and-conditionals core-python.indentation core-python.loops-and-tracing data-structures.lists data-structures.tuples data-structures.dictionaries data-structures.sets data-structures.nested-data functions.function-basics functions.function-contracts functions.decomposition-and-testing debugging.error-messages debugging.debugging-tools debugging.minimal-reproducible-examples"
+  data-course-checkpoint-ids="getting-started core-python data-structures functions debugging"
+  data-course-project-required="true"
+>
+  <div><strong data-fc-course-progress-value>0%</strong><span>completion requirements met</span></div>
+  <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
+    <span data-fc-course-progress-bar></span>
+  </div>
+  <div class="fc-requirement-grid">
+    <div><strong data-fc-required-lessons>0/18</strong><span>required lessons</span></div>
+    <div><strong data-fc-required-checkpoints>0/5</strong><span>module checkpoints</span></div>
+    <div><strong data-fc-required-project>Not recorded</strong><span>Foundations project</span></div>
+  </div>
+  <span data-fc-course-progress-label>24 completion requirements remaining</span>
+  <strong class="fc-completion-status" data-fc-course-completion-status>Course in progress</strong>
+</div>
+```
+:::
+
+## Before you start
+
+- **Designed for:** learners with little or no programming experience.
+- **You are ready when:** you can use a web browser and are willing to predict,
+  run, explain, and change small examples. No mathematics prerequisite is
+  assumed.
+- **Practice setup:** start in free Google Colab notebooks. Local Python,
+  Jupyter, or VS Code is optional and introduced step by step.
+
+## What you will be able to do
+
+- run Python in a browser and with local tools;
+- work with values, text, decisions, loops, and reusable functions;
+- choose lists, tuples, dictionaries, sets, and nested data appropriately;
+- read tracebacks, inspect program state, and reduce a bug to a useful example;
+- build and explain a small working Python project.
+
+## Course modules
+
+::: {.course-grid}
+::: {.course-card}
+### 1. [Getting Started](../../lessons/getting-started/index.qmd)
+
+Understand how Python runs and choose Colab or local tools for practice.
+Two required lessons, one optional local-tools lesson, and one checkpoint.
+:::
+
+::: {.course-card}
+### 2. [Core Python](../../lessons/core-python/index.qmd)
+
+Use values, variables, text, conditions, indentation, loops, and tracing.
+Five required lessons and one checkpoint.
+:::
+
+::: {.course-card}
+### 3. [Data Structures](../../lessons/data-structures/index.qmd)
+
+Organize values with lists, tuples, dictionaries, sets, and nested containers.
+Five required lessons and one checkpoint.
+:::
+
+::: {.course-card}
+### 4. [Functions](../../lessons/functions/index.qmd)
+
+Package behavior behind clear names, contracts, and focused tests.
+Three required lessons and one checkpoint.
+:::
+
+::: {.course-card}
+### 5. [Debugging](../../lessons/debugging/index.qmd)
+
+Read errors calmly and investigate evidence instead of guessing.
+Three required lessons and one checkpoint.
+:::
+:::
+
+## Completion requirements and assessment
+
+Python Foundations curriculum version 1 is locally complete when you have:
+
+1. completed all **18 required lessons**;
+2. recorded all **five module checkpoints** after meeting their knowledge and
+   practical thresholds;
+3. built the required [Python Foundations Project](../../lessons/foundations-project/index.qmd)
+   and self-assessed every rubric row as **Meets the requirement**.
+
+[Local Python Tools](../../lessons/getting-started/local-python-tools.qmd) is the
+one optional lesson. Completing it is useful but does not change course status.
+Lesson quizzes remain formative and do not have a stored grade.
+
+::: {.callout-important title="Local completion is not a verified certificate"}
+The completion dashboard is a private, self-reported browser record. It does not
+verify identity, submit checkpoint artifacts, grade the project, or issue a
+certificate. A verifiable certificate remains planned as a separate service.
+:::
+
+## Practice and next step
+
+Every lesson provides runnable examples, practice prompts, a Colab notebook,
+and formative quizzes. Each module then asks you to combine those skills in a
+practical checkpoint. The final project integrates all five module outcomes.
+
+[Start the first lesson](../../lessons/getting-started/what-is-programming.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
+[Open the Foundations project](../../lessons/foundations-project/index.qmd){.btn .btn-outline-primary}
+[View both pathways](../../pathways/index.qmd){.btn .btn-outline-primary}

@@ -1,0 +1,169 @@
+---
+title: "Getting Started Checkpoint"
+description: "Demonstrate a reproducible predict-run-explain-modify workflow in a Python notebook."
+checkpoint_id: "getting-started"
+assessment_type: module-checkpoint
+assessment_version: 1
+required_for_completion: true
+completion_label: "Required checkpoint"
+passing_score: 3
+categories: [python-foundations, getting-started, checkpoint]
+order: 75
+colab_notebook: "notebooks/lessons/getting-started/checkpoint.ipynb"
+---
+
+::: {.lesson-meta .checkpoint-meta}
+- **Level:** Foundations checkpoint
+- **Estimated time:** 25–35 minutes
+- **Outcome assessed:** Run a small program reproducibly and explain what the interpreter and notebook are doing.
+- **Completion rule:** Score at least 3/4, complete the practical task, then record completion below.
+:::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+## The task this checkpoint assesses
+
+This checkpoint combines a short knowledge check with one practical artifact.
+Use your lesson notebooks while reviewing, but complete the final attempt without
+copying a finished solution.
+
+## 1. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-getting-started-checkpoint",
+  "title": "Getting Started knowledge check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "interpreter-role",
+      "prompt": "What does the Python interpreter do with a program?",
+      "options": [
+        "It reads and runs the program's instructions.",
+        "It guesses what the learner intended.",
+        "It turns every line into printed text.",
+        "It only checks spelling in comments."
+      ],
+      "answer_index": 0,
+      "explanation": "The interpreter follows Python instructions and reports either results or errors."
+    },
+    {
+      "id": "prediction-loop",
+      "prompt": "Which practice sequence gives the strongest evidence of learning?",
+      "options": [
+        "Run, copy, and immediately continue.",
+        "Predict, run, compare, explain, and modify.",
+        "Read the solution without running it.",
+        "Change many lines before checking the first result."
+      ],
+      "answer_index": 1,
+      "explanation": "Prediction and one controlled modification make the difference between an expectation and the result visible."
+    },
+    {
+      "id": "notebook-state",
+      "prompt": "Why should a new notebook usually be run from top to bottom?",
+      "options": [
+        "Earlier cells may create names used by later cells.",
+        "Python requires every notebook to have ten cells.",
+        "Later cells automatically repair earlier errors.",
+        "Cell order only changes text formatting."
+      ],
+      "answer_index": 0,
+      "explanation": "Notebook state depends on which cells ran and in what order, so a top-to-bottom run checks reproducibility."
+    },
+    {
+      "id": "assignment-output",
+      "prompt": "A cell contains only score = 7. What visible output should you expect?",
+      "options": [
+        "7",
+        "score",
+        "Usually no visible output; the name is assigned.",
+        "A NameError every time."
+      ],
+      "answer_index": 2,
+      "explanation": "Assignment stores a value under a name. Use an expression or print call when you want to display it."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+::: {.callout-note title="Checkpoint threshold"}
+Aim for at least **3 of 4** correct. Review the linked module lessons and reset
+the quiz if you need another attempt. The score is formative and stays in this
+browser; recording completion is an honest self-assessment.
+:::
+
+## 2. Complete the practical task
+
+Create a tiny notebook that proves you can run Python deliberately rather than only copy output.
+
+1. Before running the code, write the exact two lines you expect.
+2. Run the cell and compare the actual output with your prediction.
+3. Change only `goal`, predict again, and rerun.
+4. Restart the notebook runtime and run all cells from top to bottom.
+5. Write two sentences explaining why the final run is reproducible.
+
+```python
+learner = "Mina"
+goal = "explain each line"
+
+print(f"{learner} is learning to {goal}.")
+print("Prediction checked before moving on.")
+```
+
+Your explanation should identify the two text values, the two names created by
+assignment, and the two `print` actions.
+
+### Evidence to keep
+
+- Your prediction written before the first run.
+- The actual two-line output.
+- One controlled change and its predicted result.
+- A successful restart-and-run-all result.
+- A plain-language explanation of every line.
+
+::: {.callout-tip collapse="true" title="Compare with one possible solution"}
+One valid first prediction is:
+
+```text
+Mina is learning to explain each line.
+Prediction checked before moving on.
+```
+
+Changing `goal` changes only the text inserted into the first line. Assignment
+creates the names `learner` and `goal`; it does not display anything by itself.
+Each `print` call then displays one line. Restarting and running from the top
+recreates both names before they are used.
+:::
+
+## 3. Decide whether the outcome is demonstrated
+
+Record this checkpoint only when all four statements are true:
+
+- [ ] I scored at least 3/4 on the knowledge check.
+- [ ] My practical task runs from top to bottom.
+- [ ] I kept the requested prediction, output, and explanation evidence.
+- [ ] I can make one new change without copying the solution.
+
+## 4. Record checkpoint completion
+
+This button stores a self-reported completion marker in this browser. It is not
+a graded submission or verified certificate evidence.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-checkpoint-action>
+  <button class="fc-complete-button" type="button" data-fc-checkpoint-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-checkpoint-complete-label>Record checkpoint complete</span>
+  </button>
+  <p data-fc-checkpoint-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- A checkpoint asks you to produce evidence, not merely recognize an answer.
+- Review is expected; record completion only after the practical outcome works.
+- Keep the notebook because it becomes useful evidence for the final project.

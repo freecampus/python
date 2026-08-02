@@ -1,0 +1,93 @@
+---
+title: Scientific Computing with Python
+description: Represent numerical problems, run experiments, visualize results, and apply scientific algorithms.
+categories: [scientific-python, scientific-computing]
+course_id: scientific-python
+course_title: Scientific Computing with Python
+course_home: courses/scientific-python
+course_order: 40
+course_level: Intermediate
+course_status: in-development
+course_status_label: In development
+course_pathway: scientific
+course_keywords: "numpy arrays simulation matplotlib plotting sympy symbolic scipy numerical experiments"
+lesson_count: 5
+estimated_effort: 5–8 hours of current material
+prerequisite_label: Python Foundations
+page-layout: full
+toc: false
+body-classes: "course-home course-scientific"
+---
+
+::: {.lesson-meta}
+- **Level:** Intermediate
+- **Estimated effort:** 5–8 hours of current material
+- **Prerequisite:** Python Foundations
+- **Status:** In development; certificate planned
+:::
+
+::: {.callout-warning title="Course in development"}
+The current scientific lessons are available, while deeper numerical workflows,
+the capstone, assessment, and certificate are still being developed.
+:::
+
+::: {.callout-important title="Prerequisite"}
+Complete [Python Foundations](../python-foundations/index.qmd). Intermediate
+Python is recommended for larger packaged projects but is not required.
+:::
+
+```{=html}
+<div class="fc-course-overview" data-fc-course-overview data-course-id="scientific-python" data-course-total="5">
+  <div><strong data-fc-course-progress-value>0%</strong><span>current material</span></div>
+  <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
+    <span data-fc-course-progress-bar></span>
+  </div>
+  <span data-fc-course-progress-label>0 of 5 current lessons complete</span>
+</div>
+```
+
+## Before you start
+
+- **Designed for:** learners who want to investigate numerical or scientific
+  questions with code.
+- **You are ready when:** you can use Python variables, collections, loops, and
+  functions and can explain the output of a small program.
+- **Practice setup:** Google Colab is sufficient for the current NumPy,
+  Matplotlib, SymPy, and SciPy examples. A local environment is optional but
+  useful for larger reproducible experiments.
+
+## What the current lessons teach
+
+- represent numerical data with NumPy arrays;
+- model uncertainty with repeated random simulations;
+- create and explain simple plots with Matplotlib;
+- distinguish symbolic mathematics from numerical computation;
+- identify where SciPy algorithms fit a scientific workflow.
+
+## Current module
+
+::: {.course-grid}
+::: {.course-card}
+### [Scientific Python](../../lessons/scientific-python/index.qmd)
+
+Use NumPy, random simulation, Matplotlib, SymPy, and SciPy in small experiments.
+:::
+:::
+
+## Planned expansion
+
+- floating-point reasoning and reproducible computation;
+- broadcasting, masking, and multidimensional arrays;
+- numerical linear algebra and applied SciPy;
+- scientific data and accessible visualization;
+- a reproducible scientific project.
+
+## Practice, assessment, and next step
+
+The current lessons provide runnable experiments, Colab notebooks, and
+formative quizzes. They count toward local progress, but a scientific capstone,
+rubric, and certificate assessment are still planned. Continue to Data & ML
+only after arrays, plotting, and simple numerical experiments feel comfortable.
+
+[Start with NumPy](../../lessons/scientific-python/numpy.qmd){.btn .btn-primary data-fc-course-resume="scientific-python"}
+[See the Data & ML prerequisite path](../data-science-ml/index.qmd){.btn .btn-outline-primary}

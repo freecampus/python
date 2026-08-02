@@ -1,6 +1,6 @@
 ---
 title: FreeCampus Python
-description: A beginner-first Python course from zero programming experience to practical projects.
+description: Five connected Python courses from first principles to software engineering, scientific computing, and machine learning.
 page-layout: full
 sidebar: false
 toc: false
@@ -11,29 +11,29 @@ body-classes: landing-page
 ::: {.hero}
 ::: {.hero-copy}
 ::: {.hero-kicker}
-Beginner-first Python course
+Five connected Python courses
 :::
 
-# Learn Python by making things work
+# Build the Python path that matches your goal
 
-Build practical confidence with focused explanations, runnable examples,
-quizzes, debugging practice, and projects. Begin in the browser, then grow into
-real tools, data science, and AI.
+Start from zero, then follow a software-development or scientific-data pathway.
+Every lesson uses focused explanations, runnable examples, quizzes, debugging
+practice, and small projects.
 
 ::: {.hero-actions}
-[Start learning](lessons/getting-started/what-is-programming.qmd){.btn .btn-primary .btn-lg}
-[Explore every path](lessons/index.qmd){.btn .btn-outline-primary .btn-lg}
+[Start with Python Foundations](courses/python-foundations/index.qmd){.btn .btn-primary .btn-lg}
+[Explore all courses](courses/index.qmd){.btn .btn-outline-primary .btn-lg}
 :::
 
 ::: {.hero-stats}
 ::: {.hero-stat}
-**14**
-chapters
+**5**
+focused courses
 :::
 
 ::: {.hero-stat}
-**75+**
-learning pages
+**2**
+learning pathways
 :::
 
 ::: {.hero-stat}
@@ -75,47 +75,106 @@ in Colab
   <span class="fc-resume-eyebrow">Continue where you stopped</span>
   <strong data-fc-resume-title>Your last lesson</strong>
 </div>
-[Resume lesson](lessons/index.qmd){.btn .btn-primary data-fc-resume-link=""}
+[Resume lesson](courses/index.qmd){.btn .btn-primary data-fc-resume-link=""}
+:::
+
+## Choose a course
+
+::: {.course-grid}
+::: {.course-card}
+### [Python Foundations](courses/python-foundations/index.qmd)
+
+**Beginner · No prerequisite**
+
+Learn core syntax, collections, functions, and debugging from zero programming
+experience, then demonstrate them in five checkpoints and a final project.
+:::
+
+::: {.course-card}
+### [Intermediate Python](courses/intermediate-python/index.qmd)
+
+**Available · Requires Foundations**
+
+Build reliable applications with files, environments, tests, tooling, and OOP.
+:::
+
+::: {.course-card}
+### [Advanced Python Engineering](courses/advanced-python/index.qmd)
+
+**In development · Requires Intermediate**
+
+Use generators, decorators, context managers, protocols, and engineering tools
+deliberately.
+:::
+
+::: {.course-card}
+### [Scientific Computing with Python](courses/scientific-python/index.qmd)
+
+**In development · Requires Foundations**
+
+Work with arrays, simulations, plots, symbolic mathematics, and scientific
+algorithms.
+:::
+
+::: {.course-card}
+### [Data Science and Machine Learning](courses/data-science-ml/index.qmd)
+
+**In development · Requires Scientific Computing**
+
+Move from a data question to a responsibly evaluated model and communicate the
+evidence.
+:::
+:::
+
+[Compare every course](courses/index.qmd){.btn .btn-primary}
+
+## Follow the pathway you need
+
+::: {.concept-diagram}
+Python Foundations is the common entry point. Solid arrows are prerequisites;
+the dotted arrow is a recommendation.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  F[Python Foundations]
+  I[Intermediate Python]
+  A[Advanced Python Engineering]
+  S[Scientific Computing]
+  M[Data Science and Machine Learning]
+  F --> I --> A
+  F --> S --> M
+  I -. recommended .-> M
+```
+
 :::
 
 ::: {.course-grid .audience-grid}
 ::: {.course-card}
 ### New to programming?
 
-Start with what programs are, how Python runs instructions, how notebooks work,
-and why errors are feedback instead of failure.
-
-[Begin with lesson 1](lessons/getting-started/what-is-programming.qmd){.card-link}
+Begin with [What Is Programming?](lessons/getting-started/what-is-programming.qmd)
+and run your first examples in a browser.
 :::
 
 ::: {.course-card}
-### Already know some basics?
+### Already know some Python?
 
-Jump to the parts you need: lists, dictionaries, functions, files, testing,
-scientific Python, data science, or machine learning.
-
-[Browse the full path](lessons/index.qmd){.card-link}
+Use the [readiness guide](pathways/index.qmd) to choose a course without repeating
+skills you can already explain and debug.
 :::
 
 ::: {.course-card}
-### Teaching this course?
+### Teaching these courses?
 
-Use learner profiles, instructor notes, section quizzes, debugging routines, and
-small practice loops for live or self-paced instruction.
-
-[Open instructor notes](lessons/instructor-notes.qmd){.card-link}
+Use [learner profiles](lessons/learner-profiles.qmd),
+[instructor notes](lessons/instructor-notes.qmd), checkpoints, and visible project
+rubrics for self-paced or classroom learning.
 :::
 :::
 
-::: {.callout-tip title="Course promise"}
-You will not learn by memorizing commands. You will learn by predicting, running,
-explaining, modifying, quizzing, and debugging small examples until the ideas are
-usable.
-:::
-
-## How the course works
-
-Each lesson follows a practical beginner loop:
+## How every course works
 
 ::: {.learning-loop}
 1. **Understand** why the idea matters.
@@ -126,60 +185,18 @@ Each lesson follows a practical beginner loop:
 6. **Debug** using evidence instead of guessing.
 :::
 
-::: {.course-grid}
-::: {.course-card}
-### Practice immediately
-
-Use [Google Colab](lessons/getting-started/google-colab.qmd) to run Python in a
-browser before installing anything.
+::: {.callout-note title="Progress and certificates"}
+Lesson progress is stored in your browser and organized by course. Python
+Foundations now has published local completion requirements and a project rubric.
+Verifiable certificates remain planned because they also require identity,
+assessment evidence, and durable learner records. Browser completion is not
+presented as a verified credential.
 :::
 
-::: {.course-card}
-### Build local confidence
+## Shared help
 
-Use [Local Python Tools](lessons/getting-started/local-python-tools.qmd) to set
-up Python, VS Code, Jupyter, and the terminal.
-:::
-
-::: {.course-card}
-### Keep errors calm
-
-Keep [Error Messages](lessons/debugging/error-messages.qmd) nearby whenever
-Python prints red text.
-:::
-:::
-
-## Learning path
-
-::: {.pathway}
-1. [Getting Started](lessons/getting-started/index.qmd)
-2. [Core Python](lessons/core-python/index.qmd)
-3. [Data Structures](lessons/data-structures/index.qmd)
-4. [Functions](lessons/functions/index.qmd)
-5. [Debugging](lessons/debugging/index.qmd)
-6. [Files and Data](lessons/files-and-data/index.qmd)
-7. [Projects and Environments](lessons/projects-and-environments/index.qmd)
-8. [Code Quality](lessons/code-quality/index.qmd)
-9. [Object-Oriented Python](lessons/object-oriented-python/index.qmd)
-10. [Advanced Python Patterns](lessons/advanced-python-patterns/index.qmd)
-11. [Scientific Python](lessons/scientific-python/index.qmd)
-12. [Data Science](lessons/data-science/index.qmd)
-13. [Machine Learning and AI](lessons/machine-learning-ai/index.qmd)
-14. [Capstone](lessons/capstone/index.qmd)
-:::
-
-## Tools you will meet
-
-- [Google Colab](https://colab.research.google.com/) for no-install practice.
-- [Python](https://www.python.org/downloads/) for local programming.
-- [VS Code](https://code.visualstudio.com/) for project work.
-- [Jupyter](https://jupyter.org/) for notebooks and data exploration.
-- `ruff`, `pytest`, type hints, and CI for code quality.
-- NumPy, pandas, Matplotlib, scikit-learn, PyTorch, TensorFlow/Keras, and
-  Transformers for applied work.
-
-::: {.callout-note title="Not sure where to start?"}
-If programming is new to you, start with [What Is Programming?](lessons/getting-started/what-is-programming.qmd).
-If you have written small Python scripts before, skim the [lesson path](lessons/index.qmd)
-and use the quizzes to find your level.
-:::
+- Use the [Python FAQ](lessons/faq/index.qmd) when an error or output surprises you.
+- Use the [Project Toolkit](lessons/capstone/index.qmd) to plan, test, document,
+  and present course projects.
+- Open the [full course catalog](courses/index.qmd) whenever you want to switch
+  pathways.

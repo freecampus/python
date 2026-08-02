@@ -1,0 +1,110 @@
+---
+title: Python Courses
+description: Choose a focused Python course and follow its prerequisites at your own pace.
+page-layout: full
+sidebar: false
+toc: false
+page-navigation: false
+body-classes: "course-hub portfolio-hub"
+listing:
+  - id: course-catalog
+    contents: "*/index.qmd"
+    sort: "course_order"
+    template: _listings/course-card.ejs.md
+    fields:
+      - title
+      - description
+      - course_id
+      - course_order
+      - course_level
+      - course_status
+      - course_status_label
+      - course_pathway
+      - course_keywords
+      - lesson_count
+      - required_lesson_count
+      - required_lesson_ids
+      - checkpoint_ids
+      - project_required
+      - estimated_effort
+      - prerequisite_label
+    filter-ui: false
+    sort-ui: false
+---
+
+## Choose your next goal
+
+Start with **Python Foundations** if programming is new to you. If you already
+have the prerequisite skills, choose the software-development or scientific-data
+path that matches what you want to build.
+
+::: {.fc-catalog-tools}
+```{=html}
+<div class="fc-catalog-search-wrap">
+  <span aria-hidden="true">⌕</span>
+  <label class="visually-hidden" for="fc-catalog-search">Search courses</label>
+  <input
+    id="fc-catalog-search"
+    type="search"
+    placeholder="Search outcomes, tools, or course names..."
+    autocomplete="off"
+    data-fc-catalog-search
+  >
+</div>
+
+<div class="fc-stage-filters" role="group" aria-label="Filter courses">
+  <button class="is-active" type="button" data-fc-course-filter="all" aria-pressed="true">All courses</button>
+  <button type="button" data-fc-course-filter="software" aria-pressed="false">Software path</button>
+  <button type="button" data-fc-course-filter="scientific" aria-pressed="false">Scientific & data path</button>
+  <button type="button" data-fc-course-filter="available" aria-pressed="false">Available now</button>
+</div>
+
+<div class="fc-catalog-summary" aria-live="polite">
+  <span data-fc-catalog-count>5 courses</span>
+  <span>Progress is stored in this browser.</span>
+</div>
+```
+:::
+
+::: {#course-catalog .fc-course-catalog data-fc-catalog=""}
+:::
+
+::: {.fc-empty-state data-fc-catalog-empty="" hidden=""}
+### No course matches that search
+
+Try a broader term such as `beginner`, `applications`, `scientific`, `data`, or
+`machine learning`.
+:::
+
+## Two pathways, one foundation
+
+::: {.concept-diagram}
+The foundation course branches into software engineering and scientific-data
+pathways.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  F[Python Foundations]
+  I[Intermediate Python]
+  A[Advanced Python Engineering]
+  S[Scientific Computing]
+  M[Data Science and Machine Learning]
+  F --> I --> A
+  F --> S --> M
+  I -. recommended .-> M
+```
+
+:::
+
+::: {.callout-note title="Course status and certificates"}
+Foundations has published local completion requirements, five checkpoints, and
+a project rubric. Intermediate uses mature lessons but still needs its own
+capstone and completion assessment. The other courses are available for study
+but clearly marked **in development** while their applied projects and
+assessment coverage grow. Certificates are planned; browser completion is not
+a verified credential.
+:::
+
+[Compare prerequisites and pathways](../pathways/index.qmd){.btn .btn-outline-primary}

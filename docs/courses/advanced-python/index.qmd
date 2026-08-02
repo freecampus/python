@@ -1,0 +1,94 @@
+---
+title: Advanced Python Engineering
+description: Use Python's deeper protocols and advanced features deliberately in maintainable systems.
+categories: [advanced-python, software-development]
+course_id: advanced-python
+course_title: Advanced Python Engineering
+course_home: courses/advanced-python
+course_order: 30
+course_level: Advanced
+course_status: in-development
+course_status_label: In development
+course_pathway: software
+course_keywords: "comprehensions generators iterators decorators context managers logging configuration typing protocols asyncio concurrency performance"
+lesson_count: 5
+estimated_effort: 5–8 hours of current material
+prerequisite_label: Intermediate Python
+page-layout: full
+toc: false
+body-classes: "course-home course-advanced"
+---
+
+::: {.lesson-meta}
+- **Level:** Advanced
+- **Estimated effort:** 5–8 hours of current material
+- **Prerequisite:** Intermediate Python
+- **Status:** In development; certificate planned
+:::
+
+::: {.callout-warning title="Course in development"}
+The current lessons are ready to study, but the complete engineering curriculum,
+capstone, assessment, and certificate are not finished yet.
+:::
+
+::: {.callout-important title="Prerequisite"}
+Complete [Intermediate Python](../intermediate-python/index.qmd) before relying on
+the abstractions in this course.
+:::
+
+```{=html}
+<div class="fc-course-overview" data-fc-course-overview data-course-id="advanced-python" data-course-total="5">
+  <div><strong data-fc-course-progress-value>0%</strong><span>current material</span></div>
+  <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
+    <span data-fc-course-progress-bar></span>
+  </div>
+  <span data-fc-course-progress-label>0 of 5 current lessons complete</span>
+</div>
+```
+
+## Before you start
+
+- **Designed for:** Python developers who want to understand protocols and use
+  advanced features without sacrificing maintainability.
+- **You are ready when:** you can structure, test, type-check, and debug a small
+  multi-file application.
+- **Practice setup:** use Colab for focused examples and a local Python
+  environment for packages, logging, configuration, profiling, and the planned
+  engineering project.
+
+## What the current lessons teach
+
+- write clear comprehensions for lists, dictionaries, and sets;
+- reason about iteration and produce values lazily with generators;
+- add behavior with decorators and manage resources with context managers;
+- use logging and configuration without mixing settings into program logic.
+
+## Current module
+
+::: {.course-grid}
+::: {.course-card}
+### [Advanced Python Patterns](../../lessons/advanced-python-patterns/index.qmd)
+
+Study comprehensions, iterables, generators, decorators, context managers,
+logging, and configuration.
+:::
+:::
+
+## Planned expansion
+
+- Python's data model and protocols;
+- advanced typing and generics;
+- threads, processes, and `asyncio`;
+- profiling and performance;
+- library/API design and packaging;
+- an engineering capstone.
+
+## Practice, assessment, and next step
+
+The current lessons include runnable examples, Colab notebooks, and formative
+quizzes. They count toward local progress, but they do not yet form a completed
+course assessment. Study them now, then revisit this page as the engineering
+capstone and completion requirements are published.
+
+[Study the current module](../../lessons/advanced-python-patterns/comprehensions.qmd){.btn .btn-primary data-fc-course-resume="advanced-python"}
+[Compare all pathways](../../pathways/index.qmd){.btn .btn-outline-primary}

@@ -1,0 +1,182 @@
+---
+title: "Core Python Checkpoint"
+description: "Combine values, text, conditions, indentation, and a loop in one small program."
+checkpoint_id: "core-python"
+assessment_type: module-checkpoint
+assessment_version: 1
+required_for_completion: true
+completion_label: "Required checkpoint"
+passing_score: 3
+categories: [python-foundations, core-python, checkpoint]
+order: 125
+colab_notebook: "notebooks/lessons/core-python/checkpoint.ipynb"
+---
+
+::: {.lesson-meta .checkpoint-meta}
+- **Level:** Foundations checkpoint
+- **Estimated time:** 35–45 minutes
+- **Outcome assessed:** Predict and build a small program that selects a path and traces repeated work.
+- **Completion rule:** Score at least 3/4, complete the practical task, then record completion below.
+:::
+
+{{< include ../_includes/colab-link.qmd >}}
+
+## The task this checkpoint assesses
+
+This checkpoint combines a short knowledge check with one practical artifact.
+Use your lesson notebooks while reviewing, but complete the final attempt without
+copying a finished solution.
+
+## 1. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-core-python-checkpoint",
+  "title": "Core Python knowledge check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "input-type",
+      "prompt": "What type of value does input() return?",
+      "options": [
+        "int",
+        "str",
+        "bool",
+        "float"
+      ],
+      "answer_index": 1,
+      "explanation": "input() returns text. Convert that text explicitly when a program needs a number."
+    },
+    {
+      "id": "condition-choice",
+      "prompt": "When does the else branch of an if statement run?",
+      "options": [
+        "Before Python checks the condition.",
+        "Only when every preceding condition in the chain is false.",
+        "After every if branch.",
+        "Only inside a loop."
+      ],
+      "answer_index": 1,
+      "explanation": "An if/elif/else chain selects one path; else is the fallback when earlier conditions are false."
+    },
+    {
+      "id": "loop-trace",
+      "prompt": "How many times does for number in range(3) run its body?",
+      "options": [
+        "2",
+        "3",
+        "4",
+        "It never stops"
+      ],
+      "answer_index": 1,
+      "explanation": "range(3) produces 0, 1, and 2, so the body runs three times."
+    },
+    {
+      "id": "indentation-role",
+      "prompt": "What does indentation communicate to Python?",
+      "options": [
+        "Which statements belong to the same code block.",
+        "Which variable is a string.",
+        "Which comments should be printed.",
+        "How fast a loop should run."
+      ],
+      "answer_index": 0,
+      "explanation": "Indentation groups statements inside conditionals, loops, functions, and other blocks."
+    }
+  ]
+}
+</script>
+
+{{< include ../_includes/ojs-quiz.qmd >}}
+
+::: {.callout-note title="Checkpoint threshold"}
+Aim for at least **3 of 4** correct. Review the linked module lessons and reset
+the quiz if you need another attempt. The score is formative and stays in this
+browser; recording completion is an honest self-assessment.
+:::
+
+## 2. Complete the practical task
+
+Complete a study-goal program that tells a learner whether the goal is
+finished and, when needed, prints the remaining session numbers.
+
+```python
+name = "Mina"
+completed_sessions = 2
+target_sessions = 4
+
+# Add an if/else statement that creates a message.
+
+print(message)
+
+# Add a loop that prints each remaining session number.
+```
+
+Before running your completed program, predict the message and every session
+number. Then make these controlled changes:
+
+1. Set `completed_sessions` equal to `target_sessions`.
+2. Replace the fixed `name` with `input("What is your name? ")`.
+3. Explain why `input` produces text but the two session values are integers.
+
+### Evidence to keep
+
+- A correct `if`/`else` block with consistent indentation.
+- A loop that stops at the target rather than running forever.
+- Predictions for both the unfinished and finished cases.
+- Output from the version that asks for a name.
+- A line-by-line explanation of what changes in each case.
+
+::: {.callout-tip collapse="true" title="Compare with one possible solution"}
+One possible solution is:
+
+```python
+name = "Mina"
+completed_sessions = 2
+target_sessions = 4
+
+if completed_sessions >= target_sessions:
+    message = f"{name}, the study goal is complete."
+else:
+    message = f"{name}, keep going."
+
+print(message)
+
+for session in range(completed_sessions + 1, target_sessions + 1):
+    print(f"Remaining session: {session}")
+```
+
+With the starting values, the condition is false, so the program creates the
+`keep going` message. `range(3, 5)` then produces `3` and `4`. When the completed
+count reaches the target, the first branch runs and the range is empty.
+:::
+
+## 3. Decide whether the outcome is demonstrated
+
+Record this checkpoint only when all four statements are true:
+
+- [ ] I scored at least 3/4 on the knowledge check.
+- [ ] My practical task runs from top to bottom.
+- [ ] I kept the requested prediction, output, and explanation evidence.
+- [ ] I can make one new change without copying the solution.
+
+## 4. Record checkpoint completion
+
+This button stores a self-reported completion marker in this browser. It is not
+a graded submission or verified certificate evidence.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-checkpoint-action>
+  <button class="fc-complete-button" type="button" data-fc-checkpoint-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-checkpoint-complete-label>Record checkpoint complete</span>
+  </button>
+  <p data-fc-checkpoint-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- A checkpoint asks you to produce evidence, not merely recognize an answer.
+- Review is expected; record completion only after the practical outcome works.
+- Keep the notebook because it becomes useful evidence for the final project.

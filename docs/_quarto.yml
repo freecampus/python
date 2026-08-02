@@ -20,36 +20,46 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: lessons/index.qmd
-        text: Learn
+      - text: Courses
+        menu:
+          - href: courses/index.qmd
+            text: All courses
+          - text: "---"
+          - href: courses/python-foundations/index.qmd
+            text: Python Foundations
+          - href: courses/intermediate-python/index.qmd
+            text: Intermediate Python
+          - href: courses/advanced-python/index.qmd
+            text: Advanced Python Engineering
+          - href: courses/scientific-python/index.qmd
+            text: Scientific Computing
+          - href: courses/data-science-ml/index.qmd
+            text: Data Science & Machine Learning
+      - href: pathways/index.qmd
+        text: Pathways
       - href: lessons/faq/index.qmd
         text: FAQ
-      - href: lessons/capstone/index.qmd
-        text: Projects
-      - href: lessons/debugging/error-messages.qmd
-        text: Debugging
     right:
       - icon: github
         href: https://github.com/freecampus/python
         aria-label: GitHub repository
   sidebar:
-    - title: Learn
+    - title: Python Foundations
       style: floating
       border: false
       search: true
       collapse-level: 1
       contents:
-        - lessons/index.qmd
-        - section: Course guide
-          contents:
-            - lessons/learner-profiles.qmd
-            - lessons/instructor-notes.qmd
+        - courses/python-foundations/index.qmd
         - section: Getting Started
           contents:
             - lessons/getting-started/index.qmd
             - lessons/getting-started/what-is-programming.qmd
             - lessons/getting-started/google-colab.qmd
-            - lessons/getting-started/local-python-tools.qmd
+            - href: lessons/getting-started/local-python-tools.qmd
+              text: Local Python Tools · optional
+            - href: lessons/getting-started/checkpoint.qmd
+              text: Getting Started checkpoint · required
         - section: Core Python
           contents:
             - lessons/core-python/index.qmd
@@ -58,6 +68,8 @@ website:
             - lessons/core-python/booleans-and-conditionals.qmd
             - lessons/core-python/indentation.qmd
             - lessons/core-python/loops-and-tracing.qmd
+            - href: lessons/core-python/checkpoint.qmd
+              text: Core Python checkpoint · required
         - section: Data Structures
           contents:
             - lessons/data-structures/index.qmd
@@ -66,18 +78,36 @@ website:
             - lessons/data-structures/dictionaries.qmd
             - lessons/data-structures/sets.qmd
             - lessons/data-structures/nested-data.qmd
+            - href: lessons/data-structures/checkpoint.qmd
+              text: Data Structures checkpoint · required
         - section: Functions
           contents:
             - lessons/functions/index.qmd
             - lessons/functions/function-basics.qmd
             - lessons/functions/function-contracts.qmd
             - lessons/functions/decomposition-and-testing.qmd
+            - href: lessons/functions/checkpoint.qmd
+              text: Functions checkpoint · required
         - section: Debugging
           contents:
             - lessons/debugging/index.qmd
             - lessons/debugging/error-messages.qmd
             - lessons/debugging/debugging-tools.qmd
             - lessons/debugging/minimal-reproducible-examples.qmd
+            - href: lessons/debugging/checkpoint.qmd
+              text: Debugging checkpoint · required
+        - section: Finish Python Foundations
+          contents:
+            - href: lessons/foundations-project/index.qmd
+              text: Foundations project · required
+
+    - title: "Intermediate Python: Building Reliable Applications"
+      style: floating
+      border: false
+      search: true
+      collapse-level: 1
+      contents:
+        - courses/intermediate-python/index.qmd
         - section: Files and Data
           contents:
             - lessons/files-and-data/index.qmd
@@ -104,6 +134,14 @@ website:
             - lessons/object-oriented-python/oop-basics.qmd
             - lessons/object-oriented-python/dataclasses.qmd
             - lessons/object-oriented-python/oop-design.qmd
+
+    - title: Advanced Python Engineering
+      style: floating
+      border: false
+      search: true
+      collapse-level: 1
+      contents:
+        - courses/advanced-python/index.qmd
         - section: Advanced Python Patterns
           contents:
             - lessons/advanced-python-patterns/index.qmd
@@ -112,6 +150,14 @@ website:
             - lessons/advanced-python-patterns/decorators.qmd
             - lessons/advanced-python-patterns/context-managers.qmd
             - lessons/advanced-python-patterns/logging-and-configuration.qmd
+
+    - title: Scientific Computing with Python
+      style: floating
+      border: false
+      search: true
+      collapse-level: 1
+      contents:
+        - courses/scientific-python/index.qmd
         - section: Scientific Python
           contents:
             - lessons/scientific-python/index.qmd
@@ -120,6 +166,14 @@ website:
             - lessons/scientific-python/matplotlib-basics.qmd
             - lessons/scientific-python/sympy-symbolic-math.qmd
             - lessons/scientific-python/scipy-overview.qmd
+
+    - title: Data Science and Machine Learning with Python
+      style: floating
+      border: false
+      search: true
+      collapse-level: 1
+      contents:
+        - courses/data-science-ml/index.qmd
         - section: Data Science
           contents:
             - lessons/data-science/index.qmd
@@ -136,13 +190,10 @@ website:
             - lessons/machine-learning-ai/deep-learning-libraries.qmd
             - lessons/machine-learning-ai/transformers-overview.qmd
             - lessons/machine-learning-ai/responsible-ai.qmd
-    - title: FAQ
-      contents:
-        - lessons/faq/index.qmd
-        - lessons/faq/unexpected-keyword-arguments-in-classes.qmd
-        - lessons/faq/running-code-and-output.qmd
-        - lessons/faq/names-values-and-types.qmd
-    - title: Projects
+
+    - title: Project Toolkit
+      style: floating
+      border: false
       contents:
         - lessons/capstone/index.qmd
         - lessons/capstone/project-selection-and-planning.qmd
@@ -165,6 +216,7 @@ format:
       - components/learning-shell.css
       - components/landing.css
       - components/catalog-faq.css
+      - components/course-portfolio.css
       - components/responsive.css
     template-partials:
       - _partials/title-block.html

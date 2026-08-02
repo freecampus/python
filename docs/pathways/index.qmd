@@ -1,0 +1,73 @@
+---
+title: Python Learning Pathways
+description: See how FreeCampus Python courses connect and choose the right starting point.
+page-layout: full
+sidebar: false
+toc: true
+page-navigation: false
+body-classes: pathways-page
+---
+
+## Start with your current skills
+
+You do not need to complete every Python course. Choose the pathway that supports
+the work you want to do, and use prerequisites to avoid being asked to guess at
+skills a course assumes.
+
+::: {.callout-tip title="New to programming?"}
+Start with [Python Foundations](../courses/python-foundations/index.qmd). It is
+the common entry point for both pathways and assumes no programming experience.
+:::
+
+## Software-development pathway
+
+1. [Python Foundations](../courses/python-foundations/index.qmd)
+2. [Intermediate Python: Building Reliable Applications](../courses/intermediate-python/index.qmd)
+3. [Advanced Python Engineering](../courses/advanced-python/index.qmd)
+
+Choose this route to build scripts, command-line applications, tested projects,
+libraries, and maintainable Python systems.
+
+## Scientific and data pathway
+
+1. [Python Foundations](../courses/python-foundations/index.qmd)
+2. [Scientific Computing with Python](../courses/scientific-python/index.qmd)
+3. [Data Science and Machine Learning with Python](../courses/data-science-ml/index.qmd)
+
+Choose this route to work with arrays, experiments, plots, tabular data, and
+machine-learning models. Intermediate Python is recommended when your data or ML
+work grows into a larger software project.
+
+::: {.concept-diagram}
+Required links use solid arrows. The dotted arrow is a recommendation rather
+than a gate.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  F[Python Foundations]
+  I[Intermediate Python:<br/>Reliable Applications]
+  A[Advanced Python Engineering]
+  S[Scientific Computing<br/>with Python]
+  M[Data Science and Machine Learning<br/>with Python]
+  F --> I --> A
+  F --> S --> M
+  I -. recommended .-> M
+```
+
+:::
+
+## Readiness guide
+
+| If you can already... | Consider starting with... |
+|---|---|
+| Write small programs with conditions, loops, collections, and functions | Intermediate Python or Scientific Computing |
+| Organize projects, use environments, test code, and work with classes | Advanced Python Engineering |
+| Use NumPy arrays, make plots, and explain a numerical experiment | Data Science and Machine Learning |
+| Recognize some syntax but cannot yet explain or debug it confidently | Python Foundations |
+
+When uncertain, open a prerequisite course and try its module checkpoints. A
+short review is usually faster than struggling with missing foundations.
+
+[Browse all courses](../courses/index.qmd){.btn .btn-primary}

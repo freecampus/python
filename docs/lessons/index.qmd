@@ -1,147 +1,102 @@
 ---
-title: Lesson Path
-description: Recommended path through the FreeCampus Python course.
+title: Lesson Library
+description: Compatibility page for the former single-course lesson path.
 execute:
   echo: true
-categories: [course]
+categories: [course-guide]
 order: 10
 colab_notebook: "notebooks/lessons/index.ipynb"
 page-layout: full
+sidebar: false
 toc: false
 body-classes: course-hub
-listing:
-  - id: course-catalog
-    contents: "*/index.qmd"
-    sort: "order"
-    template: _listings/course-card.ejs.md
-    fields: [title, description, order]
-    filter-ui: false
-    sort-ui: false
 ---
 {{< include _includes/colab-link.qmd >}}
 
-## Choose a learning path
+## The curriculum is now organized as courses
 
-If you are new to programming, follow the lessons in order. If you already know
-some Python, use the quizzes, debugging corners, and challenges to decide where
-to start.
+The lesson URLs have not changed, but the former 14-chapter path is now divided
+into five focused courses with explicit prerequisites.
 
-::: {.callout-tip title="Key idea"}
-Programming is not memorizing every command. Programming is learning how to
-break a problem into small steps, run experiments, read feedback, and improve.
+[Open the course catalog](../courses/index.qmd){.btn .btn-primary}
+[Compare the pathways](../pathways/index.qmd){.btn .btn-outline-primary}
+
+::: {.course-grid}
+::: {.course-card}
+### [Python Foundations](../courses/python-foundations/index.qmd)
+
+Getting Started, Core Python, Data Structures, Functions, and Debugging.
 :::
 
-::: {.fc-catalog-tools}
-```{=html}
-<div class="fc-catalog-search-wrap">
-  <span aria-hidden="true">⌕</span>
-  <label class="visually-hidden" for="fc-catalog-search">Search the course</label>
-  <input
-    id="fc-catalog-search"
-    type="search"
-    placeholder="Search topics, tools, or outcomes..."
-    autocomplete="off"
-    data-fc-catalog-search
-  >
-</div>
+::: {.course-card}
+### [Intermediate Python](../courses/intermediate-python/index.qmd)
 
-<div class="fc-stage-filters" role="group" aria-label="Filter by learning stage">
-  <button class="is-active" type="button" data-fc-stage="all" aria-pressed="true">All paths</button>
-  <button type="button" data-fc-stage="start" aria-pressed="false">Start here</button>
-  <button type="button" data-fc-stage="foundations" aria-pressed="false">Foundations</button>
-  <button type="button" data-fc-stage="build" aria-pressed="false">Build</button>
-  <button type="button" data-fc-stage="deeper" aria-pressed="false">Go deeper</button>
-  <button type="button" data-fc-stage="data" aria-pressed="false">Data & AI</button>
-  <button type="button" data-fc-stage="project" aria-pressed="false">Project</button>
-  <button type="button" data-fc-stage="support" aria-pressed="false">Quick help</button>
-</div>
-
-<div class="fc-catalog-summary" aria-live="polite">
-  <span data-fc-catalog-count>15 paths</span>
-  <span>Your progress stays in this browser.</span>
-</div>
-```
+Files and Data, Projects and Environments, Code Quality, and Object-Oriented
+Python.
 :::
 
-::: {#course-catalog .fc-course-catalog data-fc-catalog=""}
+::: {.course-card}
+### [Advanced Python Engineering](../courses/advanced-python/index.qmd)
+
+Advanced patterns now, with deeper engineering modules planned.
 :::
 
-::: {.fc-empty-state data-fc-catalog-empty="" hidden=""}
-### No path matches that search
+::: {.course-card}
+### [Scientific Computing](../courses/scientific-python/index.qmd)
 
-Try a broader word such as `files`, `data`, `testing`, or `beginner`.
+NumPy, simulation, Matplotlib, SymPy, and SciPy.
+:::
+
+::: {.course-card}
+### [Data Science and Machine Learning](../courses/data-science-ml/index.qmd)
+
+Data workflows, visualization, model training, AI libraries, and responsible AI.
+:::
 :::
 
 <!-- fcpython-chapter-lab: start -->
 ## A practical study routine
 
-This chapter is about **the full course path**. Do not read it like a reference manual.
-Use it as a sequence of short labs. For each lesson, open the Colab notebook
-from the button above, run Example 1, write a prediction, and then
-change one small part of the code.
-
-By the end of the chapter, you should have one small artifact: a notebook, a
-script, a trace table, or a project note. The artifact should show one working
-example, one controlled variation, and one error or surprising result that you
-investigated calmly.
-
-If time is short, study one lesson deeply instead of skimming all of them.
-A deeply understood example is one you can run again, explain in plain
-language, modify safely, and debug when it breaks.
+For each lesson, predict the result, run the smallest example, explain what
+happened, change one thing, and use errors as evidence. Study one lesson deeply
+instead of skimming an entire course.
 <!-- fcpython-chapter-lab: end -->
 
-## Lesson pattern
-
-Lessons are intentionally **cohesive**, not microscopic. A topic like lists can
-include indexing, slicing, methods, and copying on one page because those ideas
-belong to one container. When a page has multiple sections, it can also include
-multiple OJS quizzes so students can check understanding before continuing.
-
-## Study routine for every lesson
-
-1. Read the analogy first.
-2. Predict what each short code example will do.
-3. Run it in Colab, Jupyter, or VS Code.
-4. Answer the section quiz.
-5. Review if needed before continuing.
-6. Change one small thing and run again.
-7. Explain the result in your own words.
-
-## Course checkpoint
+## Check your understanding
 
 ::: {.quiz-box}
-This OJS quiz checks whether you understand how to study the course.
+This checkpoint verifies that you understand the new course organization.
 :::
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "lesson-path-overview",
-  "title": "Lesson path overview checkpoint",
+  "id": "course-portfolio-overview",
+  "title": "Course portfolio checkpoint",
   "instructions": "Choose an answer, then check your work.",
   "questions": [
     {
-      "id": "lesson-size",
-      "prompt": "What is the current lesson organization principle?",
+      "id": "common-start",
+      "prompt": "Which course is the common starting point for both pathways?",
       "options": [
-        "One page per coherent learner topic, with multiple quizzes when useful.",
-        "One page for every tiny sub-skill.",
-        "One page for the entire course.",
-        "No quizzes until the capstone."
+        "Python Foundations",
+        "Advanced Python Engineering",
+        "Data Science and Machine Learning",
+        "The Project Toolkit"
       ],
       "answer_index": 0,
-      "explanation": "Related sub-skills should live together when they form one concept, such as lists."
+      "explanation": "Python Foundations supplies the core programming skills required by both pathways."
     },
     {
-      "id": "study-habit",
-      "prompt": "What should you do after each section quiz?",
+      "id": "course-switching",
+      "prompt": "Where should you compare course prerequisites before switching paths?",
       "options": [
-        "Review if uncertain, then move to the next section.",
-        "Skip all examples.",
-        "Delete your notes.",
-        "Change many lines at once."
+        "The course catalog and pathway guide",
+        "Only the final lesson",
+        "The Python error traceback",
+        "A generated notebook filename"
       ],
       "answer_index": 0,
-      "explanation": "Short review loops make the next section easier."
+      "explanation": "Course homes and the pathway guide state required and recommended prerequisites."
     }
   ]
 }

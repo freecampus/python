@@ -11,7 +11,11 @@ from types import ModuleType
 import pytest
 
 from fcpython.questions import MultipleChoiceQuestion, Quiz
-from fcpython.quiz_banks import values_variables_types_quiz
+from fcpython.quiz_banks import (
+    python_foundations_checkpoint_quizzes,
+    python_foundations_project_quiz,
+    values_variables_types_quiz,
+)
 from fcpython.widgets import quiz_summary, show_quiz
 
 
@@ -100,6 +104,37 @@ def test_lesson_ojs_quiz_config_matches_quiz_bank() -> None:
     assert lesson_payload == values_variables_types_quiz().to_dict()
 
 
+def _first_quiz_payload(path: Path) -> dict[str, object]:
+    match = re.search(
+        r'<script type="application/json" class="fcpython-ojs-quiz-config">'
+        r"\n(.*?)\n"
+        r"</script>",
+        path.read_text(),
+        flags=re.DOTALL,
+    )
+    assert match is not None
+    return json.loads(html.unescape(match.group(1)))
+
+
+def test_foundations_assessment_pages_match_quiz_banks() -> None:
+    quizzes = python_foundations_checkpoint_quizzes()
+    expected_modules = (
+        "getting-started",
+        "core-python",
+        "data-structures",
+        "functions",
+        "debugging",
+    )
+
+    assert len(quizzes) == len(expected_modules) == 5
+    for module, quiz in zip(expected_modules, quizzes, strict=True):
+        path = Path("docs/lessons") / module / "checkpoint.qmd"
+        assert _first_quiz_payload(path) == quiz.to_dict()
+
+    project = Path("docs/lessons/foundations-project/index.qmd")
+    assert _first_quiz_payload(project) == python_foundations_project_quiz().to_dict()
+
+
 def _lesson_pages() -> list[Path]:
     return sorted(
         path
@@ -114,7 +149,9 @@ def _content_lesson_pages() -> list[Path]:
         path
         for path in _lesson_pages()
         # FAQ entries are short standalone articles, not structured lessons.
-        if path.name not in skipped and "faq" not in path.parts
+        if path.name not in skipped
+        and "faq" not in path.parts
+        and "assessment_type:" not in _front_matter(path)
     ]
 
 
