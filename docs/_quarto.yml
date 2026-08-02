@@ -53,75 +53,135 @@ website:
       contents:
         - href: courses/python-foundations/index.qmd
           text: Overview
-        - section: "Unit 1: Programming Essentials"
+        - section: "Unit 1: Getting Started"
           contents:
-            - href: courses/python-foundations/units/programming-essentials/index.qmd
+            - href: courses/python-foundations/units/getting-started/index.qmd
               text: Overview
-            - courses/python-foundations/units/programming-essentials/what-is-programming.qmd
-            - courses/python-foundations/units/programming-essentials/google-colab.qmd
-            - courses/python-foundations/units/programming-essentials/local-python-tools.qmd
-            - courses/python-foundations/units/programming-essentials/values-variables-types.qmd
-            - courses/python-foundations/units/programming-essentials/strings-input-output.qmd
-            - courses/python-foundations/units/programming-essentials/booleans-and-conditionals.qmd
-            - courses/python-foundations/units/programming-essentials/indentation.qmd
-            - courses/python-foundations/units/programming-essentials/loops-and-tracing.qmd
-            - href: courses/python-foundations/units/programming-essentials/checkpoint.qmd
-              text: Unit checkpoint · required
-        - section: "Unit 2: Data and Reusable Logic"
+            - courses/python-foundations/units/getting-started/what-is-programming.qmd
+            - courses/python-foundations/units/getting-started/google-colab.qmd
+            - courses/python-foundations/units/getting-started/local-python-tools.qmd
+        - section: "Unit 2: Values, Types, and Input/Output"
           contents:
-            - href: courses/python-foundations/units/data-and-reusable-logic/index.qmd
+            - href: courses/python-foundations/units/values-types-input-output/index.qmd
               text: Overview
-            - courses/python-foundations/units/data-and-reusable-logic/lists.qmd
-            - courses/python-foundations/units/data-and-reusable-logic/tuples.qmd
-            - courses/python-foundations/units/data-and-reusable-logic/dictionaries.qmd
-            - courses/python-foundations/units/data-and-reusable-logic/sets.qmd
-            - courses/python-foundations/units/data-and-reusable-logic/nested-data.qmd
-            - courses/python-foundations/units/data-and-reusable-logic/function-basics.qmd
-            - courses/python-foundations/units/data-and-reusable-logic/function-contracts.qmd
-            - courses/python-foundations/units/data-and-reusable-logic/decomposition-and-testing.qmd
-            - href: courses/python-foundations/units/data-and-reusable-logic/checkpoint.qmd
-              text: Unit checkpoint · required
-        - section: "Unit 3: Debugging, Files, and Validation"
+            - courses/python-foundations/units/values-types-input-output/values-variables-types.qmd
+            - courses/python-foundations/units/values-types-input-output/strings-input-output.qmd
+        - section: "Unit 3: Control Flow"
           contents:
-            - href: courses/python-foundations/units/debugging-files-validation/index.qmd
+            - href: courses/python-foundations/units/control-flow/index.qmd
               text: Overview
-            - courses/python-foundations/units/debugging-files-validation/error-messages.qmd
-            - courses/python-foundations/units/debugging-files-validation/debugging-tools.qmd
-            - courses/python-foundations/units/debugging-files-validation/minimal-reproducible-examples.qmd
-            - courses/python-foundations/units/debugging-files-validation/paths-and-text-files.qmd
-            - courses/python-foundations/units/debugging-files-validation/structured-files.qmd
-            - courses/python-foundations/units/debugging-files-validation/exceptions-and-validation.qmd
-            - href: courses/python-foundations/units/debugging-files-validation/checkpoint.qmd
-              text: Unit checkpoint · required
-        - section: "Unit 4: Building Reliable Python Projects"
+            - courses/python-foundations/units/control-flow/booleans-and-conditionals.qmd
+            - courses/python-foundations/units/control-flow/indentation.qmd
+            - courses/python-foundations/units/control-flow/loops-and-tracing.qmd
+        - href: courses/python-foundations/milestones/core-programming.qmd
+          text: Milestone 1 checkpoint · required
+        - section: "Unit 4: Data Structures"
           contents:
-            - href: courses/python-foundations/units/reliable-python-projects/index.qmd
+            - href: courses/python-foundations/units/data-structures/index.qmd
               text: Overview
-            - courses/python-foundations/units/reliable-python-projects/modules-and-packages.qmd
-            - courses/python-foundations/units/reliable-python-projects/environments-and-dependencies.qmd
-            - courses/python-foundations/units/reliable-python-projects/command-line-programs.qmd
-            - courses/python-foundations/units/reliable-python-projects/project-layout.qmd
-            - courses/python-foundations/units/reliable-python-projects/testing-with-pytest.qmd
-            - courses/python-foundations/units/reliable-python-projects/style-formatting-and-linting.qmd
-            - courses/python-foundations/units/reliable-python-projects/type-checking.qmd
-            - courses/python-foundations/units/reliable-python-projects/pre-commit-and-ci.qmd
-            - href: courses/python-foundations/units/reliable-python-projects/checkpoint.qmd
-              text: Unit checkpoint · required
-        - section: "Unit 5: Abstraction and Reusable Patterns"
+            - courses/python-foundations/units/data-structures/lists.qmd
+            - courses/python-foundations/units/data-structures/tuples.qmd
+            - courses/python-foundations/units/data-structures/dictionaries.qmd
+            - courses/python-foundations/units/data-structures/sets.qmd
+            - courses/python-foundations/units/data-structures/nested-data.qmd
+        - section: "Unit 5: Functions"
           contents:
-            - href: courses/python-foundations/units/abstraction-and-reusable-patterns/index.qmd
+            - href: courses/python-foundations/units/functions/index.qmd
               text: Overview
-            - courses/python-foundations/units/abstraction-and-reusable-patterns/oop-basics.qmd
-            - courses/python-foundations/units/abstraction-and-reusable-patterns/dataclasses.qmd
-            - courses/python-foundations/units/abstraction-and-reusable-patterns/oop-design.qmd
-            - courses/python-foundations/units/abstraction-and-reusable-patterns/comprehensions.qmd
-            - courses/python-foundations/units/abstraction-and-reusable-patterns/iterables-and-generators.qmd
-            - courses/python-foundations/units/abstraction-and-reusable-patterns/decorators.qmd
-            - courses/python-foundations/units/abstraction-and-reusable-patterns/context-managers.qmd
-            - courses/python-foundations/units/abstraction-and-reusable-patterns/logging-and-configuration.qmd
-            - href: courses/python-foundations/units/abstraction-and-reusable-patterns/checkpoint.qmd
-              text: Unit checkpoint · required
-        - section: "Unit 6: Python Foundations Project"
+            - courses/python-foundations/units/functions/function-basics.qmd
+            - courses/python-foundations/units/functions/function-contracts.qmd
+            - courses/python-foundations/units/functions/function-decomposition-and-checks.qmd
+        - href: courses/python-foundations/milestones/data-and-functions.qmd
+          text: Milestone 2 checkpoint · required
+        - section: "Unit 6: Debugging"
+          contents:
+            - href: courses/python-foundations/units/debugging/index.qmd
+              text: Overview
+            - courses/python-foundations/units/debugging/error-messages.qmd
+            - courses/python-foundations/units/debugging/debugging-tools.qmd
+            - courses/python-foundations/units/debugging/minimal-reproducible-examples.qmd
+        - section: "Unit 7: Files and Structured Data"
+          contents:
+            - href: courses/python-foundations/units/files/index.qmd
+              text: Overview
+            - courses/python-foundations/units/files/paths-and-text-files.qmd
+            - courses/python-foundations/units/files/structured-files.qmd
+        - section: "Unit 8: Error Handling and Validation"
+          contents:
+            - href: courses/python-foundations/units/error-handling-and-validation/index.qmd
+              text: Overview
+            - courses/python-foundations/units/error-handling-and-validation/exceptions-and-validation.qmd
+        - href: courses/python-foundations/milestones/debugging-and-data-boundaries.qmd
+          text: Milestone 3 checkpoint · required
+        - section: "Unit 9: Modules and Packages"
+          contents:
+            - href: courses/python-foundations/units/modules-and-packages/index.qmd
+              text: Overview
+            - courses/python-foundations/units/modules-and-packages/modules-and-packages.qmd
+        - section: "Unit 10: Project Structure"
+          contents:
+            - href: courses/python-foundations/units/project-structure/index.qmd
+              text: Overview
+            - courses/python-foundations/units/project-structure/project-layout.qmd
+        - section: "Unit 11: Environments and Dependencies"
+          contents:
+            - href: courses/python-foundations/units/environments-and-dependencies/index.qmd
+              text: Overview
+            - courses/python-foundations/units/environments-and-dependencies/environments-and-dependencies.qmd
+        - section: "Unit 12: Command-Line Programs"
+          contents:
+            - href: courses/python-foundations/units/command-line-programs/index.qmd
+              text: Overview
+            - courses/python-foundations/units/command-line-programs/command-line-programs.qmd
+        - section: "Unit 13: Testing"
+          contents:
+            - href: courses/python-foundations/units/testing/index.qmd
+              text: Overview
+            - courses/python-foundations/units/testing/testing-with-pytest.qmd
+        - section: "Unit 14: Code Style and Linting"
+          contents:
+            - href: courses/python-foundations/units/code-style-and-linting/index.qmd
+              text: Overview
+            - courses/python-foundations/units/code-style-and-linting/style-formatting-and-linting.qmd
+        - section: "Unit 15: Typing"
+          contents:
+            - href: courses/python-foundations/units/typing/index.qmd
+              text: Overview
+            - courses/python-foundations/units/typing/type-checking.qmd
+        - section: "Unit 16: Automation and CI"
+          contents:
+            - href: courses/python-foundations/units/automation-and-ci/index.qmd
+              text: Overview
+            - courses/python-foundations/units/automation-and-ci/pre-commit-and-ci.qmd
+        - href: courses/python-foundations/milestones/reliable-projects.qmd
+          text: Milestone 4 checkpoint · required
+        - section: "Unit 17: Object-Oriented Programming"
+          contents:
+            - href: courses/python-foundations/units/object-oriented-programming/index.qmd
+              text: Overview
+            - courses/python-foundations/units/object-oriented-programming/oop-basics.qmd
+            - courses/python-foundations/units/object-oriented-programming/dataclasses.qmd
+            - courses/python-foundations/units/object-oriented-programming/oop-design.qmd
+        - section: "Unit 18: Comprehensions and Iteration"
+          contents:
+            - href: courses/python-foundations/units/comprehensions-and-iteration/index.qmd
+              text: Overview
+            - courses/python-foundations/units/comprehensions-and-iteration/comprehensions.qmd
+            - courses/python-foundations/units/comprehensions-and-iteration/iterables-and-generators.qmd
+        - section: "Unit 19: Decorators and Context Managers"
+          contents:
+            - href: courses/python-foundations/units/decorators-and-context-managers/index.qmd
+              text: Overview
+            - courses/python-foundations/units/decorators-and-context-managers/decorators.qmd
+            - courses/python-foundations/units/decorators-and-context-managers/context-managers.qmd
+        - section: "Unit 20: Logging and Configuration"
+          contents:
+            - href: courses/python-foundations/units/logging-and-configuration/index.qmd
+              text: Overview
+            - courses/python-foundations/units/logging-and-configuration/logging-and-configuration.qmd
+        - href: courses/python-foundations/milestones/abstractions-and-application-patterns.qmd
+          text: Milestone 5 checkpoint · required
+        - section: "Unit 21: Python Foundations Project"
           contents:
             - href: courses/python-foundations/project/index.qmd
               text: Final project · required

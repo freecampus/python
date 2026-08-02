@@ -12,8 +12,8 @@ import pytest
 
 from fcpython.questions import MultipleChoiceQuestion, Quiz
 from fcpython.quiz_banks import (
+    python_foundations_milestone_checkpoint_quizzes,
     python_foundations_project_quiz,
-    python_foundations_unit_checkpoint_quizzes,
     values_variables_types_quiz,
 )
 from fcpython.widgets import quiz_summary, show_quiz
@@ -94,7 +94,7 @@ def test_show_quiz_returns_widget_container() -> None:
 
 def test_lesson_ojs_quiz_config_matches_quiz_bank() -> None:
     lesson_path = (
-        FOUNDATIONS_ROOT / "units/programming-essentials/values-variables-types.qmd"
+        FOUNDATIONS_ROOT / "units/values-types-input-output/values-variables-types.qmd"
     )
     lesson = lesson_path.read_text()
     match = re.search(
@@ -123,18 +123,18 @@ def _first_quiz_payload(path: Path) -> dict[str, object]:
 
 
 def test_foundations_assessment_pages_match_quiz_banks() -> None:
-    quizzes = python_foundations_unit_checkpoint_quizzes()
-    expected_units = (
-        "programming-essentials",
-        "data-and-reusable-logic",
-        "debugging-files-validation",
-        "reliable-python-projects",
-        "abstraction-and-reusable-patterns",
+    quizzes = python_foundations_milestone_checkpoint_quizzes()
+    expected_milestones = (
+        "core-programming",
+        "data-and-functions",
+        "debugging-and-data-boundaries",
+        "reliable-projects",
+        "abstractions-and-application-patterns",
     )
 
-    assert len(quizzes) == len(expected_units) == 5
-    for unit, quiz in zip(expected_units, quizzes, strict=True):
-        path = FOUNDATIONS_ROOT / "units" / unit / "checkpoint.qmd"
+    assert len(quizzes) == len(expected_milestones) == 5
+    for milestone, quiz in zip(expected_milestones, quizzes, strict=True):
+        path = FOUNDATIONS_ROOT / "milestones" / f"{milestone}.qmd"
         assert _first_quiz_payload(path) == quiz.to_dict()
 
     project = FOUNDATIONS_ROOT / "project/index.qmd"
@@ -341,7 +341,9 @@ def test_colab_notebook_paths_are_unique_and_follow_course_structure() -> None:
 
 
 def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
-    path = FOUNDATIONS_ROOT / "units/programming-essentials/values-variables-types.qmd"
+    path = (
+        FOUNDATIONS_ROOT / "units/values-types-input-output/values-variables-types.qmd"
+    )
     notebook = notebook_builder.qmd_to_notebook(path)
     code_sources = [
         "".join(cell["source"])
@@ -356,11 +358,11 @@ def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
 def test_build_colab_notebooks_writes_expected_files(tmp_path: Path) -> None:
     written = notebook_builder.build_notebooks(output_root=tmp_path)
     expected = (
-        tmp_path / "courses/python-foundations/units/programming-essentials/"
+        tmp_path / "courses/python-foundations/units/values-types-input-output/"
         "values-variables-types.ipynb"
     )
 
-    assert len(written) == 78
+    assert len(written) == 93
     assert expected in written
     assert tmp_path / "lessons/index.ipynb" in written
     payload = json.loads(expected.read_text())
@@ -413,16 +415,16 @@ def test_lessons_use_clean_numbered_section_headings() -> None:
 
 def test_selected_lessons_include_mermaid_diagrams() -> None:
     expected = {
-        FOUNDATIONS_ROOT / "units/programming-essentials/values-variables-types.qmd",
-        FOUNDATIONS_ROOT / "units/programming-essentials/booleans-and-conditionals.qmd",
-        FOUNDATIONS_ROOT / "units/programming-essentials/loops-and-tracing.qmd",
-        FOUNDATIONS_ROOT / "units/data-and-reusable-logic/function-basics.qmd",
-        FOUNDATIONS_ROOT / "units/data-and-reusable-logic/lists.qmd",
-        FOUNDATIONS_ROOT / "units/data-and-reusable-logic/dictionaries.qmd",
-        FOUNDATIONS_ROOT / "units/data-and-reusable-logic/nested-data.qmd",
-        FOUNDATIONS_ROOT / "units/debugging-files-validation/error-messages.qmd",
+        FOUNDATIONS_ROOT / "units/values-types-input-output/values-variables-types.qmd",
+        FOUNDATIONS_ROOT / "units/control-flow/booleans-and-conditionals.qmd",
+        FOUNDATIONS_ROOT / "units/control-flow/loops-and-tracing.qmd",
+        FOUNDATIONS_ROOT / "units/functions/function-basics.qmd",
+        FOUNDATIONS_ROOT / "units/data-structures/lists.qmd",
+        FOUNDATIONS_ROOT / "units/data-structures/dictionaries.qmd",
+        FOUNDATIONS_ROOT / "units/data-structures/nested-data.qmd",
+        FOUNDATIONS_ROOT / "units/debugging/error-messages.qmd",
         FOUNDATIONS_ROOT
-        / "units/reliable-python-projects/environments-and-dependencies.qmd",
+        / "units/environments-and-dependencies/environments-and-dependencies.qmd",
         DATA_ML_ROOT / "machine-learning-ai/training-and-evaluation.qmd",
     }
 

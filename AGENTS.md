@@ -85,7 +85,7 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   be used by Quarto listings without rebuilding the course map by hand.
 - Lesson front matter should also include `colab_notebook` pointing to the
   generated notebook path, for example
-  `notebooks/courses/python-foundations/units/programming-essentials/values-variables-types.ipynb`.
+  `notebooks/courses/python-foundations/units/values-types-input-output/values-variables-types.ipynb`.
 - Prefer analogies, small examples, debugging corners, hidden solution paths,
   and references over long abstract explanations.
 - Prefer Quarto callouts for standard teaching boxes, such as key ideas,

@@ -1,15 +1,18 @@
 ---
-title: "Python Foundations Project"
-description: "Build, test, and explain a file-backed study tracker using the complete Foundations pathway."
-project_id: "python-foundations-project"
+title: Python Foundations Project
+description: Build, test, and explain a file-backed study tracker using the complete Foundations pathway.
+project_id: python-foundations-project
 assessment_type: course-project
 assessment_version: 2
 rubric_version: 2
 required_for_completion: true
-completion_label: "Required project"
-categories: [python-foundations, project, assessment]
-order: 600
-colab_notebook: "notebooks/courses/python-foundations/project/index.ipynb"
+completion_label: Required project
+categories:
+- python-foundations
+- project
+- assessment
+order: 2100
+colab_notebook: notebooks/courses/python-foundations/project/index.ipynb
 ---
 
 ::: {.lesson-meta .project-meta}
@@ -163,11 +166,11 @@ not required.
 | Criterion | Not yet | Meets the requirement | Strong evidence |
 |---|---|---|---|
 | Working behavior | The project cannot be run from a clean start or gives incorrect summaries. | The documented CLI adds, reloads, filters, and summarizes the predicted sessions correctly. | Additional valid datasets and boundary cases are demonstrated. |
-| Programming essentials | Important values, branches, loops, or output cannot be explained. | Names, types, conditions, iteration, and output are correct and connected to predictions. | Both valid and invalid paths have trace evidence. |
-| Data and reusable logic | Data shapes or calculation boundaries are unclear. | Collections fit their jobs and focused functions or methods have explicit inputs, results, and contracts. | One reasonable alternative is compared with the chosen design. |
-| Debugging, files, and validation | File failures are hidden or invalid records spread through calculations. | Context-managed JSON access, boundary validation, clear handled errors, and one complete debugging record are present. | The failure is reduced to a minimal reproducible example. |
-| Reliable project workflow | Setup depends on undocumented local state or quality checks are missing. | Layout, dependencies, CLI, pytest, formatting, linting, typing, pre-commit, and CI commands are reproducible. | A second clean environment reproduces the workflow. |
-| Abstraction and patterns | Classes or patterns are copied without a clear purpose. | The dataclass, composed tracker, filtered iteration, configuration, and logging each have a stated responsibility. | A simpler alternative is implemented briefly and compared. |
+| Core programming | Important values, branches, loops, or output cannot be explained. | Names, types, conditions, iteration, and output are correct and connected to predictions. | Both valid and invalid paths have trace evidence. |
+| Data structures and functions | Data shapes or calculation boundaries are unclear. | Collections fit their jobs and focused functions or methods have explicit inputs, results, and contracts. | One reasonable alternative is compared with the chosen design. |
+| Debugging and data boundaries | File failures are hidden or invalid records spread through calculations. | Context-managed JSON access, boundary validation, clear handled errors, and one complete debugging record are present. | The failure is reduced to a minimal reproducible example. |
+| Reliable Python projects | Setup depends on undocumented local state or quality checks are missing. | Layout, dependencies, CLI, pytest, formatting, linting, typing, pre-commit, and CI commands are reproducible. | A second clean environment reproduces the workflow. |
+| Abstractions and application patterns | Classes or patterns are copied without a clear purpose. | The dataclass, composed tracker, filtered iteration, configuration, and logging each have a stated responsibility. | A simpler alternative is implemented briefly and compared. |
 | Tests and modification | Only one successful run exists or a small change breaks unexplained behavior. | Focused tests cover calculations and invalid input; one controlled modification is predicted and verified. | Tests also protect file and CLI boundaries. |
 | Explanation and documentation | Another learner cannot install, run, or understand the project. | The README, example output, line-by-line explanation, limitations, and next step are complete. | Design trade-offs cite evidence from tests or debugging. |
 

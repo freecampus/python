@@ -2,8 +2,8 @@
   (() => {
     "use strict";
 
-    const progressKey = "fcpython.progress.v3";
-    const lastLessonKey = "fcpython.last-lesson.v3";
+    const progressKey = "fcpython.progress.v4";
+    const lastLessonKey = "fcpython.last-lesson.v4";
 
     function readJson(key, fallback) {
       try {
@@ -58,19 +58,32 @@
       const unitLesson =
         parts[0] === "courses" && parts[2] === "units" && parts.length >= 5;
       const directCourseLesson =
-        parts[0] === "courses" && parts[2] !== "units" && parts.length >= 4;
+        parts[0] === "courses" &&
+        !["milestones", "units"].includes(parts[2]) &&
+        parts.length >= 4;
       return (unitLesson || directCourseLesson) && !isCheckpointKey(key);
     }
 
     function isCheckpointKey(key) {
-      return key.startsWith("courses/") && key.endsWith("/checkpoint");
+      const parts = key.split("/");
+      const milestoneCheckpoint =
+        parts[0] === "courses" &&
+        parts[2] === "milestones" &&
+        parts.length === 4;
+      return (
+        milestoneCheckpoint ||
+        (key.startsWith("courses/") && key.endsWith("/checkpoint"))
+      );
     }
 
     function checkpointIdFromKey(key) {
       if (!isCheckpointKey(key)) {
         return "";
       }
-      return key.split("/").at(-2) || "";
+      const parts = key.split("/");
+      return parts[2] === "milestones"
+        ? parts.at(-1) || ""
+        : parts.at(-2) || "";
     }
 
     function isProjectKey(key) {
@@ -88,12 +101,12 @@
     }
 
     function emptyProgress() {
-      return { schema_version: 3, courses: {} };
+      return { schema_version: 4, courses: {} };
     }
 
     function readProgress() {
       const saved = readJson(progressKey, null);
-      if (!saved || saved.schema_version !== 3 || !saved.courses) {
+      if (!saved || saved.schema_version !== 4 || !saved.courses) {
         return emptyProgress();
       }
       return saved;
@@ -131,8 +144,8 @@
       }
       if (!progress.courses[id] && create) {
         progress.courses[id] = {
-          curriculum_version: 2,
-          completion_rule_version: 2,
+          curriculum_version: 3,
+          completion_rule_version: 3,
           completed_lessons: {},
           completed_checkpoints: {},
           capstone_status: "not_started",
@@ -143,8 +156,8 @@
       }
       const state = progress.courses[id] || null;
       if (state) {
-        state.curriculum_version = state.curriculum_version || 2;
-        state.completion_rule_version = state.completion_rule_version || 2;
+        state.curriculum_version = state.curriculum_version || 3;
+        state.completion_rule_version = state.completion_rule_version || 3;
         state.completed_lessons = state.completed_lessons || {};
         state.completed_checkpoints = state.completed_checkpoints || {};
         state.capstone_status = state.capstone_status || "not_started";
@@ -324,7 +337,7 @@
           unit.position + 1
         } of ${unit.lessonLinks.length}`;
       } else if (position && checkpointId) {
-        position.textContent = `${unit.label || "Unit"} · Required checkpoint`;
+        position.textContent = "Required milestone checkpoint";
       } else if (position && projectId) {
         position.textContent = "Required course project";
       }
@@ -511,7 +524,7 @@
       }
 
       const saved = readJson(lastLessonKey, {
-        schema_version: 3,
+        schema_version: 4,
         global: null,
         courses: {},
       });
@@ -523,7 +536,7 @@
           document.querySelector("h1.title")?.textContent.trim() ||
           document.title,
       };
-      saved.schema_version = 3;
+      saved.schema_version = 4;
       saved.global = lesson;
       saved.courses = saved.courses || {};
       saved.courses[courseId] = lesson;

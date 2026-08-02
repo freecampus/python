@@ -12,55 +12,55 @@ course_level: Beginner
 course_status: available
 course_status_label: Available
 course_pathway: both
-course_keywords: beginner colab local python control flow collections functions debugging files projects environments testing typing oop generators decorators
+course_keywords: beginner colab values control flow data structures functions debugging files errors modules packages projects environments cli testing linting typing ci oop generators decorators context managers logging configuration
 lesson_count: 38
 required_lesson_count: 38
 optional_lesson_count: 0
 required_lesson_ids:
-- programming-essentials.what-is-programming
-- programming-essentials.google-colab
-- programming-essentials.local-python-tools
-- programming-essentials.values-variables-types
-- programming-essentials.strings-input-output
-- programming-essentials.booleans-and-conditionals
-- programming-essentials.indentation
-- programming-essentials.loops-and-tracing
-- data-and-reusable-logic.lists
-- data-and-reusable-logic.tuples
-- data-and-reusable-logic.dictionaries
-- data-and-reusable-logic.sets
-- data-and-reusable-logic.nested-data
-- data-and-reusable-logic.function-basics
-- data-and-reusable-logic.function-contracts
-- data-and-reusable-logic.decomposition-and-testing
-- debugging-files-validation.error-messages
-- debugging-files-validation.debugging-tools
-- debugging-files-validation.minimal-reproducible-examples
-- debugging-files-validation.paths-and-text-files
-- debugging-files-validation.structured-files
-- debugging-files-validation.exceptions-and-validation
-- reliable-python-projects.modules-and-packages
-- reliable-python-projects.environments-and-dependencies
-- reliable-python-projects.command-line-programs
-- reliable-python-projects.project-layout
-- reliable-python-projects.testing-with-pytest
-- reliable-python-projects.style-formatting-and-linting
-- reliable-python-projects.type-checking
-- reliable-python-projects.pre-commit-and-ci
-- abstraction-and-reusable-patterns.oop-basics
-- abstraction-and-reusable-patterns.dataclasses
-- abstraction-and-reusable-patterns.oop-design
-- abstraction-and-reusable-patterns.comprehensions
-- abstraction-and-reusable-patterns.iterables-and-generators
-- abstraction-and-reusable-patterns.decorators
-- abstraction-and-reusable-patterns.context-managers
-- abstraction-and-reusable-patterns.logging-and-configuration
+- getting-started.what-is-programming
+- getting-started.google-colab
+- getting-started.local-python-tools
+- values-types-input-output.values-variables-types
+- values-types-input-output.strings-input-output
+- control-flow.booleans-and-conditionals
+- control-flow.indentation
+- control-flow.loops-and-tracing
+- data-structures.lists
+- data-structures.tuples
+- data-structures.dictionaries
+- data-structures.sets
+- data-structures.nested-data
+- functions.function-basics
+- functions.function-contracts
+- functions.function-decomposition-and-checks
+- debugging.error-messages
+- debugging.debugging-tools
+- debugging.minimal-reproducible-examples
+- files.paths-and-text-files
+- files.structured-files
+- error-handling-and-validation.exceptions-and-validation
+- modules-and-packages.modules-and-packages
+- project-structure.project-layout
+- environments-and-dependencies.environments-and-dependencies
+- command-line-programs.command-line-programs
+- testing.testing-with-pytest
+- code-style-and-linting.style-formatting-and-linting
+- typing.type-checking
+- automation-and-ci.pre-commit-and-ci
+- object-oriented-programming.oop-basics
+- object-oriented-programming.dataclasses
+- object-oriented-programming.oop-design
+- comprehensions-and-iteration.comprehensions
+- comprehensions-and-iteration.iterables-and-generators
+- decorators-and-context-managers.decorators
+- decorators-and-context-managers.context-managers
+- logging-and-configuration.logging-and-configuration
 checkpoint_ids:
-- programming-essentials
-- data-and-reusable-logic
-- debugging-files-validation
-- reliable-python-projects
-- abstraction-and-reusable-patterns
+- core-programming
+- data-and-functions
+- debugging-and-data-boundaries
+- reliable-projects
+- abstractions-and-application-patterns
 project_required: true
 estimated_effort: 38–55 hours
 prerequisite_label: None
@@ -77,9 +77,9 @@ body-classes: course-home course-foundations
 
 ::: {.fc-course-intro}
 ::: {.callout-tip title="Start here if programming is new to you"}
-This course assumes no programming experience. Begin in Google Colab, then
-learn what local Python tools provide before the project workflow needs them.
-Every lesson is part of the required pathway.
+This course assumes no programming experience. Begin in Google Colab, learn
+what local Python tools provide, and progress through one focused concept at a
+time. Every lesson is part of the required pathway.
 :::
 
 ```{=html}
@@ -88,8 +88,8 @@ Every lesson is part of the required pathway.
   data-fc-course-overview
   data-course-id="python-foundations"
   data-course-total="38"
-  data-course-required-ids="programming-essentials.what-is-programming programming-essentials.google-colab programming-essentials.local-python-tools programming-essentials.values-variables-types programming-essentials.strings-input-output programming-essentials.booleans-and-conditionals programming-essentials.indentation programming-essentials.loops-and-tracing data-and-reusable-logic.lists data-and-reusable-logic.tuples data-and-reusable-logic.dictionaries data-and-reusable-logic.sets data-and-reusable-logic.nested-data data-and-reusable-logic.function-basics data-and-reusable-logic.function-contracts data-and-reusable-logic.decomposition-and-testing debugging-files-validation.error-messages debugging-files-validation.debugging-tools debugging-files-validation.minimal-reproducible-examples debugging-files-validation.paths-and-text-files debugging-files-validation.structured-files debugging-files-validation.exceptions-and-validation reliable-python-projects.modules-and-packages reliable-python-projects.environments-and-dependencies reliable-python-projects.command-line-programs reliable-python-projects.project-layout reliable-python-projects.testing-with-pytest reliable-python-projects.style-formatting-and-linting reliable-python-projects.type-checking reliable-python-projects.pre-commit-and-ci abstraction-and-reusable-patterns.oop-basics abstraction-and-reusable-patterns.dataclasses abstraction-and-reusable-patterns.oop-design abstraction-and-reusable-patterns.comprehensions abstraction-and-reusable-patterns.iterables-and-generators abstraction-and-reusable-patterns.decorators abstraction-and-reusable-patterns.context-managers abstraction-and-reusable-patterns.logging-and-configuration"
-  data-course-checkpoint-ids="programming-essentials data-and-reusable-logic debugging-files-validation reliable-python-projects abstraction-and-reusable-patterns"
+  data-course-required-ids="getting-started.what-is-programming getting-started.google-colab getting-started.local-python-tools values-types-input-output.values-variables-types values-types-input-output.strings-input-output control-flow.booleans-and-conditionals control-flow.indentation control-flow.loops-and-tracing data-structures.lists data-structures.tuples data-structures.dictionaries data-structures.sets data-structures.nested-data functions.function-basics functions.function-contracts functions.function-decomposition-and-checks debugging.error-messages debugging.debugging-tools debugging.minimal-reproducible-examples files.paths-and-text-files files.structured-files error-handling-and-validation.exceptions-and-validation modules-and-packages.modules-and-packages project-structure.project-layout environments-and-dependencies.environments-and-dependencies command-line-programs.command-line-programs testing.testing-with-pytest code-style-and-linting.style-formatting-and-linting typing.type-checking automation-and-ci.pre-commit-and-ci object-oriented-programming.oop-basics object-oriented-programming.dataclasses object-oriented-programming.oop-design comprehensions-and-iteration.comprehensions comprehensions-and-iteration.iterables-and-generators decorators-and-context-managers.decorators decorators-and-context-managers.context-managers logging-and-configuration.logging-and-configuration"
+  data-course-checkpoint-ids="core-programming data-and-functions debugging-and-data-boundaries reliable-projects abstractions-and-application-patterns"
   data-course-project-required="true"
 >
   <div><strong data-fc-course-progress-value>0%</strong><span>completion requirements met</span></div>
@@ -98,7 +98,7 @@ Every lesson is part of the required pathway.
   </div>
   <div class="fc-requirement-grid">
     <div><strong data-fc-required-lessons>0/38</strong><span>required lessons</span></div>
-    <div><strong data-fc-required-checkpoints>0/5</strong><span>unit checkpoints</span></div>
+    <div><strong data-fc-required-checkpoints>0/5</strong><span>milestone checkpoints</span></div>
     <div><strong data-fc-required-project>Not recorded</strong><span>Foundations project</span></div>
   </div>
   <span data-fc-course-progress-label>44 completion requirements remaining</span>
@@ -113,15 +113,15 @@ Every lesson is part of the required pathway.
 - **You are ready when:** you can use a web browser and are willing to predict,
   run, explain, and change small examples. No mathematics prerequisite is
   assumed.
-- **Practice setup:** start with generated Colab notebooks. The required Local
-  Python Tools lesson explains local workflows before units that use project
-  environments and command-line tools.
+- **Practice setup:** start with generated Colab notebooks. Unit 1 explains
+  local workflows before later project units use environments and command-line
+  tools.
 
 ::: {.callout-note title="Required does not mean install everything immediately"}
 Local Python Tools is required because every learner should understand the
-workflow and be able to choose a practice environment. You can complete its
+workflow and choose a practice environment deliberately. You can complete its
 browser-based comparisons before installing local software, then return to the
-setup steps when Unit 4 begins.
+setup steps when project-focused units begin.
 :::
 
 ## What you will be able to do
@@ -130,68 +130,89 @@ setup steps when Unit 4 begins.
 - choose data structures and function boundaries that make behavior explainable;
 - read tracebacks, reduce failures, validate input, and work safely with files;
 - organize a repeatable project with dependencies, a CLI, tests, typing, and CI;
-- use classes, generators, decorators, context managers, logging, and
+- use classes, iteration patterns, decorators, context managers, logging, and
   configuration when they improve the design;
-- build and defend a small complete Python project using evidence from tests,
-  output, explanations, and debugging records.
+- build and defend a complete Python project using tests, output, explanations,
+  and debugging evidence.
 
 ## Required learning sequence
 
-Python Foundations curriculum version 2 has five instructional units and one
-final-project unit. Complete them in order: later checkpoints deliberately reuse
-earlier skills.
+Python Foundations curriculum version 3 has **20 focused instructional units**,
+five milestone checkpoints, and **Unit 21**, the final project. Units stay small
+enough to name one coherent subject; milestone checkpoints ask you to integrate
+several neighboring units.
 
-::: {.course-grid}
-::: {.course-card}
-### 1. [Programming Essentials](units/programming-essentials/index.qmd)
+### Milestone 1: Core Programming
 
-Run Python deliberately; use values, text, decisions, indentation, loops, and tracing.
-:::
+| Unit | Focus |
+|---|---|
+| 1. [Getting Started](units/getting-started/index.qmd) | Choose a practice environment and run Python work reproducibly. |
+| 2. [Values, Types, and Input/Output](units/values-types-input-output/index.qmd) | Represent information with Python values and exchange text with a learner. |
+| 3. [Control Flow](units/control-flow/index.qmd) | Choose which instructions run, repeat work, and trace changing state. |
 
-::: {.course-card}
-### 2. [Data and Reusable Logic](units/data-and-reusable-logic/index.qmd)
+[Open Milestone 1: Core Programming](milestones/core-programming.qmd){.btn .btn-outline-primary}
 
-Choose useful collections and create focused, testable functions around structured data.
-:::
+### Milestone 2: Data and Functions
 
-::: {.course-card}
-### 3. [Debugging, Files, and Validation](units/debugging-files-validation/index.qmd)
+| Unit | Focus |
+|---|---|
+| 4. [Data Structures](units/data-structures/index.qmd) | Choose containers that match the relationships in your data. |
+| 5. [Functions](units/functions/index.qmd) | Give reusable behavior a clear input, result, contract, and check. |
 
-Investigate failures, work safely with external files, and validate incoming data.
-:::
+[Open Milestone 2: Data and Functions](milestones/data-and-functions.qmd){.btn .btn-outline-primary}
 
-::: {.course-card}
-### 4. [Building Reliable Python Projects](units/reliable-python-projects/index.qmd)
+### Milestone 3: Debugging and Data Boundaries
 
-Organize environments, modules, CLIs, tests, quality tools, and automation.
-:::
+| Unit | Focus |
+|---|---|
+| 6. [Debugging](units/debugging/index.qmd) | Investigate failures from evidence instead of changing code by guesswork. |
+| 7. [Files and Structured Data](units/files/index.qmd) | Move data safely between a Python program and external files. |
+| 8. [Error Handling and Validation](units/error-handling-and-validation/index.qmd) | Reject invalid input clearly and handle only failures the program understands. |
 
-::: {.course-card}
-### 5. [Abstraction and Reusable Patterns](units/abstraction-and-reusable-patterns/index.qmd)
+[Open Milestone 3: Debugging and Data Boundaries](milestones/debugging-and-data-boundaries.qmd){.btn .btn-outline-primary}
 
-Use OOP and reusable patterns when they make a program clearer and safer.
-:::
+### Milestone 4: Reliable Python Projects
 
-::: {.course-card}
-### 6. [Python Foundations Project](project/index.qmd)
+| Unit | Focus |
+|---|---|
+| 9. [Modules and Packages](units/modules-and-packages/index.qmd) | Split reusable Python code across importable files and package namespaces. |
+| 10. [Project Structure](units/project-structure/index.qmd) | Arrange source, tests, configuration, and documentation predictably. |
+| 11. [Environments and Dependencies](units/environments-and-dependencies/index.qmd) | Make a project runtime isolated and reproducible. |
+| 12. [Command-Line Programs](units/command-line-programs/index.qmd) | Turn a reusable program into a command with explicit arguments and output. |
+| 13. [Testing](units/testing/index.qmd) | Protect observable behavior with focused automated tests. |
+| 14. [Code Style and Linting](units/code-style-and-linting/index.qmd) | Use automated tools to make code consistent and reveal likely mistakes. |
+| 15. [Typing](units/typing/index.qmd) | Document value expectations and check them before runtime. |
+| 16. [Automation and CI](units/automation-and-ci/index.qmd) | Run the project quality agreement automatically before and after sharing changes. |
+
+[Open Milestone 4: Reliable Python Projects](milestones/reliable-projects.qmd){.btn .btn-outline-primary}
+
+### Milestone 5: Abstractions and Application Patterns
+
+| Unit | Focus |
+|---|---|
+| 17. [Object-Oriented Programming](units/object-oriented-programming/index.qmd) | Model cohesive state and behavior without hiding unnecessary complexity. |
+| 18. [Comprehensions and Iteration](units/comprehensions-and-iteration/index.qmd) | Express transformations clearly and produce sequences eagerly or lazily. |
+| 19. [Decorators and Context Managers](units/decorators-and-context-managers/index.qmd) | Apply reusable behavior around functions and resource lifecycles. |
+| 20. [Logging and Configuration](units/logging-and-configuration/index.qmd) | Separate operational evidence and settings from core program behavior. |
+
+[Open Milestone 5: Abstractions and Application Patterns](milestones/abstractions-and-application-patterns.qmd){.btn .btn-outline-primary}
+
+### Unit 21: [Python Foundations Project](project/index.qmd)
 
 Integrate the complete course in one small, explainable, tested project.
-:::
-:::
 
 ## Completion requirements and assessment
 
-Python Foundations curriculum version 2 is locally complete when you have:
+Python Foundations curriculum version 3 is locally complete when you have:
 
 1. completed all **38 required lessons**;
-2. recorded all **five required unit checkpoints** after meeting their knowledge
-   and practical thresholds;
+2. recorded all **five required milestone checkpoints** after meeting their
+   knowledge and practical thresholds;
 3. built the required [Python Foundations Project](project/index.qmd) and
    self-assessed every rubric row as **Meets the requirement**.
 
 Lesson quizzes remain formative and do not have a stored grade. There are no
-optional lessons in this course: the sequence is the published Foundations
-pathway, while extra exploration inside a lesson remains your choice.
+optional lessons in this course.
 
 ::: {.callout-important title="Local completion is not a verified certificate"}
 The completion dashboard is a private, self-reported browser record. It does not
@@ -202,9 +223,9 @@ certificate. A verifiable certificate remains planned as a separate service.
 ## Practice and next step
 
 Treat each lesson as a lab: predict, run, explain, modify, and keep evidence.
-Each unit checkpoint combines several lessons, and the final project connects
-all five instructional units.
+Each milestone checkpoint combines several focused concepts, and the final
+project connects all 20 instructional units.
 
-[Start Unit 1](units/programming-essentials/what-is-programming.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
+[Start Unit 1](units/getting-started/what-is-programming.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
 [Review the full pathway](../../pathways/index.qmd){.btn .btn-outline-primary}
 [Open the final project](project/index.qmd){.btn .btn-outline-primary}

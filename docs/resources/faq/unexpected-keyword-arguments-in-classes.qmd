@@ -587,7 +587,7 @@ workshop = Workshop(title="Python", level="intermediate")
 
 `Workshop(title="Python", difficulty="easy")` raises an unexpected keyword
 error because there is no field named `difficulty`. Add a real field or use the
-correct existing name. Continue with [Dataclasses](../../courses/python-foundations/units/abstraction-and-reusable-patterns/dataclasses.qmd)
+correct existing name. Continue with [Dataclasses](../../courses/python-foundations/units/object-oriented-programming/dataclasses.qmd)
 for deeper practice.
 
 ### A child class may replace its parent's initializer
@@ -620,7 +620,7 @@ class OnlineCourse(Course):
 
 Inheritance is a later topic, but the immediate debugging habit is the same:
 inspect the initializer that Python actually calls. See
-[Object-Oriented Design](../../courses/python-foundations/units/abstraction-and-reusable-patterns/oop-design.qmd) when you are
+[Object-Oriented Design](../../courses/python-foundations/units/object-oriented-programming/oop-design.qmd) when you are
 ready to study parent and child classes.
 
 ## A repeatable debugging routine
@@ -649,7 +649,7 @@ piece at a time until the mismatch returns.
 :::
 
 For a complete method of preparing code to share, use
-[Minimal Reproducible Examples](../../courses/python-foundations/units/debugging-files-validation/minimal-reproducible-examples.qmd).
+[Minimal Reproducible Examples](../../courses/python-foundations/units/debugging/minimal-reproducible-examples.qmd).
 
 ## Try three diagnoses in Colab
 
@@ -807,8 +807,8 @@ If active status does not belong in this class, remove it from the call instead.
   making broad changes.
 :::
 
-Continue with [Object-Oriented Basics](../../courses/python-foundations/units/abstraction-and-reusable-patterns/oop-basics.qmd)
+Continue with [Object-Oriented Basics](../../courses/python-foundations/units/object-oriented-programming/oop-basics.qmd)
 to practice classes, instances, attributes, methods, and `self` in a broader
-lesson. Use [Error Messages](../../courses/python-foundations/units/debugging-files-validation/error-messages.qmd) to study traceback
+lesson. Use [Error Messages](../../courses/python-foundations/units/debugging/error-messages.qmd) to study traceback
 reading in more detail.
 <!-- fcpython-faq-post: end -->

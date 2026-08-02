@@ -17,13 +17,13 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 - Python Foundations project and rubric:
   [`docs/courses/python-foundations/project/index.qmd`](docs/courses/python-foundations/project/index.qmd)
 - First lesson:
-  [`docs/courses/python-foundations/units/programming-essentials/what-is-programming.qmd`](docs/courses/python-foundations/units/programming-essentials/what-is-programming.qmd)
+  [`docs/courses/python-foundations/units/getting-started/what-is-programming.qmd`](docs/courses/python-foundations/units/getting-started/what-is-programming.qmd)
 - Google Colab:
-  [`docs/courses/python-foundations/units/programming-essentials/google-colab.qmd`](docs/courses/python-foundations/units/programming-essentials/google-colab.qmd)
+  [`docs/courses/python-foundations/units/getting-started/google-colab.qmd`](docs/courses/python-foundations/units/getting-started/google-colab.qmd)
 - Lists lesson:
-  [`docs/courses/python-foundations/units/data-and-reusable-logic/lists.qmd`](docs/courses/python-foundations/units/data-and-reusable-logic/lists.qmd)
+  [`docs/courses/python-foundations/units/data-structures/lists.qmd`](docs/courses/python-foundations/units/data-structures/lists.qmd)
 - Debugging reference:
-  [`docs/courses/python-foundations/units/debugging-files-validation/error-messages.qmd`](docs/courses/python-foundations/units/debugging-files-validation/error-messages.qmd)
+  [`docs/courses/python-foundations/units/debugging/error-messages.qmd`](docs/courses/python-foundations/units/debugging/error-messages.qmd)
 - Learner profiles:
   [`docs/resources/learner-profiles.qmd`](docs/resources/learner-profiles.qmd)
 - Instructor notes:
@@ -34,8 +34,9 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 
 ## Course portfolio
 
-1. **Python Foundations**: 38 required lessons in five instructional units, five
-   practical unit checkpoints, and a rubric-scored final project.
+1. **Python Foundations**: 38 required lessons in 20 concept-focused
+   instructional units, five milestone checkpoints, and a rubric-scored final
+   project.
 2. **Intermediate Python: Applied Problem Solving**: a challenge-based course
    focused on parsing, modeling, testing, refactoring, and explaining unfamiliar
    problems; curriculum TBD.
@@ -65,9 +66,9 @@ Cross-course material such as the FAQ and project toolkit lives under
 
 ### Python Foundations completion
 
-Python Foundations curriculum version 2 can be completed independently. The
-local completion rule requires all 38 lessons, all five unit checkpoints, and
-the Foundations project self-assessed against rubric version 2. Progress is
+Python Foundations curriculum version 3 can be completed independently. The
+local completion rule requires all 38 lessons, all five milestone checkpoints,
+and the Foundations project self-assessed against rubric version 2. Progress is
 stored in the learner's browser for convenience. It is self-reported and is not
 a verified certificate, identity record, or instructor grade.
 

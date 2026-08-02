@@ -62,11 +62,11 @@ def values_variables_types_quiz() -> Quiz:
     )
 
 
-def programming_essentials_checkpoint_quiz() -> Quiz:
-    """Return the Programming Essentials unit checkpoint."""
+def core_programming_milestone_quiz() -> Quiz:
+    """Return the Core Programming milestone checkpoint."""
     return Quiz(
-        id="foundations-programming-essentials-checkpoint",
-        title="Programming Essentials knowledge check",
+        id="foundations-core-programming-milestone",
+        title="Core Programming knowledge check",
         questions=(
             MultipleChoiceQuestion(
                 id="interpreter-role",
@@ -121,11 +121,11 @@ def programming_essentials_checkpoint_quiz() -> Quiz:
     )
 
 
-def data_and_reusable_logic_checkpoint_quiz() -> Quiz:
-    """Return the Data and Reusable Logic unit checkpoint."""
+def data_and_functions_milestone_quiz() -> Quiz:
+    """Return the Data and Functions milestone checkpoint."""
     return Quiz(
-        id="foundations-data-and-reusable-logic-checkpoint",
-        title="Data and Reusable Logic knowledge check",
+        id="foundations-data-and-functions-milestone",
+        title="Data and Functions knowledge check",
         questions=(
             MultipleChoiceQuestion(
                 id="container-choice",
@@ -185,11 +185,11 @@ def data_and_reusable_logic_checkpoint_quiz() -> Quiz:
     )
 
 
-def debugging_files_validation_checkpoint_quiz() -> Quiz:
-    """Return the Debugging, Files, and Validation unit checkpoint."""
+def debugging_and_data_boundaries_milestone_quiz() -> Quiz:
+    """Return the Debugging and Data Boundaries milestone checkpoint."""
     return Quiz(
-        id="foundations-debugging-files-validation-checkpoint",
-        title="Debugging, Files, and Validation knowledge check",
+        id="foundations-debugging-and-data-boundaries-milestone",
+        title="Debugging and Data Boundaries knowledge check",
         questions=(
             MultipleChoiceQuestion(
                 id="traceback-first-step",
@@ -255,11 +255,11 @@ def debugging_files_validation_checkpoint_quiz() -> Quiz:
     )
 
 
-def reliable_python_projects_checkpoint_quiz() -> Quiz:
-    """Return the Building Reliable Python Projects unit checkpoint."""
+def reliable_projects_milestone_quiz() -> Quiz:
+    """Return the Reliable Projects milestone checkpoint."""
     return Quiz(
-        id="foundations-reliable-python-projects-checkpoint",
-        title="Building Reliable Python Projects knowledge check",
+        id="foundations-reliable-projects-milestone",
+        title="Reliable Python Projects knowledge check",
         questions=(
             MultipleChoiceQuestion(
                 id="module-boundary",
@@ -325,11 +325,11 @@ def reliable_python_projects_checkpoint_quiz() -> Quiz:
     )
 
 
-def abstraction_and_patterns_checkpoint_quiz() -> Quiz:
-    """Return the Abstraction and Reusable Patterns unit checkpoint."""
+def abstractions_and_application_patterns_milestone_quiz() -> Quiz:
+    """Return the Abstractions and Application Patterns milestone checkpoint."""
     return Quiz(
-        id="foundations-abstraction-and-reusable-patterns-checkpoint",
-        title="Abstraction and Reusable Patterns knowledge check",
+        id="foundations-abstractions-and-application-patterns-milestone",
+        title="Abstractions and Application Patterns knowledge check",
         questions=(
             MultipleChoiceQuestion(
                 id="class-purpose",
@@ -395,14 +395,14 @@ def abstraction_and_patterns_checkpoint_quiz() -> Quiz:
     )
 
 
-def python_foundations_unit_checkpoint_quizzes() -> tuple[Quiz, ...]:
-    """Return the five required Python Foundations unit checkpoint quizzes."""
+def python_foundations_milestone_checkpoint_quizzes() -> tuple[Quiz, ...]:
+    """Return the five required Python Foundations milestone quizzes."""
     return (
-        programming_essentials_checkpoint_quiz(),
-        data_and_reusable_logic_checkpoint_quiz(),
-        debugging_files_validation_checkpoint_quiz(),
-        reliable_python_projects_checkpoint_quiz(),
-        abstraction_and_patterns_checkpoint_quiz(),
+        core_programming_milestone_quiz(),
+        data_and_functions_milestone_quiz(),
+        debugging_and_data_boundaries_milestone_quiz(),
+        reliable_projects_milestone_quiz(),
+        abstractions_and_application_patterns_milestone_quiz(),
     )
 
 
