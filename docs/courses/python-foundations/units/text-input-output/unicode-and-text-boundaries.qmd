@@ -1,0 +1,139 @@
+---
+title: Unicode and Text Boundaries
+lesson_id: text-input-output.unicode-and-text-boundaries
+lesson_order: 20
+description: Preserve human text when converting between strings, bytes, and files.
+execute:
+  echo: true
+categories:
+- python-foundations
+- text-input-output
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/text-input-output/unicode-and-text-boundaries.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Preserve human text when converting between strings, bytes, and files.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Python `str` values hold Unicode text; files and messages store bytes. An encoding translates between them. The character count and byte count can differ, and decoding with the wrong encoding can fail or corrupt data.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+message = "café ☕"
+raw = message.encode("utf-8")
+restored = raw.decode("utf-8")
+print(len(message), len(raw))
+print(restored == message)
+```
+
+### What Python does
+
+1. Encoding creates bytes for storage or transfer.
+2. UTF-8 may use several bytes for one character.
+3. Decoding with the same documented encoding restores the text.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This version is valid Python but does not satisfy the lesson's intended contract:
+
+```python
+raw = "São Paulo".encode("utf-8")
+print(raw.decode("ascii"))
+```
+
+A focused repair is:
+
+```python
+print(raw.decode("utf-8"))
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Compare the character and byte lengths of three scripts.
+2. Normalize two visually identical accented strings with `unicodedata.normalize`.
+3. Keep a raw display name and a normalized comparison key.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "text-input-output-unicode-and-text-boundaries",
+  "title": "Unicode and Text Boundaries checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "str",
+      "prompt": "What does `str` represent?",
+      "options": [
+        "Bytes",
+        "Only ASCII",
+        "Integers",
+        "Unicode text"
+      ],
+      "answer_index": 3,
+      "explanation": "Strings are Unicode text."
+    },
+    {
+      "id": "encode",
+      "prompt": "What type does `encode` return?",
+      "options": [
+        "bytes",
+        "str",
+        "list",
+        "dict"
+      ],
+      "answer_index": 0,
+      "explanation": "Encoding creates bytes."
+    },
+    {
+      "id": "source",
+      "prompt": "What should determine a decoding encoding?",
+      "options": [
+        "The font",
+        "The documented data source",
+        "The filename length",
+        "A random guess"
+      ],
+      "answer_index": 1,
+      "explanation": "The producer or format defines it."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

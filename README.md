@@ -14,14 +14,12 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 - Pathway guide: [`docs/pathways/index.qmd`](docs/pathways/index.qmd)
 - Python Foundations:
   [`docs/courses/python-foundations/index.qmd`](docs/courses/python-foundations/index.qmd)
-- Python Foundations project and rubric:
-  [`docs/courses/python-foundations/project/index.qmd`](docs/courses/python-foundations/project/index.qmd)
 - First lesson:
-  [`docs/courses/python-foundations/units/getting-started/what-is-programming.qmd`](docs/courses/python-foundations/units/getting-started/what-is-programming.qmd)
+  [`docs/courses/python-foundations/units/learning-workflow-tools/what-is-programming.qmd`](docs/courses/python-foundations/units/learning-workflow-tools/what-is-programming.qmd)
 - Google Colab:
-  [`docs/courses/python-foundations/units/getting-started/google-colab.qmd`](docs/courses/python-foundations/units/getting-started/google-colab.qmd)
+  [`docs/courses/python-foundations/units/learning-workflow-tools/google-colab.qmd`](docs/courses/python-foundations/units/learning-workflow-tools/google-colab.qmd)
 - Lists lesson:
-  [`docs/courses/python-foundations/units/data-structures/lists.qmd`](docs/courses/python-foundations/units/data-structures/lists.qmd)
+  [`docs/courses/python-foundations/units/sequences/lists.qmd`](docs/courses/python-foundations/units/sequences/lists.qmd)
 - Debugging reference:
   [`docs/courses/python-foundations/units/debugging/error-messages.qmd`](docs/courses/python-foundations/units/debugging/error-messages.qmd)
 - Learner profiles:
@@ -34,9 +32,8 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 
 ## Course portfolio
 
-1. **Python Foundations**: 38 required lessons in 20 concept-focused
-   instructional units, one required challenge per unit, and a rubric-scored
-   final project.
+1. **Python Foundations**: 62 lessons in 24 concept-focused instructional units,
+   with a guided challenge at the end of every unit.
 2. **Intermediate Python: Applied Problem Solving**: a challenge-based course
    focused on parsing, modeling, testing, refactoring, and explaining unfamiliar
    problems; curriculum TBD.
@@ -64,13 +61,13 @@ Python Foundations sources and notebooks mirror its `units/` hierarchy.
 Cross-course material such as the FAQ and project toolkit lives under
 `docs/resources/`.
 
-### Python Foundations completion
+### Python Foundations progress
 
-Python Foundations curriculum version 4 can be completed independently. The
-local completion rule requires all 38 lessons, all 20 unit challenges, and the
-Foundations project self-assessed against rubric version 2. Progress is stored
-in the learner's browser for convenience. It is self-reported and is not a
-verified certificate, identity record, or instructor grade.
+Python Foundations curriculum version 5 can be completed independently. It
+contains 62 lessons and 24 unit challenges in one learning sequence. Progress is
+stored in the learner's browser for convenience. It is self-reported and is not
+a verified certificate, identity record, or instructor grade. A final project
+and certificate are planned and will be announced later.
 
 ## Local planning note
 

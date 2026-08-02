@@ -1,0 +1,142 @@
+---
+title: Packaging with pyproject.toml
+lesson_id: reproducible-projects.packaging-with-pyproject
+lesson_order: 30
+description: Connect source layout, distribution metadata, editable installation, and entry
+  points.
+execute:
+  echo: true
+categories:
+- python-foundations
+- reproducible-projects
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/reproducible-projects/packaging-with-pyproject.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Connect source layout, distribution metadata, editable installation, and entry points.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+An import package is code Python imports; a distribution is the installable artifact described by `pyproject.toml`. A source layout makes installation part of development instead of accidentally importing the working directory.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+from pathlib import Path
+
+for path in [
+    Path("pyproject.toml"),
+    Path("src/study_tools/__init__.py"),
+    Path("tests/test_report.py"),
+]:
+    print(path)
+```
+
+### What Python does
+
+1. Metadata describes the distribution.
+2. The `src` directory contains import packages.
+3. Tests should import the installed project.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This command is valid shell syntax but bypasses the installed-package contract:
+
+```bash
+python src/study_tools/cli.py
+```
+
+A focused repair is:
+
+```bash
+python -m study_tools.cli
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Distinguish repository, distribution, package, and module names.
+2. Write minimal project metadata.
+3. Verify an editable install in a fresh environment.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "reproducible-projects-packaging-with-pyproject",
+  "title": "Packaging with pyproject.toml checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "meta",
+      "prompt": "What does pyproject metadata describe?",
+      "options": [
+        "One local variable",
+        "Git history",
+        "Notebook state",
+        "Installable distribution"
+      ],
+      "answer_index": 3,
+      "explanation": "It describes project distribution and tools."
+    },
+    {
+      "id": "src",
+      "prompt": "What can src layout prevent?",
+      "options": [
+        "Accidental uninstalled imports",
+        "All import errors",
+        "Tests running",
+        "Virtual environments"
+      ],
+      "answer_index": 0,
+      "explanation": "It exposes packaging mistakes."
+    },
+    {
+      "id": "entry",
+      "prompt": "What does a console entry point target?",
+      "options": [
+        "A Git commit",
+        "A callable such as package.cli:main",
+        "A file extension",
+        "A fixture"
+      ],
+      "answer_index": 1,
+      "explanation": "Installers map commands to callables."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

@@ -1,0 +1,188 @@
+---
+title: Modules and Packages
+lesson_id: modules-and-standard-library.modules-and-packages
+lesson_order: 10
+description: Organize reusable code into Python files and package folders.
+execute:
+  echo: true
+categories:
+- python-foundations
+- modules-and-standard-library
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/modules-and-standard-library/modules-and-packages.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner to intermediate
+- **Estimated time:** 25–40 minutes
+- **You will learn:** Organize reusable code into Python files and package folders.
+- **Practice in:** VS Code and the terminal
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Organize reusable code into Python files and package folders. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+
+::: {.callout-note title="Questions to answer with evidence"}
+- What problem does **Modules and Packages** solve?
+- What value, output, or failure demonstrates that it works?
+- Which boundary or misuse would expose an incorrect implementation?
+:::
+
+## 2. Modules
+
+Put reusable Python code in .py files and import it elsewhere.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+A module is like a toolbox drawer: open it when you need a tool stored there.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** A module is a Python file that can define functions, classes, and constants for reuse.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+import math
+print(math.sqrt(16))
+```
+
+### Trace it line by line
+
+1. `import math` — Python loads the named module or object so later lines can use it.
+2. `print(math.sqrt(16))` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Naming your file the same as a standard library module, such as math.py, can shadow the real module.
+:::
+
+### Practice modules
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Modules**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "modules-and-standard-library-modules-and-packages-modules",
+  "title": "Modules checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Modules?",
+      "options": [
+        "A package is a folder of modules that belong together.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "A module is a Python file that can define functions, classes, and constants for reuse.",
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+      ],
+      "answer_index": 2,
+      "explanation": "A module is a Python file that can define functions, classes, and constants for reuse."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Packages
+
+Group related modules into folders with importable names.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+A package is a labeled binder with several sections, not a pile of loose papers.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** A package is a folder of modules that belong together.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+from pathlib import Path
+print(Path("src") / "my_project")
+```
+
+### Trace it line by line
+
+1. `from pathlib import Path` — Python loads the named module or object so later lines can use it.
+2. `print(Path("src") / "my_project")` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Imports depend on project layout. Run code from the project root while learning to reduce path surprises.
+:::
+
+### Practice packages
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Packages**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "modules-and-standard-library-modules-and-packages-packages",
+  "title": "Packages checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Packages?",
+      "options": [
+        "A module is a Python file that can define functions, classes, and constants for reuse.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
+        "A package is a folder of modules that belong together."
+      ],
+      "answer_index": 3,
+      "explanation": "A package is a folder of modules that belong together."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Integrate the lesson
+
+Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+
+## 5. Key points
+
+- **Modules:** A module is a Python file that can define functions, classes, and constants for reuse.
+- **Packages:** A package is a folder of modules that belong together.
+- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

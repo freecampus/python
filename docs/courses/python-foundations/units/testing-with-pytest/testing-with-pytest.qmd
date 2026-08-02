@@ -1,0 +1,272 @@
+---
+title: Testing with pytest
+lesson_id: testing-with-pytest.testing-with-pytest
+lesson_order: 10
+description: Use assertions, pytest, and edge cases to check behavior.
+execute:
+  echo: true
+categories:
+- python-foundations
+- testing-with-pytest
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/testing-with-pytest/testing-with-pytest.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner to intermediate
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Use assertions, pytest, and edge cases to check behavior.
+- **Practice in:** VS Code, terminal, pytest, and ruff
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Use assertions, pytest, and edge cases to check behavior. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+
+::: {.callout-note title="Questions to answer with evidence"}
+- What problem does **Testing with pytest** solve?
+- What value, output, or failure demonstrates that it works?
+- Which boundary or misuse would expose an incorrect implementation?
+:::
+
+## 2. Assertions
+
+Use assert statements to document and check assumptions while learning and testing.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+An assertion is a checkpoint gate: if the rule is false, the gate stops you immediately.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** An assertion says a condition should be true at this point in the program.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+total = 2 + 3
+assert total == 5
+```
+
+### Trace it line by line
+
+1. `total = 2 + 3` — Python evaluates the right-hand expression and binds or updates `total` with the result.
+2. `assert total == 5` — Python checks the condition and raises `AssertionError` if the expected behavior is false.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Do not use assert for user-facing validation in production programs; assertions can be disabled.
+:::
+
+### Practice assertions
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Assertions**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "testing-with-pytest-testing-with-pytest-assertions",
+  "title": "Assertions checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Assertions?",
+      "options": [
+        "pytest discovers test functions and reports which expectations pass or fail.",
+        "An edge case is an input near a boundary where assumptions often break.",
+        "An assertion says a condition should be true at this point in the program.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+      ],
+      "answer_index": 2,
+      "explanation": "An assertion says a condition should be true at this point in the program."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. pytest
+
+Write and run automated tests with pytest.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+pytest is a tireless practice partner: it repeats your checks every time you change the code.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** pytest discovers test functions and reports which expectations pass or fail.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+def add(a, b):
+    return a + b
+
+def test_add():
+    assert add(2, 3) == 5
+```
+
+### Trace it line by line
+
+1. `def add(a, b):` — Python creates the function `add`; the indented body runs only when the function is called.
+2. `return a + b` — Python evaluates the expression and sends that value back to the caller, ending this call.
+3. `def test_add():` — Python creates the function `test_add`; the indented body runs only when the function is called.
+4. `assert add(2, 3) == 5` — Python checks the condition and raises `AssertionError` if the expected behavior is false.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+A test file or test function with the wrong name may not be discovered. Use test_ prefixes.
+:::
+
+### Practice pytest
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **pytest**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "testing-with-pytest-testing-with-pytest-pytest",
+  "title": "pytest checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to pytest?",
+      "options": [
+        "An assertion says a condition should be true at this point in the program.",
+        "An edge case is an input near a boundary where assumptions often break.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "pytest discovers test functions and reports which expectations pass or fail."
+      ],
+      "answer_index": 3,
+      "explanation": "pytest discovers test functions and reports which expectations pass or fail."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Edge Cases
+
+Choose tests for boundaries, empty inputs, and unusual but valid situations.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+Edge cases are the corners of a tablecloth: if the corners are secure, the middle is usually easier.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** An edge case is an input near a boundary where assumptions often break.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+def first(items):
+    if not items:
+        return None
+    return items[0]
+
+assert first([]) is None
+```
+
+### Trace it line by line
+
+1. `def first(items):` — Python creates the function `first`; the indented body runs only when the function is called.
+2. `if not items:` — Python evaluates this condition and enters the indented branch only when the result is true.
+3. `return None` — Python evaluates the expression and sends that value back to the caller, ending this call.
+4. `return items[0]` — Python evaluates the expression and sends that value back to the caller, ending this call.
+5. `assert first([]) is None` — Python checks the condition and raises `AssertionError` if the expected behavior is false.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Only testing typical examples can leave boundary bugs hidden until users find them.
+:::
+
+### Practice edge cases
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Edge Cases**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "testing-with-pytest-testing-with-pytest-edge-cases",
+  "title": "Edge Cases checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Edge Cases?",
+      "options": [
+        "An edge case is an input near a boundary where assumptions often break.",
+        "An assertion says a condition should be true at this point in the program.",
+        "pytest discovers test functions and reports which expectations pass or fail.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+      ],
+      "answer_index": 0,
+      "explanation": "An edge case is an input near a boundary where assumptions often break."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Integrate the lesson
+
+Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+
+## 6. Key points
+
+- **Assertions:** An assertion says a condition should be true at this point in the program.
+- **pytest:** pytest discovers test functions and reports which expectations pass or fail.
+- **Edge Cases:** An edge case is an input near a boundary where assumptions often break.
+- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

@@ -1,8 +1,8 @@
 ::: {.list}
 
 <% for (let index = 0; index < items.length; index++) { %> <% const item =
-items[index]; %> <% const requiredIds = item.required_lesson_ids || []; %> <%
-const challengeIds = item.challenge_ids || []; %>
+items[index]; %> <% const lessonIds = item.lesson_ids || []; %> <% const
+challengeIds = item.challenge_ids || []; %>
 
 ```{=html}
 <article
@@ -11,10 +11,9 @@ const challengeIds = item.challenge_ids || []; %>
   data-course-id="<%- item.course_id %>"
   data-course-pathway="<%- item.course_pathway %>"
   data-course-status="<%- item.course_status %>"
-  data-course-total="<%- item.required_lesson_count || item.lesson_count %>"
-  data-course-required-ids="<%- requiredIds.join(' ') %>"
+  data-course-total="<%- item.lesson_count %>"
+  data-course-lesson-ids="<%- lessonIds.join(' ') %>"
   data-course-challenge-ids="<%- challengeIds.join(' ') %>"
-  data-course-project-required="<%- item.project_required ? 'true' : 'false' %>"
   data-course-keywords="<%- item.course_keywords %>"
 >
   <a class="fc-catalog-card-link" href="<%- item.path %>">

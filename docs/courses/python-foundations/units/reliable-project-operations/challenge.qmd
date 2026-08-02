@@ -1,0 +1,236 @@
+---
+title: 'Unit Challenge: Automate the Quality Gate'
+description: Make the same project quality agreement runnable locally and in CI.
+challenge_id: reliable-project-operations.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- reliable-project-operations
+- unit-challenge
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/reliable-project-operations/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 24 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Make the same project quality agreement runnable locally and in CI.
+- **Evidence:** Complete the checks and explain the result in your own words.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Operate a configurable batch helper with useful logs, then configure pre-commit and CI to run the same formatting, linting, typing, and test agreement.
+
+**Scenario:** A checked `quality_demo` package already has source and tests. Add automation so contributors and a clean CI runner execute the same commands.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+Local pre-commit passes on all files and the pull-request workflow runs install, format-check, lint, type-check, and pytest steps.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Constraints
+
+1. Use one documented command list as the quality agreement.
+2. Pin action major versions and select one supported Python version.
+3. Install tools from declared project metadata rather than hidden runner state.
+4. Do not use CI to modify and commit formatted files.
+5. Read non-secret settings from environment variables, keep `.env` out of Git, and pass CI secrets through the platform secret store without logging them.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+import logging
+import os
+
+
+def batch_limit(environment: dict[str, str] | None = None) -> int:
+    """Return a positive batch limit from configuration."""
+    source = os.environ if environment is None else environment
+    return int(source.get("BATCH_LIMIT", "10"))
+
+
+def run_batch(values: list[int], logger: logging.Logger) -> list[int]:
+    """Double values while logging non-secret operational context."""
+    logger.info("processing %s values", len(values))
+    return [value * 2 for value in values]
+```
+
+## 4. Build in small stages
+
+1. Test default, configured, and invalid batch limits without changing the real process environment.
+2. Capture one log record and verify that it contains context but no credential value.
+3. Run the four quality commands locally and repair the project baseline.
+4. Add pre-commit hooks and a pull-request workflow that reconstructs the environment and runs the same checks.
+5. Introduce one controlled failing test, observe local and CI failure, then repair it.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+from pathlib import Path
+
+workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
+pre_commit = Path(".pre-commit-config.yaml").read_text(encoding="utf-8")
+gitignore = Path(".gitignore").read_text(encoding="utf-8")
+assert batch_limit({}) == 10
+assert batch_limit({"BATCH_LIMIT": "25"}) == 25
+assert "pull_request" in workflow
+assert "pytest" in workflow
+assert "mypy" in workflow
+assert "ruff check" in workflow
+assert "ruff format --check" in workflow
+assert "ruff" in pre_commit
+assert ".env" in gitignore
+assert "secrets." in workflow
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+Start with a passing local baseline; otherwise automation only repeats unexplained failures.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+A basic workflow needs checkout, Python setup, dependency installation, and explicit check commands.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Compare the exact commands in the README, pre-commit configuration, and workflow; reconcile any difference.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one failed local hook or CI log. Identify the exact command and file, reproduce it locally, make one repair, and preserve the passing rerun.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-reliable-project-operations-challenge",
+  "title": "Automated Quality Gate readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "same-checks",
+      "prompt": "Why should local and CI commands agree?",
+      "options": [
+        "CI then guarantees no bugs exist.",
+        "A learner can reproduce failures before and after sharing a change.",
+        "Local tests become unnecessary.",
+        "Every workflow runs faster."
+      ],
+      "answer_index": 1,
+      "explanation": "One quality agreement reduces surprises between local work and remote automation."
+    },
+    {
+      "id": "ci-trigger",
+      "prompt": "What should a basic pull-request workflow do?",
+      "options": [
+        "Publish without running tests.",
+        "Modify source files and commit them.",
+        "Check out the code, prepare Python, install declared tools, and run the agreed checks.",
+        "Depend on packages installed on a learner's laptop."
+      ],
+      "answer_index": 2,
+      "explanation": "A clean runner must reconstruct the project before it can verify the agreed checks."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

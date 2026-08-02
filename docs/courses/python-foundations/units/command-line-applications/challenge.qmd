@@ -1,0 +1,230 @@
+---
+title: 'Unit Challenge: Create a Converter CLI'
+description: Wrap reusable conversion logic in a predictable command-line interface.
+challenge_id: command-line-applications.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- command-line-applications
+- unit-challenge
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 19 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Wrap reusable conversion logic in a predictable command-line interface.
+- **Evidence:** Complete the checks and explain the result in your own words.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Build an `argparse` CLI that converts temperatures while keeping parsing, calculation, and output separable.
+
+**Scenario:** A learner needs `python converter.py 100 --from-unit c --to-unit f` to print `212.0`. Tests should pass arguments directly without changing global process arguments.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+`main(["100", "--from-unit", "c", "--to-unit", "f"])` returns `0` and prints `212.0`.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Constraints
+
+1. Keep the exact three supplied function signatures.
+2. Limit this challenge to Celsius and Fahrenheit conversions.
+3. Let `argparse` reject unsupported unit choices.
+4. Do not perform the conversion calculation inside `build_parser` or `main`.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+import argparse
+
+
+def build_parser():
+    """Return the configured command-line argument parser."""
+    raise NotImplementedError
+
+
+def convert_value(value, from_unit, to_unit):
+    """Convert value between c and f, or return it when units match."""
+    raise NotImplementedError
+
+
+def main(argv=None):
+    """Parse argv, print the converted value, and return exit status zero."""
+    raise NotImplementedError
+```
+
+## 4. Build in small stages
+
+1. Implement and assert the pure conversion function first.
+2. Build a parser with the value and two required unit options.
+3. Parse the supplied `argv`, call the conversion, print it, and return zero.
+4. Run one real terminal command and one invalid-unit command.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+parser = build_parser()
+arguments = parser.parse_args(["100", "--from-unit", "c", "--to-unit", "f"])
+assert arguments.value == 100.0
+assert arguments.from_unit == "c"
+assert arguments.to_unit == "f"
+assert convert_value(100, "c", "f") == 212
+assert convert_value(32, "f", "c") == 0
+assert convert_value(12, "c", "c") == 12
+assert main(["100", "--from-unit", "c", "--to-unit", "f"]) == 0
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+Configure `value` with `type=float` and unit options with `choices=("c", "f")`.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Handle equal units first, then one Celsius-to-Fahrenheit branch and one Fahrenheit-to-Celsius branch.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+`main` calls `build_parser().parse_args(argv)`, passes the parsed names to `convert_value`, and prints the returned number.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one invalid invocation and its parser message. Explain whether the failure belongs to argument parsing or conversion logic and why.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-command-line-applications-challenge",
+  "title": "Converter CLI readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "argv-test",
+      "prompt": "Why let main accept argv=None?",
+      "options": [
+        "Tests can pass a known argument list while normal runs use command-line arguments.",
+        "It prevents argparse from validating input.",
+        "It converts all arguments to numbers.",
+        "It removes the need for a parser."
+      ],
+      "answer_index": 0,
+      "explanation": "An injectable argument list makes parsing behavior reproducible in checks."
+    },
+    {
+      "id": "logic-separation",
+      "prompt": "Where should the numeric conversion calculation live?",
+      "options": [
+        "Only in the help text.",
+        "In a reusable function separate from printing and parsing.",
+        "Inside every assertion as copied code.",
+        "In a global exception handler."
+      ],
+      "answer_index": 1,
+      "explanation": "Separating calculation from the interface makes both easier to explain and test."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

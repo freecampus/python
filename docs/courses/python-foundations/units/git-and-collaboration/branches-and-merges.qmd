@@ -1,0 +1,144 @@
+---
+title: Branches, Merges, and Recovery
+lesson_id: git-and-collaboration.branches-and-merges
+lesson_order: 20
+description: Develop on branches, resolve conflicts, and select safe recovery tools.
+execute:
+  echo: true
+categories:
+- python-foundations
+- git-and-collaboration
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/git-and-collaboration/branches-and-merges.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Develop on branches, resolve conflicts, and select safe recovery tools.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+A branch is a movable reference to a commit, not a copied folder. A conflict asks a human to decide intended final content, remove markers, run checks, and stage the resolution.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+history = {
+    "main": ["A", "B"],
+    "feature/report": ["A", "B", "C"],
+}
+for branch, commits in history.items():
+    print(branch, commits[-1])
+```
+
+### What Python does
+
+1. Branches share earlier commits.
+2. New commits move only the current branch pointer.
+3. Merging integrates histories according to repository state.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This unresolved file cannot run because it still contains Git's conflict markers:
+
+```text
+<<<<<<< HEAD
+message = "main"
+=======
+message = "feature"
+>>>>>>> feature
+```
+
+A focused repair is:
+
+```python
+message = "feature report enabled"
+print(message)
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Create a branch and draw both pointers.
+2. Resolve a two-line conflict and run checks.
+3. Match restore and revert to safe scenarios.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "git-and-collaboration-branches-and-merges",
+  "title": "Branches, Merges, and Recovery checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "branch",
+      "prompt": "What is a branch?",
+      "options": [
+        "Movable commit reference",
+        "Folder copy",
+        "Remote server",
+        "Staged file"
+      ],
+      "answer_index": 0,
+      "explanation": "Branches point into history."
+    },
+    {
+      "id": "conflict",
+      "prompt": "After resolving conflict?",
+      "options": [
+        "Keep markers",
+        "Run checks and stage result",
+        "Delete repo",
+        "Force push"
+      ],
+      "answer_index": 1,
+      "explanation": "Resolution must be valid and verified."
+    },
+    {
+      "id": "revert",
+      "prompt": "What safely undoes shared commit?",
+      "options": [
+        "git init",
+        "git restore",
+        "git revert",
+        "git add"
+      ],
+      "answer_index": 2,
+      "explanation": "Revert creates an inverse commit."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

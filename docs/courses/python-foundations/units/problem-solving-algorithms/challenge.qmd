@@ -1,0 +1,187 @@
+---
+title: "Unit Challenge: Analyze a Delivery Code Stream"
+description: "Move from acceptance examples to pseudocode and a one-pass counting algorithm."
+challenge_id: problem-solving-algorithms.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: "60–120 minutes"
+categories: [python-foundations, problem-solving-algorithms, unit-challenge]
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algorithms/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 6 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Move from acceptance examples to pseudocode and a one-pass counting algorithm.
+- **Evidence:** Passing checks, a clean rerun, and a short debugging record
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+A volunteer delivery desk receives a compact text stream. Valid codes are uppercase letters; `X` marks a failed delivery. Count valid deliveries, failures, and ignored characters without using collections.
+
+::: {.callout-note title="Work independently, but not without support"}
+Plan for one or two focused hours. Start with the contract, run the smallest
+relevant check after each change, and open a hint only after naming the evidence
+that has blocked you.
+:::
+
+## 2. Understand the acceptance examples
+
+Before writing implementation code, write one ordinary example, one boundary,
+and one invalid or empty case. Predict the result for each. These examples are
+the specification you will compare against while working.
+
+### Constraints
+
+1. Write three acceptance examples before implementation.
+2. Make exactly one pass through the input text.
+3. Update named counters for each category.
+4. Explain the time and extra-space cost in plain language.
+
+## 3. Start from the contract
+
+Preserve the supplied public names and comments so that each assertion gives a
+useful location signal.
+
+```python
+stream = "ABX C!DX"
+valid_deliveries = 0
+failed_deliveries = 0
+ignored = 0
+
+for symbol in stream:
+    # Classify one symbol and update exactly one counter.
+    pass
+```
+
+## 4. Build in small stages
+
+1. Make the ordinary example pass without adding behavior for every case.
+2. Trace the important state after each step and compare it with your prediction.
+3. Add the boundary case, then the empty or invalid case.
+4. Restart the notebook or process and run the complete solution from the top.
+
+## 5. Run progressive assertions
+
+Do not weaken an expected value to make a check pass. If a check appears wrong,
+write down the contract conflict before changing either side.
+
+```python
+assert valid_deliveries == 4
+assert failed_deliveries == 3
+assert ignored == 3
+assert valid_deliveries + failed_deliveries + ignored == len(stream)
+```
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+Classify `X` before the general uppercase-letter rule.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+String methods such as `.isalpha()` and `.isupper()` can express the valid-code rule.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+The conservation assertion proves every input symbol entered exactly one category.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one failure that helped you understand the program. Record the actual
+value or message, your single-cause hypothesis, the controlled change, and the
+clean rerun that confirmed or rejected it.
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What did you observe? | Which cause fits? | What one thing changed? | Which check now passes? |
+
+## 8. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-problem-solving-algorithms-challenge",
+  "title": "Analyze a Delivery Code Stream readiness check",
+  "instructions": "Trace the situation before choosing an answer.",
+  "questions": [
+    {
+      "id": "one-pass",
+      "prompt": "What makes this a one-pass algorithm?",
+      "options": [
+        "Each input symbol is examined once.",
+        "It has only one variable.",
+        "It contains no decisions.",
+        "It always returns one."
+      ],
+      "answer_index": 0,
+      "explanation": "One pass means work advances through the input once."
+    },
+    {
+      "id": "example-purpose",
+      "prompt": "Which example best exposes category overlap?",
+      "options": [
+        "An empty comment.",
+        "A stream containing `X` and another uppercase letter.",
+        "A variable rename.",
+        "A repeated print call."
+      ],
+      "answer_index": 1,
+      "explanation": "`X` is uppercase but has a more specific meaning, so it tests rule order."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+- [ ] The acceptance examples and supplied checks pass.
+- [ ] The work runs from a clean state.
+- [ ] I can explain the important state changes and boundaries.
+- [ ] I kept one debugging record and verified a controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit or grade the artifact.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The contract narrows the design without supplying the implementation.
+- Progressive checks turn the task into observable behavior.
+- A clean rerun and explanation are part of the evidence.

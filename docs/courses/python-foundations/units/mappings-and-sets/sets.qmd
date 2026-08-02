@@ -1,0 +1,196 @@
+---
+title: Sets
+lesson_id: mappings-and-sets.sets
+lesson_order: 20
+description: Store unique values, test membership, and compare groups with set operations.
+execute:
+  echo: true
+categories:
+- python-foundations
+- mappings-and-sets
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/mappings-and-sets/sets.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Store unique values, test membership, and compare groups with set operations.
+- **Practice in:** Google Colab, Jupyter, or VS Code
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Store unique values, test membership, and compare groups with set operations. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+
+::: {.callout-note title="Questions to answer with evidence"}
+- What problem does **Sets** solve?
+- What value, output, or failure demonstrates that it works?
+- Which boundary or misuse would expose an incorrect implementation?
+:::
+
+## 2. Sets
+
+Store unique unordered values and test membership quickly.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+A set is like a guest list at the door: each name appears once, and membership matters more than position.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** A set keeps one copy of each value and ignores order.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+names = {"Ada", "Grace", "Ada"}
+print(names)
+print("Ada" in names)
+```
+
+### Trace it line by line
+
+1. `names = {"Ada", "Grace", "Ada"}` — Python evaluates the right-hand expression and binds or updates `names` with the result.
+2. `print(names)` — Python evaluates the arguments and writes their display form to standard output.
+3. `print("Ada" in names)` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Sets do not preserve positions. You cannot reliably ask for set_item[0].
+:::
+
+### Practice sets
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Sets**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "mappings-and-sets-sets-sets",
+  "title": "Sets checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Sets?",
+      "options": [
+        "A set keeps one copy of each value and ignores order.",
+        "Set operations answer questions about overlap and difference.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+      ],
+      "answer_index": 0,
+      "explanation": "A set keeps one copy of each value and ignores order."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Set Operations
+
+Combine sets with union, intersection, difference, and symmetric difference.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+Set operations are like comparing club rosters: who is in either club, both clubs, or only one club?
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** Set operations answer questions about overlap and difference.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+python = {"Ada", "Grace", "Linus"}
+data = {"Grace", "Katherine"}
+print(python | data)
+print(python & data)
+print(python - data)
+```
+
+### Trace it line by line
+
+1. `python = {"Ada", "Grace", "Linus"}` — Python evaluates the right-hand expression and binds or updates `python` with the result.
+2. `data = {"Grace", "Katherine"}` — Python evaluates the right-hand expression and binds or updates `data` with the result.
+3. `print(python | data)` — Python evaluates the arguments and writes their display form to standard output.
+4. `print(python & data)` — Python evaluates the arguments and writes their display form to standard output.
+5. `print(python - data)` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Use set operators on sets, not lists. Convert with set(items) when needed.
+:::
+
+### Practice set operations
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Set Operations**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "mappings-and-sets-sets-set-operations",
+  "title": "Set Operations checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Set Operations?",
+      "options": [
+        "A set keeps one copy of each value and ignores order.",
+        "Set operations answer questions about overlap and difference.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+      ],
+      "answer_index": 1,
+      "explanation": "Set operations answer questions about overlap and difference."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Integrate the lesson
+
+Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+
+## 5. Key points
+
+- **Sets:** A set keeps one copy of each value and ignores order.
+- **Set Operations:** Set operations answer questions about overlap and difference.
+- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

@@ -77,7 +77,7 @@ def test_lesson_header_exposes_course_and_progress_identity() -> None:
     assert "$challenge_id$" in title_block
     assert "$checkpoint_id$" not in title_block
     assert "$project_id$" in title_block
-    assert "$completion_label$" in title_block
+    assert "$completion_label$" not in title_block
     assert "data-fc-complete" in title_block
     assert "data-fc-lesson-progress" in title_block
     assert "fcpython.progress.v5" in course_ui
@@ -148,7 +148,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
     lesson_ids: set[str] = set()
 
     assert catalog["schema_version"] == 2
-    assert catalog["curriculum_version"] == 4
+    assert catalog["curriculum_version"] == 5
     for course in courses:
         assert "modules" not in course
         course_total = 0
@@ -190,7 +190,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
         if _front_matter(page).get("lesson_id")
     }
     assert owned_paths == expected
-    assert len(lesson_ids) == 53
+    assert len(lesson_ids) == 77
 
 
 def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
@@ -236,8 +236,8 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         assert notebook not in notebook_paths, page
         notebook_paths.add(notebook)
 
-    assert len(public_pages) == 79
-    assert len(notebook_paths) == 79
+    assert len(public_pages) == 110
+    assert len(notebook_paths) == 110
 
 
 def test_course_homes_and_sidebars_match_catalog() -> None:
@@ -270,8 +270,7 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
         assert "certificate" in home_text.lower()
         if course["lesson_count"]:
             assert "data-fc-course-overview" in home_text
-            progress_total = course.get("required_lesson_count", course["lesson_count"])
-            assert f'data-course-total="{progress_total}"' in home_text
+            assert f'data-course-total="{course["lesson_count"]}"' in home_text
         else:
             assert course["status"] == "in-development"
             assert "Curriculum TBD" in home_text
@@ -284,7 +283,7 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
         previous_unit_position = 0
         challenges_by_unit = {
             challenge["unit_id"]: challenge
-            for challenge in course.get("completion", {}).get("required_challenges", [])
+            for challenge in course.get("completion", {}).get("challenges", [])
         }
 
         for number, unit in enumerate(course["units"], start=1):
@@ -302,14 +301,6 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
                 ),
                 key=lambda page: _front_matter(page)["lesson_order"],
             )
-            if unit.get("kind") == "project":
-                project_path = course["completion"]["project"]["path"]
-                assert unit_navigation["contents"] == [
-                    {"href": project_path, "text": "Final project · required"}
-                ]
-                expected_paths.add(project_path)
-                continue
-
             assert _front_matter(unit_home)["title"] == f"{unit['title']} Overview"
             assert unit_navigation["contents"][0] == {
                 "href": (directory / "index.qmd").as_posix(),
@@ -330,7 +321,7 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
             if challenge := challenges_by_unit.get(unit["id"]):
                 assert unit_navigation["contents"][-1] == {
                     "href": challenge["path"],
-                    "text": "Unit Challenge · required",
+                    "text": "Unit Challenge",
                 }
                 previous_unit_position = unit_position + len(unit_paths) - 1
 
@@ -354,21 +345,20 @@ def test_project_toolkit_starts_with_an_overview() -> None:
     )
 
 
-def test_foundations_has_versioned_completion_requirements() -> None:
+def test_foundations_has_versioned_course_sequence() -> None:
     courses = _yaml(Path("docs/courses/_catalog.yml"))["courses"]
     foundations = next(
         course for course in courses if course["id"] == "python-foundations"
     )
     completion = foundations["completion"]
-    required = set(completion["required_lesson_ids"])
-    optional = set(completion["optional_lesson_ids"])
+    lesson_ids = set(completion["lesson_ids"])
 
-    assert completion["curriculum_version"] == 4
-    assert completion["rule_version"] == 4
+    assert completion["curriculum_version"] == 5
+    assert completion["rule_version"] == 5
     assert completion["recognition"] == "local-self-reported"
-    assert len(required) == foundations["required_lesson_count"] == 38
-    assert not optional
-    assert foundations["optional_lesson_count"] == 0
+    assert len(lesson_ids) == foundations["lesson_count"] == 62
+    assert "required_lesson_count" not in foundations
+    assert "optional_lesson_count" not in foundations
 
     metadata_by_id = {}
     for unit in foundations["units"]:
@@ -378,16 +368,16 @@ def test_foundations_has_versioned_completion_requirements() -> None:
             if lesson_id := front_matter.get("lesson_id"):
                 metadata_by_id[lesson_id] = front_matter
 
-    assert set(metadata_by_id) == required
-    for lesson_id in required:
+    assert set(metadata_by_id) == lesson_ids
+    for lesson_id in lesson_ids:
         assert "required_for_completion" not in metadata_by_id[lesson_id]
         assert "completion_label" not in metadata_by_id[lesson_id]
 
     instructional_units = {
         unit["id"] for unit in foundations["units"] if unit["kind"] == "instructional"
     }
-    challenges = completion["required_challenges"]
-    assert len(challenges) == len(instructional_units) == 20
+    challenges = completion["challenges"]
+    assert len(challenges) == len(instructional_units) == 24
     assert {challenge["unit_id"] for challenge in challenges} == instructional_units
     assert {challenge["id"] for challenge in challenges} == {
         f"{unit_id}.challenge" for unit_id in instructional_units
@@ -397,20 +387,44 @@ def test_foundations_has_versioned_completion_requirements() -> None:
         challenge_path = Path("docs") / challenge["path"]
         front_matter = _front_matter(challenge_path)
         assert challenge_path.exists()
-        assert challenge["required"] is True
+        assert "required" not in challenge
         assert front_matter["challenge_id"] == challenge["id"]
         assert front_matter["assessment_type"] == "unit-challenge"
-        assert front_matter["required_for_completion"] is True
+        assert "required_for_completion" not in front_matter
+        assert "completion_label" not in front_matter
 
-    project = completion["project"]
-    project_path = Path("docs") / project["path"]
-    project_front_matter = _front_matter(project_path)
-    project_text = project_path.read_text()
-    assert project_front_matter["project_id"] == project["id"]
-    assert project_front_matter["rubric_version"] == project["rubric_version"] == 2
-    assert project_front_matter["required_for_completion"] is True
-    assert "| Criterion | Not yet | Meets the requirement |" in project_text
-    assert "not a submission" in project_text.lower()
+    assert "project" not in completion
+    assert not Path("docs/courses/python-foundations/project").exists()
+
+
+def test_foundations_outcome_map_covers_the_course_once() -> None:
+    outcomes = _yaml(Path("docs/courses/python-foundations/_outcomes.yml"))
+    foundations = next(
+        course
+        for course in _yaml(Path("docs/courses/_catalog.yml"))["courses"]
+        if course["id"] == "python-foundations"
+    )
+    mapped_units = outcomes["units"]
+
+    assert outcomes["schema_version"] == 1
+    assert (
+        outcomes["curriculum_version"]
+        == foundations["completion"]["curriculum_version"]
+    )
+    assert [unit["id"] for unit in mapped_units] == [
+        unit["id"] for unit in foundations["units"]
+    ]
+    assert {lesson for unit in mapped_units for lesson in unit["lesson_ids"]} == set(
+        foundations["completion"]["lesson_ids"]
+    )
+    assert {unit["challenge_id"] for unit in mapped_units} == {
+        challenge["id"] for challenge in foundations["completion"]["challenges"]
+    }
+    graduate_ids = set(outcomes["graduate_outcomes"])
+    assert graduate_ids
+    assert all(
+        set(unit["graduate_outcome_ids"]) <= graduate_ids for unit in mapped_units
+    )
 
 
 def test_foundations_unit_challenges_are_guided_and_self_checking() -> None:
@@ -418,14 +432,15 @@ def test_foundations_unit_challenges_are_guided_and_self_checking() -> None:
         Path("docs/courses/python-foundations/units").glob("*/challenge.qmd")
     )
 
-    assert len(challenge_pages) == 20
+    assert len(challenge_pages) == 24
     for path in challenge_pages:
         front_matter = _front_matter(path)
         text = path.read_text()
         unit_id = path.parent.name
 
         assert front_matter["challenge_id"] == f"{unit_id}.challenge"
-        assert front_matter["required_for_completion"] is True
+        assert "required_for_completion" not in front_matter
+        assert "completion_label" not in front_matter
         assert front_matter["assessment_type"] == "unit-challenge"
         assert front_matter["colab_notebook"].endswith(
             f"/units/{unit_id}/challenge.ipynb"
@@ -434,7 +449,7 @@ def test_foundations_unit_challenges_are_guided_and_self_checking() -> None:
         assert "ojs-quiz.qmd" in text
         assert "colab-link.qmd" in text
 
-        if unit_id == "getting-started":
+        if unit_id == "learning-workflow-tools":
             assert front_matter["challenge_format"] == "quiz"
             assert "<!-- fcpython-unit-challenge: quiz -->" in text
             assert "8 of 10" in text
@@ -448,8 +463,8 @@ def test_foundations_unit_challenges_are_guided_and_self_checking() -> None:
         assert "## 6. Use the hint ladder only when needed" in text
         assert "## 7. Keep debugging evidence" in text
         assert text.count("<summary>Hint ") == 3
-        assert "```python" in text
-        assert "assert " in text
+        assert "```python" in text or "```bash" in text
+        assert "assert " in text or "Evidence targets:" in text
 
 
 def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None:
@@ -459,29 +474,32 @@ def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None
     intermediate = by_id["intermediate-python"]
     advanced = by_id["advanced-python"]
 
-    assert foundations["lesson_count"] == 38
+    assert foundations["lesson_count"] == 62
     assert [unit["id"] for unit in foundations["units"]] == [
-        "getting-started",
-        "values-types-input-output",
-        "control-flow",
-        "data-structures",
-        "functions",
+        "learning-workflow-tools",
+        "numeric-foundations",
+        "text-input-output",
+        "decisions",
+        "loops-and-state",
+        "problem-solving-algorithms",
+        "sequences",
+        "mappings-and-sets",
+        "mutability-and-copying",
+        "functions-and-interfaces",
+        "scope-and-call-stacks",
         "debugging",
-        "files",
-        "error-handling-and-validation",
-        "modules-and-packages",
-        "project-structure",
-        "environments-and-dependencies",
-        "command-line-programs",
-        "testing",
-        "code-style-and-linting",
-        "typing",
-        "automation-and-ci",
-        "object-oriented-programming",
-        "comprehensions-and-iteration",
-        "decorators-and-context-managers",
-        "logging-and-configuration",
-        "foundations-project",
+        "files-and-paths",
+        "structured-data-and-patterns",
+        "exceptions-and-validation",
+        "modules-and-standard-library",
+        "reproducible-projects",
+        "git-and-collaboration",
+        "command-line-applications",
+        "testing-with-pytest",
+        "maintainable-code",
+        "object-oriented-python",
+        "pythonic-iteration",
+        "reliable-project-operations",
     ]
     assert intermediate["title"] == "Intermediate Python: Applied Problem Solving"
     assert advanced["title"] == "Advanced Python: Complex Problem Solving"
@@ -521,11 +539,11 @@ window.__fcTest = {
   currentKey,
   lessonId,
   progress,
-  unitChallengeId: challengeIdFromKey(
-    "courses/python-foundations/units/values-types-input-output/challenge"
+    unitChallengeId: challengeIdFromKey(
+    "courses/python-foundations/units/numeric-foundations/challenge"
   ),
   challengeIsLesson: isLessonKey(
-    "courses/python-foundations/units/values-types-input-output/challenge"
+    "courses/python-foundations/units/numeric-foundations/challenge"
   ),
 };
 })();
@@ -533,10 +551,10 @@ window.__fcTest = {
     )
     lesson_url = (
         "https://freecampus.github.io/python/courses/python-foundations/units/"
-        "values-types-input-output/values-variables-types.html"
+        "numeric-foundations/values-variables-types.html"
     )
     lesson_path = (
-        "/python/courses/python-foundations/units/values-types-input-output/"
+        "/python/courses/python-foundations/units/numeric-foundations/"
         "values-variables-types.html"
     )
     harness = f"""
@@ -570,14 +588,12 @@ process.stdout.write(JSON.stringify({{
     observed = json.loads(result.stdout)
 
     assert observed["state"]["currentKey"] == (
-        "courses/python-foundations/units/values-types-input-output/values-variables-types"
+        "courses/python-foundations/units/numeric-foundations/values-variables-types"
     )
     assert observed["state"]["lessonId"] == (
-        "values-types-input-output.values-variables-types"
+        "numeric-foundations.values-variables-types"
     )
-    assert observed["state"]["unitChallengeId"] == (
-        "values-types-input-output.challenge"
-    )
+    assert observed["state"]["unitChallengeId"] == ("numeric-foundations.challenge")
     assert observed["state"]["challengeIsLesson"] is False
     assert observed["state"]["progress"] == {"schema_version": 5, "courses": {}}
     assert observed["oldProgress"]["schema_version"] == 4

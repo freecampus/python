@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 4
+curriculum_version: 5
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -8,271 +8,297 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 38
-    required_lesson_count: 38
-    optional_lesson_count: 0
-    estimated_effort: 55–85 hours
+    lesson_count: 62
+    estimated_effort: 85–135 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 4
-      rule_version: 4
+      curriculum_version: 5
+      rule_version: 5
       recognition: local-self-reported
-      required_lesson_ids:
-        - getting-started.what-is-programming
-        - getting-started.google-colab
-        - getting-started.local-python-tools
-        - values-types-input-output.values-variables-types
-        - values-types-input-output.strings-input-output
-        - control-flow.booleans-and-conditionals
-        - control-flow.indentation
-        - control-flow.loops-and-tracing
-        - data-structures.lists
-        - data-structures.tuples
-        - data-structures.dictionaries
-        - data-structures.sets
-        - data-structures.nested-data
-        - functions.function-basics
-        - functions.function-contracts
-        - functions.function-decomposition-and-checks
+      lesson_ids:
+        - learning-workflow-tools.what-is-programming
+        - learning-workflow-tools.google-colab
+        - learning-workflow-tools.local-python-tools
+        - numeric-foundations.values-variables-types
+        - numeric-foundations.numeric-computation
+        - text-input-output.strings-input-output
+        - text-input-output.unicode-and-text-boundaries
+        - decisions.booleans-and-conditionals
+        - decisions.boolean-reasoning
+        - loops-and-state.blocks-and-indentation
+        - loops-and-state.loops-and-tracing
+        - problem-solving-algorithms.specifications-and-examples
+        - problem-solving-algorithms.decomposition-and-pseudocode
+        - problem-solving-algorithms.search-count-transform
+        - sequences.lists
+        - sequences.tuples
+        - mappings-and-sets.dictionaries
+        - mappings-and-sets.sets
+        - mappings-and-sets.nested-data
+        - mutability-and-copying.identity-aliasing-copying
+        - mutability-and-copying.mutation-across-boundaries
+        - functions-and-interfaces.function-basics
+        - functions-and-interfaces.function-contracts
+        - functions-and-interfaces.function-decomposition-and-checks
+        - scope-and-call-stacks.scope-and-call-stacks
+        - scope-and-call-stacks.recursion-and-functions-as-values
         - debugging.error-messages
         - debugging.debugging-tools
         - debugging.minimal-reproducible-examples
-        - files.paths-and-text-files
-        - files.structured-files
-        - error-handling-and-validation.exceptions-and-validation
-        - modules-and-packages.modules-and-packages
-        - project-structure.project-layout
-        - environments-and-dependencies.environments-and-dependencies
-        - command-line-programs.command-line-programs
-        - testing.testing-with-pytest
-        - code-style-and-linting.style-formatting-and-linting
-        - typing.type-checking
-        - automation-and-ci.pre-commit-and-ci
-        - object-oriented-programming.oop-basics
-        - object-oriented-programming.dataclasses
-        - object-oriented-programming.oop-design
-        - comprehensions-and-iteration.comprehensions
-        - comprehensions-and-iteration.iterables-and-generators
-        - decorators-and-context-managers.decorators
-        - decorators-and-context-managers.context-managers
-        - logging-and-configuration.logging-and-configuration
-      optional_lesson_ids: []
-      required_challenges:
-        - id: getting-started.challenge
+        - files-and-paths.paths-and-text-files
+        - files-and-paths.text-files-and-encodings
+        - structured-data-and-patterns.structured-files
+        - structured-data-and-patterns.regular-expressions
+        - structured-data-and-patterns.validation-pipelines
+        - exceptions-and-validation.exceptions-and-validation
+        - exceptions-and-validation.exception-design
+        - modules-and-standard-library.modules-and-packages
+        - modules-and-standard-library.standard-library-fluency
+        - reproducible-projects.project-layout
+        - reproducible-projects.environments-and-dependencies
+        - reproducible-projects.packaging-with-pyproject
+        - git-and-collaboration.repositories-and-commits
+        - git-and-collaboration.branches-and-merges
+        - git-and-collaboration.remotes-and-collaboration
+        - command-line-applications.command-line-programs
+        - command-line-applications.streams-and-exit-codes
+        - testing-with-pytest.testing-with-pytest
+        - testing-with-pytest.test-design-and-failures
+        - testing-with-pytest.fixtures-parametrization-and-boundaries
+        - maintainable-code.style-formatting-and-linting
+        - maintainable-code.type-checking
+        - maintainable-code.documentation-and-refactoring
+        - object-oriented-python.oop-basics
+        - object-oriented-python.dataclasses
+        - object-oriented-python.oop-design
+        - pythonic-iteration.comprehensions
+        - pythonic-iteration.iterables-and-generators
+        - pythonic-iteration.decorators
+        - pythonic-iteration.context-managers
+        - reliable-project-operations.logging-and-configuration
+        - reliable-project-operations.pre-commit-and-ci
+        - reliable-project-operations.project-operations-and-secrets
+      challenges:
+        - id: learning-workflow-tools.challenge
           title: Learning Workflow Readiness Check
-          unit_id: getting-started
-          path: courses/python-foundations/units/getting-started/challenge.qmd
-          required: true
-        - id: values-types-input-output.challenge
+          unit_id: learning-workflow-tools
+          path: courses/python-foundations/units/learning-workflow-tools/challenge.qmd
+        - id: numeric-foundations.challenge
           title: Build a Purchase Summary
-          unit_id: values-types-input-output
-          path: courses/python-foundations/units/values-types-input-output/challenge.qmd
-          required: true
-        - id: control-flow.challenge
+          unit_id: numeric-foundations
+          path: courses/python-foundations/units/numeric-foundations/challenge.qmd
+        - id: text-input-output.challenge
+          title: Normalize a Multilingual Contact Badge
+          unit_id: text-input-output
+          path: courses/python-foundations/units/text-input-output/challenge.qmd
+        - id: decisions.challenge
+          title: Implement a Community Room Access Policy
+          unit_id: decisions
+          path: courses/python-foundations/units/decisions/challenge.qmd
+        - id: loops-and-state.challenge
           title: Reach a Savings Goal
-          unit_id: control-flow
-          path: courses/python-foundations/units/control-flow/challenge.qmd
-          required: true
-        - id: data-structures.challenge
+          unit_id: loops-and-state
+          path: courses/python-foundations/units/loops-and-state/challenge.qmd
+        - id: problem-solving-algorithms.challenge
+          title: Analyze a Delivery Code Stream
+          unit_id: problem-solving-algorithms
+          path: courses/python-foundations/units/problem-solving-algorithms/challenge.qmd
+        - id: sequences.challenge
+          title: Build a Prioritized Workshop Queue
+          unit_id: sequences
+          path: courses/python-foundations/units/sequences/challenge.qmd
+        - id: mappings-and-sets.challenge
           title: Organize a Classroom Inventory
-          unit_id: data-structures
-          path: courses/python-foundations/units/data-structures/challenge.qmd
-          required: true
-        - id: functions.challenge
+          unit_id: mappings-and-sets
+          path: courses/python-foundations/units/mappings-and-sets/challenge.qmd
+        - id: mutability-and-copying.challenge
+          title: Repair a Shared Study Planner
+          unit_id: mutability-and-copying
+          path: courses/python-foundations/units/mutability-and-copying/challenge.qmd
+        - id: functions-and-interfaces.challenge
           title: Create a Study-Session Report
-          unit_id: functions
-          path: courses/python-foundations/units/functions/challenge.qmd
-          required: true
+          unit_id: functions-and-interfaces
+          path: courses/python-foundations/units/functions-and-interfaces/challenge.qmd
+        - id: scope-and-call-stacks.challenge
+          title: Traverse a Nested Study Plan
+          unit_id: scope-and-call-stacks
+          path: courses/python-foundations/units/scope-and-call-stacks/challenge.qmd
         - id: debugging.challenge
           title: Run a Bug Clinic
           unit_id: debugging
           path: courses/python-foundations/units/debugging/challenge.qmd
-          required: true
-        - id: files.challenge
+        - id: files-and-paths.challenge
+          title: Organize a UTF-8 Notes Archive
+          unit_id: files-and-paths
+          path: courses/python-foundations/units/files-and-paths/challenge.qmd
+        - id: structured-data-and-patterns.challenge
           title: Convert a Reading Log
-          unit_id: files
-          path: courses/python-foundations/units/files/challenge.qmd
-          required: true
-        - id: error-handling-and-validation.challenge
+          unit_id: structured-data-and-patterns
+          path: courses/python-foundations/units/structured-data-and-patterns/challenge.qmd
+        - id: exceptions-and-validation.challenge
           title: Import Records Safely
-          unit_id: error-handling-and-validation
-          path: courses/python-foundations/units/error-handling-and-validation/challenge.qmd
-          required: true
-        - id: modules-and-packages.challenge
+          unit_id: exceptions-and-validation
+          path: courses/python-foundations/units/exceptions-and-validation/challenge.qmd
+        - id: modules-and-standard-library.challenge
           title: Build a Conversion Package
-          unit_id: modules-and-packages
-          path: courses/python-foundations/units/modules-and-packages/challenge.qmd
-          required: true
-        - id: project-structure.challenge
-          title: Restructure a Task Tracker
-          unit_id: project-structure
-          path: courses/python-foundations/units/project-structure/challenge.qmd
-          required: true
-        - id: environments-and-dependencies.challenge
+          unit_id: modules-and-standard-library
+          path: courses/python-foundations/units/modules-and-standard-library/challenge.qmd
+        - id: reproducible-projects.challenge
           title: Make a Reproducible Text Tool
-          unit_id: environments-and-dependencies
-          path: courses/python-foundations/units/environments-and-dependencies/challenge.qmd
-          required: true
-        - id: command-line-programs.challenge
+          unit_id: reproducible-projects
+          path: courses/python-foundations/units/reproducible-projects/challenge.qmd
+        - id: git-and-collaboration.challenge
+          title: Rescue and Review a Small Git History
+          unit_id: git-and-collaboration
+          path: courses/python-foundations/units/git-and-collaboration/challenge.qmd
+        - id: command-line-applications.challenge
           title: Create a Converter CLI
-          unit_id: command-line-programs
-          path: courses/python-foundations/units/command-line-programs/challenge.qmd
-          required: true
-        - id: testing.challenge
+          unit_id: command-line-applications
+          path: courses/python-foundations/units/command-line-applications/challenge.qmd
+        - id: testing-with-pytest.challenge
           title: Protect a Grade Summary
-          unit_id: testing
-          path: courses/python-foundations/units/testing/challenge.qmd
-          required: true
-        - id: code-style-and-linting.challenge
+          unit_id: testing-with-pytest
+          path: courses/python-foundations/units/testing-with-pytest/challenge.qmd
+        - id: maintainable-code.challenge
           title: Rescue a Messy Report Script
-          unit_id: code-style-and-linting
-          path: courses/python-foundations/units/code-style-and-linting/challenge.qmd
-          required: true
-        - id: typing.challenge
-          title: Type a Record Summarizer
-          unit_id: typing
-          path: courses/python-foundations/units/typing/challenge.qmd
-          required: true
-        - id: automation-and-ci.challenge
-          title: Automate the Quality Gate
-          unit_id: automation-and-ci
-          path: courses/python-foundations/units/automation-and-ci/challenge.qmd
-          required: true
-        - id: object-oriented-programming.challenge
+          unit_id: maintainable-code
+          path: courses/python-foundations/units/maintainable-code/challenge.qmd
+        - id: object-oriented-python.challenge
           title: Model an Equipment Rental Desk
-          unit_id: object-oriented-programming
-          path: courses/python-foundations/units/object-oriented-programming/challenge.qmd
-          required: true
-        - id: comprehensions-and-iteration.challenge
-          title: Process a Sensor Stream
-          unit_id: comprehensions-and-iteration
-          path: courses/python-foundations/units/comprehensions-and-iteration/challenge.qmd
-          required: true
-        - id: decorators-and-context-managers.challenge
+          unit_id: object-oriented-python
+          path: courses/python-foundations/units/object-oriented-python/challenge.qmd
+        - id: pythonic-iteration.challenge
           title: Trace a Managed Operation
-          unit_id: decorators-and-context-managers
-          path: courses/python-foundations/units/decorators-and-context-managers/challenge.qmd
-          required: true
-        - id: logging-and-configuration.challenge
-          title: Run a Configurable Batch Processor
-          unit_id: logging-and-configuration
-          path: courses/python-foundations/units/logging-and-configuration/challenge.qmd
-          required: true
-      project:
-        id: python-foundations-project
-        title: Python Foundations Project
-        path: courses/python-foundations/project/index.qmd
-        required: true
-        rubric_version: 2
+          unit_id: pythonic-iteration
+          path: courses/python-foundations/units/pythonic-iteration/challenge.qmd
+        - id: reliable-project-operations.challenge
+          title: Automate the Quality Gate
+          unit_id: reliable-project-operations
+          path: courses/python-foundations/units/reliable-project-operations/challenge.qmd
     units:
-      - id: getting-started
-        title: Getting Started
-        directory: courses/python-foundations/units/getting-started
+      - id: learning-workflow-tools
+        title: Learning Workflow and Tools
+        directory: courses/python-foundations/units/learning-workflow-tools
         lesson_count: 3
         kind: instructional
-      - id: values-types-input-output
-        title: Values, Types, and Input/Output
-        directory: courses/python-foundations/units/values-types-input-output
+      - id: numeric-foundations
+        title: Values, Names, and Numeric Computation
+        directory: courses/python-foundations/units/numeric-foundations
         lesson_count: 2
         kind: instructional
-      - id: control-flow
-        title: Control Flow
-        directory: courses/python-foundations/units/control-flow
+      - id: text-input-output
+        title: Text, Unicode, Input, and Output
+        directory: courses/python-foundations/units/text-input-output
+        lesson_count: 2
+        kind: instructional
+      - id: decisions
+        title: Boolean Logic and Decisions
+        directory: courses/python-foundations/units/decisions
+        lesson_count: 2
+        kind: instructional
+      - id: loops-and-state
+        title: Loops, Tracing, and State
+        directory: courses/python-foundations/units/loops-and-state
+        lesson_count: 2
+        kind: instructional
+      - id: problem-solving-algorithms
+        title: Problem Decomposition and Basic Algorithms
+        directory: courses/python-foundations/units/problem-solving-algorithms
         lesson_count: 3
         kind: instructional
-      - id: data-structures
-        title: Data Structures
-        directory: courses/python-foundations/units/data-structures
-        lesson_count: 5
+      - id: sequences
+        title: "Sequences: Lists and Tuples"
+        directory: courses/python-foundations/units/sequences
+        lesson_count: 2
         kind: instructional
-      - id: functions
-        title: Functions
-        directory: courses/python-foundations/units/functions
+      - id: mappings-and-sets
+        title: Mappings, Sets, and Nested Data
+        directory: courses/python-foundations/units/mappings-and-sets
         lesson_count: 3
+        kind: instructional
+      - id: mutability-and-copying
+        title: Mutability, Identity, and Copying
+        directory: courses/python-foundations/units/mutability-and-copying
+        lesson_count: 2
+        kind: instructional
+      - id: functions-and-interfaces
+        title: Functions and Interfaces
+        directory: courses/python-foundations/units/functions-and-interfaces
+        lesson_count: 3
+        kind: instructional
+      - id: scope-and-call-stacks
+        title: Scope, Call Stacks, and Functions as Values
+        directory: courses/python-foundations/units/scope-and-call-stacks
+        lesson_count: 2
         kind: instructional
       - id: debugging
-        title: Debugging
+        title: Debugging and Reproducible Failures
         directory: courses/python-foundations/units/debugging
         lesson_count: 3
         kind: instructional
-      - id: files
-        title: Files and Structured Data
-        directory: courses/python-foundations/units/files
+      - id: files-and-paths
+        title: Files, Paths, and Encodings
+        directory: courses/python-foundations/units/files-and-paths
         lesson_count: 2
         kind: instructional
-      - id: error-handling-and-validation
-        title: Error Handling and Validation
-        directory: courses/python-foundations/units/error-handling-and-validation
-        lesson_count: 1
-        kind: instructional
-      - id: modules-and-packages
-        title: Modules and Packages
-        directory: courses/python-foundations/units/modules-and-packages
-        lesson_count: 1
-        kind: instructional
-      - id: project-structure
-        title: Project Structure
-        directory: courses/python-foundations/units/project-structure
-        lesson_count: 1
-        kind: instructional
-      - id: environments-and-dependencies
-        title: Environments and Dependencies
-        directory: courses/python-foundations/units/environments-and-dependencies
-        lesson_count: 1
-        kind: instructional
-      - id: command-line-programs
-        title: Command-Line Programs
-        directory: courses/python-foundations/units/command-line-programs
-        lesson_count: 1
-        kind: instructional
-      - id: testing
-        title: Testing
-        directory: courses/python-foundations/units/testing
-        lesson_count: 1
-        kind: instructional
-      - id: code-style-and-linting
-        title: Code Style and Linting
-        directory: courses/python-foundations/units/code-style-and-linting
-        lesson_count: 1
-        kind: instructional
-      - id: typing
-        title: Typing
-        directory: courses/python-foundations/units/typing
-        lesson_count: 1
-        kind: instructional
-      - id: automation-and-ci
-        title: Automation and CI
-        directory: courses/python-foundations/units/automation-and-ci
-        lesson_count: 1
-        kind: instructional
-      - id: object-oriented-programming
-        title: Object-Oriented Programming
-        directory: courses/python-foundations/units/object-oriented-programming
+      - id: structured-data-and-patterns
+        title: Structured Data and Text Patterns
+        directory: courses/python-foundations/units/structured-data-and-patterns
         lesson_count: 3
         kind: instructional
-      - id: comprehensions-and-iteration
-        title: Comprehensions and Iteration
-        directory: courses/python-foundations/units/comprehensions-and-iteration
+      - id: exceptions-and-validation
+        title: Exceptions and Defensive Programming
+        directory: courses/python-foundations/units/exceptions-and-validation
         lesson_count: 2
         kind: instructional
-      - id: decorators-and-context-managers
-        title: Decorators and Context Managers
-        directory: courses/python-foundations/units/decorators-and-context-managers
+      - id: modules-and-standard-library
+        title: Modules, Imports, and Standard Library
+        directory: courses/python-foundations/units/modules-and-standard-library
         lesson_count: 2
         kind: instructional
-      - id: logging-and-configuration
-        title: Logging and Configuration
-        directory: courses/python-foundations/units/logging-and-configuration
-        lesson_count: 1
+      - id: reproducible-projects
+        title: Reproducible Python Projects
+        directory: courses/python-foundations/units/reproducible-projects
+        lesson_count: 3
         kind: instructional
-      - id: foundations-project
-        title: Python Foundations Project
-        directory: courses/python-foundations/project
-        lesson_count: 0
-        kind: project
+      - id: git-and-collaboration
+        title: Git and Collaboration
+        directory: courses/python-foundations/units/git-and-collaboration
+        lesson_count: 3
+        kind: instructional
+      - id: command-line-applications
+        title: Command-Line Applications
+        directory: courses/python-foundations/units/command-line-applications
+        lesson_count: 2
+        kind: instructional
+      - id: testing-with-pytest
+        title: Testing with pytest
+        directory: courses/python-foundations/units/testing-with-pytest
+        lesson_count: 3
+        kind: instructional
+      - id: maintainable-code
+        title: Documentation, Style, Linting, and Typing
+        directory: courses/python-foundations/units/maintainable-code
+        lesson_count: 3
+        kind: instructional
+      - id: object-oriented-python
+        title: Object-Oriented Python and Dataclasses
+        directory: courses/python-foundations/units/object-oriented-python
+        lesson_count: 3
+        kind: instructional
+      - id: pythonic-iteration
+        title: Pythonic Iteration and Resource Control
+        directory: courses/python-foundations/units/pythonic-iteration
+        lesson_count: 4
+        kind: instructional
+      - id: reliable-project-operations
+        title: Operating a Reliable Project
+        directory: courses/python-foundations/units/reliable-project-operations
+        lesson_count: 3
+        kind: instructional
   - id: intermediate-python
     title: "Intermediate Python: Applied Problem Solving"
     short_title: Intermediate

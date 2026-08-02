@@ -1,0 +1,268 @@
+---
+title: Paths and Text Files
+lesson_id: files-and-paths.paths-and-text-files
+lesson_order: 10
+description: Find files reliably and read or write plain text safely.
+execute:
+  echo: true
+categories:
+- python-foundations
+- files-and-paths
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/files-and-paths/paths-and-text-files.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner to intermediate
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Find files reliably and read or write plain text safely.
+- **Practice in:** VS Code, Jupyter, and local files
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Find files reliably and read or write plain text safely. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+
+::: {.callout-note title="Questions to answer with evidence"}
+- What problem does **Paths and Text Files** solve?
+- What value, output, or failure demonstrates that it works?
+- Which boundary or misuse would expose an incorrect implementation?
+:::
+
+## 2. Paths and Working Directories
+
+Find files reliably using paths and the current working directory.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+A path is an address, and the working directory is your current neighborhood.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** A path describes where a file lives; the working directory is the folder Python starts searching from.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+from pathlib import Path
+print(Path.cwd())
+data_file = Path("data") / "scores.csv"
+print(data_file)
+```
+
+### Trace it line by line
+
+1. `from pathlib import Path` — Python loads the named module or object so later lines can use it.
+2. `print(Path.cwd())` — Python evaluates the arguments and writes their display form to standard output.
+3. `data_file = Path("data") / "scores.csv"` — Python evaluates the right-hand expression and binds or updates `data_file` with the result.
+4. `print(data_file)` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+A file can exist but still not be found if your program starts in a different working directory.
+:::
+
+### Practice paths and working directories
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Paths and Working Directories**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "files-and-paths-paths-and-text-files-paths-and-working-directories",
+  "title": "Paths and Working Directories checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Paths and Working Directories?",
+      "options": [
+        "Reading a file copies text from storage into your program.",
+        "A path describes where a file lives; the working directory is the folder Python starts searching from.",
+        "Writing sends text from your program to storage.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+      ],
+      "answer_index": 1,
+      "explanation": "A path describes where a file lives; the working directory is the folder Python starts searching from."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Reading Text Files
+
+Open a text file and read its contents safely.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+Reading a file is like opening a notebook and copying a paragraph onto your desk.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** Reading a file copies text from storage into your program.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+from pathlib import Path
+text = Path("notes.txt").read_text(encoding="utf-8")
+print(text)
+```
+
+### Trace it line by line
+
+1. `from pathlib import Path` — Python loads the named module or object so later lines can use it.
+2. `text = Path("notes.txt").read_text(encoding="utf-8")` — Python evaluates the right-hand expression and binds or updates `text` with the result.
+3. `print(text)` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Encoding problems are easier to debug when you specify encoding="utf-8" consistently.
+:::
+
+### Practice reading text files
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Reading Text Files**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "files-and-paths-paths-and-text-files-reading-text-files",
+  "title": "Reading Text Files checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Reading Text Files?",
+      "options": [
+        "A path describes where a file lives; the working directory is the folder Python starts searching from.",
+        "Writing sends text from your program to storage.",
+        "Reading a file copies text from storage into your program.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+      ],
+      "answer_index": 2,
+      "explanation": "Reading a file copies text from storage into your program."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Writing Text Files
+
+Create or replace text files with clear output.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+Writing a file is like saving a note in a folder for future you.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** Writing sends text from your program to storage.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+from pathlib import Path
+report = "Result: success\n"
+Path("report.txt").write_text(report, encoding="utf-8")
+```
+
+### Trace it line by line
+
+1. `from pathlib import Path` — Python loads the named module or object so later lines can use it.
+2. `report = "Result: success\n"` — Python evaluates the right-hand expression and binds or updates `report` with the result.
+3. `Path("report.txt").write_text(report, encoding="utf-8")` — Python evaluates the right-hand expression and binds or updates `Path("report.txt").write_text(report, encoding` with the result.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+write_text replaces existing content. If that is risky, write to a new file name first.
+:::
+
+### Practice writing text files
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Writing Text Files**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "files-and-paths-paths-and-text-files-writing-text-files",
+  "title": "Writing Text Files checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Writing Text Files?",
+      "options": [
+        "A path describes where a file lives; the working directory is the folder Python starts searching from.",
+        "Reading a file copies text from storage into your program.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "Writing sends text from your program to storage."
+      ],
+      "answer_index": 3,
+      "explanation": "Writing sends text from your program to storage."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Integrate the lesson
+
+Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+
+## 6. Key points
+
+- **Paths and Working Directories:** A path describes where a file lives; the working directory is the folder Python starts searching from.
+- **Reading Text Files:** Reading a file copies text from storage into your program.
+- **Writing Text Files:** Writing sends text from your program to storage.
+- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

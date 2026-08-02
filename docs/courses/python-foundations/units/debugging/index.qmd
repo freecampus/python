@@ -1,60 +1,88 @@
 ---
-title: "Debugging Overview"
-description: "Investigate failures from evidence instead of changing code by guesswork."
+title: "Debugging and Reproducible Failures Overview"
+description: "Use tracebacks, controlled experiments, tools, and minimal reproductions to investigate failures from evidence."
 categories: [python-foundations, debugging, overview]
-order: 600
-colab_notebook: "notebooks/courses/python-foundations/units/debugging/index.ipynb"
+order: 0
+colab_notebook: notebooks/courses/python-foundations/units/debugging/index.ipynb
 ---
 
 ::: {.lesson-meta}
-- **Level:** Python Foundations · Unit 6
-- **Estimated time:** 3–5 hours
-- **You will learn:** Read tracebacks, inspect state, and reduce a problem to a reproducible example.
-- **Practice in:** Generated Colab notebooks and, where noted, local Python tools
+- **Level:** Python Foundations · Unit 12
+- **Estimated time:** 4–8 hours including the challenge
+- **Unit outcome:** Use tracebacks, controlled experiments, tools, and minimal reproductions to investigate failures from evidence.
+- **Practice in:** Generated Colab notebooks and, when introduced, a local project
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## The problem this unit solves
+## 1. The capability you are building
 
-Investigate failures from evidence instead of changing code by guesswork.
+Use tracebacks, controlled experiments, tools, and minimal reproductions to investigate failures from evidence.
 
-## Questions to carry through the unit
+This unit is a learning sequence rather than a reference list. In every lesson,
+write a prediction, run the smallest complete example, explain the evidence,
+make one controlled change, and retain one useful failure.
 
-- What concrete problem does this concept solve?
-- What should you predict before running the example?
-- What evidence would show that your explanation is correct?
+## 2. Before you start
 
-## Lessons in this unit
+**Prior knowledge:** Complete Unit 11 and bring its challenge notes, especially one debugging record.
 
-1. [Error Messages](error-messages.qmd)
-2. [Debugging Tools](debugging-tools.qmd)
-3. [Minimal Reproducible Examples](minimal-reproducible-examples.qmd)
+Prepare one notebook or project folder for the unit. Keep a small evidence log
+with four columns: prediction, observed result, explanation, and next change.
 
-Work through the lessons in order. Keep one prediction, one controlled change,
-and one debugging note from each lesson.
-<!-- fcpython-chapter-lab: end -->
+## 3. Lessons
 
-## Check your direction
+| Step | Lesson | Purpose |
+|---:|---|---|
+| 1 | [Error Messages](error-messages.qmd) | Read tracebacks and recognize common beginner error patterns. |
+| 2 | [Debugging Tools](debugging-tools.qmd) | Use print debugging, VS Code breakpoints, and pdb to inspect running programs. |
+| 3 | [Minimal Reproducible Examples](minimal-reproducible-examples.qmd) | Shrink a bug into the smallest code that still shows the problem. |
+| 4 | [Unit Challenge](challenge.qmd) | Combine the unit skills in a guided 60–120 minute task. |
+
+## 4. How to study this unit
+
+1. Attempt the prediction prompts before revealing output.
+2. Type or adapt the examples rather than only reading them.
+3. Use quizzes as diagnosis: explain why each distractor fails.
+4. Complete the challenge from a clean state and keep the debugging evidence.
+
+::: {.callout-tip title="Do not optimize for speed"}
+A fast first run is not the goal. Aim to explain why the program behaved as it
+did and how one change caused the new result.
+:::
+
+## 5. Check your orientation
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "debugging-overview",
-  "title": "Debugging direction check",
-  "instructions": "Choose an answer, then check your reasoning.",
+  "title": "Debugging and Reproducible Failures orientation check",
+  "instructions": "Use the unit outcome and workflow to choose the best answer.",
   "questions": [
     {
-      "id": "unit-purpose",
-      "prompt": "What is the central goal of the Debugging unit?",
+      "id": "unit-outcome",
+      "prompt": "What is the main evidence you should produce in this unit?",
       "options": [
-        "Read tracebacks, inspect state, and reduce a problem to a reproducible example.",
-        "Memorize syntax without running it.",
-        "Copy a finished project without explaining it.",
-        "Replace every earlier Python concept."
+        "A memorized list of every Python name.",
+        "A screenshot without an explanation.",
+        "Code copied without a clean rerun.",
+        "Use tracebacks, controlled experiments, tools, and minimal reproductions to investigate failures from evidence."
+      ],
+      "answer_index": 3,
+      "explanation": "Use tracebacks, controlled experiments, tools, and minimal reproductions to investigate failures from evidence."
+    },
+    {
+      "id": "learning-loop",
+      "prompt": "What should you do before running an unfamiliar example?",
+      "options": [
+        "Write a prediction you can compare with the result.",
+        "Change several lines.",
+        "Hide the output.",
+        "Open the solution immediately."
       ],
       "answer_index": 0,
-      "explanation": "Investigate failures from evidence instead of changing code by guesswork."
+      "explanation": "A prediction makes the difference between expectation and evidence visible."
     }
   ]
 }
@@ -62,13 +90,13 @@ and one debugging note from each lesson.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## Start the unit
+## 6. Unit evidence
 
-[Open the first lesson](error-messages.qmd){.btn .btn-primary}
+By the end, keep:
 
-## Required unit challenge
+- working lesson exercises and their controlled modifications;
+- quiz corrections written in your own words;
+- one complete debugging record; and
+- the challenge solution with passing checks and a clean rerun.
 
-After completing every lesson, use the challenge to apply this unit in one
-focused task and check your progress independently.
-
-[Open Unit Challenge: Run a Bug Clinic](challenge.qmd){.btn .btn-outline-primary}
+<!-- fcpython-chapter-lab: end -->

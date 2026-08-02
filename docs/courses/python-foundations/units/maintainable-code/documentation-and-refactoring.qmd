@@ -1,0 +1,144 @@
+---
+title: Documentation and Evidence-Driven Refactoring
+lesson_id: maintainable-code.documentation-and-refactoring
+lesson_order: 30
+description: Improve names and interfaces while checks protect behavior.
+execute:
+  echo: true
+categories:
+- python-foundations
+- maintainable-code
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/maintainable-code/documentation-and-refactoring.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Improve names and interfaces while checks protect behavior.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Refactoring changes structure without intentionally changing observable behavior. Capture tests first, make one coherent change, rerun focused checks, and keep the diff explainable.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+def active_total(records):
+    """Return amount for records whose status is active."""
+    return sum(
+        record["amount"]
+        for record in records
+        if record["status"] == "active"
+    )
+```
+
+### What Python does
+
+1. The name states result and filter.
+2. The docstring adds a contract rather than narrating syntax.
+3. The expression stays focused on one transformation.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This version is valid Python but does not satisfy the lesson's intended contract:
+
+```python
+def calc(a):
+    # add a because we need total
+    return sum(a)
+```
+
+A focused repair is:
+
+```python
+def total_amount(amounts):
+    """Return the sum of amounts."""
+    return sum(amounts)
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Refactor vague names with tests in place.
+2. Remove a syntax-narrating comment.
+3. Follow README commands from a clean copy.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "maintainable-code-documentation-and-refactoring",
+  "title": "Documentation and Evidence-Driven Refactoring checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "preserve",
+      "prompt": "What must refactor preserve?",
+      "options": [
+        "Behavior",
+        "Local names",
+        "Line order",
+        "All comments"
+      ],
+      "answer_index": 0,
+      "explanation": "Refactoring preserves behavior."
+    },
+    {
+      "id": "comment",
+      "prompt": "What is valuable comment?",
+      "options": [
+        "Translate `i += 1`",
+        "Explain a surprising constraint",
+        "Copy code",
+        "State filename"
+      ],
+      "answer_index": 1,
+      "explanation": "Intent adds information."
+    },
+    {
+      "id": "readme",
+      "prompt": "Where verify README commands?",
+      "options": [
+        "Hidden author state",
+        "Only screenshot",
+        "Clean environment",
+        "After errors"
+      ],
+      "answer_index": 2,
+      "explanation": "Clean setup exposes assumptions."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

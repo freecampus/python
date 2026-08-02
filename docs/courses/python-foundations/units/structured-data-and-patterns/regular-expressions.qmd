@@ -1,0 +1,137 @@
+---
+title: Regular Expressions for Text Patterns
+lesson_id: structured-data-and-patterns.regular-expressions
+lesson_order: 20
+description: Extract patterned text while choosing string methods for simpler jobs.
+execute:
+  echo: true
+categories:
+- python-foundations
+- structured-data-and-patterns
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/structured-data-and-patterns/regular-expressions.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Extract patterned text while choosing string methods for simpler jobs.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Regular expressions are useful for alternatives, optional parts, repeated character classes, and captured fields. Fixed separators and prefixes are clearer with `split` and `startswith`.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+import re
+pattern = re.compile(r"^(?P<area>\d{3})-(?P<number>\d{4})$")
+match = pattern.fullmatch("555-0123")
+print(match.groupdict() if match else None)
+```
+
+### What Python does
+
+1. A raw string keeps backslashes readable.
+2. Whole-string matching validates the complete value.
+3. Named groups document extracted fields.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This version is valid Python but does not satisfy the lesson's intended contract:
+
+```python
+re.fullmatch(r".+@.+..+", "a@bXc")
+```
+
+A focused repair is:
+
+```python
+re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", "a@bXc")
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Use `split` for `key=value` and explain why regex is unnecessary.
+2. Match `YYYY-MM-DD` with named groups.
+3. Use `re.escape` for literal user input.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "structured-data-and-patterns-regular-expressions",
+  "title": "Regular Expressions for Text Patterns checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "full",
+      "prompt": "What does fullmatch require?",
+      "options": [
+        "The entire string",
+        "Any substring",
+        "Two groups",
+        "Bytes only"
+      ],
+      "answer_index": 0,
+      "explanation": "It matches the complete value."
+    },
+    {
+      "id": "raw",
+      "prompt": "Why raw strings?",
+      "options": [
+        "They compile automatically",
+        "They reduce Python backslash escaping",
+        "They match ASCII only",
+        "They disable groups"
+      ],
+      "answer_index": 1,
+      "explanation": "Pattern backslashes remain legible."
+    },
+    {
+      "id": "simple",
+      "prompt": "What best checks a fixed prefix?",
+      "options": [
+        "A complex regex",
+        "deepcopy",
+        "startswith",
+        "a class"
+      ],
+      "answer_index": 2,
+      "explanation": "The direct string method is clearer."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

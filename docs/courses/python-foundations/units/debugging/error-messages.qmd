@@ -20,98 +20,6 @@ colab_notebook: notebooks/courses/python-foundations/units/debugging/error-messa
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-<!-- fcpython-lab: start -->
-## Questions
-
-- What problem does **Error Messages** help us solve in a small Python program?
-- What should we predict before running the example?
-- What value, output, or error should we inspect after changing one line?
-
-## Objectives
-
-- Run a complete example for **Python error messages** in Colab.
-- Explain the example line by line using plain language.
-- Change one part of the code and predict the result before running it.
-- Recognize one common mistake and use the error message as evidence.
-
-## Hands-on episode: Error Messages
-
-A traceback is a stack of clues. Start near the bottom for the error type and message, then look upward for the file name, line number, and expression Python was running.
-
-We will learn this by running code, not by memorizing a definition first.
-Open the Colab notebook from the button above, find this section, and run each
-cell in order. Keep a small note beside the notebook with three columns:
-**prediction**, **actual result**, and **what changed**.
-
-### Example 1.1
-
-Predict the error type before running, then read the traceback from bottom to top.
-
-```python
-scores = [10, 8, 9]
-print(scores[3])
-```
-
-Run the cell once without editing it. If the result is different from your
-prediction, leave the prediction visible and write one sentence about the
-difference. That sentence is more useful than a perfect first guess.
-
-### Explain Example 1.1
-
-- The list has three items, so its valid positive indexes are `0`, `1`, and `2`.
-- `scores[3]` asks for a fourth item that does not exist.
-- Python raises `IndexError`, and the message tells you the index is outside the list's range.
-
-Now explain the example out loud or in a Markdown cell. Use short sentences:
-"this line creates...", "this name stores...", "this output appears because...".
-If you cannot explain a line yet, run only the lines above it and inspect the
-values that exist at that moment.
-
-### Challenge 1.1
-
-::: {.callout-note title="Challenge"}
-Change the index to `2` and run again. The program now succeeds, which confirms that the bug was the position, not the list itself.
-:::
-
-<details class="solution">
-<summary>Show a safe way to approach the challenge</summary>
-
-1. Copy Example 1.1 into a new Colab cell.
-2. Change exactly one value, name, condition, or line.
-3. Write the expected output before running the cell.
-4. Run the cell and compare the actual result with your prediction.
-5. If the result surprises you, undo the change and try a smaller one.
-
-Suggested first move: Change the index to `2` and run again.
-
-</details>
-
-### Debugging checkpoint 1.1
-
-::: {.callout-warning title="Debugging checkpoint"}
-Do not rewrite the whole program after seeing a traceback. First underline four clues: error type, error message, line number, and the smallest expression on that line. Then make one change and rerun.
-:::
-
-Do not debug by rewriting the whole example. Read the error type or surprising
-output, inspect the closest value with `print(...)` or `type(...)`, then change
-one thing. This is the same routine you will use in larger projects.
-
-### Apply it
-
-Create one `NameError`, one `TypeError`, one `IndexError`, and one `KeyError` in Colab. For each, write a one-sentence diagnosis before fixing it.
-
-Finish by adding a Markdown cell that answers: **What did this example teach
-me that I can reuse in a project?**
-
-## Key points
-
-- Learn the concept by running a complete, small example first.
-- Predict before execution so your thinking becomes visible.
-- Change one thing at a time so cause and effect stay clear.
-- Treat errors as clues about the exact line or value Python could not handle.
-<!-- fcpython-lab: end -->
-
-
 ## The problem this lesson solves
 
 Every programmer sees error messages. Beginners often read a traceback as a wall
@@ -226,24 +134,24 @@ This reveals that one item is a string.
       "id": "last-line",
       "prompt": "When reading a traceback, what should a beginner inspect first?",
       "options": [
-        "The last line, because it names the error type and message.",
         "Only the first red line.",
         "The editor theme.",
+        "The last line, because it names the error type and message.",
         "Every installed package."
       ],
-      "answer_index": 0,
+      "answer_index": 2,
       "explanation": "The last line usually gives the most compact clue: error type plus message."
     },
     {
       "id": "line-number",
       "prompt": "What does a traceback line number usually tell you?",
       "options": [
-        "Where Python was running when it discovered the problem.",
         "The only line that could possibly be wrong.",
         "How many times the program ran.",
-        "The Python version."
+        "The Python version.",
+        "Where Python was running when it discovered the problem."
       ],
-      "answer_index": 0,
+      "answer_index": 3,
       "explanation": "The line number is the best starting point, though the cause can be earlier."
     },
     {
@@ -351,36 +259,36 @@ print(person.get("email", "No email saved"))
       "id": "nameerror-meaning",
       "prompt": "What does NameError usually mean?",
       "options": [
-        "Python does not know the name you used.",
         "A list index is too large.",
+        "Python does not know the name you used.",
         "A dictionary key is missing.",
         "The program finished successfully."
       ],
-      "answer_index": 0,
+      "answer_index": 1,
       "explanation": "NameError points to spelling, assignment order, or scope."
     },
     {
       "id": "indexerror-meaning",
       "prompt": "What should you check first for IndexError?",
       "options": [
-        "The length of the sequence and the index being used.",
         "Only whether the value is a dictionary.",
         "Whether the function has a return statement.",
+        "The length of the sequence and the index being used.",
         "The file extension."
       ],
-      "answer_index": 0,
+      "answer_index": 2,
       "explanation": "IndexError means an index is outside the valid range."
     },
     {
       "id": "keyerror-meaning",
       "prompt": "What should you check first for KeyError?",
       "options": [
-        "Whether the requested key exists in the dictionary.",
         "Whether a loop has enough spaces.",
         "Whether a string has quotes.",
-        "Whether Python is installed."
+        "Whether Python is installed.",
+        "Whether the requested key exists in the dictionary."
       ],
-      "answer_index": 0,
+      "answer_index": 3,
       "explanation": "KeyError means dictionary lookup could not find the key."
     }
   ]
@@ -465,24 +373,24 @@ If you can explain the fix, you are learning—not just guessing.
       "id": "input-type-debug",
       "prompt": "If code multiplies two input() results and raises TypeError, what is a likely issue?",
       "options": [
-        "input() returned strings that need conversion.",
         "print() returned too many values.",
+        "input() returned strings that need conversion.",
         "The if statement needs an else.",
         "The file name is too short."
       ],
-      "answer_index": 0,
+      "answer_index": 1,
       "explanation": "input() always returns text, so arithmetic often needs int() or float()."
     },
     {
       "id": "explain-fix",
       "prompt": "What is a good habit after fixing an error?",
       "options": [
-        "Write one sentence explaining the cause and the fix.",
         "Delete the original code immediately.",
         "Change several unrelated lines.",
+        "Write one sentence explaining the cause and the fix.",
         "Assume the same fix works everywhere."
       ],
-      "answer_index": 0,
+      "answer_index": 2,
       "explanation": "Explaining the fix turns debugging into learning."
     }
   ]

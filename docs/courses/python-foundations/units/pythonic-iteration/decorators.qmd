@@ -1,0 +1,150 @@
+---
+title: Decorators
+lesson_id: pythonic-iteration.decorators
+lesson_order: 30
+description: Wrap a function to add behavior without changing its body.
+execute:
+  echo: true
+categories:
+- python-foundations
+- pythonic-iteration
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/pythonic-iteration/decorators.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Wrap a function to add behavior without changing its body.
+- **Practice in:** Generated Colab notebook and a local project when appropriate
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Several functions may need the same behavior around a call, such as timing or authorization. A decorator transforms a callable while preserving a reusable core function.
+
+::: {.callout-note title="Prediction"}
+Before running the example, write the output or failure you expect and identify the line that will produce it.
+:::
+
+## 2. Count calls without changing the domain calculation.
+
+```python
+from functools import wraps
+
+def count_calls(function):
+    count = 0
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        nonlocal count
+        count += 1
+        print(f"call {count}")
+        return function(*args, **kwargs)
+
+    return wrapper
+
+@count_calls
+def square(number):
+    return number * number
+
+print(square(4))
+```
+
+### Step-by-step explanation
+
+1. `count_calls` receives a function and creates persistent closure state for its call count.
+2. The wrapper accepts and forwards positional and keyword arguments, then returns the original result.
+3. `@count_calls` rebinds `square` to the wrapper at definition time; each call now passes through it.
+
+Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
+
+## 3. Debug a contract violation
+
+This version is syntactically valid but communicates or implements the wrong contract:
+
+```python
+def announce(function):
+    def wrapper():
+        print("starting")
+        function()
+    return wrapper
+```
+
+A focused repair is:
+
+```python
+from functools import wraps
+
+def announce(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        print("starting")
+        return function(*args, **kwargs)
+    return wrapper
+```
+
+Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
+
+## 4. Practice from trace to transfer
+
+1. Decorate a function that accepts one positional and one keyword argument.
+2. Stack two simple decorators and predict their call order.
+3. Inspect `square.__name__` with and without `@wraps`.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the tasks</summary>
+
+Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "pythonic-iteration-decorators",
+  "title": "Decorators checkpoint",
+  "instructions": "Trace the code and contract before choosing.",
+  "questions": [
+    {
+      "id": "time",
+      "prompt": "When does `@count_calls` execute the decorator itself?",
+      "options": [
+        "Only after the tenth call",
+        "When the module is deleted",
+        "Before parsing the file",
+        "When Python defines the decorated function"
+      ],
+      "answer_index": 3,
+      "explanation": "Decorator application happens as the function definition executes."
+    },
+    {
+      "id": "return",
+      "prompt": "Why must the wrapper return the original result?",
+      "options": [
+        "To preserve the callable’s result contract",
+        "To make the decorator run twice",
+        "To convert every result to text",
+        "To create a global variable"
+      ],
+      "answer_index": 0,
+      "explanation": "Dropping the return value silently changes how callers can use the function."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- State the behavior contract before selecting syntax or tools.
+- Trace the values and boundaries that provide observable evidence.
+- Preserve one useful failure and verify the repair from a clean state.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

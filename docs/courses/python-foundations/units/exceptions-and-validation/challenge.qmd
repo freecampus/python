@@ -1,0 +1,236 @@
+---
+title: 'Unit Challenge: Import Records Safely'
+description: Validate external records and handle only the failures the importer understands.
+challenge_id: exceptions-and-validation.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- exceptions-and-validation
+- unit-challenge
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/exceptions-and-validation/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 15 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Validate external records and handle only the failures the importer understands.
+- **Evidence:** Complete the checks and explain the result in your own words.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Build a safe importer that accepts valid study records, reports invalid ones clearly, and keeps processing.
+
+**Scenario:** Parsed JSON records may have missing topics, non-positive minutes, or text where a number is required. The importer should return valid normalized records and a specific message for each rejected record.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+Two valid records are returned and two invalid records produce indexed messages without stopping the import.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Constraints
+
+1. Make `validate_record` either return a normalized dictionary or raise `ValueError` with a specific message.
+2. Catch only `ValueError` in `import_records`.
+3. Include the record index in every collected error message.
+4. Do not silently replace invalid values with defaults.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+def validate_record(record):
+    """Return a normalized study record or raise ValueError."""
+    raise NotImplementedError
+
+
+def import_records(records):
+    """Return a pair containing valid records and indexed error messages."""
+    raise NotImplementedError
+```
+
+## 4. Build in small stages
+
+1. Validate the shape and topic before validating minutes.
+2. Write one assertion for each `ValueError` message before building the importer loop.
+3. Catch `ValueError` around one record at a time and append an indexed message.
+4. Add an unexpected programmer error temporarily and verify it is not swallowed.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+records = [
+    {"topic": "loops", "minutes": 25},
+    {"topic": "", "minutes": 10},
+    {"topic": "files", "minutes": "many"},
+    {"topic": "tests", "minutes": 15},
+]
+valid, errors = import_records(records)
+
+assert valid == [
+    {"topic": "loops", "minutes": 25},
+    {"topic": "tests", "minutes": 15},
+]
+assert errors == [
+    "Record 2: topic must not be empty",
+    "Record 3: minutes must be an integer",
+]
+
+try:
+    validate_record({"topic": "loops", "minutes": 0})
+except ValueError as error:
+    assert str(error) == "minutes must be positive"
+else:
+    raise AssertionError("zero minutes should be rejected")
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+Validate one requirement at a time and raise immediately with the required message.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Use `enumerate(records, start=1)` so learner-facing record numbers begin at one.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Inside the loop, append the validated result in `try` and append `f"Record {index}: {error}"` in `except ValueError`.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one rejected record and its exact boundary message. Explain why the failure is expected input evidence rather than a defect to hide.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-exceptions-and-validation-challenge",
+  "title": "Safe Record Import readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "validate-boundary",
+      "prompt": "When should a record from an external file be validated?",
+      "options": [
+        "As it enters the program, before calculations depend on it.",
+        "Only after every result is printed.",
+        "Only if the file name is long.",
+        "Never when JSON parsing succeeds."
+      ],
+      "answer_index": 0,
+      "explanation": "Valid JSON can still contain missing or invalid application values, so validate at the boundary."
+    },
+    {
+      "id": "narrow-except",
+      "prompt": "Why catch a specific expected exception rather than Exception everywhere?",
+      "options": [
+        "It makes every invalid record valid.",
+        "It avoids hiding failures the program does not know how to handle.",
+        "It removes the need for error messages.",
+        "It prevents syntax errors before running."
+      ],
+      "answer_index": 1,
+      "explanation": "A narrow handler documents the failure the program understands and lets unexpected defects remain visible."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

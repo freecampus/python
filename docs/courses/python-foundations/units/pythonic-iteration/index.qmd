@@ -1,0 +1,103 @@
+---
+title: "Pythonic Iteration and Resource Control Overview"
+description: "Choose comprehensions, generators, decorators, and context managers when they make intent and lifecycles clearer."
+categories: [python-foundations, pythonic-iteration, overview]
+order: 0
+colab_notebook: notebooks/courses/python-foundations/units/pythonic-iteration/index.ipynb
+---
+
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 23
+- **Estimated time:** 5–10 hours including the challenge
+- **Unit outcome:** Choose comprehensions, generators, decorators, and context managers when they make intent and lifecycles clearer.
+- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## 1. The capability you are building
+
+Choose comprehensions, generators, decorators, and context managers when they make intent and lifecycles clearer.
+
+This unit is a learning sequence rather than a reference list. In every lesson,
+write a prediction, run the smallest complete example, explain the evidence,
+make one controlled change, and retain one useful failure.
+
+## 2. Before you start
+
+**Prior knowledge:** Complete Unit 22 and bring its challenge notes, especially one debugging record.
+
+Prepare one notebook or project folder for the unit. Keep a small evidence log
+with four columns: prediction, observed result, explanation, and next change.
+
+## 3. Lessons
+
+| Step | Lesson | Purpose |
+|---:|---|---|
+| 1 | [Comprehensions](comprehensions.qmd) | Build lists, dictionaries, and sets with compact loop expressions. |
+| 2 | [Iterables and Generators](iterables-and-generators.qmd) | Understand iteration and produce values lazily with generators. |
+| 3 | [Decorators](decorators.qmd) | Wrap a function to add behavior without changing its body. |
+| 4 | [Context Managers](context-managers.qmd) | Use with statements to acquire and release resources safely. |
+| 5 | [Unit Challenge](challenge.qmd) | Combine the unit skills in a guided 60–120 minute task. |
+
+## 4. How to study this unit
+
+1. Attempt the prediction prompts before revealing output.
+2. Type or adapt the examples rather than only reading them.
+3. Use quizzes as diagnosis: explain why each distractor fails.
+4. Complete the challenge from a clean state and keep the debugging evidence.
+
+::: {.callout-tip title="Do not optimize for speed"}
+A fast first run is not the goal. Aim to explain why the program behaved as it
+did and how one change caused the new result.
+:::
+
+## 5. Check your orientation
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "pythonic-iteration-overview",
+  "title": "Pythonic Iteration and Resource Control orientation check",
+  "instructions": "Use the unit outcome and workflow to choose the best answer.",
+  "questions": [
+    {
+      "id": "unit-outcome",
+      "prompt": "What is the main evidence you should produce in this unit?",
+      "options": [
+        "A memorized list of every Python name.",
+        "Choose comprehensions, generators, decorators, and context managers when they make intent and lifecycles clearer.",
+        "A screenshot without an explanation.",
+        "Code copied without a clean rerun."
+      ],
+      "answer_index": 1,
+      "explanation": "Choose comprehensions, generators, decorators, and context managers when they make intent and lifecycles clearer."
+    },
+    {
+      "id": "learning-loop",
+      "prompt": "What should you do before running an unfamiliar example?",
+      "options": [
+        "Change several lines.",
+        "Hide the output.",
+        "Write a prediction you can compare with the result.",
+        "Open the solution immediately."
+      ],
+      "answer_index": 2,
+      "explanation": "A prediction makes the difference between expectation and evidence visible."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Unit evidence
+
+By the end, keep:
+
+- working lesson exercises and their controlled modifications;
+- quiz corrections written in your own words;
+- one complete debugging record; and
+- the challenge solution with passing checks and a clean rerun.
+
+<!-- fcpython-chapter-lab: end -->

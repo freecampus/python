@@ -1,0 +1,189 @@
+---
+title: "Unit Challenge: Organize a UTF-8 Notes Archive"
+description: "Create paths safely, read and write UTF-8 text, and verify a repeatable file transformation."
+challenge_id: files-and-paths.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: "60–120 minutes"
+categories: [python-foundations, files-and-paths, unit-challenge]
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/files-and-paths/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 13 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Create paths safely, read and write UTF-8 text, and verify a repeatable file transformation.
+- **Evidence:** Passing checks, a clean rerun, and a short debugging record
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+A community archive stores one note per learner. Normalize a supplied note, write it under an output directory, read it back, and prove that rerunning does not duplicate content.
+
+::: {.callout-note title="Work independently, but not without support"}
+Plan for one or two focused hours. Start with the contract, run the smallest
+relevant check after each change, and open a hint only after naming the evidence
+that has blocked you.
+:::
+
+## 2. Understand the acceptance examples
+
+Before writing implementation code, write one ordinary example, one boundary,
+and one invalid or empty case. Predict the result for each. These examples are
+the specification you will compare against while working.
+
+### Constraints
+
+1. Use `pathlib.Path` instead of manual path separators.
+2. Create the output directory safely.
+3. Specify UTF-8 for every text read and write.
+4. Make a second run produce the same file content.
+
+## 3. Start from the contract
+
+Preserve the supplied public names and comments so that each assertion gives a
+useful location signal.
+
+```python
+from pathlib import Path
+
+source_text = "  Aprender Python — café e dados  "
+output_dir = Path("notes_output")
+output_path = output_dir / "zoe.txt"
+normalized = ""  # Strip surrounding whitespace and add one newline.
+
+# Create the directory, write normalized, then read it back.
+round_trip = ""
+```
+
+## 4. Build in small stages
+
+1. Make the ordinary example pass without adding behavior for every case.
+2. Trace the important state after each step and compare it with your prediction.
+3. Add the boundary case, then the empty or invalid case.
+4. Restart the notebook or process and run the complete solution from the top.
+
+## 5. Run progressive assertions
+
+Do not weaken an expected value to make a check pass. If a check appears wrong,
+write down the contract conflict before changing either side.
+
+```python
+assert output_path.parent == Path("notes_output")
+assert normalized == "Aprender Python — café e dados\n"
+assert round_trip == normalized
+assert output_path.read_text(encoding="utf-8") == normalized
+assert len(list(output_dir.glob("*.txt"))) == 1
+```
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+Call `output_dir.mkdir(parents=True, exist_ok=True)` before writing.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Use `.strip() + "\n"` to define one stable file ending.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Both `write_text` and `read_text` accept an explicit `encoding` argument.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one failure that helped you understand the program. Record the actual
+value or message, your single-cause hypothesis, the controlled change, and the
+clean rerun that confirmed or rejected it.
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What did you observe? | Which cause fits? | What one thing changed? | Which check now passes? |
+
+## 8. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-files-and-paths-challenge",
+  "title": "Organize a UTF-8 Notes Archive readiness check",
+  "instructions": "Trace the situation before choosing an answer.",
+  "questions": [
+    {
+      "id": "path-join",
+      "prompt": "Which expression creates a child path portably?",
+      "options": [
+        "str(output_dir) + \"\\\\zoe.txt\"",
+        "output_dir / \"zoe.txt\"",
+        "output_dir - \"zoe.txt\"",
+        "Path.join = \"zoe.txt\""
+      ],
+      "answer_index": 1,
+      "explanation": "`Path` overloads `/` to join path components for the current platform."
+    },
+    {
+      "id": "idempotent",
+      "prompt": "What does an idempotent rerun do here?",
+      "options": [
+        "Creates a duplicate on every run",
+        "Changes the encoding each time",
+        "Produces the same final file content",
+        "Deletes the source variable"
+      ],
+      "answer_index": 2,
+      "explanation": "The archive transformation should converge on the same observable result."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+- [ ] The acceptance examples and supplied checks pass.
+- [ ] The work runs from a clean state.
+- [ ] I can explain the important state changes and boundaries.
+- [ ] I kept one debugging record and verified a controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit or grade the artifact.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The contract narrows the design without supplying the implementation.
+- Progressive checks turn the task into observable behavior.
+- A clean rerun and explanation are part of the evidence.

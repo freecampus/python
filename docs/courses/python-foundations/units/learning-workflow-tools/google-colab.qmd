@@ -1,0 +1,267 @@
+---
+title: Google Colab
+lesson_id: learning-workflow-tools.google-colab
+lesson_order: 20
+description: Run Python in a browser and learn the notebook workflow without installing software.
+execute:
+  echo: true
+categories:
+- python-foundations
+- learning-workflow-tools
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/learning-workflow-tools/google-colab.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 20–30 minutes
+- **You will learn:** Run Python in a browser and learn the notebook workflow without installing software.
+- **Practice in:** Google Colab and browser notebooks
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+You can learn Python before installing anything on your computer. Google Colab
+runs notebooks in the browser, which makes it a friendly place to practice code,
+write notes, see output, and share work.
+
+Colab is especially useful at the beginning because it removes setup problems.
+You can focus on code first, then later learn local tools such as VS Code and
+Jupyter.
+
+## 2. What a notebook is
+
+A notebook is a document made of **cells**. A cell can contain code or notes.
+When you run a code cell, Python executes that cell and shows the output below
+it.
+
+## 3. How notebook cells run
+
+::: {.concept-diagram}
+A notebook keeps code, output, and explanation close together.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  notebook["Notebook"] --> markdown["Text/Markdown cell<br/>explain the idea"]
+  notebook --> code["Code cell<br/>name = 'Ada'"]
+  code --> runtime["Runtime<br/>Python process"]
+  runtime --> output["Output under the cell<br/>Welcome, Ada!"]
+```
+
+The runtime remembers values from cells that have already run. If results become
+confusing, restart the runtime and run cells from top to bottom.
+:::
+
+## 4. Vocabulary in plain language
+
+| Word | Beginner-friendly meaning |
+| --- | --- |
+| Notebook | A document containing notes, code cells, and output. |
+| Cell | One editable block in a notebook. |
+| Code cell | A cell that Python can run. |
+| Markdown cell | A cell for formatted notes, headings, and explanations. |
+| Runtime | The Python session connected to the notebook. |
+| Output | What appears below a code cell after it runs. |
+
+## 5. First notebook exercise
+
+Open <https://colab.new>. Create or use the first code cell and run:
+
+```python
+name = "Ada"
+print(f"Welcome, {name}!")
+```
+
+## 6. Step-by-step explanation
+
+1. `name = "Ada"`
+   - Python creates the string `"Ada"`.
+   - The name `name` now refers to that string.
+2. `print(f"Welcome, {name}!")`
+   - The `f` creates an f-string.
+   - `{name}` is replaced with the value `"Ada"`.
+   - The output is `Welcome, Ada!`.
+3. The output appears below the code cell.
+
+## 7. Cell order matters
+
+A notebook can be run out of order. That is powerful, but it can also confuse
+beginners.
+
+Try this in two separate code cells.
+
+Cell 1:
+
+```python
+name = "Ada"
+```
+
+Cell 2:
+
+```python
+print(name)
+```
+
+If you run Cell 2 before Cell 1, Python raises `NameError` because `name` does
+not exist yet. Run Cell 1 first, then Cell 2.
+
+::: {.callout-warning title="Common mistake"}
+If notebook output stops making sense, restart the runtime and run all cells from
+the top. This clears old hidden state.
+:::
+
+## 8. Notes and code together
+
+Add a Markdown cell above your code and write:
+
+```markdown
+## 9. Greeting experiment
+
+Prediction: the code will print a welcome message for Ada.
+```
+
+Good notebooks explain the purpose of the code, not just the final answer. Use
+notes for predictions, observations, and questions.
+
+## 10. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "colab-basics-checkpoint",
+  "title": "Colab basics checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "notebook-meaning",
+      "prompt": "What is a notebook?",
+      "options": [
+        "Only a Python package installer.",
+        "A folder that cannot run code.",
+        "A terminal command only.",
+        "A document with cells for notes, code, and output."
+      ],
+      "answer_index": 3,
+      "explanation": "Notebooks combine explanation, executable code, and results."
+    },
+    {
+      "id": "runtime-meaning",
+      "prompt": "What is the runtime in a Colab notebook?",
+      "options": [
+        "The Python session connected to the notebook.",
+        "A Markdown heading.",
+        "The name of every variable.",
+        "A saved image only."
+      ],
+      "answer_index": 0,
+      "explanation": "The runtime runs code and remembers values created by cells."
+    },
+    {
+      "id": "output-location",
+      "prompt": "Where does output from a code cell usually appear?",
+      "options": [
+        "Only in a separate email.",
+        "Below the cell after it runs.",
+        "Inside the browser address bar.",
+        "Nowhere, because notebooks hide all output."
+      ],
+      "answer_index": 1,
+      "explanation": "Notebook output appears near the code that produced it."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Practice routine in Colab
+
+Use this three-cell pattern for course exercises:
+
+1. **Prediction cell**: write what you expect in a Markdown cell.
+2. **Original code cell**: run the lesson example unchanged.
+3. **Experiment cell**: copy the code and change one thing.
+
+Example experiment:
+
+```python
+name = "Grace"
+print(f"Welcome, {name}!")
+```
+
+## 12. Common Colab problems and fixes
+
+| Problem | What to try first |
+| --- | --- |
+| `NameError` for a value defined earlier | Run the earlier cell, or restart and run from top. |
+| Output looks old | Run the current cell again. |
+| Too much output | Stop or interrupt the running cell. |
+| Notebook is not saved | Save a copy in your own Drive or download a copy. |
+
+## 13. Check your understanding again
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "colab-workflow-checkpoint",
+  "title": "Colab workflow checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "cell-order",
+      "prompt": "Why can running cells out of order cause NameError?",
+      "options": [
+        "Colab cannot run strings.",
+        "Markdown cells delete variables.",
+        "A later cell may use a name before the earlier cell creates it.",
+        "Python refuses all notebooks with two cells."
+      ],
+      "answer_index": 2,
+      "explanation": "Names exist only after the cell that creates them has run in the current runtime."
+    },
+    {
+      "id": "restart-run-all",
+      "prompt": "What should you try when notebook state becomes confusing?",
+      "options": [
+        "Delete every code example.",
+        "Change many cells at once.",
+        "Assume Python is random.",
+        "Restart the runtime and run cells from the top."
+      ],
+      "answer_index": 3,
+      "explanation": "Restarting clears old state and running top-to-bottom rebuilds it predictably."
+    },
+    {
+      "id": "markdown-use",
+      "prompt": "What is a good use for Markdown cells?",
+      "options": [
+        "Predictions, explanations, headings, and observations.",
+        "Only storing secret passwords.",
+        "Replacing all Python code.",
+        "Installing the interpreter."
+      ],
+      "answer_index": 0,
+      "explanation": "Markdown cells help learners explain what code is doing."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 14. Key points
+
+::: {.callout-tip title="Key points"}
+- Colab lets you run Python in a browser.
+- A notebook contains code cells, note cells, and output.
+- The runtime remembers values from cells that have run.
+- Running cells out of order can cause confusing results.
+- Restarting and running from top is a reliable notebook debugging habit.
+:::
+
+## 15. References
+
+- Google Colab: https://colab.new
+- Colab overview: https://colab.research.google.com/
+- Markdown guide: https://www.markdownguide.org/basic-syntax/

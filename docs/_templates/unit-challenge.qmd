@@ -5,8 +5,6 @@ challenge_id: unit-id.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
 assessment_version: 1
-required_for_completion: true
-completion_label: Required unit challenge
 estimated_time: "60–120 minutes"
 categories: [course-id, unit-id, unit-challenge]
 order: 90
@@ -17,7 +15,7 @@ colab_notebook: notebooks/courses/course-id/units/unit-id/challenge.ipynb
 - **Level:** Course name · Unit number challenge
 - **Estimated time:** 60–120 minutes
 - **Outcome assessed:** State one observable outcome.
-- **Completion rule:** Complete the required checks, then record completion.
+- **Evidence:** Complete the checks, explain the result, then record progress.
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
@@ -31,8 +29,7 @@ learner should be able to explain after finishing.
 ## 2. Understand the acceptance example
 
 Give exact sample input and output. Ask for a written prediction before code.
-List constraints, including concepts that have not been taught and therefore
-must not be required.
+List constraints and avoid concepts that have not been taught yet.
 
 ## 3. Start from the contract
 
@@ -98,7 +95,7 @@ rerun.
       "id": "contract",
       "prompt": "What should the learner verify before recording completion?",
       "options": [
-        "The required observable behavior",
+        "The observable behavior",
         "Only the number of lines",
         "An unrelated optional feature",
         "A copied screenshot"
@@ -114,7 +111,7 @@ rerun.
 
 ## 9. Decide whether the challenge is complete
 
-List required checks, clean-start evidence, explanation, debugging evidence, and
+List acceptance checks, clean-start evidence, explanation, debugging evidence, and
 one controlled modification.
 
 ```{=html}

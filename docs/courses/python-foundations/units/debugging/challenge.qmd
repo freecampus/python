@@ -1,23 +1,24 @@
 ---
-title: "Unit Challenge: Run a Bug Clinic"
-description: "Use reproducible evidence to diagnose several logical defects in a small program."
+title: 'Unit Challenge: Run a Bug Clinic'
+description: Use reproducible evidence to diagnose several logical defects in a small program.
 challenge_id: debugging.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
 assessment_version: 1
-required_for_completion: true
-completion_label: Required unit challenge
-estimated_time: "60–120 minutes"
-categories: [python-foundations, debugging, unit-challenge]
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- debugging
+- unit-challenge
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/debugging/challenge.ipynb
 ---
 
 ::: {.lesson-meta .challenge-meta}
-- **Level:** Python Foundations · Unit 6 challenge
+- **Level:** Python Foundations · Unit 12 challenge
 - **Estimated time:** 60–120 minutes
 - **Outcome assessed:** Use reproducible evidence to diagnose several logical defects in a small program.
-- **Completion rule:** Complete the required checks, then record completion below.
+- **Evidence:** Complete the checks and explain the result in your own words.
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
@@ -46,7 +47,7 @@ For the supplied input, the expected evidence is:
 Write your prediction in a notebook text cell or project note. Do not change
 the sample input until the matching assertions pass.
 
-### Required constraints
+### Constraints
 
 1. Reproduce one failure before changing the function.
 2. Change one behavior at a time and rerun the smallest relevant assertion.
@@ -81,7 +82,7 @@ all earlier checks before moving forward.
 
 ## 5. Run progressive assertions
 
-These checks describe required observable behavior. A failed assertion is a
+These checks describe observable behavior. A failed assertion is a
 location signal: read its message, inspect the actual value, and change one
 cause rather than weakening the assertion.
 
@@ -148,24 +149,24 @@ in your browser.
       "id": "first-evidence",
       "prompt": "What belongs in a useful first bug report?",
       "options": [
-        "The observed result, expected result, and reproducible input.",
         "Only a guess about the fix.",
+        "The observed result, expected result, and reproducible input.",
         "A screenshot without code or data.",
         "Every unrelated project file."
       ],
-      "answer_index": 0,
+      "answer_index": 1,
       "explanation": "A reproducible input and a precise expectation let you investigate the same failure repeatedly."
     },
     {
       "id": "small-change",
       "prompt": "Why rerun assertions after one repair?",
       "options": [
-        "To verify the change fixed the target behavior without hiding another failure.",
         "To make the source file longer.",
         "To avoid reading the failure message.",
+        "To verify the change fixed the target behavior without hiding another failure.",
         "To rename every variable."
       ],
-      "answer_index": 0,
+      "answer_index": 2,
       "explanation": "A controlled rerun connects the repair to observable evidence."
     }
   ]
@@ -175,6 +176,16 @@ in your browser.
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
 ## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
 
 Record completion only when every statement is true:
 

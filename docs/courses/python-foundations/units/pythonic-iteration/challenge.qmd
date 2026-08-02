@@ -1,0 +1,257 @@
+---
+title: 'Unit Challenge: Trace a Managed Operation'
+description: Apply reusable tracing around a function and guarantee cleanup around managed
+  work.
+challenge_id: pythonic-iteration.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- pythonic-iteration
+- unit-challenge
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/pythonic-iteration/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 23 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Apply reusable tracing around a function and guarantee cleanup around managed work.
+- **Evidence:** Complete the checks and explain the result in your own words.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Build a lazy event-label iterator, then implement a metadata-preserving call decorator and a context manager with observable setup and cleanup order.
+
+**Scenario:** A small operation needs consistent call tracing and a managed boundary. An event list makes ordering visible without depending on timestamps or external services.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+The event order is `call`, `enter`, operation work, `exit`; cleanup also appears when work raises.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Constraints
+
+1. Use `functools.wraps` so the decorated function keeps its name and docstring.
+2. The decorator must accept and return arbitrary positional and keyword arguments.
+3. Use `contextlib.contextmanager` with `try/finally` for guaranteed cleanup.
+4. Do not suppress exceptions from the managed block.
+5. Produce event labels lazily with a generator instead of building an unnecessary intermediate list.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+from contextlib import contextmanager
+from functools import wraps
+
+
+def record_call(events):
+    """Return a decorator that records a call event before delegation."""
+    raise NotImplementedError
+
+
+def iter_event_labels(events):
+    """Yield numbered event labels without constructing a result list."""
+    raise NotImplementedError
+    yield
+
+
+@contextmanager
+def managed_operation(events):
+    """Record enter and guaranteed exit around a block of work."""
+    raise NotImplementedError
+    yield
+```
+
+## 4. Build in small stages
+
+1. Implement the decorator factory and verify metadata before testing events.
+2. Implement the normal context-manager path and inspect event order.
+3. Place a deliberate exception inside the managed block and verify cleanup.
+4. Compose the decorator and context manager around one small function.
+5. Implement the event-label generator and compare it with an eager comprehension.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+events = []
+
+
+@record_call(events)
+def greet(name):
+    """Return a greeting."""
+    with managed_operation(events):
+        events.append("work")
+        return f"Hello, {name}"
+
+
+assert greet.__name__ == "greet"
+assert greet.__doc__ == "Return a greeting."
+assert greet("Ari") == "Hello, Ari"
+assert events == ["call", "enter", "work", "exit"]
+assert list(iter_event_labels(events)) == [
+    "1:call",
+    "2:enter",
+    "3:work",
+    "4:exit",
+]
+
+failed_events = []
+try:
+    with managed_operation(failed_events):
+        raise RuntimeError("demo")
+except RuntimeError:
+    pass
+assert failed_events == ["enter", "exit"]
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+The outer function receives `events`; the inner decorator receives the function; the wrapper receives `*args, **kwargs`.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Place `@wraps(function)` directly above the wrapper and return the delegated result.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+In the context manager, append `"enter"`, `yield` inside `try`, and append `"exit"` in `finally`.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one wrong event order or lost function name. Identify which wrapper or lifecycle boundary owns the defect and preserve the corrected assertion run.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-pythonic-iteration-challenge",
+  "title": "Managed Operation readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "wraps-purpose",
+      "prompt": "Why use functools.wraps in a function decorator?",
+      "options": [
+        "It guarantees the function never raises.",
+        "It preserves useful metadata from the wrapped function.",
+        "It converts arguments to strings.",
+        "It opens a file automatically."
+      ],
+      "answer_index": 1,
+      "explanation": "wraps keeps metadata such as the original name and docstring visible."
+    },
+    {
+      "id": "cleanup-path",
+      "prompt": "Where should context-manager cleanup run?",
+      "options": [
+        "Only when the block prints output.",
+        "Before setup.",
+        "After both successful work and exceptions inside the managed block.",
+        "Only when no resource was acquired."
+      ],
+      "answer_index": 2,
+      "explanation": "The context boundary exists to pair setup with reliable cleanup on every exit path."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

@@ -1,0 +1,249 @@
+---
+title: 'Unit Challenge: Model an Equipment Rental Desk'
+description: Model cohesive equipment state and rental behavior with dataclasses and composition.
+challenge_id: object-oriented-python.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- object-oriented-python
+- unit-challenge
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 22 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Model cohesive equipment state and rental behavior with dataclasses and composition.
+- **Evidence:** Complete the checks and explain the result in your own words.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Implement an equipment record and a rental desk that protects checkout and return invariants.
+
+**Scenario:** A community media desk owns equipment items. The desk looks up items and coordinates state changes; each item owns its ID, name, and current borrower.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+Checkout records a borrower, a second checkout fails clearly, return clears the borrower, and unknown IDs fail clearly.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Constraints
+
+1. Keep the supplied dataclass fields and rental-desk public methods.
+2. Use composition: `RentalDesk` owns equipment objects rather than inheriting from them.
+3. Protect invalid state transitions with `ValueError` or `KeyError` at the responsible boundary.
+4. Do not expose a second mutable copy of item state.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass
+class Equipment:
+    item_id: str
+    name: str
+    borrower: str | None = None
+
+    def is_available(self) -> bool:
+        """Return whether this item is not currently borrowed."""
+        raise NotImplementedError
+
+
+class RentalDesk:
+    def __init__(self, items: list[Equipment]) -> None:
+        """Create a desk indexed by each equipment item ID."""
+        raise NotImplementedError
+
+    def checkout(self, item_id: str, borrower: str) -> None:
+        """Loan an available item or raise a clear error."""
+        raise NotImplementedError
+
+    def return_item(self, item_id: str) -> None:
+        """Return a borrowed item or raise a clear error."""
+        raise NotImplementedError
+```
+
+## 4. Build in small stages
+
+1. Implement and check `Equipment.is_available` on both states.
+2. Build the desk lookup and decide how an unknown ID is reported.
+3. Implement checkout, then assert both the successful and unavailable paths.
+4. Implement return and verify the same object becomes available again.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+camera = Equipment("cam-1", "Camera")
+desk = RentalDesk([camera])
+assert camera.is_available() is True
+
+desk.checkout("cam-1", "Ari")
+assert camera.borrower == "Ari"
+assert camera.is_available() is False
+
+try:
+    desk.checkout("cam-1", "Bo")
+except ValueError as error:
+    assert str(error) == "cam-1 is already borrowed"
+else:
+    raise AssertionError("a borrowed item must not be checked out again")
+
+desk.return_item("cam-1")
+assert camera.borrower is None
+assert camera.is_available() is True
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+`is_available` compares `borrower` with `None`; the desk can index items by ID in its constructor.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Checkout first obtains the item, then asks the item state whether the transition is valid.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Mutate the composed `Equipment` object rather than replacing it with an unrelated dictionary copy.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one invalid transition and its exact exception. Explain which object owns the relevant state and why the repaired boundary belongs there.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-object-oriented-python-challenge",
+  "title": "Equipment Rental readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "composition",
+      "prompt": "What should the rental service own?",
+      "options": [
+        "A collection of equipment objects it coordinates.",
+        "Copies of every method as strings.",
+        "Only one unrelated global number.",
+        "The Python interpreter."
+      ],
+      "answer_index": 0,
+      "explanation": "Composition lets the service coordinate cohesive item objects without pretending it is an item."
+    },
+    {
+      "id": "class-invariant",
+      "prompt": "Where should an item's unavailable-state rule be protected?",
+      "options": [
+        "Only in the README.",
+        "At the method boundary that changes checkout state.",
+        "In a caller's comment.",
+        "By renaming the class."
+      ],
+      "answer_index": 1,
+      "explanation": "The object that owns the state should keep invalid transitions from being represented silently."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

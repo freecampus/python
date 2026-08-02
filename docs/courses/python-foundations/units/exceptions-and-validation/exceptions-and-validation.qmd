@@ -1,0 +1,202 @@
+---
+title: Exceptions and Validation
+lesson_id: exceptions-and-validation.exceptions-and-validation
+lesson_order: 10
+description: Handle expected failures and validate user input before trusting it.
+execute:
+  echo: true
+categories:
+- python-foundations
+- exceptions-and-validation
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/exceptions-and-validation/exceptions-and-validation.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner to intermediate
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Handle expected failures and validate user input before trusting it.
+- **Practice in:** VS Code, Jupyter, and local files
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Handle expected failures and validate user input before trusting it. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+
+::: {.callout-note title="Questions to answer with evidence"}
+- What problem does **Exceptions and Validation** solve?
+- What value, output, or failure demonstrates that it works?
+- Which boundary or misuse would expose an incorrect implementation?
+:::
+
+## 2. Exceptions
+
+Handle expected failures with try and except.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+An exception handler is like a safety net under a tightrope: it does not remove risk, but it gives a planned response.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** An exception interrupts normal flow when something goes wrong; handling catches a specific expected problem.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+text = "abc"
+try:
+    number = int(text)
+except ValueError:
+    print("Please enter digits only.")
+```
+
+### Trace it line by line
+
+1. `text = "abc"` — Python evaluates the right-hand expression and binds or updates `text` with the result.
+2. `try:` — Python executes this statement in the current block; inspect the names it reads and the state it changes.
+3. `number = int(text)` — Python evaluates the right-hand expression and binds or updates `number` with the result.
+4. `except ValueError:` — Python enters this handler only for the named exception raised by the protected operation.
+5. `print("Please enter digits only.")` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Catching every exception with bare except hides real bugs. Catch the specific error you expect.
+:::
+
+### Practice exceptions
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Exceptions**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "exceptions-and-validation-exceptions-and-validation-exceptions",
+  "title": "Exceptions checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Exceptions?",
+      "options": [
+        "Validation confirms that input has the shape and meaning your program needs.",
+        "An exception interrupts normal flow when something goes wrong; handling catches a specific expected problem.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+      ],
+      "answer_index": 1,
+      "explanation": "An exception interrupts normal flow when something goes wrong; handling catches a specific expected problem."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Validating User Input
+
+Check user input before trusting it in calculations or file operations.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+Validation is a door checklist: do you have a ticket, is it for today, and is it for this room?
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** Validation confirms that input has the shape and meaning your program needs.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+age_text = input("Age: ")
+if age_text.isdigit():
+    age = int(age_text)
+    print(age + 1)
+else:
+    print("Use digits only.")
+```
+
+### Trace it line by line
+
+1. `age_text = input("Age: ")` — Python evaluates the right-hand expression and binds or updates `age_text` with the result.
+2. `if age_text.isdigit():` — Python evaluates this condition and enters the indented branch only when the result is true.
+3. `age = int(age_text)` — Python evaluates the right-hand expression and binds or updates `age` with the result.
+4. `print(age + 1)` — Python evaluates the arguments and writes their display form to standard output.
+5. `else:` — Python enters this fallback when none of the preceding conditions matched.
+6. `print("Use digits only.")` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Validation should explain what went wrong and how to fix it, not only say invalid.
+:::
+
+### Practice validating user input
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Validating User Input**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "exceptions-and-validation-exceptions-and-validation-validating-user-input",
+  "title": "Validating User Input checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Validating User Input?",
+      "options": [
+        "An exception interrupts normal flow when something goes wrong; handling catches a specific expected problem.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "Validation confirms that input has the shape and meaning your program needs.",
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+      ],
+      "answer_index": 2,
+      "explanation": "Validation confirms that input has the shape and meaning your program needs."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Integrate the lesson
+
+Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+
+## 5. Key points
+
+- **Exceptions:** An exception interrupts normal flow when something goes wrong; handling catches a specific expected problem.
+- **Validating User Input:** Validation confirms that input has the shape and meaning your program needs.
+- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

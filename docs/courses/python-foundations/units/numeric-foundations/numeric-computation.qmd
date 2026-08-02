@@ -1,0 +1,139 @@
+---
+title: Numeric Computation and Precision
+lesson_id: numeric-foundations.numeric-computation
+lesson_order: 20
+description: Model grouping, remainders, rounding, and decimal precision deliberately.
+execute:
+  echo: true
+categories:
+- python-foundations
+- numeric-foundations
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/numeric-foundations/numeric-computation.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Model grouping, remainders, rounding, and decimal precision deliberately.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+A calculation can look plausible while answering the wrong question. Complete groups use floor division, leftovers use remainder, averages use true division, and financial rules must say when rounding happens.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+items = 29
+box_size = 6
+print(items // box_size)  # complete boxes
+print(items % box_size)   # remaining items
+print(items / box_size)   # exact ratio
+```
+
+### What Python does
+
+1. `//` answers how many complete groups fit.
+2. `%` answers what remains after those groups.
+3. `/` returns a floating-point ratio, even when the result is mathematically whole.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This version is valid Python but does not satisfy the lesson's intended contract:
+
+```python
+unit_price = 1.235
+subtotal = round(unit_price, 2) * 3
+```
+
+A focused repair is:
+
+```python
+subtotal = round(unit_price * 3, 2)
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Convert 367 seconds into complete minutes and remaining seconds.
+2. Compare `0.1 + 0.2` with `0.3` using a tolerance.
+3. Use `Decimal` values created from strings for a small invoice.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "numeric-foundations-numeric-computation",
+  "title": "Numeric Computation and Precision checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "floor",
+      "prompt": "Which operator counts complete groups?",
+      "options": [
+        "/",
+        "//",
+        "%",
+        "**"
+      ],
+      "answer_index": 1,
+      "explanation": "Floor division counts complete groups."
+    },
+    {
+      "id": "remainder",
+      "prompt": "What is `29 % 6`?",
+      "options": [
+        "4",
+        "6",
+        "5",
+        "23"
+      ],
+      "answer_index": 2,
+      "explanation": "Four groups use 24 and leave 5."
+    },
+    {
+      "id": "decimal",
+      "prompt": "Why create `Decimal(\"0.1\")` from text?",
+      "options": [
+        "It becomes an integer.",
+        "It disables rounding.",
+        "It is always faster.",
+        "It preserves intended base-ten digits."
+      ],
+      "answer_index": 3,
+      "explanation": "Text avoids first creating a float approximation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

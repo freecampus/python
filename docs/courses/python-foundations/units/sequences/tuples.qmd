@@ -1,0 +1,192 @@
+---
+title: Tuples
+lesson_id: sequences.tuples
+lesson_order: 20
+description: Use immutable ordered records and unpack their values clearly.
+execute:
+  echo: true
+categories:
+- python-foundations
+- sequences
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/sequences/tuples.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Use immutable ordered records and unpack their values clearly.
+- **Practice in:** Google Colab, Jupyter, or VS Code
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Use immutable ordered records and unpack their values clearly. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+
+::: {.callout-note title="Questions to answer with evidence"}
+- What problem does **Tuples** solve?
+- What value, output, or failure demonstrates that it works?
+- Which boundary or misuse would expose an incorrect implementation?
+:::
+
+## 2. Tuples
+
+Store ordered records that should not be changed after creation.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+A tuple is like a sealed envelope containing related pieces of information; you can read it but not rewrite it in place.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** A tuple is an immutable ordered container often used for small fixed records.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+point = (3, 4)
+print(point[0])
+print(point[1])
+```
+
+### Trace it line by line
+
+1. `point = (3, 4)` — Python evaluates the right-hand expression and binds or updates `point` with the result.
+2. `print(point[0])` — Python evaluates the arguments and writes their display form to standard output.
+3. `print(point[1])` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Parentheses are common, but the comma creates a one-item tuple: single = (5,).
+:::
+
+### Practice tuples
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Tuples**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "sequences-tuples-tuples",
+  "title": "Tuples checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Tuples?",
+      "options": [
+        "Unpacking matches positions on the right with names on the left.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "A tuple is an immutable ordered container often used for small fixed records.",
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+      ],
+      "answer_index": 2,
+      "explanation": "A tuple is an immutable ordered container often used for small fixed records."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Tuple Unpacking
+
+Assign multiple names from a tuple or sequence in one clear line.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+Unpacking is like handing out labeled seats: the first value goes to the first name, the second to the second name.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** Unpacking matches positions on the right with names on the left.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+point = (3, 4)
+x, y = point
+print(x + y)
+```
+
+### Trace it line by line
+
+1. `point = (3, 4)` — Python evaluates the right-hand expression and binds or updates `point` with the result.
+2. `x, y = point` — Python evaluates the right-hand expression and binds or updates `x, y` with the result.
+3. `print(x + y)` — Python evaluates the arguments and writes their display form to standard output.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+The number of names must match the number of values unless you use starred unpacking.
+:::
+
+### Practice tuple unpacking
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Tuple Unpacking**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "sequences-tuples-tuple-unpacking",
+  "title": "Tuple Unpacking checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Tuple Unpacking?",
+      "options": [
+        "A tuple is an immutable ordered container often used for small fixed records.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
+        "Unpacking matches positions on the right with names on the left."
+      ],
+      "answer_index": 3,
+      "explanation": "Unpacking matches positions on the right with names on the left."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Integrate the lesson
+
+Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+
+## 5. Key points
+
+- **Tuples:** A tuple is an immutable ordered container often used for small fixed records.
+- **Tuple Unpacking:** Unpacking matches positions on the right with names on the left.
+- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

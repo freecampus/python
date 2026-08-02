@@ -1,0 +1,185 @@
+---
+title: "Unit Challenge: Build a Prioritized Workshop Queue"
+description: "Use list operations, slicing, and tuples to maintain an ordered queue without losing the original record."
+challenge_id: sequences.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: "60–120 minutes"
+categories: [python-foundations, sequences, unit-challenge]
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/sequences/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 7 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Use list operations, slicing, and tuples to maintain an ordered queue without losing the original record.
+- **Evidence:** Passing checks, a clean rerun, and a short debugging record
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+A workshop coordinator receives attendee names in arrival order, inserts one priority attendee, removes cancellations, and publishes an immutable snapshot.
+
+::: {.callout-note title="Work independently, but not without support"}
+Plan for one or two focused hours. Start with the contract, run the smallest
+relevant check after each change, and open a hint only after naming the evidence
+that has blocked you.
+:::
+
+## 2. Understand the acceptance examples
+
+Before writing implementation code, write one ordinary example, one boundary,
+and one invalid or empty case. Predict the result for each. These examples are
+the specification you will compare against while working.
+
+### Constraints
+
+1. Keep arrival order for ordinary attendees.
+2. Do not mutate the original intake list.
+3. Use a tuple for the final published snapshot.
+4. Handle a cancellation that is not present without crashing.
+
+## 3. Start from the contract
+
+Preserve the supplied public names and comments so that each assertion gives a
+useful location signal.
+
+```python
+intake = ["Amina", "Bruno", "Chen", "Dara"]
+priority_name = "Eli"
+cancellations = ["Chen", "Missing Name"]
+
+queue = []  # Start from a copy of intake.
+published = ()  # Convert the finished queue to a tuple.
+```
+
+## 4. Build in small stages
+
+1. Make the ordinary example pass without adding behavior for every case.
+2. Trace the important state after each step and compare it with your prediction.
+3. Add the boundary case, then the empty or invalid case.
+4. Restart the notebook or process and run the complete solution from the top.
+
+## 5. Run progressive assertions
+
+Do not weaken an expected value to make a check pass. If a check appears wrong,
+write down the contract conflict before changing either side.
+
+```python
+assert intake == ["Amina", "Bruno", "Chen", "Dara"]
+assert queue == ["Eli", "Amina", "Bruno", "Dara"]
+assert published == ("Eli", "Amina", "Bruno", "Dara")
+assert isinstance(published, tuple)
+```
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+A full slice such as `intake[:]` creates a new outer list.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Check membership before calling `.remove()` for a possible cancellation.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Insert the priority attendee at index 0, then convert the finished list with `tuple`.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one failure that helped you understand the program. Record the actual
+value or message, your single-cause hypothesis, the controlled change, and the
+clean rerun that confirmed or rejected it.
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What did you observe? | Which cause fits? | What one thing changed? | Which check now passes? |
+
+## 8. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-sequences-challenge",
+  "title": "Build a Prioritized Workshop Queue readiness check",
+  "instructions": "Trace the situation before choosing an answer.",
+  "questions": [
+    {
+      "id": "copy",
+      "prompt": "Which expression creates a separate outer list?",
+      "options": [
+        "queue = intake",
+        "queue = (intake,)",
+        "queue = intake[:]",
+        "queue = str(intake)"
+      ],
+      "answer_index": 2,
+      "explanation": "A full slice creates a shallow copy of the list."
+    },
+    {
+      "id": "snapshot",
+      "prompt": "Why publish a tuple instead of the working list?",
+      "options": [
+        "It sorts names automatically.",
+        "It removes all duplicates.",
+        "It makes every nested value immutable.",
+        "It communicates that the snapshot should not be changed."
+      ],
+      "answer_index": 3,
+      "explanation": "A tuple prevents item assignment in the published sequence."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+- [ ] The acceptance examples and supplied checks pass.
+- [ ] The work runs from a clean state.
+- [ ] I can explain the important state changes and boundaries.
+- [ ] I kept one debugging record and verified a controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit or grade the artifact.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The contract narrows the design without supplying the implementation.
+- Progressive checks turn the task into observable behavior.
+- A clean rerun and explanation are part of the evidence.

@@ -1,0 +1,132 @@
+---
+title: Context Managers
+lesson_id: pythonic-iteration.context-managers
+lesson_order: 40
+description: Use with statements to acquire and release resources safely.
+execute:
+  echo: true
+categories:
+- python-foundations
+- pythonic-iteration
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/pythonic-iteration/context-managers.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Use with statements to acquire and release resources safely.
+- **Practice in:** Generated Colab notebook and a local project when appropriate
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Files, locks, and connections need cleanup even when work fails. A context manager makes entry and exit one visible control-flow boundary.
+
+::: {.callout-note title="Prediction"}
+Before running the example, write the output or failure you expect and identify the line that will produce it.
+:::
+
+## 2. Read a resource and prove that cleanup happens after both success and failure.
+
+```python
+from io import StringIO
+
+stream = StringIO("Ada,9\nGrace,8\n")
+with stream as handle:
+    first_row = handle.readline().strip()
+    print(first_row)
+
+print(stream.closed)
+```
+
+### Step-by-step explanation
+
+1. The `with` statement calls the resource’s entry protocol and binds it to `handle`.
+2. The indented block is the only region allowed to use the open handle.
+3. Leaving the block calls the exit protocol; `stream.closed` is therefore `True`.
+
+Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
+
+## 3. Debug a contract violation
+
+This version is syntactically valid but communicates or implements the wrong contract:
+
+```python
+handle = open("report.txt", encoding="utf-8")
+text = handle.read()
+# An exception before close() leaks the resource lifetime.
+handle.close()
+```
+
+A focused repair is:
+
+```python
+with open("report.txt", encoding="utf-8") as handle:
+    text = handle.read()
+```
+
+Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
+
+## 4. Practice from trace to transfer
+
+1. Trigger a handled exception inside a custom context manager and log entry and exit.
+2. Open two resources in one `with` statement and explain exit order.
+3. Use `contextlib.contextmanager` to time a small operation.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the tasks</summary>
+
+Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "pythonic-iteration-context-managers",
+  "title": "Context Managers checkpoint",
+  "instructions": "Trace the code and contract before choosing.",
+  "questions": [
+    {
+      "id": "exit",
+      "prompt": "When does a context manager run its exit behavior?",
+      "options": [
+        "Only after a return value is printed",
+        "Whenever control leaves the block, including through an exception",
+        "Only when no exception occurred",
+        "Before entering the block"
+      ],
+      "answer_index": 1,
+      "explanation": "The protocol guarantees exit handling as control leaves the managed region."
+    },
+    {
+      "id": "scope",
+      "prompt": "Does leaving a `with` block delete names created inside it?",
+      "options": [
+        "Yes, always",
+        "Only for strings",
+        "No; `with` controls a resource lifetime, not Python name scope",
+        "Only in notebooks"
+      ],
+      "answer_index": 2,
+      "explanation": "Python blocks do not create a new local scope; the resource may be closed while names remain bound."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- State the behavior contract before selecting syntax or tools.
+- Trace the values and boundaries that provide observable evidence.
+- Preserve one useful failure and verify the repair from a clean state.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

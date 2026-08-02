@@ -1,0 +1,142 @@
+---
+title: Text Files and Encodings
+lesson_id: files-and-paths.text-files-and-encodings
+lesson_order: 20
+description: Read, stream, and replace text files with explicit encoding and failure behavior.
+execute:
+  echo: true
+categories:
+- python-foundations
+- files-and-paths
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/files-and-paths/text-files-and-encodings.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Read, stream, and replace text files with explicit encoding and failure behavior.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Text files contain encoded bytes. A file contract should state encoding, newline behavior, size assumptions, and whether replacement may expose partial output. Build and validate content before replacing a good destination.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+from pathlib import Path
+path = Path("greeting.txt")
+path.write_text("Olá, Python!\n", encoding="utf-8")
+message = path.read_text(encoding="utf-8")
+print(repr(message))
+```
+
+### What Python does
+
+1. UTF-8 converts between text and bytes.
+2. `repr` makes the final newline visible.
+3. A `Path` avoids manual separator construction.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This version is valid Python but does not satisfy the lesson's intended contract:
+
+```python
+with open("report.txt", "w", encoding="utf-8") as out:
+    for record in parse_records():
+        out.write(format_record(record))
+```
+
+A focused repair is:
+
+```python
+temporary = Path("report.txt.tmp")
+temporary.write_text(complete_report, encoding="utf-8")
+temporary.replace("report.txt")
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Stream non-empty lines from a large file.
+2. Use a temporary directory to test transformation.
+3. Preserve or remove a final newline deliberately.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "files-and-paths-text-files-and-encodings",
+  "title": "Text Files and Encodings checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "encoding",
+      "prompt": "What translates bytes to text?",
+      "options": [
+        "An encoding",
+        "A list index",
+        "A branch",
+        "A comment"
+      ],
+      "answer_index": 0,
+      "explanation": "Encoding maps bytes and characters."
+    },
+    {
+      "id": "repr",
+      "prompt": "Why inspect `repr(text)`?",
+      "options": [
+        "It deletes spaces",
+        "It exposes escapes such as newline",
+        "It changes encoding",
+        "It closes files"
+      ],
+      "answer_index": 1,
+      "explanation": "Invisible characters become visible."
+    },
+    {
+      "id": "replace",
+      "prompt": "When replace the destination?",
+      "options": [
+        "Before parsing",
+        "After one row",
+        "After complete validation",
+        "On any error"
+      ],
+      "answer_index": 2,
+      "explanation": "Avoid partial ordinary output."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

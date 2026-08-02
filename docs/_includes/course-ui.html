@@ -137,8 +137,8 @@
       }
       if (!progress.courses[id] && create) {
         progress.courses[id] = {
-          curriculum_version: 4,
-          completion_rule_version: 4,
+          curriculum_version: 5,
+          completion_rule_version: 5,
           completed_lessons: {},
           completed_challenges: {},
           capstone_status: "not_started",
@@ -149,8 +149,8 @@
       }
       const state = progress.courses[id] || null;
       if (state) {
-        state.curriculum_version = state.curriculum_version || 4;
-        state.completion_rule_version = state.completion_rule_version || 4;
+        state.curriculum_version = 5;
+        state.completion_rule_version = 5;
         state.completed_lessons = state.completed_lessons || {};
         state.completed_challenges = state.completed_challenges || {};
         state.capstone_status = state.capstone_status || "not_started";
@@ -221,12 +221,12 @@
         return false;
       }
 
-      const requiredIds = courseLessonLinks().map((link) =>
+      const lessonIds = courseLessonLinks().map((link) =>
         lessonIdFromKey(pageKey(link.href)),
       );
       const complete =
-        countRecorded(requiredIds, state.completed_lessons) ===
-          requiredIds.length &&
+        countRecorded(lessonIds, state.completed_lessons) ===
+          lessonIds.length &&
         countRecorded(challengeIds, state.completed_challenges) ===
           challengeIds.length &&
         (!projectRequired || state.capstone_status === "complete");
@@ -245,16 +245,16 @@
     }
 
     function completionSnapshot(root, id) {
-      const requiredIds = idsFromDataset(root.dataset.courseRequiredIds);
+      const lessonIds = idsFromDataset(root.dataset.courseLessonIds);
       const challengeIds = idsFromDataset(root.dataset.courseChallengeIds);
       const projectRequired = root.dataset.courseProjectRequired === "true";
       const structured = Boolean(
-        requiredIds.length || challengeIds.length || projectRequired,
+        lessonIds.length || challengeIds.length || projectRequired,
       );
       const lessonTotal =
-        requiredIds.length || Number(root.dataset.courseTotal) || 0;
-      const lessonCompleted = requiredIds.length
-        ? countRecorded(requiredIds, completedLessons(id))
+        lessonIds.length || Number(root.dataset.courseTotal) || 0;
+      const lessonCompleted = lessonIds.length
+        ? countRecorded(lessonIds, completedLessons(id))
         : Math.min(lessonTotal, Object.keys(completedLessons(id)).length);
       const challengeCompleted = countRecorded(
         challengeIds,
@@ -330,9 +330,9 @@
           unit.position + 1
         } of ${unit.lessonLinks.length}`;
       } else if (position && challengeId) {
-        position.textContent = "Required unit challenge";
+        position.textContent = "Unit challenge";
       } else if (position && projectId) {
-        position.textContent = "Required course project";
+        position.textContent = "Course project";
       }
 
       chips?.querySelectorAll(".fc-title-chip").forEach((chip) => {
@@ -372,11 +372,11 @@
         return;
       }
 
-      const requiredIds = courseLessonLinks().map((link) =>
+      const lessonIds = courseLessonLinks().map((link) =>
         lessonIdFromKey(pageKey(link.href)),
       );
-      const total = requiredIds.length;
-      const completed = countRecorded(requiredIds, completedLessons(courseId));
+      const total = lessonIds.length;
+      const completed = countRecorded(lessonIds, completedLessons(courseId));
       const percent = total ? Math.round((completed / total) * 100) : 0;
       const isComplete = Boolean(completedLessons(courseId)[lessonId]);
       const label = button.querySelector("[data-fc-complete-label]");
@@ -394,7 +394,7 @@
 
       root.querySelector(
         "[data-fc-progress-label]",
-      ).textContent = `${completed} of ${total} required lessons complete`;
+      ).textContent = `${completed} of ${total} lessons complete`;
       root.querySelector(
         "[data-fc-progress-value]",
       ).textContent = `${percent}%`;
@@ -584,19 +584,19 @@
       root.querySelector("[data-fc-course-progress-label]").textContent =
         snapshot.structured
           ? snapshot.completed === snapshot.total
-            ? `All ${snapshot.total} completion requirements met`
+            ? `All ${snapshot.total} course activities recorded`
             : `${snapshot.total - snapshot.completed} of ${
                 snapshot.total
-              } completion requirements remaining`
+              } course activities remaining`
           : `${snapshot.completed} of ${snapshot.total} lessons complete`;
       root.querySelector(
         "[data-fc-course-progress-bar]",
       ).style.width = `${percent}%`;
       track?.setAttribute("aria-valuenow", String(percent));
 
-      const lessons = root.querySelector("[data-fc-required-lessons]");
-      const challenges = root.querySelector("[data-fc-required-challenges]");
-      const project = root.querySelector("[data-fc-required-project]");
+      const lessons = root.querySelector("[data-fc-course-lessons]");
+      const challenges = root.querySelector("[data-fc-course-challenges]");
+      const project = root.querySelector("[data-fc-course-project]");
       const status = root.querySelector("[data-fc-course-completion-status]");
       if (lessons) {
         lessons.textContent = `${snapshot.lessonCompleted}/${snapshot.lessonTotal}`;
@@ -651,7 +651,7 @@
           value.textContent = curriculumTbd
             ? "Curriculum TBD"
             : snapshot.structured
-            ? `${snapshot.completed}/${snapshot.total} requirements`
+            ? `${snapshot.completed}/${snapshot.total} activities`
             : `${snapshot.completed}/${snapshot.total} complete`;
         }
       });

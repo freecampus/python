@@ -1,0 +1,144 @@
+---
+title: Repositories, Diffs, and Commits
+lesson_id: git-and-collaboration.repositories-and-commits
+lesson_order: 10
+description: Use status and diffs to create focused, explainable history.
+execute:
+  echo: true
+categories:
+- python-foundations
+- git-and-collaboration
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/git-and-collaboration/repositories-and-commits.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Use status and diffs to create focused, explainable history.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+The working tree contains current files, the staging area selects the next snapshot, and a commit records it. Inspecting staged changes prevents unrelated artifacts and secrets entering history.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+steps = [
+    "git status",
+    "git diff",
+    "git add FILE",
+    "git diff --staged",
+    "git commit -m MESSAGE",
+]
+print("\n".join(steps))
+```
+
+### What Python does
+
+1. Status shows working/staged/committed relationships.
+2. Diff inspects exact content changes.
+3. A commit message explains coherent intent.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+These commands run, but they do not satisfy the repository-safety contract:
+
+```bash
+git add .
+git commit -m "updates"  # includes .env
+```
+
+A focused repair is:
+
+```bash
+git restore --staged .env
+printf ".env\n" >> .gitignore
+git diff --staged
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Make two focused commits from one script.
+2. Trace status after edit, stage, edit again.
+3. Write ignore rules and explain each category.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "git-and-collaboration-repositories-and-commits",
+  "title": "Repositories, Diffs, and Commits checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "stage",
+      "prompt": "What does staging select?",
+      "options": [
+        "Python version",
+        "Remote URL",
+        "Next commit snapshot",
+        "Environment"
+      ],
+      "answer_index": 2,
+      "explanation": "The index prepares the next commit."
+    },
+    {
+      "id": "diff",
+      "prompt": "Which inspects unstaged changes?",
+      "options": [
+        "git log",
+        "git clone",
+        "git tag",
+        "git diff"
+      ],
+      "answer_index": 3,
+      "explanation": "git diff compares working tree and index."
+    },
+    {
+      "id": "secret",
+      "prompt": "What after exposing a credential?",
+      "options": [
+        "Rotate/revoke it",
+        "Rename variable",
+        "Add comment",
+        "Only delete file"
+      ],
+      "answer_index": 0,
+      "explanation": "History may retain it."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)
