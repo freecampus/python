@@ -6,6 +6,7 @@ import importlib.util
 import io
 import json
 import re
+import subprocess
 import sys
 import tokenize
 from pathlib import Path
@@ -529,6 +530,79 @@ def test_mermaid_blocks_are_not_empty() -> None:
     assert len(blocks) >= 10
     for path, block in blocks:
         assert block.strip(), path
+
+
+def test_mermaid_blocks_parse_with_quartos_bundled_version() -> None:
+    blocks = []
+    for path in sorted(Path("docs").rglob("*.qmd")):
+        text = path.read_text()
+        for match in re.finditer(r"```\{mermaid\}\n(.*?)\n```", text, flags=re.DOTALL):
+            blocks.append(
+                {
+                    "path": str(path),
+                    "line": text.count("\n", 0, match.start(1)) + 1,
+                    "source": match.group(1),
+                }
+            )
+
+    quarto_paths = subprocess.run(
+        ["quarto", "--paths"],
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout.splitlines()
+    mermaid_bundle = (
+        Path(quarto_paths[-1]) / "formats/html/mermaid/mermaid.js"
+    ).resolve()
+    node_script = r"""
+const fs = require("fs");
+const vm = require("vm");
+const bundlePath = __MERMAID_BUNDLE__;
+const blocks = __MERMAID_BLOCKS__;
+let bundle = fs.readFileSync(bundlePath, "utf8");
+const browserPurify = "purify = createDOMPurify();";
+if (!bundle.includes(browserPurify)) {
+  throw new Error("Unable to prepare the bundled Mermaid parser");
+}
+// Node has no browser DOM. Keep Mermaid's real grammar while bypassing only
+// label sanitization, which the browser performs when the site loads.
+bundle = bundle.replace(
+  browserPurify,
+  "purify = { addHook() {}, sanitize(value) { return value; } };",
+);
+vm.runInThisContext(bundle);
+
+(async () => {
+  const failures = [];
+  for (const block of blocks) {
+    try {
+      await globalThis.mermaid.parse(block.source);
+    } catch (error) {
+      failures.push({
+        path: block.path,
+        line: block.line,
+        error: error?.message || String(error),
+      });
+    }
+  }
+  if (failures.length) {
+    process.stderr.write(`${JSON.stringify(failures, null, 2)}\n`);
+    process.exitCode = 1;
+  }
+})();
+"""
+    node_script = node_script.replace(
+        "__MERMAID_BUNDLE__", json.dumps(str(mermaid_bundle))
+    ).replace("__MERMAID_BLOCKS__", json.dumps(blocks))
+    result = subprocess.run(
+        ["node", "-e", node_script],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert blocks
+    assert result.returncode == 0, result.stderr
 
 
 def test_mermaid_blocks_are_rendered_not_echoed_as_code() -> None:

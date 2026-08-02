@@ -162,8 +162,8 @@ methods use `self` to work with that particular object.
 %%| echo: false
 %%| eval: true
 flowchart LR
-  class["class Student<br/>blueprint"] --> ada["object<br/>ada"]
-  class --> grace["object<br/>grace"]
+  student_class["class Student<br/>blueprint"] --> ada["object<br/>ada"]
+  student_class --> grace["object<br/>grace"]
   ada --> ada_name["attribute<br/>name = 'Ada'"]
   grace --> grace_name["attribute<br/>name = 'Grace'"]
   ada --> method["method call<br/>ada.study()"]
