@@ -280,7 +280,7 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
             unit_root = Path("docs") / directory
             unit_home = unit_root / "index.qmd"
             unit_navigation = _sidebar_section(
-                sidebar["contents"], f"Unit {number} — {unit['title']}"
+                sidebar["contents"], f"Unit {number}: {unit['title']}"
             )
             pages = sorted(
                 (
