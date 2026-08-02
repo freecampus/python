@@ -362,8 +362,8 @@ def test_foundations_has_versioned_completion_requirements() -> None:
 
     assert set(metadata_by_id) == required
     for lesson_id in required:
-        assert metadata_by_id[lesson_id]["required_for_completion"] is True
-        assert metadata_by_id[lesson_id]["completion_label"] == "Required lesson"
+        assert "required_for_completion" not in metadata_by_id[lesson_id]
+        assert "completion_label" not in metadata_by_id[lesson_id]
 
     checkpoint_ids = {
         "programming-essentials",
