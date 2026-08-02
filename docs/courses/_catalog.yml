@@ -1,6 +1,5 @@
-schema_version: 1
-curriculum_version: 1
-
+schema_version: 2
+curriculum_version: 2
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -10,126 +9,115 @@ courses:
     status: available
     pathway: both
     lesson_count: 38
-    required_lesson_count: 18
-    optional_lesson_count: 20
-    estimated_effort: 18–25 core hours; extensions self-paced
+    required_lesson_count: 38
+    optional_lesson_count: 0
+    estimated_effort: 38–55 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 1
-      rule_version: 1
+      curriculum_version: 2
+      rule_version: 2
       recognition: local-self-reported
       required_lesson_ids:
-        - getting-started.what-is-programming
-        - getting-started.google-colab
-        - core-python.values-variables-types
-        - core-python.strings-input-output
-        - core-python.booleans-and-conditionals
-        - core-python.indentation
-        - core-python.loops-and-tracing
-        - data-structures.lists
-        - data-structures.tuples
-        - data-structures.dictionaries
-        - data-structures.sets
-        - data-structures.nested-data
-        - functions.function-basics
-        - functions.function-contracts
-        - functions.decomposition-and-testing
-        - debugging.error-messages
-        - debugging.debugging-tools
-        - debugging.minimal-reproducible-examples
-      optional_lesson_ids:
-        - getting-started.local-python-tools
-        - files-and-data.paths-and-text-files
-        - files-and-data.structured-files
-        - files-and-data.exceptions-and-validation
-        - projects-and-environments.modules-and-packages
-        - projects-and-environments.environments-and-dependencies
-        - projects-and-environments.command-line-programs
-        - projects-and-environments.project-layout
-        - code-quality.testing-with-pytest
-        - code-quality.style-formatting-and-linting
-        - code-quality.type-checking
-        - code-quality.pre-commit-and-ci
-        - object-oriented-python.oop-basics
-        - object-oriented-python.dataclasses
-        - object-oriented-python.oop-design
-        - advanced-python-patterns.comprehensions
-        - advanced-python-patterns.iterables-and-generators
-        - advanced-python-patterns.decorators
-        - advanced-python-patterns.context-managers
-        - advanced-python-patterns.logging-and-configuration
+        - programming-essentials.what-is-programming
+        - programming-essentials.google-colab
+        - programming-essentials.local-python-tools
+        - programming-essentials.values-variables-types
+        - programming-essentials.strings-input-output
+        - programming-essentials.booleans-and-conditionals
+        - programming-essentials.indentation
+        - programming-essentials.loops-and-tracing
+        - data-and-reusable-logic.lists
+        - data-and-reusable-logic.tuples
+        - data-and-reusable-logic.dictionaries
+        - data-and-reusable-logic.sets
+        - data-and-reusable-logic.nested-data
+        - data-and-reusable-logic.function-basics
+        - data-and-reusable-logic.function-contracts
+        - data-and-reusable-logic.decomposition-and-testing
+        - debugging-files-validation.error-messages
+        - debugging-files-validation.debugging-tools
+        - debugging-files-validation.minimal-reproducible-examples
+        - debugging-files-validation.paths-and-text-files
+        - debugging-files-validation.structured-files
+        - debugging-files-validation.exceptions-and-validation
+        - reliable-python-projects.modules-and-packages
+        - reliable-python-projects.environments-and-dependencies
+        - reliable-python-projects.command-line-programs
+        - reliable-python-projects.project-layout
+        - reliable-python-projects.testing-with-pytest
+        - reliable-python-projects.style-formatting-and-linting
+        - reliable-python-projects.type-checking
+        - reliable-python-projects.pre-commit-and-ci
+        - abstraction-and-reusable-patterns.oop-basics
+        - abstraction-and-reusable-patterns.dataclasses
+        - abstraction-and-reusable-patterns.oop-design
+        - abstraction-and-reusable-patterns.comprehensions
+        - abstraction-and-reusable-patterns.iterables-and-generators
+        - abstraction-and-reusable-patterns.decorators
+        - abstraction-and-reusable-patterns.context-managers
+        - abstraction-and-reusable-patterns.logging-and-configuration
+      optional_lesson_ids: []
       checkpoints:
-        - id: getting-started
-          title: Getting Started Checkpoint
-          path: courses/python-foundations/getting-started/checkpoint.qmd
+        - id: programming-essentials
+          title: Programming Essentials Checkpoint
+          path: courses/python-foundations/units/programming-essentials/checkpoint.qmd
           required: true
-        - id: core-python
-          title: Core Python Checkpoint
-          path: courses/python-foundations/core-python/checkpoint.qmd
+        - id: data-and-reusable-logic
+          title: Data and Reusable Logic Checkpoint
+          path: courses/python-foundations/units/data-and-reusable-logic/checkpoint.qmd
           required: true
-        - id: data-structures
-          title: Data Structures Checkpoint
-          path: courses/python-foundations/data-structures/checkpoint.qmd
+        - id: debugging-files-validation
+          title: Debugging, Files, and Validation Checkpoint
+          path: courses/python-foundations/units/debugging-files-validation/checkpoint.qmd
           required: true
-        - id: functions
-          title: Functions Checkpoint
-          path: courses/python-foundations/functions/checkpoint.qmd
+        - id: reliable-python-projects
+          title: Building Reliable Python Projects Checkpoint
+          path: courses/python-foundations/units/reliable-python-projects/checkpoint.qmd
           required: true
-        - id: debugging
-          title: Debugging Checkpoint
-          path: courses/python-foundations/debugging/checkpoint.qmd
+        - id: abstraction-and-reusable-patterns
+          title: Abstraction and Reusable Patterns Checkpoint
+          path: courses/python-foundations/units/abstraction-and-reusable-patterns/checkpoint.qmd
           required: true
       project:
         id: python-foundations-project
         title: Python Foundations Project
         path: courses/python-foundations/project/index.qmd
         required: true
-        rubric_version: 1
-    modules:
-      - id: getting-started
-        title: Getting Started
-        directory: courses/python-foundations/getting-started
-        lesson_count: 3
-      - id: core-python
-        title: Core Python
-        directory: courses/python-foundations/core-python
-        lesson_count: 5
-      - id: data-structures
-        title: Data Structures
-        directory: courses/python-foundations/data-structures
-        lesson_count: 5
-      - id: functions
-        title: Functions
-        directory: courses/python-foundations/functions
-        lesson_count: 3
-      - id: debugging
-        title: Debugging
-        directory: courses/python-foundations/debugging
-        lesson_count: 3
-      - id: files-and-data
-        title: Files and Data
-        directory: courses/python-foundations/files-and-data
-        lesson_count: 3
-      - id: projects-and-environments
-        title: Projects and Environments
-        directory: courses/python-foundations/projects-and-environments
-        lesson_count: 4
-      - id: code-quality
-        title: Code Quality
-        directory: courses/python-foundations/code-quality
-        lesson_count: 4
-      - id: object-oriented-python
-        title: Object-Oriented Python
-        directory: courses/python-foundations/object-oriented-python
-        lesson_count: 3
-      - id: advanced-python-patterns
-        title: Advanced Python Patterns
-        directory: courses/python-foundations/advanced-python-patterns
-        lesson_count: 5
-
+        rubric_version: 2
+    units:
+      - id: programming-essentials
+        title: Programming Essentials
+        directory: courses/python-foundations/units/programming-essentials
+        lesson_count: 8
+        kind: instructional
+      - id: data-and-reusable-logic
+        title: Data and Reusable Logic
+        directory: courses/python-foundations/units/data-and-reusable-logic
+        lesson_count: 8
+        kind: instructional
+      - id: debugging-files-validation
+        title: Debugging, Files, and Validation
+        directory: courses/python-foundations/units/debugging-files-validation
+        lesson_count: 6
+        kind: instructional
+      - id: reliable-python-projects
+        title: Building Reliable Python Projects
+        directory: courses/python-foundations/units/reliable-python-projects
+        lesson_count: 8
+        kind: instructional
+      - id: abstraction-and-reusable-patterns
+        title: Abstraction and Reusable Patterns
+        directory: courses/python-foundations/units/abstraction-and-reusable-patterns
+        lesson_count: 8
+        kind: instructional
+      - id: foundations-project
+        title: Python Foundations Project
+        directory: courses/python-foundations/project
+        lesson_count: 0
+        kind: project
   - id: intermediate-python
     title: "Intermediate Python: Applied Problem Solving"
     short_title: Intermediate
@@ -140,11 +128,11 @@ courses:
     lesson_count: 0
     estimated_effort: TBD
     home: courses/intermediate-python/index.qmd
-    prerequisite_ids: [python-foundations]
+    prerequisite_ids:
+      - python-foundations
     recommended_ids: []
     certificate_status: planned
-    modules: []
-
+    units: []
   - id: advanced-python
     title: "Advanced Python: Complex Problem Solving"
     short_title: Advanced
@@ -155,11 +143,11 @@ courses:
     lesson_count: 0
     estimated_effort: TBD
     home: courses/advanced-python/index.qmd
-    prerequisite_ids: [intermediate-python]
+    prerequisite_ids:
+      - intermediate-python
     recommended_ids: []
     certificate_status: planned
-    modules: []
-
+    units: []
   - id: scientific-python
     title: Scientific Computing with Python
     short_title: Scientific
@@ -170,15 +158,16 @@ courses:
     lesson_count: 5
     estimated_effort: 5–8 hours of current material
     home: courses/scientific-python/index.qmd
-    prerequisite_ids: [python-foundations]
-    recommended_ids: [intermediate-python]
+    prerequisite_ids:
+      - python-foundations
+    recommended_ids:
+      - intermediate-python
     certificate_status: planned
-    modules:
+    units:
       - id: scientific-python
         title: Scientific Python
         directory: courses/scientific-python/scientific-python
         lesson_count: 5
-
   - id: data-science-ml
     title: Data Science and Machine Learning with Python
     short_title: Data & ML
@@ -189,10 +178,12 @@ courses:
     lesson_count: 10
     estimated_effort: 10–16 hours of current material
     home: courses/data-science-ml/index.qmd
-    prerequisite_ids: [scientific-python]
-    recommended_ids: [intermediate-python]
+    prerequisite_ids:
+      - scientific-python
+    recommended_ids:
+      - intermediate-python
     certificate_status: planned
-    modules:
+    units:
       - id: data-science
         title: Data Science
         directory: courses/data-science-ml/data-science

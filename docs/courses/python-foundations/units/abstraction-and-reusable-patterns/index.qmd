@@ -1,0 +1,80 @@
+---
+title: "Abstraction and Reusable Patterns Overview"
+description: "Use classes and reusable Python patterns when they make state, iteration, resources, or cross-cutting behavior clearer."
+categories: [python-foundations, abstraction-and-reusable-patterns, overview]
+order: 500
+colab_notebook: "notebooks/courses/python-foundations/units/abstraction-and-reusable-patterns/index.ipynb"
+---
+
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 8–12 hours
+- **You will learn:** Use classes and reusable Python patterns when they make state, iteration, resources, or cross-cutting behavior clearer.
+- **Practice in:** Generated Colab notebooks and, where noted, local Python tools
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## The problem this unit solves
+
+Abstraction is useful only when it reduces confusion. This unit asks you to compare a pattern with a simpler alternative and justify the boundary.
+
+## Questions to carry through the unit
+
+- What input, state, and output can you identify before running the code?
+- Which boundary makes the next change easier to explain and test?
+- What evidence would distinguish a correct result from a lucky one?
+
+## Learning sequence
+
+### 1. Model cohesive concepts
+
+Use classes and dataclasses to connect related state and behavior.
+### 2. Choose relationships
+
+Prefer clear composition and use inheritance only for a genuine substitutable relationship.
+### 3. Build value pipelines
+
+Use comprehensions, iterables, and generators without hiding important logic.
+### 4. Manage shared behavior
+
+Apply decorators, context managers, logging, and configuration at explicit boundaries.
+
+## Unit checkpoint
+
+After every lesson, complete the [required unit checkpoint](checkpoint.qmd).
+It asks you to combine the unit skills in one small artifact rather than recall
+each lesson separately.
+<!-- fcpython-chapter-lab: end -->
+
+## Check your direction
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "abstraction-and-reusable-patterns-overview",
+  "title": "Abstraction and Reusable Patterns readiness check",
+  "instructions": "Choose an answer, then check your reasoning.",
+  "questions": [
+    {
+      "id": "unit-purpose",
+      "prompt": "When should you keep a plain function instead of introducing a class or decorator?",
+      "options": [
+        "When the simpler function already expresses the behavior clearly.",
+        "Never; advanced syntax is always better.",
+        "Only when the function has no return value.",
+        "Whenever tests exist."
+      ],
+      "answer_index": 0,
+      "explanation": "Use an abstraction because it clarifies a real boundary, not merely because the syntax is available."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Start the unit
+
+[Open the first lesson](oop-basics.qmd){.btn .btn-primary}
+[See the unit checkpoint](checkpoint.qmd){.btn .btn-outline-primary}

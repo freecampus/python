@@ -1,0 +1,92 @@
+---
+title: "Programming Essentials Checkpoint"
+description: "Demonstrate the combined skills from the Programming Essentials unit."
+checkpoint_id: "programming-essentials"
+assessment_type: unit-checkpoint
+assessment_version: 2
+required_for_completion: true
+completion_label: "Required unit checkpoint"
+passing_score: 3
+categories: [python-foundations, programming-essentials, checkpoint]
+order: 190
+colab_notebook: "notebooks/courses/python-foundations/units/programming-essentials/checkpoint.ipynb"
+---
+
+::: {.lesson-meta .checkpoint-meta}
+- **Level:** Python Foundations · Unit 1 checkpoint
+- **Estimated time:** 45–75 minutes
+- **Outcome assessed:** Run, trace, and modify small Python programs that use values, text, decisions, and loops.
+- **Completion rule:** Score at least 3/4, complete the practical task, then record completion below.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The task this checkpoint assesses
+
+This required checkpoint combines a short knowledge check with one practical
+artifact. Review lesson notebooks when needed, then complete the final attempt
+without copying a finished solution.
+
+## 1. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{"id": "foundations-programming-essentials-checkpoint", "title": "Programming Essentials knowledge check", "instructions": "Choose an answer, then check your work.", "questions": [{"id": "interpreter-role", "prompt": "What does the Python interpreter do with a program?", "options": ["It reads and runs the program's instructions.", "It guesses what the learner intended.", "It turns every line into printed text.", "It only checks spelling in comments."], "answer_index": 0, "explanation": "The interpreter follows Python instructions and reports either results or errors."}, {"id": "input-type", "prompt": "What type of value does input() return?", "options": ["int", "str", "bool", "float"], "answer_index": 1, "explanation": "input() returns text. Convert that text explicitly when a program needs a number."}, {"id": "condition-choice", "prompt": "When does the else branch of an if statement run?", "options": ["Before Python checks the condition.", "Only when every preceding condition in the chain is false.", "After every if branch.", "Only inside a loop."], "answer_index": 1, "explanation": "An if/elif/else chain selects one path; else is the fallback when earlier conditions are false."}, {"id": "loop-trace", "prompt": "How many times does for number in range(3) run its body?", "options": ["2", "3", "4", "It never stops"], "answer_index": 1, "explanation": "range(3) produces 0, 1, and 2, so the body runs three times."}]}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+::: {.callout-note title="Checkpoint threshold"}
+Aim for at least **3 of 4** correct. Reset the quiz and revisit the relevant
+lesson when an explanation reveals a gap. The score stays in this browser.
+:::
+
+## 2. Complete the practical task
+
+Build a small command-line-friendly meal-cost estimator. Ask for a meal name and price, apply one discount rule with a conditional, and use a loop to print three numbered summary lines.
+
+Work in small steps: predict one result, run the smallest useful example,
+compare the evidence, and change one thing at a time.
+
+### Evidence to keep
+
+1. A prediction for one complete run.
+2. A trace showing every loop iteration.
+3. One input that selects each conditional path.
+4. A line-by-line explanation of the final program.
+
+::: {.callout-tip collapse="true" title="A useful completion check"}
+A finished artifact runs from a clean start, contains no unexplained copied
+code, and gives another learner enough instructions to reproduce your result.
+If one of those statements is false, improve that specific gap before recording
+completion.
+:::
+
+## 3. Decide whether the outcome is demonstrated
+
+Record this checkpoint only when all four statements are true:
+
+- [ ] I scored at least 3/4 on the knowledge check.
+- [ ] My practical artifact runs from a clean start.
+- [ ] I kept the requested output, checks, and explanation evidence.
+- [ ] I can make one new change without copying a solution.
+
+## 4. Record checkpoint completion
+
+This button stores a self-reported completion marker in this browser. It is not
+a graded submission or verified certificate record.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-checkpoint-action>
+  <button class="fc-complete-button" type="button" data-fc-checkpoint-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-checkpoint-complete-label>Record checkpoint complete</span>
+  </button>
+  <p data-fc-checkpoint-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- A unit checkpoint demonstrates integration, not isolated recall.
+- The practical artifact and explanation are the evidence that matters.
+- Review is expected; record completion only after the complete outcome works.

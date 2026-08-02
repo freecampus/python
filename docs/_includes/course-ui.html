@@ -2,27 +2,8 @@
   (() => {
     "use strict";
 
-    const progressKey = "fcpython.progress.v2";
-    const legacyProgressKey = "fcpython.progress.v1";
-    const lastLessonKey = "fcpython.last-lesson.v2";
-    const legacyLastLessonKey = "fcpython.last-lesson.v1";
-    const courseOwnershipMigrations = [
-      {
-        from: "intermediate-python",
-        to: "python-foundations",
-        modulePrefixes: [
-          "files-and-data.",
-          "projects-and-environments.",
-          "code-quality.",
-          "object-oriented-python.",
-        ],
-      },
-      {
-        from: "advanced-python",
-        to: "python-foundations",
-        modulePrefixes: ["advanced-python-patterns."],
-      },
-    ];
+    const progressKey = "fcpython.progress.v3";
+    const lastLessonKey = "fcpython.last-lesson.v3";
 
     function readJson(key, fallback) {
       try {
@@ -74,16 +55,15 @@
 
     function isLessonKey(key) {
       const parts = key.split("/");
-      const legacyLesson = parts[0] === "lessons" && parts.length >= 3;
-      const courseLesson = parts[0] === "courses" && parts.length >= 4;
-      return (legacyLesson || courseLesson) && !isCheckpointKey(key);
+      const unitLesson =
+        parts[0] === "courses" && parts[2] === "units" && parts.length >= 5;
+      const directCourseLesson =
+        parts[0] === "courses" && parts[2] !== "units" && parts.length >= 4;
+      return (unitLesson || directCourseLesson) && !isCheckpointKey(key);
     }
 
     function isCheckpointKey(key) {
-      return (
-        (key.startsWith("lessons/") || key.startsWith("courses/")) &&
-        key.endsWith("/checkpoint")
-      );
+      return key.startsWith("courses/") && key.endsWith("/checkpoint");
     }
 
     function checkpointIdFromKey(key) {
@@ -94,10 +74,7 @@
     }
 
     function isProjectKey(key) {
-      return (
-        key === "lessons/foundations-project" ||
-        (key.startsWith("courses/") && key.endsWith("/project"))
-      );
+      return key.startsWith("courses/") && key.endsWith("/project");
     }
 
     function lessonIdFromKey(key) {
@@ -105,18 +82,18 @@
         return "";
       }
       const parts = key.split("/");
-      return parts[0] === "courses"
-        ? parts.slice(2).join(".")
-        : parts.slice(1).join(".");
+      const lessonParts =
+        parts[2] === "units" ? parts.slice(3) : parts.slice(2);
+      return lessonParts.join(".");
     }
 
     function emptyProgress() {
-      return { schema_version: 2, courses: {} };
+      return { schema_version: 3, courses: {} };
     }
 
     function readProgress() {
       const saved = readJson(progressKey, null);
-      if (!saved || saved.schema_version !== 2 || !saved.courses) {
+      if (!saved || saved.schema_version !== 3 || !saved.courses) {
         return emptyProgress();
       }
       return saved;
@@ -154,8 +131,8 @@
       }
       if (!progress.courses[id] && create) {
         progress.courses[id] = {
-          curriculum_version: 1,
-          completion_rule_version: 1,
+          curriculum_version: 2,
+          completion_rule_version: 2,
           completed_lessons: {},
           completed_checkpoints: {},
           capstone_status: "not_started",
@@ -166,8 +143,8 @@
       }
       const state = progress.courses[id] || null;
       if (state) {
-        state.curriculum_version = state.curriculum_version || 1;
-        state.completion_rule_version = state.completion_rule_version || 1;
+        state.curriculum_version = state.curriculum_version || 2;
+        state.completion_rule_version = state.completion_rule_version || 2;
         state.completed_lessons = state.completed_lessons || {};
         state.completed_checkpoints = state.completed_checkpoints || {};
         state.capstone_status = state.capstone_status || "not_started";
@@ -185,36 +162,14 @@
       return courseState(id)?.completed_checkpoints || {};
     }
 
-    function isOptionalSidebarLink(link) {
-      if (link.textContent.toLowerCase().includes("optional")) {
-        return true;
-      }
-
-      let section = link.closest("li.sidebar-item-section");
-      while (section && sidebar?.contains(section)) {
-        const label = section
-          .querySelector(":scope > .sidebar-item-container .menu-text")
-          ?.textContent.toLowerCase();
-        if (label?.includes("optional")) {
-          return true;
-        }
-        section = section.parentElement?.closest("li.sidebar-item-section");
-      }
-      return false;
-    }
-
-    function courseLessonLinks({ requiredOnly = false } = {}) {
+    function courseLessonLinks() {
       const links = [
         ...(sidebar?.querySelectorAll("a.sidebar-link[href]") || []),
       ];
       const seen = new Set();
       return links.filter((link) => {
         const key = pageKey(link.href);
-        if (
-          !isLessonKey(key) ||
-          seen.has(key) ||
-          (requiredOnly && isOptionalSidebarLink(link))
-        ) {
+        if (!isLessonKey(key) || seen.has(key)) {
           return false;
         }
         seen.add(key);
@@ -260,8 +215,8 @@
         return false;
       }
 
-      const requiredIds = courseLessonLinks({ requiredOnly: true }).map(
-        (link) => lessonIdFromKey(pageKey(link.href)),
+      const requiredIds = courseLessonLinks().map((link) =>
+        lessonIdFromKey(pageKey(link.href)),
       );
       const complete =
         countRecorded(requiredIds, state.completed_lessons) ===
@@ -322,124 +277,7 @@
       };
     }
 
-    function ownershipMigrationForLesson(id) {
-      return courseOwnershipMigrations.find((migration) =>
-        migration.modulePrefixes.some((prefix) => id?.startsWith(prefix)),
-      );
-    }
-
-    function relocatedLessonKey(id) {
-      return `courses/python-foundations/${id.replaceAll(".", "/")}`;
-    }
-
-    function migrateCourseOwnership() {
-      let changed = false;
-      let target = null;
-
-      courseOwnershipMigrations.forEach((migration) => {
-        const source = courseState(migration.from);
-        if (!source) {
-          return;
-        }
-        let sourceChanged = false;
-
-        Object.entries(source.completed_lessons).forEach(([id, recordedAt]) => {
-          if (
-            !migration.modulePrefixes.some((prefix) => id.startsWith(prefix))
-          ) {
-            return;
-          }
-          target = target || courseState(migration.to, true);
-          target.completed_lessons[id] ||= recordedAt;
-          delete source.completed_lessons[id];
-          sourceChanged = true;
-          changed = true;
-        });
-
-        if (sourceChanged) {
-          source.completion_status = "in_progress";
-          source.completed_at = null;
-          source.updated_at = new Date().toISOString();
-        }
-      });
-
-      if (changed && target) {
-        target.updated_at = new Date().toISOString();
-        writeJson(progressKey, progress);
-      }
-    }
-
-    function migrateLastLessonOwnership() {
-      const saved = readJson(lastLessonKey, null);
-      if (!saved?.courses) {
-        return;
-      }
-
-      let changed = false;
-      const relocate = (lesson) => {
-        const migration = ownershipMigrationForLesson(lesson?.lesson_id);
-        if (!migration) {
-          return lesson;
-        }
-        changed = true;
-        return {
-          ...lesson,
-          key: relocatedLessonKey(lesson.lesson_id),
-          course_id: migration.to,
-        };
-      };
-
-      const previousGlobal = saved.global;
-      saved.global = relocate(saved.global);
-      const globalRelocated = saved.global !== previousGlobal;
-      courseOwnershipMigrations.forEach((migration) => {
-        const previous = saved.courses[migration.from];
-        const relocated = relocate(previous);
-        if (relocated !== previous) {
-          saved.courses[migration.to] ||= relocated;
-          delete saved.courses[migration.from];
-        }
-      });
-      if (globalRelocated) {
-        saved.courses["python-foundations"] = saved.global;
-      }
-
-      if (changed) {
-        writeJson(lastLessonKey, saved);
-      }
-    }
-
-    function migrateLegacyProgress() {
-      if (!courseId || !sidebar) {
-        return;
-      }
-
-      const legacy = readJson(legacyProgressKey, {});
-      const state = courseState(courseId, true);
-      let changed = false;
-
-      courseLessonLinks().forEach((link) => {
-        const key = pageKey(link.href);
-        const id = lessonIdFromKey(key);
-        const legacyKey = `lessons/${id.replaceAll(".", "/")}`;
-        if (
-          (legacy[key] || legacy[legacyKey]) &&
-          id &&
-          !state.completed_lessons[id]
-        ) {
-          state.completed_lessons[id] = "migrated-from-v1";
-          changed = true;
-        }
-      });
-
-      if (changed) {
-        state.updated_at = new Date().toISOString();
-        syncCourseCompletionState();
-        writeJson(progressKey, progress);
-      }
-    }
-
-    function currentModule() {
+    function currentUnit() {
       const active = sidebar?.querySelector("a.sidebar-link.active");
       const group = active?.closest("ul.sidebar-section");
       const groupRoot = group?.closest("li.sidebar-item-section");
@@ -463,7 +301,7 @@
       const context = document.querySelector("[data-fc-context]");
       const position = document.querySelector("[data-fc-position]");
       const chips = document.querySelector("[data-fc-title-chips]");
-      const module = currentModule();
+      const unit = currentUnit();
 
       if (context) {
         if (isFaq) {
@@ -481,14 +319,12 @@
         }
       }
 
-      if (position && isTrackable && module.position >= 0) {
-        position.textContent = `${module.label || "Module"} · Lesson ${
-          module.position + 1
-        } of ${module.lessonLinks.length}`;
+      if (position && isTrackable && unit.position >= 0) {
+        position.textContent = `${unit.label || "Unit"} · Lesson ${
+          unit.position + 1
+        } of ${unit.lessonLinks.length}`;
       } else if (position && checkpointId) {
-        position.textContent = `${
-          module.label || "Module"
-        } · Required checkpoint`;
+        position.textContent = `${unit.label || "Unit"} · Required checkpoint`;
       } else if (position && projectId) {
         position.textContent = "Required course project";
       }
@@ -530,8 +366,8 @@
         return;
       }
 
-      const requiredIds = courseLessonLinks({ requiredOnly: true }).map(
-        (link) => lessonIdFromKey(pageKey(link.href)),
+      const requiredIds = courseLessonLinks().map((link) =>
+        lessonIdFromKey(pageKey(link.href)),
       );
       const total = requiredIds.length;
       const completed = countRecorded(requiredIds, completedLessons(courseId));
@@ -675,7 +511,7 @@
       }
 
       const saved = readJson(lastLessonKey, {
-        schema_version: 2,
+        schema_version: 3,
         global: null,
         courses: {},
       });
@@ -687,7 +523,7 @@
           document.querySelector("h1.title")?.textContent.trim() ||
           document.title,
       };
-      saved.schema_version = 2;
+      saved.schema_version = 3;
       saved.global = lesson;
       saved.courses = saved.courses || {};
       saved.courses[courseId] = lesson;
@@ -697,8 +533,7 @@
     function setupResumePanel() {
       const panel = document.querySelector("[data-fc-resume]");
       const saved = readJson(lastLessonKey, null);
-      const legacy = readJson(legacyLastLessonKey, null);
-      const lastLesson = saved?.global || legacy;
+      const lastLesson = saved?.global;
       if (!panel || !lastLesson?.key) {
         return;
       }
@@ -920,9 +755,6 @@
         ?.classList.add("active");
     }
 
-    migrateCourseOwnership();
-    migrateLastLessonOwnership();
-    migrateLegacyProgress();
     if (syncCourseCompletionState()) {
       writeJson(progressKey, progress);
     }

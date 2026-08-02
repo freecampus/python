@@ -2,8 +2,8 @@
 
 The QMD files are the source of truth for the website. This script creates
 matching ``.ipynb`` files at the explicit paths in their front matter. Notebook
-paths remain independent of source paths so course reorganization does not break
-published Colab links on the ``gh-pages`` branch.
+paths remain independent of source paths and can mirror the curriculum's
+course-and-unit organization on the ``gh-pages`` branch.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 SOURCE_ROOT = Path("docs")
-OUTPUT_ROOT = Path("docs/_site/notebooks/lessons")
+OUTPUT_ROOT = Path("docs/_site/notebooks")
 
 
 @dataclass(frozen=True)
@@ -28,8 +28,8 @@ class FrontMatter:
 def notebook_path_for(source: Path, source_root: Path = SOURCE_ROOT) -> Path:
     """Return the front-matter notebook path relative to ``docs/_site``.
 
-    ``legacy_colab_notebook`` keeps a compatibility notebook available without
-    adding a Colab action to the canonical website page.
+    ``legacy_colab_notebook`` allows a page without a visible Colab action to
+    declare an alternate notebook output.
     """
     del source_root  # Retained for compatibility with existing callers.
     text = source.read_text()
@@ -225,7 +225,7 @@ def build_notebooks(
     written: list[Path] = []
     for source in public_qmd_files(source_root):
         relative_notebook = notebook_path_for(source, source_root).relative_to(
-            "notebooks/lessons"
+            "notebooks"
         )
         output = output_root / relative_notebook
         output.parent.mkdir(parents=True, exist_ok=True)

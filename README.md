@@ -17,13 +17,13 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 - Python Foundations project and rubric:
   [`docs/courses/python-foundations/project/index.qmd`](docs/courses/python-foundations/project/index.qmd)
 - First lesson:
-  [`docs/courses/python-foundations/getting-started/what-is-programming.qmd`](docs/courses/python-foundations/getting-started/what-is-programming.qmd)
+  [`docs/courses/python-foundations/units/programming-essentials/what-is-programming.qmd`](docs/courses/python-foundations/units/programming-essentials/what-is-programming.qmd)
 - Google Colab:
-  [`docs/courses/python-foundations/getting-started/google-colab.qmd`](docs/courses/python-foundations/getting-started/google-colab.qmd)
+  [`docs/courses/python-foundations/units/programming-essentials/google-colab.qmd`](docs/courses/python-foundations/units/programming-essentials/google-colab.qmd)
 - Lists lesson:
-  [`docs/courses/python-foundations/data-structures/lists.qmd`](docs/courses/python-foundations/data-structures/lists.qmd)
+  [`docs/courses/python-foundations/units/data-and-reusable-logic/lists.qmd`](docs/courses/python-foundations/units/data-and-reusable-logic/lists.qmd)
 - Debugging reference:
-  [`docs/courses/python-foundations/debugging/error-messages.qmd`](docs/courses/python-foundations/debugging/error-messages.qmd)
+  [`docs/courses/python-foundations/units/debugging-files-validation/error-messages.qmd`](docs/courses/python-foundations/units/debugging-files-validation/error-messages.qmd)
 - Learner profiles:
   [`docs/resources/learner-profiles.qmd`](docs/resources/learner-profiles.qmd)
 - Instructor notes:
@@ -34,9 +34,8 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 
 ## Course portfolio
 
-1. **Python Foundations**: 18 required lessons, five practical module
-   checkpoints, a rubric-scored project, and 20 optional lessons covering local
-   tools, files, environments, code quality, OOP, and Python patterns.
+1. **Python Foundations**: 38 required lessons in five instructional units, five
+   practical unit checkpoints, and a rubric-scored final project.
 2. **Intermediate Python: Applied Problem Solving**: a challenge-based course
    focused on parsing, modeling, testing, refactoring, and explaining unfamiliar
    problems; curriculum TBD.
@@ -51,7 +50,7 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 
 Python Foundations is the common entry point. Intermediate leads to Advanced;
 Scientific Computing leads to Data Science and Machine Learning. The canonical
-course and module definitions live in
+course and unit definitions live in
 [`docs/courses/_catalog.yml`](docs/courses/_catalog.yml).
 
 Lessons are cohesive rather than microscopic. A page can contain multiple
@@ -60,17 +59,17 @@ Reusable notebook quizzes live in `src/fcpython` and can be rendered with
 ipywidgets in Jupyter or Google Colab.
 
 Canonical teaching sources live with their owning course under `docs/courses/`.
+Python Foundations sources and notebooks mirror its `units/` hierarchy.
 Cross-course material such as the FAQ and project toolkit lives under
-`docs/resources/`. Published `/lessons/...` pages and `notebooks/lessons/...`
-Colab URLs remain available as compatibility paths.
+`docs/resources/`.
 
 ### Python Foundations completion
 
-Python Foundations curriculum version 1 can now be completed independently. The
-local completion rule requires all 18 required lessons, all five module
-checkpoints, and the Foundations project self-assessed against rubric version 1.
-Progress is stored in the learner's browser for convenience. It is self-reported
-and is not a verified certificate, identity record, or instructor grade.
+Python Foundations curriculum version 2 can be completed independently. The
+local completion rule requires all 38 lessons, all five unit checkpoints, and
+the Foundations project self-assessed against rubric version 2. Progress is
+stored in the learner's browser for convenience. It is self-reported and is not
+a verified certificate, identity record, or instructor grade.
 
 ## Local planning note
 
@@ -103,7 +102,7 @@ makim docs.preview
 ├── docs/
 │   ├── index.qmd
 │   ├── _quarto.yml
-│   ├── courses/             # Course homes and course-owned modules
+│   ├── courses/             # Course homes and course-owned units
 │   ├── pathways/
 │   ├── resources/           # Shared FAQ, guidance, and project toolkit
 │   ├── _includes/           # Shared OJS and Colab includes

@@ -1,0 +1,92 @@
+---
+title: "Data and Reusable Logic Checkpoint"
+description: "Demonstrate the combined skills from the Data and Reusable Logic unit."
+checkpoint_id: "data-and-reusable-logic"
+assessment_type: unit-checkpoint
+assessment_version: 2
+required_for_completion: true
+completion_label: "Required unit checkpoint"
+passing_score: 3
+categories: [python-foundations, data-and-reusable-logic, checkpoint]
+order: 290
+colab_notebook: "notebooks/courses/python-foundations/units/data-and-reusable-logic/checkpoint.ipynb"
+---
+
+::: {.lesson-meta .checkpoint-meta}
+- **Level:** Python Foundations · Unit 2 checkpoint
+- **Estimated time:** 45–75 minutes
+- **Outcome assessed:** Choose useful collections and build focused functions that transform and test structured data.
+- **Completion rule:** Score at least 3/4, complete the practical task, then record completion below.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The task this checkpoint assesses
+
+This required checkpoint combines a short knowledge check with one practical
+artifact. Review lesson notebooks when needed, then complete the final attempt
+without copying a finished solution.
+
+## 1. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{"id": "foundations-data-and-reusable-logic-checkpoint", "title": "Data and Reusable Logic knowledge check", "instructions": "Choose an answer, then check your work.", "questions": [{"id": "container-choice", "prompt": "Which container best maps each student name to one score?", "options": ["list", "tuple", "dictionary", "set"], "answer_index": 2, "explanation": "A dictionary associates each unique key with a value."}, {"id": "nested-access", "prompt": "For student = {'scores': [8, 10]}, which expression returns 10?", "options": ["student[10]", "student['scores'][1]", "student.scores.10", "student['scores'][10]"], "answer_index": 1, "explanation": "First select the list stored under 'scores', then select the value at index 1."}, {"id": "return-purpose", "prompt": "Why does a function return a value?", "options": ["So its result can be stored or used by other code.", "So Python prints every local variable.", "So the function can avoid having a name.", "So arguments become comments."], "answer_index": 0, "explanation": "A returned value crosses the function boundary and can be assigned, compared, printed, or passed elsewhere."}, {"id": "focused-test", "prompt": "What makes a first function test useful?", "options": ["It checks one stated behavior with a known input and result.", "It depends on many unrelated functions.", "It prints output without checking it.", "It changes the function while running."], "answer_index": 0, "explanation": "A focused example makes failures easier to understand and connect to the function's contract."}]}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+::: {.callout-note title="Checkpoint threshold"}
+Aim for at least **3 of 4** correct. Reset the quiz and revisit the relevant
+lesson when an explanation reveals a gap. The score stays in this browser.
+:::
+
+## 2. Complete the practical task
+
+Create a study-session summary from a list of dictionaries. Write focused functions that validate one session, total minutes, group minutes by topic, and return the most-studied topic.
+
+Work in small steps: predict one result, run the smallest useful example,
+compare the evidence, and change one thing at a time.
+
+### Evidence to keep
+
+1. The chosen data shape and why it fits.
+2. A contract for every function.
+3. Checks for ordinary, empty, and invalid data.
+4. One controlled change to the input with a predicted result.
+
+::: {.callout-tip collapse="true" title="A useful completion check"}
+A finished artifact runs from a clean start, contains no unexplained copied
+code, and gives another learner enough instructions to reproduce your result.
+If one of those statements is false, improve that specific gap before recording
+completion.
+:::
+
+## 3. Decide whether the outcome is demonstrated
+
+Record this checkpoint only when all four statements are true:
+
+- [ ] I scored at least 3/4 on the knowledge check.
+- [ ] My practical artifact runs from a clean start.
+- [ ] I kept the requested output, checks, and explanation evidence.
+- [ ] I can make one new change without copying a solution.
+
+## 4. Record checkpoint completion
+
+This button stores a self-reported completion marker in this browser. It is not
+a graded submission or verified certificate record.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-checkpoint-action>
+  <button class="fc-complete-button" type="button" data-fc-checkpoint-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-checkpoint-complete-label>Record checkpoint complete</span>
+  </button>
+  <p data-fc-checkpoint-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- A unit checkpoint demonstrates integration, not isolated recall.
+- The practical artifact and explanation are the evidence that matters.
+- Review is expected; record completion only after the complete outcome works.

@@ -31,7 +31,7 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 │   ├── index.qmd            # Portfolio home
 │   ├── _quarto.yml          # Site navigation/config
 │   ├── styles.css           # Course callouts, quizzes, diagram styling
-│   ├── courses/             # Course homes and course-owned lesson modules
+│   ├── courses/             # Course homes and course-owned learning units
 │   ├── pathways/            # Cross-course prerequisite guidance
 │   ├── resources/           # Shared FAQ, guidance, and project toolkit
 │   ├── _includes/           # Shared OJS and Colab includes
@@ -46,18 +46,19 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 
 ## Course design rules
 
-- Treat `docs/courses/_catalog.yml` as the canonical course/module ownership
+- Treat `docs/courses/_catalog.yml` as the canonical course/unit ownership
   manifest. Every teaching lesson belongs to exactly one course; shared FAQ,
   teaching, and project resources do not count toward course completion.
-- Keep `course_id`, `module_id`, and `lesson_id` stable when titles or URLs
+- Keep `course_id`, `unit_id`, and `lesson_id` stable when titles or URLs
   change. Course prerequisites must point to existing course IDs and remain
   acyclic.
 - Keep `checkpoint_id`, `project_id`, curriculum versions, and rubric versions
   stable once learners can record completion against them. Encode completion
   rules in the course manifest rather than inferring them from page titles.
-- Distinguish required and optional material in metadata and visible navigation.
-  Browser progress and self-assessment are local learner conveniences, not
-  verified certificate evidence.
+- State completion requirements explicitly in metadata and visible navigation.
+  Python Foundations currently requires every lesson. Browser progress and
+  self-assessment are local learner conveniences, not verified certificate
+  evidence.
 - Keep existing lesson and generated Colab URLs stable unless a dedicated
   redirect and progress-migration change is planned and tested.
 - Classify course level by problem complexity and learner independence, not by
@@ -84,7 +85,7 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   be used by Quarto listings without rebuilding the course map by hand.
 - Lesson front matter should also include `colab_notebook` pointing to the
   generated notebook path, for example
-  `notebooks/lessons/core-python/values-variables-types.ipynb`.
+  `notebooks/courses/python-foundations/units/programming-essentials/values-variables-types.ipynb`.
 - Prefer analogies, small examples, debugging corners, hidden solution paths,
   and references over long abstract explanations.
 - Prefer Quarto callouts for standard teaching boxes, such as key ideas,
@@ -116,11 +117,19 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   adding, removing, or renaming lesson pages.
 - Shared OJS renderer: `docs/_includes/ojs-quiz.qmd`.
 - Shared Colab launch link: `docs/_includes/colab-link.qmd`.
-- For course module pages under `docs/courses/<course>/<module>/`, include with:
+- For course unit pages under `docs/courses/<course>/<unit>/`, include with:
 
   ```markdown
   {{< include ../../../_includes/ojs-quiz.qmd >}}
   {{< include ../../../_includes/colab-link.qmd >}}
+  ```
+
+- Python Foundations unit pages are one directory deeper, under
+  `docs/courses/python-foundations/units/<unit>/`, so include with:
+
+  ```markdown
+  {{< include ../../../../_includes/ojs-quiz.qmd >}}
+  {{< include ../../../../_includes/colab-link.qmd >}}
   ```
 
 - For pages under `docs/resources/<resource>/`, include with:
@@ -137,12 +146,12 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
   executable Python chunks that require a kernel during docs builds.
 - QMD files under `docs/courses/` and `docs/resources/` are the source of truth.
   `scripts/build_colab_notebooks.py` uses each page's explicit `colab_notebook`
-  path to generate notebooks under `docs/_site/notebooks/lessons/` after the
-  Quarto render step. The legacy notebook namespace is intentionally independent
-  of the canonical source layout so existing Colab links on the `gh-pages`
-  branch remain valid.
-- When moving a published page, keep its stable IDs and `colab_notebook` path,
-  and add a Quarto `aliases` entry for its previous HTML URL.
+  path to generate notebooks under `docs/_site/notebooks/` after the Quarto
+  render step.
+- When moving a published page, decide explicitly whether compatibility is a
+  requirement. If it is, keep stable IDs and notebook paths and add a tested
+  Quarto alias. Intentional pre-release curriculum resets may instead change
+  routes, IDs, notebook paths, and progress schema together.
 - If a notebook or example imports from `fcpython`, keep setup/import cells
   hidden in rendered teaching material with `#| echo: false` when appropriate.
 - Mermaid diagrams should use fenced blocks like:

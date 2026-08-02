@@ -1,0 +1,80 @@
+---
+title: "Data and Reusable Logic Overview"
+description: "Choose useful collections and build focused functions that transform and test structured data."
+categories: [python-foundations, data-and-reusable-logic, overview]
+order: 200
+colab_notebook: "notebooks/courses/python-foundations/units/data-and-reusable-logic/index.ipynb"
+---
+
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 7–10 hours
+- **You will learn:** Choose useful collections and build focused functions that transform and test structured data.
+- **Practice in:** Generated Colab notebooks and, where noted, local Python tools
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## The problem this unit solves
+
+Programs become easier to explain when data has a deliberate shape and repeated behavior has a named, testable function boundary.
+
+## Questions to carry through the unit
+
+- What input, state, and output can you identify before running the code?
+- Which boundary makes the next change easier to explain and test?
+- What evidence would distinguish a correct result from a lucky one?
+
+## Learning sequence
+
+### 1. Choose a collection
+
+Compare lists, tuples, dictionaries, and sets by the job each one performs.
+### 2. Navigate real shapes
+
+Read and update nested combinations without losing track of each level.
+### 3. Create reusable behavior
+
+Define functions with clear parameters, return values, and contracts.
+### 4. Decompose and check
+
+Split one calculation into focused functions and test stated behavior.
+
+## Unit checkpoint
+
+After every lesson, complete the [required unit checkpoint](checkpoint.qmd).
+It asks you to combine the unit skills in one small artifact rather than recall
+each lesson separately.
+<!-- fcpython-chapter-lab: end -->
+
+## Check your direction
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-and-reusable-logic-overview",
+  "title": "Data and Reusable Logic readiness check",
+  "instructions": "Choose an answer, then check your reasoning.",
+  "questions": [
+    {
+      "id": "unit-purpose",
+      "prompt": "Which design is easiest to test?",
+      "options": [
+        "One function that reads input, calculates, and prints everything.",
+        "A calculation function that receives data and returns a result.",
+        "Repeated calculations copied into several loops.",
+        "A global list changed by unrelated code."
+      ],
+      "answer_index": 1,
+      "explanation": "A calculation with explicit input and a returned result has a clear test boundary."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Start the unit
+
+[Open the first lesson](lists.qmd){.btn .btn-primary}
+[See the unit checkpoint](checkpoint.qmd){.btn .btn-outline-primary}

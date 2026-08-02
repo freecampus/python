@@ -1,0 +1,80 @@
+---
+title: "Building Reliable Python Projects Overview"
+description: "Organize a Python project with an environment, CLI, tests, automated quality checks, and clear dependencies."
+categories: [python-foundations, reliable-python-projects, overview]
+order: 400
+colab_notebook: "notebooks/courses/python-foundations/units/reliable-python-projects/index.ipynb"
+---
+
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 8–12 hours
+- **You will learn:** Organize a Python project with an environment, CLI, tests, automated quality checks, and clear dependencies.
+- **Practice in:** Generated Colab notebooks and, where noted, local Python tools
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## The problem this unit solves
+
+A script becomes a maintainable project when another learner can install it, run it, test it, and understand its boundaries.
+
+## Questions to carry through the unit
+
+- What input, state, and output can you identify before running the code?
+- Which boundary makes the next change easier to explain and test?
+- What evidence would distinguish a correct result from a lucky one?
+
+## Learning sequence
+
+### 1. Define project boundaries
+
+Separate reusable modules from entry points and choose a readable layout.
+### 2. Make execution repeatable
+
+Record dependencies, isolate an environment, and accept command-line arguments.
+### 3. Protect behavior
+
+Write focused pytest tests and use formatting, linting, and type checking.
+### 4. Automate the agreement
+
+Run the same checks with pre-commit locally and CI after sharing changes.
+
+## Unit checkpoint
+
+After every lesson, complete the [required unit checkpoint](checkpoint.qmd).
+It asks you to combine the unit skills in one small artifact rather than recall
+each lesson separately.
+<!-- fcpython-chapter-lab: end -->
+
+## Check your direction
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "reliable-python-projects-overview",
+  "title": "Building Reliable Python Projects readiness check",
+  "instructions": "Choose an answer, then check your reasoning.",
+  "questions": [
+    {
+      "id": "unit-purpose",
+      "prompt": "Why should CI run the same checks developers run locally?",
+      "options": [
+        "So shared changes are checked by a repeatable agreement.",
+        "So tests become unnecessary.",
+        "So dependencies never need versions.",
+        "So every warning can be ignored."
+      ],
+      "answer_index": 0,
+      "explanation": "Matching local and CI commands makes the quality agreement visible and reproducible."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Start the unit
+
+[Open the first lesson](modules-and-packages.qmd){.btn .btn-primary}
+[See the unit checkpoint](checkpoint.qmd){.btn .btn-outline-primary}

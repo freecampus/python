@@ -1,0 +1,570 @@
+---
+title: Style, Formatting, and Linting
+lesson_id: reliable-python-projects.style-formatting-and-linting
+lesson_order: 60
+required_for_completion: true
+completion_label: Required lesson
+description: Use PEP 8 and Ruff to keep Python readable and consistent.
+execute:
+  echo: true
+categories:
+- python-foundations
+- reliable-python-projects
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/reliable-python-projects/style-formatting-and-linting.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner to intermediate
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Use PEP 8 and Ruff to keep Python readable and consistent.
+- **Practice in:** VS Code, terminal, pytest, and ruff
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Style, Formatting, and Linting** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **style, formatting, and linting** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Style, Formatting, and Linting
+
+PEP 8 is Python's style guide, formatters make layout consistent automatically, and linters warn about code that is confusing, unused, or likely to be wrong.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### Example 1.1
+
+Compare the messy version with the formatted version and notice that the behavior is the same but the reading effort is different.
+
+```python
+def total(prices):
+result = 0
+for price in prices:
+result = result + price
+return result
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### Explain Example 1.1
+
+- The function name is lowercase with an underscore style when needed.
+- Indentation shows which lines belong inside the loop and function.
+- Clear spacing around `=` and `+` makes the expression easier to scan.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### Challenge 1.1
+
+::: {.callout-note title="Challenge"}
+Add an unused variable such as `debug = True` and run a linter. The warning is not an insult; it is a reviewer asking whether that line still has a purpose.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy Example 1.1 into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Add an unused variable such as `debug = True` and run a linter.
+
+</details>
+
+### Debugging checkpoint 1.1
+
+::: {.callout-warning title="Debugging checkpoint"}
+Do not argue with a formatter over personal spacing preferences. Let the formatter handle mechanical choices so your attention stays on names, design, tests, and correctness. If a linter warning is confusing, learn what it means before suppressing it.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### Apply it
+
+Take a messy function, run Ruff format, then run Ruff check. For each warning, write whether it affects readability, correctness, or cleanup.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
+
+## Why this matters
+
+Use PEP 8 and Ruff to keep Python readable and consistent.
+
+This lesson combines related subtopics that belong together in one learning
+conversation. You will still pause for a quiz after each section, but you do not
+need to jump between separate pages while building one clear explanation.
+
+::: {.callout-note title="Guiding questions"}
+By the end of this lesson, you should be able to answer:
+
+- How do the sections in **Style, Formatting, and Linting** fit together?
+- Which small example demonstrates each section?
+- Which debugging clue should I check first for each section?
+:::
+
+::: {.callout-note title="Learning objectives"}
+You will practice how to:
+
+- explain the shared concept for this lesson;
+- use each section as one step in a larger workflow;
+- complete 3 short section quizzes before moving on;
+- connect examples, mistakes, and debugging routines.
+:::
+
+## Lesson map
+
+- **1. PEP 8** — Use Python's style guide to make code easier to read with other Python users.
+- **2. Formatting with Ruff** — Automatically format Python code so humans can focus on meaning.
+- **3. Linting with Ruff** — Find suspicious code patterns before they become bugs.
+
+## 1. PEP 8
+
+Use Python's style guide to make code easier to read with other Python users.
+
+::: {.callout-tip title="Analogy"}
+PEP 8 is like road markings: everyone moves more safely when conventions are
+predictable.
+:::
+
+### What this means
+
+PEP 8 is a community style guide for naming, spacing, imports, and readability.
+
+### Example 1
+Predict what will happen before you run the code.
+
+```python
+def calculate_total(price, quantity):
+    return price * quantity
+```
+
+### Step-by-step explanation
+
+1. `def calculate_total(price, quantity):` — pause here and say what this line reads, creates, changes, or displays.
+2. `return price * quantity` — pause here and say what this line reads, creates, changes, or displays.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.callout-note title="Practice"}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+Style is not about decoration. Consistent code lowers the mental effort of reading.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Check your understanding
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "code-quality-pep8",
+  "title": "PEP 8 checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes PEP 8?",
+      "options": [
+        "PEP 8 is a community style guide for naming, spacing, imports, and readability.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: PEP 8 is a community style guide for naming, spacing, imports, and readability."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: PEP 8 is like road markings: everyone moves more safely when conventions are predictable."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after Example 1 works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 2. Formatting with Ruff
+
+Automatically format Python code so humans can focus on meaning.
+
+::: {.callout-tip title="Analogy"}
+A formatter is like an automatic dishwasher: you still cook, but cleanup is consistent.
+:::
+
+### What this means
+
+A formatter rewrites spacing and layout according to consistent rules.
+
+### Example 2
+Predict what will happen before you run the code.
+
+```bash
+ruff format src tests
+```
+
+### Step-by-step explanation
+
+1. `ruff format src tests` — pause here and say what this line reads, creates, changes, or displays.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.callout-note title="Practice"}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+Formatting changes layout, not program logic. Review diffs, but do not hand-fight every
+spacing rule.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Check your understanding
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "code-quality-formatting-with-ruff",
+  "title": "Formatting with Ruff checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Formatting with Ruff?",
+      "options": [
+        "A formatter rewrites spacing and layout according to consistent rules.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A formatter rewrites spacing and layout according to consistent rules."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A formatter is like an automatic dishwasher: you still cook, but cleanup is consistent."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after Example 1 works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Linting with Ruff
+
+Find suspicious code patterns before they become bugs.
+
+::: {.callout-tip title="Analogy"}
+A linter is a spellchecker for code: it cannot understand everything, but it catches
+many slips quickly.
+:::
+
+### What this means
+
+A linter scans code for likely mistakes and style problems.
+
+### Example 3
+Predict what will happen before you run the code.
+
+```bash
+ruff check src tests
+```
+
+### Step-by-step explanation
+
+1. `ruff check src tests` — pause here and say what this line reads, creates, changes, or displays.
+
+After running the example, compare the actual output with your prediction. If
+they differ, do not erase your prediction. The difference is the part that can
+teach you the most.
+
+### Challenge
+
+::: {.callout-note title="Practice"}
+Change one input value, predict the new output, run the code, and explain the difference
+in one sentence.
+:::
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+1. Copy Example 1 into Colab, Jupyter, or a `.py` file.
+2. Mark the line you plan to change.
+3. Write a one-sentence prediction.
+4. Run the changed code.
+5. If the result surprises you, restore the original and change a smaller part.
+
+The goal is not to find the only correct answer. The goal is to create a small
+experiment where you can explain cause and effect.
+
+</details>
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+Ignoring all linter warnings trains you to miss useful feedback. Fix or intentionally
+configure rules.
+:::
+
+When you get stuck, use this debugging routine:
+
+1. Read the last line of the error message or inspect the unexpected output.
+2. Find the smallest line of code that could be responsible.
+3. Print or inspect the value and type at that point.
+4. Change one thing.
+5. Run again and record what changed.
+
+### Check your understanding
+
+This quiz checks the ideas in this section before you move on.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "code-quality-linting-with-ruff",
+  "title": "Linting with Ruff checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "main-idea",
+      "prompt": "Which statement best describes Linting with Ruff?",
+      "options": [
+        "A linter scans code for likely mistakes and style problems.",
+        "It is mainly about memorizing every Python command before writing code.",
+        "It is a topic you can safely skip because later tools replace it.",
+        "It is only useful after you already know advanced programming."
+      ],
+      "answer_index": 0,
+      "explanation": "The key idea is: A linter scans code for likely mistakes and style problems."
+    },
+    {
+      "id": "analogy",
+      "prompt": "What is the purpose of the analogy in this lesson?",
+      "options": [
+        "To connect a new programming idea to an everyday experience.",
+        "To replace practice with memorization.",
+        "To prove that programming is only for experts.",
+        "To avoid reading and running code examples."
+      ],
+      "answer_index": 0,
+      "explanation": "The analogy in this lesson is: A linter is a spellchecker for code: it cannot understand everything, but it catches many slips quickly."
+    },
+    {
+      "id": "debugging-habit",
+      "prompt": "What is the best first debugging habit for this topic?",
+      "options": [
+        "Read the message or output carefully and change one thing at a time.",
+        "Delete the whole program immediately.",
+        "Change many lines before running again.",
+        "Assume Python is random."
+      ],
+      "answer_index": 0,
+      "explanation": "Small experiments make cause and effect visible."
+    },
+    {
+      "id": "practice-habit",
+      "prompt": "How should you practice after Example 1 works?",
+      "options": [
+        "Make one small variation, predict the result, run it, and explain what changed.",
+        "Copy a large project without reading it.",
+        "Skip practice and rely on recognition.",
+        "Only read the final key points."
+      ],
+      "answer_index": 0,
+      "explanation": "Prediction plus small variation builds durable understanding."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Notebook and Colab practice
+
+Open a blank notebook at <https://colab.new>. Use one section at a time: copy the
+Example 1, predict the result, run it, answer the section quiz, and then move
+to the next section. This is better than copying the entire page at once.
+
+## Instructor note
+
+<details class="instructor">
+<summary>Teaching notes</summary>
+
+- Treat each section as a short teaching episode.
+- Pause for the section quiz before introducing the next section.
+- Ask learners to compare sections: what stayed the same, and what changed?
+- If time is short, teach the first two sections live and assign the rest as practice.
+
+</details>
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- **PEP 8**: PEP 8 is a community style guide for naming, spacing, imports, and readability.
+- **Formatting with Ruff**: A formatter rewrites spacing and layout according to consistent rules.
+- **Linting with Ruff**: A linter scans code for likely mistakes and style problems.
+- Use the section quizzes as gates: review before moving on if a quiz feels uncertain.
+:::
+
+## References
+
+- PEP 8 style guide: https://peps.python.org/pep-0008/
+- pytest documentation: https://docs.pytest.org/
+- Ruff documentation: https://docs.astral.sh/ruff/
+- mypy documentation: https://mypy.readthedocs.io/
+- Python Tutorial: https://docs.python.org/3/tutorial/
+- Quarto OJS documentation: https://quarto.org/docs/interactive/ojs/
+- ipywidgets documentation: https://ipywidgets.readthedocs.io/en/stable/

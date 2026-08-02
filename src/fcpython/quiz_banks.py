@@ -62,11 +62,11 @@ def values_variables_types_quiz() -> Quiz:
     )
 
 
-def getting_started_checkpoint_quiz() -> Quiz:
-    """Return the Python Foundations Getting Started checkpoint."""
+def programming_essentials_checkpoint_quiz() -> Quiz:
+    """Return the Programming Essentials unit checkpoint."""
     return Quiz(
-        id="foundations-getting-started-checkpoint",
-        title="Getting Started knowledge check",
+        id="foundations-programming-essentials-checkpoint",
+        title="Programming Essentials knowledge check",
         questions=(
             MultipleChoiceQuestion(
                 id="interpreter-role",
@@ -83,66 +83,6 @@ def getting_started_checkpoint_quiz() -> Quiz:
                     "either results or errors."
                 ),
             ),
-            MultipleChoiceQuestion(
-                id="prediction-loop",
-                prompt=(
-                    "Which practice sequence gives the strongest evidence of learning?"
-                ),
-                options=(
-                    "Run, copy, and immediately continue.",
-                    "Predict, run, compare, explain, and modify.",
-                    "Read the solution without running it.",
-                    "Change many lines before checking the first result.",
-                ),
-                answer_index=1,
-                explanation=(
-                    "Prediction and one controlled modification make the "
-                    "difference between an expectation and the result visible."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="notebook-state",
-                prompt="Why should a new notebook usually be run from top to bottom?",
-                options=(
-                    "Earlier cells may create names used by later cells.",
-                    "Python requires every notebook to have ten cells.",
-                    "Later cells automatically repair earlier errors.",
-                    "Cell order only changes text formatting.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "Notebook state depends on which cells ran and in what "
-                    "order, so a top-to-bottom run checks reproducibility."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="assignment-output",
-                prompt=(
-                    "A cell contains only score = 7. What visible output should "
-                    "you expect?"
-                ),
-                options=(
-                    "7",
-                    "score",
-                    "Usually no visible output; the name is assigned.",
-                    "A NameError every time.",
-                ),
-                answer_index=2,
-                explanation=(
-                    "Assignment stores a value under a name. Use an expression "
-                    "or print call when you want to display it."
-                ),
-            ),
-        ),
-    )
-
-
-def core_python_checkpoint_quiz() -> Quiz:
-    """Return the Python Foundations Core Python checkpoint."""
-    return Quiz(
-        id="foundations-core-python-checkpoint",
-        title="Core Python knowledge check",
-        questions=(
             MultipleChoiceQuestion(
                 id="input-type",
                 prompt="What type of value does input() return?",
@@ -177,30 +117,15 @@ def core_python_checkpoint_quiz() -> Quiz:
                     "range(3) produces 0, 1, and 2, so the body runs three times."
                 ),
             ),
-            MultipleChoiceQuestion(
-                id="indentation-role",
-                prompt="What does indentation communicate to Python?",
-                options=(
-                    "Which statements belong to the same code block.",
-                    "Which variable is a string.",
-                    "Which comments should be printed.",
-                    "How fast a loop should run.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "Indentation groups statements inside conditionals, loops, "
-                    "functions, and other blocks."
-                ),
-            ),
         ),
     )
 
 
-def data_structures_checkpoint_quiz() -> Quiz:
-    """Return the Python Foundations Data Structures checkpoint."""
+def data_and_reusable_logic_checkpoint_quiz() -> Quiz:
+    """Return the Data and Reusable Logic unit checkpoint."""
     return Quiz(
-        id="foundations-data-structures-checkpoint",
-        title="Data Structures knowledge check",
+        id="foundations-data-and-reusable-logic-checkpoint",
+        title="Data and Reusable Logic knowledge check",
         questions=(
             MultipleChoiceQuestion(
                 id="container-choice",
@@ -208,31 +133,6 @@ def data_structures_checkpoint_quiz() -> Quiz:
                 options=("list", "tuple", "dictionary", "set"),
                 answer_index=2,
                 explanation="A dictionary associates each unique key with a value.",
-            ),
-            MultipleChoiceQuestion(
-                id="unique-values",
-                prompt="Which container is designed to keep unique values?",
-                options=("set", "list", "string", "tuple"),
-                answer_index=0,
-                explanation="A set stores unique values and supports membership tests.",
-            ),
-            MultipleChoiceQuestion(
-                id="mutation-alias",
-                prompt=(
-                    "If backup = tasks and tasks is a list, what happens when "
-                    "tasks.append('test') runs?"
-                ),
-                options=(
-                    "Only tasks changes.",
-                    "Both names show the changed list.",
-                    "Python converts both names to tuples.",
-                    "The append call always raises an error.",
-                ),
-                answer_index=1,
-                explanation=(
-                    "Both names refer to the same mutable list unless an "
-                    "independent copy is created."
-                ),
             ),
             MultipleChoiceQuestion(
                 id="nested-access",
@@ -251,16 +151,6 @@ def data_structures_checkpoint_quiz() -> Quiz:
                     "the value at index 1."
                 ),
             ),
-        ),
-    )
-
-
-def functions_checkpoint_quiz() -> Quiz:
-    """Return the Python Foundations Functions checkpoint."""
-    return Quiz(
-        id="foundations-functions-checkpoint",
-        title="Functions knowledge check",
-        questions=(
             MultipleChoiceQuestion(
                 id="return-purpose",
                 prompt="Why does a function return a value?",
@@ -274,33 +164,6 @@ def functions_checkpoint_quiz() -> Quiz:
                 explanation=(
                     "A returned value crosses the function boundary and can be "
                     "assigned, compared, printed, or passed elsewhere."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="parameter-argument",
-                prompt="In greet('Mina'), what is 'Mina'?",
-                options=(
-                    "A return statement",
-                    "An argument",
-                    "A function name",
-                    "A type hint",
-                ),
-                answer_index=1,
-                explanation="The call supplies the argument 'Mina' to a parameter.",
-            ),
-            MultipleChoiceQuestion(
-                id="contract-purpose",
-                prompt="What should a useful function contract explain?",
-                options=(
-                    "Expected inputs, returned result, and important behavior.",
-                    "Only the author's name.",
-                    "Every value ever used by the program.",
-                    "The color of the editor theme.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "A contract helps callers understand how to use the "
-                    "function and what result to expect."
                 ),
             ),
             MultipleChoiceQuestion(
@@ -322,11 +185,11 @@ def functions_checkpoint_quiz() -> Quiz:
     )
 
 
-def debugging_checkpoint_quiz() -> Quiz:
-    """Return the Python Foundations Debugging checkpoint."""
+def debugging_files_validation_checkpoint_quiz() -> Quiz:
+    """Return the Debugging, Files, and Validation unit checkpoint."""
     return Quiz(
-        id="foundations-debugging-checkpoint",
-        title="Debugging knowledge check",
+        id="foundations-debugging-files-validation-checkpoint",
+        title="Debugging, Files, and Validation knowledge check",
         questions=(
             MultipleChoiceQuestion(
                 id="traceback-first-step",
@@ -341,21 +204,6 @@ def debugging_checkpoint_quiz() -> Quiz:
                 explanation=(
                     "The exception type, message, and line provide evidence "
                     "about what Python could not do."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="inspect-state",
-                prompt="Why add a focused print statement or breakpoint?",
-                options=(
-                    "To inspect a value at the point where behavior changes.",
-                    "To make the program permanently longer.",
-                    "To hide the original error.",
-                    "To replace every test.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "Inspecting state tests a specific explanation instead of "
-                    "changing code by guesswork."
                 ),
             ),
             MultipleChoiceQuestion(
@@ -374,32 +222,187 @@ def debugging_checkpoint_quiz() -> Quiz:
                 ),
             ),
             MultipleChoiceQuestion(
-                id="controlled-fix",
-                prompt="After forming a debugging hypothesis, what should you do next?",
+                id="file-context",
+                prompt="Why use with open(...) as file for file access?",
                 options=(
-                    "Change one relevant thing and rerun the smallest example.",
-                    "Rewrite the entire program before running it.",
-                    "Ignore the actual output.",
-                    "Delete the traceback.",
+                    "It closes the file reliably when the block finishes.",
+                    "It converts every file to JSON.",
+                    "It guarantees every path exists.",
+                    "It prevents all validation errors.",
                 ),
                 answer_index=0,
                 explanation=(
-                    "One controlled change lets you compare evidence and decide "
-                    "whether the hypothesis was supported."
+                    "The context manager releases the file resource even when "
+                    "the block finishes because of an error."
+                ),
+            ),
+            MultipleChoiceQuestion(
+                id="validation-boundary",
+                prompt="When should external data be validated?",
+                options=(
+                    "As it enters the program, before other code depends on it.",
+                    "Only after every calculation finishes.",
+                    "Only when Python raises SyntaxError.",
+                    "Never when the source is a file.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "Checking data at the boundary creates clear failures before "
+                    "invalid values spread through the program."
                 ),
             ),
         ),
     )
 
 
-def python_foundations_checkpoint_quizzes() -> tuple[Quiz, ...]:
-    """Return the five required Python Foundations checkpoint quizzes."""
+def reliable_python_projects_checkpoint_quiz() -> Quiz:
+    """Return the Building Reliable Python Projects unit checkpoint."""
+    return Quiz(
+        id="foundations-reliable-python-projects-checkpoint",
+        title="Building Reliable Python Projects knowledge check",
+        questions=(
+            MultipleChoiceQuestion(
+                id="module-boundary",
+                prompt="Why move reusable behavior from a script into a module?",
+                options=(
+                    "So it can be imported, tested, and reused behind a clear "
+                    "boundary.",
+                    "So Python stops checking its syntax.",
+                    "So every function becomes global.",
+                    "So dependencies install automatically.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "A focused module gives related behavior a reusable, testable home."
+                ),
+            ),
+            MultipleChoiceQuestion(
+                id="environment-purpose",
+                prompt="What problem does a project virtual environment solve?",
+                options=(
+                    "It isolates that project's dependency versions.",
+                    "It replaces source control.",
+                    "It makes every command-line argument valid.",
+                    "It publishes the project automatically.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "An isolated environment prevents one project's packages "
+                    "from silently changing another project's runtime."
+                ),
+            ),
+            MultipleChoiceQuestion(
+                id="test-contract",
+                prompt="What should a focused pytest test describe?",
+                options=(
+                    "One observable behavior and its expected result.",
+                    "The editor theme used by the author.",
+                    "Every implementation detail in one assertion.",
+                    "A result inspected only by printing it.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "A focused test protects one behavior and makes a failure "
+                    "easier to interpret."
+                ),
+            ),
+            MultipleChoiceQuestion(
+                id="automation-role",
+                prompt="What do pre-commit checks and CI provide together?",
+                options=(
+                    "Repeatable quality checks before and after changes are shared.",
+                    "A guarantee that no program can contain a bug.",
+                    "A replacement for tests and code review.",
+                    "Automatic type conversion at runtime.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "Local and remote automation run the same agreed checks at "
+                    "important points in the project workflow."
+                ),
+            ),
+        ),
+    )
+
+
+def abstraction_and_patterns_checkpoint_quiz() -> Quiz:
+    """Return the Abstraction and Reusable Patterns unit checkpoint."""
+    return Quiz(
+        id="foundations-abstraction-and-reusable-patterns-checkpoint",
+        title="Abstraction and Reusable Patterns knowledge check",
+        questions=(
+            MultipleChoiceQuestion(
+                id="class-purpose",
+                prompt="When is a small class a useful design choice?",
+                options=(
+                    "When related state and behavior form one clear concept.",
+                    "Whenever a program has one variable.",
+                    "Only when inheritance is required.",
+                    "When functions should become impossible to test.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "A class can make a cohesive concept explicit by keeping its "
+                    "state and operations together."
+                ),
+            ),
+            MultipleChoiceQuestion(
+                id="dataclass-purpose",
+                prompt="What does @dataclass mainly reduce for data-focused classes?",
+                options=(
+                    "Repetitive methods such as initialization and representation.",
+                    "The need to choose meaningful attributes.",
+                    "All runtime validation.",
+                    "The need to create instances.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "A dataclass generates common methods while leaving the data "
+                    "model and behavior visible."
+                ),
+            ),
+            MultipleChoiceQuestion(
+                id="generator-value",
+                prompt="Why can a generator help with a long sequence of values?",
+                options=(
+                    "It produces values on demand instead of storing them all at once.",
+                    "It automatically sorts every value.",
+                    "It converts every value to text.",
+                    "It prevents iteration from stopping.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "Lazy generation can reduce memory use and lets a pipeline "
+                    "process one value at a time."
+                ),
+            ),
+            MultipleChoiceQuestion(
+                id="context-boundary",
+                prompt="What behavior should a context manager make explicit?",
+                options=(
+                    "Setup and guaranteed cleanup around a block of work.",
+                    "A hidden global variable shared by every module.",
+                    "An infinite loop around a function.",
+                    "Automatic inheritance between unrelated classes.",
+                ),
+                answer_index=0,
+                explanation=(
+                    "A context manager pairs resource setup with reliable cleanup "
+                    "at a visible block boundary."
+                ),
+            ),
+        ),
+    )
+
+
+def python_foundations_unit_checkpoint_quizzes() -> tuple[Quiz, ...]:
+    """Return the five required Python Foundations unit checkpoint quizzes."""
     return (
-        getting_started_checkpoint_quiz(),
-        core_python_checkpoint_quiz(),
-        data_structures_checkpoint_quiz(),
-        functions_checkpoint_quiz(),
-        debugging_checkpoint_quiz(),
+        programming_essentials_checkpoint_quiz(),
+        data_and_reusable_logic_checkpoint_quiz(),
+        debugging_files_validation_checkpoint_quiz(),
+        reliable_python_projects_checkpoint_quiz(),
+        abstraction_and_patterns_checkpoint_quiz(),
     )
 
 

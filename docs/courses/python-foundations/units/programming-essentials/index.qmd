@@ -1,0 +1,80 @@
+---
+title: "Programming Essentials Overview"
+description: "Run, trace, and modify small Python programs that use values, text, decisions, and loops."
+categories: [python-foundations, programming-essentials, overview]
+order: 100
+colab_notebook: "notebooks/courses/python-foundations/units/programming-essentials/index.ipynb"
+---
+
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 1
+- **Estimated time:** 7–10 hours
+- **You will learn:** Run, trace, and modify small Python programs that use values, text, decisions, and loops.
+- **Practice in:** Generated Colab notebooks and, where noted, local Python tools
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## The problem this unit solves
+
+Before a program can work with files, projects, or reusable designs, you need to see how Python executes instructions and changes state.
+
+## Questions to carry through the unit
+
+- What input, state, and output can you identify before running the code?
+- Which boundary makes the next change easier to explain and test?
+- What evidence would distinguish a correct result from a lucky one?
+
+## Learning sequence
+
+### 1. Start deliberately
+
+Understand programs, run notebooks reproducibly, and recognize what local tools provide.
+### 2. Represent and communicate
+
+Use values, variables, types, strings, input, and output.
+### 3. Control execution
+
+Choose branches with booleans and conditionals, then repeat work with loops.
+### 4. Trace what changed
+
+Use indentation and trace tables to explain every executed step.
+
+## Unit checkpoint
+
+After every lesson, complete the [required unit checkpoint](checkpoint.qmd).
+It asks you to combine the unit skills in one small artifact rather than recall
+each lesson separately.
+<!-- fcpython-chapter-lab: end -->
+
+## Check your direction
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "programming-essentials-overview",
+  "title": "Programming Essentials readiness check",
+  "instructions": "Choose an answer, then check your reasoning.",
+  "questions": [
+    {
+      "id": "unit-purpose",
+      "prompt": "A loop produces an unexpected total. Which unit habit helps most?",
+      "options": [
+        "Add several changes at once.",
+        "Trace each iteration and record how the total changes.",
+        "Ignore intermediate values.",
+        "Replace the loop without predicting."
+      ],
+      "answer_index": 1,
+      "explanation": "A trace exposes the value used and changed during each iteration."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Start the unit
+
+[Open the first lesson](what-is-programming.qmd){.btn .btn-primary}
+[See the unit checkpoint](checkpoint.qmd){.btn .btn-outline-primary}

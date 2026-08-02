@@ -1,0 +1,574 @@
+---
+title: Function Basics
+lesson_id: data-and-reusable-logic.function-basics
+lesson_order: 60
+required_for_completion: true
+completion_label: Required lesson
+description: Define functions, pass arguments, return results, and understand scope.
+execute:
+  echo: true
+categories:
+- python-foundations
+- data-and-reusable-logic
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/data-and-reusable-logic/function-basics.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 25–40 minutes
+- **You will learn:** Define functions, pass arguments, return results, and understand scope.
+- **Practice in:** Google Colab, Jupyter, or VS Code
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-lab: start -->
+## Questions
+
+- What problem does **Function Basics** help us solve in a small Python program?
+- What should we predict before running the example?
+- What value, output, or error should we inspect after changing one line?
+
+## Objectives
+
+- Run a complete example for **function basics** in Colab.
+- Explain the example line by line using plain language.
+- Change one part of the code and predict the result before running it.
+- Recognize one common mistake and use the error message as evidence.
+
+## Hands-on episode: Function Basics
+
+Defining a function teaches Python a reusable step. Calling a function runs it. Parameters are names inside the definition; arguments are the actual values passed during a call.
+
+We will learn this by running code, not by memorizing a definition first.
+Open the Colab notebook from the button above, find this section, and run each
+cell in order. Keep a small note beside the notebook with three columns:
+**prediction**, **actual result**, and **what changed**.
+
+### Example 1.1
+
+Predict the returned value and notice that the function body does not run until the call happens.
+
+```python
+def double(number):
+result = number * 2
+return result
+
+answer = double(6)
+print(answer)
+```
+
+Run the cell once without editing it. If the result is different from your
+prediction, leave the prediction visible and write one sentence about the
+difference. That sentence is more useful than a perfect first guess.
+
+### Explain Example 1.1
+
+- `def double(number):` defines a function and creates the parameter name `number`.
+- The indented body is stored as the function's instructions; it does not run yet.
+- `double(6)` calls the function with the argument `6`, so inside the function `number` is `6`.
+- `return result` sends the value back to the caller, and `answer` stores it.
+
+Now explain the example out loud or in a Markdown cell. Use short sentences:
+"this line creates...", "this name stores...", "this output appears because...".
+If you cannot explain a line yet, run only the lines above it and inspect the
+values that exist at that moment.
+
+### Challenge 1.1
+
+::: {.callout-note title="Challenge"}
+Replace `return result` with `print(result)` and inspect `answer`. It will be `None`, because printing shows a value to a person while returning gives a value back to the program.
+:::
+
+<details class="solution">
+<summary>Show a safe way to approach the challenge</summary>
+
+1. Copy Example 1.1 into a new Colab cell.
+2. Change exactly one value, name, condition, or line.
+3. Write the expected output before running the cell.
+4. Run the cell and compare the actual result with your prediction.
+5. If the result surprises you, undo the change and try a smaller one.
+
+Suggested first move: Replace `return result` with `print(result)` and inspect `answer`.
+
+</details>
+
+### Debugging checkpoint 1.1
+
+::: {.callout-warning title="Debugging checkpoint"}
+If you get a wrong-argument-count error, compare the parameters in the definition with the arguments in the call. If you get `NameError` outside the function, remember that local names created inside the function do not automatically exist outside it.
+:::
+
+Do not debug by rewriting the whole example. Read the error type or surprising
+output, inspect the closest value with `print(...)` or `type(...)`, then change
+one thing. This is the same routine you will use in larger projects.
+
+### Apply it
+
+Write `celsius_to_fahrenheit(celsius)`, call it with three values, print the returned results, and then write one sentence explaining why `return` is better than `print` for a converter.
+
+Finish by adding a Markdown cell that answers: **What did this example teach
+me that I can reuse in a project?**
+
+## Key points
+
+- Learn the concept by running a complete, small example first.
+- Predict before execution so your thinking becomes visible.
+- Change one thing at a time so cause and effect stay clear.
+- Treat errors as clues about the exact line or value Python could not handle.
+<!-- fcpython-lab: end -->
+
+
+## The problem this lesson solves
+
+As programs grow, repeated code becomes hard to read and easy to break. A
+**function** gives a name to a reusable block of code. Instead of copying the
+same steps in many places, you define the steps once and call the function when
+you need them.
+
+Functions also help you think clearly: each function should answer a small
+question or perform a small task.
+
+## How a function call works
+
+::: {.concept-diagram}
+A function call moves information into a named block of code and may send one
+result back to the caller.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  caller["caller code"] -- arguments --> params["parameters<br/>inside function"]
+  params --> body["function body"]
+  body -- return value --> caller
+  body -. local names stay inside .-> scope["local scope"]
+```
+
+Read every function by asking: what arguments go in, what local names are used,
+and what value comes back?
+:::
+
+## 1. Defining and calling functions
+
+A function definition starts with `def`:
+
+```python
+def greet():
+    print("Hello!")
+```
+
+This teaches Python a new action named `greet`. It does not run the action yet.
+To run it, call the function with parentheses:
+
+```python
+greet()
+```
+
+### Example 1
+Predict when `Hello!` will print.
+
+```python
+def greet():
+    print("Hello!")
+
+print("Before")
+greet()
+print("After")
+```
+
+### Step-by-step explanation
+
+1. `def greet():`
+   - Python records the function definition.
+   - The indented body belongs to the function.
+   - The body does not run yet.
+2. `print("Before")`
+   - Python prints `Before`.
+3. `greet()`
+   - Parentheses mean "call this function now".
+   - Python jumps into the function body and runs `print("Hello!")`.
+4. `print("After")`
+   - After the function call finishes, Python continues with the next line.
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+**Mistake: defining a function but never calling it.**
+
+```python
+def greet():
+    print("Hello!")
+```
+
+Nothing prints because the function is only defined. Add `greet()` to call it.
+:::
+
+::: {.callout-warning title="Common mistake"}
+**Mistake: forgetting parentheses.**
+
+```python
+print(greet)
+```
+
+This displays information about the function object. Use `greet()` to run the
+function.
+:::
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "function-def-call-checkpoint",
+  "title": "Defining and calling functions checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "definition-runs",
+      "prompt": "What happens when Python reads def greet():?",
+      "options": [
+        "It records the function definition but does not run the body yet.",
+        "It immediately prints everything inside the function.",
+        "It deletes the name greet.",
+        "It converts greet to a string."
+      ],
+      "answer_index": 0,
+      "explanation": "A function body runs when the function is called, not when it is defined."
+    },
+    {
+      "id": "call-syntax",
+      "prompt": "Which code calls the function greet?",
+      "options": [
+        "greet()",
+        "greet",
+        "def greet():",
+        "print(def greet)"
+      ],
+      "answer_index": 0,
+      "explanation": "Parentheses after the function name call the function."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 2. Parameters and arguments
+
+A **parameter** is a name in the function definition. An **argument** is the
+actual value supplied when the function is called.
+
+Think of a function as a form:
+
+- the parameter is the blank line on the form;
+- the argument is what you write in the blank.
+
+### Example 2
+```python
+def greet(name):
+    print(f"Hello, {name}!")
+
+greet("Ada")
+greet("Grace")
+```
+
+### Step-by-step explanation
+
+1. `def greet(name):`
+   - The function needs one piece of information.
+   - Inside the function, that information will be called `name`.
+2. `greet("Ada")`
+   - The argument is `"Ada"`.
+   - During this call, `name` refers to `"Ada"`.
+   - The function prints `Hello, Ada!`.
+3. `greet("Grace")`
+   - This is a separate call.
+   - During this call, `name` refers to `"Grace"`.
+
+### Multiple parameters
+
+```python
+def describe_pet(name, animal):
+    print(f"{name} is a {animal}.")
+
+describe_pet("Milo", "cat")
+```
+
+Arguments are matched to parameters by position unless you use keyword
+arguments:
+
+```python
+describe_pet(animal="dog", name="Rex")
+```
+
+Keyword arguments can make calls easier to read.
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+**Mistake: passing the wrong number of arguments.**
+
+```python
+def greet(name):
+    print(f"Hello, {name}!")
+
+greet()
+```
+
+Python raises `TypeError` because `greet` expected one argument and received
+zero.
+:::
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "function-parameters-checkpoint",
+  "title": "Parameters and arguments checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "parameter-meaning",
+      "prompt": "In def greet(name):, what is name?",
+      "options": [
+        "A parameter: a local name for an input value.",
+        "An argument already fixed to Ada.",
+        "The function's return value.",
+        "A Python keyword."
+      ],
+      "answer_index": 0,
+      "explanation": "Parameters are names listed in the function definition."
+    },
+    {
+      "id": "argument-meaning",
+      "prompt": "In greet(\"Ada\"), what is \"Ada\"?",
+      "options": [
+        "An argument",
+        "A parameter",
+        "A return statement",
+        "A scope error"
+      ],
+      "answer_index": 0,
+      "explanation": "Arguments are actual values supplied during a call."
+    },
+    {
+      "id": "wrong-number",
+      "prompt": "What error type often appears when a function gets the wrong number of arguments?",
+      "options": [
+        "TypeError",
+        "KeyError",
+        "IndexError",
+        "IndentationError"
+      ],
+      "answer_index": 0,
+      "explanation": "Python raises TypeError for many function-call shape problems."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Return values
+
+`print()` displays a value for a human. `return` sends a value back to the code
+that called the function.
+
+This difference is one of the most important function ideas.
+
+### Example 3
+```python
+def add(a, b):
+    total = a + b
+    return total
+
+result = add(2, 3)
+print(result)
+```
+
+### Step-by-step explanation
+
+1. `def add(a, b):` defines a function with two parameters.
+2. `result = add(2, 3)` calls the function.
+3. Inside the function, `a` is `2` and `b` is `3`.
+4. `total = a + b` creates `5`.
+5. `return total` sends `5` back to the caller.
+6. `result = ...` stores that returned value in `result`.
+7. `print(result)` displays `5`.
+
+### `return` stops the function
+
+```python
+def sign(number):
+    if number > 0:
+        return "positive"
+    if number < 0:
+        return "negative"
+    return "zero"
+```
+
+Once Python reaches a `return`, the function ends. Later lines in the function
+body do not run for that call.
+
+### Common mistakes
+
+::: {.callout-warning title="Common mistake"}
+**Mistake: printing instead of returning.**
+
+```python
+def add(a, b):
+    print(a + b)
+
+result = add(2, 3)
+print(result)
+```
+
+The first print displays `5`, but `result` is `None` because the function did
+not return a value. Use `return a + b` when the caller needs the result.
+:::
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "function-returns-checkpoint",
+  "title": "Return values checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "return-job",
+      "prompt": "What is the job of return inside a function?",
+      "options": [
+        "Send a value back to the caller and end the function call.",
+        "Display text on the screen only.",
+        "Create a global variable automatically.",
+        "Start a loop."
+      ],
+      "answer_index": 0,
+      "explanation": "return provides the function's result to the calling code."
+    },
+    {
+      "id": "print-vs-return",
+      "prompt": "If a function only prints a value and has no return, what does it return by default?",
+      "options": [
+        "None",
+        "The printed text",
+        "0",
+        "True"
+      ],
+      "answer_index": 0,
+      "explanation": "A function with no explicit return value returns None."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Scope
+
+**Scope** describes where a variable name can be used. Names created inside a
+function are usually **local** to that function.
+
+### Example 4
+```python
+def calculate_total(price, quantity):
+    total = price * quantity
+    return total
+
+print(calculate_total(4, 3))
+```
+
+Inside the function, `price`, `quantity`, and `total` are local names. They exist
+for the function call. Code outside the function should use the returned value,
+not reach inside for `total`.
+
+### Common mistake
+
+```python
+def calculate_total(price, quantity):
+    total = price * quantity
+    return total
+
+calculate_total(4, 3)
+print(total)
+```
+
+This raises `NameError` because `total` was created inside the function. Fix it
+by storing the returned value:
+
+```python
+final_total = calculate_total(4, 3)
+print(final_total)
+```
+
+### Practice
+
+In Colab, write and test a small function:
+
+```python
+def dollars_to_cents(dollars):
+    return dollars * 100
+
+print(dollars_to_cents(5))
+```
+
+Then modify one thing at a time:
+
+1. Change the argument from `5` to `12`.
+2. Store the result in a variable before printing.
+3. Add a second parameter for extra cents.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "function-scope-checkpoint",
+  "title": "Scope checkpoint",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "local-name",
+      "prompt": "Where can you normally use a variable created inside a function?",
+      "options": [
+        "Inside that function call.",
+        "Anywhere in any future program automatically.",
+        "Only inside comments.",
+        "Only in dictionary keys."
+      ],
+      "answer_index": 0,
+      "explanation": "Names created inside a function are local unless explicitly returned or otherwise shared."
+    },
+    {
+      "id": "store-return",
+      "prompt": "How should outside code use a value calculated inside a function?",
+      "options": [
+        "Return it and store the returned value.",
+        "Print a local variable name directly outside the function.",
+        "Depend on Python guessing the name.",
+        "Use indentation only."
+      ],
+      "answer_index": 0,
+      "explanation": "The clean pattern is to return the value, then assign it outside."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- `def` defines a function; parentheses call it.
+- Defining a function does not run its body.
+- Parameters are names in the definition; arguments are values in the call.
+- `return` sends a result back to the caller.
+- `print()` displays; it does not return a useful value by itself.
+- Local variables created inside a function are not automatically available outside.
+:::
+
+## References
+
+- Python Tutorial: defining functions: https://docs.python.org/3/tutorial/controlflow.html#defining-functions
+- Python Tutorial: more on functions: https://docs.python.org/3/tutorial/controlflow.html#more-on-defining-functions
