@@ -1,0 +1,218 @@
+---
+title: "Unit Challenge: Restructure a Task Tracker"
+description: "Move a one-file task tracker into predictable source, interface, test, and documentation boundaries."
+challenge_id: project-structure.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+required_for_completion: true
+completion_label: Required unit challenge
+estimated_time: "60–120 minutes"
+categories: [python-foundations, project-structure, unit-challenge]
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/project-structure/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 10 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Move a one-file task tracker into predictable source, interface, test, and documentation boundaries.
+- **Completion rule:** Complete the required checks, then record completion below.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Create a clean project tree whose reusable task calculations can be imported and run from the project root.
+
+**Scenario:** A task tracker currently mixes data, calculations, printing, and manual checks in `tracker.py`. Restructure it before adding later environment and quality tools.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+The target tree contains `src/task_tracker/core.py`, `src/task_tracker/cli.py`, `tests/`, `README.md`, and `pyproject.toml`; a smoke check imports the core behavior.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Required constraints
+
+1. Keep calculation behavior in `core.py` and interface/printing behavior in `cli.py`.
+2. Do not duplicate functions when moving them.
+3. Keep generated output and local environment folders out of source directories.
+4. Document one command that runs from the project root.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+def completed_count(tasks):
+    """Return the number of task dictionaries whose done value is true."""
+    raise NotImplementedError
+
+
+def summary_line(tasks):
+    """Return a short completed-versus-total summary."""
+    raise NotImplementedError
+
+
+sample_tasks = [
+    {"title": "Read lesson", "done": True},
+    {"title": "Run challenge", "done": False},
+]
+```
+
+## 4. Build in small stages
+
+1. Draw the target tree and write one responsibility beside each file.
+2. Move calculation functions into `core.py` and make the package importable.
+3. Create a thin `cli.py` that builds or receives tasks and prints `summary_line`.
+4. Add the README, placeholder test folder, and project metadata, then run from the root.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe required observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+from task_tracker.core import completed_count, summary_line
+
+sample_tasks = [
+    {"title": "Read lesson", "done": True},
+    {"title": "Run challenge", "done": False},
+]
+assert completed_count(sample_tasks) == 1
+assert completed_count([]) == 0
+assert summary_line(sample_tasks) == "1 of 2 tasks complete"
+assert summary_line([]) == "0 of 0 tasks complete"
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+A file belongs where its responsibility is easiest to state, not where it was first written.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+The core module should not call `input()` or decide how terminal output looks.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+A minimal `pyproject.toml` can declare the project and its `src` package even before external dependencies are introduced.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one clean-start import failure. Record the directory, command, tree, and the boundary change that made the import reproducible.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-project-structure-challenge",
+  "title": "Task Tracker Structure readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "source-home",
+      "prompt": "Where should reusable task-tracker behavior live in the target layout?",
+      "options": [
+        "Inside the source package rather than the README or generated output.",
+        "Only inside a screenshot.",
+        "Inside the dependency cache.",
+        "In every test file as a copy."
+      ],
+      "answer_index": 0,
+      "explanation": "The source package is the clear home for application behavior."
+    },
+    {
+      "id": "separate-entry",
+      "prompt": "Why keep the entry point thin?",
+      "options": [
+        "So argument/input handling delegates to reusable behavior that can be checked separately.",
+        "So no functions can be imported.",
+        "So all state becomes global.",
+        "So documentation executes automatically."
+      ],
+      "answer_index": 0,
+      "explanation": "A thin entry point separates interface concerns from reusable application logic."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

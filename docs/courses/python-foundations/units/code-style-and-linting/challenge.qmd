@@ -1,0 +1,214 @@
+---
+title: "Unit Challenge: Rescue a Messy Report Script"
+description: "Improve readability and static quality without changing checked behavior."
+challenge_id: code-style-and-linting.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+required_for_completion: true
+completion_label: Required unit challenge
+estimated_time: "60–120 minutes"
+categories: [python-foundations, code-style-and-linting, unit-challenge]
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/code-style-and-linting/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 14 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Improve readability and static quality without changing checked behavior.
+- **Completion rule:** Complete the required checks, then record completion below.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Format, lint, rename, and simplify a messy report function while preserving its output.
+
+**Scenario:** A report script works for the supplied records but has unclear names, compressed statements, and avoidable lint findings. Protect its behavior first, then improve it in small passes.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+`build_report` still returns `"Ari: 25 minutes\nBo: 15 minutes"`, while formatter and linter checks pass.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Required constraints
+
+1. Run behavioral assertions before and after every style pass.
+2. Use descriptive names and one statement per line.
+3. Remove unused names rather than suppressing the linter.
+4. Do not combine unrelated refactoring with a behavior change.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+unused_label = "study"
+
+
+def build_report(x):
+    result = []
+    for y in x:
+        n = y["name"]
+        m = y["minutes"]
+        result.append(f"{n}: {m} minutes")
+    return "\n".join(result)
+
+
+records = [{"name": "Ari", "minutes": 25}, {"name": "Bo", "minutes": 15}]
+```
+
+## 4. Build in small stages
+
+1. Run the assertions and save their passing output as the baseline.
+2. Run the formatter and inspect its changes before doing anything else.
+3. Run the linter, remove the unused name, and improve vague parameter/local names.
+4. Rerun behavior, format-check, and lint-check commands from a clean file.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe required observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+expected = "Ari: 25 minutes\nBo: 15 minutes"
+assert build_report(records) == expected
+assert build_report([]) == ""
+assert records == [
+    {"name": "Ari", "minutes": 25},
+    {"name": "Bo", "minutes": 15},
+]
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+Protect behavior before editing style; a clean linter cannot tell you whether output changed.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Names such as `records`, `record`, `name`, and `minutes` communicate the represented values.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Run `ruff format`, `ruff check`, the assertions, and then `ruff format --check` as the final evidence sequence.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one formatter or linter finding and explain it in plain language. Show the smallest repair and the rerun proving both style and behavior remain correct.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-code-style-and-linting-challenge",
+  "title": "Messy Report Rescue readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "format-vs-behavior",
+      "prompt": "What must remain true after formatting and renaming a script?",
+      "options": [
+        "Its checked observable behavior remains unchanged.",
+        "Every line becomes the same length.",
+        "All functions are removed.",
+        "The script prints more output."
+      ],
+      "answer_index": 0,
+      "explanation": "Style improvements should not silently change the behavior protected by assertions."
+    },
+    {
+      "id": "linter-evidence",
+      "prompt": "What does a clean linter run demonstrate?",
+      "options": [
+        "The configured static checks found no remaining reported issues.",
+        "The program has no possible bugs.",
+        "Every design choice is ideal.",
+        "Runtime tests are no longer useful."
+      ],
+      "answer_index": 0,
+      "explanation": "Linting is one form of evidence, not a proof of complete correctness."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

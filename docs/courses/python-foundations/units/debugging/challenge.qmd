@@ -1,0 +1,205 @@
+---
+title: "Unit Challenge: Run a Bug Clinic"
+description: "Use reproducible evidence to diagnose several logical defects in a small program."
+challenge_id: debugging.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+required_for_completion: true
+completion_label: Required unit challenge
+estimated_time: "60–120 minutes"
+categories: [python-foundations, debugging, unit-challenge]
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/debugging/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 6 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Use reproducible evidence to diagnose several logical defects in a small program.
+- **Completion rule:** Complete the required checks, then record completion below.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Repair a broken order-total function and explain each fix with a minimal failing example.
+
+**Scenario:** The supplied function runs without a syntax error but calculates the wrong total and discount. Treat each failed assertion as evidence rather than rewriting the function at once.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+`order_total([10.0, 5.0], 20)` returns `12.0`, while an empty order returns `0.0`.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Required constraints
+
+1. Reproduce one failure before changing the function.
+2. Change one behavior at a time and rerun the smallest relevant assertion.
+3. Keep the public function name and parameters unchanged.
+4. Do not replace the implementation with a hard-coded expected answer.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+def order_total(prices, discount_percent):
+    """Return the total after subtracting a percentage discount."""
+    total = 0.0
+    for price in prices:
+        total = price
+    discount = total * discount_percent
+    return total + discount
+```
+
+## 4. Build in small stages
+
+1. Run only the no-discount assertion and reduce the failure to two prices.
+2. Trace `total` after each iteration and repair accumulation.
+3. Inspect the units of `discount_percent` and repair the discount amount.
+4. Check the operation used to apply the discount and then run the empty case.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe required observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+assert order_total([10.0, 5.0], 0) == 15.0
+assert order_total([10.0, 5.0], 20) == 12.0
+assert order_total([8.0], 25) == 6.0
+assert order_total([], 15) == 0.0
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+After the second loop iteration, should `total` contain one price or both prices?
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+A percentage such as `20` becomes a multiplier by dividing by `100`.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+A discount reduces the accumulated total; write the final arithmetic in words before coding it.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Use a table with failure, evidence, hypothesis, controlled change, and verified rerun. Include at least one minimal reproduction with fewer values than the full example.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-debugging-challenge",
+  "title": "Bug Clinic readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "first-evidence",
+      "prompt": "What belongs in a useful first bug report?",
+      "options": [
+        "The observed result, expected result, and reproducible input.",
+        "Only a guess about the fix.",
+        "A screenshot without code or data.",
+        "Every unrelated project file."
+      ],
+      "answer_index": 0,
+      "explanation": "A reproducible input and a precise expectation let you investigate the same failure repeatedly."
+    },
+    {
+      "id": "small-change",
+      "prompt": "Why rerun assertions after one repair?",
+      "options": [
+        "To verify the change fixed the target behavior without hiding another failure.",
+        "To make the source file longer.",
+        "To avoid reading the failure message.",
+        "To rename every variable."
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled rerun connects the repair to observable evidence."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

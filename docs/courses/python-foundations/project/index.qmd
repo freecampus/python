@@ -27,7 +27,7 @@ colab_notebook: notebooks/courses/python-foundations/project/index.ipynb
 <!-- fcpython-chapter-lab: start -->
 ## How to use this project lab
 
-Build one milestone at a time. Predict a result before each run, keep focused
+Build one stage at a time. Predict a result before each run, keep focused
 tests close to the behavior they protect, and preserve one debugging record.
 The generated notebook is useful for planning and experiments; the final
 project should also have a local project layout so its CLI and checks can run.
@@ -93,38 +93,38 @@ Write these predictions in the README or a project note:
 Also predict the exact error message for an empty topic and for a JSON record
 with missing `minutes`. These examples become the first test cases.
 
-## 3. Build in six milestones
+## 3. Build in six stages
 
-### Milestone 1: Model one valid session
+### Stage 1: Model one valid session
 
 Create a `StudySession` dataclass. Decide where validation occurs and write tests
 for one valid and two invalid instances before adding file access.
 
-### Milestone 2: Compose sessions in a tracker
+### Stage 2: Compose sessions in a tracker
 
 Create a tracker that owns a collection of sessions. Add focused methods or
 functions for totals, per-topic grouping, and filtered iteration. Explain why
 each operation is a method, function, comprehension, or generator.
 
-### Milestone 3: Cross the file boundary safely
+### Stage 3: Cross the file boundary safely
 
 Load and save JSON using `pathlib.Path` and `with`. Keep conversion between JSON
 records and application objects in a focused boundary. Reproduce one malformed
 file, reduce the failure, and preserve the traceback and controlled fix.
 
-### Milestone 4: Add a small command-line interface
+### Stage 4: Add a small command-line interface
 
 Provide commands or arguments for adding a session and viewing a summary. Keep
 argument parsing and printing separate from the calculation code so tests do not
 need interactive input.
 
-### Milestone 5: Make the project repeatable
+### Stage 5: Make the project repeatable
 
 Create the environment and dependency record, then run pytest, formatting,
 linting, and type checking. Add pre-commit configuration and a small CI workflow
 that runs the same agreed checks.
 
-### Milestone 6: Add operational evidence
+### Stage 6: Add operational evidence
 
 Read the data path or log level from one documented configuration source. Log a
 useful event or handled failure without replacing learner-facing error messages.

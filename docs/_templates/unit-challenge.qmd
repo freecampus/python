@@ -1,0 +1,132 @@
+---
+title: "Unit Challenge: Concrete Task Name"
+description: "State the observable unit outcome."
+challenge_id: unit-id.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+required_for_completion: true
+completion_label: Required unit challenge
+estimated_time: "60–120 minutes"
+categories: [course-id, unit-id, unit-challenge]
+order: 90
+colab_notebook: notebooks/courses/course-id/units/unit-id/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Course name · Unit number challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** State one observable outcome.
+- **Completion rule:** Complete the required checks, then record completion.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Name one bounded artifact and give it a concrete scenario. State what the
+learner should be able to explain after finishing.
+
+## 2. Understand the acceptance example
+
+Give exact sample input and output. Ask for a written prediction before code.
+List constraints, including concepts that have not been taught and therefore
+must not be required.
+
+## 3. Start from the contract
+
+Provide only the public structure needed to avoid blank-page confusion. Preserve
+meaningful names, signatures, type hints already taught, and short docstrings.
+
+```python
+def focused_function(value):
+    """State the input and returned behavior without revealing the algorithm."""
+    raise NotImplementedError
+```
+
+## 4. Build in small stages
+
+1. Implement and check the smallest ordinary behavior.
+2. Add the next independent behavior.
+3. Check a boundary or invalid input already covered by the unit.
+4. Predict and verify one controlled modification.
+
+## 5. Run progressive assertions
+
+```python
+assert focused_function("known input") == "known result"
+```
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+Point to the relevant lesson or concept.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Suggest a decomposition or next operation.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+Give pseudocode or partial structure, not a finished implementation.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Ask for failure, evidence, hypothesis, one controlled change, and a verified
+rerun.
+
+## 8. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "course-unit-challenge",
+  "title": "Unit challenge readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "What should the learner verify before recording completion?",
+      "options": [
+        "The required observable behavior",
+        "Only the number of lines",
+        "An unrelated optional feature",
+        "A copied screenshot"
+      ],
+      "answer_index": 0,
+      "explanation": "Completion evidence should match the stated contract."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+List required checks, clean-start evidence, explanation, debugging evidence, and
+one controlled modification.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+Summarize the unit outcome, checks, and evidence in concrete language.

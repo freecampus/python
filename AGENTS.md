@@ -52,7 +52,7 @@ predict, run, explain, modify, quiz, and debug small examples before moving on.
 - Keep `course_id`, `unit_id`, and `lesson_id` stable when titles or URLs
   change. Course prerequisites must point to existing course IDs and remain
   acyclic.
-- Keep `checkpoint_id`, `project_id`, curriculum versions, and rubric versions
+- Keep `challenge_id`, `project_id`, curriculum versions, and rubric versions
   stable once learners can record completion against them. Encode completion
   rules in the course manifest rather than inferring them from page titles.
 - State completion requirements explicitly in metadata and visible navigation.

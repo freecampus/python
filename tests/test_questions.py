@@ -16,8 +16,8 @@ import pytest
 
 from fcpython.questions import MultipleChoiceQuestion, Quiz
 from fcpython.quiz_banks import (
-    python_foundations_milestone_checkpoint_quizzes,
     python_foundations_project_quiz,
+    python_foundations_unit_challenge_quizzes,
     values_variables_types_quiz,
 )
 from fcpython.widgets import quiz_summary, show_quiz
@@ -127,18 +127,34 @@ def _first_quiz_payload(path: Path) -> dict[str, object]:
 
 
 def test_foundations_assessment_pages_match_quiz_banks() -> None:
-    quizzes = python_foundations_milestone_checkpoint_quizzes()
-    expected_milestones = (
-        "core-programming",
-        "data-and-functions",
-        "debugging-and-data-boundaries",
-        "reliable-projects",
-        "abstractions-and-application-patterns",
+    quizzes = python_foundations_unit_challenge_quizzes()
+    expected_units = (
+        "getting-started",
+        "values-types-input-output",
+        "control-flow",
+        "data-structures",
+        "functions",
+        "debugging",
+        "files",
+        "error-handling-and-validation",
+        "modules-and-packages",
+        "project-structure",
+        "environments-and-dependencies",
+        "command-line-programs",
+        "testing",
+        "code-style-and-linting",
+        "typing",
+        "automation-and-ci",
+        "object-oriented-programming",
+        "comprehensions-and-iteration",
+        "decorators-and-context-managers",
+        "logging-and-configuration",
     )
 
-    assert len(quizzes) == len(expected_milestones) == 5
-    for milestone, quiz in zip(expected_milestones, quizzes, strict=True):
-        path = FOUNDATIONS_ROOT / "milestones" / f"{milestone}.qmd"
+    assert len(quizzes) == len(expected_units) == 20
+    assert len(quizzes[0].questions) == 10
+    for unit, quiz in zip(expected_units, quizzes, strict=True):
+        path = FOUNDATIONS_ROOT / "units" / unit / "challenge.qmd"
         assert _first_quiz_payload(path) == quiz.to_dict()
 
     project = FOUNDATIONS_ROOT / "project/index.qmd"
@@ -443,7 +459,7 @@ def test_build_colab_notebooks_writes_expected_files(tmp_path: Path) -> None:
         "values-variables-types.ipynb"
     )
 
-    assert len(written) == 93
+    assert len(written) == 108
     assert expected in written
     assert tmp_path / "lessons/index.ipynb" in written
     payload = json.loads(expected.read_text())

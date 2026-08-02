@@ -55,14 +55,29 @@ required_lesson_ids:
 - decorators-and-context-managers.decorators
 - decorators-and-context-managers.context-managers
 - logging-and-configuration.logging-and-configuration
-checkpoint_ids:
-- core-programming
-- data-and-functions
-- debugging-and-data-boundaries
-- reliable-projects
-- abstractions-and-application-patterns
+challenge_ids:
+- getting-started.challenge
+- values-types-input-output.challenge
+- control-flow.challenge
+- data-structures.challenge
+- functions.challenge
+- debugging.challenge
+- files.challenge
+- error-handling-and-validation.challenge
+- modules-and-packages.challenge
+- project-structure.challenge
+- environments-and-dependencies.challenge
+- command-line-programs.challenge
+- testing.challenge
+- code-style-and-linting.challenge
+- typing.challenge
+- automation-and-ci.challenge
+- object-oriented-programming.challenge
+- comprehensions-and-iteration.challenge
+- decorators-and-context-managers.challenge
+- logging-and-configuration.challenge
 project_required: true
-estimated_effort: 38–55 hours
+estimated_effort: 55–85 hours
 prerequisite_label: None
 page-layout: full
 toc: false
@@ -70,7 +85,7 @@ body-classes: course-home course-foundations
 ---
 ::: {.lesson-meta}
 - **Level:** Beginner to project-ready
-- **Estimated effort:** 38–55 hours
+- **Estimated effort:** 55–85 hours
 - **Prerequisite:** None
 - **Status:** Available; certificate planned
 :::
@@ -79,7 +94,7 @@ body-classes: course-home course-foundations
 ::: {.callout-tip title="Start here if programming is new to you"}
 This course assumes no programming experience. Begin in Google Colab, learn
 what local Python tools provide, and progress through one focused concept at a
-time. Every lesson is part of the required pathway.
+time. Every lesson and unit challenge is part of the required pathway.
 :::
 
 ```{=html}
@@ -89,7 +104,7 @@ time. Every lesson is part of the required pathway.
   data-course-id="python-foundations"
   data-course-total="38"
   data-course-required-ids="getting-started.what-is-programming getting-started.google-colab getting-started.local-python-tools values-types-input-output.values-variables-types values-types-input-output.strings-input-output control-flow.booleans-and-conditionals control-flow.indentation control-flow.loops-and-tracing data-structures.lists data-structures.tuples data-structures.dictionaries data-structures.sets data-structures.nested-data functions.function-basics functions.function-contracts functions.function-decomposition-and-checks debugging.error-messages debugging.debugging-tools debugging.minimal-reproducible-examples files.paths-and-text-files files.structured-files error-handling-and-validation.exceptions-and-validation modules-and-packages.modules-and-packages project-structure.project-layout environments-and-dependencies.environments-and-dependencies command-line-programs.command-line-programs testing.testing-with-pytest code-style-and-linting.style-formatting-and-linting typing.type-checking automation-and-ci.pre-commit-and-ci object-oriented-programming.oop-basics object-oriented-programming.dataclasses object-oriented-programming.oop-design comprehensions-and-iteration.comprehensions comprehensions-and-iteration.iterables-and-generators decorators-and-context-managers.decorators decorators-and-context-managers.context-managers logging-and-configuration.logging-and-configuration"
-  data-course-checkpoint-ids="core-programming data-and-functions debugging-and-data-boundaries reliable-projects abstractions-and-application-patterns"
+  data-course-challenge-ids="getting-started.challenge values-types-input-output.challenge control-flow.challenge data-structures.challenge functions.challenge debugging.challenge files.challenge error-handling-and-validation.challenge modules-and-packages.challenge project-structure.challenge environments-and-dependencies.challenge command-line-programs.challenge testing.challenge code-style-and-linting.challenge typing.challenge automation-and-ci.challenge object-oriented-programming.challenge comprehensions-and-iteration.challenge decorators-and-context-managers.challenge logging-and-configuration.challenge"
   data-course-project-required="true"
 >
   <div><strong data-fc-course-progress-value>0%</strong><span>completion requirements met</span></div>
@@ -98,10 +113,10 @@ time. Every lesson is part of the required pathway.
   </div>
   <div class="fc-requirement-grid">
     <div><strong data-fc-required-lessons>0/38</strong><span>required lessons</span></div>
-    <div><strong data-fc-required-checkpoints>0/5</strong><span>milestone checkpoints</span></div>
+    <div><strong data-fc-required-challenges>0/20</strong><span>unit challenges</span></div>
     <div><strong data-fc-required-project>Not recorded</strong><span>Foundations project</span></div>
   </div>
-  <span data-fc-course-progress-label>44 completion requirements remaining</span>
+  <span data-fc-course-progress-label>59 completion requirements remaining</span>
   <strong class="fc-completion-status" data-fc-course-completion-status>Course in progress</strong>
 </div>
 ```
@@ -137,65 +152,32 @@ setup steps when project-focused units begin.
 
 ## Required learning sequence
 
-Python Foundations curriculum version 3 has **20 focused instructional units**,
-five milestone checkpoints, and **Unit 21**, the final project. Units stay small
-enough to name one coherent subject; milestone checkpoints ask you to integrate
-several neighboring units.
+Python Foundations curriculum version 4 has **20 focused instructional units**.
+Each unit starts with an Overview, continues through required lessons, and ends
+with a required Unit Challenge. **Unit 21** is the final project.
 
-### Milestone 1: Core Programming
-
-| Unit | Focus |
-|---|---|
-| 1. [Getting Started](units/getting-started/index.qmd) | Choose a practice environment and run Python work reproducibly. |
-| 2. [Values, Types, and Input/Output](units/values-types-input-output/index.qmd) | Represent information with Python values and exchange text with a learner. |
-| 3. [Control Flow](units/control-flow/index.qmd) | Choose which instructions run, repeat work, and trace changing state. |
-
-[Open Milestone 1: Core Programming](milestones/core-programming.qmd){.btn .btn-outline-primary}
-
-### Milestone 2: Data and Functions
-
-| Unit | Focus |
-|---|---|
-| 4. [Data Structures](units/data-structures/index.qmd) | Choose containers that match the relationships in your data. |
-| 5. [Functions](units/functions/index.qmd) | Give reusable behavior a clear input, result, contract, and check. |
-
-[Open Milestone 2: Data and Functions](milestones/data-and-functions.qmd){.btn .btn-outline-primary}
-
-### Milestone 3: Debugging and Data Boundaries
-
-| Unit | Focus |
-|---|---|
-| 6. [Debugging](units/debugging/index.qmd) | Investigate failures from evidence instead of changing code by guesswork. |
-| 7. [Files and Structured Data](units/files/index.qmd) | Move data safely between a Python program and external files. |
-| 8. [Error Handling and Validation](units/error-handling-and-validation/index.qmd) | Reject invalid input clearly and handle only failures the program understands. |
-
-[Open Milestone 3: Debugging and Data Boundaries](milestones/debugging-and-data-boundaries.qmd){.btn .btn-outline-primary}
-
-### Milestone 4: Reliable Python Projects
-
-| Unit | Focus |
-|---|---|
-| 9. [Modules and Packages](units/modules-and-packages/index.qmd) | Split reusable Python code across importable files and package namespaces. |
-| 10. [Project Structure](units/project-structure/index.qmd) | Arrange source, tests, configuration, and documentation predictably. |
-| 11. [Environments and Dependencies](units/environments-and-dependencies/index.qmd) | Make a project runtime isolated and reproducible. |
-| 12. [Command-Line Programs](units/command-line-programs/index.qmd) | Turn a reusable program into a command with explicit arguments and output. |
-| 13. [Testing](units/testing/index.qmd) | Protect observable behavior with focused automated tests. |
-| 14. [Code Style and Linting](units/code-style-and-linting/index.qmd) | Use automated tools to make code consistent and reveal likely mistakes. |
-| 15. [Typing](units/typing/index.qmd) | Document value expectations and check them before runtime. |
-| 16. [Automation and CI](units/automation-and-ci/index.qmd) | Run the project quality agreement automatically before and after sharing changes. |
-
-[Open Milestone 4: Reliable Python Projects](milestones/reliable-projects.qmd){.btn .btn-outline-primary}
-
-### Milestone 5: Abstractions and Application Patterns
-
-| Unit | Focus |
-|---|---|
-| 17. [Object-Oriented Programming](units/object-oriented-programming/index.qmd) | Model cohesive state and behavior without hiding unnecessary complexity. |
-| 18. [Comprehensions and Iteration](units/comprehensions-and-iteration/index.qmd) | Express transformations clearly and produce sequences eagerly or lazily. |
-| 19. [Decorators and Context Managers](units/decorators-and-context-managers/index.qmd) | Apply reusable behavior around functions and resource lifecycles. |
-| 20. [Logging and Configuration](units/logging-and-configuration/index.qmd) | Separate operational evidence and settings from core program behavior. |
-
-[Open Milestone 5: Abstractions and Application Patterns](milestones/abstractions-and-application-patterns.qmd){.btn .btn-outline-primary}
+| Unit | Focus | Required assessment |
+|---|---|---|
+| 1. [Getting Started](units/getting-started/index.qmd) | Choose a practice environment and use the course workflow deliberately. | [Challenge](units/getting-started/challenge.qmd) |
+| 2. [Values, Types, and Input/Output](units/values-types-input-output/index.qmd) | Represent information with Python values and exchange text with a learner. | [Challenge](units/values-types-input-output/challenge.qmd) |
+| 3. [Control Flow](units/control-flow/index.qmd) | Choose which instructions run, repeat work, and trace changing state. | [Challenge](units/control-flow/challenge.qmd) |
+| 4. [Data Structures](units/data-structures/index.qmd) | Choose containers that match the relationships in your data. | [Challenge](units/data-structures/challenge.qmd) |
+| 5. [Functions](units/functions/index.qmd) | Give reusable behavior a clear input, result, contract, and check. | [Challenge](units/functions/challenge.qmd) |
+| 6. [Debugging](units/debugging/index.qmd) | Investigate failures from evidence instead of changing code by guesswork. | [Challenge](units/debugging/challenge.qmd) |
+| 7. [Files and Structured Data](units/files/index.qmd) | Move data safely between a Python program and external files. | [Challenge](units/files/challenge.qmd) |
+| 8. [Error Handling and Validation](units/error-handling-and-validation/index.qmd) | Reject invalid input clearly and handle only understood failures. | [Challenge](units/error-handling-and-validation/challenge.qmd) |
+| 9. [Modules and Packages](units/modules-and-packages/index.qmd) | Split reusable Python code across importable files and package namespaces. | [Challenge](units/modules-and-packages/challenge.qmd) |
+| 10. [Project Structure](units/project-structure/index.qmd) | Arrange source, tests, configuration, and documentation predictably. | [Challenge](units/project-structure/challenge.qmd) |
+| 11. [Environments and Dependencies](units/environments-and-dependencies/index.qmd) | Make a project runtime isolated and reproducible. | [Challenge](units/environments-and-dependencies/challenge.qmd) |
+| 12. [Command-Line Programs](units/command-line-programs/index.qmd) | Turn reusable behavior into a command with explicit arguments and output. | [Challenge](units/command-line-programs/challenge.qmd) |
+| 13. [Testing](units/testing/index.qmd) | Protect observable behavior with focused automated tests. | [Challenge](units/testing/challenge.qmd) |
+| 14. [Code Style and Linting](units/code-style-and-linting/index.qmd) | Use automated tools to improve consistency and reveal likely mistakes. | [Challenge](units/code-style-and-linting/challenge.qmd) |
+| 15. [Typing](units/typing/index.qmd) | Document value expectations and check them before runtime. | [Challenge](units/typing/challenge.qmd) |
+| 16. [Automation and CI](units/automation-and-ci/index.qmd) | Run the project quality agreement automatically before and after sharing. | [Challenge](units/automation-and-ci/challenge.qmd) |
+| 17. [Object-Oriented Programming](units/object-oriented-programming/index.qmd) | Model cohesive state and behavior without hiding unnecessary complexity. | [Challenge](units/object-oriented-programming/challenge.qmd) |
+| 18. [Comprehensions and Iteration](units/comprehensions-and-iteration/index.qmd) | Express transformations clearly and produce sequences eagerly or lazily. | [Challenge](units/comprehensions-and-iteration/challenge.qmd) |
+| 19. [Decorators and Context Managers](units/decorators-and-context-managers/index.qmd) | Apply reusable behavior around functions and resource lifecycles. | [Challenge](units/decorators-and-context-managers/challenge.qmd) |
+| 20. [Logging and Configuration](units/logging-and-configuration/index.qmd) | Separate operational evidence and settings from core program behavior. | [Challenge](units/logging-and-configuration/challenge.qmd) |
 
 ### Unit 21: [Python Foundations Project](project/index.qmd)
 
@@ -203,28 +185,30 @@ Integrate the complete course in one small, explainable, tested project.
 
 ## Completion requirements and assessment
 
-Python Foundations curriculum version 3 is locally complete when you have:
+Python Foundations curriculum version 4 is locally complete when you have:
 
 1. completed all **38 required lessons**;
-2. recorded all **five required milestone checkpoints** after meeting their
-   knowledge and practical thresholds;
+2. recorded all **20 required unit challenges** after meeting their checks;
 3. built the required [Python Foundations Project](project/index.qmd) and
    self-assessed every rubric row as **Meets the requirement**.
 
-Lesson quizzes remain formative and do not have a stored grade. There are no
-optional lessons in this course.
+The Unit 1 challenge is a methodology-and-tools readiness quiz. Unit 2 through
+Unit 20 use guided practical tasks designed for one or two focused hours, with
+starter contracts, progressive assertions, and tiered hints. Lesson quizzes
+remain formative and do not have a stored grade. There are no optional lessons
+or challenges in this course.
 
 ::: {.callout-important title="Local completion is not a verified certificate"}
 The completion dashboard is a private, self-reported browser record. It does not
-verify identity, submit checkpoint artifacts, grade the project, or issue a
+verify identity, submit challenge artifacts, grade the project, or issue a
 certificate. A verifiable certificate remains planned as a separate service.
 :::
 
 ## Practice and next step
 
 Treat each lesson as a lab: predict, run, explain, modify, and keep evidence.
-Each milestone checkpoint combines several focused concepts, and the final
-project connects all 20 instructional units.
+Finish each unit with its challenge while the concept is fresh, then use the
+final project to connect all 20 instructional units.
 
 [Start Unit 1](units/getting-started/what-is-programming.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
 [Review the full pathway](../../pathways/index.qmd){.btn .btn-outline-primary}

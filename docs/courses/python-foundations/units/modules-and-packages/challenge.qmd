@@ -1,0 +1,214 @@
+---
+title: "Unit Challenge: Build a Conversion Package"
+description: "Split reusable conversions into an importable package with one clear public boundary."
+challenge_id: modules-and-packages.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+required_for_completion: true
+completion_label: Required unit challenge
+estimated_time: "60–120 minutes"
+categories: [python-foundations, modules-and-packages, unit-challenge]
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/modules-and-packages/challenge.ipynb
+---
+
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 9 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Split reusable conversions into an importable package with one clear public boundary.
+- **Completion rule:** Complete the required checks, then record completion below.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Create a `conversions` package whose public functions can be imported without exposing internal file choices.
+
+**Scenario:** A one-file temperature utility is growing. Separate temperature and distance behavior into modules, then re-export the supported functions from the package.
+
+::: {.callout-note title="Work independently, but not without support"}
+This challenge should take about one or two focused hours. Use the starter
+contract, run one group of assertions at a time, and open hints only after you
+can state what evidence is blocking you.
+:::
+
+## 2. Understand the acceptance example
+
+Before writing code, predict the important values and the exact final result.
+For the supplied input, the expected evidence is:
+
+`from conversions import celsius_to_fahrenheit, km_to_miles` works from the project root and returns checked values.
+
+Write your prediction in a notebook text cell or project note. Do not change
+the sample input until the matching assertions pass.
+
+### Required constraints
+
+1. Use the exact package and module names in the target tree.
+2. Keep each function in the module matching its concept.
+3. Use relative imports in `conversions/__init__.py` to define the public boundary.
+4. Run the smoke check from the project root.
+
+## 3. Start from the contract
+
+Copy this scaffold into the generated notebook or the indicated local project
+files. Preserve the supplied public names and docstrings so the checks can guide
+you.
+
+```python
+# conversions/temperature.py
+def celsius_to_fahrenheit(celsius):
+    """Return celsius converted to Fahrenheit."""
+    raise NotImplementedError
+
+
+# conversions/distance.py
+def km_to_miles(kilometres):
+    """Return kilometres converted to miles."""
+    raise NotImplementedError
+
+
+# conversions/__init__.py
+# Re-export both supported functions here.
+```
+
+## 4. Build in small stages
+
+1. Create the package tree and implement the temperature module.
+2. Implement the distance module and check each module import directly.
+3. Define the public imports in `__init__.py` and switch the smoke check to package imports.
+4. Temporarily create a conflicting `conversions.py`, observe the failure, and then remove it.
+
+After each stage, rerun only the smallest relevant check. When it passes, run
+all earlier checks before moving forward.
+
+## 5. Run progressive assertions
+
+These checks describe required observable behavior. A failed assertion is a
+location signal: read its message, inspect the actual value, and change one
+cause rather than weakening the assertion.
+
+```python
+from conversions import celsius_to_fahrenheit, km_to_miles
+
+assert celsius_to_fahrenheit(0) == 32
+assert celsius_to_fahrenheit(100) == 212
+assert round(km_to_miles(1), 5) == 0.62137
+assert round(km_to_miles(5), 5) == 3.10686
+```
+
+::: {.callout-warning title="Do not edit the expected values to create a pass"}
+Change the implementation until the stated behavior is true. If you believe an
+assertion is wrong, explain the contract conflict in writing before changing
+either side.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+A package is a directory containing modules and an `__init__.py` boundary.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Use the formulas `(celsius * 9 / 5) + 32` and `kilometres * 0.621371` inside their focused modules.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+In `__init__.py`, relative imports begin with a dot: `from .temperature import ...`.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Preserve one import failure with the command, working directory, exception, and file tree. Explain which path or name Python resolved after the repair.
+
+Use this short record:
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+
+## 8. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly
+in your browser.
+:::
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-modules-and-packages-challenge",
+  "title": "Conversion Package readiness check",
+  "instructions": "Choose an answer, then check your work.",
+  "questions": [
+    {
+      "id": "import-boundary",
+      "prompt": "Why place conversion behavior in an importable module?",
+      "options": [
+        "It gives reusable behavior a named boundary that other code can call.",
+        "It stops Python from checking syntax.",
+        "It installs dependencies automatically.",
+        "It makes every name global."
+      ],
+      "answer_index": 0,
+      "explanation": "A module gives related reusable behavior one importable home."
+    },
+    {
+      "id": "module-shadow",
+      "prompt": "A local file named statistics.py breaks import statistics. What should you inspect first?",
+      "options": [
+        "Whether the local filename shadows the intended module.",
+        "The monitor brightness.",
+        "The number of comments.",
+        "Whether every function prints a value."
+      ],
+      "answer_index": 0,
+      "explanation": "Python's import search can find a local file before the intended module."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+Record completion only when every statement is true:
+
+- [ ] All supplied assertions pass without editing their expected values.
+- [ ] The work runs from a clean notebook state or documented project root.
+- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified one controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit the artifact, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows the design without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

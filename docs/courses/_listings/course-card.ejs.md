@@ -2,7 +2,7 @@
 
 <% for (let index = 0; index < items.length; index++) { %> <% const item =
 items[index]; %> <% const requiredIds = item.required_lesson_ids || []; %> <%
-const checkpointIds = item.checkpoint_ids || []; %>
+const challengeIds = item.challenge_ids || []; %>
 
 ```{=html}
 <article
@@ -13,7 +13,7 @@ const checkpointIds = item.checkpoint_ids || []; %>
   data-course-status="<%- item.course_status %>"
   data-course-total="<%- item.required_lesson_count || item.lesson_count %>"
   data-course-required-ids="<%- requiredIds.join(' ') %>"
-  data-course-checkpoint-ids="<%- checkpointIds.join(' ') %>"
+  data-course-challenge-ids="<%- challengeIds.join(' ') %>"
   data-course-project-required="<%- item.project_required ? 'true' : 'false' %>"
   data-course-keywords="<%- item.course_keywords %>"
 >

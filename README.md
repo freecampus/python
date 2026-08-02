@@ -35,8 +35,8 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
 ## Course portfolio
 
 1. **Python Foundations**: 38 required lessons in 20 concept-focused
-   instructional units, five milestone checkpoints, and a rubric-scored final
-   project.
+   instructional units, one required challenge per unit, and a rubric-scored
+   final project.
 2. **Intermediate Python: Applied Problem Solving**: a challenge-based course
    focused on parsing, modeling, testing, refactoring, and explaining unfamiliar
    problems; curriculum TBD.
@@ -66,11 +66,11 @@ Cross-course material such as the FAQ and project toolkit lives under
 
 ### Python Foundations completion
 
-Python Foundations curriculum version 3 can be completed independently. The
-local completion rule requires all 38 lessons, all five milestone checkpoints,
-and the Foundations project self-assessed against rubric version 2. Progress is
-stored in the learner's browser for convenience. It is self-reported and is not
-a verified certificate, identity record, or instructor grade.
+Python Foundations curriculum version 4 can be completed independently. The
+local completion rule requires all 38 lessons, all 20 unit challenges, and the
+Foundations project self-assessed against rubric version 2. Progress is stored
+in the learner's browser for convenience. It is self-reported and is not a
+verified certificate, identity record, or instructor grade.
 
 ## Local planning note
 

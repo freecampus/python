@@ -62,348 +62,947 @@ def values_variables_types_quiz() -> Quiz:
     )
 
 
-def core_programming_milestone_quiz() -> Quiz:
-    """Return the Core Programming milestone checkpoint."""
+QuestionSpec = tuple[str, str, tuple[str, ...], int, str]
+ChallengeQuizSpec = tuple[str, str, tuple[QuestionSpec, ...]]
+
+
+def _quiz_from_spec(spec: ChallengeQuizSpec) -> Quiz:
+    quiz_id, title, questions = spec
     return Quiz(
-        id="foundations-core-programming-milestone",
-        title="Core Programming knowledge check",
-        questions=(
+        id=quiz_id,
+        title=title,
+        questions=tuple(
             MultipleChoiceQuestion(
-                id="interpreter-role",
-                prompt="What does the Python interpreter do with a program?",
-                options=(
-                    "It reads and runs the program's instructions.",
-                    "It guesses what the learner intended.",
-                    "It turns every line into printed text.",
-                    "It only checks spelling in comments.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "The interpreter follows Python instructions and reports "
-                    "either results or errors."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="input-type",
-                prompt="What type of value does input() return?",
-                options=("int", "str", "bool", "float"),
-                answer_index=1,
-                explanation=(
-                    "input() returns text. Convert that text explicitly when a "
-                    "program needs a number."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="condition-choice",
-                prompt="When does the else branch of an if statement run?",
-                options=(
-                    "Before Python checks the condition.",
-                    "Only when every preceding condition in the chain is false.",
-                    "After every if branch.",
-                    "Only inside a loop.",
-                ),
-                answer_index=1,
-                explanation=(
-                    "An if/elif/else chain selects one path; else is the "
-                    "fallback when earlier conditions are false."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="loop-trace",
-                prompt="How many times does for number in range(3) run its body?",
-                options=("2", "3", "4", "It never stops"),
-                answer_index=1,
-                explanation=(
-                    "range(3) produces 0, 1, and 2, so the body runs three times."
-                ),
-            ),
+                id=question_id,
+                prompt=prompt,
+                options=options,
+                answer_index=answer_index,
+                explanation=explanation,
+            )
+            for question_id, prompt, options, answer_index, explanation in questions
         ),
     )
 
 
-def data_and_functions_milestone_quiz() -> Quiz:
-    """Return the Data and Functions milestone checkpoint."""
-    return Quiz(
-        id="foundations-data-and-functions-milestone",
-        title="Data and Functions knowledge check",
-        questions=(
-            MultipleChoiceQuestion(
-                id="container-choice",
-                prompt="Which container best maps each student name to one score?",
-                options=("list", "tuple", "dictionary", "set"),
-                answer_index=2,
-                explanation="A dictionary associates each unique key with a value.",
+def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
+    """Return the required quiz for each Python Foundations unit challenge."""
+    specs: tuple[ChallengeQuizSpec, ...] = (
+        (
+            "foundations-getting-started-challenge",
+            "Learning Workflow Readiness Check",
+            (
+                (
+                    "predict-first",
+                    (
+                        "A code cell prints a value you did not expect. What should "
+                        "you do first?"
+                    ),
+                    (
+                        "Replace several lines until the output changes.",
+                        (
+                            "Write down the output you expected and trace the current "
+                            "values."
+                        ),
+                        "Restart the course from the beginning.",
+                        "Ignore the result if the cell ran without an error.",
+                    ),
+                    1,
+                    (
+                        "A written prediction gives you something precise to compare "
+                        "with the evidence from the run."
+                    ),
+                ),
+                (
+                    "controlled-change",
+                    "Which experiment is a controlled change?",
+                    (
+                        "Rename every variable and change all input values at once.",
+                        "Copy a different program and compare screenshots.",
+                        (
+                            "Change one input value, predict the result, and rerun "
+                            "the same code."
+                        ),
+                        "Keep editing without rerunning.",
+                    ),
+                    2,
+                    (
+                        "Changing one thing preserves a clear connection between the "
+                        "change and the new evidence."
+                    ),
+                ),
+                (
+                    "colab-order",
+                    (
+                        "A Colab cell uses a name created in an earlier cell, but the "
+                        "name is undefined. What is the best first check?"
+                    ),
+                    (
+                        "Whether the earlier cell has run in the current session.",
+                        "Whether the notebook title contains Python.",
+                        "Whether the browser window is maximized.",
+                        "Whether every cell has exactly the same length.",
+                    ),
+                    0,
+                    (
+                        "Notebook state depends on which cells ran and in what order; "
+                        "rerunning from the top exposes hidden state."
+                    ),
+                ),
+                (
+                    "clean-rerun",
+                    (
+                        "Why restart the runtime and run all cells before calling "
+                        "notebook work reproducible?"
+                    ),
+                    (
+                        "It makes every program faster.",
+                        (
+                            "It proves the result does not depend on forgotten hidden "
+                            "state."
+                        ),
+                        "It automatically fixes syntax errors.",
+                        "It installs every possible package.",
+                    ),
+                    1,
+                    (
+                        "A clean rerun checks that the visible notebook contains "
+                        "every step needed to reproduce the result."
+                    ),
+                ),
+                (
+                    "choose-colab",
+                    (
+                        "When is Colab the most useful starting environment for this "
+                        "course?"
+                    ),
+                    (
+                        (
+                            "When you want to begin in a browser without installing "
+                            "Python locally."
+                        ),
+                        "When you must test a local command-line package layout.",
+                        "When you need to inspect a local virtual environment.",
+                        (
+                            "When the program must run without a web browser or "
+                            "internet access."
+                        ),
+                    ),
+                    0,
+                    (
+                        "Colab removes the initial installation barrier and is "
+                        "suitable for the course's early notebook exercises."
+                    ),
+                ),
+                (
+                    "choose-local",
+                    (
+                        "Which task is a strong reason to use local Python tools "
+                        "later in the course?"
+                    ),
+                    (
+                        "Selecting an answer in a browser quiz.",
+                        "Reading a short code example.",
+                        (
+                            "Practising project folders, virtual environments, and "
+                            "command-line programs."
+                        ),
+                        "Changing one number in an isolated expression.",
+                    ),
+                    2,
+                    (
+                        "Project layout, environments, and CLI work depend on "
+                        "filesystem and terminal behavior that local tools expose "
+                        "directly."
+                    ),
+                ),
+                (
+                    "read-error",
+                    (
+                        "Python shows a traceback. Which information should you "
+                        "identify before editing code?"
+                    ),
+                    (
+                        "Only the color of the error output.",
+                        "The exception type, message, and relevant line.",
+                        "A package to reinstall immediately.",
+                        "Every comment in the program.",
+                    ),
+                    1,
+                    (
+                        "The exception type, message, and line are evidence about "
+                        "what Python could not do."
+                    ),
+                ),
+                (
+                    "explain-copy",
+                    (
+                        "A copied example works. What turns it into useful learning "
+                        "evidence?"
+                    ),
+                    (
+                        "Keeping it unchanged so it always matches the source.",
+                        "Running it many times without reading it.",
+                        (
+                            "Explaining the important lines and predicting a small "
+                            "modification."
+                        ),
+                        "Removing every variable name.",
+                    ),
+                    2,
+                    (
+                        "Explanation and controlled modification show that you "
+                        "understand the behavior rather than only reproducing it."
+                    ),
+                ),
+                (
+                    "input-output",
+                    (
+                        "A program asks for a name and then displays a greeting. "
+                        "Which statement is correct?"
+                    ),
+                    (
+                        "The typed name is input and the displayed greeting is output.",
+                        "Both values are comments.",
+                        "The greeting is input because Python created it.",
+                        "The typed name is an error message.",
+                    ),
+                    0,
+                    (
+                        "Input enters the program; output is information the program "
+                        "presents after processing."
+                    ),
+                ),
+                (
+                    "stuck-routine",
+                    (
+                        "You are stuck after two guesses. Which next step best "
+                        "follows the course method?"
+                    ),
+                    (
+                        "Make several more guesses quickly.",
+                        "Delete the failing example.",
+                        (
+                            "Reduce the problem, inspect one value, and make one "
+                            "evidence-based change."
+                        ),
+                        "Assume the tool is broken.",
+                    ),
+                    2,
+                    (
+                        "A smaller reproduction and one inspected value create "
+                        "evidence that can confirm or reject a hypothesis."
+                    ),
+                ),
             ),
-            MultipleChoiceQuestion(
-                id="nested-access",
-                prompt=(
-                    "For student = {'scores': [8, 10]}, which expression returns 10?"
+        ),
+        (
+            "foundations-values-types-input-output-challenge",
+            "Purchase Summary readiness check",
+            (
+                (
+                    "input-type",
+                    "What type does input() return before explicit conversion?",
+                    ("int", "str", "float", "bool"),
+                    1,
+                    "input() returns text, even when the learner types digits.",
                 ),
-                options=(
-                    "student[10]",
-                    "student['scores'][1]",
-                    "student.scores.10",
-                    "student['scores'][10]",
-                ),
-                answer_index=1,
-                explanation=(
-                    "First select the list stored under 'scores', then select "
-                    "the value at index 1."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="return-purpose",
-                prompt="Why does a function return a value?",
-                options=(
-                    "So its result can be stored or used by other code.",
-                    "So Python prints every local variable.",
-                    "So the function can avoid having a name.",
-                    "So arguments become comments.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "A returned value crosses the function boundary and can be "
-                    "assigned, compared, printed, or passed elsewhere."
+                (
+                    "formatted-total",
+                    "Which value should be numeric before formatting a money total?",
+                    (
+                        "The prompt text",
+                        "The subtotal",
+                        "The item label",
+                        "The newline",
+                    ),
+                    1,
+                    (
+                        "Arithmetic must produce a numeric subtotal before an "
+                        "f-string formats it as money."
+                    ),
                 ),
             ),
-            MultipleChoiceQuestion(
-                id="focused-test",
-                prompt="What makes a first function test useful?",
-                options=(
-                    "It checks one stated behavior with a known input and result.",
-                    "It depends on many unrelated functions.",
-                    "It prints output without checking it.",
-                    "It changes the function while running.",
+        ),
+        (
+            "foundations-control-flow-challenge",
+            "Savings Goal readiness check",
+            (
+                (
+                    "loop-stop",
+                    "What prevents a savings loop from running forever?",
+                    (
+                        "A balance that changes toward a clear stopping condition.",
+                        "A longer variable name.",
+                        "Printing the balance twice.",
+                        "Converting the target to text.",
+                    ),
+                    0,
+                    (
+                        "Each iteration must make progress toward a condition that "
+                        "eventually becomes false."
+                    ),
                 ),
-                answer_index=0,
-                explanation=(
-                    "A focused example makes failures easier to understand and "
-                    "connect to the function's contract."
+                (
+                    "boundary-trace",
+                    (
+                        "If the starting balance already equals the target, how many "
+                        "deposits should a while balance < target loop make?"
+                    ),
+                    ("One", "Two", "Zero", "It never stops"),
+                    2,
+                    (
+                        "The condition is false before the first iteration, so the "
+                        "loop body does not run."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-data-structures-challenge",
+            "Classroom Inventory readiness check",
+            (
+                (
+                    "lookup-shape",
+                    "Which structure directly maps each item ID to its record?",
+                    ("A dictionary", "A set", "A single string", "A Boolean"),
+                    0,
+                    "A dictionary associates each unique key with its record.",
+                ),
+                (
+                    "unique-borrowers",
+                    "Which structure naturally removes repeated borrower names?",
+                    ("A list", "A set", "A tuple containing duplicates", "A float"),
+                    1,
+                    "A set represents unique values without duplicate entries.",
+                ),
+            ),
+        ),
+        (
+            "foundations-functions-challenge",
+            "Study-Session Report readiness check",
+            (
+                (
+                    "return-boundary",
+                    (
+                        "Why should total_minutes return a number instead of only "
+                        "printing it?"
+                    ),
+                    (
+                        "So callers can store, compare, test, or format the result.",
+                        "So the function has no inputs.",
+                        "So Python skips the calculation.",
+                        "So local variables become global.",
+                    ),
+                    0,
+                    (
+                        "A return value crosses the function boundary and remains "
+                        "useful to other code."
+                    ),
+                ),
+                (
+                    "focused-contract",
+                    "What makes a function contract focused?",
+                    (
+                        "It promises one clear behavior for stated inputs and results.",
+                        "It performs every program task at once.",
+                        "It depends on hidden global state.",
+                        "It changes whenever it is called.",
+                    ),
+                    0,
+                    (
+                        "A focused contract makes the behavior explainable and "
+                        "independently checkable."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-debugging-challenge",
+            "Bug Clinic readiness check",
+            (
+                (
+                    "first-evidence",
+                    "What belongs in a useful first bug report?",
+                    (
+                        "The observed result, expected result, and reproducible input.",
+                        "Only a guess about the fix.",
+                        "A screenshot without code or data.",
+                        "Every unrelated project file.",
+                    ),
+                    0,
+                    (
+                        "A reproducible input and a precise expectation let you "
+                        "investigate the same failure repeatedly."
+                    ),
+                ),
+                (
+                    "small-change",
+                    "Why rerun assertions after one repair?",
+                    (
+                        (
+                            "To verify the change fixed the target behavior without "
+                            "hiding another failure."
+                        ),
+                        "To make the source file longer.",
+                        "To avoid reading the failure message.",
+                        "To rename every variable.",
+                    ),
+                    0,
+                    "A controlled rerun connects the repair to observable evidence.",
+                ),
+            ),
+        ),
+        (
+            "foundations-files-challenge",
+            "Reading Log readiness check",
+            (
+                (
+                    "path-purpose",
+                    "Why pass input and output paths into file functions?",
+                    (
+                        "It makes the file boundary explicit and easier to test.",
+                        "It guarantees every file contains JSON.",
+                        "It prevents all operating-system errors.",
+                        "It turns paths into numbers.",
+                    ),
+                    0,
+                    (
+                        "Explicit paths let checks use temporary files instead of "
+                        "hidden working-directory assumptions."
+                    ),
+                ),
+                (
+                    "with-file",
+                    "What does a with block provide for an opened file?",
+                    (
+                        "Reliable closing when the block ends.",
+                        "Automatic data validation.",
+                        "A permanent global variable.",
+                        "A guarantee that the path exists.",
+                    ),
+                    0,
+                    (
+                        "The context manager closes the file even when work leaves "
+                        "the block because of an error."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-error-handling-and-validation-challenge",
+            "Safe Record Import readiness check",
+            (
+                (
+                    "validate-boundary",
+                    "When should a record from an external file be validated?",
+                    (
+                        "As it enters the program, before calculations depend on it.",
+                        "Only after every result is printed.",
+                        "Only if the file name is long.",
+                        "Never when JSON parsing succeeds.",
+                    ),
+                    0,
+                    (
+                        "Valid JSON can still contain missing or invalid application "
+                        "values, so validate at the boundary."
+                    ),
+                ),
+                (
+                    "narrow-except",
+                    (
+                        "Why catch a specific expected exception rather than "
+                        "Exception everywhere?"
+                    ),
+                    (
+                        (
+                            "It avoids hiding failures the program does not know how "
+                            "to handle."
+                        ),
+                        "It makes every invalid record valid.",
+                        "It removes the need for error messages.",
+                        "It prevents syntax errors before running.",
+                    ),
+                    0,
+                    (
+                        "A narrow handler documents the failure the program "
+                        "understands and lets unexpected defects remain visible."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-modules-and-packages-challenge",
+            "Conversion Package readiness check",
+            (
+                (
+                    "import-boundary",
+                    "Why place conversion behavior in an importable module?",
+                    (
+                        (
+                            "It gives reusable behavior a named boundary that other "
+                            "code can call."
+                        ),
+                        "It stops Python from checking syntax.",
+                        "It installs dependencies automatically.",
+                        "It makes every name global.",
+                    ),
+                    0,
+                    "A module gives related reusable behavior one importable home.",
+                ),
+                (
+                    "module-shadow",
+                    (
+                        "A local file named statistics.py breaks import statistics. "
+                        "What should you inspect first?"
+                    ),
+                    (
+                        "Whether the local filename shadows the intended module.",
+                        "The monitor brightness.",
+                        "The number of comments.",
+                        "Whether every function prints a value.",
+                    ),
+                    0,
+                    (
+                        "Python's import search can find a local file before the "
+                        "intended module."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-project-structure-challenge",
+            "Task Tracker Structure readiness check",
+            (
+                (
+                    "source-home",
+                    (
+                        "Where should reusable task-tracker behavior live in the "
+                        "target layout?"
+                    ),
+                    (
+                        (
+                            "Inside the source package rather than the README or "
+                            "generated output."
+                        ),
+                        "Only inside a screenshot.",
+                        "Inside the dependency cache.",
+                        "In every test file as a copy.",
+                    ),
+                    0,
+                    "The source package is the clear home for application behavior.",
+                ),
+                (
+                    "separate-entry",
+                    "Why keep the entry point thin?",
+                    (
+                        (
+                            "So argument/input handling delegates to reusable "
+                            "behavior that can be checked separately."
+                        ),
+                        "So no functions can be imported.",
+                        "So all state becomes global.",
+                        "So documentation executes automatically.",
+                    ),
+                    0,
+                    (
+                        "A thin entry point separates interface concerns from "
+                        "reusable application logic."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-environments-and-dependencies-challenge",
+            "Reproducible Text Tool readiness check",
+            (
+                (
+                    "venv-purpose",
+                    "What does a project virtual environment isolate?",
+                    (
+                        (
+                            "That project's interpreter context and installed package "
+                            "versions."
+                        ),
+                        "The project's Git history.",
+                        "Every file on the computer.",
+                        "Only comments in Python files.",
+                    ),
+                    0,
+                    (
+                        "An environment keeps one project's dependencies from "
+                        "silently changing another project."
+                    ),
+                ),
+                (
+                    "declare-dependency",
+                    "Why record a dependency in project metadata after installing it?",
+                    (
+                        "So another clean environment can reproduce the requirement.",
+                        "So Python no longer imports it.",
+                        "So the package becomes standard-library code.",
+                        "So tests are unnecessary.",
+                    ),
+                    0,
+                    (
+                        "A declaration turns local installation state into a "
+                        "reproducible project requirement."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-command-line-programs-challenge",
+            "Converter CLI readiness check",
+            (
+                (
+                    "argv-test",
+                    "Why let main accept argv=None?",
+                    (
+                        (
+                            "Tests can pass a known argument list while normal runs "
+                            "use command-line arguments."
+                        ),
+                        "It prevents argparse from validating input.",
+                        "It converts all arguments to numbers.",
+                        "It removes the need for a parser.",
+                    ),
+                    0,
+                    (
+                        "An injectable argument list makes parsing behavior "
+                        "reproducible in checks."
+                    ),
+                ),
+                (
+                    "logic-separation",
+                    "Where should the numeric conversion calculation live?",
+                    (
+                        "In a reusable function separate from printing and parsing.",
+                        "Only in the help text.",
+                        "Inside every assertion as copied code.",
+                        "In a global exception handler.",
+                    ),
+                    0,
+                    (
+                        "Separating calculation from the interface makes both easier "
+                        "to explain and test."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-testing-challenge",
+            "Grade Summary readiness check",
+            (
+                (
+                    "behavior-test",
+                    "What should a focused test protect?",
+                    (
+                        (
+                            "One observable behavior with a known input and expected "
+                            "result."
+                        ),
+                        "The exact order of unrelated implementation lines.",
+                        "A printed value that nobody checks.",
+                        "The editor theme.",
+                    ),
+                    0,
+                    (
+                        "A focused behavior makes failure meaning clear and supports "
+                        "safe refactoring."
+                    ),
+                ),
+                (
+                    "bug-regression",
+                    (
+                        "What should you do after finding and repairing a "
+                        "boundary-case bug?"
+                    ),
+                    (
+                        "Add a test that reproduces the old failure and now passes.",
+                        "Delete the boundary input.",
+                        "Replace all tests with one screenshot.",
+                        "Test only the happy path again.",
+                    ),
+                    0,
+                    "A regression test preserves the evidence that exposed the bug.",
+                ),
+            ),
+        ),
+        (
+            "foundations-code-style-and-linting-challenge",
+            "Messy Report Rescue readiness check",
+            (
+                (
+                    "format-vs-behavior",
+                    "What must remain true after formatting and renaming a script?",
+                    (
+                        "Its checked observable behavior remains unchanged.",
+                        "Every line becomes the same length.",
+                        "All functions are removed.",
+                        "The script prints more output.",
+                    ),
+                    0,
+                    (
+                        "Style improvements should not silently change the behavior "
+                        "protected by assertions."
+                    ),
+                ),
+                (
+                    "linter-evidence",
+                    "What does a clean linter run demonstrate?",
+                    (
+                        (
+                            "The configured static checks found no remaining reported "
+                            "issues."
+                        ),
+                        "The program has no possible bugs.",
+                        "Every design choice is ideal.",
+                        "Runtime tests are no longer useful.",
+                    ),
+                    0,
+                    (
+                        "Linting is one form of evidence, not a proof of complete "
+                        "correctness."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-typing-challenge",
+            "Typed Record Summarizer readiness check",
+            (
+                (
+                    "useful-type",
+                    "What makes a type annotation useful?",
+                    (
+                        "It communicates an actual value expectation at a boundary.",
+                        "It replaces runtime validation of external data.",
+                        "It guarantees the implementation is correct.",
+                        "It makes every value a string.",
+                    ),
+                    0,
+                    (
+                        "Annotations document expectations and enable static checks, "
+                        "but external values still need validation."
+                    ),
+                ),
+                (
+                    "avoid-any",
+                    "Why avoid replacing every difficult annotation with Any?",
+                    (
+                        (
+                            "Broad Any removes the checks that would expose "
+                            "inconsistent use."
+                        ),
+                        "Any is invalid Python syntax.",
+                        "Any always raises at runtime.",
+                        "Any can only describe integers.",
+                    ),
+                    0,
+                    "Any opts out of much of the type checker's useful reasoning.",
+                ),
+            ),
+        ),
+        (
+            "foundations-automation-and-ci-challenge",
+            "Automated Quality Gate readiness check",
+            (
+                (
+                    "same-checks",
+                    "Why should local and CI commands agree?",
+                    (
+                        (
+                            "A learner can reproduce failures before and after "
+                            "sharing a change."
+                        ),
+                        "CI then guarantees no bugs exist.",
+                        "Local tests become unnecessary.",
+                        "Every workflow runs faster.",
+                    ),
+                    0,
+                    (
+                        "One quality agreement reduces surprises between local work "
+                        "and remote automation."
+                    ),
+                ),
+                (
+                    "ci-trigger",
+                    "What should a basic pull-request workflow do?",
+                    (
+                        (
+                            "Check out the code, prepare Python, install declared "
+                            "tools, and run the agreed checks."
+                        ),
+                        "Publish without running tests.",
+                        "Modify source files and commit them.",
+                        "Depend on packages installed on a learner's laptop.",
+                    ),
+                    0,
+                    (
+                        "A clean runner must reconstruct the project before it can "
+                        "verify the agreed checks."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-object-oriented-programming-challenge",
+            "Equipment Rental readiness check",
+            (
+                (
+                    "composition",
+                    "What should the rental service own?",
+                    (
+                        "A collection of equipment objects it coordinates.",
+                        "Copies of every method as strings.",
+                        "Only one unrelated global number.",
+                        "The Python interpreter.",
+                    ),
+                    0,
+                    (
+                        "Composition lets the service coordinate cohesive item "
+                        "objects without pretending it is an item."
+                    ),
+                ),
+                (
+                    "class-invariant",
+                    "Where should an item's unavailable-state rule be protected?",
+                    (
+                        "At the method boundary that changes checkout state.",
+                        "Only in the README.",
+                        "In a caller's comment.",
+                        "By renaming the class.",
+                    ),
+                    0,
+                    (
+                        "The object that owns the state should keep invalid "
+                        "transitions from being represented silently."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-comprehensions-and-iteration-challenge",
+            "Sensor Stream readiness check",
+            (
+                (
+                    "generator-lazy",
+                    "What makes a generator suitable for a long sensor stream?",
+                    (
+                        "It can produce matching readings on demand.",
+                        "It sorts every reading automatically.",
+                        "It can never be exhausted.",
+                        "It converts every reading to text.",
+                    ),
+                    0,
+                    (
+                        "Lazy iteration avoids building every possible result before "
+                        "the caller needs it."
+                    ),
+                ),
+                (
+                    "readable-comprehension",
+                    "When should a comprehension be replaced by an ordinary loop?",
+                    (
+                        (
+                            "When the expression becomes difficult to explain or "
+                            "needs several stateful steps."
+                        ),
+                        "Whenever it creates a list.",
+                        "Whenever it has one condition.",
+                        "Only when the input is empty.",
+                    ),
+                    0,
+                    "Conciseness helps only while the transformation remains readable.",
+                ),
+            ),
+        ),
+        (
+            "foundations-decorators-and-context-managers-challenge",
+            "Managed Operation readiness check",
+            (
+                (
+                    "wraps-purpose",
+                    "Why use functools.wraps in a function decorator?",
+                    (
+                        "It preserves useful metadata from the wrapped function.",
+                        "It guarantees the function never raises.",
+                        "It converts arguments to strings.",
+                        "It opens a file automatically.",
+                    ),
+                    0,
+                    (
+                        "wraps keeps metadata such as the original name and docstring "
+                        "visible."
+                    ),
+                ),
+                (
+                    "cleanup-path",
+                    "Where should context-manager cleanup run?",
+                    (
+                        (
+                            "After both successful work and exceptions inside the "
+                            "managed block."
+                        ),
+                        "Only when the block prints output.",
+                        "Before setup.",
+                        "Only when no resource was acquired.",
+                    ),
+                    0,
+                    (
+                        "The context boundary exists to pair setup with reliable "
+                        "cleanup on every exit path."
+                    ),
+                ),
+            ),
+        ),
+        (
+            "foundations-logging-and-configuration-challenge",
+            "Configurable Batch Processor readiness check",
+            (
+                (
+                    "log-vs-output",
+                    "What should logging provide in the batch processor?",
+                    (
+                        (
+                            "Operational evidence for diagnosis without replacing "
+                            "user-facing results."
+                        ),
+                        "Every value the user requested as hidden debug output.",
+                        "A substitute for validation.",
+                        "A guarantee that file access succeeds.",
+                    ),
+                    0,
+                    (
+                        "Logs describe operation; user-facing output communicates the "
+                        "requested result."
+                    ),
+                ),
+                (
+                    "config-boundary",
+                    (
+                        "What should happen when configuration contains an "
+                        "unsupported log level?"
+                    ),
+                    (
+                        (
+                            "Validation should report a clear boundary error before "
+                            "processing starts."
+                        ),
+                        "The value should silently become valid.",
+                        "Every exception should be ignored.",
+                        "The program should edit its own source code.",
+                    ),
+                    0,
+                    (
+                        "Explicit validation prevents invalid settings from spreading "
+                        "into later behavior."
+                    ),
                 ),
             ),
         ),
     )
-
-
-def debugging_and_data_boundaries_milestone_quiz() -> Quiz:
-    """Return the Debugging and Data Boundaries milestone checkpoint."""
-    return Quiz(
-        id="foundations-debugging-and-data-boundaries-milestone",
-        title="Debugging and Data Boundaries knowledge check",
-        questions=(
-            MultipleChoiceQuestion(
-                id="traceback-first-step",
-                prompt="What should you identify first in a Python traceback?",
-                options=(
-                    "The exception type, message, and relevant line.",
-                    "A random line to rewrite.",
-                    "The editor's font size.",
-                    "A package to reinstall immediately.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "The exception type, message, and line provide evidence "
-                    "about what Python could not do."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="mre-purpose",
-                prompt="What does a minimal reproducible example preserve?",
-                options=(
-                    "The smallest code and data that still show the problem.",
-                    "Every feature in the original project.",
-                    "Only the expected output.",
-                    "A screenshot without executable code.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "Removing unrelated parts makes the cause easier to isolate "
-                    "while keeping the failure reproducible."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="file-context",
-                prompt="Why use with open(...) as file for file access?",
-                options=(
-                    "It closes the file reliably when the block finishes.",
-                    "It converts every file to JSON.",
-                    "It guarantees every path exists.",
-                    "It prevents all validation errors.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "The context manager releases the file resource even when "
-                    "the block finishes because of an error."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="validation-boundary",
-                prompt="When should external data be validated?",
-                options=(
-                    "As it enters the program, before other code depends on it.",
-                    "Only after every calculation finishes.",
-                    "Only when Python raises SyntaxError.",
-                    "Never when the source is a file.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "Checking data at the boundary creates clear failures before "
-                    "invalid values spread through the program."
-                ),
-            ),
-        ),
-    )
-
-
-def reliable_projects_milestone_quiz() -> Quiz:
-    """Return the Reliable Projects milestone checkpoint."""
-    return Quiz(
-        id="foundations-reliable-projects-milestone",
-        title="Reliable Python Projects knowledge check",
-        questions=(
-            MultipleChoiceQuestion(
-                id="module-boundary",
-                prompt="Why move reusable behavior from a script into a module?",
-                options=(
-                    "So it can be imported, tested, and reused behind a clear "
-                    "boundary.",
-                    "So Python stops checking its syntax.",
-                    "So every function becomes global.",
-                    "So dependencies install automatically.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "A focused module gives related behavior a reusable, testable home."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="environment-purpose",
-                prompt="What problem does a project virtual environment solve?",
-                options=(
-                    "It isolates that project's dependency versions.",
-                    "It replaces source control.",
-                    "It makes every command-line argument valid.",
-                    "It publishes the project automatically.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "An isolated environment prevents one project's packages "
-                    "from silently changing another project's runtime."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="test-contract",
-                prompt="What should a focused pytest test describe?",
-                options=(
-                    "One observable behavior and its expected result.",
-                    "The editor theme used by the author.",
-                    "Every implementation detail in one assertion.",
-                    "A result inspected only by printing it.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "A focused test protects one behavior and makes a failure "
-                    "easier to interpret."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="automation-role",
-                prompt="What do pre-commit checks and CI provide together?",
-                options=(
-                    "Repeatable quality checks before and after changes are shared.",
-                    "A guarantee that no program can contain a bug.",
-                    "A replacement for tests and code review.",
-                    "Automatic type conversion at runtime.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "Local and remote automation run the same agreed checks at "
-                    "important points in the project workflow."
-                ),
-            ),
-        ),
-    )
-
-
-def abstractions_and_application_patterns_milestone_quiz() -> Quiz:
-    """Return the Abstractions and Application Patterns milestone checkpoint."""
-    return Quiz(
-        id="foundations-abstractions-and-application-patterns-milestone",
-        title="Abstractions and Application Patterns knowledge check",
-        questions=(
-            MultipleChoiceQuestion(
-                id="class-purpose",
-                prompt="When is a small class a useful design choice?",
-                options=(
-                    "When related state and behavior form one clear concept.",
-                    "Whenever a program has one variable.",
-                    "Only when inheritance is required.",
-                    "When functions should become impossible to test.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "A class can make a cohesive concept explicit by keeping its "
-                    "state and operations together."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="dataclass-purpose",
-                prompt="What does @dataclass mainly reduce for data-focused classes?",
-                options=(
-                    "Repetitive methods such as initialization and representation.",
-                    "The need to choose meaningful attributes.",
-                    "All runtime validation.",
-                    "The need to create instances.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "A dataclass generates common methods while leaving the data "
-                    "model and behavior visible."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="generator-value",
-                prompt="Why can a generator help with a long sequence of values?",
-                options=(
-                    "It produces values on demand instead of storing them all at once.",
-                    "It automatically sorts every value.",
-                    "It converts every value to text.",
-                    "It prevents iteration from stopping.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "Lazy generation can reduce memory use and lets a pipeline "
-                    "process one value at a time."
-                ),
-            ),
-            MultipleChoiceQuestion(
-                id="context-boundary",
-                prompt="What behavior should a context manager make explicit?",
-                options=(
-                    "Setup and guaranteed cleanup around a block of work.",
-                    "A hidden global variable shared by every module.",
-                    "An infinite loop around a function.",
-                    "Automatic inheritance between unrelated classes.",
-                ),
-                answer_index=0,
-                explanation=(
-                    "A context manager pairs resource setup with reliable cleanup "
-                    "at a visible block boundary."
-                ),
-            ),
-        ),
-    )
-
-
-def python_foundations_milestone_checkpoint_quizzes() -> tuple[Quiz, ...]:
-    """Return the five required Python Foundations milestone quizzes."""
-    return (
-        core_programming_milestone_quiz(),
-        data_and_functions_milestone_quiz(),
-        debugging_and_data_boundaries_milestone_quiz(),
-        reliable_projects_milestone_quiz(),
-        abstractions_and_application_patterns_milestone_quiz(),
-    )
+    return tuple(_quiz_from_spec(spec) for spec in specs)
 
 
 def python_foundations_project_quiz() -> Quiz:

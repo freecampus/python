@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 3
+curriculum_version: 4
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -11,14 +11,14 @@ courses:
     lesson_count: 38
     required_lesson_count: 38
     optional_lesson_count: 0
-    estimated_effort: 38–55 hours
+    estimated_effort: 55–85 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 3
-      rule_version: 3
+      curriculum_version: 4
+      rule_version: 4
       recognition: local-self-reported
       required_lesson_ids:
         - getting-started.what-is-programming
@@ -60,31 +60,106 @@ courses:
         - decorators-and-context-managers.context-managers
         - logging-and-configuration.logging-and-configuration
       optional_lesson_ids: []
-      checkpoints:
-        - id: core-programming
-          title: Core Programming Milestone Checkpoint
-          path: courses/python-foundations/milestones/core-programming.qmd
-          after_unit_id: control-flow
+      required_challenges:
+        - id: getting-started.challenge
+          title: Learning Workflow Readiness Check
+          unit_id: getting-started
+          path: courses/python-foundations/units/getting-started/challenge.qmd
           required: true
-        - id: data-and-functions
-          title: Data and Functions Milestone Checkpoint
-          path: courses/python-foundations/milestones/data-and-functions.qmd
-          after_unit_id: functions
+        - id: values-types-input-output.challenge
+          title: Build a Purchase Summary
+          unit_id: values-types-input-output
+          path: courses/python-foundations/units/values-types-input-output/challenge.qmd
           required: true
-        - id: debugging-and-data-boundaries
-          title: Debugging and Data Boundaries Milestone Checkpoint
-          path: courses/python-foundations/milestones/debugging-and-data-boundaries.qmd
-          after_unit_id: error-handling-and-validation
+        - id: control-flow.challenge
+          title: Reach a Savings Goal
+          unit_id: control-flow
+          path: courses/python-foundations/units/control-flow/challenge.qmd
           required: true
-        - id: reliable-projects
-          title: Reliable Python Projects Milestone Checkpoint
-          path: courses/python-foundations/milestones/reliable-projects.qmd
-          after_unit_id: automation-and-ci
+        - id: data-structures.challenge
+          title: Organize a Classroom Inventory
+          unit_id: data-structures
+          path: courses/python-foundations/units/data-structures/challenge.qmd
           required: true
-        - id: abstractions-and-application-patterns
-          title: Abstractions and Application Patterns Milestone Checkpoint
-          path: courses/python-foundations/milestones/abstractions-and-application-patterns.qmd
-          after_unit_id: logging-and-configuration
+        - id: functions.challenge
+          title: Create a Study-Session Report
+          unit_id: functions
+          path: courses/python-foundations/units/functions/challenge.qmd
+          required: true
+        - id: debugging.challenge
+          title: Run a Bug Clinic
+          unit_id: debugging
+          path: courses/python-foundations/units/debugging/challenge.qmd
+          required: true
+        - id: files.challenge
+          title: Convert a Reading Log
+          unit_id: files
+          path: courses/python-foundations/units/files/challenge.qmd
+          required: true
+        - id: error-handling-and-validation.challenge
+          title: Import Records Safely
+          unit_id: error-handling-and-validation
+          path: courses/python-foundations/units/error-handling-and-validation/challenge.qmd
+          required: true
+        - id: modules-and-packages.challenge
+          title: Build a Conversion Package
+          unit_id: modules-and-packages
+          path: courses/python-foundations/units/modules-and-packages/challenge.qmd
+          required: true
+        - id: project-structure.challenge
+          title: Restructure a Task Tracker
+          unit_id: project-structure
+          path: courses/python-foundations/units/project-structure/challenge.qmd
+          required: true
+        - id: environments-and-dependencies.challenge
+          title: Make a Reproducible Text Tool
+          unit_id: environments-and-dependencies
+          path: courses/python-foundations/units/environments-and-dependencies/challenge.qmd
+          required: true
+        - id: command-line-programs.challenge
+          title: Create a Converter CLI
+          unit_id: command-line-programs
+          path: courses/python-foundations/units/command-line-programs/challenge.qmd
+          required: true
+        - id: testing.challenge
+          title: Protect a Grade Summary
+          unit_id: testing
+          path: courses/python-foundations/units/testing/challenge.qmd
+          required: true
+        - id: code-style-and-linting.challenge
+          title: Rescue a Messy Report Script
+          unit_id: code-style-and-linting
+          path: courses/python-foundations/units/code-style-and-linting/challenge.qmd
+          required: true
+        - id: typing.challenge
+          title: Type a Record Summarizer
+          unit_id: typing
+          path: courses/python-foundations/units/typing/challenge.qmd
+          required: true
+        - id: automation-and-ci.challenge
+          title: Automate the Quality Gate
+          unit_id: automation-and-ci
+          path: courses/python-foundations/units/automation-and-ci/challenge.qmd
+          required: true
+        - id: object-oriented-programming.challenge
+          title: Model an Equipment Rental Desk
+          unit_id: object-oriented-programming
+          path: courses/python-foundations/units/object-oriented-programming/challenge.qmd
+          required: true
+        - id: comprehensions-and-iteration.challenge
+          title: Process a Sensor Stream
+          unit_id: comprehensions-and-iteration
+          path: courses/python-foundations/units/comprehensions-and-iteration/challenge.qmd
+          required: true
+        - id: decorators-and-context-managers.challenge
+          title: Trace a Managed Operation
+          unit_id: decorators-and-context-managers
+          path: courses/python-foundations/units/decorators-and-context-managers/challenge.qmd
+          required: true
+        - id: logging-and-configuration.challenge
+          title: Run a Configurable Batch Processor
+          unit_id: logging-and-configuration
+          path: courses/python-foundations/units/logging-and-configuration/challenge.qmd
           required: true
       project:
         id: python-foundations-project
