@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Repair and Annotate a Broken Python Program'
-description: Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
+title: 'Unit Challenge: Repair and Explain a Broken Study Planner'
+description: Repair a complete beginner Python program, prove its behavior with assertions, document its decisions, and explain every important line.
 challenge_id: python-syntax.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 2
+assessment_version: 3
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -18,167 +18,497 @@ unit_number: 1
 ---
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 1 challenge
-- **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
-- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+- **Estimated time:** 90–120 minutes for a first careful attempt
+- **Outcome assessed:** Read, repair, format, document, check, and explain a short Python program using Unit 1 syntax skills.
+- **Evidence:** A clean program, passing assertions, one debugging record, and a line-by-line explanation
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
+## 1. Your task: repair the study planner
 
-The repaired source compiles, creates the specified names, chooses the focused-session message, and contains a module docstring.
+A study-planner program was damaged while being copied from a message. Its
+purpose is simple, but Python cannot parse it. Repair it in stages until it:
 
-**Scenario:** A study-session script was copied from a message and no longer parses. Repair its tokens and indentation, then annotate what each statement contributes.
+- preserves the required names and input values;
+- calculates focused time;
+- chooses the correct session label;
+- stores a progress comparison;
+- displays a readable summary;
+- begins with a useful module docstring;
+- contains one comment explaining why the break is excluded;
+- passes every supplied assertion; and
+- still works after one requirement change.
 
-::: {.callout-note title="Work independently, but not without support"}
-Use the starter contract, run one group of checks at a time, and open hints only
-after you can state the evidence blocking your next step.
+The challenge intentionally combines independent and cascading mistakes. The
+first repair may reveal another error. Make one change, rerun, and record what
+the new result teaches you.
+
+::: {.callout-note title="Work independently, but use the support deliberately"}
+Attempt each stage before opening a hint. A hint should answer a specific
+question you can state, not replace reading the source and error report.
 :::
 
 ## 2. Understand the acceptance example
 
-Before implementation, restate the normal input, expected result, important
-boundary, and one anticipated failure in your own words.
+The repaired program starts with these facts:
+
+| Name | Value | Meaning |
+|---|---:|---|
+| `course_title` | `"Python Foundations"` | course being studied |
+| `session_minutes` | `45` | scheduled session length |
+| `break_minutes` | `10` | scheduled break |
+| `completed_lessons` | `3` | lessons completed so far |
+| `target_lessons` | `7` | current target |
+
+It must calculate:
+
+| Name | Expected value |
+|---|---:|
+| `focused_minutes` | `35` |
+| `session_label` | `"focused"` |
+| `is_target_reached` | `False` |
+
+Expected output:
+
+```text
+Course: Python Foundations
+Focused minutes: 35
+Session: focused
+Target reached: False
+```
 
 ### Constraints
 
-1. Edit only the text assigned to `program_source`.
-2. Keep the names `course`, `minutes`, and `message`.
-3. Use a docstring, not a comment, as the first statement.
-4. Do not remove the conditional block.
+1. Keep every required name exactly as shown.
+2. Keep the initial input values unchanged until the controlled-change stage.
+3. Use one module docstring as the first statement.
+4. Keep the `if`/`else` block; do not replace the decision with a fixed string.
+5. Write the focused-time calculation across multiple lines inside parentheses.
+6. Use a comment to explain why the break is subtracted.
+7. Do not edit expected assertion values merely to create a pass.
+8. Do not use `compile()`, `exec()`, exception handling, functions, or classes.
+
+Before editing, annotate the starter source on paper or in Markdown:
+
+- circle literals;
+- underline intended identifiers;
+- box keywords;
+- mark operators;
+- pair delimiters where possible;
+- draw a line along each intended indentation level.
 
 ## 3. Start from the contract
 
+Copy this starter into one code cell. It is intentionally invalid.
+
+<!-- fcpython-intentional-invalid-python -->
+
 ```python
-program_source = '''
-"""Describe one focused study session."""
-course = "Python Foundations"
-minutes = 45
+"""Do study stuff."""
 
-if minutes >= 30
-message = course + ": focused session"
-else:
-message = course + ": short session"
-'''
+course title = "Python Foundations"
+session_minutes = 45
+break-minutes = 10
+completed_lessons = 3
+target_lessons = 7
 
-# Keep these names; the checks compile and run the repaired source.
-compiled_program = None
-namespace = {}
+# Subtract the break.
+focused_minutes = (
+    session_minutes
+    - break-minutes
+
+if focused_minutes >= 30
+session_label = "focused"
+    else:
+        session_label = "short"
+
+is_target_reached = completed_lessons >= target_lessons
+
+print("Course:" course title)
+print(
+    "Focused minutes:",
+    focused_minutes,
+]
+print("Session:", session_label)
+print("Target reached:", is_target_reached)
 ```
+
+Do not replace the entire program with a new one. Repair the starter so each
+change remains connected to an observed problem.
+
+### Stage A: make every intended name valid
+
+Inspect the two intended multiword names that do not follow identifier rules.
+Repair their definitions **and every later use**.
+
+After your edit, state:
+
+- why a space cannot occur inside one identifier;
+- why a hyphen is read as an operator;
+- why changing only the assignment would leave a later lookup inconsistent.
+
+Run again. A different syntax report is progress.
+
+### Stage B: complete the multiline expression
+
+Pair the opening parenthesis in the `focused_minutes` assignment. Keep the
+calculation spread across readable physical lines.
+
+Replace the existing comment with one that explains the reporting rule rather
+than translating subtraction. For example, it should answer:
+
+> Why does this report exclude the break?
+
+Run again and read the next report.
+
+### Stage C: repair the decision block
+
+The `if` header, body, `else` header, and second body must form one visible
+structure.
+
+Before editing, draw the intended shape:
+
+```text
+if condition:
+    first body
+else:
+    second body
+```
+
+Then repair the missing delimiter and indentation. Do not change the comparison
+or label values.
+
+### Stage D: repair both output calls
+
+One call is missing an argument separator. Another closes with the wrong
+delimiter. Repair the smallest relevant token in each call.
+
+Once the program parses, compare its four output lines with the acceptance
+example. Valid syntax is not enough; spelling, order, and values must match.
+
+### Stage E: document the program's promise
+
+Replace `"""Do study stuff."""` with a one-sentence module docstring that
+describes the program's actual purpose. Keep it as the first statement.
+
+Review the focused-time comment. It should explain the decision to exclude the
+break, not say only “subtract the break.”
 
 ## 4. Build in small stages
 
-1. Make the smallest normal case observable.
-2. Run the nearest check and read its complete failure evidence.
-3. Add one boundary behavior without weakening earlier checks.
-4. Restart and run the complete artifact from top to bottom.
+Use this repair sequence:
+
+1. Run the unchanged starter and preserve the first report.
+2. Classify the nearby issue as name, quote, delimiter, comma, header, or
+   indentation.
+3. State one broken rule.
+4. Make one smallest edit.
+5. Rerun immediately.
+6. Record whether the same error, a new error, or normal output appears.
+7. Continue until the program parses.
+8. Compare normal output with the acceptance example.
+9. Run the assertions in groups.
+10. Restart the runtime and run every challenge cell from the top.
+
+A useful progress log is:
+
+| Run | Reported evidence | Rule you believe is broken | One edit | New evidence |
+|---:|---|---|---|---|
+| 1 | Copy the error type, line, and message | One grammatical rule | One change | Same, new, or resolved |
+| 2 | ... | ... | ... | ... |
+
+::: {.callout-warning title="Do not fix by deleting the difficult feature"}
+Removing the multiline expression, `if` block, documentation, or assertions
+would avoid practicing the unit skill. Repair the required structure instead.
+:::
 
 ## 5. Run progressive assertions
 
-```python
-compiled_program = compile(program_source, "study_session.py", "exec")
-exec(compiled_program, namespace)
+Run each group only after the repaired program reaches normal output.
 
-assert namespace["course"] == "Python Foundations"
-assert namespace["minutes"] == 45
-assert namespace["message"] == "Python Foundations: focused session"
-assert namespace["__doc__"] == "Describe one focused study session."
+### Group 1: required input bindings
+
+```python
+assert course_title == "Python Foundations"
+assert session_minutes == 45
+assert break_minutes == 10
+assert completed_lessons == 3
+assert target_lessons == 7
 ```
 
-::: {.callout-warning title="Do not edit expected values to create a pass"}
-If a check appears wrong, explain the contract conflict before changing either
-side. Otherwise, repair the implementation and preserve the check.
-:::
+If one fails, inspect the corresponding assignment. Do not edit the expected
+value.
+
+### Group 2: calculated values
+
+```python
+assert focused_minutes == session_minutes - break_minutes
+assert focused_minutes == 35
+assert is_target_reached == (completed_lessons >= target_lessons)
+assert is_target_reached is False
+```
+
+The first and third checks restate relationships. The second and fourth verify
+the acceptance example.
+
+### Group 3: decision result
+
+```python
+assert session_label == "focused"
+assert session_label in ("focused", "short")
+```
+
+The first check verifies the current input. The second protects the allowed
+vocabulary.
+
+### Group 4: required source qualities
+
+Verify these by reading the source:
+
+- the first statement is the module docstring;
+- the focused-time comment explains *why* the break is excluded;
+- the focused-time expression remains multiline and parenthesized;
+- the two branch bodies use four spaces;
+- `else` aligns with `if`;
+- each `print()` call has matching parentheses and comma-separated arguments.
+
+Assertions can verify values. They cannot prove that a comment is useful.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
-<summary>Hint 1</summary>
+<summary>Hint 1: classify the remaining problems</summary>
 
-The `if` header needs a delimiter that announces an indented suite.
+Work from top to bottom.
+
+- The intended course name contains whitespace.
+- The intended break name contains an operator.
+- The focused-time grouping never closes.
+- The decision header lacks its closing delimiter.
+- The two branch headers and bodies do not form matching levels.
+- The first output call lacks an argument separator.
+- The multiline output call closes with a square bracket.
+
+Fix only the first unresolved category, then rerun.
 
 </details>
 
 <details>
-<summary>Hint 2</summary>
+<summary>Hint 2: compare each broken shape with a valid shape</summary>
 
-Both assignments to `message` belong inside their corresponding blocks.
+Valid identifier and continuation shapes:
+
+```text
+course_title = value
+break_minutes = value
+
+focused_minutes = (
+    first value
+    - second value
+)
+```
+
+Valid decision shape:
+
+```text
+if comparison:
+    assignment
+else:
+    assignment
+```
+
+Valid two-argument call:
+
+```text
+print("Label:", value)
+```
+
+Use these shapes to locate a mismatch; do not copy new behavior into the
+program.
 
 </details>
 
 <details>
-<summary>Hint 3</summary>
+<summary>Hint 3: expected repaired structure</summary>
 
-A module docstring is the first string expression in the repaired source.
+The repaired executable statements, without the documentation wording, should
+have this order:
+
+```text
+five input assignments
+focused-time assignment
+if/else assigning session_label
+comparison assigned to is_target_reached
+four print calls
+```
+
+The focused calculation is `45 - 10`. The decision compares that result with
+`30`. The progress comparison checks `3 >= 7`.
+
+If those relationships exist and the syntax is repaired, the acceptance values
+follow.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing check. Record its inputs, actual result or exception,
-expected result, one hypothesis, one controlled change, and the verified rerun.
+Choose one failure that required thought. Record:
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
-|---|---|---|---|---|
-| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+| Field | Your evidence |
+|---|---|
+| Input or source state | What exact code did you run? |
+| Error type and message | What did Python report? |
+| Reported location | Which line and token were highlighted? |
+| Nearby cause | Was the actual cause on that line or earlier? |
+| Hypothesis | Which one syntax rule explained it? |
+| Controlled change | What one edit did you make? |
+| Verified rerun | What changed after rerunning? |
+| Explanation | Why did that edit resolve this failure? |
 
-## 8. Compare with a solution path
+A useful record contains exact source and observed text. “It was broken, then I
+fixed it” is not enough to reuse the method later.
 
-<details>
-<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+## 8. Test a changed requirement
+
+After all initial checks pass, change only:
 
 ```python
-program_source = '''
-"""Describe one focused study session."""
-course = "Python Foundations"
-minutes = 45
-
-if minutes >= 30:
-    message = course + ": focused session"
-else:
-    message = course + ": short session"
-'''
+session_minutes = 25
+completed_lessons = 7
 ```
 
-Compare contracts and decisions, not only line-for-line syntax. If your solution
-also satisfies the constraints and checks, explain one trade-off between the
-approaches.
+Before running, predict:
+
+- `focused_minutes`;
+- `session_label`;
+- `is_target_reached`;
+- all four output lines.
+
+The expected changed values are:
+
+```python
+assert focused_minutes == 15
+assert session_label == "short"
+assert is_target_reached is True
+```
+
+If the old labels remain, check whether a derived assignment was run before or
+after the changed input. Restart and run from the top.
+
+Then restore the original input values and rerun every initial assertion. The
+program should support both examples without changing its decision logic.
+
+## 9. Explain the repaired program
+
+Write one sentence for each important line or group:
+
+1. What value or name appears?
+2. What lookup or calculation does Python perform?
+3. What binding changes?
+4. What block owns the line?
+5. What output or stored result should follow?
+
+Your explanation should distinguish:
+
+- the docstring from the comment;
+- assignment `=` from comparison `>=`;
+- the multiline expression from the decision block;
+- the `if` body from the `else` body;
+- calculated values from displayed values.
+
+## 10. Compare with a solution path
+
+<details class="solution">
+<summary>Reveal after your assertions pass or all three hints have been used</summary>
+
+```python
+"""Display a study-session summary and current lesson-target status."""
+
+course_title = "Python Foundations"
+session_minutes = 45
+break_minutes = 10
+completed_lessons = 3
+target_lessons = 7
+
+# The report measures active study, so the scheduled break is excluded.
+focused_minutes = (
+    session_minutes
+    - break_minutes
+)
+
+if focused_minutes >= 30:
+    session_label = "focused"
+else:
+    session_label = "short"
+
+is_target_reached = completed_lessons >= target_lessons
+
+print("Course:", course_title)
+print(
+    "Focused minutes:",
+    focused_minutes,
+)
+print("Session:", session_label)
+print("Target reached:", is_target_reached)
+```
+
+Passing checks:
+
+```python
+assert course_title == "Python Foundations"
+assert session_minutes == 45
+assert break_minutes == 10
+assert completed_lessons == 3
+assert target_lessons == 7
+assert focused_minutes == session_minutes - break_minutes
+assert focused_minutes == 35
+assert session_label == "focused"
+assert is_target_reached == (completed_lessons >= target_lessons)
+assert is_target_reached is False
+```
+
+Your docstring and comment may use different words if they accurately describe
+the same purpose and decision.
 
 </details>
 
-## 9. Check your understanding
+## 11. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-python-syntax-challenge",
-  "title": "Repair and Annotate a Broken Python Program readiness check",
-  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "title": "Broken study planner review",
+  "instructions": "Connect each answer to the source you repaired.",
   "questions": [
     {
-      "id": "design-boundary",
-      "prompt": "Why does the assignment after `if` need indentation?",
-      "options": [
-        "Indentation marks that statement as part of the conditional block.",
-        "Indentation changes the string into an integer.",
-        "Every assignment must begin with eight spaces.",
-        "The variable name requires whitespace."
-      ],
+      "id": "identifier-repair",
+      "prompt": "Why is course_title a valid repair for course title?",
+      "options": ["The underscore joins the words inside one identifier", "Every name must contain title", "Quotation marks would perform assignment", "Spaces are valid only after print"],
       "answer_index": 0,
-      "explanation": "Indentation marks that statement as part of the conditional block."
+      "explanation": "An underscore may occur inside an identifier; whitespace would separate two tokens."
     },
     {
-      "id": "clean-evidence",
-      "prompt": "What should happen before recording this challenge as complete?",
-      "options": [
-        "The unchanged checks pass from a clean state and the important decisions can be explained.",
-        "The expected values are edited to match the current output.",
-        "Only the final successful line is kept.",
-        "Several unrelated features are added."
-      ],
-      "answer_index": 0,
-      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+      "id": "multiline-boundary",
+      "prompt": "What makes the focused_minutes assignment one logical statement across several lines?",
+      "options": ["The comment above it", "Its matching opening and closing parentheses", "The later if keyword", "The output labels"],
+      "answer_index": 1,
+      "explanation": "Newlines inside the open parentheses do not finish the assignment."
+    },
+    {
+      "id": "branch-shape",
+      "prompt": "Which visual relationship connects else to its if?",
+      "options": ["else is inside the message string", "else is indented under the first body", "else aligns with the if header", "else appears after every print"],
+      "answer_index": 2,
+      "explanation": "Sibling branch headers align; each branch body is indented beneath its header."
+    },
+    {
+      "id": "documentation",
+      "prompt": "Which source explanation should remain after the challenge?",
+      "options": ["# Subtract with a minus sign.", "# Assign a variable.", "# This line has code.", "# The report excludes scheduled breaks because it measures active study."],
+      "answer_index": 3,
+      "explanation": "The final comment records the domain reason for the calculation rather than translating visible syntax."
     }
   ]
 }
@@ -186,20 +516,21 @@ approaches.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 10. Decide whether the challenge is complete
+## 12. Before you finish
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | Acceptance examples and progressive checks pass unchanged. |
-| Scope | The artifact follows the constraints without unrelated features. |
-| Reasoning | Important values, boundaries, and design choices can be traced. |
-| Debugging | One record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+| Syntax | The program runs from a clean state with no syntax or indentation errors. |
+| Values | All initial and changed-example assertions pass without editing expected values. |
+| Structure | Names, delimiters, continuation, and block levels follow the required shapes. |
+| Documentation | The first statement is a useful docstring and the comment explains a real decision. |
+| Debugging | One record connects an exact failure to one hypothesis, edit, and rerun. |
+| Explanation | Every important line can be described as a value, lookup, expression, statement, block, or output action. |
 
 This button stores a self-reported marker only in this browser. It does not
-submit work, grade it, verify identity, or issue a certificate.
+submit work, grade the program, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -213,7 +544,9 @@ submit work, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows design choices without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- Repair syntax from the earliest clear failure, one controlled edit at a time.
+- Passing assertions verify relationships and values; source review verifies
+  readability and documentation.
+- A changed example tests whether the program represents a rule rather than one
+  memorized output.
+- A clean rerun and line-by-line explanation complete the challenge.

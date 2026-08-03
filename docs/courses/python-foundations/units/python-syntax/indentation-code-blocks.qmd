@@ -1,29 +1,36 @@
 ---
-title: Indentation, Blocks, and Multiline Syntax
-lesson_id: python-syntax.indentation-blocks-multiline
-lesson_order: 30
-description: Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
+title: Indentation and Code Blocks
+lesson_id: python-syntax.indentation-code-blocks
+lesson_order: 40
+description: Read Python's left edge as a structural map, build correctly nested blocks, and diagnose both indentation errors and valid code at the wrong level.
 execute:
   echo: true
 categories:
 - python-foundations
 - python-syntax
-order: 30
-colab_notebook: notebooks/courses/python-foundations/units/python-syntax/indentation-blocks-multiline.ipynb
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/python-syntax/indentation-code-blocks.ipynb
 course_id: python-foundations
 unit_id: python-syntax
 unit_number: 1
 ---
 ::: {.lesson-meta}
 - **Level:** Beginner
-- **Estimated time:** 45–70 minutes
+- **Estimated time:** 3–4 hours, with natural stopping points after Sections 2, 6, and 8
 - **You will learn:** Use indentation to group code blocks and debug indentation errors.
 - **Practice in:** Google Colab, Jupyter, or VS Code
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The basic block rule
+::: {.callout-note title="Questions you will answer"}
+1. How does the left edge show which statements belong together?
+2. Which headers require an indented body?
+3. Why can wrong indentation change behavior without producing an error?
+4. How can you repair invisible tabs, spaces, and mismatched levels?
+:::
+
+## 1. A colon opens a block
 
 A Python block normally starts with a **header line** ending in a colon. The body
 of the block is indented under that header. When the indentation returns to a
@@ -75,7 +82,7 @@ flowchart TD
 ```
 :::
 
-### Example 1
+### Map your first block
 
 ```python
 ready = True
@@ -150,12 +157,18 @@ print("Start later")
 `pass` means "do nothing here on purpose." It is useful while sketching a
 program, but replace it with real code when the behavior is ready.
 
-## 2. Indentation with `if`, `elif`, and `else`
+::: {.callout-note title="A preview of later Python"}
+This lesson uses `if`, loops, functions, and classes because they all share the
+same visible block rule. You only need to read and repair their indentation
+shape here. Units 4, 5, and 11 teach their behavior in depth.
+:::
+
+## 2. Keep `if`, `elif`, and `else` aligned
 
 The `if`, `elif`, and `else` headers must line up with each other. Their bodies
 are indented one level deeper.
 
-### Example 2
+### Map sibling branches
 
 ```python
 temperature = 18
@@ -244,7 +257,7 @@ a line belongs to the wrong block. When output surprises you, inspect the left
 edge of the lines before changing conditions or values.
 :::
 
-### Checkpoint quiz
+### Check which lines belong to each branch
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
@@ -294,12 +307,12 @@ edge of the lines before changing conditions or values.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. Indentation with `for` loops
+## 3. Indent the work repeated by a `for` loop
 
 A `for` loop repeats its indented body once for each item. Lines inside the loop
 are indented. Lines after the loop return to the previous indentation level.
 
-### Example 3
+### Follow one loop body
 
 ```python
 names = ["Ada", "Grace", "Katherine"]
@@ -396,7 +409,7 @@ for price in prices:
 print("last tax:", last_tax)
 ```
 
-### Challenge 3.1
+### Move one line and predict the effect
 
 ::: {.callout-note title="Challenge"}
 Move the final `print(total)` line inside the loop. Predict how many lines will
@@ -428,13 +441,13 @@ total. Outside the loop, it would show only the final total.
 
 </details>
 
-## 4. Indentation with `while` loops
+## 4. Show which lines repeat in a `while` loop
 
 A `while` loop repeats as long as its condition is true. Indentation decides what
 repeats. This is especially important because a misplaced update can create an
 infinite loop.
 
-### Example 4
+### Follow the changing loop state
 
 ```python
 countdown = 3
@@ -522,13 +535,13 @@ for item in items:
 The `break` is inside the `if`, and the `if` is inside the loop. That means
 `break` runs only when the loop reaches the stop item.
 
-## 5. Indentation with functions
+## 5. Put a function's body beneath `def`
 
 A function definition has a header line and an indented body. Code inside the
 body runs only when the function is called. Code outside the body runs normally
 as the program reaches it.
 
-### Example 5
+### Map a function body and its caller
 
 ```python
 def greet(name):
@@ -623,7 +636,7 @@ def greet(name):
 greet("Ada")
 ```
 
-### Challenge 5.1
+### Move `return` and trace the result
 
 ::: {.callout-note title="Challenge"}
 Write a function named `is_passing(score)` that returns `True` when the score is
@@ -650,13 +663,13 @@ inside the matching conditional bodies.
 
 </details>
 
-## 6. Indentation with classes and methods
+## 6. Put methods inside their class
 
 A class body is indented under the `class` header. Methods are functions defined
 inside a class, so method definitions are indented under the class, and method
 bodies are indented under the method definition.
 
-### Example 6
+### Map class, method, and method-body levels
 
 ```python
 class Counter:
@@ -892,7 +905,7 @@ definitions inside the class, then method bodies inside each method. Count the
 levels before editing.
 :::
 
-## 7. Tabs, spaces, and inconsistent indentation
+## 7. Fix tabs, spaces, and invisible mismatches
 
 Python can technically read tabs, but the standard style is four spaces. Mixing
 tabs and spaces can produce errors that are hard to see because a tab may look
@@ -951,13 +964,13 @@ if True:
 The exact number of spaces matters less than consistency, but four spaces is the
 community standard and the style used throughout this course.
 
-## 8. Nested blocks
+## 8. Read nested blocks along the left edge
 
 A nested block is a block inside another block. You have already seen this with
 loops inside functions, `if` statements inside loops, and methods inside classes.
 Each nested level moves four more spaces to the right.
 
-### Example 7
+### Trace three nested levels
 
 ```python
 def summarize_scores(scores):
@@ -997,7 +1010,7 @@ This example is worth tracing slowly. Ask three questions for each line:
 2. Is this line inside the loop?
 3. Is this line inside the `if` or `else` body?
 
-### Challenge 8.1
+### Move `return` into the loop and predict the effect
 
 ::: {.callout-note title="Challenge"}
 Move `return total` four spaces to the right so it is inside the loop. Predict
@@ -1052,7 +1065,7 @@ Expected output:
 
 </details>
 
-## 9. A debugging checklist for indentation problems
+## 9. Diagnose indentation before changing program logic
 
 Use this checklist when code looks correct but Python complains about spacing or
 runs lines at the wrong time.
@@ -1070,7 +1083,7 @@ runs lines at the wrong time.
 | Method missing from class | `def method(...)` starts at the left margin | Indent the method under `class` |
 | Method missing from object | `def method(...)` is nested inside another method | Line up method definitions with each other |
 
-### Example 8: diagnose before fixing
+### Mark every incorrect level before fixing it
 
 Broken code:
 
@@ -1186,7 +1199,7 @@ if ready:
     print("Start")
 ```
 
-## Final challenge
+## 11. Map and repair a complete block structure
 
 ::: {.callout-note title="Challenge"}
 Create a small `Notebook` class with three methods:
@@ -1238,7 +1251,7 @@ bodies are one level deeper inside their methods.
 
 </details>
 
-## Check your understanding
+## 12. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {

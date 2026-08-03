@@ -8,8 +8,8 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 79
-    estimated_effort: 110–175 hours
+    lesson_count: 82
+    estimated_effort: 125–195 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
@@ -23,10 +23,13 @@ courses:
         - get-started.learning-loop-ai
         - get-started.notebooks-literate-workflows
         - get-started.local-python-environment
-        - python-syntax.values-names-expressions-statements
-        - python-syntax.keywords-operators-vocabulary
-        - python-syntax.indentation-blocks-multiline
-        - python-syntax.comments-docstrings-syntax-errors
+        - python-syntax.values-names-assignment
+        - python-syntax.expressions-statements-execution-order
+        - python-syntax.python-words-symbols
+        - python-syntax.indentation-code-blocks
+        - python-syntax.writing-code-across-lines
+        - python-syntax.comments-docstrings
+        - python-syntax.reading-fixing-syntax-errors
         - core-values-types.objects-types-none-conversion
         - core-values-types.integers-floats-precision
         - core-values-types.decimal-fraction-complex
@@ -104,7 +107,7 @@ courses:
           unit_id: get-started
           path: courses/python-foundations/units/get-started/challenge.qmd
         - id: python-syntax.challenge
-          title: Repair and Annotate a Broken Python Program
+          title: Repair and Explain a Broken Study Planner
           unit_id: python-syntax
           path: courses/python-foundations/units/python-syntax/challenge.qmd
         - id: core-values-types.challenge
@@ -172,9 +175,9 @@ courses:
         kind: instructional
       - number: 1
         id: python-syntax
-        title: Reading and Writing Python Syntax
+        title: Learning to Read and Write Python Code
         directory: courses/python-foundations/units/python-syntax
-        lesson_count: 4
+        lesson_count: 7
         kind: instructional
       - number: 2
         id: core-values-types

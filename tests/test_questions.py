@@ -95,10 +95,8 @@ def test_show_quiz_returns_widget_container() -> None:
     assert len(widget.children) > 1
 
 
-def test_lesson_ojs_quiz_config_matches_quiz_bank() -> None:
-    lesson_path = (
-        FOUNDATIONS_ROOT / "units/python-syntax/values-names-expressions-statements.qmd"
-    )
+def test_values_assignment_lesson_has_topic_specific_quiz() -> None:
+    lesson_path = FOUNDATIONS_ROOT / "units/python-syntax/values-names-assignment.qmd"
     lesson = lesson_path.read_text()
     match = re.search(
         r'<script type="application/json" class="fcpython-ojs-quiz-config">'
@@ -110,7 +108,8 @@ def test_lesson_ojs_quiz_config_matches_quiz_bank() -> None:
 
     assert match is not None
     lesson_payload = json.loads(html.unescape(match.group(1)))
-    assert lesson_payload == values_variables_types_quiz().to_dict()
+    assert lesson_payload["id"] == "syntax-values-assignment-first-check"
+    assert len(lesson_payload["questions"]) == 4
 
 
 def _first_quiz_payload(path: Path) -> dict[str, object]:
@@ -484,9 +483,7 @@ def test_colab_notebook_paths_are_unique_and_follow_course_structure() -> None:
 
 
 def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
-    path = (
-        FOUNDATIONS_ROOT / "units/python-syntax/values-names-expressions-statements.qmd"
-    )
+    path = FOUNDATIONS_ROOT / "units/python-syntax/values-names-assignment.qmd"
     notebook = notebook_builder.qmd_to_notebook(path)
     code_sources = [
         "".join(cell["source"])
@@ -494,7 +491,7 @@ def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
         if cell["cell_type"] == "code"
     ]
 
-    assert any("price = 10" in source for source in code_sources)
+    assert any("session_minutes = 45" in source for source in code_sources)
     assert all("fcpython-ojs-quiz-config" not in source for source in code_sources)
 
 
@@ -502,7 +499,7 @@ def test_build_colab_notebooks_writes_expected_files(tmp_path: Path) -> None:
     written = notebook_builder.build_notebooks(output_root=tmp_path)
     expected = (
         tmp_path / "courses/python-foundations/units/python-syntax/"
-        "values-names-expressions-statements.ipynb"
+        "values-names-assignment.ipynb"
     )
 
     # The legacy docs/lessons/index.qmd support notebook is also generated.
@@ -559,8 +556,7 @@ def test_lessons_use_clean_numbered_section_headings() -> None:
 
 def test_selected_lessons_include_mermaid_diagrams() -> None:
     expected = {
-        FOUNDATIONS_ROOT
-        / "units/python-syntax/values-names-expressions-statements.qmd",
+        FOUNDATIONS_ROOT / "units/python-syntax/values-names-assignment.qmd",
         FOUNDATIONS_ROOT
         / "units/decisions-repetition/conditionals-decision-tables.qmd",
         FOUNDATIONS_ROOT / "units/decisions-repetition/for-loops-traversal.qmd",

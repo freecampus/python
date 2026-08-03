@@ -1,6 +1,6 @@
 ---
-title: Reading and Writing Python Syntax Overview
-description: Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
+title: Learning to Read and Write Python Code Overview
+description: Learn how Python turns written code into values, actions, blocks, and useful error messages before building larger programs.
 course_id: python-foundations
 unit_id: python-syntax
 unit_number: 1
@@ -13,54 +13,138 @@ colab_notebook: notebooks/courses/python-foundations/units/python-syntax/index.i
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 1
-- **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 19–27 hours including the challenge
+- **Unit outcome:** Read a short Python program, explain its parts and execution order, format it clearly, and repair syntax errors methodically.
+- **Practice in:** Generated Colab notebooks and your Unit 0 practice environment
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. What you will be able to do
 
-Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
+A Python program begins as text. Before Python can calculate a total, display a
+message, or make a decision, it must understand that text. Quotation marks must
+match. Names must follow Python's rules. Symbols must appear in meaningful
+places. Lines that belong together must be indented together.
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+By the end of this unit, code such as the following will no longer look like a
+wall of punctuation:
 
-## 2. Before you start
+```python
+course = "Python Foundations"
+session_minutes = 45
+break_minutes = 10
+focused_minutes = session_minutes - break_minutes
 
-**Prior knowledge:** Complete Unit 0 and bring its challenge notes and debugging record.
+if focused_minutes >= 30:
+    session_kind = "focused"
+else:
+    session_kind = "short"
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+print(course, session_kind, focused_minutes)
+```
 
-## 3. Lessons
+You will be able to point to a value, name, expression, statement, operator,
+keyword, delimiter, and block. More importantly, you will be able to explain
+what each line asks Python to do and where to look when Python cannot read it.
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Values, Names, Expressions, and Statements](values-names-expressions-statements.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Keywords, Operators, and Python's Vocabulary](keywords-operators-vocabulary.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Indentation, Blocks, and Multiline Syntax](indentation-blocks-multiline.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Comments, Introductory Docstrings, and Syntax Errors](comments-docstrings-syntax-errors.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
-
-## 4. How to study this unit
-
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
-
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+::: {.callout-note title="You do not need to understand every line yet"}
+The `if` and `else` lines are a preview of decisions, which receive a complete
+unit later. Here you are learning to recognize the shape of the code: headers
+end with a colon, and the lines controlled by each header are indented.
 :::
 
-## 5. Unit evidence
+## 2. Meet the program you will learn to repair
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+The unit challenge gives you a damaged version of a small study planner. It has
+poor names, missing punctuation, unsafe line breaks, indentation problems, and
+unhelpful documentation. You will repair it in stages rather than guessing at
+all the fixes at once.
 
+A successful final program will:
+
+- use valid, readable names;
+- calculate values in an order that can be traced;
+- use words and symbols in roles Python understands;
+- make blocks and continued lines visually clear;
+- explain important decisions with a docstring and useful comments;
+- pass supplied checks; and
+- run from the first cell to the last without hidden state.
+
+Every lesson contributes one part of that repair. The challenge is not a
+surprise topic added at the end.
+
+## 3. Your path through the unit
+
+| Step | Lesson | What you will do |
+|---:|---|---|
+| 1 | [Values, Names, and Assignment](values-names-assignment.qmd) | Track how names become connected to values and how reassignment changes program state. |
+| 2 | [Expressions, Statements, and Execution Order](expressions-statements-execution-order.qmd) | Follow the order in which Python evaluates calculations and runs lines. |
+| 3 | [Python's Words and Symbols](python-words-symbols.qmd) | Identify keywords, names, literals, operators, and punctuation in unfamiliar code. |
+| 4 | [Indentation and Code Blocks](indentation-code-blocks.qmd) | Read the left edge of a program and repair blocks that are missing, misplaced, or inconsistent. |
+| 5 | [Writing Python Across Multiple Lines](writing-code-across-lines.qmd) | Break long code safely without accidentally ending or changing a statement. |
+| 6 | [Comments and Docstrings That Help](comments-docstrings.qmd) | Write explanations for people without confusing comments with executable code. |
+| 7 | [Reading and Fixing Syntax Errors](reading-fixing-syntax-errors.qmd) | Use the error type, line, caret, and nearby code to make the smallest useful repair. |
+| 8 | [Unit Challenge](challenge.qmd) | Repair, document, check, modify, and explain a complete study-planner program. |
+
+The lessons are intentionally substantial. It is normal to complete one over
+several study sessions.
+
+## 4. Set up your practice workspace
+
+Open the generated notebook for each lesson or create a fresh notebook in the
+environment you selected in Unit 0. For each practice task, keep the original
+example and place your modified version in a new cell. That makes it possible to
+compare what changed.
+
+Use these four actions throughout the unit:
+
+1. **Predict:** Write the value, output, or error you expect.
+2. **Run:** Execute the smallest complete example.
+3. **Explain:** Connect the result to a particular name, symbol, or line.
+4. **Repair or extend:** Change one relevant part, then run again.
+
+These actions are not extra paperwork. They stop a common beginner problem:
+running code repeatedly until it works without knowing why.
+
+::: {.callout-tip title="Keep useful failures"}
+When a practice prompt asks you to break code intentionally, keep one copy of the
+failure and its message. A repaired result is useful; a failure you can explain
+is evidence that you know how the rule works.
+:::
+
+## 5. Choose a pace that leaves room for practice
+
+The estimated 19–27 hours includes typing examples, making predictions, taking
+the checkpoints, and completing the challenge. Reading without running the code
+will be faster, but it will not build the same skill.
+
+A practical schedule is:
+
+- **Session 1:** values, names, and assignment;
+- **Session 2:** expressions, statements, and execution order;
+- **Session 3:** Python's words and symbols;
+- **Sessions 4–5:** indentation and blocks;
+- **Session 6:** code across multiple lines;
+- **Session 7:** comments and docstrings;
+- **Session 8:** syntax-error clinic;
+- **Session 9:** unit challenge and a clean rerun.
+
+Shorter sessions are fine. Stop after a lab or checkpoint rather than halfway
+through a debugging sequence.
+
+## 6. Before you continue
+
+You are ready to begin when you can:
+
+- open a Colab or Jupyter notebook;
+- run one Python cell;
+- add a new cell without deleting the original;
+- read normal output and a basic error message; and
+- restart the notebook and run from the top.
+
+If one of those actions is unfamiliar, revisit
+[Unit 0: Get Started](../get-started/index.qmd). Otherwise, continue to
+[Values, Names, and Assignment](values-names-assignment.qmd).
 <!-- fcpython-chapter-lab: end -->

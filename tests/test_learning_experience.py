@@ -196,7 +196,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
         if _front_matter(page).get("lesson_id")
     }
     assert owned_paths == expected
-    assert len(lesson_ids) == 94
+    assert len(lesson_ids) == 97
 
 
 def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
@@ -263,8 +263,8 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         assert notebook not in notebook_paths, page
         notebook_paths.add(notebook)
 
-    assert len(public_pages) == 111
-    assert len(notebook_paths) == 111
+    assert len(public_pages) == 114
+    assert len(notebook_paths) == 114
 
 
 def test_course_homes_and_sidebars_match_catalog() -> None:
@@ -386,7 +386,7 @@ def test_foundations_has_versioned_course_sequence() -> None:
     assert completion["curriculum_version"] == 6
     assert completion["rule_version"] == 6
     assert completion["recognition"] == "local-self-reported"
-    assert len(lesson_ids) == foundations["lesson_count"] == 79
+    assert len(lesson_ids) == foundations["lesson_count"] == 82
     assert "required_lesson_count" not in foundations
     assert "optional_lesson_count" not in foundations
 
@@ -504,7 +504,7 @@ def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None
     intermediate = by_id["intermediate-python"]
     advanced = by_id["advanced-python"]
 
-    assert foundations["lesson_count"] == 79
+    assert foundations["lesson_count"] == 82
     assert [unit["id"] for unit in foundations["units"]] == [
         "get-started",
         "python-syntax",
@@ -574,11 +574,11 @@ window.__fcTest = {
     )
     lesson_url = (
         "https://freecampus.github.io/python/courses/python-foundations/units/"
-        "python-syntax/values-names-expressions-statements.html"
+        "python-syntax/values-names-assignment.html"
     )
     lesson_path = (
         "/python/courses/python-foundations/units/python-syntax/"
-        "values-names-expressions-statements.html"
+        "values-names-assignment.html"
     )
     harness = f"""
 const storage = new Map(Object.entries({json.dumps(old_storage)}));
@@ -611,11 +611,9 @@ process.stdout.write(JSON.stringify({{
     observed = json.loads(result.stdout)
 
     assert observed["state"]["currentKey"] == (
-        "courses/python-foundations/units/python-syntax/values-names-expressions-statements"
+        "courses/python-foundations/units/python-syntax/values-names-assignment"
     )
-    assert observed["state"]["lessonId"] == (
-        "python-syntax.values-names-expressions-statements"
-    )
+    assert observed["state"]["lessonId"] == ("python-syntax.values-names-assignment")
     assert observed["state"]["unitChallengeId"] == ("python-syntax.challenge")
     assert observed["state"]["challengeIsLesson"] is False
     assert observed["state"]["progress"] == {"schema_version": 6, "courses": {}}

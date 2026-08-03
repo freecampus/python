@@ -1,0 +1,828 @@
+---
+title: Expressions, Statements, and Execution Order
+lesson_id: python-syntax.expressions-statements-execution-order
+lesson_order: 20
+description: Learn how Python evaluates expressions, runs statements in order, calls built-in tools, and turns intermediate results into a traceable program.
+execute:
+  echo: true
+categories:
+- python-foundations
+- python-syntax
+- expressions
+- execution-order
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/python-syntax/expressions-statements-execution-order.ipynb
+course_id: python-foundations
+unit_id: python-syntax
+unit_number: 1
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 2.5–3.5 hours
+- **You will learn:** Trace how Python evaluates expressions, performs statements, calls built-ins, and runs a program from top to bottom.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+A program is more than a collection of values. It combines values, stores
+results, and performs actions in a particular order. That order explains why a
+program works—and why moving one line can change everything.
+
+::: {.callout-note title="Questions you will answer"}
+1. Which part of a line produces a value?
+2. In what order are nested calculations evaluated?
+3. What is the difference between calculating, storing, and displaying?
+4. How can intermediate names make a program easier to verify?
+:::
+
+## 1. An expression produces a value
+
+An **expression** is code Python can evaluate to produce a value. Each of these
+is an expression:
+
+```python
+2 + 3
+```
+
+```python
+10 * 4
+```
+
+```python
+45 - 10
+```
+
+```python
+"Py" + "thon"
+```
+
+The pieces around an operator are called **operands**. In `2 + 3`, the operands
+are `2` and `3`; the operator is `+`; the result is `5`.
+
+A literal is already a simple expression:
+
+```python
+42
+```
+
+A name can also be an expression because looking it up produces a value:
+
+```python
+minutes = 45
+minutes
+```
+
+The assignment line creates the binding. The final line is a name expression
+whose value is `45`.
+
+### Read a calculation from the inside out
+
+```python
+focused_minutes = 60 - (10 + 5)
+```
+
+Python evaluates the parenthesized expression first:
+
+1. Evaluate `10 + 5` and produce `15`.
+2. Evaluate `60 - 15` and produce `45`.
+3. Bind `focused_minutes` to `45`.
+
+Parentheses do not mean “print this” or “save this.” In this example they group
+a smaller expression so its result is used first.
+
+### One expression can contain other expressions
+
+```python
+ticket_price = 12
+adult_count = 2
+child_count = 3
+subtotal = ticket_price * (adult_count + child_count)
+```
+
+The right side of the final line contains:
+
+- the name expression `ticket_price`;
+- the parenthesized expression `adult_count + child_count`;
+- the outer multiplication expression.
+
+Predict the result before running:
+
+```python
+print(subtotal)
+```
+
+The output is `60`: add the two counts to get `5`, then multiply by `12`.
+
+## 2. Operators describe the work
+
+An operator tells Python how to combine or examine values. You will study each
+type's behavior in later units. For now, learn to recognize a few common roles.
+
+| Purpose | Operators seen here | Example | Result |
+|---|---|---|---|
+| Add or join | `+` | `8 + 2` | `10` |
+| Subtract | `-` | `8 - 2` | `6` |
+| Multiply | `*` | `8 * 2` | `16` |
+| Divide | `/` | `8 / 2` | `4.0` |
+| Floor division | `//` | `9 // 2` | `4` |
+| Remainder | `%` | `9 % 2` | `1` |
+| Exponent | `**` | `3 ** 2` | `9` |
+| Compare | `==`, `!=`, `<`, `<=`, `>`, `>=` | `8 >= 2` | `True` |
+
+`=` is assignment. `==` is comparison. They have related spelling but different
+jobs:
+
+```python
+score = 8
+print(score == 8)
+```
+
+Line by line:
+
+1. `score = 8` binds the name `score` to `8`.
+2. `score == 8` compares the current value with `8` and produces `True`.
+3. `print(...)` displays that result.
+
+### Try the same symbol with different values
+
+```python
+print(2 + 3)
+print("Py" + "thon")
+```
+
+The first `+` adds numbers. The second joins text. The symbol is the same, but
+the operand values determine which supported operation Python performs. Unit 2
+develops this idea through Python's core types.
+
+### A comparison still produces a value
+
+```python
+focused_minutes = 35
+is_long_session = focused_minutes >= 30
+
+print(is_long_session)
+```
+
+The comparison produces `True`, then assignment stores that result under
+`is_long_session`. A comparison is not automatically an `if` statement. It is
+an expression whose value can be stored, printed, or used later.
+
+## 3. Precedence decides which operator goes first
+
+Predict this result:
+
+```python
+total = 2 + 3 * 4
+print(total)
+```
+
+Python performs multiplication before addition, so the result is `14`, not
+`20`.
+
+Parentheses change the grouping:
+
+```python
+total = (2 + 3) * 4
+print(total)
+```
+
+Now the result is `20`.
+
+For the operators introduced here, this small guide is enough:
+
+1. parentheses;
+2. exponentiation;
+3. multiplication, division, floor division, and remainder;
+4. addition and subtraction;
+5. comparisons.
+
+You do not need to recite this list from memory. Use parentheses when the
+intended grouping is not immediately clear.
+
+### Left-to-right matters within a level
+
+Multiplication and division have the same precedence, so Python evaluates them
+from left to right:
+
+```python
+result = 24 / 3 * 2
+print(result)
+```
+
+Python calculates `24 / 3`, producing `8.0`, then multiplies by `2`, producing
+`16.0`.
+
+Compare:
+
+```python
+result = 24 / (3 * 2)
+print(result)
+```
+
+The parentheses make the denominator `6`, so the result is `4.0`.
+
+### Predict before adding parentheses
+
+For each expression, write your prediction, run it, then add parentheses that
+make the existing grouping explicit:
+
+```python
+5 + 2 * 3
+```
+
+```python
+18 / 3 + 2
+```
+
+```python
+10 - 4 - 1
+```
+
+Possible explicit versions are:
+
+```python
+5 + (2 * 3)
+(18 / 3) + 2
+(10 - 4) - 1
+```
+
+Do not add parentheses around every literal. Use them to reveal a meaningful
+group.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-expressions-first-check",
+  "title": "Expressions and operators",
+  "instructions": "Evaluate the smallest inner expression first.",
+  "questions": [
+    {
+      "id": "expression",
+      "prompt": "Which description best fits 10 + 5?",
+      "options": ["An expression that produces 15", "A name binding", "A comment", "An indentation level"],
+      "answer_index": 0,
+      "explanation": "The two operands and + operator form an expression whose value is 15."
+    },
+    {
+      "id": "comparison",
+      "prompt": "What does focused_minutes >= 30 produce when focused_minutes is 35?",
+      "options": ["The number 30", "The boolean value True", "An assignment to focused_minutes", "No value until used by if"],
+      "answer_index": 1,
+      "explanation": "A comparison is an expression. Here it produces True even when it is not inside an if statement."
+    },
+    {
+      "id": "precedence",
+      "prompt": "What is the value of 2 + 3 * 4?",
+      "options": ["20", "24", "14", "9"],
+      "answer_index": 2,
+      "explanation": "Multiplication runs before addition: 3 * 4 is 12, then 2 + 12 is 14."
+    },
+    {
+      "id": "assignment-comparison",
+      "prompt": "Which symbol compares two values rather than binding a name?",
+      "options": ["=", ":", "+", "=="],
+      "answer_index": 3,
+      "explanation": "A double equals sign compares. A single equals sign performs assignment."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. A function call is an expression with a tool
+
+You have used `print()`. Python also provides built-in tools that calculate and
+return values.
+
+```python
+rounded = round(8.376, 2)
+print(rounded)
+```
+
+Read `round(8.376, 2)` as a **function call**:
+
+- `round` is the function's name;
+- `(` begins the argument list;
+- `8.376` is the first argument;
+- `,` separates arguments;
+- `2` is the second argument;
+- `)` ends the call;
+- the call produces the value `8.38`.
+
+Assignment then binds `rounded` to that result.
+
+### Calls can appear inside larger expressions
+
+```python
+difference = abs(35 - 50)
+print(difference)
+```
+
+Evaluation proceeds from the nested pieces outward:
+
+1. Look up or read `35` and `50`.
+2. Calculate `35 - 50`, producing `-15`.
+3. Call `abs(-15)`, producing `15`.
+4. Bind `difference` to `15`.
+5. Display `15`.
+
+Another example:
+
+```python
+longest_session = max(25, 50, 40)
+print(longest_session)
+```
+
+`max(...)` examines its arguments and returns the largest value.
+
+::: {.callout-note title="Using a function is not the same as defining one"}
+In this unit, you are learning to read and call existing tools. Unit 5 teaches
+how to define functions, choose parameters, and return results.
+:::
+
+### Some calls mainly perform an action
+
+`round()` and `abs()` return values intended for further use. `print()` mainly
+causes visible output:
+
+```python
+subtotal = 19.5
+print("Subtotal:", subtotal)
+```
+
+The arguments are evaluated first. Then `print()` displays them separated by a
+space.
+
+The distinction to remember is:
+
+- **calculate:** an expression produces a value;
+- **store:** assignment binds a result to a name;
+- **display:** `print()` makes values visible to a person.
+
+A single line can combine all three, but separating them often helps beginners
+see what happened.
+
+## 5. Statements tell Python to perform a step
+
+A **statement** is a complete instruction in a Python program. Assignment is a
+statement:
+
+```python
+subtotal = 12 * 3
+```
+
+A call used on its own is an expression statement:
+
+```python
+print(subtotal)
+```
+
+Python normally executes top-level statements from top to bottom.
+
+```python
+base_minutes = 30
+bonus_minutes = 15
+total_minutes = base_minutes + bonus_minutes
+print(total_minutes)
+```
+
+The order forms a dependency chain:
+
+::: {.concept-diagram}
+Each statement makes a result available to the statement below it.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A["1. base_minutes = 30"] --> B["2. bonus_minutes = 15"]
+  B --> C["3. total_minutes = base_minutes + bonus_minutes"]
+  C --> D["4. print(total_minutes)"]
+```
+:::
+
+Move the calculation above its inputs:
+
+```python
+total_minutes = base_minutes + bonus_minutes
+base_minutes = 30
+bonus_minutes = 15
+print(total_minutes)
+```
+
+In a clean runtime, the first line raises `NameError` because neither input name
+has been bound yet. The lines are individually valid, but their execution order
+does not satisfy the dependency.
+
+### A notebook can hide an order problem
+
+Suppose you previously ran cells that defined `base_minutes` and
+`bonus_minutes`. The out-of-order cell may appear to work by using those older
+bindings. Restart the runtime and run all cells from the top to test whether the
+notebook tells a reproducible story.
+
+::: {.callout-warning title="Green output can still come from stale state"}
+When a notebook result seems impossible, do not immediately add more code.
+Restart, run from the top, and check the first line whose inputs differ from
+your prediction.
+:::
+
+## 6. A value can be produced without being saved
+
+Compare these cells:
+
+```python
+12 * 3
+```
+
+```python
+subtotal = 12 * 3
+```
+
+```python
+print(12 * 3)
+```
+
+All evaluate the multiplication. Their next actions differ:
+
+- the first leaves the value as the cell's last expression, so the notebook may
+  display it;
+- the second stores the value under `subtotal`;
+- the third gives the value to `print()` for display.
+
+Only the second creates a reusable name:
+
+```python
+print(subtotal)
+```
+
+If you ran only the third cell, `subtotal` was never assigned.
+
+### Saving intermediate values supports inspection
+
+A dense calculation:
+
+```python
+print((18 * 3 + 12 * 2) - (18 * 3 + 12 * 2) * 0.1)
+```
+
+A traceable version:
+
+```python
+adult_total = 18 * 3
+child_total = 12 * 2
+subtotal = adult_total + child_total
+discount = subtotal * 0.1
+final_total = subtotal - discount
+
+print(final_total)
+```
+
+The second version lets you print or check every stage:
+
+```python
+print(adult_total)
+print(child_total)
+print(subtotal)
+print(discount)
+print(final_total)
+```
+
+Intermediate names are not automatically better. A name should clarify a
+meaningful stage. Avoid replacing `price * quantity` with vague names such as
+`step1` and `step2`.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-execution-order-check",
+  "title": "Calls, statements, and order",
+  "instructions": "Trace what each complete line makes available to the next.",
+  "questions": [
+    {
+      "id": "call-result",
+      "prompt": "In rounded = round(8.376, 2), what is bound to rounded?",
+      "options": ["The value returned by round()", "The name round", "Both arguments as text", "Nothing, because calls cannot be assigned"],
+      "answer_index": 0,
+      "explanation": "The call is evaluated first and returns 8.38; assignment binds that result to rounded."
+    },
+    {
+      "id": "dependency-order",
+      "prompt": "Which line must run before total = price * quantity in a clean program?",
+      "options": ["print(total)", "Assignments that bind price and quantity", "A comment containing the word total", "A second assignment to total"],
+      "answer_index": 1,
+      "explanation": "The right-side names must already have bindings when Python evaluates the expression."
+    },
+    {
+      "id": "stored-versus-displayed",
+      "prompt": "Which line both calculates a value and gives it a reusable name?",
+      "options": ["12 * 3", "print(12 * 3)", "subtotal = 12 * 3", "# subtotal is 36"],
+      "answer_index": 2,
+      "explanation": "Assignment stores the calculated result under subtotal for later lookup."
+    },
+    {
+      "id": "clean-run",
+      "prompt": "Why restart and run a notebook from the top?",
+      "options": ["Restarting changes Python's arithmetic", "It makes comments execute", "It sorts cells alphabetically", "It reveals dependencies on old or out-of-order state"],
+      "answer_index": 3,
+      "explanation": "A clean run proves that every value is created by visible cells in the intended order."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Trace a complete calculation pipeline
+
+Read this program without running:
+
+```python
+standard_minutes = 25
+session_count = 3
+planned_minutes = standard_minutes * session_count
+
+break_count = session_count - 1
+break_minutes = break_count * 5
+
+active_minutes = planned_minutes - break_minutes
+completion_ratio = active_minutes / planned_minutes
+
+print("Planned:", planned_minutes)
+print("Active:", active_minutes)
+print("Ratio:", round(completion_ratio, 2))
+```
+
+### Predict every important value
+
+Complete this table:
+
+| Statement | Names read | Operation or call | Name changed | New value |
+|---|---|---|---|---:|
+| `standard_minutes = 25` | none | literal | `standard_minutes` | 25 |
+| `session_count = 3` | none | literal | `session_count` | 3 |
+| `planned_minutes = ...` | ? | ? | ? | ? |
+| `break_count = ...` | ? | ? | ? | ? |
+| `break_minutes = ...` | ? | ? | ? | ? |
+| `active_minutes = ...` | ? | ? | ? | ? |
+| `completion_ratio = ...` | ? | ? | ? | ? |
+
+Then write the three output lines. Run the program only after the table is
+complete.
+
+<details class="solution">
+<summary>Show the completed values</summary>
+
+- `planned_minutes` is `25 * 3`, or `75`.
+- `break_count` is `3 - 1`, or `2`.
+- `break_minutes` is `2 * 5`, or `10`.
+- `active_minutes` is `75 - 10`, or `65`.
+- `completion_ratio` is `65 / 75`, approximately `0.8667`.
+- `round(completion_ratio, 2)` returns `0.87`.
+
+The output is:
+
+```text
+Planned: 75
+Active: 65
+Ratio: 0.87
+```
+
+</details>
+
+### Modify one dependency at a time
+
+1. Change `session_count` from `3` to `4`.
+2. Predict which names will receive different values.
+3. Run and compare.
+4. Restore `3`.
+5. Change the break length from `5` to `10`.
+6. Again identify every downstream value that changes.
+
+This is a **dependency trace**: a changed input affects expressions that read it,
+then expressions that read those results.
+
+## 8. Repair execution-order mistakes
+
+### Output happens before the calculation
+
+```python
+price = 8
+quantity = 4
+print(total)
+total = price * quantity
+```
+
+Move the display below the assignment to `total`.
+
+### A derived value is calculated from an old input
+
+```python
+hourly_rate = 20
+hours = 3
+pay = hourly_rate * hours
+
+hours = 5
+print(pay)
+```
+
+If `5` is the intended final input, calculate `pay` after that assignment.
+
+### Parentheses change the requirement
+
+A shop intends to add a fixed delivery fee after applying a discount:
+
+```python
+subtotal = 80
+delivery_fee = 10
+discount_rate = 0.25
+
+final_total = subtotal + delivery_fee * (1 - discount_rate)
+print(final_total)
+```
+
+The current grouping discounts only the fee. A clearer version is:
+
+```python
+discounted_subtotal = subtotal * (1 - discount_rate)
+final_total = discounted_subtotal + delivery_fee
+print(final_total)
+```
+
+This is not merely a precedence exercise. The correct expression depends on the
+business rule. State the rule in words before choosing parentheses.
+
+### One line hides too much
+
+```python
+print(round((50 * 4 - 20) / 60, 2))
+```
+
+The code is valid, but its meaning is invisible. Give names to the meaningful
+stages. One possible story is four planned sessions, twenty break minutes, and a
+conversion from minutes to hours.
+
+<details class="solution">
+<summary>Show a traceable version</summary>
+
+```python
+session_minutes = 50
+session_count = 4
+break_minutes = 20
+
+planned_minutes = session_minutes * session_count
+active_minutes = planned_minutes - break_minutes
+active_hours = active_minutes / 60
+rounded_hours = round(active_hours, 2)
+
+print(rounded_hours)
+```
+
+</details>
+
+## 9. Build a transparent event budget
+
+Create a small budget calculator using these facts:
+
+- room rental: `120`;
+- materials per learner: `8`;
+- learner count: `15`;
+- refreshments: `45`;
+- sponsor contribution: `100`.
+
+Required names:
+
+```text
+room_cost
+materials_per_learner
+learner_count
+refreshment_cost
+sponsor_contribution
+materials_total
+gross_cost
+amount_to_raise
+```
+
+Requirements:
+
+1. Calculate `materials_total`.
+2. Calculate `gross_cost` from room, materials, and refreshments.
+3. Subtract the sponsor contribution to calculate `amount_to_raise`.
+4. Print labels with the three calculated results.
+5. Use intermediate names rather than repeating a long expression.
+6. Add parentheses only where they clarify grouping.
+7. Make a prediction table before running.
+8. Change the learner count to `20` and identify every downstream result that
+   should change.
+
+Progress checks:
+
+```python
+assert materials_total == materials_per_learner * learner_count
+assert gross_cost == room_cost + materials_total + refreshment_cost
+assert amount_to_raise == gross_cost - sponsor_contribution
+```
+
+These assertions are supplied checks: each comparison must produce `True`.
+Testing receives a complete treatment in Unit 13.
+
+<details class="hint">
+<summary>Hint: calculate in dependency order</summary>
+
+Assign the five input facts first. `materials_total` depends on two inputs.
+`gross_cost` depends on `materials_total`. `amount_to_raise` depends on
+`gross_cost`. Place each assignment after the values it reads.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution</summary>
+
+```python
+room_cost = 120
+materials_per_learner = 8
+learner_count = 15
+refreshment_cost = 45
+sponsor_contribution = 100
+
+materials_total = materials_per_learner * learner_count
+gross_cost = room_cost + materials_total + refreshment_cost
+amount_to_raise = gross_cost - sponsor_contribution
+
+print("Materials:", materials_total)
+print("Gross cost:", gross_cost)
+print("Amount to raise:", amount_to_raise)
+
+assert materials_total == 120
+assert gross_cost == 285
+assert amount_to_raise == 185
+```
+
+</details>
+
+## 10. Check your execution trace
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-execution-final-check",
+  "title": "Read a program in execution order",
+  "instructions": "Use the stated program order and grouping.",
+  "questions": [
+    {
+      "id": "evaluate-inside-out",
+      "prompt": "What is the first calculation in result = 60 - (10 + 5)?",
+      "options": ["10 + 5", "60 - 10", "Bind result to 60", "Print 5"],
+      "answer_index": 0,
+      "explanation": "The parentheses group 10 + 5, so that inner expression is evaluated first."
+    },
+    {
+      "id": "intermediate-name",
+      "prompt": "What is the strongest reason to store discount = subtotal * rate?",
+      "options": ["Python cannot calculate it inline", "The name exposes a meaningful stage that can be inspected", "Every expression must be assigned twice", "It prevents subtotal from having a value"],
+      "answer_index": 1,
+      "explanation": "A meaningful intermediate name makes the dependency and result easier to inspect and explain."
+    },
+    {
+      "id": "call-nesting",
+      "prompt": "In difference = abs(35 - 50), what value is passed to abs()?",
+      "options": ["15", "50", "-15", "difference"],
+      "answer_index": 2,
+      "explanation": "The inner subtraction produces -15; abs(-15) then produces 15."
+    },
+    {
+      "id": "requirement-first",
+      "prompt": "Two parenthesized formulas produce different totals. What should determine which one is correct?",
+      "options": ["The shorter formula", "The one with more operators", "Whichever was run first", "The stated rule the program must represent"],
+      "answer_index": 3,
+      "explanation": "Syntax can make either formula valid. The requirement determines which calculation is correct."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- An expression is evaluated to produce a value.
+- Operators combine or compare operands.
+- Parentheses make grouping explicit and can change a result.
+- Function-call arguments are evaluated before the call produces its result or
+  performs its action.
+- Statements normally run from top to bottom.
+- Calculating, storing, and displaying are different actions.
+- Intermediate names make meaningful stages visible.
+- A clean top-to-bottom run exposes hidden notebook dependencies.
+:::
+
+## References
+
+- [Python tutorial: numbers and arithmetic](https://docs.python.org/3/tutorial/introduction.html#numbers)
+- [Python language reference: expressions](https://docs.python.org/3/reference/expressions.html)
+- [Python language reference: simple statements](https://docs.python.org/3/reference/simple_stmts.html)
+- [Python documentation: built-in functions](https://docs.python.org/3/library/functions.html)

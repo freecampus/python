@@ -1,0 +1,834 @@
+---
+title: Values, Names, and Assignment
+lesson_id: python-syntax.values-names-assignment
+lesson_order: 10
+description: Build a reliable model of values, names, assignment, reassignment, and program state by tracing practical calculations line by line.
+execute:
+  echo: true
+categories:
+- python-foundations
+- python-syntax
+- values
+- assignment
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/python-syntax/values-names-assignment.ipynb
+course_id: python-foundations
+unit_id: python-syntax
+unit_number: 1
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 2.5–3.5 hours
+- **You will learn:** Explain how Python creates values, binds names, looks up names, and updates program state through assignment.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+A useful program needs to remember facts. A study planner remembers a course
+name and a session length. A shop program remembers prices and quantities. A
+game remembers a score. Python lets us attach readable **names** to those
+values, then use the names in later lines.
+
+::: {.callout-note title="Questions you will answer"}
+By the end of the lesson, you should be able to explain:
+
+1. What is the difference between a value and a name?
+2. What does Python do with the right side of an assignment?
+3. Why can the same name produce different values at different times?
+4. How can a trace table reveal a mistake before the final output?
+:::
+
+## 1. Begin with values Python can use
+
+A **value** is a piece of information Python can work with. Enter each example
+in a separate cell:
+
+```python
+45
+```
+
+```python
+"Python Foundations"
+```
+
+```python
+3.5
+```
+
+```python
+True
+```
+
+A value written directly in source code is called a **literal**. The characters
+`45` are an integer literal. The quotation marks in `"Python Foundations"` tell
+Python to create a text value. `True` is Python's spelling for one of its two
+boolean values.
+
+For now, concentrate on reading the values rather than memorizing every type.
+Unit 2 studies numbers, text, booleans, conversion, and input in depth.
+
+### Values are not automatically displayed in a program
+
+A notebook often displays the value of the last expression in a cell:
+
+```python
+45
+```
+
+A normal Python file does not display every value it creates. Use `print()` when
+displaying a value is part of the program:
+
+```python
+print(45)
+print("Python Foundations")
+```
+
+Line by line:
+
+1. Python sees the name `print`.
+2. The parentheses contain the value to give to `print`.
+3. The first call displays `45`.
+4. The second call displays `Python Foundations` without the quotation marks.
+   The marks describe the text in source code; they are not part of the text.
+
+::: {.callout-warning title="Notebook display is not the same as print"}
+A notebook may show the last value in a cell as a convenience. If the output is
+important to your program, call `print()` explicitly. Later you will learn that
+a value can be calculated, stored, returned, or displayed—these are different
+actions.
+:::
+
+### Try three different uses
+
+Run this cell:
+
+```python
+print("Session minutes:")
+print(45)
+print(30 + 15)
+```
+
+All three lines display something, but the values reach `print()` differently:
+
+- the first is a text literal;
+- the second is an integer literal;
+- the third is calculated from an expression.
+
+Change only `15` to `20`. Predict the final line before running it.
+
+## 2. Give important values readable names
+
+A literal is useful once. A name makes the value easy to reuse and change.
+
+```python
+course = "Python Foundations"
+session_minutes = 45
+
+print(course)
+print(session_minutes)
+```
+
+The first line is an **assignment statement**. Read it as:
+
+> Bind the name `course` to the value `"Python Foundations"`.
+
+Do not read `=` as “is already equal to.” In Python, one equals sign performs
+assignment.
+
+The second assignment binds `session_minutes` to `45`. The calls to `print()`
+then ask Python to look up the value currently bound to each name.
+
+### What Python does on each line
+
+Consider a small shop calculation:
+
+```python
+notebook_price = 4
+notebook_count = 3
+subtotal = notebook_price * notebook_count
+print(subtotal)
+```
+
+Python handles it in this order:
+
+1. Create the value `4`, then bind `notebook_price` to it.
+2. Create the value `3`, then bind `notebook_count` to it.
+3. Look up `notebook_price` and obtain `4`.
+4. Look up `notebook_count` and obtain `3`.
+5. Multiply the two values and produce `12`.
+6. Bind `subtotal` to `12`.
+7. Look up `subtotal` and display `12`.
+
+The names make the calculation explain itself. Compare it with:
+
+```python
+print(4 * 3)
+```
+
+Both versions display `12`. Only the first version preserves what `4`, `3`, and
+`12` mean.
+
+## 3. Assignment evaluates the right side first
+
+The assignment pattern is:
+
+```text
+name = expression
+```
+
+Python evaluates the expression on the right **before** it changes the name on
+the left.
+
+```python
+minutes = 20 + 25
+print(minutes)
+```
+
+Python adds `20 + 25`, obtains `45`, and only then binds `minutes` to `45`.
+
+The right side can use names that already exist:
+
+```python
+session_minutes = 45
+break_minutes = 10
+focused_minutes = session_minutes - break_minutes
+
+print(focused_minutes)
+```
+
+Before running, predict the value of `focused_minutes`.
+
+Line by line:
+
+1. `session_minutes` becomes bound to `45`.
+2. `break_minutes` becomes bound to `10`.
+3. Python looks up both names and calculates `45 - 10`.
+4. `focused_minutes` becomes bound to the result, `35`.
+5. The final line displays `35`.
+
+::: {.concept-diagram}
+The diagram follows assignment from the written line to the resulting binding.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["focused_minutes = session_minutes - break_minutes"] --> B["Look up session_minutes → 45"]
+  B --> C["Look up break_minutes → 10"]
+  C --> D["Evaluate 45 - 10 → 35"]
+  D --> E["Bind focused_minutes → 35"]
+```
+:::
+
+### The left side is not read like the right side
+
+This line is valid:
+
+```python
+score = 8
+```
+
+This reversed version is not assignment:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+8 = score
+```
+
+The left side must identify a place Python can bind the result. A number literal
+cannot become a name.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-values-assignment-first-check",
+  "title": "Values and assignment",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "literal",
+      "prompt": "Which item is a text literal?",
+      "options": ["\"45\"", "session_minutes", "print", "="],
+      "answer_index": 0,
+      "explanation": "Quotation marks tell Python to create a text value. The other items are a name or a symbol."
+    },
+    {
+      "id": "assignment-order",
+      "prompt": "In total = price * quantity, what happens immediately before total is bound?",
+      "options": ["total is printed", "The right-side expression is evaluated", "price is deleted", "The equals sign compares two values"],
+      "answer_index": 1,
+      "explanation": "Python looks up price and quantity and multiplies them before binding the result to total."
+    },
+    {
+      "id": "notebook-display",
+      "prompt": "Why should a program use print(total) when displaying total is required?",
+      "options": ["Assignment always hides numbers", "Only strings can be displayed", "A notebook's automatic last-value display is not the same as program output", "print changes total into text"],
+      "answer_index": 2,
+      "explanation": "Notebook display is an interface convenience. print() explicitly makes display part of the program."
+    },
+    {
+      "id": "meaningful-names",
+      "prompt": "Why is notebook_price * notebook_count usually clearer than 4 * 3?",
+      "options": ["Names make multiplication faster", "Literals cannot be multiplied", "Python requires long names", "The names preserve what the two values represent"],
+      "answer_index": 3,
+      "explanation": "Both calculations work, but meaningful names communicate the role of each value."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Trace state instead of guessing
+
+A program's **state** is the collection of relevant name-to-value bindings at a
+particular moment. A trace table records that state after each line.
+
+```python
+pages_read = 12
+pages_read = pages_read + 5
+pages_remaining = 30 - pages_read
+print(pages_remaining)
+```
+
+Before running, complete the table:
+
+| After line | `pages_read` | `pages_remaining` |
+|---:|---:|---:|
+| 1 | 12 | not assigned |
+| 2 | ? | not assigned |
+| 3 | ? | ? |
+| 4 | ? | ? |
+
+The completed trace is:
+
+| After line | `pages_read` | `pages_remaining` |
+|---:|---:|---:|
+| 1 | 12 | not assigned |
+| 2 | 17 | not assigned |
+| 3 | 17 | 13 |
+| 4 | 17 | 13 |
+
+The fourth line displays a value but does not change either binding.
+
+### Reassignment changes what a name finds next
+
+This line often surprises people seeing programming for the first time:
+
+```python
+pages_read = pages_read + 5
+```
+
+It is not an equation claiming that a number equals itself plus five. It is a
+sequence of actions:
+
+1. Look up the **current** value of `pages_read`: `12`.
+2. Add `5`: the result is `17`.
+3. Bind `pages_read` to `17`.
+4. Future lookups of `pages_read` find `17`.
+
+::: {.concept-diagram}
+Reassignment uses the old binding to calculate a new one.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["pages_read → 12"] --> B["Evaluate pages_read + 5"]
+  B --> C["12 + 5 → 17"]
+  C --> D["pages_read → 17"]
+```
+:::
+
+The earlier line of source code has not changed. The program has moved to a new
+state.
+
+### A calculated value does not update by itself
+
+Predict the output:
+
+```python
+price = 5
+quantity = 2
+total = price * quantity
+
+quantity = 4
+print(total)
+```
+
+The output is `10`, not `20`. `total = price * quantity` ran only once. Changing
+`quantity` later does not make Python revisit earlier assignments.
+
+To refresh the total, calculate it again:
+
+```python
+price = 5
+quantity = 2
+total = price * quantity
+
+quantity = 4
+total = price * quantity
+print(total)
+```
+
+Now the output is `20`.
+
+This behavior matters in notebooks. If you run cells out of order, a result may
+have been calculated from older values. Restarting and running from the top
+reveals the true sequence.
+
+## 5. Names must exist before Python can read them
+
+Python can only look up a name after an executed assignment has created its
+binding.
+
+```python
+course = "Python Foundations"
+print(course)
+```
+
+Reverse the order:
+
+```python
+print(course_name)
+course_name = "Python Foundations"
+```
+
+If no earlier cell created `course_name`, Python raises:
+
+```text
+NameError: name 'course_name' is not defined
+```
+
+The source is grammatically valid, so this is not a `SyntaxError`. Python
+understood the instruction but could not find the requested name while running
+it.
+
+### Similar-looking names are still different
+
+```python
+session_minutes = 45
+print(session_minute)
+```
+
+The assignment uses plural `minutes`; the lookup uses singular `minute`. Python
+does not guess that they were intended to match.
+
+Case also matters:
+
+```python
+course = "Python Foundations"
+print(Course)
+```
+
+`course` and `Course` are two different names.
+
+### Find the first inconsistent name
+
+Read this without running:
+
+```python
+ticket_price = 12
+ticket_count = 3
+ticket_total = ticket_price * tickets_count
+print(ticket_total)
+```
+
+Which name is inconsistent? The third line asks for `tickets_count`, but the
+second line created `ticket_count`.
+
+Make the smallest repair. Do not rename every variable; change the one use that
+does not match the established name.
+
+::: {.callout-tip title="Read NameError from the bottom up"}
+Start with the final error line to learn the error type and missing name. Then
+inspect the named source line and the assignments above it. Look for spelling,
+pluralization, capitalization, and execution-order differences.
+:::
+
+## 6. Two names can refer to equal values
+
+Run:
+
+```python
+morning_minutes = 30
+evening_minutes = 30
+
+print(morning_minutes)
+print(evening_minutes)
+```
+
+The two names have the same numeric value, but they represent different facts.
+Changing one binding does not change the other:
+
+```python
+morning_minutes = 30
+evening_minutes = 30
+
+morning_minutes = 45
+
+print(morning_minutes)
+print(evening_minutes)
+```
+
+The output is:
+
+```text
+45
+30
+```
+
+This is why names describe roles, not only values. A program may need separate
+names even when their current values happen to match.
+
+### Copying a value into another name
+
+```python
+planned_minutes = 45
+actual_minutes = planned_minutes
+
+planned_minutes = 60
+
+print(planned_minutes)
+print(actual_minutes)
+```
+
+When `actual_minutes = planned_minutes` runs, Python looks up `planned_minutes`
+and binds `actual_minutes` to the resulting value, `45`. Reassigning
+`planned_minutes` later does not automatically rerun the copy.
+
+For simple number and text examples, think of the trace as:
+
+| Line | `planned_minutes` | `actual_minutes` |
+|---:|---:|---:|
+| 1 | 45 | not assigned |
+| 2 | 45 | 45 |
+| 3 | 60 | 45 |
+
+Collections and mutable objects add an important sharing question. Unit 6 treats
+that topic carefully; do not generalize this simple trace to every Python
+object yet.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-values-assignment-state-check",
+  "title": "Names and changing state",
+  "instructions": "Trace the lines before choosing an answer.",
+  "questions": [
+    {
+      "id": "reassignment",
+      "prompt": "After score = 8 followed by score = score + 2, what value does score find?",
+      "options": ["10", "8", "2", "The code cannot run"],
+      "answer_index": 0,
+      "explanation": "Python reads the old value 8, adds 2, and rebinds score to 10."
+    },
+    {
+      "id": "stale-total",
+      "prompt": "price = 5; quantity = 2; total = price * quantity; quantity = 4. What is total?",
+      "options": ["20", "10", "4", "It changes whenever quantity changes"],
+      "answer_index": 1,
+      "explanation": "total was calculated when quantity was 2. Earlier assignments do not rerun automatically."
+    },
+    {
+      "id": "name-error",
+      "prompt": "Which issue most directly explains NameError for session_minute when session_minutes was assigned?",
+      "options": ["Numbers cannot use names", "Assignment requires two equals signs", "The lookup uses a different name", "print() deletes the earlier name"],
+      "answer_index": 2,
+      "explanation": "Singular session_minute and plural session_minutes are distinct names."
+    },
+    {
+      "id": "copied-value",
+      "prompt": "planned = 45; actual = planned; planned = 60. What does actual contain?",
+      "options": ["60 because names remain synchronized", "No value", "Both 45 and 60", "45 because the assignment to actual ran before planned changed"],
+      "answer_index": 3,
+      "explanation": "The second line looked up 45 and bound actual to it. Reassigning planned did not rerun that line."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Choose names that make change safer
+
+These names are legal but unhelpful:
+
+```python
+x = 45
+y = 10
+z = x - y
+print(z)
+```
+
+This version exposes the program's meaning:
+
+```python
+session_minutes = 45
+break_minutes = 10
+focused_minutes = session_minutes - break_minutes
+print(focused_minutes)
+```
+
+A useful beginner naming checklist:
+
+- use lowercase words separated by underscores: `focused_minutes`;
+- describe the value's role, not only its type: `course_name`, not `text`;
+- include units when confusion is possible: `duration_seconds`;
+- use the same spelling everywhere;
+- avoid one-letter names except in a tiny mathematical example;
+- avoid names that Python already uses for common tools, such as `print`.
+
+Lesson 3 gives the complete rules for valid identifiers and reserved keywords.
+
+### Legal does not always mean wise
+
+This code runs:
+
+```python
+print = 45
+```
+
+But the name `print` now refers to `45` in the current notebook state. A later
+call such as `print("hello")` fails because Python finds the number instead of
+the built-in display tool.
+
+If you do this accidentally in a notebook, restart the runtime or remove the
+binding before continuing. The safest habit is not to reuse familiar built-in
+names.
+
+### Rename without changing behavior
+
+Improve this program:
+
+```python
+a = 7
+b = 6
+c = a * b
+print(c)
+```
+
+Choose one interpretation, such as boxes and items per box. Rename all four uses
+consistently. The output should remain `42`.
+
+<details class="solution">
+<summary>Show one possible revision</summary>
+
+```python
+box_count = 7
+items_per_box = 6
+item_total = box_count * items_per_box
+print(item_total)
+```
+
+The new names expose the meaning of the multiplication. Different names are fine
+if they tell a coherent story and every use is updated.
+
+</details>
+
+## 8. Build a study-session summary
+
+Create a new cell with this starter code:
+
+```python
+course_name = "Python Foundations"
+planned_minutes = 50
+break_minutes = 10
+
+focused_minutes = planned_minutes - break_minutes
+
+print("Course:")
+print(course_name)
+print("Focused minutes:")
+print(focused_minutes)
+```
+
+Before running, write the four displayed lines in order.
+
+Then complete these changes one at a time:
+
+1. Change `planned_minutes` to `65`; predict the new focused time.
+2. Add `review_minutes = 15`.
+3. Add `total_learning_minutes = focused_minutes + review_minutes`.
+4. Display a label and the new total.
+5. Change `break_minutes` after the totals are calculated. Observe which stored
+   values become stale.
+6. Move the calculations to the correct place so every result reflects the
+   latest inputs.
+7. Rename one value consistently without changing the output.
+
+### Use a trace table to verify the final version
+
+Your final table should have one row after each assignment:
+
+| Line | `planned_minutes` | `break_minutes` | `focused_minutes` | `review_minutes` | `total_learning_minutes` |
+|---:|---:|---:|---:|---:|---:|
+| 1 | value | — | — | — | — |
+| 2 | value | value | — | — | — |
+| ... | ... | ... | ... | ... | ... |
+
+Do not fill a cell from memory. Read the program in execution order and update
+only the binding changed by that line.
+
+<details class="hint">
+<summary>Hint: a reliable calculation order</summary>
+
+Assign the input facts first. Calculate `focused_minutes` only after the final
+values of `planned_minutes` and `break_minutes` are available. Calculate
+`total_learning_minutes` only after both of its inputs are available. Display
+the results last.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete version</summary>
+
+```python
+course_name = "Python Foundations"
+planned_minutes = 65
+break_minutes = 10
+review_minutes = 15
+
+focused_minutes = planned_minutes - break_minutes
+total_learning_minutes = focused_minutes + review_minutes
+
+print("Course:")
+print(course_name)
+print("Focused minutes:")
+print(focused_minutes)
+print("Total learning minutes:")
+print(total_learning_minutes)
+```
+
+The output is:
+
+```text
+Course:
+Python Foundations
+Focused minutes:
+55
+Total learning minutes:
+70
+```
+
+</details>
+
+## 9. Diagnose three state mistakes
+
+For each example:
+
+1. predict the output or error;
+2. identify the first line that does not match the intended story;
+3. make one repair;
+4. rerun from the top.
+
+### The calculation happens too early
+
+```python
+adult_tickets = 2
+ticket_total = adult_tickets * 12
+adult_tickets = 3
+
+print(ticket_total)
+```
+
+If the intended total is for three tickets, move or repeat the calculation after
+the final assignment to `adult_tickets`.
+
+### The same fact has two spellings
+
+```python
+workshop_minutes = 90
+break_minute = 15
+active_minutes = workshop_minutes - break_minutes
+
+print(active_minutes)
+```
+
+Choose either singular or plural and use it consistently.
+
+### A result overwrites an input
+
+```python
+distance_km = 12
+distance_km = distance_km * 2
+print(distance_km)
+```
+
+The code is valid, and doubling may even be intended. But if the program needs
+both the one-way distance and round-trip distance, preserve both meanings:
+
+```python
+one_way_km = 12
+round_trip_km = one_way_km * 2
+print(round_trip_km)
+```
+
+The best repair depends on the requirement, not only on what Python accepts.
+
+## 10. Check your model of assignment
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-values-assignment-final-check",
+  "title": "Trace values and bindings",
+  "instructions": "Answer from the execution trace, not from what the variable names suggest.",
+  "questions": [
+    {
+      "id": "right-side-first",
+      "prompt": "minutes = 40; minutes = minutes + 5. Which value is read on the right side of the second line?",
+      "options": ["40", "45", "5", "No value"],
+      "answer_index": 0,
+      "explanation": "The old binding, 40, is read first. Python then calculates 45 and rebinds minutes."
+    },
+    {
+      "id": "display-only",
+      "prompt": "Which line displays a stored value without changing its binding?",
+      "options": ["total = price * quantity", "print(total)", "total = 0", "quantity = quantity + 1"],
+      "answer_index": 1,
+      "explanation": "print(total) looks up and displays total. It does not assign a new value to total."
+    },
+    {
+      "id": "separate-roles",
+      "prompt": "Why might morning_minutes and evening_minutes remain separate names when both currently equal 30?",
+      "options": ["Python forbids reusing 30", "Names can contain only one word", "They represent different facts that may change independently", "Equal numbers must be printed separately"],
+      "answer_index": 2,
+      "explanation": "The role of each value matters. Morning and evening time can later change independently."
+    },
+    {
+      "id": "repair-strategy",
+      "prompt": "A result is stale because an input was reassigned later. What is the most direct repair?",
+      "options": ["Add quotation marks around every name", "Delete the input assignment", "Rename print", "Calculate the result after the final input assignments"],
+      "answer_index": 3,
+      "explanation": "Execution order controls which values an expression reads. Calculate the result after its inputs have their intended values."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A literal writes a value directly in source code.
+- Assignment evaluates the right side, then binds its result to the name on the
+  left.
+- Looking up a name returns the value currently bound to it.
+- Reassignment changes a binding for future lookups; it does not rewrite earlier
+  source code.
+- Calculated results do not refresh automatically when an input changes.
+- Trace tables make state and execution order visible.
+- Good names preserve meaning and make later changes safer.
+- Detailed types, conversion, and user input belong to Unit 2.
+:::
+
+## References
+
+- [Python tutorial: using Python as a calculator](https://docs.python.org/3/tutorial/introduction.html#using-python-as-a-calculator)
+- [Python language reference: assignment statements](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements)
+- [PEP 8: naming conventions](https://peps.python.org/pep-0008/#naming-conventions)

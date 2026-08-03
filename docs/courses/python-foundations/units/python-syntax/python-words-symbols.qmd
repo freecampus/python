@@ -1,0 +1,890 @@
+---
+title: Python's Words and Symbols
+lesson_id: python-syntax.python-words-symbols
+lesson_order: 30
+description: Learn to identify Python's keywords, identifiers, literals, operators, and delimiters, then use that vocabulary to read and repair unfamiliar lines.
+execute:
+  echo: true
+categories:
+- python-foundations
+- python-syntax
+- tokens
+- identifiers
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/python-syntax/python-words-symbols.ipynb
+course_id: python-foundations
+unit_id: python-syntax
+unit_number: 1
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 2.5–3.5 hours
+- **You will learn:** Identify the roles of Python's words and symbols, create valid readable names, and diagnose token-level mistakes.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+At first, Python punctuation can look decorative. It is not. A quote can turn
+digits into text. One extra equals sign can turn assignment into comparison. A
+colon can announce a block. Parentheses can group a calculation or call a tool.
+
+Learning the vocabulary lets you read unfamiliar code without pretending you
+already understand its complete behavior.
+
+::: {.callout-note title="Questions you will answer"}
+1. Which pieces of a line are names, literals, keywords, operators, or delimiters?
+2. Why are some words unavailable as variable names?
+3. Which naming mistakes stop Python, and which merely make code harder to read?
+4. How does context change the role of a symbol?
+:::
+
+## 1. Take apart one line of Python
+
+Consider:
+
+```python
+total_minutes = session_count * 25
+```
+
+Python does not see one long command. It recognizes smaller pieces:
+
+| Piece | Role | Meaning here |
+|---|---|---|
+| `total_minutes` | identifier | the name that will receive a value |
+| `=` | operator | assignment |
+| `session_count` | identifier | a name whose value will be looked up |
+| `*` | operator | multiplication |
+| `25` | literal | an integer value written directly |
+
+A smallest meaningful piece recognized by Python's tokenizer is called a
+**token**. You do not need to operate a tokenizer to read code, but the term
+helps us discuss the pieces precisely.
+
+Another line has different token roles:
+
+```python
+print("Total:", total_minutes)
+```
+
+| Piece | Role | Meaning here |
+|---|---|---|
+| `print` | identifier | the name of a built-in function |
+| `(` | delimiter | begins the call's argument list |
+| `"Total:"` | literal | a text value |
+| `,` | delimiter | separates two arguments |
+| `total_minutes` | identifier | a value to look up |
+| `)` | delimiter | ends the argument list |
+
+Whitespace separates some tokens and helps people see the structure. It is not
+included in the table as an executable action.
+
+::: {.concept-diagram}
+Python first recognizes pieces, then checks whether their arrangement follows
+the language grammar.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Source text"] --> B["Tokens<br/>names, literals, symbols"]
+  B --> C["Grammar<br/>valid arrangement?"]
+  C -->|yes| D["Executable instruction"]
+  C -->|no| E["SyntaxError"]
+```
+:::
+
+### Label a line yourself
+
+Copy this line and write each token in a table:
+
+```python
+is_ready = completed_tasks >= 3
+```
+
+You should find:
+
+- two identifiers: `is_ready`, `completed_tasks`;
+- two operators: `=`, `>=`;
+- one integer literal: `3`.
+
+The underscore is part of each identifier. The two characters `>` and `=`
+combine into the single comparison operator `>=`.
+
+## 2. Identifiers are names that follow spelling rules
+
+An **identifier** is the grammatical form Python uses for names. These are valid
+identifiers:
+
+```python
+course
+course_name
+session2
+_private_note
+café
+```
+
+Python permits Unicode letters, which is why `café` is valid. This course uses
+simple ASCII names in most code because they are easier to type consistently
+across keyboards and tools.
+
+These are not valid identifiers:
+
+```text
+2sessions
+course-name
+course name
+session.minutes
+```
+
+Why:
+
+- `2sessions` starts with a digit;
+- `course-name` is read as `course - name`, not one identifier;
+- the space in `course name` separates two identifiers;
+- the dot in `session.minutes` separates an object expression and an attribute
+  name; the complete text is not one identifier.
+
+The practical rules are:
+
+1. Start with a letter or underscore.
+2. Continue with letters, digits, or underscores.
+3. Do not include spaces, hyphens, dots, quotation marks, or other punctuation.
+4. Match capitalization exactly.
+5. Do not use a reserved keyword.
+
+### Valid syntax can still be poor naming
+
+All these assignments are valid:
+
+```python
+x = 45
+thing = 10
+this_is_the_number_of_minutes_remaining_after_the_break = 35
+```
+
+Validity only tells you Python can read the name. Readability asks whether a
+person can understand it.
+
+Prefer:
+
+```python
+session_minutes = 45
+break_minutes = 10
+focused_minutes = 35
+```
+
+Good names are specific enough to explain the role and short enough to scan.
+
+### Snake case joins multiple words
+
+Python code normally writes variable and function names in **snake case**:
+lowercase words separated by underscores.
+
+```python
+learner_count = 18
+materials_per_learner = 4
+materials_total = learner_count * materials_per_learner
+```
+
+`learner_count` is one token, not two. The underscore belongs to the identifier.
+
+Names beginning with one or two underscores can have special conventions.
+Beginners should not invent such names without a reason. `_temporary` is legal,
+but `temporary` is clearer unless a specific convention calls for the underscore.
+
+## 3. Capitalization and spelling must match exactly
+
+Python is case-sensitive:
+
+```python
+course = "Python Foundations"
+Course = "Scientific Python"
+
+print(course)
+print(Course)
+```
+
+The two names have separate bindings.
+
+This example fails at runtime:
+
+```python
+session_minutes = 45
+print(Session_minutes)
+```
+
+The first character differs. Python raises `NameError` because
+`Session_minutes` was never assigned.
+
+Common naming mismatches include:
+
+| Assigned | Read later | Difference |
+|---|---|---|
+| `ticket_count` | `tickets_count` | singular versus plural |
+| `total_cost` | `totalcost` | missing underscore |
+| `course_name` | `course_Name` | capitalization |
+| `focused_minutes` | `focus_minutes` | different word form |
+
+When you see `NameError`, copy the missing name from the error and compare it
+character by character with the assignments above.
+
+### Repair a naming set
+
+Each line below intends to use a snake-case name. Rewrite it as one valid
+assignment:
+
+```text
+1st_session = 25
+break-time = 5
+course title = "Python"
+total.minutes = 30
+```
+
+One possible repair:
+
+```python
+first_session = 25
+break_time = 5
+course_title = "Python"
+total_minutes = 30
+```
+
+The exact words can differ. The repaired name must follow the identifier rules
+and communicate the intended role.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-words-identifiers-check",
+  "title": "Tokens and identifiers",
+  "instructions": "Choose the answer that follows Python's lexical rules.",
+  "questions": [
+    {
+      "id": "valid-identifier",
+      "prompt": "Which text is one valid Python identifier?",
+      "options": ["session_2", "2_session", "session-time", "session time"],
+      "answer_index": 0,
+      "explanation": "session_2 starts with a letter and contains only letters, an underscore, and a digit."
+    },
+    {
+      "id": "snake-case",
+      "prompt": "Which name follows the usual snake-case style?",
+      "options": ["FocusedMinutes", "focused_minutes", "focused-minutes", "FOCUSED MINUTES"],
+      "answer_index": 1,
+      "explanation": "Snake case uses lowercase words separated by underscores."
+    },
+    {
+      "id": "case-sensitive",
+      "prompt": "course is assigned, but print(Course) raises NameError. Why?",
+      "options": ["print requires lowercase arguments", "Text values cannot use names", "course and Course are different identifiers", "Every identifier must contain an underscore"],
+      "answer_index": 2,
+      "explanation": "Python identifiers are case-sensitive, so changing C changes the name."
+    },
+    {
+      "id": "token-count",
+      "prompt": "In total = count * 5, which piece is a literal?",
+      "options": ["total", "=", "*", "5"],
+      "answer_index": 3,
+      "explanation": "5 directly represents an integer value in the source code."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Keywords belong to Python's grammar
+
+A **keyword** is a word reserved by Python for a grammatical role. Examples
+include:
+
+```text
+if      else      for      while
+def     class     return   import
+True    False     None     and
+or      not       in       is
+```
+
+You will learn the behavior connected to these words in later units. For now,
+recognize that you cannot use them as ordinary names.
+
+This is invalid:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+class = "Python Foundations"
+```
+
+Python sees `class` as the beginning of a class statement, not as a variable
+name. The rest of the line does not fit that grammar, so parsing stops.
+
+This repair is valid and clearer:
+
+```python
+course_class = "Python Foundations"
+```
+
+### Keywords are not commands by themselves
+
+Writing a keyword without the structure it requires may be invalid:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+if
+```
+
+The word `if` begins a conditional statement. Python expects a condition, a
+colon, and an indented body. Recognizing the keyword tells you which grammatical
+shape to expect.
+
+### Check a word after making a prediction
+
+Python's standard library provides the `keyword` module. This example uses
+`import` and a loop before their full lessons, so read it as a guided
+exploration:
+
+```python
+import keyword
+
+print(keyword.iskeyword("for"))
+print(keyword.iskeyword("total"))
+print(keyword.iskeyword("return"))
+print(keyword.iskeyword("course_name"))
+```
+
+Expected output:
+
+```text
+True
+False
+True
+False
+```
+
+`keyword.iskeyword(...)` answers whether a text value is currently reserved by
+Python.
+
+Try `"match"`, `"case"`, `"print"`, and `"None"`. Predict each result first.
+`print` is a built-in name, not a keyword; shadowing it is legal but unwise.
+
+## 5. Built-in names are available tools, not grammar
+
+Python starts with names such as `print`, `round`, `abs`, `min`, and `max`
+available. They are **built-ins**. Unlike keywords, they are ordinary names and
+can technically be rebound:
+
+```python
+print = 42
+```
+
+The assignment is valid, but the next call fails because `print` now refers to a
+number:
+
+```python
+print("Hello")
+```
+
+In a notebook, restart the runtime after accidentally shadowing a built-in. In a
+file, rename the variable and run the file again.
+
+Compare the categories:
+
+| Category | Example | Can it be a new variable name? |
+|---|---|---|
+| Keyword | `for` | No |
+| Built-in name | `print` | Yes, but usually should not |
+| Identifier you create | `course_name` | Yes |
+| Literal | `"course_name"` | No; this is a text value |
+
+Quotation marks are decisive. `course_name` asks Python to look up a name;
+`"course_name"` creates text containing those characters.
+
+### Diagnose four different lines
+
+```python
+course = "Python"
+print(course)
+print("course")
+print
+```
+
+- Line 1 assigns text to `course`.
+- Line 2 calls the built-in and displays the value bound to `course`: `Python`.
+- Line 3 displays the literal text `course`.
+- Line 4 is a name expression. In a notebook it may display a representation of
+  the function object, but it does not call the function because there are no
+  parentheses.
+
+## 6. Operators tell Python what relationship to apply
+
+Operators are tokens such as `+`, `*`, `=`, and `>=`. Some consist of more than
+one character.
+
+### Assignment and comparison
+
+```python
+minutes = 45
+print(minutes == 45)
+print(minutes != 30)
+```
+
+- `=` binds.
+- `==` asks “are these equal?”
+- `!=` asks “are these different?”
+
+Do not insert spaces inside a multi-character operator:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print(minutes > = 30)
+```
+
+Write `>=` as one token:
+
+```python
+print(minutes >= 30)
+```
+
+### Arithmetic operators
+
+```python
+total = 8 + 4
+difference = 8 - 4
+product = 8 * 4
+quotient = 8 / 4
+remainder = 9 % 4
+power = 2 ** 3
+```
+
+This lesson focuses on reading the symbols. Unit 2 covers numeric behavior,
+precision, floor division, and specialized numeric types.
+
+### Word operators
+
+Not every operator is punctuation. Python has word operators such as `and`,
+`or`, `not`, `in`, and `is`. Because these words have grammatical roles, they
+are also reserved keywords.
+
+```python
+is_ready = True
+has_time = True
+can_start = is_ready and has_time
+print(can_start)
+```
+
+Boolean reasoning belongs to Units 2 and 4. Here, identify `and` as an operator
+that combines two operand expressions.
+
+### Context gives a symbol its role
+
+The `-` symbol can negate one value or subtract a second value:
+
+```python
+temperature = -5
+change = 10 - 5
+```
+
+The first `-` is unary: it has one operand. The second is binary: it appears
+between two operands.
+
+The `*` symbol means multiplication in an arithmetic expression:
+
+```python
+area = 6 * 4
+```
+
+Later, you will see `*` used in function parameters, argument unpacking, and
+sequence repetition. Do not assign a universal English word to a symbol without
+reading its context.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-words-keywords-operators-check",
+  "title": "Keywords, built-ins, and operators",
+  "instructions": "Identify the role the token has in the shown context.",
+  "questions": [
+    {
+      "id": "keyword",
+      "prompt": "Why can course_class be a name while class cannot?",
+      "options": ["class is a reserved keyword", "Names must contain underscores", "course_class is a built-in", "class contains too few letters"],
+      "answer_index": 0,
+      "explanation": "class has a role in Python's grammar and is reserved; course_class is an ordinary identifier."
+    },
+    {
+      "id": "builtin",
+      "prompt": "Which description of print is accurate?",
+      "options": ["It is punctuation", "It is a built-in name that should normally not be reused", "It is a reserved keyword", "It is a string literal"],
+      "answer_index": 1,
+      "explanation": "print is a built-in function name. Rebinding it is legal but prevents normal print calls."
+    },
+    {
+      "id": "comparison-token",
+      "prompt": "Which token means greater than or equal to?",
+      "options": ["> =", "=>", ">=", "==>"],
+      "answer_index": 2,
+      "explanation": ">= is one two-character comparison operator; no space belongs inside it."
+    },
+    {
+      "id": "quoted-name",
+      "prompt": "What does print(\"course\") display?",
+      "options": ["The value bound to course", "A syntax error", "The print function", "The literal text course"],
+      "answer_index": 3,
+      "explanation": "Quotation marks create a text literal, so Python does not look up the name course."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Delimiters mark boundaries and relationships
+
+**Delimiters** separate, group, or enclose parts of code.
+
+### Parentheses: grouping or calling
+
+Grouping:
+
+```python
+total = (2 + 3) * 4
+```
+
+Calling:
+
+```python
+print(total)
+```
+
+In the first line, the opening parenthesis follows an operator and groups an
+expression. In the second, it follows the name `print` and begins an argument
+list. Context tells you the role.
+
+### Commas: separating items
+
+```python
+print("Total:", total)
+```
+
+The comma separates two arguments. It is not part of either value.
+
+A missing comma can produce a confusing error or an unintended expression:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Total:" total)
+```
+
+Repair:
+
+```python
+print("Total:", total)
+```
+
+### Colons: announcing a body or separating parts
+
+A colon after a header announces an indented block:
+
+```python
+if total >= 20:
+    print("Large total")
+```
+
+The `if` behavior is a preview. Read only the shape for now:
+
+1. `if` is a keyword.
+2. `total >= 20` is the condition expression.
+3. `:` finishes the header.
+4. The indented call is the body.
+
+Later, a colon can also separate keys from values in a dictionary or a start
+from a stop in a slice. The same token can have several grammatical contexts.
+
+### Dots: selecting an attribute
+
+```python
+course_name = "python foundations"
+print(course_name.title())
+```
+
+The dot connects the value found through `course_name` with the attribute name
+`title`. The following parentheses call that method. String methods receive
+full coverage in Unit 2; here, recognize that `course_name.title` is not one
+identifier.
+
+### Brackets and braces: enclosed structures
+
+You will soon see:
+
+```python
+scores = [80, 90, 75]
+settings = {"theme": "dark"}
+```
+
+Brackets delimit a list; braces delimit a dictionary. Collections receive their
+own unit. For syntax reading, notice the opening delimiter, separated contents,
+and matching closing delimiter.
+
+## 8. Whitespace can separate tokens or create blocks
+
+These lines mean the same thing:
+
+```python
+total=price*quantity
+total = price * quantity
+```
+
+The second follows normal style and is easier to scan.
+
+Sometimes a space is necessary:
+
+```python
+notready = True
+if notready:
+    print("Waiting")
+```
+
+The code above is actually valid, but `notready` is one identifier. If the
+intention was to apply the `not` operator to a name `ready`, write:
+
+```python
+ready = False
+if not ready:
+    print("Waiting")
+```
+
+Token boundaries change meaning. `notready` and `not ready` are different code.
+
+Inside an indented block, leading whitespace has a grammatical role:
+
+```python
+if True:
+    print("Inside the block")
+
+print("Outside the block")
+```
+
+The next lesson examines indentation in depth. Spaces around `=` are style;
+spaces at the left edge can determine block membership.
+
+::: {.callout-warning title="Do not remove all spaces mechanically"}
+Python can ignore some spaces, requires others to separate words, and uses
+leading indentation for blocks. A formatter understands these contexts; blind
+search-and-replace does not.
+:::
+
+## 9. Annotate an unfamiliar program
+
+Read this guided preview:
+
+```python
+course = "Python Foundations"
+completed_tasks = 3
+target_tasks = 5
+is_finished = completed_tasks >= target_tasks
+
+if is_finished:
+    message = "Target reached"
+else:
+    message = "Keep going"
+
+print(course, message)
+```
+
+You do not need to master decisions yet. Annotate it using this checklist:
+
+1. Circle each literal.
+2. Underline every identifier.
+3. Box each keyword.
+4. Mark each operator.
+5. Pair every opening and closing parenthesis.
+6. Mark the commas and colons.
+7. Draw a vertical line along each indentation level.
+
+<details class="solution">
+<summary>Show an annotation guide</summary>
+
+- Literals: `"Python Foundations"`, `3`, `5`, `"Target reached"`,
+  `"Keep going"`.
+- Identifiers: `course`, `completed_tasks`, `target_tasks`, `is_finished`,
+  `message`, `print`.
+- Keywords: `if`, `else`.
+- Operators: the four assignment `=` tokens and the comparison `>=`.
+- Parentheses: the pair in `print(course, message)`.
+- Comma: separates the two arguments to `print`.
+- Colons: complete the `if` and `else` headers.
+- Indentation: each assignment to `message` belongs to the block above it.
+
+</details>
+
+### Change one category at a time
+
+1. Change only a literal: set `completed_tasks` to `5`.
+2. Change only an identifier: rename `target_tasks` consistently.
+3. Change only an operator: compare with `>` instead of `>=`.
+4. Change punctuation incorrectly on purpose: remove one colon.
+5. Restore the colon and explain the error message.
+
+The output changes for different reasons. Naming the changed token category helps
+you explain the cause.
+
+## 10. Complete a symbol-repair clinic
+
+Each item contains one focused problem. Predict whether it is a syntax error,
+runtime name error, or valid-but-confusing code before revealing the repair.
+
+### A digit begins the intended name
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+2nd_session = 45
+```
+
+Repair:
+
+```python
+second_session = 45
+```
+
+### A keyword is used as a name
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+return = 30
+```
+
+Repair:
+
+```python
+return_minutes = 30
+```
+
+### A built-in is shadowed
+
+```python
+max = 90
+print(max)
+```
+
+The code is valid and displays `90`, but future calls to `max(...)` fail in this
+runtime. Prefer:
+
+```python
+maximum_score = 90
+print(maximum_score)
+```
+
+### A multi-character operator is split
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+is_ready = completed_tasks > = target_tasks
+```
+
+Repair:
+
+```python
+is_ready = completed_tasks >= target_tasks
+```
+
+### A lookup uses a string by accident
+
+```python
+course = "Python Foundations"
+print("course")
+```
+
+The code is valid, but it displays `course`. Remove the quotation marks to look
+up the name:
+
+```python
+print(course)
+```
+
+### A call is missing its closing delimiter
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Ready"
+```
+
+Repair:
+
+```python
+print("Ready")
+```
+
+## 11. Check your reading vocabulary
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-words-final-check",
+  "title": "Read Python's words and symbols",
+  "instructions": "Choose the category or repair that matches the exact code.",
+  "questions": [
+    {
+      "id": "delimiter-role",
+      "prompt": "What does the comma do in print(\"Total:\", total)?",
+      "options": ["It separates two call arguments", "It adds the two values", "It begins a comment", "It ends the function call"],
+      "answer_index": 0,
+      "explanation": "The comma delimits separate arguments inside the parentheses."
+    },
+    {
+      "id": "dot-role",
+      "prompt": "How should course_name.title be read?",
+      "options": ["As one identifier containing a dot", "As attribute title selected from the course_name value", "As subtraction", "As a string literal"],
+      "answer_index": 1,
+      "explanation": "The dot separates the object expression on the left from the attribute name on the right."
+    },
+    {
+      "id": "context",
+      "prompt": "Why can parentheses have more than one explanation?",
+      "options": ["Python randomly assigns punctuation", "Parentheses are comments", "Their role depends on context, such as grouping or calling", "Every pair performs multiplication"],
+      "answer_index": 2,
+      "explanation": "After a callable expression they delimit arguments; elsewhere they can group an expression."
+    },
+    {
+      "id": "smallest-repair",
+      "prompt": "Which repair makes print(\"Total:\" total) a two-argument call?",
+      "options": ["Remove print", "Replace both values with keywords", "Add an equals sign", "Insert a comma between the arguments"],
+      "answer_index": 3,
+      "explanation": "A comma separates adjacent arguments in a call."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Python recognizes source code as tokens arranged according to grammar.
+- Identifiers begin with a letter or underscore and continue with letters,
+  digits, or underscores.
+- Keywords are reserved; built-in names are reusable but should usually not be
+  shadowed.
+- Literals write values directly; unquoted identifiers request name lookup.
+- Operators describe operations or relationships.
+- Delimiters group and separate parts of code.
+- A symbol's role depends on its context.
+- Whitespace may be style, a required token separator, or block indentation.
+:::
+
+## References
+
+- [Python language reference: lexical analysis](https://docs.python.org/3/reference/lexical_analysis.html)
+- [Python standard library: keyword checking](https://docs.python.org/3/library/keyword.html)
+- [Python language reference: identifiers and keywords](https://docs.python.org/3/reference/lexical_analysis.html#identifiers)
+- [PEP 8: naming conventions](https://peps.python.org/pep-0008/#naming-conventions)

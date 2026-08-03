@@ -1,0 +1,803 @@
+---
+title: Comments and Docstrings That Help
+lesson_id: python-syntax.comments-docstrings
+lesson_order: 60
+description: Write comments and introductory docstrings that explain purpose, units, constraints, and decisions without merely translating the code.
+execute:
+  echo: true
+categories:
+- python-foundations
+- python-syntax
+- comments
+- docstrings
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/python-syntax/comments-docstrings.ipynb
+course_id: python-foundations
+unit_id: python-syntax
+unit_number: 1
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 2–3 hours
+- **You will learn:** Distinguish comments from docstrings and executable strings, then document decisions in a way that remains useful when code changes.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+Python code has two audiences. Python needs exact syntax. People need purpose,
+context, units, assumptions, and reasons. Clear names and structure should carry
+most of the explanation; comments and docstrings fill the gaps that code alone
+cannot express.
+
+::: {.callout-note title="Questions you will answer"}
+1. What information belongs in a comment rather than in a name?
+2. How is a docstring different from a `#` comment?
+3. When does Python make a docstring discoverable through `help()`?
+4. Why can an outdated comment be more dangerous than no comment?
+:::
+
+## 1. Comments speak to people reading the source
+
+A `#` begins a comment outside a string. Python ignores the comment from that
+point to the end of the physical line.
+
+```python
+# Session lengths are measured in minutes.
+session_minutes = 45
+print(session_minutes)
+```
+
+The output is `45`. The comment does not create a value, perform assignment, or
+become part of the output.
+
+A comment can follow code:
+
+```python
+break_minutes = 10  # Includes time to leave and return to the room.
+```
+
+Python performs the assignment and ignores the comment.
+
+The `#` character inside a string is ordinary text:
+
+```python
+message = "Complete lesson #1"
+print(message)
+```
+
+Expected output:
+
+```text
+Complete lesson #1
+```
+
+Quotation marks determine that `#1` belongs to the string rather than starting a
+comment.
+
+### Remove a comment and compare behavior
+
+Run:
+
+```python
+# Keep the named stages so each cost can be checked.
+room_cost = 120
+materials_cost = 80
+event_total = room_cost + materials_cost
+print(event_total)
+```
+
+Then remove only the comment and rerun. The output stays `200`. A normal comment
+does not change program behavior.
+
+This makes comments useful for explanation, but unsuitable for disabling
+important logic without careful review.
+
+## 2. Prefer comments that explain why
+
+This comment merely translates visible syntax:
+
+```python
+# Add room_cost and materials_cost.
+event_total = room_cost + materials_cost
+```
+
+Anyone who recognizes `+` can read that. It adds maintenance work without adding
+knowledge.
+
+This comment supplies context that the expression cannot:
+
+```python
+# The venue invoice includes equipment, so do not add it a second time.
+event_total = room_cost + materials_cost
+```
+
+Useful comments often explain:
+
+- why a non-obvious rule exists;
+- which unit a number uses;
+- where a requirement or constraint came from;
+- why an apparently simpler approach is unsafe;
+- what a temporary workaround is waiting for;
+- what a surprising boundary means.
+
+### Put meaning in names first
+
+Weak:
+
+```python
+m = 45  # minutes
+b = 10  # break
+r = m - b  # remaining focused time
+```
+
+Stronger:
+
+```python
+session_minutes = 45
+break_minutes = 10
+focused_minutes = session_minutes - break_minutes
+```
+
+The stronger version does not require three comments because the names carry the
+meaning.
+
+A comment can still add a domain rule:
+
+```python
+# Break time is excluded because the report measures active instruction.
+focused_minutes = session_minutes - break_minutes
+```
+
+::: {.callout-tip title="Use this order"}
+First improve the names and structure. Then add a comment only for important
+information that still is not visible.
+:::
+
+## 3. Place comments where readers need them
+
+### A full-line comment introduces a decision
+
+```python
+ticket_income = 336
+
+# The grant is paid directly to the venue, so it reduces costs rather than income.
+venue_cost = 150 - 50
+balance = ticket_income - venue_cost
+
+print(balance)
+```
+
+The comment sits immediately above the decision it explains.
+
+### An inline comment labels a compact fact
+
+```python
+grace_period_seconds = 30  # Required by the device protocol.
+```
+
+Inline comments work best when both the code and explanation remain short.
+Avoid pushing a long paragraph to the right of a long expression.
+
+### A short comment can divide a small script
+
+```python
+# Inputs
+room_cost = 120
+materials_cost = 80
+
+# Calculations
+event_total = room_cost + materials_cost
+
+# Output
+print("Total:", event_total)
+```
+
+Section comments can help in a small educational script. In larger programs,
+functions and modules become better structural tools.
+
+### Too many comments interrupt reading
+
+Avoid narrating every line:
+
+```python
+# Set the price to 12.
+ticket_price = 12
+
+# Set the count to 3.
+ticket_count = 3
+
+# Multiply price by count.
+ticket_total = ticket_price * ticket_count
+
+# Print the total.
+print(ticket_total)
+```
+
+The code already tells that story. A single relevant comment may be enough:
+
+```python
+ticket_price = 12
+ticket_count = 3
+
+# Service fees are already included in the advertised ticket price.
+ticket_total = ticket_price * ticket_count
+print(ticket_total)
+```
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-comments-first-check",
+  "title": "Comments that add information",
+  "instructions": "Choose the comment practice that helps the next reader most.",
+  "questions": [
+    {
+      "id": "why-comment",
+      "prompt": "Which comment adds information not already visible in total = price * count?",
+      "options": ["# The listed price already includes the service fee.", "# Multiply price and count.", "# Use an equals sign.", "# This is Python code."],
+      "answer_index": 0,
+      "explanation": "The first comment records a domain rule that the arithmetic alone cannot show."
+    },
+    {
+      "id": "hash-in-string",
+      "prompt": "What does # do inside the string \"Lesson #1\"?",
+      "options": ["It deletes the rest of the program", "It becomes an ordinary character in the text value", "It begins a block", "It creates a docstring"],
+      "answer_index": 1,
+      "explanation": "Quotation marks contain the # character, so it does not start a source comment."
+    },
+    {
+      "id": "names-first",
+      "prompt": "What should usually happen before adding comments to explain x, y, and z?",
+      "options": ["Put every statement on one line", "Replace values with keywords", "Rename them to express their roles", "Turn the assignments into strings"],
+      "answer_index": 2,
+      "explanation": "Clear names make the code explain itself; comments can then cover context the names cannot."
+    },
+    {
+      "id": "placement",
+      "prompt": "Where should a comment explaining a surprising calculation rule usually appear?",
+      "options": ["In an unrelated later file", "Inside the numeric literal", "Only in the final output", "Immediately above or beside the relevant calculation"],
+      "answer_index": 3,
+      "explanation": "Keeping explanation near the decision makes it easier to find and update with the code."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Comments must change when the code changes
+
+An outdated comment lies:
+
+```python
+# Give a 10 percent discount.
+discount_rate = 0.20
+```
+
+Python uses `0.20`; it ignores the conflicting comment. A reader may trust the
+wrong explanation and make a bad decision later.
+
+Possible repairs depend on the real requirement:
+
+```python
+# Give a 20 percent discount during the community event.
+discount_rate = 0.20
+```
+
+or:
+
+```python
+# Give the standard 10 percent discount.
+discount_rate = 0.10
+```
+
+The absence of a syntax error does not decide which requirement is correct.
+
+### Review comments as part of every behavior change
+
+Suppose the first version excludes breaks:
+
+```python
+# Report active time, excluding breaks.
+reported_minutes = session_minutes - break_minutes
+```
+
+A later requirement includes the entire scheduled time:
+
+```python
+reported_minutes = session_minutes
+```
+
+The old comment must be removed or rewritten. Comments are part of the product
+even though Python does not execute them.
+
+### Temporary comments need an owner or condition
+
+Vague:
+
+```python
+# TODO: fix this later
+display_minutes = session_minutes
+```
+
+Useful:
+
+```python
+# TODO: include break_minutes after the schedule form collects it.
+display_minutes = session_minutes
+```
+
+The second comment states what is missing and what condition allows the work to
+continue. A real project may also include an issue reference or owner.
+
+Do not use `TODO` to avoid finishing a requirement that the current lesson or
+challenge expects.
+
+## 5. A docstring documents a surrounding object
+
+A **docstring** is a string literal placed as the first statement in a module,
+function, class, or method body. Python records it as that object's
+documentation.
+
+At the top of a Python file or first code cell:
+
+```python
+"""Calculate and display a community workshop budget."""
+
+room_cost = 120
+materials_cost = 80
+event_total = room_cost + materials_cost
+
+print(event_total)
+```
+
+The opening string is the module docstring because it is the first statement.
+
+A comment and module docstring have different jobs:
+
+```python
+"""Summarize one workshop budget."""
+
+# The venue invoice already includes equipment rental.
+room_cost = 120
+materials_cost = 80
+event_total = room_cost + materials_cost
+```
+
+- The docstring identifies the module's overall purpose.
+- The comment explains one local domain decision.
+- The assignments perform the calculation.
+
+### A random triple-quoted string is not automatically a docstring
+
+```python
+course = "Python Foundations"
+"""This string appears after executable code."""
+```
+
+The triple-quoted text creates a string value, but it is not the module's
+docstring because another statement came first.
+
+Triple quotes allow multiline strings. **Position**, not triple-quote spelling
+alone, gives a string its docstring role.
+
+### Inspect the current module docstring
+
+In a notebook cell, run:
+
+```python
+"""Explore module documentation."""
+
+print(__doc__)
+```
+
+Many notebook environments expose the cell or interactive module documentation
+differently, so the exact surrounding value can vary. The reliable language
+rule is that a module's first string statement becomes its `__doc__` value when
+the module is loaded.
+
+A `.py` file makes this easiest to observe:
+
+```python
+"""Calculate a study-session summary."""
+
+course = "Python Foundations"
+minutes = 45
+
+print(__doc__)
+```
+
+## 6. Function and class docstrings are previews
+
+Functions are introduced fully in Unit 5. For now, read the placement:
+
+```python
+def focused_time(session_minutes, break_minutes):
+    """Return active study minutes after subtracting a break."""
+    return session_minutes - break_minutes
+```
+
+The levels are:
+
+1. `def ...:` opens the function body.
+2. The indented string is the first body statement, so it becomes the function
+   docstring.
+3. The indented `return` provides the function's behavior.
+
+Move an assignment above the string:
+
+```python
+def focused_time(session_minutes, break_minutes):
+    active_minutes = session_minutes - break_minutes
+    """Return active study minutes after subtracting a break."""
+    return active_minutes
+```
+
+The string is now an unused expression inside the function, not its docstring.
+The code is syntactically valid, but documentation discovery changes.
+
+A class follows the same position rule:
+
+```python
+class StudySession:
+    """Represent one planned study session."""
+
+    pass
+```
+
+You do not need to design classes yet. Recognize the class header, indented body,
+first string, and placeholder `pass`.
+
+::: {.callout-note title="Docstrings describe a public promise"}
+A useful introductory docstring says what the module, function, or class
+provides. Detailed parameter formats, exceptions, examples, documentation
+toolchains, and publishing belong to Unit 15.
+:::
+
+## 7. `help()` makes docstrings discoverable
+
+Run:
+
+```python
+def focused_time(session_minutes, break_minutes):
+    """Return active study minutes after subtracting a break."""
+    return session_minutes - break_minutes
+
+
+help(focused_time)
+```
+
+The output includes the function's name, signature, and docstring.
+
+You can also inspect the recorded text directly:
+
+```python
+print(focused_time.__doc__)
+```
+
+The dot selects the `__doc__` attribute. Attribute and method syntax receive
+more attention in later units; here it shows that docstrings are data Python
+preserves, not comments Python discards.
+
+### Compare with a comment-only function
+
+```python
+def focused_time(session_minutes, break_minutes):
+    # Return active minutes after subtracting the break.
+    return session_minutes - break_minutes
+
+
+print(focused_time.__doc__)
+```
+
+The output is `None` because a `#` comment is not recorded as a docstring.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-docstrings-check",
+  "title": "Comments and docstrings",
+  "instructions": "Pay attention to both syntax and position.",
+  "questions": [
+    {
+      "id": "module-docstring",
+      "prompt": "Which text becomes a module docstring?",
+      "options": ["A string literal used as the module's first statement", "Every # comment", "The last printed string", "Any string assigned to message"],
+      "answer_index": 0,
+      "explanation": "Python records a string expression in the module's first statement position as its docstring."
+    },
+    {
+      "id": "position",
+      "prompt": "A string appears after an assignment inside a function. What is it?",
+      "options": ["Always the function name", "An ordinary string expression, not the function docstring", "A syntax error", "A source comment"],
+      "answer_index": 1,
+      "explanation": "The docstring must be the first statement in the function body."
+    },
+    {
+      "id": "help",
+      "prompt": "Which tool displays discoverable documentation for an object?",
+      "options": ["round()", "print()", "help()", "abs()"],
+      "answer_index": 2,
+      "explanation": "help(object) uses information including the object's recorded docstring."
+    },
+    {
+      "id": "comment-docstring-difference",
+      "prompt": "Which statement is true?",
+      "options": ["Comments and docstrings are identical tokens", "Every triple-quoted string starts a comment", "Python stores all # comments in __doc__", "Python ignores normal comments but records docstrings in special first-statement positions"],
+      "answer_index": 3,
+      "explanation": "Comments are discarded during parsing; qualifying string statements become an object's __doc__ value."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Write a small docstring with a clear promise
+
+For a module, begin with one direct sentence:
+
+```python
+"""Calculate attendance and cost summaries for one workshop."""
+```
+
+For a simple function preview:
+
+```python
+def material_cost(learner_count, cost_per_learner):
+    """Return the total material cost for all learners."""
+    return learner_count * cost_per_learner
+```
+
+Prefer a verb that describes the result or action:
+
+- `Return ...`
+- `Calculate ...`
+- `Load ...`
+- `Display ...`
+- `Represent ...`
+
+Avoid empty wording:
+
+```python
+def material_cost(learner_count, cost_per_learner):
+    """This is the material_cost function."""
+    return learner_count * cost_per_learner
+```
+
+The weak docstring repeats the name and says nothing about the result.
+
+### Document units and boundaries when they matter
+
+```python
+def focused_minutes(session_minutes, break_minutes):
+    """Return active minutes; both inputs are measured in whole minutes."""
+    return session_minutes - break_minutes
+```
+
+This is more useful because a caller can distinguish minutes from seconds and
+knows what “focused” excludes.
+
+Do not promise validation or error handling the function does not provide. A
+docstring must match actual behavior.
+
+## 9. Review good and harmful explanations
+
+### Example A
+
+```python
+# Multiply by 60.
+duration_seconds = duration_minutes * 60
+```
+
+The comment repeats the operator but not the reason. Improve it:
+
+```python
+# The device API accepts seconds, while the form collects minutes.
+duration_seconds = duration_minutes * 60
+```
+
+### Example B
+
+```python
+# Never change this.
+grace_period = 30
+```
+
+“Never” has no context. Improve it:
+
+```python
+# The access controller requires a 30-second grace period.
+grace_period_seconds = 30
+```
+
+### Example C
+
+```python
+"""Do stuff."""
+
+room_cost = 120
+materials_cost = 80
+print(room_cost + materials_cost)
+```
+
+Improve the module docstring:
+
+```python
+"""Calculate the base cost of one community workshop."""
+
+room_cost = 120
+materials_cost = 80
+print(room_cost + materials_cost)
+```
+
+### Example D
+
+```python
+# Total is price times quantity.
+total = price * quantity
+```
+
+Remove the comment. The names and expression already explain the line.
+
+## 10. Prepare a program for a classmate
+
+Start with:
+
+```python
+c = "Python Foundations"
+m = 45
+b = 10
+f = m - b
+print(c, f)
+```
+
+The behavior is small, but the program lacks context. Revise it so that:
+
+1. a module docstring states the program's purpose;
+2. names express course, scheduled time, break time, and focused time;
+3. one comment explains why break time is excluded;
+4. no comment merely translates an assignment;
+5. output labels identify both displayed values;
+6. the result remains `35` focused minutes;
+7. changing scheduled time to `60` requires changing only one input assignment.
+
+Then give only the revised source to another person. Ask them:
+
+- What unit is time measured in?
+- Why is the break subtracted?
+- Which value should they edit for a longer session?
+- What output should appear for a 60-minute session?
+
+If the code and documentation do not answer those questions, revise them.
+
+<details class="hint">
+<summary>Hint: let names carry the basic story</summary>
+
+Use names such as `course_name`, `session_minutes`, `break_minutes`, and
+`focused_minutes`. Reserve the comment for the reporting rule that excludes the
+break.
+
+</details>
+
+<details class="solution">
+<summary>Show one documented version</summary>
+
+```python
+"""Display the active study time for one planned course session."""
+
+course_name = "Python Foundations"
+session_minutes = 45
+break_minutes = 10
+
+# The study report measures active work, so scheduled breaks are excluded.
+focused_minutes = session_minutes - break_minutes
+
+print("Course:", course_name)
+print("Focused minutes:", focused_minutes)
+
+assert focused_minutes == 35
+```
+
+</details>
+
+## 11. Find documentation drift
+
+Run this first version:
+
+```python
+"""Calculate the cost after a standard 10 percent discount."""
+
+subtotal = 200
+discount_rate = 0.10
+discount = subtotal * discount_rate
+final_total = subtotal - discount
+
+print(final_total)
+```
+
+Now imagine the event discount changes to 20 percent. Change only the numeric
+value and observe that the code runs while the docstring becomes false.
+
+Your repair must update both behavior and documentation:
+
+```python
+"""Calculate the cost after the current event discount."""
+
+subtotal = 200
+discount_rate = 0.20
+discount = subtotal * discount_rate
+final_total = subtotal - discount
+
+print(final_total)
+```
+
+The revised docstring avoids duplicating a value that already has a clear name.
+Another valid choice is to retain “20 percent” and commit to updating it whenever
+the rule changes. Decide which promise will be safer for the next reader.
+
+## 12. Check the next-reader experience
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-comments-final-check",
+  "title": "Document code for its next reader",
+  "instructions": "Choose the explanation that remains accurate and discoverable.",
+  "questions": [
+    {
+      "id": "units",
+      "prompt": "Which comment best explains duration_seconds = duration_minutes * 60?",
+      "options": ["# The external API requires seconds, but the form collects minutes.", "# Multiply by 60.", "# Set a variable.", "# Python supports numbers."],
+      "answer_index": 0,
+      "explanation": "The first comment records the boundary between two systems and explains why conversion is necessary."
+    },
+    {
+      "id": "drift",
+      "prompt": "A discount changes from 10% to 20%. What documentation should be reviewed?",
+      "options": ["Only unrelated comments", "Any comment or docstring that promises the old rule", "No documentation because Python ignores it", "Only the filename"],
+      "answer_index": 1,
+      "explanation": "Behavior and its explanation must change together or readers receive conflicting information."
+    },
+    {
+      "id": "discoverable",
+      "prompt": "Where should a function docstring appear?",
+      "options": ["After the final return", "Before the def line as a # comment", "As the first statement inside the function body", "Inside every print call"],
+      "answer_index": 2,
+      "explanation": "The first string statement in the function body becomes its docstring."
+    },
+    {
+      "id": "remove-comment",
+      "prompt": "When should a comment usually be removed rather than expanded?",
+      "options": ["When it records a surprising requirement", "When it states a required unit", "When it explains a workaround condition", "When it only restates clear code such as total = price * count"],
+      "answer_index": 3,
+      "explanation": "A narration of obvious syntax creates maintenance cost without adding knowledge."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A `#` comment is ignored by Python outside a string.
+- Clear names and structure should explain ordinary mechanics.
+- Useful comments record purpose, units, constraints, and non-obvious decisions.
+- Comments must be updated when the behavior or requirement changes.
+- A docstring is a string in the first statement position of a module, function,
+  class, or method.
+- Triple quotes alone do not make a string a docstring.
+- `help()` and `.__doc__` expose recorded docstrings.
+- Documentation should promise only behavior the code actually provides.
+:::
+
+## References
+
+- [Python tutorial: comments](https://docs.python.org/3/tutorial/introduction.html#an-informal-introduction-to-python)
+- [Python tutorial: documentation strings](https://docs.python.org/3/tutorial/controlflow.html#documentation-strings)
+- [PEP 257: docstring conventions](https://peps.python.org/pep-0257/)
+- [Python documentation: `help()`](https://docs.python.org/3/library/functions.html#help)

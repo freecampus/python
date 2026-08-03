@@ -98,7 +98,7 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         ),
         (
             "python-syntax",
-            "Reading and Writing Python Syntax",
+            "Learning to Read and Write Python Code",
             "identify expressions, statements, keywords, and blocks before "
             "reasoning about behavior",
         ),

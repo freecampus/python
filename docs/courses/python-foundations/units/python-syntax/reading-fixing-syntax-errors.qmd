@@ -1,0 +1,952 @@
+---
+title: Reading and Fixing Syntax Errors
+lesson_id: python-syntax.reading-fixing-syntax-errors
+lesson_order: 70
+description: Read every part of a SyntaxError report, locate the broken grammatical rule, and repair common quote, delimiter, colon, name, and indentation mistakes.
+execute:
+  echo: true
+categories:
+- python-foundations
+- python-syntax
+- syntax-errors
+- debugging
+order: 70
+colab_notebook: notebooks/courses/python-foundations/units/python-syntax/reading-fixing-syntax-errors.ipynb
+course_id: python-foundations
+unit_id: python-syntax
+unit_number: 1
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 3–4 hours
+- **You will learn:** Use the error type, message, line, caret, and nearby source to make one evidence-based syntax repair at a time.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+A syntax error is not Python refusing to help. It is Python showing where its
+attempt to read the program stopped. The message may not name the complete
+repair, but it narrows the search.
+
+::: {.callout-note title="Questions you will answer"}
+1. Which parts of an error report should you read before editing?
+2. Why can the caret appear after the character that is actually missing?
+3. How do syntax errors differ from runtime and logic failures?
+4. What repair sequence avoids replacing one guess with several new mistakes?
+:::
+
+## 1. Python checks grammar before running the program
+
+When Python receives source code, it first needs to recognize tokens and arrange
+them according to the language grammar. If that parsing step fails, execution
+cannot begin.
+
+This source is missing a closing quote:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+course = "Python Foundations
+print(course)
+```
+
+Python reports a `SyntaxError`, often with wording similar to:
+
+```text
+  Cell In[1], line 1
+    course = "Python Foundations
+             ^
+SyntaxError: unterminated string literal
+```
+
+The exact filename, cell label, caret width, and wording can vary by Python
+version and environment. The useful structure remains:
+
+1. **Location:** the file or notebook cell and line number.
+2. **Source:** the line Python was reading.
+3. **Caret:** the point where Python detected that parsing could not continue.
+4. **Type:** `SyntaxError`.
+5. **Message:** a clue such as `unterminated string literal`.
+
+Repair the missing quote:
+
+```python
+course = "Python Foundations"
+print(course)
+```
+
+Now Python can parse the complete program and begin execution.
+
+::: {.concept-diagram}
+A syntax failure happens before ordinary statement execution.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Read source"] --> B["Recognize tokens"]
+  B --> C["Check grammar"]
+  C -->|invalid| D["Report SyntaxError<br/>execution stops"]
+  C -->|valid| E["Execute statements"]
+  E --> F["Output or runtime result"]
+```
+:::
+
+## 2. Read the report before touching the code
+
+Use this five-part routine:
+
+1. Read the final line: error type and message.
+2. Read the named source line.
+3. Locate the caret or highlighted range.
+4. Inspect the line **before** it as well.
+5. State one broken rule in words before making one edit.
+
+Do not begin by rewriting the whole example. A small repair preserves the
+connection between cause and result.
+
+### The caret marks detection, not always cause
+
+This invalid call is missing a comma:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Course:" course_name)
+```
+
+Python may underline `course_name` because adjacent tokens no longer fit a valid
+argument list. The missing character belongs **before** the highlighted name:
+
+```python
+print("Course:", course_name)
+```
+
+Similarly, a delimiter left open on one line may cause Python to complain at a
+later line where the unfinished structure becomes impossible.
+
+### Inspect one line above
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+event_total = (
+    room_cost
+    + materials_cost
+
+print(event_total)
+```
+
+The `print` line is where Python discovers the grouped expression never closed.
+The root cause is the missing `)` above it.
+
+Repair:
+
+```python
+event_total = (
+    room_cost
+    + materials_cost
+)
+
+print(event_total)
+```
+
+::: {.callout-tip title="Say the rule before the edit"}
+A useful diagnosis sounds like “The opening parenthesis has no matching closing
+parenthesis,” not “The red line looks wrong.” The first statement tells you
+which smallest edit to test.
+:::
+
+## 3. Syntax, runtime, and logic failures are different
+
+Not every broken program has invalid syntax.
+
+| Failure | Did parsing finish? | What happens? | Example |
+|---|---|---|---|
+| Syntax error | No | Python cannot start ordinary execution | missing quote |
+| Runtime exception | Yes | Execution starts and then an operation fails | unknown name |
+| Logic error | Yes | Program runs but produces the wrong behavior | stale total |
+
+### Syntax error
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+if minutes >= 30
+    print("Focused")
+```
+
+The `if` header is missing its colon.
+
+### Runtime exception
+
+```python
+print(minutes)
+```
+
+The syntax is valid. In a clean runtime, the line raises `NameError` because
+`minutes` has no binding.
+
+### Logic error
+
+```python
+minutes = 45
+break_minutes = 10
+focused_minutes = minutes + break_minutes
+print(focused_minutes)
+```
+
+The code parses and runs. If focused time should exclude the break, `+` represents
+the wrong rule. The result is incorrect without an exception.
+
+Unit 8 develops all three categories and a complete debugging method. In this
+lesson, the distinction prevents you from searching for punctuation when the
+actual problem is missing state or wrong behavior.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-errors-anatomy-check",
+  "title": "Read an error report",
+  "instructions": "Classify the evidence before choosing a repair.",
+  "questions": [
+    {
+      "id": "final-line",
+      "prompt": "Which part of an error report gives the error type and summary message?",
+      "options": ["The final line", "The notebook title", "The first comment", "The variable's value"],
+      "answer_index": 0,
+      "explanation": "Start at the final line to identify SyntaxError and read its parser clue."
+    },
+    {
+      "id": "caret",
+      "prompt": "What does the caret in a SyntaxError report most reliably show?",
+      "options": ["The only character that may be edited", "Where Python detected that parsing could not continue", "The value of every variable", "The line that executed successfully"],
+      "answer_index": 1,
+      "explanation": "The cause may be earlier, but the caret marks the parser's detection point."
+    },
+    {
+      "id": "name-error",
+      "prompt": "print(missing_name) parses but the name has no binding. Which category is this?",
+      "options": ["Syntax error", "Comment error", "Runtime exception", "Indentation style only"],
+      "answer_index": 2,
+      "explanation": "Parsing succeeds; execution fails when Python tries to look up the unknown name."
+    },
+    {
+      "id": "logic-error",
+      "prompt": "A program runs but adds a break when it should subtract it. Which category fits?",
+      "options": ["Unclosed delimiter", "Invalid identifier", "Missing block body", "Logic error"],
+      "answer_index": 3,
+      "explanation": "The code is valid and executable, but it represents the wrong requirement."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Repair unclosed and mismatched quotes
+
+### One ordinary quote never closes
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+message = "Ready to study
+```
+
+Repair:
+
+```python
+message = "Ready to study"
+```
+
+### The closing quote has a different kind
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+message = "Ready to study'
+```
+
+A string opened with `"` must close with `"`. Repair:
+
+```python
+message = "Ready to study"
+```
+
+Python allows single-quoted strings too:
+
+```python
+message = 'Ready to study'
+```
+
+Choose one matching pair.
+
+### An apostrophe ends a single-quoted string early
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+message = 'Python's syntax is readable'
+```
+
+Python reads the quote after `Python` as the end of the string. Use double quotes
+around text containing an apostrophe:
+
+```python
+message = "Python's syntax is readable"
+```
+
+or escape the apostrophe:
+
+```python
+message = 'Python\'s syntax is readable'
+```
+
+The first version is often easier to scan.
+
+### Triple quotes must also match
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+"""Summarize one study session."
+
+course = "Python Foundations"
+```
+
+Three opening quotes need three closing quotes:
+
+```python
+"""Summarize one study session."""
+
+course = "Python Foundations"
+```
+
+### Repair practice
+
+For each text below, predict the first place Python will stop:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+course = "Python Foundations'
+message = "Start now
+print(course, message)
+```
+
+Repair one quote problem, rerun, then repair the next. The first syntax error can
+hide later ones.
+
+## 5. Pair every opening and closing delimiter
+
+### Missing closing parenthesis
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Minutes:", focused_minutes
+```
+
+Repair:
+
+```python
+print("Minutes:", focused_minutes)
+```
+
+### Extra closing parenthesis
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+focused_minutes = session_minutes - break_minutes)
+```
+
+Repair by removing the unmatched `)`:
+
+```python
+focused_minutes = session_minutes - break_minutes
+```
+
+### Mismatched delimiter types
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+session_lengths = [25, 45, 30)
+```
+
+Repair the closing delimiter:
+
+```python
+session_lengths = [25, 45, 30]
+```
+
+### Nested delimiters need inside-out pairing
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print(round((45 - 10, 2))
+```
+
+Write the intended calls first:
+
+```text
+round(45 - 10, 2)
+print(the rounded result)
+```
+
+Then pair them:
+
+```python
+print(round(45 - 10, 2))
+```
+
+Read from the inside out:
+
+1. `(` after `print` opens the outer call.
+2. `(` after `round` opens the inner call.
+3. `)` after `2` closes `round`.
+4. the final `)` closes `print`.
+
+### Let the editor help
+
+Most editors highlight a delimiter and its partner when the cursor touches one.
+Use that feature. For a long expression:
+
+1. place the cursor beside the first opening delimiter;
+2. find its highlighted partner;
+3. repeat for nested pairs;
+4. only then inspect commas and operators.
+
+This is faster and more reliable than counting punctuation in your head.
+
+## 6. Put commas between neighboring items
+
+### Missing comma in a call
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Course:" course_name)
+```
+
+Repair:
+
+```python
+print("Course:", course_name)
+```
+
+### Missing comma in a collection preview
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+session_lengths = [25, 45 30]
+```
+
+Repair:
+
+```python
+session_lengths = [25, 45, 30]
+```
+
+### Adjacent strings can hide the mistake
+
+This is valid:
+
+```python
+labels = [
+    "Course:"
+    "Minutes:",
+]
+```
+
+Python joins adjacent string literals, producing one list item:
+`"Course:Minutes:"`. If the intent is two items, add the comma:
+
+```python
+labels = [
+    "Course:",
+    "Minutes:",
+]
+```
+
+No syntax error appears in the first version. The requirement and resulting data
+reveal the problem.
+
+### Commas are not decimal separators in Python source
+
+```python
+price = 12.50
+```
+
+A period forms the decimal literal. Writing `12,50` creates two comma-separated
+integer expressions in some contexts; it does not mean the decimal number
+twelve and a half.
+
+Locale-aware number parsing belongs to later data-boundary lessons.
+
+## 7. Finish headers with a colon and a body
+
+Headers such as `if`, `for`, `while`, `def`, and `class` normally end with a
+colon and own an indented body.
+
+### Missing colon
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+if session_minutes >= 30
+    message = "Focused"
+```
+
+Repair:
+
+```python
+if session_minutes >= 30:
+    message = "Focused"
+```
+
+### Missing indented body
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+if session_minutes >= 30:
+message = "Focused"
+```
+
+Repair:
+
+```python
+if session_minutes >= 30:
+    message = "Focused"
+```
+
+### A blank line is not a body
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+if session_minutes >= 30:
+
+message = "Focused"
+```
+
+Use a real indented statement. If the behavior is not ready, `pass` is a valid
+placeholder:
+
+```python
+if session_minutes >= 30:
+    pass
+
+message = "Continue planning"
+```
+
+### `else` must align with its partner
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+if session_minutes >= 30:
+    message = "Focused"
+    else:
+        message = "Short"
+```
+
+Repair:
+
+```python
+if session_minutes >= 30:
+    message = "Focused"
+else:
+    message = "Short"
+```
+
+The indentation lesson provides many more block maps and repair cases.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-errors-common-repairs-check",
+  "title": "Common parser repairs",
+  "instructions": "Choose the smallest edit that restores the intended grammar.",
+  "questions": [
+    {
+      "id": "apostrophe",
+      "prompt": "What is a clear repair for message = 'Python's ready'?",
+      "options": ["Use double quotes around the complete text", "Remove the equals sign", "Indent the assignment", "Replace the apostrophe with a comma"],
+      "answer_index": 0,
+      "explanation": "Double quotes can contain the apostrophe without ending the string."
+    },
+    {
+      "id": "pairing",
+      "prompt": "A list opens with [ but closes with ). What is the direct repair?",
+      "options": ["Add a colon", "Replace ) with ]", "Remove every comma", "Quote the variable name"],
+      "answer_index": 1,
+      "explanation": "Delimiter pairs must match by type: [ closes with ]."
+    },
+    {
+      "id": "missing-comma",
+      "prompt": "Python highlights course_name in print(\"Course:\" course_name). What is likely missing?",
+      "options": ["A second print name", "Four leading spaces", "A comma before course_name", "A multiplication operator"],
+      "answer_index": 2,
+      "explanation": "Two call arguments require a comma separator."
+    },
+    {
+      "id": "else-level",
+      "prompt": "Where should else align in a simple if/else statement?",
+      "options": ["Inside the string", "Under the assignment in the if body", "At a random deeper level", "With its matching if header"],
+      "answer_index": 3,
+      "explanation": "Related if and else headers are siblings and use the same indentation level."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Repair invalid and reserved names
+
+### Name begins with a digit
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+1st_session = 25
+```
+
+Repair:
+
+```python
+first_session = 25
+```
+
+### Hyphen is interpreted as subtraction
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+break-time = 10
+```
+
+This does not form one identifier. Repair with snake case:
+
+```python
+break_time = 10
+```
+
+### Space separates identifiers
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+course name = "Python Foundations"
+```
+
+Repair:
+
+```python
+course_name = "Python Foundations"
+```
+
+### Keyword is reserved
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+class = "Foundations"
+```
+
+Repair:
+
+```python
+course_level = "Foundations"
+```
+
+### A built-in name is different
+
+```python
+print = "Foundations"
+```
+
+This is syntactically valid because `print` is a built-in, not a keyword. It is
+still a bad choice because it replaces access to the normal function in the
+current runtime.
+
+Syntax repair asks “Can Python read it?” Code review also asks “Will people and
+later operations understand it safely?”
+
+## 9. The first error can hide the next one
+
+Try to diagnose this source without running:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+course name = "Python Foundations"
+session_minutes = 45
+break_minutes = 10
+
+if session_minutes >= 30
+focused_minutes = session_minutes - break_minutes
+
+print("Focused minutes:" focused_minutes)
+```
+
+There are several errors:
+
+1. `course name` contains a space.
+2. The `if` header lacks a colon.
+3. The block body lacks indentation.
+4. The call lacks a comma.
+
+Python cannot report every issue accurately in one pass. Its first report is
+based on the earliest point where parsing becomes impossible.
+
+Use progressive repair:
+
+1. Run the source.
+2. Read the first report completely.
+3. Repair one rule.
+4. Run again.
+5. Repeat until parsing succeeds.
+6. Only then examine runtime and logic behavior.
+
+A possible repaired version:
+
+```python
+course_name = "Python Foundations"
+session_minutes = 45
+break_minutes = 10
+
+if session_minutes >= 30:
+    focused_minutes = session_minutes - break_minutes
+
+print("Focused minutes:", focused_minutes)
+```
+
+This parses and runs for the current input. A later decisions lesson will ask
+what happens when `session_minutes` is below `30` and the assignment never runs.
+That is a runtime-path question, not a remaining syntax error.
+
+## 10. Use a syntax-repair record
+
+For one difficult error, fill this table before editing:
+
+| Field | Record |
+|---|---|
+| Error type and message | Copy the final line |
+| Reported location | File/cell, line, and caret |
+| Nearby structure | Quote, delimiter, comma, header, name, or indentation |
+| Broken rule | State one grammatical mismatch |
+| Smallest edit | Describe one change |
+| Rerun result | New error or successful parse |
+| Explanation | Why the edit fits the rule |
+
+Example:
+
+| Field | Record |
+|---|---|
+| Error type and message | `SyntaxError: '(' was never closed` |
+| Reported location | line 3 at `print` |
+| Nearby structure | grouped addition above |
+| Broken rule | opening `(` has no closing `)` |
+| Smallest edit | add `)` after `materials_cost` |
+| Rerun result | program displays `200` |
+| Explanation | the closing delimiter completes the right-side expression |
+
+The table prevents “I changed several things and it worked” from replacing an
+understood repair.
+
+## 11. Run a mixed syntax-error clinic
+
+The following four stages should be completed in separate cells. Keep a copy of
+each broken version and record the error before repairing it.
+
+### Stage A: quotes and names
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+course title = "Python Foundations
+print(course title)
+```
+
+Target:
+
+```python
+course_title = "Python Foundations"
+print(course_title)
+```
+
+### Stage B: delimiters and comma
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print(
+    "Course:"
+    course_title,
+]
+```
+
+Target:
+
+```python
+print(
+    "Course:",
+    course_title,
+)
+```
+
+### Stage C: header and indentation
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+session_minutes = 45
+
+if session_minutes >= 30
+message = "Focused session"
+else:
+    message = "Short session"
+```
+
+Target:
+
+```python
+session_minutes = 45
+
+if session_minutes >= 30:
+    message = "Focused session"
+else:
+    message = "Short session"
+```
+
+### Stage D: multiline calculation
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+focused_minutes = (
+    session_minutes
+    - 10
+
+print("Focused:", focused_minutes)
+```
+
+Target:
+
+```python
+focused_minutes = (
+    session_minutes
+    - 10
+)
+
+print("Focused:", focused_minutes)
+```
+
+Final checks:
+
+```python
+assert course_title == "Python Foundations"
+assert session_minutes == 45
+assert message == "Focused session"
+assert focused_minutes == 35
+```
+
+<details class="hint">
+<summary>Hint: classify before repairing</summary>
+
+- Stage A has one invalid identifier and one unclosed string.
+- Stage B has a missing argument separator and mismatched closing delimiter.
+- Stage C has a missing header delimiter and missing body indentation.
+- Stage D has one open grouping delimiter.
+
+Repair and rerun after each individual change.
+
+</details>
+
+## 12. Read editor feedback without surrendering judgment
+
+Editors may underline syntax before you run the code. That early feedback is
+valuable, but treat it as a clue:
+
+- bracket highlighting can expose missing pairs;
+- visible whitespace can reveal tabs and inconsistent indentation;
+- syntax coloring can show a string that accidentally continues too far;
+- a formatter can refuse code it cannot parse;
+- a linter can identify legal but suspicious patterns.
+
+Still read Python's actual error after running. Editor rules, Python version, and
+notebook parsing can differ. Your goal is to connect the source, the language
+rule, and the observed result.
+
+## 13. Check your repair method
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-errors-final-check",
+  "title": "Repair syntax methodically",
+  "instructions": "Choose the next action supported by the parser evidence.",
+  "questions": [
+    {
+      "id": "previous-line",
+      "prompt": "Python points at print below a multiline calculation. What should you inspect first?",
+      "options": ["Whether the expression above has unmatched delimiters", "The color theme", "Every file in the project", "The final numeric result"],
+      "answer_index": 0,
+      "explanation": "An unfinished structure above often becomes impossible only when Python reaches the next statement."
+    },
+    {
+      "id": "one-edit",
+      "prompt": "Why make one small repair before rerunning?",
+      "options": ["Python permits only one edit per file", "It preserves the connection between the diagnosed rule and new evidence", "It guarantees no later error exists", "It turns runtime errors into comments"],
+      "answer_index": 1,
+      "explanation": "A controlled edit shows whether the stated diagnosis explained the parser failure."
+    },
+    {
+      "id": "first-error",
+      "prompt": "Why might Python report only one of several syntax problems?",
+      "options": ["Python can parse every invalid program", "Later errors are comments", "Parsing stops at an early point where valid structure cannot continue", "Only indentation matters"],
+      "answer_index": 2,
+      "explanation": "The parser may be unable to interpret later source reliably until the earliest failure is repaired."
+    },
+    {
+      "id": "after-parse",
+      "prompt": "The code now parses. What should happen next?",
+      "options": ["Assume the behavior is correct", "Delete all checks", "Add random punctuation", "Run it and evaluate runtime behavior against the requirement"],
+      "answer_index": 3,
+      "explanation": "Valid syntax is necessary but does not guarantee available names or correct logic."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A `SyntaxError` means Python could not finish parsing the source.
+- Read the type, message, line, caret, and preceding structure before editing.
+- The reported location is where failure was detected, not always where the
+  missing character belongs.
+- Pair quotes and delimiters, separate items with commas, complete headers with
+  colons, and give blocks consistent indentation.
+- Repair the earliest grammatical problem one change at a time.
+- Syntax, runtime, and logic failures require different questions.
+- A clean parse is the beginning of behavioral checking, not proof of correctness.
+:::
+
+## References
+
+- [Python tutorial: syntax errors](https://docs.python.org/3/tutorial/errors.html#syntax-errors)
+- [Python language reference: lexical analysis](https://docs.python.org/3/reference/lexical_analysis.html)
+- [Python built-in exception: `SyntaxError`](https://docs.python.org/3/library/exceptions.html#SyntaxError)
+- [Python tutorial: errors and exceptions](https://docs.python.org/3/tutorial/errors.html)

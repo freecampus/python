@@ -1,0 +1,903 @@
+---
+title: Writing Python Across Multiple Lines
+lesson_id: python-syntax.writing-code-across-lines
+lesson_order: 50
+description: Break long Python statements across lines safely, distinguish continuation indentation from code blocks, and repair mismatched delimiters.
+execute:
+  echo: true
+categories:
+- python-foundations
+- python-syntax
+- multiline
+- readability
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/python-syntax/writing-code-across-lines.ipynb
+course_id: python-foundations
+unit_id: python-syntax
+unit_number: 1
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 2–3 hours
+- **You will learn:** Format one Python statement across several readable lines without changing its result or confusing continuation with block structure.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+A long line forces readers to scroll, hides related parts, and makes missing
+punctuation harder to notice. Python lets one statement continue across several
+screen lines, but the opening and closing symbols must still describe one
+complete structure.
+
+::: {.callout-note title="Questions you will answer"}
+1. When does a newline end a statement?
+2. How do parentheses, brackets, and braces keep a statement open?
+3. Why is continuation indentation different from block indentation?
+4. Which multiline styles are valid but unnecessarily fragile?
+:::
+
+## 1. One statement can occupy several screen lines
+
+A **physical line** is one line visible in the editor. A **logical line** is the
+complete instruction Python reads as one statement.
+
+This assignment fits on one physical line:
+
+```python
+event_total = room_cost + materials_cost + refreshment_cost + equipment_cost
+```
+
+The same logical statement can use several physical lines:
+
+```python
+event_total = (
+    room_cost
+    + materials_cost
+    + refreshment_cost
+    + equipment_cost
+)
+```
+
+The opening `(` tells Python the expression is not finished. Newlines inside the
+matching parentheses do not end the assignment.
+
+Run a complete example:
+
+```python
+room_cost = 120
+materials_cost = 80
+refreshment_cost = 45
+equipment_cost = 30
+
+event_total = (
+    room_cost
+    + materials_cost
+    + refreshment_cost
+    + equipment_cost
+)
+
+print(event_total)
+```
+
+The output is `275`, exactly as it would be with a one-line expression.
+
+### What Python does on each line
+
+1. The four input assignments run normally.
+2. `event_total = (` starts an assignment whose right side is still open.
+3. Python collects the following name and operator tokens.
+4. The closing `)` completes the grouped expression.
+5. Python evaluates the complete addition.
+6. Assignment binds `event_total` to `275`.
+7. The final call displays it.
+
+The blank lines improve visual grouping. They do not create or end a block.
+
+::: {.concept-diagram}
+Several physical lines can form one logical statement while delimiters remain
+open.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A["Physical line 1<br/>event_total = ("] --> B["Physical line 2<br/>room_cost"]
+  B --> C["Physical lines 3–5<br/>+ more costs"]
+  C --> D["Physical line 6<br/>)"]
+  D --> E["One logical assignment"]
+```
+:::
+
+## 2. Open delimiters permit safe continuation
+
+Python supports implicit continuation inside three delimiter pairs:
+
+| Pair | Familiar use | Example |
+|---|---|---|
+| `(` and `)` | grouped expression or function call | `round(total, 2)` |
+| `[` and `]` | list or indexing | `[25, 30, 45]` |
+| `{` and `}` | dictionary or set | `{"course": "Python"}` |
+
+Collections receive full coverage in Unit 3. Here, focus on the opening and
+closing shape.
+
+### Group a calculation
+
+```python
+active_minutes = (
+    session_count * session_minutes
+    - break_count * break_minutes
+)
+```
+
+The outer parentheses keep the expression open. The two physical calculation
+lines form one value.
+
+### Spread call arguments vertically
+
+```python
+print(
+    "Course:",
+    course_name,
+    "Minutes:",
+    active_minutes,
+)
+```
+
+Each comma separates an argument. The final comma after `active_minutes` is a
+**trailing comma**. Python accepts it, and it makes adding or rearranging lines
+easier.
+
+### Lay out a collection as a preview
+
+```python
+session_lengths = [
+    25,
+    45,
+    30,
+]
+```
+
+The list still contains three values. The layout gives each item a clear line
+and leaves a trailing comma after the last item.
+
+```python
+print(session_lengths)
+```
+
+Expected output:
+
+```text
+[25, 45, 30]
+```
+
+### A closing delimiter must match the opening one
+
+This is invalid:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+session_lengths = [
+    25,
+    45,
+    30,
+)
+```
+
+The list opens with `[` but closes with `)`. Repair the final symbol to `]`.
+
+::: {.callout-tip title="Pair delimiters before reading the details"}
+When a long statement looks confusing, first match every `(` with `)`, `[` with
+`]`, and `{` with `}`. Only then trace the values and operators inside.
+:::
+
+## 3. Continuation indentation is not a code block
+
+Compare a block:
+
+```python
+if session_minutes >= 30:
+    message = "Focused session"
+```
+
+with a continued expression:
+
+```python
+message = (
+    "Focused "
+    + "session"
+)
+```
+
+The indented block line belongs to the `if` header because the header ends in a
+colon. The indented string lines belong to an expression whose parenthesis is
+still open.
+
+Both use visual indentation, but the grammar is different:
+
+| Question | Block | Continued statement |
+|---|---|---|
+| What starts it? | A header ending in `:` | An unclosed `(`, `[`, or `{` |
+| What ends it? | Dedenting to an earlier level | The matching closing delimiter |
+| Does indentation control behavior? | Yes | Usually no; delimiters control continuation |
+| Typical style | Four spaces per block level | Align for readability |
+
+### Continuation inside a block
+
+The two forms can appear together:
+
+```python
+if session_minutes >= 30:
+    message = (
+        course_name
+        + ": focused session"
+    )
+```
+
+Read the left edge:
+
+1. `if ...:` begins a block.
+2. `message = (` is four spaces inside that block.
+3. The continued expression is indented farther for readability.
+4. The closing parenthesis lines up with the start of the continued expression.
+5. Dedenting to the left margin would end the `if` block.
+
+You do not need to master the condition yet. Your task is to distinguish the
+block level from the continuation layout.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-multiline-first-check",
+  "title": "Logical lines and open delimiters",
+  "instructions": "Identify what keeps each statement open.",
+  "questions": [
+    {
+      "id": "logical-line",
+      "prompt": "What is a logical line in this lesson?",
+      "options": ["One complete Python instruction, even if displayed across several lines", "Exactly one row in the editor", "Every line beginning with four spaces", "Only a line containing print"],
+      "answer_index": 0,
+      "explanation": "Open delimiters can let one complete statement span several physical editor lines."
+    },
+    {
+      "id": "implicit-continuation",
+      "prompt": "Which feature safely permits a calculation to continue after a newline?",
+      "options": ["A comment on every line", "An unmatched opening parenthesis that will be closed later", "Changing every name", "A colon at the end of an assignment"],
+      "answer_index": 1,
+      "explanation": "A newline inside an open delimiter does not finish the logical statement."
+    },
+    {
+      "id": "matching-pairs",
+      "prompt": "A list begins with [. Which symbol must close that delimiter?",
+      "options": [")", "}", "]", ":"],
+      "answer_index": 2,
+      "explanation": "Square brackets must form a matching [ and ] pair."
+    },
+    {
+      "id": "block-versus-continuation",
+      "prompt": "What primarily determines block membership?",
+      "options": ["A trailing comma", "The width of the browser", "Parentheses around a value", "Indentation beneath a header ending in a colon"],
+      "answer_index": 3,
+      "explanation": "Block indentation belongs to a colon-terminated header; continuation is controlled by open delimiters."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Choose a layout that exposes the structure
+
+Python accepts several layouts inside parentheses. People still need a
+consistent visual pattern.
+
+A compact call is clear when it is short:
+
+```python
+rounded_total = round(event_total, 2)
+```
+
+A vertical call is clearer when arguments need separate attention:
+
+```python
+print(
+    "Event:",
+    event_name,
+    "Learners:",
+    learner_count,
+    "Total:",
+    event_total,
+)
+```
+
+Avoid a half-expanded shape:
+
+```python
+print("Event:", event_name,
+    "Learners:", learner_count,
+    "Total:", event_total)
+```
+
+It may run, but the argument boundaries are harder to scan and the indentation
+does not reveal a deliberate structure.
+
+Prefer either one clear line or one argument per line:
+
+```python
+print(
+    "Event:",
+    event_name,
+    "Learners:",
+    learner_count,
+    "Total:",
+    event_total,
+)
+```
+
+### Break before operators consistently
+
+This course uses operators at the beginning of continuation lines:
+
+```python
+net_total = (
+    ticket_income
+    + sponsor_income
+    - room_cost
+    - material_cost
+)
+```
+
+The vertical operator column makes the additions and subtractions visible.
+
+Do not alternate styles inside one expression:
+
+```python
+net_total = (
+    ticket_income +
+    sponsor_income
+    - room_cost -
+    material_cost
+)
+```
+
+The code can be valid, but a consistent pattern is easier to review.
+
+### Use meaningful subexpressions
+
+A very long continued expression can still hide its meaning:
+
+```python
+amount_due = (
+    ticket_price * adult_count
+    + ticket_price * 0.5 * child_count
+    + 12
+    - 20
+)
+```
+
+Named stages may be better:
+
+```python
+adult_total = ticket_price * adult_count
+child_total = ticket_price * 0.5 * child_count
+booking_fee = 12
+credit = 20
+
+amount_due = (
+    adult_total
+    + child_total
+    + booking_fee
+    - credit
+)
+```
+
+Multiline layout solves width. Intermediate names solve meaning. Use both when
+the program benefits from both.
+
+## 5. Trailing commas support safer edits
+
+Compare a vertical call without a trailing comma:
+
+```python
+print(
+    course_name,
+    focused_minutes
+)
+```
+
+and with one:
+
+```python
+print(
+    course_name,
+    focused_minutes,
+)
+```
+
+Both run. The trailing comma makes future editing simpler: a new argument can be
+added without modifying the previous line.
+
+It also tells formatters that the structure may remain expanded. Formatting
+tools are covered later; the beginner habit is simple:
+
+> In a structure with one item per line, include a trailing comma after the last
+> item when Python permits it.
+
+### A one-item tuple is a special case
+
+This is a preview of Unit 3:
+
+```python
+one_score = (90,)
+print(one_score)
+```
+
+The comma, not the parentheses alone, creates the one-item tuple. Compare:
+
+```python
+grouped_score = (90)
+print(grouped_score)
+```
+
+`grouped_score` is just the number `90` grouped in parentheses.
+
+Do not memorize all tuple behavior now. Remember that punctuation can carry
+meaning beyond visual layout.
+
+## 6. Long text needs a deliberate strategy
+
+This short text fits on one line:
+
+```python
+message = "Python Foundations begins with careful reading."
+```
+
+Adjacent string literals inside parentheses are joined by Python:
+
+```python
+message = (
+    "Python Foundations begins with careful reading. "
+    "Small experiments turn syntax rules into practical skill."
+)
+
+print(message)
+```
+
+The space after `reading.` is inside the first string. Without it, the words
+would touch.
+
+For visible line breaks inside the text, use an escape sequence:
+
+```python
+message = "First session\nSecond session"
+print(message)
+```
+
+Expected output:
+
+```text
+First session
+Second session
+```
+
+Triple-quoted strings can contain physical newlines:
+
+```python
+message = """First session
+Second session"""
+print(message)
+```
+
+Triple-quoted strings also have a special role as docstrings when they appear in
+particular positions. The next lesson explains that difference.
+
+### Do not place a bare newline inside ordinary quotes
+
+This is invalid:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+message = "First session
+Second session"
+```
+
+An ordinary quoted string must close before the physical line ends. Use `\n`,
+adjacent literals in parentheses, or a triple-quoted string according to the
+desired value.
+
+## 7. Avoid fragile continuation with backslashes
+
+Python permits an explicit backslash at the end of a line:
+
+```python
+event_total = room_cost + materials_cost + \
+    refreshment_cost
+```
+
+It works, but it is fragile. A space or comment after the backslash breaks the
+continuation, and editing delimiter-based code is usually safer.
+
+Prefer:
+
+```python
+event_total = (
+    room_cost
+    + materials_cost
+    + refreshment_cost
+)
+```
+
+Do not write a comment after a continuation backslash:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+event_total = room_cost + materials_cost + \  # more costs below
+    refreshment_cost
+```
+
+The backslash must be the final character on its physical line. The better
+repair is to use parentheses, not merely delete the comment.
+
+::: {.callout-warning title="Default to delimiters"}
+Use implicit continuation inside `()`, `[]`, or `{}`. Treat backslash
+continuation as syntax you may need to recognize, not the normal style to write.
+:::
+
+## 8. Put one simple statement on each line
+
+Python permits semicolons between simple statements:
+
+```python
+course = "Python"; minutes = 45; print(course, minutes)
+```
+
+The line runs, but three actions are hidden on one physical line. Prefer:
+
+```python
+course = "Python"
+minutes = 45
+print(course, minutes)
+```
+
+A semicolon does not help with a complex statement that owns an indented body.
+This is invalid and unreadable:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+if minutes >= 30: message = "focused"; else: message = "short"
+```
+
+Use visible blocks:
+
+```python
+if minutes >= 30:
+    message = "focused"
+else:
+    message = "short"
+```
+
+The decision behavior is still a preview. The syntax lesson is that blocks
+deserve their own indented lines.
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-multiline-style-check",
+  "title": "Readable multiline style",
+  "instructions": "Choose the layout that preserves behavior and exposes structure.",
+  "questions": [
+    {
+      "id": "trailing-comma",
+      "prompt": "Why is a trailing comma useful in a one-item-per-line call?",
+      "options": ["It supports adding or rearranging arguments with smaller edits", "It turns every value into text", "It closes the parenthesis", "It starts a code block"],
+      "answer_index": 0,
+      "explanation": "The previous last item already has its separator, so a new line can be added without editing that item."
+    },
+    {
+      "id": "intermediate-names",
+      "prompt": "A multiline expression is still hard to understand. What can improve its meaning?",
+      "options": ["Remove all whitespace", "Give meaningful names to important intermediate results", "Replace every operator with a comma", "Put everything after a semicolon"],
+      "answer_index": 1,
+      "explanation": "Layout addresses width; meaningful intermediate names expose the calculation's conceptual stages."
+    },
+    {
+      "id": "ordinary-string",
+      "prompt": "How can an ordinary quoted string include a visible line break in its value?",
+      "options": ["Place a raw newline before the closing quote", "Add a semicolon", "Use the escape sequence \\n", "Indent the second word"],
+      "answer_index": 2,
+      "explanation": "\\n represents a newline character inside an ordinary string."
+    },
+    {
+      "id": "backslash",
+      "prompt": "What is the preferred repair for fragile backslash continuation?",
+      "options": ["Add a comment after the backslash", "Put several statements on the line", "Remove all operators", "Wrap the continued expression in matching parentheses"],
+      "answer_index": 3,
+      "explanation": "Implicit continuation inside matching delimiters is safer and easier to edit."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Read delimiter-related errors from the outside in
+
+### Missing closing parenthesis
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+total = (
+    room_cost
+    + materials_cost
+```
+
+Python may point at a later line or report that a parenthesis was never closed.
+The cause is the unmatched `(`.
+
+Repair:
+
+```python
+total = (
+    room_cost
+    + materials_cost
+)
+```
+
+### Extra closing parenthesis
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+total = room_cost + materials_cost)
+```
+
+There is no opening `(` for the final `)`. Remove it or add the intended opening
+group.
+
+### Missing comma between arguments
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print(
+    "Course:"
+    course_name,
+)
+```
+
+The missing comma may be reported near `course_name`. Repair:
+
+```python
+print(
+    "Course:",
+    course_name,
+)
+```
+
+### A string silently joins when a comma was intended
+
+This code is valid:
+
+```python
+print(
+    "Course:"
+    "Python Foundations",
+)
+```
+
+Adjacent string literals join, so the output is:
+
+```text
+Course:Python Foundations
+```
+
+If the intention was two arguments, add a comma:
+
+```python
+print(
+    "Course:",
+    "Python Foundations",
+)
+```
+
+Valid syntax can still hide a punctuation mistake. Compare behavior with the
+requirement, not only with the absence of an error.
+
+### A closing delimiter is too early
+
+```python
+total = (
+    room_cost
+    + materials_cost
+) + refreshment_cost
+```
+
+This is valid. The final addition happens outside the parenthesized group. If
+the group is meant to show all event costs, move the closing delimiter:
+
+```python
+total = (
+    room_cost
+    + materials_cost
+    + refreshment_cost
+)
+```
+
+The numeric result is the same for addition, but the second layout communicates
+the intended grouping.
+
+## 10. Reformat a registration summary
+
+Start with this working but crowded program:
+
+```python
+event_name = "Community Python Workshop"
+adult_count = 12
+student_count = 8
+adult_price = 20
+student_price = 12
+room_cost = 150
+materials_cost = 65
+income = adult_count * adult_price + student_count * student_price
+balance = income - room_cost - materials_cost
+print("Event:", event_name, "Adults:", adult_count, "Students:", student_count, "Income:", income, "Balance:", balance)
+```
+
+Complete these tasks:
+
+1. Predict `income` and `balance`.
+2. Split the income calculation across multiple lines inside parentheses.
+3. Introduce `adult_income` and `student_income` if they make the calculation
+   easier to verify.
+4. Format the `print()` call with one label or value per line.
+5. Add trailing commas to the vertical argument list.
+6. Keep one simple assignment per logical line.
+7. Run before and after versions and confirm the values match.
+8. Temporarily remove one closing delimiter, read the error, then restore it.
+9. Add a new `sponsor_income = 100` input and update the balance without creating
+   an unreadable line.
+
+Progress checks before adding the sponsor:
+
+```python
+assert income == 336
+assert balance == 121
+```
+
+Progress checks after adding the sponsor:
+
+```python
+assert sponsor_income == 100
+assert balance == 221
+```
+
+<details class="hint">
+<summary>Hint: separate meaning before arranging lines</summary>
+
+Calculate adult and student income under separate names. Add those names inside
+a parenthesized `income` assignment. Then calculate `balance` from income and
+cost names. Formatting is easiest after the conceptual stages are clear.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete version</summary>
+
+```python
+event_name = "Community Python Workshop"
+adult_count = 12
+student_count = 8
+adult_price = 20
+student_price = 12
+room_cost = 150
+materials_cost = 65
+sponsor_income = 100
+
+adult_income = adult_count * adult_price
+student_income = student_count * student_price
+registration_income = (
+    adult_income
+    + student_income
+)
+total_income = (
+    registration_income
+    + sponsor_income
+)
+balance = (
+    total_income
+    - room_cost
+    - materials_cost
+)
+
+print(
+    "Event:",
+    event_name,
+    "Adults:",
+    adult_count,
+    "Students:",
+    student_count,
+    "Registration income:",
+    registration_income,
+    "Total income:",
+    total_income,
+    "Balance:",
+    balance,
+)
+
+assert registration_income == 336
+assert total_income == 436
+assert balance == 221
+```
+
+</details>
+
+## 11. Check your multiline reading
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "syntax-multiline-final-check",
+  "title": "Trace code across physical lines",
+  "instructions": "Treat matching delimiters as the boundary of each logical statement.",
+  "questions": [
+    {
+      "id": "continuation-end",
+      "prompt": "What ends an implicitly continued parenthesized expression?",
+      "options": ["Its matching closing parenthesis", "Any newline", "Four leading spaces", "A comment anywhere below it"],
+      "answer_index": 0,
+      "explanation": "Newlines are allowed while the parenthesis remains open; the matching ) closes the grouped expression."
+    },
+    {
+      "id": "same-behavior",
+      "prompt": "How should you verify that reformatting did not change a calculation?",
+      "options": ["Count the physical lines", "Run the same behavior checks before and after", "Remove intermediate names", "Add a backslash to every line"],
+      "answer_index": 1,
+      "explanation": "Assertions or predicted outputs compare behavior rather than appearance."
+    },
+    {
+      "id": "adjacent-strings",
+      "prompt": "Inside parentheses, what can happen to two adjacent string literals with no comma?",
+      "options": ["They always raise SyntaxError", "They become a dictionary", "Python joins them into one string", "They start separate blocks"],
+      "answer_index": 2,
+      "explanation": "Adjacent string literals are implicitly concatenated, which can hide a missing comma."
+    },
+    {
+      "id": "semicolon-style",
+      "prompt": "Why prefer one simple statement per line over semicolon-separated statements?",
+      "options": ["Semicolons perform division", "Python cannot parse semicolons", "Newlines change every value", "Separate lines expose execution order and make edits easier"],
+      "answer_index": 3,
+      "explanation": "One statement per line makes the program's sequence visible and reduces crowded edits."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A logical statement can span several physical editor lines.
+- Matching parentheses, brackets, or braces permit implicit continuation.
+- Block indentation follows a colon-terminated header; continuation indentation
+  arranges tokens inside open delimiters.
+- Consistent vertical layout and trailing commas make structures easier to edit.
+- Intermediate names improve meaning when line breaks alone are not enough.
+- Prefer delimiter-based continuation over backslashes.
+- Prefer one simple statement per line over semicolon-packed code.
+- Pair delimiters before diagnosing the details inside a long statement.
+:::
+
+## References
+
+- [Python language reference: line structure](https://docs.python.org/3/reference/lexical_analysis.html#line-structure)
+- [Python language reference: implicit line joining](https://docs.python.org/3/reference/lexical_analysis.html#implicit-line-joining)
+- [PEP 8: maximum line length and line breaks](https://peps.python.org/pep-0008/#maximum-line-length)
+- [Python tutorial: first steps toward programming](https://docs.python.org/3/tutorial/introduction.html#first-steps-towards-programming)

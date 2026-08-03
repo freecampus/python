@@ -27,15 +27,18 @@ units:
     challenge_id: get-started.challenge
   - number: 1
     id: python-syntax
-    outcome: Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
+    outcome: Read a short Python program from top to bottom, identify the role of its words and symbols, trace names and expressions, recognize blocks and continued lines, document decisions, and repair syntax errors systematically.
     graduate_outcome_ids:
       - trace-and-explain
       - learn-independently
     lesson_ids:
-      - python-syntax.values-names-expressions-statements
-      - python-syntax.keywords-operators-vocabulary
-      - python-syntax.indentation-blocks-multiline
-      - python-syntax.comments-docstrings-syntax-errors
+      - python-syntax.values-names-assignment
+      - python-syntax.expressions-statements-execution-order
+      - python-syntax.python-words-symbols
+      - python-syntax.indentation-code-blocks
+      - python-syntax.writing-code-across-lines
+      - python-syntax.comments-docstrings
+      - python-syntax.reading-fixing-syntax-errors
     challenge_id: python-syntax.challenge
   - number: 2
     id: core-values-types
