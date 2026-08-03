@@ -110,9 +110,9 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         ),
         (
             "collections-iteration",
-            "Collections and Iteration",
-            "choose a collection from its order, lookup, uniqueness, mutability, "
-            "and data-shape needs",
+            "Organizing and Traversing Collections",
+            "choose, traverse, combine, and sort collections without losing the "
+            "relationships between their values",
         ),
         (
             "decisions-repetition",

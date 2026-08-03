@@ -1,0 +1,799 @@
+---
+title: Building and Reading Nested Data
+lesson_id: collections-iteration.nested-data-collection-choice
+lesson_order: 70
+description: Choose and navigate nested collection shapes one level at a time, diagnose wrong-key and wrong-index failures, and build alternate lookup and grouping views without losing source relationships.
+course_id: python-foundations
+unit_id: collections-iteration
+unit_number: 3
+execute:
+  echo: true
+categories:
+- python-foundations
+- collections-iteration
+- nested-data
+- data-modeling
+order: 70
+colab_notebook: notebooks/courses/python-foundations/units/collections-iteration/nested-data-collection-choice.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 3
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Describe, navigate, update, and refactor nested collection shapes while distinguishing wrong types, missing fields, missing positions, optional values, and shallow copies.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Model one game world with several collection jobs
+
+Real data rarely fits one flat collection. A game world may preserve region order,
+name each region’s fields, keep one fixed coordinate, group unique hazards, and
+store a nested weather record:
+
+```python
+world = [
+    {
+        "id": "garden",
+        "coordinate": (4, 7),
+        "hazards": {"fog"},
+        "weather": {"condition": "mist", "temperature": 12},
+    },
+    {
+        "id": "vault",
+        "coordinate": (9, 2),
+        "hazards": {"lock", "darkness"},
+        "weather": {"condition": "dry", "temperature": 18},
+    },
+]
+```
+
+Read its type shape from the outside inward:
+
+```text
+list
+└── dictionary region record
+    ├── "id" -> string
+    ├── "coordinate" -> tuple of two integers
+    ├── "hazards" -> set of strings
+    └── "weather" -> dictionary
+        ├── "condition" -> string
+        └── "temperature" -> integer
+```
+
+No single container is doing every job. The outer list preserves region display
+order. Each dictionary names fields. The tuple preserves a fixed coordinate, the
+set preserves unique hazards, and the nested dictionary names weather fields.
+
+This lesson answers:
+
+- How can you read a long path without guessing which type comes next?
+- What do `TypeError`, `KeyError`, and `IndexError` reveal about the failed level?
+- How should absent, stored-as-`None`, and empty values remain distinct?
+- When should an ordered list of records gain a separate direct-lookup dictionary?
+
+## 2. Navigate one container level at a time
+
+The compact access below reaches the vault temperature:
+
+```python
+temperature = world[1]["weather"]["temperature"]
+print(temperature)
+```
+
+Read every operation against its immediate left-hand value:
+
+1. `world[1]` indexes the outer list and produces a region dictionary;
+2. `...["weather"]` looks up a key and produces a weather dictionary; and
+3. `...["temperature"]` looks up a key and produces integer `18`.
+
+When the path is unfamiliar, store the intermediate levels:
+
+```python
+vault_record = world[1]
+vault_weather = vault_record["weather"]
+vault_temperature = vault_weather["temperature"]
+
+print(type(vault_record).__name__)
+print(type(vault_weather).__name__)
+print(type(vault_temperature).__name__)
+```
+
+Intermediate names turn an opaque chain into inspectable evidence. They also give
+tracebacks a smaller region of code to identify.
+
+::: {.concept-diagram}
+Each access operation selects one level and produces the container or scalar
+needed by the next operation.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+    A["world list"] -->|"index 1"| B["vault dictionary"]
+    B -->|"weather key"| C["weather dictionary"]
+    C -->|"temperature key"| D["integer 18"]
+```
+
+:::
+
+### Draw the path before writing it
+
+For each requested result, state the levels:
+
+| Question | Access path | Types crossed |
+|---|---|---|
+| First region ID | `world[0]["id"]` | list → dictionary → string |
+| Vault row | `world[1]["coordinate"][0]` | list → dictionary → tuple → integer |
+| Garden hazards | `world[0]["hazards"]` | list → dictionary → set |
+| Garden condition | `world[0]["weather"]["condition"]` | list → dictionary → dictionary → string |
+
+An index belongs to a sequence. A key belongs to a mapping. Membership belongs to
+a set-like group. Choosing the next operation depends on the value produced at the
+current level.
+
+## 3. Wrong operations produce different evidence
+
+Applying a string key to the outer list raises `TypeError`:
+
+```python
+region = world["vault"]
+```
+
+The outer value is a list and expects an integer or slice. The error does not mean
+the key `"vault"` is misspelled; it means this **level has the wrong operation**.
+
+A missing dictionary field raises `KeyError`:
+
+```python
+terrain = world[0]["terrain"]
+```
+
+The region record is a dictionary, but it contains no `"terrain"` key.
+
+An absent sequence position raises `IndexError`:
+
+```python
+third_region = world[2]
+```
+
+The outer list has only positions 0 and 1.
+
+A set rejects numeric indexing with `TypeError`:
+
+```python
+first_hazard = world[1]["hazards"][0]
+```
+
+The path reaches the right field, but a set has no positional member zero.
+
+::: {.callout-tip title="Use the exception to identify the failed level"}
+- `TypeError` often means the current value does not support the attempted kind of
+  access.
+- `KeyError` means mapping access reached a dictionary but the requested key is
+  absent.
+- `IndexError` means sequence access reached a sequence but the position is absent.
+
+Print or inspect the value immediately to the left of the failing brackets before
+changing the full chain.
+:::
+
+### Checkpoint: reading nested paths
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-nested-reading-paths",
+  "title": "Nested-path checkpoint",
+  "instructions": "Follow one produced type at a time.",
+  "questions": [
+    {
+      "id": "weather-temperature",
+      "prompt": "Which expression reads the temperature from the first record in `world`?",
+      "options": ["`world[0]['weather']['temperature']`", "`world['weather'][0]['temperature']`", "`world[0][0]['temperature']`", "`world.weather.temperature`"],
+      "answer_index": 0,
+      "explanation": "Index the outer list, then use dictionary keys for the weather record and its temperature field."
+    },
+    {
+      "id": "intermediate-type",
+      "prompt": "What type does `world[1]['coordinate']` produce in the example?",
+      "options": ["A dictionary", "A tuple", "A set", "An integer"],
+      "answer_index": 1,
+      "explanation": "The coordinate field stores the fixed tuple (9, 2)."
+    },
+    {
+      "id": "string-key-on-list",
+      "prompt": "Why does `world['vault']` fail when `world` is a list?",
+      "options": ["The word vault is reserved.", "The list is empty.", "A list expects an integer index or slice, not a string key.", "Nested dictionaries cannot be stored in lists."],
+      "answer_index": 2,
+      "explanation": "The operation is applied to the outer list before Python can inspect any record IDs."
+    },
+    {
+      "id": "missing-field",
+      "prompt": "Which failure normally indicates that a dictionary record lacks the requested field?",
+      "options": ["`IndexError`", "`NameError`", "`ZeroDivisionError`", "`KeyError`"],
+      "answer_index": 3,
+      "explanation": "Square-bracket lookup of an absent dictionary key raises KeyError."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Choose a nested shape from the dominant question
+
+Several shapes can store the same facts, but they optimize different access
+questions.
+
+### A list of dictionaries preserves record order
+
+```python
+regions = [
+    {"id": "garden", "temperature": 12},
+    {"id": "vault", "temperature": 18},
+]
+```
+
+Use this when ordered display or repeated full-record traversal matters. Finding
+one ID requires a search unless another index is built.
+
+### A dictionary of dictionaries gives direct ID lookup
+
+```python
+regions_by_id = {
+    "garden": {"temperature": 12},
+    "vault": {"temperature": 18},
+}
+
+print(regions_by_id["vault"]["temperature"])
+```
+
+Use this when stable IDs are unique and direct lookup dominates. The ID can live
+only as the outer key or be repeated inside each record when complete standalone
+records are valuable; choose one consistent contract.
+
+### A dictionary of lists groups values
+
+```python
+regions_by_climate = {
+    "cool": ["garden", "tower"],
+    "warm": ["vault"],
+}
+```
+
+Use this when the central question is “Which region IDs belong to this group?”
+The list retains group order and can contain several members.
+
+### A list of lists models a position-based grid
+
+```python
+grid = [
+    ["dock", "water", "water"],
+    ["path", "garden", "wall"],
+    ["path", "tower", "vault"],
+]
+
+print(grid[2][1])
+```
+
+The result is `"tower"`: choose row 2 from the outer list, then column 1 from that
+row. A rectangular grid is a good positional shape only when rows and columns have
+consistent meaning.
+
+No shape wins universally. Preserve more than one view when the program has both
+ordered-display and repeated-direct-lookup requirements, and define which view is
+the source of truth.
+
+## 5. Update the exact nested container you intend
+
+Assignment through a complete path mutates the reached dictionary:
+
+```python
+world = [
+    {
+        "id": "garden",
+        "weather": {"condition": "mist", "temperature": 12},
+    },
+    {
+        "id": "vault",
+        "weather": {"condition": "dry", "temperature": 18},
+    },
+]
+
+world[0]["weather"]["temperature"] = 13
+assert world[0]["weather"]["temperature"] == 13
+```
+
+The outer list still has two positions. The first region dictionary still has the
+same fields. The nested weather dictionary’s temperature value changed.
+
+Intermediate names can make the mutation target clearer:
+
+```python
+garden = world[0]
+garden_weather = garden["weather"]
+garden_weather["condition"] = "clear"
+
+assert world[0]["weather"]["condition"] == "clear"
+```
+
+`garden_weather` is an alias for the nested dictionary; it is not a detached copy.
+
+### Outer copies still share nested values
+
+```python
+source_record = {
+    "id": "garden",
+    "weather": {"condition": "mist", "temperature": 12},
+}
+working_record = source_record.copy()
+
+working_record["weather"]["temperature"] = 13
+
+print(source_record["weather"]["temperature"])
+```
+
+The source also reports 13 because `.copy()` separated only the outer dictionary.
+For this one known shape, reconstruct the nested level deliberately:
+
+```python
+source_record = {
+    "id": "garden",
+    "weather": {"condition": "mist", "temperature": 12},
+}
+working_record = source_record.copy()
+working_record["weather"] = source_record["weather"].copy()
+working_record["weather"]["temperature"] = 13
+
+assert source_record["weather"]["temperature"] == 12
+assert working_record["weather"]["temperature"] == 13
+```
+
+This is not a universal deep-copy recipe. Unit 6 teaches shared reference graphs,
+`copy.deepcopy()`, and when rebuilding a value is preferable.
+
+## 6. Keep absent, `None`, and empty values distinct
+
+Consider three records:
+
+```python
+records = [
+    {"id": "garden"},
+    {"id": "vault", "guide": None},
+    {"id": "tower", "guide": "Nova", "hazards": []},
+]
+```
+
+- `garden` has no `"guide"` field;
+- `vault` has a guide field whose value is deliberately missing; and
+- `tower` has a guide name and an empty hazards list.
+
+Membership and `.get()` serve different questions:
+
+```python
+garden, vault, tower = records
+
+assert "guide" not in garden
+assert "guide" in vault and vault["guide"] is None
+assert tower.get("guide") == "Nova"
+assert "hazards" in tower and tower["hazards"] == []
+```
+
+`.get("guide")` alone returns `None` for both the absent garden field and the
+stored-`None` vault field. Check membership when the schema state matters.
+
+A default should match the expected type:
+
+```python
+garden_hazards = garden.get("hazards", [])
+assert garden_hazards == []
+```
+
+Do not mutate a shared default object stored elsewhere. The fresh literal above is
+used only as a read fallback.
+
+## 7. Consistent record shapes make traversal predictable
+
+This collection promises that each record has an ID and coordinate:
+
+```python
+regions = [
+    {"id": "garden", "coordinate": (4, 7)},
+    {"id": "vault", "coordinate": (9, 2)},
+]
+
+for region in regions:
+    region_id = region["id"]
+    row, column = region["coordinate"]
+    print(region_id, row, column)
+```
+
+A malformed record exposes the broken promise:
+
+```python
+regions = [
+    {"id": "garden", "coordinate": (4, 7)},
+    {"name": "vault", "coordinate": (9,)},
+]
+
+for region in regions:
+    region_id = region["id"]
+    row, column = region["coordinate"]
+    print(region_id, row, column)
+```
+
+The second record first raises `KeyError` for `"id"`; after that key is repaired,
+its one-item coordinate raises an unpacking `ValueError`. These are separate schema
+failures, and both are more useful than guessing around them with unrelated
+defaults.
+
+External validation belongs in Unit 9. Inside this lesson, write and assert the
+shape that your own in-memory examples promise.
+
+### Checkpoint: shape failures and optional values
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-nested-failures-options",
+  "title": "Nested-shape boundary checkpoint",
+  "instructions": "Preserve the difference between operation errors and meaningful missing states.",
+  "questions": [
+    {
+      "id": "grid-path",
+      "prompt": "For a rectangular list-of-lists named `grid`, what does `grid[2][1]` do?",
+      "options": ["Select row index 2, then column index 1", "Select a dictionary key named 2", "Select every row except 1", "Sort the grid by two fields"],
+      "answer_index": 0,
+      "explanation": "Each integer index applies to the list produced by the previous level."
+    },
+    {
+      "id": "stored-none-check",
+      "prompt": "How do you prove key `'guide'` exists and deliberately stores `None`?",
+      "options": ["`record.get('guide') is None` only", "`'guide' in record and record['guide'] is None`", "`record == None`", "`record.count('guide') == 0`"],
+      "answer_index": 1,
+      "explanation": "Membership distinguishes an existing key from absence before the stored value is checked."
+    },
+    {
+      "id": "nested-alias",
+      "prompt": "Why can an intermediate `weather = record['weather']` name mutate the original record's weather?",
+      "options": ["String keys copy every value.", "All dictionaries are global.", "The name refers to the same nested dictionary object.", "Nested mutation changes only printed output."],
+      "answer_index": 2,
+      "explanation": "Lookup returns the referenced nested value; assignment to another name does not copy it."
+    },
+    {
+      "id": "malformed-coordinate",
+      "prompt": "What does `row, column = (9,)` reveal?",
+      "options": ["Coordinates must be dictionaries.", "The row must be text.", "Tuple values cannot be assigned.", "The record's coordinate length does not match the promised two-position shape."],
+      "answer_index": 3,
+      "explanation": "The unpacking ValueError exposes a fixed-shape mismatch."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Avoid parallel lists when fields form records
+
+This representation depends on matching positions forever:
+
+```python
+region_ids = ["garden", "vault", "tower"]
+temperatures = [12, 18, 9]
+conditions = ["mist", "dry", "wind"]
+```
+
+Removing `"vault"` from only one list silently assigns the wrong temperature and
+condition to later IDs. Strict zip detects length mismatch but cannot detect equal-
+length lists that are already semantically misaligned.
+
+Keep fields together:
+
+```python
+regions = [
+    {"id": "garden", "temperature": 12, "condition": "mist"},
+    {"id": "vault", "temperature": 18, "condition": "dry"},
+    {"id": "tower", "temperature": 9, "condition": "wind"},
+]
+```
+
+Now one insertion, removal, or sort moves a complete record.
+
+## 9. Add a lookup view without discarding source order
+
+An ordered source and keyed index can coexist:
+
+```python
+regions = [
+    {"id": "garden", "temperature": 12},
+    {"id": "vault", "temperature": 18},
+    {"id": "tower", "temperature": 9},
+]
+
+regions_by_id = {}
+
+for region in regions:
+    regions_by_id[region["id"]] = region
+
+assert regions_by_id["vault"]["temperature"] == 18
+assert regions[0]["id"] == "garden"
+```
+
+The list remains the ordered source. The dictionary is a secondary index for
+direct lookup. Its values intentionally reference the same record objects. If the
+program permits mutations, document which view owns changes so the structures do
+not drift.
+
+Group IDs for another question:
+
+```python
+regions = [
+    {"id": "garden", "climate": "cool"},
+    {"id": "vault", "climate": "warm"},
+    {"id": "tower", "climate": "cool"},
+]
+ids_by_climate = {}
+
+for region in regions:
+    climate = region["climate"]
+    if climate not in ids_by_climate:
+        ids_by_climate[climate] = []
+    ids_by_climate[climate].append(region["id"])
+
+assert ids_by_climate == {
+    "cool": ["garden", "tower"],
+    "warm": ["vault"],
+}
+```
+
+One source can support several derived views, each answering a named question.
+
+## 10. JSON-like does not mean JSON has been parsed
+
+Lists, dictionaries, strings, numbers, Booleans, and `None` resemble the values
+commonly produced by parsing JSON:
+
+```python
+json_like_value = {
+    "regions": [
+        {"id": "garden", "open": True},
+        {"id": "vault", "open": False},
+    ],
+    "next_page": None,
+}
+```
+
+This is an ordinary in-memory Python value. No file was opened and no external
+text was parsed. Unit 9 teaches JSON parsing, file encodings, schemas, and
+validation at an external-data boundary. The collection skills here prepare you
+to inspect the resulting shape safely.
+
+### Checkpoint: choosing and refactoring shapes
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-nested-shape-choice",
+  "title": "Nested collection choice checkpoint",
+  "instructions": "Choose the top-level shape from the program's dominant access question.",
+  "questions": [
+    {
+      "id": "ordered-records",
+      "prompt": "Which shape best preserves an ordered series of named region records?",
+      "options": ["A list of dictionaries", "A set of lists", "One string containing commas", "A dictionary whose keys are mutable lists"],
+      "answer_index": 0,
+      "explanation": "The list preserves record order while each dictionary names its fields."
+    },
+    {
+      "id": "direct-id",
+      "prompt": "Which shape directly answers `regions_by_id['vault']`?",
+      "options": ["A list of temperatures", "A dictionary mapping IDs to complete records", "A set of region dictionaries", "A tuple of unrelated fields"],
+      "answer_index": 1,
+      "explanation": "A keyed lookup dictionary connects the stable vault ID to its record."
+    },
+    {
+      "id": "parallel-lists-risk",
+      "prompt": "What relationship can equal-length parallel lists still fail to preserve?",
+      "options": ["Whether integers can be printed", "Whether each list has indexes", "Whether values at matching positions still describe the same record", "Whether strings are hashable"],
+      "answer_index": 2,
+      "explanation": "Lengths can match even after one list has been reordered or replaced incorrectly, leaving fields semantically misaligned."
+    },
+    {
+      "id": "secondary-index",
+      "prompt": "Why keep both an ordered source list and a dictionary lookup view?",
+      "options": ["Every program must duplicate all data.", "Dictionaries cannot contain records.", "Lists cannot be traversed.", "They answer different questions: ordered display and direct access by stable ID."],
+      "answer_index": 3,
+      "explanation": "Multiple deliberate views can serve distinct access patterns while one documented source remains authoritative."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Build the game-world archive
+
+Preserve the supplied source tuple. Build ordered display, direct lookup, unique
+hazard, and climate-group views without mutating any record.
+
+```python
+source_world = (
+    {
+        "id": "garden",
+        "coordinate": (4, 7),
+        "climate": "cool",
+        "hazards": {"fog"},
+        "guide": "Nova",
+    },
+    {
+        "id": "vault",
+        "coordinate": (9, 2),
+        "climate": "warm",
+        "hazards": {"lock", "darkness"},
+        "guide": None,
+    },
+    {
+        "id": "tower",
+        "coordinate": (2, 8),
+        "climate": "cool",
+        "hazards": set(),
+    },
+)
+
+region_ids = []
+regions_by_id = {}
+all_hazards = set()
+ids_by_climate = {}
+guide_states = {}
+vault_row = None
+vault_column = None
+```
+
+Requirements:
+
+1. preserve source order in `region_ids`;
+2. map each stable ID to its complete record;
+3. combine every unique hazard;
+4. group IDs by climate while preserving source order within each group;
+5. classify each guide state as `"named"`, `"none"`, or `"absent"` using the
+   supplied scaffold below; and
+6. unpack the vault coordinate into named row and column values.
+
+The classification uses simple conditional syntax supplied from the next unit:
+
+```python
+for region in source_world:
+    region_id = region["id"]
+
+    if "guide" not in region:
+        guide_states[region_id] = "absent"
+    elif region["guide"] is None:
+        guide_states[region_id] = "none"
+    else:
+        guide_states[region_id] = "named"
+```
+
+Complete the other views around that scaffold, then run:
+
+```python
+assert region_ids == ["garden", "vault", "tower"]
+assert list(regions_by_id) == ["garden", "vault", "tower"]
+assert regions_by_id["garden"]["coordinate"] == (4, 7)
+assert all_hazards == {"fog", "lock", "darkness"}
+assert ids_by_climate == {
+    "cool": ["garden", "tower"],
+    "warm": ["vault"],
+}
+assert guide_states == {
+    "garden": "named",
+    "vault": "none",
+    "tower": "absent",
+}
+assert (vault_row, vault_column) == (9, 2)
+assert source_world == (
+    {
+        "id": "garden",
+        "coordinate": (4, 7),
+        "climate": "cool",
+        "hazards": {"fog"},
+        "guide": "Nova",
+    },
+    {
+        "id": "vault",
+        "coordinate": (9, 2),
+        "climate": "warm",
+        "hazards": {"lock", "darkness"},
+        "guide": None,
+    },
+    {
+        "id": "tower",
+        "coordinate": (2, 8),
+        "climate": "cool",
+        "hazards": set(),
+    },
+)
+```
+
+Boundary variation: add a fourth well-shaped cool region with one repeated and one
+new hazard. Predict which output collections preserve the duplicate, discard it,
+or add another ordered ID before rerunning.
+
+<details>
+<summary>Hint: let every derived collection answer one named question</summary>
+
+In one traversal, append the ID, assign the complete record by ID, update the
+hazard set from the record’s set, and create/append the climate group list. Use the
+provided guide-state scaffold in that same traversal or a second one. Retrieve the
+vault record from the finished lookup and unpack its coordinate.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the archive</summary>
+
+```python
+region_ids = []
+regions_by_id = {}
+all_hazards = set()
+ids_by_climate = {}
+guide_states = {}
+
+for region in source_world:
+    region_id = region["id"]
+    climate = region["climate"]
+
+    region_ids.append(region_id)
+    regions_by_id[region_id] = region
+    all_hazards.update(region["hazards"])
+
+    if climate not in ids_by_climate:
+        ids_by_climate[climate] = []
+    ids_by_climate[climate].append(region_id)
+
+    if "guide" not in region:
+        guide_states[region_id] = "absent"
+    elif region["guide"] is None:
+        guide_states[region_id] = "none"
+    else:
+        guide_states[region_id] = "named"
+
+vault_row, vault_column = regions_by_id["vault"]["coordinate"]
+```
+
+Every derived collection has a distinct purpose. The lookup intentionally shares
+the immutable-by-convention source records, and the code never mutates them. The
+hazard view stores only unique strings, while the ordered ID and grouped-ID lists
+preserve the order relevant to their displays.
+
+</details>
+
+## 12. Explain the data shape
+
+1. How do you determine whether the next brackets need an index or a key?
+2. What different broken promises do `TypeError`, `KeyError`, and `IndexError`
+   reveal along a nested path?
+3. Why are absent, stored `None`, and empty collection values not interchangeable?
+4. How can a shallow outer copy still expose source data to nested mutation?
+5. When is a secondary dictionary lookup worth keeping beside an ordered list?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Describe the outer type and every nested level before writing a long access path.
+- Apply each index or key to the value immediately on its left; store intermediate
+  values when the current type is unclear.
+- A list of records, keyed record dictionary, grouped dictionary of lists, and
+  position-based grid answer different access questions.
+- Preserve absent, stored `None`, and empty values when they express different
+  states.
+- Consistent record fields and tuple lengths make traversal predictable; failures
+  provide evidence about the malformed level.
+- Parallel lists can drift; complete records preserve field relationships.
+- A shallow copy separates an outer container but can retain nested aliases.
+- Ordered source and direct-lookup views can coexist when ownership is explicit.
+:::
+
+## References
+
+- [Python tutorial: nested list comprehensions and nested structures](https://docs.python.org/3/tutorial/datastructures.html#nested-list-comprehensions)
+- [Python tutorial: dictionaries](https://docs.python.org/3/tutorial/datastructures.html#dictionaries)
+- [Python standard types: sequence operations](https://docs.python.org/3/library/stdtypes.html#common-sequence-operations)
+- [Python standard types: dictionary operations](https://docs.python.org/3/library/stdtypes.html#mapping-types-dict)

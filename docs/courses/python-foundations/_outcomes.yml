@@ -1,5 +1,5 @@
 schema_version: 1
-curriculum_version: 7
+curriculum_version: 8
 course_id: python-foundations
 graduate_outcomes:
   learn-independently: Use prediction, clean execution, documentation, deliberate practice, and responsible AI assistance to learn from evidence.
@@ -58,16 +58,18 @@ units:
     challenge_id: core-values-types.challenge
   - number: 3
     id: collections-iteration
-    outcome: Choose a data structure based on order, lookup, uniqueness, mutability, and data shape, then traverse it without losing meaning.
+    outcome: Choose among lists, tuples, dictionaries, and sets from the required order, mutability, lookup, uniqueness, and data shape; traverse them safely; and sort or combine them without losing relationships between values.
     graduate_outcome_ids:
       - model-data
       - trace-and-explain
     lesson_ids:
       - collections-iteration.lists
-      - collections-iteration.tuples-ranges-packing
+      - collections-iteration.tuples-unpacking
       - collections-iteration.dictionaries
-      - collections-iteration.sets-frozen-sets
-      - collections-iteration.nested-data-iterables-sorting
+      - collections-iteration.sets-frozensets
+      - collections-iteration.traversing-collections
+      - collections-iteration.sorting-collections
+      - collections-iteration.nested-data-collection-choice
     challenge_id: collections-iteration.challenge
   - number: 4
     id: decisions-repetition

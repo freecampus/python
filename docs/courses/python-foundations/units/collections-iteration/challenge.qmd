@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Organize a Community Workshop Inventory'
-description: Choose a data structure based on order, lookup, uniqueness, mutability, and data shape, then traverse it without losing meaning.
+title: 'Unit Challenge: Decode the Starship Signal Vault'
+description: Preserve a damaged signal archive while building keyed, unique, grouped, ranked, and ordered views that reveal the vault code NOVA.
 challenge_id: collections-iteration.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 4
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,92 +19,319 @@ unit_number: 3
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 3 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Choose and combine containers to answer inventory questions without losing the original data.
-- **Evidence:** Complete the checks and explain the result in your own words.
+- **Outcome assessed:** Choose, traverse, compare, sort, and combine collection shapes without losing source order, record relationships, unique membership, or fixed clue positions.
+- **Evidence:** Twenty progressive checks, a decoded vault artifact, one boundary rerun, and one debugging record
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-
 <!-- fcpython-unit-challenge: practical -->
 ## 1. Challenge outcome
 
-Build useful lookup, availability, category, and borrower views from nested community-workshop inventory records.
+The research starship *Wayfinder* has recovered five signals from a damaged
+archive. Four active transmissions contain the pieces of a vault code. One
+inactive transmission is interference, two signals have equal strength, several
+symbols repeat, and the records arrived in an order that must remain evidence.
 
-**Scenario:** A community workshop lends shared equipment. Each record has an ID, a category, and either a borrower name or `None`. Build derived collections while leaving the supplied records unchanged.
+Build several deliberate views of the archive and use the tuple clues to unlock
+the final word **NOVA**. The puzzle is solved only when the source remains intact,
+every progressive check passes unchanged, and the final artifact is produced from
+the derived collections.
 
-::: {.callout-note title="Work independently, but not without support"}
-This challenge should take about one or two focused hours. Use the starter
-contract, run one group of assertions at a time, and open hints only after you
-can state what evidence is blocking you.
+::: {.callout-note title="Mission rule"}
+Run one assertion group at a time. Repair the first failed promise before moving
+on. Do not edit expected values, sort the source list, replace sets with display
+lists, or hard-code the final vault word.
 :::
+
+The challenge uses simple `for` and `if` scaffolding because Unit 4 owns complete
+loop design. Your work is to choose the collection operations, preserve their
+relationships, and explain the state each derived view represents.
 
 ## 2. Understand the acceptance example
 
-Before writing code, predict the important values and the exact final result.
-For the supplied input, the expected evidence is:
+The final artifact must be exactly:
 
-A lookup by ID, the available IDs, unique borrower names, and item counts by category.
+```text
+=== WAYFINDER SIGNAL VAULT ===
+Status: OPEN
+Code: NOVA
+Signals: 4 active / 5 total
+Sectors: Lyra=2, Orion=2, Vela=1
+Symbols: key, moon, star, sun
+```
 
-Write your prediction in a notebook text cell or project note. Do not change
-the sample input until the matching assertions pass.
+The code is not written directly in source order. Each active record contains a
+tuple `(code_position, letter)`. Sort complete clue tuples by position and then
+unpack their letters.
+
+### Collection contracts
+
+1. `source_signals` remains the ordered source of truth.
+2. `signals_by_id` maps every unique signal ID to its complete record.
+3. `active_ids` preserves transmission order while excluding inactive records.
+4. `active_symbols` contains unique symbols from active records only.
+5. `required_symbols` remains a `frozenset` and determines `vault_ready`.
+6. `sector_counts` counts all records, including the inactive one.
+7. `clue_pairs` preserves active transmission order before sorting.
+8. `ranked_signals` is a new list ordered by strength descending and ID ascending
+   for equal strengths.
+9. `sorted_clues` orders the tuple clues by code position.
+10. `vault_word` is joined from derived letters, never typed as a solution value.
 
 ### Constraints
 
-1. Use a dictionary for direct lookup, a list for ordered available IDs, and a set for unique borrowers.
-2. Use the item ID as a stable key and preserve the original `items` order.
-3. Do not mutate the supplied dictionaries while building derived collections.
-4. Count every category, including categories with no available items.
+- Keep every public variable name in the starter contract.
+- Do not mutate any dictionary, set, tuple, or the outer source list.
+- Do not use functions, comprehensions, exception handlers, classes, or nested
+  loops.
+- One straightforward traversal may build the lookup, active views, counts, and
+  clue list together.
+- Use tuple unpacking for every clue.
+- Use set operations for symbol readiness.
+- Use `operator.itemgetter()` and stable sorting for ranking.
+- Sort only derived lists, never `source_signals` in place.
 
 ## 3. Start from the contract
 
-Copy this scaffold into the generated notebook or the indicated local project
-files. Preserve the supplied public names and docstrings so the checks can guide
-you.
+Copy this complete starter into a fresh cell. `source_snapshot` is supplied so the
+checks can detect accidental nested mutation.
 
 ```python
-items = [
-    {"id": "cam-1", "category": "camera", "borrower": "Ari"},
-    {"id": "mic-1", "category": "audio", "borrower": None},
-    {"id": "cam-2", "category": "camera", "borrower": "Bo"},
-    {"id": "tripod-1", "category": "support", "borrower": "Ari"},
-]
-original_snapshot = [item.copy() for item in items]
+from operator import itemgetter
 
-item_by_id = {}
-available_ids = []
-borrowers = set()
-category_counts = {}
+source_signals = [
+    {
+        "id": "SIG-N",
+        "sector": "Lyra",
+        "strength": 88,
+        "status": "active",
+        "clue": (0, "N"),
+        "symbols": {"star", "moon"},
+    },
+    {
+        "id": "SIG-X",
+        "sector": "Orion",
+        "strength": 99,
+        "status": "inactive",
+        "clue": (9, "X"),
+        "symbols": {"comet"},
+    },
+    {
+        "id": "SIG-O",
+        "sector": "Lyra",
+        "strength": 94,
+        "status": "active",
+        "clue": (1, "O"),
+        "symbols": {"moon", "key"},
+    },
+    {
+        "id": "SIG-A",
+        "sector": "Vela",
+        "strength": 82,
+        "status": "active",
+        "clue": (3, "A"),
+        "symbols": {"sun", "key"},
+    },
+    {
+        "id": "SIG-V",
+        "sector": "Orion",
+        "strength": 94,
+        "status": "active",
+        "clue": (2, "V"),
+        "symbols": {"star", "sun"},
+    },
+]
+
+source_snapshot = [
+    {
+        "id": "SIG-N",
+        "sector": "Lyra",
+        "strength": 88,
+        "status": "active",
+        "clue": (0, "N"),
+        "symbols": {"star", "moon"},
+    },
+    {
+        "id": "SIG-X",
+        "sector": "Orion",
+        "strength": 99,
+        "status": "inactive",
+        "clue": (9, "X"),
+        "symbols": {"comet"},
+    },
+    {
+        "id": "SIG-O",
+        "sector": "Lyra",
+        "strength": 94,
+        "status": "active",
+        "clue": (1, "O"),
+        "symbols": {"moon", "key"},
+    },
+    {
+        "id": "SIG-A",
+        "sector": "Vela",
+        "strength": 82,
+        "status": "active",
+        "clue": (3, "A"),
+        "symbols": {"sun", "key"},
+    },
+    {
+        "id": "SIG-V",
+        "sector": "Orion",
+        "strength": 94,
+        "status": "active",
+        "clue": (2, "V"),
+        "symbols": {"star", "sun"},
+    },
+]
+
+required_symbols = frozenset({"key", "moon", "star", "sun"})
+
+# Stage A: archive views.
+signals_by_id = {}
+active_ids = []
+active_symbols = set()
+sector_counts = {}
+clue_pairs = []
+
+# Stage B: readiness, ranking, and decoding.
+missing_symbols = None
+vault_ready = None
+ranked_signals = None
+ranked_ids = []
+sorted_clues = None
+vault_letters = []
+vault_word = None
+
+# Stage C: final display values.
+sector_text = None
+symbol_text = None
+artifact = None
 ```
 
 ## 4. Build in small stages
 
-1. Build `item_by_id`, then check one known lookup before deriving anything else.
-2. Collect available IDs and unique non-`None` borrower names.
-3. Count every item by category.
-4. Change one copied record, predict which derived collections change, and rebuild them.
+### Stage A: create archive views in one traversal
 
-After each stage, rerun only the smallest relevant check. When it passes, run
-all earlier checks before moving forward.
+Use this supplied structure. Replace each `None` with the relevant collection
+operation; do not add another nested loop.
+
+```python
+for signal in source_signals:
+    signal_id = signal["id"]
+    sector = signal["sector"]
+
+    # Map the stable ID to the complete signal record.
+    signals_by_id[signal_id] = None
+
+    # Count every record in its sector.
+    sector_counts[sector] = None
+
+    if signal["status"] == "active":
+        # Preserve active transmission order.
+        active_ids.append(None)
+
+        # Combine the members of this record's symbol set.
+        active_symbols.update(None)
+
+        # Unpack the fixed clue tuple, then preserve it as one tuple.
+        code_position, code_letter = signal["clue"]
+        clue_pairs.append(None)
+```
+
+Run assertion group A. If a value has the wrong nesting level, inspect one signal
+record and the affected derived collection before changing another line.
+
+### Stage B: compare, rank, and decode
+
+1. Calculate symbols missing from the required frozen set.
+2. Calculate readiness with a subset relationship.
+3. Rank **all** signals by ID ascending first, then strength descending. The
+   second stable pass makes strength primary while retaining ID order among ties.
+4. Traverse the ranked records to preserve their IDs in `ranked_ids`.
+5. Sort the clue tuples. Because their first values are unique integer positions,
+   ordinary tuple ordering gives the intended sequence.
+6. Traverse `sorted_clues`, unpack each tuple, and append only its letter.
+7. Join the letters into `vault_word`.
+
+Run group B before formatting any display text.
+
+### Stage C: produce the vault artifact
+
+The expected sector order is alphabetical. The expected symbol display is also
+alphabetical. Build:
+
+```python
+sector_text = (
+    f"Lyra={sector_counts['Lyra']}, "
+    f"Orion={sector_counts['Orion']}, "
+    f"Vela={sector_counts['Vela']}"
+)
+symbol_text = ", ".join(sorted(active_symbols))
+```
+
+Use an adjacent multi-line f-string for `artifact`. Derive the status without an
+`if` expression by using the supplied Boolean tuple lookup:
+
+```python
+vault_status = ("SEALED", "OPEN")[vault_ready]
+```
+
+Do not type `NOVA` anywhere in the implementation.
 
 ## 5. Run progressive assertions
 
-These checks describe observable behavior. A failed assertion is a
-location signal: read its message, inspect the actual value, and change one
-cause rather than weakening the assertion.
+### Group A: source, lookup, active order, counts, and clues
 
 ```python
-assert item_by_id["cam-2"]["borrower"] == "Bo"
-assert available_ids == ["mic-1"]
-assert borrowers == {"Ari", "Bo"}
-assert category_counts == {"camera": 2, "audio": 1, "support": 1}
-assert items == original_snapshot, "derived views must not mutate the source records"
+assert source_signals == source_snapshot
+assert len(signals_by_id) == 5
+assert list(signals_by_id) == ["SIG-N", "SIG-X", "SIG-O", "SIG-A", "SIG-V"]
+assert signals_by_id["SIG-O"]["strength"] == 94
+assert active_ids == ["SIG-N", "SIG-O", "SIG-A", "SIG-V"]
+assert "SIG-X" not in active_ids
+assert sector_counts == {"Lyra": 2, "Orion": 2, "Vela": 1}
+assert clue_pairs == [(0, "N"), (1, "O"), (3, "A"), (2, "V")]
 ```
 
-::: {.callout-warning title="Do not edit the expected values to create a pass"}
-Change the implementation until the stated behavior is true. If you believe an
-assertion is wrong, explain the contract conflict in writing before changing
-either side.
+### Group B: unique membership, ranking, and decoded values
+
+```python
+assert active_symbols == {"key", "moon", "star", "sun"}
+assert type(required_symbols) is frozenset
+assert missing_symbols == set()
+assert vault_ready is True
+assert ranked_ids == ["SIG-X", "SIG-O", "SIG-V", "SIG-N", "SIG-A"]
+assert source_signals == source_snapshot
+assert sorted_clues == [(0, "N"), (1, "O"), (2, "V"), (3, "A")]
+assert vault_letters == ["N", "O", "V", "A"]
+assert vault_word == "".join(vault_letters)
+```
+
+### Group C: final artifact
+
+```python
+expected_artifact = (
+    "=== WAYFINDER SIGNAL VAULT ===\n"
+    "Status: OPEN\n"
+    "Code: NOVA\n"
+    "Signals: 4 active / 5 total\n"
+    "Sectors: Lyra=2, Orion=2, Vela=1\n"
+    "Symbols: key, moon, star, sun"
+)
+
+assert sector_text == "Lyra=2, Orion=2, Vela=1"
+assert symbol_text == "key, moon, star, sun"
+assert artifact == expected_artifact
+print(artifact)
+```
+
+::: {.callout-warning title="A plausible result can still violate the contract"}
+Typing `vault_word = "NOVA"`, sorting `source_signals` in place, or adding inactive
+`"comet"` to the active symbol set may make one visible line look plausible while
+earlier evidence is wrong. The unchanged progressive checks are part of the
+artifact.
 :::
 
 ## 6. Use the hint ladder only when needed
@@ -112,70 +339,244 @@ either side.
 <details>
 <summary>Hint 1</summary>
 
-Iterate over one item at a time and name the three fields you need from that record.
+Match each question to one collection behavior:
+
+- ID lookup: dictionary assignment with `signal_id` as key;
+- active transmission order: list append inside the active branch;
+- unique active symbols: set update from each active symbol set;
+- sector frequency: `.get(sector, 0) + 1`; and
+- fixed clue meaning: unpack `(code_position, code_letter)` and append that pair.
+
+Run group A before attempting ranking.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Use the ID as a dictionary key; add a borrower to the set only when it is not `None`.
+The central Stage B operations have these shapes:
+
+```python
+missing_symbols = required_symbols - active_symbols
+vault_ready = required_symbols <= active_symbols
+
+ranked_signals = sorted(source_signals, key=itemgetter("id"))
+ranked_signals = sorted(
+    ranked_signals,
+    key=itemgetter("strength"),
+    reverse=True,
+)
+
+sorted_clues = sorted(clue_pairs)
+```
+
+Use separate straightforward traversals to append ranked IDs and unpacked clue
+letters.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-For category counts, read the old count with `.get(category, 0)` before adding one.
+One complete final assembly has this structure:
+
+```python
+vault_letters = []
+for code_position, code_letter in sorted_clues:
+    vault_letters.append(code_letter)
+
+vault_word = "".join(vault_letters)
+vault_status = ("SEALED", "OPEN")[vault_ready]
+
+artifact = (
+    "=== WAYFINDER SIGNAL VAULT ===\n"
+    f"Status: {vault_status}\n"
+    f"Code: {vault_word}\n"
+    f"Signals: {len(active_ids)} active / {len(source_signals)} total\n"
+    f"Sectors: {sector_text}\n"
+    f"Symbols: {symbol_text}"
+)
+```
+
+If the text still differs, compare `repr(artifact)` with
+`repr(expected_artifact)` to expose hidden spaces or newlines.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Keep one failure caused by choosing the wrong container or nested key. Show the problematic record, the expression you tried, and the corrected access path.
+Preserve one real failed assertion or exception. A useful record connects the
+wrong collection decision to the observed value rather than saying only “the code
+did not work.”
 
-Use this short record:
-
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+| Failure | Exact evidence | One hypothesis | Controlled change | Verified rerun |
 |---|---|---|---|---|
-| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+| What was the first blocked check? | Include actual/expected values or the final exception line. | Which key, position, mutation, or collection operation explains it? | What one line changed? | Which unchanged group now passes? |
 
-## 8. Check your understanding
+Good puzzle evidence could include:
+
+- appending a symbol set and creating a nested list instead of updating a set;
+- counting only active signals instead of all sector records;
+- directly traversing a dictionary and expecting complete records;
+- applying only the strength sort and losing the explicit tie policy;
+- unpacking clue fields in the wrong order; or
+- mutating a source symbol set while combining membership.
+
+## 8. Test the echo-signal variation
+
+After the ordinary challenge passes from a clean state, append this record to a
+new outer list—not to `source_signals`:
+
+```python
+variation_signals = source_signals.copy()
+variation_signals.append(
+    {
+        "id": "SIG-ECHO",
+        "sector": "Vela",
+        "strength": 70,
+        "status": "inactive",
+        "clue": (4, "?"),
+        "symbols": {"star", "echo"},
+    }
+)
+```
+
+Copy your implementation to a new section, use `variation_signals` as its input,
+and recalculate every derived collection from empty state. Verify:
+
+```python
+assert source_signals == source_snapshot
+assert len(variation_signals) == 6
+assert "SIG-ECHO" in signals_by_id
+assert active_ids == ["SIG-N", "SIG-O", "SIG-A", "SIG-V"]
+assert active_symbols == {"key", "moon", "star", "sun"}
+assert sector_counts == {"Lyra": 2, "Orion": 2, "Vela": 2}
+assert sorted_clues == [(0, "N"), (1, "O"), (2, "V"), (3, "A")]
+assert vault_word == "NO" + "VA"
+assert ranked_ids[-1] == "SIG-ECHO"
+```
+
+Explain why the lookup, total record count, Vela count, and ranking change while
+the active order, required-symbol readiness, clue order, and decoded word do not.
+
+## 9. Compare with a solution path
+
+<details class="solution">
+<summary>Reveal after your checks pass or all three hints have been used</summary>
+
+```python
+from operator import itemgetter
+
+# Use source_signals, source_snapshot, and required_symbols from the starter.
+signals_by_id = {}
+active_ids = []
+active_symbols = set()
+sector_counts = {}
+clue_pairs = []
+
+for signal in source_signals:
+    signal_id = signal["id"]
+    sector = signal["sector"]
+
+    signals_by_id[signal_id] = signal
+    sector_counts[sector] = sector_counts.get(sector, 0) + 1
+
+    if signal["status"] == "active":
+        active_ids.append(signal_id)
+        active_symbols.update(signal["symbols"])
+
+        code_position, code_letter = signal["clue"]
+        clue_pairs.append((code_position, code_letter))
+
+missing_symbols = required_symbols - active_symbols
+vault_ready = required_symbols <= active_symbols
+
+ranked_signals = sorted(source_signals, key=itemgetter("id"))
+ranked_signals = sorted(
+    ranked_signals,
+    key=itemgetter("strength"),
+    reverse=True,
+)
+
+ranked_ids = []
+for signal in ranked_signals:
+    ranked_ids.append(signal["id"])
+
+sorted_clues = sorted(clue_pairs)
+vault_letters = []
+for code_position, code_letter in sorted_clues:
+    vault_letters.append(code_letter)
+
+vault_word = "".join(vault_letters)
+vault_status = ("SEALED", "OPEN")[vault_ready]
+
+sector_text = (
+    f"Lyra={sector_counts['Lyra']}, "
+    f"Orion={sector_counts['Orion']}, "
+    f"Vela={sector_counts['Vela']}"
+)
+symbol_text = ", ".join(sorted(active_symbols))
+
+artifact = (
+    "=== WAYFINDER SIGNAL VAULT ===\n"
+    f"Status: {vault_status}\n"
+    f"Code: {vault_word}\n"
+    f"Signals: {len(active_ids)} active / {len(source_signals)} total\n"
+    f"Sectors: {sector_text}\n"
+    f"Symbols: {symbol_text}"
+)
+
+print(artifact)
+```
+
+The source list provides authoritative order. The lookup and counts include all
+records; the active list, symbol set, and clue tuples include only active records.
+Two stable ranking passes preserve an explicit ID tie rule. The word is derived
+from sorted fixed-position clues, and display sorting is applied only to a new
+symbol list.
+
+</details>
+
+## 10. Check your understanding
 
 ::: {.quiz-box}
-Answer these questions before recording the challenge. The quiz runs directly
-in your browser.
+Answer these questions before recording the challenge. The quiz runs directly in
+your browser.
 :::
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-collections-iteration-challenge",
-  "title": "Community Workshop Inventory readiness check",
-  "instructions": "Choose an answer, then check your work.",
+  "title": "Signal-vault collection decisions",
+  "instructions": "Choose the operation that preserves the archive contract.",
   "questions": [
     {
       "id": "lookup-shape",
-      "prompt": "Which structure directly maps each item ID to its record?",
-      "options": [
-        "A set",
-        "A single string",
-        "A dictionary",
-        "A Boolean"
-      ],
-      "answer_index": 2,
-      "explanation": "A dictionary associates each unique key with its record."
+      "prompt": "Which view directly retrieves a complete signal from its stable ID?",
+      "options": ["A dictionary mapping ID to record", "A set of strengths", "A sorted symbol list", "A tuple of sector counts"],
+      "answer_index": 0,
+      "explanation": "A dictionary preserves the direct key-to-record relationship."
     },
     {
-      "id": "unique-borrowers",
-      "prompt": "Which structure naturally removes repeated borrower names?",
-      "options": [
-        "A list",
-        "A tuple containing duplicates",
-        "A float",
-        "A set"
-      ],
+      "id": "combine-symbols",
+      "prompt": "Which operation combines members of one signal's symbol set into `active_symbols`?",
+      "options": ["`active_symbols.append(signal['symbols'])`", "`active_symbols.update(signal['symbols'])`", "`active_symbols[0] = signal['symbols']`", "`active_symbols.pop(signal['symbols'])`"],
+      "answer_index": 1,
+      "explanation": "Set update consumes the record's symbol members and preserves unique membership."
+    },
+    {
+      "id": "preserve-source-sort",
+      "prompt": "Why does the ranking use `sorted()` rather than `source_signals.sort()`?",
+      "options": ["Dictionaries cannot be sorted.", "sorted() removes inactive records automatically.", "It returns a ranked list while preserving source transmission order.", "sort() can compare only strings."],
+      "answer_index": 2,
+      "explanation": "The source order is evidence, so ranking must be a separate list."
+    },
+    {
+      "id": "clue-order",
+      "prompt": "Why are active clue tuples sorted before their letters are joined?",
+      "options": ["Sets require tuple sorting.", "Joining mutates tuples.", "Signal strength is stored in the tuple.", "The first tuple value is the intended code position, which differs from transmission order."],
       "answer_index": 3,
-      "explanation": "A set represents unique values without duplicate entries."
+      "explanation": "Sorting the complete (position, letter) clues puts letters into their encoded code positions."
     }
   ]
 }
@@ -183,28 +584,29 @@ in your browser.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+| Behavior | All twenty progressive checks pass unchanged and the artifact displays exactly. |
+| Collection design | You can explain why each derived view is a list, tuple, dictionary, set, or `frozenset`. |
+| Source preservation | The source snapshot passes before and after ranking and variation work. |
+| Debugging | One failure record connects exact evidence, one hypothesis, one change, and a passing rerun. |
+| Reproducibility | The ordinary challenge and variation work from separately initialized clean state. |
 
 Record completion only when every statement is true:
 
 - [ ] All supplied assertions pass without editing their expected values.
-- [ ] The work runs from a clean notebook state or documented project root.
-- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] The artifact is derived rather than hard-coded.
+- [ ] The work runs from a clean notebook state.
+- [ ] I can explain each collection choice and mutation boundary in my own words.
 - [ ] I kept one complete debugging record.
-- [ ] I predicted and verified one controlled modification.
+- [ ] I predicted and verified the echo-signal variation.
 
-This button stores a self-reported marker only in this browser. It does not
-submit the artifact, grade it, verify identity, or issue a certificate.
+This button stores a self-reported marker only in this browser. It does not submit
+the artifact, grade it, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -218,7 +620,15 @@ submit the artifact, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows the design without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+::: {.callout-tip title="Key points"}
+- One ordered source can support keyed, grouped, unique, ranked, and display views
+  when every view has a named purpose.
+- Progressive assertions reveal the first broken collection contract before a
+  plausible final string hides it.
+- Stable sorting and complete tuple/record movement preserve relationships among
+  tied or repositioned values.
+- Sets answer unique-membership questions; frozen sets can state immutable
+  requirements; lists preserve the orders the puzzle actually needs.
+- A clean rerun, boundary variation, and debugging record are part of the solved
+  artifact.
+:::

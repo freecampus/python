@@ -1,248 +1,188 @@
 ---
-title: 'Dictionaries: Records, Lookup, and Counting'
+title: 'Dictionaries: Finding Values by Key'
 lesson_id: collections-iteration.dictionaries
 lesson_order: 30
-description: Choose a data structure based on order, lookup, uniqueness, mutability, and data shape, then traverse it without losing meaning.
+description: Build keyed catalogs, distinguish missing keys from stored values, update and merge mappings, use dynamic views, and create record, counter, grouping, and lookup shapes.
+course_id: python-foundations
+unit_id: collections-iteration
+unit_number: 3
 execute:
   echo: true
 categories:
 - python-foundations
 - collections-iteration
+- dictionaries
+- mappings
 order: 30
 colab_notebook: notebooks/courses/python-foundations/units/collections-iteration/dictionaries.ipynb
-course_id: python-foundations
-unit_id: collections-iteration
-unit_number: 3
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 25–40 minutes
-- **You will learn:** Store, loop over, and use key-value pairs for lookup, counting, grouping, and records.
-- **Practice in:** Google Colab, Jupyter, or VS Code
+- **Level:** Python Foundations · Unit 3
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Create, inspect, update, merge, remove, traverse, copy, count, and group dictionary values without confusing keys, values, missing data, or source state.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+## 1. Find a creature by ID rather than by position
 
-Lists are good when position matters: first item, second item, third item. But
-many programs need lookup by a meaningful label: a person's name, a product ID,
-a column name, or a setting. A **dictionary** stores key-value pairs so you can
-ask for a value by key.
+A field guide should answer “What do we know about creature `mossling`?” A list
+could store creature records, but repeated lookup would require finding the right
+position. A dictionary connects a stable **key** directly to a **value**:
 
-A dictionary is useful when your question sounds like:
+```python
+creature_energy = {
+    "mossling": 30,
+    "skyfin": 55,
+    "emberfox": 42,
+}
 
-- "What is Ada's score?"
-- "How many times have we seen this word?"
-- "What email address belongs to this user?"
-- "What settings did the user choose?"
+print(creature_energy["skyfin"])
+print(len(creature_energy))
+print(type(creature_energy).__name__)
+```
 
-## How dictionary lookup works
+The key `"skyfin"` maps to integer value `55`. Keys are unique within one
+dictionary. Values may repeat.
+
+Python dictionaries preserve **insertion order**, but their central purpose is
+lookup by key, not access by numeric position. If visible order is the only
+requirement, a list may communicate that job more directly.
+
+An empty pair of braces is a dictionary, not a set:
+
+```python
+empty_catalog = {}
+also_empty = dict()
+
+assert type(empty_catalog) is dict
+assert empty_catalog == also_empty
+```
+
+This lesson will help you answer:
+
+- Is a key absent, or is its stored value deliberately `None`?
+- Does an operation mutate the dictionary or create a new mapping?
+- What do keys, values, and item views supply during traversal?
+- When does a dictionary represent one record, a lookup table, a counter, or a
+  grouping?
+
+## 2. Direct lookup makes missing keys visible
+
+Square brackets state that the key must exist:
+
+```python
+creature_energy = {"mossling": 30, "skyfin": 55}
+
+print(creature_energy["mossling"])
+print("skyfin" in creature_energy)
+print("dragon" not in creature_energy)
+```
+
+Dictionary membership checks **keys**, not values:
+
+```python
+print("mossling" in creature_energy)
+print(30 in creature_energy)
+print(30 in creature_energy.values())
+```
+
+The results are `True`, `False`, and `True`. State the side of the mapping you
+intend to search.
+
+An absent direct key raises `KeyError`:
+
+```python
+print(creature_energy["dragon"])
+```
+
+The traceback includes the requested key. That failure is useful when absence
+means the program’s data contract is broken.
+
+### `.get()` supports expected absence
+
+```python
+creature_energy = {"mossling": 30, "skyfin": 55}
+
+print(creature_energy.get("skyfin"))
+print(creature_energy.get("dragon"))
+print(creature_energy.get("dragon", 0))
+```
+
+`.get(key)` returns `None` for an absent key; `.get(key, default)` returns the
+provided default. It does not add that key to the dictionary.
+
+### Missing and stored-as-`None` are different states
+
+```python
+observations = {
+    "mossling": "near the river",
+    "skyfin": None,
+}
+
+print(observations.get("skyfin"))
+print(observations.get("dragon"))
+print("skyfin" in observations)
+print("dragon" in observations)
+```
+
+Both `.get()` calls print `None`, but membership distinguishes the states. The
+`skyfin` key exists and deliberately stores a missing observation; `dragon` has no
+entry. Use `key in mapping` when that distinction changes the program’s meaning.
 
 ::: {.concept-diagram}
-A dictionary is a lookup table. You provide a key; Python returns the value stored
-under that key.
+A dictionary connects unique lookup keys to values; the name references the
+complete mapping rather than one pair.
 
 ```{mermaid}
 %%| echo: false
 %%| eval: true
 flowchart LR
-  key1["key<br/>'name'"] --> value1["value<br/>'Ada'"]
-  key2["key<br/>'role'"] --> value2["value<br/>'programmer'"]
-  key3["key<br/>'language'"] --> value3["value<br/>'Python'"]
-  lookup["person['name']"] --> key1
-  value1 --> result["result<br/>'Ada'"]
+    A["creature_energy"] --> B["dictionary"]
+    B --> C["mossling key"]
+    C --> D["30 value"]
+    B --> E["skyfin key"]
+    E --> F["55 value"]
 ```
 
-When a `KeyError` appears, compare the key you asked for with the keys actually
-inside the dictionary.
 :::
 
-## 1. Key-value pairs
-
-A dictionary is written with curly braces. Each pair has a key, a colon, and a
-value.
-
-```python
-person = {"name": "Ada", "role": "programmer"}
-```
-
-Read this as: the key `"name"` maps to the value `"Ada"`; the key `"role"`
-maps to the value `"programmer"`.
-
-### Example 1
-Predict the two printed outputs before running the code.
-
-```python
-person = {"name": "Ada", "role": "programmer"}
-print(person["name"])
-person["language"] = "Python"
-print(person)
-```
-
-### Step-by-step explanation
-
-1. `person = {"name": "Ada", "role": "programmer"}`
-   - Python creates a dictionary with two key-value pairs.
-2. `person["name"]`
-   - Python looks for the key `"name"`.
-   - It returns the value `"Ada"`.
-3. `person["language"] = "Python"`
-   - This adds a new key-value pair.
-   - If the key already existed, it would replace the old value.
-4. `print(person)` displays the dictionary.
-
-### Keys must be unique
-
-A dictionary cannot keep two different values for the same key:
-
-```python
-scores = {"Ada": 90, "Ada": 95}
-print(scores)
-```
-
-The later value wins, so the dictionary contains only `{"Ada": 95}`.
-
-### Common mistakes
-
-::: {.callout-warning title="Common mistake"}
-**Mistake: asking for a key that is not there.**
-
-```python
-person = {"name": "Ada"}
-print(person["email"])
-```
-
-This raises `KeyError`. Python is telling you: "I looked for this key and did
-not find it."
-:::
-
-### Check your understanding
+### Checkpoint: lookup and missing states
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "dictionaries-basics-checkpoint",
-  "title": "Dictionary basics checkpoint",
-  "instructions": "Choose an answer, then check your work.",
+  "id": "unit3-dictionaries-lookup-missing",
+  "title": "Dictionary lookup checkpoint",
+  "instructions": "Choose the operation that preserves the intended missing-data meaning.",
   "questions": [
     {
-      "id": "lookup-name",
-      "prompt": "What does person[\"name\"] do?",
-      "options": [
-        "Looks up the value stored under the key \"name\".",
-        "Returns the first item by position.",
-        "Deletes the key \"name\".",
-        "Converts the dictionary to a string."
-      ],
+      "id": "membership-side",
+      "prompt": "What does `'mossling' in catalog` check for a dictionary?",
+      "options": ["Whether `'mossling'` is a key", "Whether every value equals `'mossling'`", "Whether `'mossling'` is the first inserted value", "Whether the dictionary has exactly one pair"],
       "answer_index": 0,
-      "explanation": "Dictionary square-bracket lookup uses a key, not a numeric position."
+      "explanation": "Direct dictionary membership tests keys."
     },
     {
-      "id": "unique-keys",
-      "prompt": "What happens if the same key appears twice in a dictionary literal?",
-      "options": [
-        "Both values are stored under the same key.",
-        "The later value for that key wins.",
-        "Python always raises SyntaxError.",
-        "The key becomes a list automatically."
-      ],
+      "id": "required-key",
+      "prompt": "Which expression makes an absent required key fail with `KeyError`?",
+      "options": ["`catalog.get('dragon')`", "`catalog['dragon']`", "`'dragon' in catalog`", "`catalog.values()`"],
       "answer_index": 1,
-      "explanation": "A dictionary stores one value per key."
+      "explanation": "Square-bracket lookup requires the key and raises KeyError when it is absent."
     },
-    {
-      "id": "missing-key",
-      "prompt": "What error usually appears when you directly access a missing dictionary key?",
-      "options": [
-        "IndexError",
-        "NameError",
-        "KeyError",
-        "IndentationError"
-      ],
-      "answer_index": 2,
-      "explanation": "KeyError means Python could not find the requested key."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 2. Safe lookup and dictionary loops
-
-When a key might be missing, check before direct lookup.
-
-```python
-person = {"name": "Ada"}
-
-if "email" in person:
-    print(person["email"])
-else:
-    print("No email saved yet.")
-```
-
-You can also use `.get()` to provide a default value:
-
-```python
-email = person.get("email", "No email saved yet.")
-print(email)
-```
-
-### Looping through a dictionary
-
-```python
-scores = {"Ada": 95, "Grace": 98}
-
-for name, score in scores.items():
-    print(f"{name}: {score}")
-```
-
-`.items()` gives key-value pairs. In this example, each pair is unpacked into
-`name` and `score`.
-
-Other common loops:
-
-```python
-for name in scores:
-    print(name)              # keys
-
-for score in scores.values():
-    print(score)             # values
-
-for name, score in scores.items():
-    print(name, score)       # key and value together
-```
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "dictionaries-lookup-looping-checkpoint",
-  "title": "Lookup and looping checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
     {
       "id": "get-default",
-      "prompt": "What does person.get(\"email\", \"none\") do if email is missing?",
-      "options": [
-        "Creates a syntax error.",
-        "Deletes the dictionary.",
-        "Returns the key \"email\".",
-        "Returns \"none\" instead of raising KeyError."
-      ],
-      "answer_index": 3,
-      "explanation": ".get(key, default) returns the default when the key is absent."
+      "prompt": "What does `counts.get('north', 0)` return when `'north'` is absent?",
+      "options": ["It raises `IndexError`.", "It adds `'north': 0` and returns the dictionary.", "It returns `0` without adding the key.", "It always returns `None`."],
+      "answer_index": 2,
+      "explanation": "get() returns the supplied default for absence and does not mutate the dictionary."
     },
     {
-      "id": "items-loop",
-      "prompt": "What does scores.items() provide in a loop?",
-      "options": [
-        "Key-value pairs.",
-        "Only values.",
-        "Only numeric indexes.",
-        "A sorted copy every time."
-      ],
-      "answer_index": 0,
-      "explanation": ".items() is used when you need both the key and the value."
+      "id": "stored-none",
+      "prompt": "How can code distinguish an absent key from a key whose value is `None`?",
+      "options": ["Call `.get()` twice.", "Compare the dictionary with `None`.", "Use `.count(None)`.", "Check `key in mapping` as well as retrieving the value."],
+      "answer_index": 3,
+      "explanation": "Membership reports whether the key exists even when the associated value is None."
     }
   ]
 }
@@ -250,145 +190,529 @@ for name, score in scores.items():
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. Counting, grouping, and records
+## 3. Add and replace pairs with assignment
 
-Dictionaries shine when you update values by key.
-
-### Counting words
+Assignment through a key adds an absent pair or replaces an existing value:
 
 ```python
-words = ["red", "blue", "red", "green", "blue", "red"]
-counts = {}
+creature_energy = {"mossling": 30, "skyfin": 55}
 
-for word in words:
-    if word not in counts:
-        counts[word] = 0
-    counts[word] = counts[word] + 1
+creature_energy["emberfox"] = 42
+creature_energy["mossling"] = 35
 
-print(counts)
+print(creature_energy)
 ```
 
-### Step-by-step explanation
+The dictionary now has three keys. Replacing `mossling` does not move it to the
+end; its original insertion position remains.
 
-- `counts = {}` starts with an empty dictionary.
-- The loop visits one word at a time.
-- If a word is not yet a key, the code creates it with count `0`.
-- Then the count increases by `1`.
-
-The final result is `{"red": 3, "blue": 2, "green": 1}`.
-
-### Using dictionaries as records
-
-A dictionary can represent one record:
+`.update()` applies several pairs in place:
 
 ```python
-student = {
-    "name": "Ada",
-    "score": 95,
-    "passed": True,
-}
+catalog = {"mossling": 30, "skyfin": 55}
+changes = {"skyfin": 60, "emberfox": 42}
 
-print(f"{student['name']} scored {student['score']}.")
+result = catalog.update(changes)
+
+print(catalog)
+print(result)
 ```
 
-This is common in data science because one row of data often has named fields.
+The existing `skyfin` value is replaced, `emberfox` is added, and the method
+returns `None`.
 
-### Common mistakes
-
-::: {.callout-warning title="Common mistake"}
-**Mistake: trying to update a count before the key exists.**
+The merge operator creates a new dictionary:
 
 ```python
-counts = {}
-counts["red"] = counts["red"] + 1
+original = {"mossling": 30, "skyfin": 55}
+changes = {"skyfin": 60, "emberfox": 42}
+
+merged = original | changes
+
+print(original)
+print(merged)
 ```
 
-The lookup `counts["red"]` fails because the key has not been created yet. Check
-with `if "red" not in counts`, or use `.get()`:
+When both operands contain the same key, the right operand’s value wins. The
+original mapping remains unchanged.
+
+The in-place merge operator changes its left operand:
 
 ```python
-counts["red"] = counts.get("red", 0) + 1
+working_catalog = {"mossling": 30}
+working_catalog |= {"skyfin": 55}
+print(working_catalog)
 ```
-:::
 
-### Practice
+Choose from the state requirement: use `|` when both inputs must remain available;
+use update/assignment when the existing working mapping is meant to change.
 
-In Colab, count letters in a short word:
+## 4. Remove a pair and know what is returned
+
+`pop(key)` removes a requested key and returns its value:
 
 ```python
-word = "banana"
-counts = {}
+catalog = {"mossling": 30, "skyfin": 55, "emberfox": 42}
+retired_energy = catalog.pop("skyfin")
 
-for letter in word:
-    counts[letter] = counts.get(letter, 0) + 1
-
-print(counts)
+print(retired_energy)
+print(catalog)
 ```
 
-Before running, predict which letter has the largest count.
+An absent key raises `KeyError`, unless you supply a default:
 
-### Check your understanding
+```python
+missing_energy = catalog.pop("dragon", None)
+print(missing_energy)
+```
+
+No pair is added. Use a default only when absence is an expected state; it can
+otherwise hide a misspelled key.
+
+`del` removes without returning the value:
+
+```python
+catalog = {"mossling": 30, "skyfin": 55}
+del catalog["mossling"]
+print(catalog)
+```
+
+`popitem()` removes and returns the most recently inserted remaining pair:
+
+```python
+catalog = {"mossling": 30, "skyfin": 55, "emberfox": 42}
+last_pair = catalog.popitem()
+
+print(last_pair)
+print(type(last_pair).__name__)
+```
+
+The result is the tuple `('emberfox', 42)`. This is useful for last-in processing,
+not for choosing an arbitrary key. Calling it on an empty dictionary raises
+`KeyError`.
+
+`clear()` removes all pairs and returns `None`.
+
+## 5. Views stay connected to the dictionary
+
+`.keys()`, `.values()`, and `.items()` expose different sides of a mapping:
+
+```python
+catalog = {"mossling": 30, "skyfin": 55}
+
+keys = catalog.keys()
+values = catalog.values()
+pairs = catalog.items()
+
+print(keys)
+print(values)
+print(pairs)
+```
+
+These are **view objects**, not frozen list snapshots. If the mapping changes,
+the views reflect its current state:
+
+```python
+keys = catalog.keys()
+catalog["emberfox"] = 42
+
+print(keys)
+print("emberfox" in keys)
+```
+
+Create a list explicitly when you need a separate positional snapshot:
+
+```python
+key_snapshot = list(catalog.keys())
+catalog["cloudwhale"] = 90
+
+print(key_snapshot)
+print(list(catalog.keys()))
+```
+
+### Direct traversal supplies keys
+
+```python
+catalog = {"mossling": 30, "skyfin": 55}
+
+for creature_id in catalog:
+    print(creature_id)
+```
+
+Use `.values()` when only values matter, or `.items()` to unpack key-value tuples:
+
+```python
+for creature_id, energy in catalog.items():
+    print(f"{creature_id}: {energy}")
+```
+
+Do not write `for key, value in catalog:` and expect pairs. Direct traversal
+receives each key; a string key might then be incorrectly unpacked character by
+character or fail from the wrong length.
+
+### Checkpoint: updates, removals, and views
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "dictionaries-patterns-checkpoint",
-  "title": "Dictionary patterns checkpoint",
-  "instructions": "Choose an answer, then check your work.",
+  "id": "unit3-dictionaries-updates-views",
+  "title": "Updates, removals, and views checkpoint",
+  "instructions": "Track mutation, return values, duplicate keys, and traversal inputs.",
   "questions": [
     {
-      "id": "counter-start",
-      "prompt": "Why does the counting example create counts[word] = 0 before adding 1?",
-      "options": [
-        "Because dictionaries can only store zeros.",
-        "Because the key must exist before direct lookup can read its old value.",
-        "Because loops require every value to start as a string.",
-        "Because print() needs it."
-      ],
+      "id": "merge-winner",
+      "prompt": "What is `({'x': 1} | {'x': 9})['x']`?",
+      "options": ["`9`", "`1`", "`[1, 9]`", "A duplicate-key error"],
+      "answer_index": 0,
+      "explanation": "For duplicate keys, the right mapping's value wins in a merge."
+    },
+    {
+      "id": "pop-value",
+      "prompt": "What does `removed = catalog.pop('skyfin')` store in `removed`?",
+      "options": ["The changed dictionary", "The value associated with `'skyfin'`", "The key string `'skyfin'`", "Always `None`"],
       "answer_index": 1,
-      "explanation": "You cannot read counts[word] until that key exists."
+      "explanation": "Dictionary pop removes a specified key and returns its associated value."
     },
     {
-      "id": "record-use",
-      "prompt": "Why is a dictionary useful as a student record?",
-      "options": [
-        "It only stores values by numeric position.",
-        "It prevents any value from changing.",
-        "It stores named fields such as name, score, and passed.",
-        "It automatically writes a file."
-      ],
+      "id": "dynamic-view",
+      "prompt": "What happens to a previously created `keys = catalog.keys()` view after a new key is added?",
+      "options": ["It becomes invalid.", "It remains a frozen two-key list.", "It reflects the dictionary's current keys.", "It turns into a set automatically."],
       "answer_index": 2,
-      "explanation": "Record-like dictionaries connect meaningful field names to values."
+      "explanation": "Dictionary views are dynamic windows onto the current mapping."
     },
     {
-      "id": "get-count",
-      "prompt": "What does counts.get(letter, 0) + 1 accomplish?",
-      "options": [
-        "Always returns 0.",
-        "Deletes missing letters.",
-        "Sorts all dictionary keys.",
-        "Uses the old count if present, otherwise starts from 0, then adds 1."
-      ],
+      "id": "direct-loop",
+      "prompt": "What values does `for item in catalog:` receive?",
+      "options": ["Only dictionary values", "Numeric positions", "Two-item lists", "Dictionary keys"],
       "answer_index": 3,
-      "explanation": ".get() is a compact way to handle a missing key while counting."
+      "explanation": "Direct dictionary traversal supplies keys in insertion order."
     }
   ]
 }
 </script>
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Keys must be unique and hashable
+
+Writing a duplicate key in one literal retains the last value:
+
+```python
+levels = {"mossling": 1, "mossling": 2}
+print(levels)
+```
+
+The dictionary contains one pair: `"mossling": 2`. Duplicate key syntax is not a
+way to store several values; use a list as the one value when grouping is the job.
+
+Common immutable scalar values—strings, integers, and suitable tuples—can be keys:
+
+```python
+terrain = {
+    (12, 7): "vault",
+    (5, 3): "garden",
+}
+
+print(terrain[(12, 7)])
+```
+
+A list cannot be a key:
+
+```python
+invalid_catalog = {[12, 7]: "vault"}
+```
+
+Python raises `TypeError: unhashable type: 'list'`. A key must have a stable hash
+and equality behavior while it participates in the dictionary. Unit 6 develops
+the full rule; for now, stable IDs and immutable coordinate tuples are safe,
+readable choices.
+
+::: {.callout-note title="Lookup is the dictionary's strength"}
+A dictionary is designed to find a value from its key without scanning every pair
+in the ordinary case. Searching for an arbitrary value still requires inspecting
+values unless the program maintains a second reverse lookup. Use this cost
+intuition to choose a shape; Unit 7 treats algorithmic efficiency more formally.
+:::
+
+## 7. One dictionary can represent one named record
+
+Keys make heterogeneous fields readable:
+
+```python
+creature = {
+    "id": "mossling",
+    "energy": 30,
+    "habitat": "riverbank",
+    "discovered": True,
+    "nickname": None,
+}
+
+print(creature["habitat"])
+creature["energy"] = 35
+```
+
+`creature["energy"]` explains its meaning more clearly than `creature[1]` when
+the record has several fields. Keep field names consistent across similar records;
+Lesson 7 shows how malformed nested shapes fail.
+
+An optional field may be absent, explicitly `None`, or an empty collection. Those
+states should be chosen, not accidentally collapsed:
+
+```python
+record = {"id": "skyfin", "nickname": None, "sightings": []}
+
+assert "notes" not in record
+assert "nickname" in record and record["nickname"] is None
+assert "sightings" in record and record["sightings"] == []
+```
+
+## 8. Dictionaries also count and group
+
+For a counter, each distinct item becomes a key and its occurrence count becomes
+the value:
+
+```python
+regions = ["north", "east", "north", "west", "north"]
+counts = {}
+
+for region in regions:
+    counts[region] = counts.get(region, 0) + 1
+
+print(counts)
+```
+
+Trace the first `"north"`: it is absent, so `.get(..., 0)` supplies zero; adding
+one stores `1`. The later occurrences retrieve and increment the existing value.
+The loop pattern itself is developed further in Unit 4; here the important model
+is `{value_being_counted: count}`.
+
+A grouping dictionary maps each category to a list of complete items:
+
+```python
+observations = (
+    ("north", "mossling"),
+    ("east", "skyfin"),
+    ("north", "emberfox"),
+)
+groups = {}
+
+for region, creature_id in observations:
+    if region not in groups:
+        groups[region] = []
+    groups[region].append(creature_id)
+
+print(groups)
+```
+
+After the explicit steps make sense, `.setdefault()` can express “retrieve the
+list, creating it if absent”:
+
+```python
+groups = {}
+
+for region, creature_id in observations:
+    groups.setdefault(region, []).append(creature_id)
+```
+
+`.setdefault(key, default)` inserts the default only when the key is absent and
+then returns the stored value. It is concise, but do not use it before you can
+explain which list receives `.append()`.
+
+## 9. A shallow copy separates only the outer mapping
+
+```python
+source = {
+    "name": "mossling",
+    "skills": ["hide", "heal"],
+}
+snapshot = source.copy()
+
+snapshot["name"] = "elder mossling"
+snapshot["skills"].append("glow")
+
+print(source)
+print(snapshot)
+```
+
+The top-level `"name"` fields differ because the outer dictionaries are separate.
+Both `"skills"` keys still refer to the same nested list, so both displays include
+`"glow"`. `dict(source)` and `{**source}` also make shallow outer copies. Unit 6
+owns the choice between shared nested state, deliberate reconstruction, and deep
+copying.
+
+### Checkpoint: records, counters, and grouping
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-dictionaries-modeling",
+  "title": "Dictionary modeling checkpoint",
+  "instructions": "Choose the mapping shape that preserves the required relationship.",
+  "questions": [
+    {
+      "id": "named-record",
+      "prompt": "Which expression reads the energy field from a dictionary record named `creature`?",
+      "options": ["`creature['energy']`", "`creature.energy()`", "`creature[energy]` when no such name exists", "`creature.index('energy')`"],
+      "answer_index": 0,
+      "explanation": "A string field key provides direct named lookup in the record mapping."
+    },
+    {
+      "id": "counter-shape",
+      "prompt": "Which mapping best represents occurrence counts for regions?",
+      "options": ["`{1: 'north', 2: 'east'}`", "`{'north': 3, 'east': 1}`", "`{'north', 'east'}`", "`('north', 3, 'east', 1)`"],
+      "answer_index": 1,
+      "explanation": "A counter maps each distinct value to the number of times it occurred."
+    },
+    {
+      "id": "group-shape",
+      "prompt": "Which shape keeps every creature grouped under its region?",
+      "options": ["`{'north': 2}`", "`['north', 'mossling']`", "`{'north': ['mossling', 'emberfox']}`", "`{'north', 'mossling', 'emberfox'}`"],
+      "answer_index": 2,
+      "explanation": "A grouping dictionary uses the category as key and a collection of matching items as its value."
+    },
+    {
+      "id": "shallow-copy",
+      "prompt": "After `copy = source.copy()`, why can `copy['skills'].append('glow')` affect `source`?",
+      "options": ["Dictionary keys are always global.", "copy() returns the same outer dictionary.", "append() ignores its receiver.", "Both outer dictionaries may still refer to the same nested skills list."],
+      "answer_index": 3,
+      "explanation": "Dictionary copy is shallow: it separates the outer mapping while retaining current value references."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Build a creature codex
+
+Preserve the source tuple of records while producing a direct lookup, a working
+update, habitat counts, and grouped creature IDs.
+
+```python
+source_creatures = (
+    {"id": "mossling", "energy": 30, "habitat": "river"},
+    {"id": "skyfin", "energy": 55, "habitat": "cliffs"},
+    {"id": "emberfox", "energy": 42, "habitat": "river"},
+)
+
+creatures_by_id = {}
+working_mossling = None
+habitat_counts = {}
+creatures_by_habitat = {}
+removed_skyfin = None
+```
+
+Complete these stages:
+
+1. traverse the source and map each creature ID to its complete record;
+2. create a separate outer dictionary for the mossling record and increase only
+   that working energy to `35`;
+3. count records by habitat;
+4. group creature IDs into lists by habitat;
+5. create a separate working copy of the lookup and `pop()` the skyfin record;
+   store the returned record in `removed_skyfin`; and
+6. prove that the source tuple and original lookup still contain their original
+   data.
+
+```python
+assert list(creatures_by_id) == ["mossling", "skyfin", "emberfox"]
+assert creatures_by_id["skyfin"]["energy"] == 55
+assert working_mossling == {
+    "id": "mossling",
+    "energy": 35,
+    "habitat": "river",
+}
+assert source_creatures[0]["energy"] == 30
+assert habitat_counts == {"river": 2, "cliffs": 1}
+assert creatures_by_habitat == {
+    "river": ["mossling", "emberfox"],
+    "cliffs": ["skyfin"],
+}
+assert removed_skyfin["id"] == "skyfin"
+assert "skyfin" in creatures_by_id
+assert source_creatures == (
+    {"id": "mossling", "energy": 30, "habitat": "river"},
+    {"id": "skyfin", "energy": 55, "habitat": "cliffs"},
+    {"id": "emberfox", "energy": 42, "habitat": "river"},
+)
+```
+
+Then add a fourth source record in habitat `"cliffs"`. Rerun cleanly and update
+the expected order, count, and group without hard-coding a special case for that
+creature.
+
+<details>
+<summary>Hint: build each dictionary around one lookup question</summary>
+
+For the direct lookup, assign `record["id"]` as a key and the complete `record` as
+its value. Copy the mossling record before replacing its energy. For each habitat,
+use `.get(habitat, 0) + 1` in the counter and create a list before appending in the
+grouping dictionary. Pop from a copy of the complete lookup.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+source_creatures = (
+    {"id": "mossling", "energy": 30, "habitat": "river"},
+    {"id": "skyfin", "energy": 55, "habitat": "cliffs"},
+    {"id": "emberfox", "energy": 42, "habitat": "river"},
+)
+
+creatures_by_id = {}
+habitat_counts = {}
+creatures_by_habitat = {}
+
+for record in source_creatures:
+    creature_id = record["id"]
+    habitat = record["habitat"]
+    creatures_by_id[creature_id] = record
+    habitat_counts[habitat] = habitat_counts.get(habitat, 0) + 1
+    if habitat not in creatures_by_habitat:
+        creatures_by_habitat[habitat] = []
+    creatures_by_habitat[habitat].append(creature_id)
+
+working_mossling = creatures_by_id["mossling"].copy()
+working_mossling["energy"] = 35
+
+working_lookup = creatures_by_id.copy()
+removed_skyfin = working_lookup.pop("skyfin")
+```
+
+The lookup values deliberately share the untouched source records. The lab never
+mutates those nested records. The one edited record is copied first, and the one
+removed pair is popped from a separate outer lookup.
+
+</details>
+
+## 11. Explain the mapping decisions
+
+1. When is square-bracket lookup better evidence than `.get()`?
+2. Why does dictionary membership not answer whether a value occurs?
+3. What do `update()` and `|` do differently to their input mappings?
+4. Why is a dictionary view different from `list(dictionary)`?
+5. Which question is answered by a record, a counter, a grouping, and a direct
+   lookup?
 
 ## Key points
 
 ::: {.callout-tip title="Key points"}
-- Dictionaries map keys to values.
-- Keys are used for lookup and must be unique.
-- A missing key raises `KeyError` when accessed with square brackets.
-- Use `in` or `.get()` when a key may be absent.
-- `.items()` is useful when you need both key and value in a loop.
-- Dictionaries are useful for records, counters, grouping, and settings.
+- Dictionaries map unique hashable keys to values and preserve insertion order.
+- Square brackets require a key; `.get()` supports expected absence; membership
+  distinguishes an absent key from a stored `None`.
+- Assignment and `update()` mutate; `|` creates a new merged dictionary; the
+  right-side value wins for duplicate keys.
+- `pop()` returns a removed value, `popitem()` returns the latest pair, and `del`
+  removes without returning the value.
+- Keys, values, and item views remain connected to the mapping; direct traversal
+  supplies keys.
+- Dictionaries can model named records, keyed lookups, counters, and groups.
+- `.copy()` creates a separate outer mapping but retains nested value references.
 :::
 
 ## References
 
-- Python Tutorial: dictionaries: https://docs.python.org/3/tutorial/datastructures.html#dictionaries
-- Python standard types: mapping types: https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
+- [Python tutorial: dictionaries](https://docs.python.org/3/tutorial/datastructures.html#dictionaries)
+- [Python standard types: mapping types and dictionary operations](https://docs.python.org/3/library/stdtypes.html#mapping-types-dict)
+- [Python standard types: dictionary view objects](https://docs.python.org/3/library/stdtypes.html#dictionary-view-objects)
+- [Python built-in function: `dict`](https://docs.python.org/3/library/functions.html#func-dict)

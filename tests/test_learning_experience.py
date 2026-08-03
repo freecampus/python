@@ -148,7 +148,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
     lesson_ids: set[str] = set()
 
     assert catalog["schema_version"] == 2
-    assert catalog["curriculum_version"] == 7
+    assert catalog["curriculum_version"] == 8
     for course in courses:
         assert "modules" not in course
         course_total = 0
@@ -196,7 +196,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
         if _front_matter(page).get("lesson_id")
     }
     assert owned_paths == expected
-    assert len(lesson_ids) == 99
+    assert len(lesson_ids) == 101
 
 
 def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
@@ -263,8 +263,8 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         assert notebook not in notebook_paths, page
         notebook_paths.add(notebook)
 
-    assert len(public_pages) == 116
-    assert len(notebook_paths) == 116
+    assert len(public_pages) == 118
+    assert len(notebook_paths) == 118
 
 
 def test_course_homes_and_sidebars_match_catalog() -> None:
@@ -382,11 +382,18 @@ def test_foundations_has_versioned_course_sequence() -> None:
     )
     completion = foundations["completion"]
     lesson_ids = set(completion["lesson_ids"])
+    home_path = Path("docs/courses/python-foundations/index.qmd")
+    home_metadata = _front_matter(home_path)
+    home_text = home_path.read_text()
+    progress_ids_match = re.search(r'data-course-lesson-ids="([^"]+)"', home_text)
 
-    assert completion["curriculum_version"] == 7
-    assert completion["rule_version"] == 7
+    assert completion["curriculum_version"] == 8
+    assert completion["rule_version"] == 8
     assert completion["recognition"] == "local-self-reported"
-    assert len(lesson_ids) == foundations["lesson_count"] == 84
+    assert len(lesson_ids) == foundations["lesson_count"] == 86
+    assert home_metadata["lesson_ids"] == completion["lesson_ids"]
+    assert progress_ids_match is not None
+    assert progress_ids_match.group(1).split() == completion["lesson_ids"]
     assert "required_lesson_count" not in foundations
     assert "optional_lesson_count" not in foundations
 
@@ -504,7 +511,7 @@ def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None
     intermediate = by_id["intermediate-python"]
     advanced = by_id["advanced-python"]
 
-    assert foundations["lesson_count"] == 84
+    assert foundations["lesson_count"] == 86
     assert [unit["id"] for unit in foundations["units"]] == [
         "get-started",
         "python-syntax",

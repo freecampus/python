@@ -1,6 +1,6 @@
 ---
-title: Collections and Iteration Overview
-description: Choose a data structure based on order, lookup, uniqueness, mutability, and data shape, then traverse it without losing meaning.
+title: Organizing and Traversing Collections Overview
+description: Learn how lists, tuples, dictionaries, sets, traversal, sorting, and nested shapes keep related Python values useful and understandable.
 course_id: python-foundations
 unit_id: collections-iteration
 unit_number: 3
@@ -13,55 +13,220 @@ colab_notebook: notebooks/courses/python-foundations/units/collections-iteration
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 3
-- **Estimated time:** 5–10 hours including the challenge
-- **Unit outcome:** Choose a data structure based on order, lookup, uniqueness, mutability, and data shape, then traverse it without losing meaning.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 45–75 minutes for orientation and readiness work
+- **You will learn:** Choose a collection from the relationships the program must preserve, then follow the seven-lesson route through traversal, sorting, and nested data.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. One game state needs four collection jobs
 
-Choose a data structure based on order, lookup, uniqueness, mutability, and data shape, then traverse it without losing meaning.
+Imagine a small exploration game. Its current state contains an ordered route,
+a fixed map coordinate, a named player record, and a group of unique skills:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+```python
+route = ["dock", "garden", "observatory", "vault"]
+position = (12, 7)
+player = {"name": "Nova", "energy": 80, "rank": "scout"}
+skills = {"mapping", "translation", "repair"}
 
-## 2. Before you start
+print(route[0])
+print(position)
+print(player["energy"])
+print("repair" in skills)
+```
 
-**Prior knowledge:** Complete Unit 2 and bring its challenge notes and debugging record.
+All four values hold several other values, but they do not promise the same
+behavior:
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+- a **list** keeps a deliberate order and can grow, shrink, or change;
+- a **tuple** keeps a fixed sequence of positions;
+- a **dictionary** connects unique keys with values; and
+- a **set** keeps unique members for fast membership and group comparisons.
 
-## 3. Lessons
+The question is not “Which collection is best?” There is no best collection in
+isolation. The useful question is “Which relationships must this part of the
+program preserve?”
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Lists: Ordered, Mutable Collections](lists.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Tuples, Ranges, Packing, and Unpacking](tuples-ranges-packing.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Dictionaries: Records, Lookup, and Counting](dictionaries.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Sets and Frozen Sets: Uniqueness and Membership](sets-frozen-sets.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Nested Data, Iterables, Sorting, and Choosing a Collection](nested-data-iterables-sorting.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
-
-## 4. How to study this unit
-
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
-
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+::: {.callout-tip title="Say the job before naming the type"}
+“Keep every checkpoint in visit order, including repeats” points toward a list.
+“Find the player’s energy by the key `energy`” points toward a dictionary. A
+precise statement of the job usually makes the Python type easier to choose.
 :::
 
-## 5. Unit evidence
+## 2. Choose from the question the program asks
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+Use these decision axes before reaching for familiar syntax:
 
-<!-- fcpython-chapter-lab: end -->
+| Program requirement | Collection to consider | Important trade-off |
+|---|---|---|
+| Preserve position and permit edits | `list` | Finding an arbitrary value usually scans the list. |
+| Preserve a small fixed positional record | `tuple` | Its positions cannot be replaced, added, or removed. |
+| Look up a value by a stable unique key | `dict` | Keys must be hashable and communicate real identity. |
+| Remove duplicates or compare membership groups | `set` | It offers no numeric position or display-order promise. |
+| Keep an immutable set value | `frozenset` | It cannot be changed after construction. |
+
+Ask six questions about new data:
+
+1. Does **order** carry meaning?
+2. Are **duplicates** meaningful or noise?
+3. Will the program ask by **position**, by **key**, or only by membership?
+4. Must the collection **change in place**?
+5. Do several fields belong to one **record**?
+6. Is the data **nested**, and can you describe the type at every level?
+
+One artifact can legitimately use several answers. For example, a list of
+dictionaries preserves record order while each dictionary gives fields names.
+
+## 3. Your path through this unit
+
+| Lesson | Capability you will build | Main lab artifact |
+|---:|---|---|
+| 1 | [Lists: Keeping Values in Order](lists.qmd) — index, slice, change, search, add, remove, copy, and explain method returns. | Adventure backpack |
+| 2 | [Tuples and Unpacking Fixed Records](tuples-unpacking.qmd) — recognize tuple syntax and unpack fixed or starred shapes. | Treasure-map clues |
+| 3 | [Dictionaries: Finding Values by Key](dictionaries.qmd) — distinguish missing keys, update mappings, use views, and build records, counters, and groups. | Creature codex |
+| 4 | [Sets: Uniqueness and Group Comparisons](sets-frozensets.qmd) — deduplicate, compare groups, and use immutable `frozenset` values. | Expedition skills |
+| 5 | [Visiting Items in a Collection](traversing-collections.qmd) — trace what lists, dictionaries, ranges, `enumerate()`, and `zip()` supply. | Route manifest |
+| 6 | [Sorting Collections Without Losing Meaning](sorting-collections.qmd) — rank values and complete records with an explicit stable policy. | Tournament leaderboard |
+| 7 | [Building and Reading Nested Data](nested-data-collection-choice.qmd) — navigate one level at a time and refactor shapes for new questions. | Game-world archive |
+
+The [Unit Challenge](challenge.qmd) combines those capabilities in a signal-vault
+puzzle. You will decode an ordered archive without mutating its evidence.
+
+## 4. What you already know from Unit 2
+
+This unit builds on scalar values rather than replacing them. You will reuse:
+
+- integers for positions, counts, and scores;
+- strings for IDs, labels, and the final decoded message;
+- `None` for a deliberately missing value;
+- comparisons and Boolean values for assertions and membership facts;
+- string indexing, slicing, and `"".join(...)`; and
+- errors as evidence about a value’s type and the attempted operation.
+
+Collections answer a different layer of the design question. `80` can represent
+one energy value; `{"energy": 80}` preserves the relationship between the label
+and that value; a list of such dictionaries preserves several player records in
+an order.
+
+## 5. Simple traversal now, full control flow next
+
+You need a small amount of `for`-loop syntax to observe what collections supply:
+
+```python
+signals = ["north", "east", "home"]
+
+for signal in signals:
+    print(signal)
+```
+
+Read this as “for each value supplied by `signals`, bind that value to `signal`
+and run the indented line.” The loop visits every list item in order.
+
+Unit 3 uses simple traversal to explain collection behavior. [Unit
+4](../decisions-repetition/index.qmd) develops conditional rules, accumulators,
+filtering, `break`, `continue`, nested loops, `while` loops, and comprehensions.
+When a Unit 3 lab supplies a small `if` statement, the collection decision—not
+the branching syntax—is the work being assessed.
+
+## 6. Set up a collection laboratory
+
+State changes are easier to understand when one notebook cell has one purpose.
+Use a five-part layout:
+
+```python
+# 1. Untouched source evidence
+source_route = ["dock", "garden", "vault"]
+
+# 2. A deliberate working copy
+working_route = source_route.copy()
+
+# 3. One operation under investigation
+removed_stop = working_route.pop(1)
+
+# 4. Observable facts
+print(removed_stop)
+print(source_route)
+print(working_route)
+
+# 5. Checks that state the promises
+assert removed_stop == "garden"
+assert source_route == ["dock", "garden", "vault"]
+assert working_route == ["dock", "vault"]
+```
+
+Do not keep rerunning only the final cell after earlier state has changed. Use
+**Restart and run all** periodically so the notebook proves that its result can be
+reproduced from a clean state.
+
+::: {.callout-warning title="Printed braces are not a data model"}
+Two collection values can display with similar punctuation and still offer very
+different operations. Check `type(value).__name__`, inspect the construction
+syntax, and state the required relationship instead of guessing from appearance.
+:::
+
+## 7. Choose a realistic pace
+
+Unit 3 is planned for approximately **23–34 hours**, including reading, running
+examples, completing checkpoints, modifying code, doing the seven labs, and
+solving the challenge. That range is guidance, not a deadline.
+
+A sustainable rhythm is:
+
+1. complete one numbered section and its modification;
+2. stop after a checkpoint and explain one answer aloud;
+3. return for the next group of operations;
+4. do the final lab without opening its support first; and
+5. record one error, its actual cause, and the evidence that confirmed the repair.
+
+If the lab feels like copying rather than deciding, close the solution, change the
+input data, and rebuild the checks for the new case.
+
+## 8. Before you continue
+
+Run this readiness task from a clean cell:
+
+```python
+route = ["dock", "garden", "observatory"]
+position = (12, 7)
+pilot = {"name": "Nova", "energy": 80}
+skills = {"mapping", "repair", "mapping"}
+
+assert route[1] == "garden"
+assert position[0] == 12
+assert pilot["energy"] == 80
+assert skills == {"mapping", "repair"}
+
+print(f"{pilot['name']} starts at {route[0]} with {len(skills)} unique skills.")
+```
+
+Then make four changes:
+
+1. add `"vault"` to the end of `route`;
+2. replace the energy value with `95` by using its dictionary key;
+3. add one new unique skill; and
+4. prove with assertions that `position` and the original three route entries
+   still have the expected values.
+
+You are ready for Lesson 1 when you can point to the exact collection each line
+changes and explain why the other three values remain unchanged.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Choose a collection from the relationships and operations the program needs.
+- Lists preserve editable order, tuples preserve fixed positions, dictionaries
+  connect keys to values, and sets preserve unique membership.
+- Real programs combine collection types; nested shape should be deliberate.
+- Keep source evidence, working state, observations, and assertions separate.
+- Unit 3 owns collection behavior and simple traversal; Unit 4 develops complete
+  control-flow design.
+:::
+
+## References
+
+- [Python tutorial: data structures](https://docs.python.org/3/tutorial/datastructures.html)
+- [Python standard types: sequence, set, and mapping types](https://docs.python.org/3/library/stdtypes.html)
+- [Python built-in functions used with collections](https://docs.python.org/3/library/functions.html)

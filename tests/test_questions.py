@@ -565,7 +565,7 @@ def test_selected_lessons_include_mermaid_diagrams() -> None:
         FOUNDATIONS_ROOT / "units/collections-iteration/lists.qmd",
         FOUNDATIONS_ROOT / "units/collections-iteration/dictionaries.qmd",
         FOUNDATIONS_ROOT
-        / "units/collections-iteration/nested-data-iterables-sorting.qmd",
+        / "units/collections-iteration/nested-data-collection-choice.qmd",
         FOUNDATIONS_ROOT
         / "units/errors-exceptions-debugging/failure-categories-tracebacks.qmd",
         FOUNDATIONS_ROOT

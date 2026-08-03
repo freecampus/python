@@ -1,0 +1,595 @@
+---
+title: Tuples and Unpacking Fixed Records
+lesson_id: collections-iteration.tuples-unpacking
+lesson_order: 20
+description: Represent fixed positional records with tuples, unpack their values into meaningful names, and diagnose comma, immutability, length, and starred-shape boundaries.
+course_id: python-foundations
+unit_id: collections-iteration
+unit_number: 3
+execute:
+  echo: true
+categories:
+- python-foundations
+- collections-iteration
+- tuples
+- unpacking
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/collections-iteration/tuples-unpacking.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 3
+- **Estimated time:** 2.5–4 hours
+- **You will learn:** Use tuples for ordered fixed-shape values and unpack ordinary or starred shapes without confusing commas, parentheses, or mutability.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Give each clue position one fixed meaning
+
+A treasure scanner produces a row, a column, and a symbol together:
+
+```python
+clue = (12, 7, "N")
+
+print(clue)
+print(type(clue).__name__)
+print(len(clue))
+```
+
+This tuple is an ordered three-position record. Position 0 always means row,
+position 1 column, and position 2 symbol. Unlike an adventure backpack, the clue
+is not intended to gain or lose positions.
+
+Tuples work well for small values whose **length and positional meaning are
+fixed**: coordinates, RGB colors, database result rows, or the pair returned by
+`divmod()`. A dictionary is usually clearer when a record has many optional or
+self-describing fields.
+
+This lesson answers four practical questions:
+
+- What syntax creates zero-, one-, and many-item tuples?
+- Which sequence operations still work when positions cannot be changed?
+- How does unpacking make positional meaning visible through names?
+- When should a variable-length remainder use one starred target?
+
+## 2. The comma creates the tuple
+
+Parentheses make tuple boundaries easy to see, but the comma is the decisive
+syntax:
+
+```python
+parenthesized = (12, 7)
+packed = 12, 7
+
+assert parenthesized == packed
+assert type(packed) is tuple
+```
+
+This difference matters for a one-item tuple:
+
+```python
+not_a_tuple = (5)
+one_item_tuple = (5,)
+
+print(type(not_a_tuple).__name__)
+print(type(one_item_tuple).__name__)
+```
+
+`(5)` merely groups the integer expression. `(5,)` is a tuple containing one
+integer. A trailing comma is also accepted in longer tuples and makes multi-line
+editing safer:
+
+```python
+checkpoint = (
+    "garden",
+    12,
+    True,
+)
+```
+
+The empty tuple needs no comma:
+
+```python
+empty = ()
+also_empty = tuple()
+
+assert empty == also_empty
+```
+
+The `tuple()` constructor consumes values from another iterable:
+
+```python
+letters = tuple("NOVA")
+numbers = tuple([3, 1, 4])
+
+print(letters)
+print(numbers)
+```
+
+The string supplies individual characters; the list supplies its integer items.
+
+## 3. Read a tuple like any ordered sequence
+
+Tuples support length, indexing, negative indexing, slicing, membership, counting,
+and first-match search:
+
+```python
+clue = (12, 7, "N", "N")
+
+print(len(clue))
+print(clue[0])
+print(clue[-1])
+print(clue[1:3])
+print("N" in clue)
+print(clue.count("N"))
+print(clue.index("N"))
+```
+
+`clue[1:3]` is a new tuple because slicing preserves the sequence family. The
+count is two, and `index("N")` returns only the first matching position, index 2.
+
+As with a list, an absent numeric position raises `IndexError` and a missing value
+passed to `.index()` raises `ValueError`.
+
+### Tuple positions cannot be replaced
+
+```python
+coordinate = (12, 7)
+coordinate[0] = 13
+```
+
+Python raises `TypeError: 'tuple' object does not support item assignment`. Tuples
+also have no `.append()`, `.remove()`, or `.clear()` methods. To represent a
+different coordinate, create a different tuple:
+
+```python
+coordinate = (12, 7)
+moved_coordinate = (coordinate[0] + 1, coordinate[1])
+
+print(coordinate)
+print(moved_coordinate)
+```
+
+The original remains `(12, 7)`.
+
+### An immutable tuple can point to a mutable value
+
+```python
+mission = ("NOVA", ["map", "rope"])
+mission[1].append("torch")
+
+print(mission)
+```
+
+The tuple still has the same two positions and still refers to the same list in
+position 1. The nested list itself permits mutation. “A tuple is immutable” means
+its own sequence of references cannot be replaced, added, or removed; it does not
+promise that every reachable object is frozen. Unit 6 explores that object graph
+in depth.
+
+### Checkpoint: tuple syntax and immutability
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-tuples-syntax-immutability",
+  "title": "Tuple syntax and immutability checkpoint",
+  "instructions": "Identify the tuple and the boundary of its immutability.",
+  "questions": [
+    {
+      "id": "single-item",
+      "prompt": "Which expression creates a tuple containing only integer 5?",
+      "options": ["`(5,)`", "`(5)`", "`[5]`", "`{5}`"],
+      "answer_index": 0,
+      "explanation": "The comma creates the one-item tuple; parentheses alone only group the integer expression."
+    },
+    {
+      "id": "slice-type",
+      "prompt": "What type does `(10, 20, 30)[1:]` produce?",
+      "options": ["`list`", "`tuple`", "`int`", "`range`"],
+      "answer_index": 1,
+      "explanation": "Slicing a tuple returns a new tuple containing the selected positions."
+    },
+    {
+      "id": "replacement-error",
+      "prompt": "What happens when code evaluates `point[0] = 9` for a tuple?",
+      "options": ["The tuple grows.", "A list is created automatically.", "Python raises `TypeError` because tuple positions do not support assignment.", "Only the displayed value changes."],
+      "answer_index": 2,
+      "explanation": "A tuple's positions cannot be replaced in place."
+    },
+    {
+      "id": "nested-list",
+      "prompt": "Why can `(name, items)` appear to change after `items.append('key')`?",
+      "options": ["Appending replaces the tuple.", "Tuples become lists when named.", "The comma stops enforcing types.", "The tuple still refers to the same mutable list, whose contents changed."],
+      "answer_index": 3,
+      "explanation": "Tuple immutability protects its positions, not the internal state of mutable objects referenced there."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Unpack fixed positions into meaningful names
+
+Unpacking assigns each supplied position to a target name:
+
+```python
+clue = (12, 7, "N")
+row, column, symbol = clue
+
+print(row)
+print(column)
+print(symbol)
+```
+
+Read the assignment in two stages. Python evaluates the right side first and
+obtains three values. It then assigns the first to `row`, the second to `column`,
+and the third to `symbol`.
+
+The names expose meaning that `clue[0]`, `clue[1]`, and `clue[2]` hide:
+
+```python
+is_expected_clue = row == 12 and column == 7 and symbol == "N"
+print(is_expected_clue)
+```
+
+Parentheses around targets are optional:
+
+```python
+(red, green, blue) = (40, 80, 120)
+```
+
+Use them when they clarify a nested record boundary, not because unpacking
+requires them.
+
+### Target count must match value count
+
+```python
+row, column = (12, 7, "N")
+```
+
+Python raises `ValueError: too many values to unpack (expected 2)`.
+
+```python
+row, column, symbol = (12, 7)
+```
+
+This raises `ValueError: not enough values to unpack`. These errors are evidence
+that the supplied record shape disagrees with the assignment’s promised shape.
+Do not silence them by adding meaningless throwaway names until you understand
+which data contract changed.
+
+### Swap names without a temporary variable
+
+```python
+left = "map"
+right = "key"
+
+left, right = right, left
+
+print(left)
+print(right)
+```
+
+Python first packs the right-side values, then unpacks them into the left-side
+names. `left` becomes `"key"` and `right` becomes `"map"` without losing either
+original value.
+
+### Unpack values returned together
+
+`divmod()` returns quotient and remainder as a two-item tuple:
+
+```python
+complete_crates, leftover_items = divmod(29, 6)
+
+assert complete_crates == 4
+assert leftover_items == 5
+```
+
+Naming the two meanings immediately is clearer than retaining a value such as
+`result[0]` and `result[1]`.
+
+## 5. One starred target absorbs a variable-length remainder
+
+When the first and last positions have fixed meanings but the middle varies, use
+one starred target:
+
+```python
+first, *middle, last = ("N", "O", "V", "A")
+
+print(first)
+print(middle)
+print(last)
+print(type(middle).__name__)
+```
+
+`first` is `"N"`, `last` is `"A"`, and `middle` is the **list** `["O", "V"]`.
+The starred target always collects its share into a list, even when the source is
+a tuple.
+
+It can appear at the beginning or end:
+
+```python
+*earlier, latest = (4, 7, 9, 12)
+leader, *followers = ("Nova", "Mira", "Sol")
+
+print(earlier)
+print(latest)
+print(leader)
+print(followers)
+```
+
+One assignment may contain only one starred target because two stars would make
+the division ambiguous:
+
+```text
+*beginning, *ending = (1, 2, 3, 4)
+```
+
+The syntax is invalid before the program runs.
+
+An empty remainder is valid:
+
+```python
+first, *middle, last = ("N", "A")
+assert middle == []
+```
+
+There are still enough values for the two unstarred targets.
+
+### Checkpoint: ordinary and starred unpacking
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-tuples-unpacking-shapes",
+  "title": "Unpacking shapes checkpoint",
+  "instructions": "Match target shapes to the values Python supplies.",
+  "questions": [
+    {
+      "id": "fixed-unpack",
+      "prompt": "After `row, column = (4, 9)`, what is `row`?",
+      "options": ["`4`", "`(4, 9)`", "`9`", "`[4]`"],
+      "answer_index": 0,
+      "explanation": "The first supplied value is assigned to the first target name."
+    },
+    {
+      "id": "too-many",
+      "prompt": "Why does `a, b = (1, 2, 3)` raise `ValueError`?",
+      "options": ["Tuples cannot be assigned.", "Three supplied values cannot fit two ordinary targets.", "Integers cannot be unpacked from tuples.", "Parentheses are missing on the left."],
+      "answer_index": 1,
+      "explanation": "Without a starred target, the number of target names must match the supplied value count exactly."
+    },
+    {
+      "id": "starred-result",
+      "prompt": "What is `middle` after `first, *middle, last = ('N', 'O', 'V', 'A')`?",
+      "options": ["`('O', 'V')`", "`'OV'`", "`['O', 'V']`", "`{'O', 'V'}`"],
+      "answer_index": 2,
+      "explanation": "A starred assignment target collects its values into a new list."
+    },
+    {
+      "id": "empty-star",
+      "prompt": "What happens for `first, *middle, last = ('N', 'A')`?",
+      "options": ["`last` becomes `None`.", "The tuple gains an empty item.", "Python raises an unpacking error.", "`middle` becomes an empty list."],
+      "answer_index": 3,
+      "explanation": "The two values fill the ordinary targets, leaving an empty list for the starred target."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Choose tuple or list from the promised lifecycle
+
+Both types preserve order, allow duplicates, and support indexes and slices. The
+difference is what the program promises to do next:
+
+| Requirement | Prefer | Reason |
+|---|---|---|
+| Ordered collection that grows or shrinks | `list` | Its sequence structure is mutable. |
+| Small fixed positional record | `tuple` | Its length and positions cannot be changed. |
+| Named record fields | `dict` | Keys communicate meaning better than distant numeric positions. |
+| Unique membership with no positions | `set` | Uniqueness and group comparisons are its purpose. |
+
+Do not choose a tuple merely to prevent every possible change. A tuple containing
+mutable objects is not deeply frozen, and a value often needs validation beyond
+its container type. Choose it when fixed positional shape communicates the model.
+
+### Hashability is a practical preview
+
+Some tuples can be dictionary keys or set members:
+
+```python
+visited_coordinates = {(12, 7), (5, 3)}
+terrain_by_coordinate = {(12, 7): "vault", (5, 3): "garden"}
+
+print((12, 7) in visited_coordinates)
+print(terrain_by_coordinate[(5, 3)])
+```
+
+A tuple is hashable only when all values needed for equality are themselves
+hashable. A tuple containing a list is not:
+
+```python
+invalid_key = ("NOVA", [12, 7])
+catalog = {invalid_key: "signal"}
+```
+
+This raises `TypeError: unhashable type: 'list'`. Lessons 3 and 4 use the rule;
+Unit 6 explains hashability systematically.
+
+## 7. Decode the treasure-map clues
+
+The scanner supplies fixed clue records. Preserve the source tuple and derive
+named facts and a final word.
+
+```python
+source_clues = (
+    (12, 7, "N"),
+    (4, 11, "O"),
+    (9, 2, "V"),
+    (1, 5, "A"),
+)
+
+first_clue = None
+first_row = None
+first_column = None
+first_symbol = None
+remaining_clues = None
+second_row = None
+second_column = None
+second_symbol = None
+letters = None
+vault_word = None
+```
+
+Complete these stages:
+
+1. unpack the first clue and collect all remaining clues with a starred target;
+2. unpack the first clue into its three meaningful names;
+3. unpack the second clue from `remaining_clues`;
+4. create a tuple containing the four symbol positions; and
+5. join those symbols into the vault word.
+
+Use these progressive checks:
+
+```python
+assert source_clues[0] == (12, 7, "N")
+assert source_clues[-1] == (1, 5, "A")
+assert first_clue == (12, 7, "N")
+assert remaining_clues == [
+    (4, 11, "O"),
+    (9, 2, "V"),
+    (1, 5, "A"),
+]
+assert (first_row, first_column, first_symbol) == (12, 7, "N")
+assert (second_row, second_column, second_symbol) == (4, 11, "O")
+assert letters == ("N", "O", "V", "A")
+assert vault_word == "NOVA"
+assert source_clues == (
+    (12, 7, "N"),
+    (4, 11, "O"),
+    (9, 2, "V"),
+    (1, 5, "A"),
+)
+```
+
+For a boundary test, temporarily change one clue to `(4, 11)` and run the line
+that unpacks it into three names. Record the error message, restore the source,
+and explain why the failure is useful contract evidence.
+
+<details>
+<summary>Hint: reveal fixed meanings before assembling the word</summary>
+
+Use `first_clue, *remaining_clues = source_clues`. Ordinary three-name unpacking
+then exposes each clue. The final tuple can select index 2 from each of the four
+known fixed records, after which `"".join(letters)` produces text.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+source_clues = (
+    (12, 7, "N"),
+    (4, 11, "O"),
+    (9, 2, "V"),
+    (1, 5, "A"),
+)
+
+first_clue, *remaining_clues = source_clues
+first_row, first_column, first_symbol = first_clue
+second_row, second_column, second_symbol = remaining_clues[0]
+
+letters = (
+    first_symbol,
+    second_symbol,
+    source_clues[2][2],
+    source_clues[3][2],
+)
+vault_word = "".join(letters)
+```
+
+The final two numeric chains are acceptable here because every clue has already
+been established as the same compact three-position shape. In a larger or less
+stable record, named dictionary fields would communicate the access better.
+
+</details>
+
+### Checkpoint: choosing and using fixed records
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-tuples-record-decisions",
+  "title": "Fixed-record decisions checkpoint",
+  "instructions": "Choose a representation from the record's promised shape.",
+  "questions": [
+    {
+      "id": "coordinate-choice",
+      "prompt": "Which value best communicates one fixed row-column coordinate?",
+      "options": ["`(12, 7)`", "`{12, 7}`", "`[12, 7, 12, 7]`", "`{'12:7'}`"],
+      "answer_index": 0,
+      "explanation": "A two-item tuple preserves the coordinate's fixed positional order."
+    },
+    {
+      "id": "growing-route",
+      "prompt": "Which type better fits a route that learners will append to and remove stops from?",
+      "options": ["A tuple", "A list", "A frozenset", "An integer"],
+      "answer_index": 1,
+      "explanation": "The route's ordered structure is intended to grow and shrink, which matches a list."
+    },
+    {
+      "id": "hashable-tuple",
+      "prompt": "Which tuple can be used as a dictionary key?",
+      "options": ["`('zone', ['N', 'O'])`", "`([1], [2])`", "`('zone', 3)`", "`({'row': 1}, 2)`"],
+      "answer_index": 2,
+      "explanation": "The string and integer in ('zone', 3) are hashable; the other tuples contain lists or a dictionary."
+    },
+    {
+      "id": "shape-error-value",
+      "prompt": "What does an unpacking `ValueError` most directly reveal?",
+      "options": ["Every source value has the wrong type.", "Tuples are no longer supported.", "The target names are misspelled.", "The number of supplied values disagrees with the assignment shape."],
+      "answer_index": 3,
+      "explanation": "Ordinary unpacking requires one target per supplied value; the error exposes a shape mismatch."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Explain the record contract
+
+Answer these before moving to dictionaries:
+
+1. Why does `(5)` produce an integer while `(5,)` produces a tuple?
+2. What part of `("NOVA", ["map"])` is protected from change, and what part is
+   not?
+3. Why can unpacking be safer to read than repeated numeric indexing?
+4. What type does a starred target produce, and why might that matter later?
+5. When would named dictionary fields communicate a record better than tuple
+   positions?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- The comma creates a tuple; parentheses normally clarify its boundary.
+- Tuples preserve order and duplicates but do not permit replacing, inserting, or
+  deleting their own positions.
+- A tuple may still contain a mutable object.
+- Ordinary unpacking requires matching value and target counts; one starred target
+  absorbs a variable-length remainder into a list.
+- Fixed, compact positional records often suit tuples; changing sequences suit
+  lists, and named records often suit dictionaries.
+- A tuple can be a dictionary key or set member only when its relevant contents
+  are hashable.
+:::
+
+## References
+
+- [Python tutorial: tuples and sequences](https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences)
+- [Python standard types: common sequence operations](https://docs.python.org/3/library/stdtypes.html#common-sequence-operations)
+- [Python language reference: assignment statements and unpacking](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements)
+- [Python built-in function: `tuple`](https://docs.python.org/3/library/functions.html#func-tuple)

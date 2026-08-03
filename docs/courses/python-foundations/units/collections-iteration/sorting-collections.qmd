@@ -1,0 +1,616 @@
+---
+title: Sorting Collections Without Losing Meaning
+lesson_id: collections-iteration.sorting-collections
+lesson_order: 60
+description: Sort values and complete records by explicit policies while distinguishing mutation, new results, reversal, key functions, type boundaries, stability, and source preservation.
+course_id: python-foundations
+unit_id: collections-iteration
+unit_number: 3
+execute:
+  echo: true
+categories:
+- python-foundations
+- collections-iteration
+- sorting
+- ordering
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/collections-iteration/sorting-collections.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 3
+- **Estimated time:** 3–4.5 hours
+- **You will learn:** Sort scalar values and related record fields by an explicit, stable policy without accidentally replacing a list with `None` or destroying source order.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Rank complete records, not disconnected fields
+
+A tournament result connects a pilot, score, and completion time:
+
+```python
+results = [
+    {"pilot": "Nova", "score": 91, "seconds": 74},
+    {"pilot": "Mira", "score": 96, "seconds": 83},
+    {"pilot": "Sol", "score": 91, "seconds": 68},
+]
+```
+
+Sorting a separate score list would lose which pilot earned each score. The unit
+of movement must be the **complete record**. The sort policy then chooses which
+field determines order.
+
+This lesson answers:
+
+- Does the operation mutate the list or create a new list?
+- Is reversal the same as sorting in descending order?
+- How does a key function turn a domain rule into a comparable value?
+- What happens when values are not mutually comparable?
+- How does stable sorting preserve earlier order among equal keys?
+
+## 2. `sorted()` creates a new list
+
+The built-in `sorted()` accepts any iterable and returns a list:
+
+```python
+scores = [91, 74, 96, 83]
+ranked_scores = sorted(scores)
+
+print(scores)
+print(ranked_scores)
+```
+
+`scores` remains in source order. `ranked_scores` is `[74, 83, 91, 96]`.
+
+The input does not need to be a list:
+
+```python
+tuple_result = sorted((3, 1, 2))
+set_result = sorted({"vault", "dock", "garden"})
+dict_result = sorted({"Nova": 91, "Mira": 96})
+
+print(type(tuple_result).__name__)
+print(set_result)
+print(dict_result)
+```
+
+All three results are lists. Direct dictionary traversal supplies keys, so
+`sorted(dictionary)` sorts keys.
+
+## 3. `.sort()` changes one list and returns `None`
+
+```python
+scores = [91, 74, 96, 83]
+result = scores.sort()
+
+print(scores)
+print(result)
+```
+
+The existing list changes and `result` is `None`. This makes a common bug clear:
+
+```python
+scores = [91, 74, 96]
+scores = scores.sort()
+
+print(scores)
+```
+
+The useful list name now refers to `None`. The sort already happened in place
+before assignment discarded the reference.
+
+Choose from the state requirement:
+
+- use `sorted(source)` when source order remains evidence or both versions matter;
+- use `working.sort()` when the working list itself should adopt the new order.
+
+### Copy before an intentional in-place sort
+
+```python
+source_scores = [91, 74, 96, 83]
+working_scores = source_scores.copy()
+working_scores.sort()
+
+assert source_scores == [91, 74, 96, 83]
+assert working_scores == [74, 83, 91, 96]
+```
+
+This separates preservation from mutation visibly.
+
+## 4. Descending sort and reversal answer different questions
+
+Use `reverse=True` to sort in descending order:
+
+```python
+scores = [91, 74, 96, 83]
+highest_first = sorted(scores, reverse=True)
+
+assert highest_first == [96, 91, 83, 74]
+```
+
+`.reverse()` merely flips the current list positions:
+
+```python
+arrival_scores = [91, 74, 96, 83]
+result = arrival_scores.reverse()
+
+assert arrival_scores == [83, 96, 74, 91]
+assert result is None
+```
+
+The result is not score-ranked; it is reverse arrival order.
+
+`reversed()` supplies values in reverse traversal order without changing the
+source:
+
+```python
+route = ["dock", "garden", "vault"]
+backtrack = list(reversed(route))
+
+assert backtrack == ["vault", "garden", "dock"]
+assert route == ["dock", "garden", "vault"]
+```
+
+`reversed(route)` itself is a reverse iterator, not a list. Convert it only when
+the program needs to retain all reversed values as a list.
+
+### Checkpoint: mutation and return values
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-sorting-mutation-results",
+  "title": "Sorting state checkpoint",
+  "instructions": "Track the original collection, returned value, and ordering rule.",
+  "questions": [
+    {
+      "id": "sorted-return",
+      "prompt": "What does `ranked = sorted(scores)` guarantee?",
+      "options": ["`ranked` is a new sorted list and `scores` is not mutated.", "`ranked` is always a tuple.", "`scores` becomes `None`.", "Only sets can be sorted."],
+      "answer_index": 0,
+      "explanation": "sorted() returns a new list from any sortable iterable and leaves the input collection unchanged."
+    },
+    {
+      "id": "sort-return",
+      "prompt": "What does `result` reference after `result = scores.sort()`?",
+      "options": ["A sorted copy", "`None`", "The original unsorted list", "The largest score"],
+      "answer_index": 1,
+      "explanation": "list.sort() changes the list in place and returns None."
+    },
+    {
+      "id": "reverse-vs-sort",
+      "prompt": "What does `items.reverse()` do?",
+      "options": ["It sorts descending by value.", "It creates a sorted tuple.", "It reverses the current positions in place.", "It returns a reverse-ordered copy."],
+      "answer_index": 2,
+      "explanation": "reverse() flips existing order; it does not calculate ascending or descending value rank."
+    },
+    {
+      "id": "sorted-set-type",
+      "prompt": "What type does `sorted({'b', 'a'})` return?",
+      "options": ["`set`", "`frozenset`", "`tuple`", "`list`"],
+      "answer_index": 3,
+      "explanation": "The sorted() built-in always returns a list."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Strings follow Unicode ordering unless you choose another policy
+
+Default string comparison is case-sensitive and based on Unicode code points:
+
+```python
+pilots = ["nova", "Mira", "sol", "Ada"]
+default_order = sorted(pilots)
+
+print(default_order)
+```
+
+Uppercase spellings can appear before lowercase ones. That behavior is
+deterministic but may not match a human-facing name policy.
+
+The `key` argument asks Python to calculate a comparison key for each value:
+
+```python
+name_order = sorted(pilots, key=str.casefold)
+print(name_order)
+```
+
+`str.casefold` is passed without parentheses. Python calls it once per string for
+comparison and still returns the original spellings in the result.
+
+```python
+assert name_order == ["Ada", "Mira", "nova", "sol"]
+```
+
+This is a preview of a function used as a value. Unit 5 explains callables and
+callbacks fully. For now, read `key=str.casefold` as “compare the casefolded form
+of each original string.”
+
+Other built-ins can express simple policies:
+
+```python
+words = ["star", "observatory", "map", "vault"]
+by_length = sorted(words, key=len)
+
+offsets = [-12, 4, -3, 9]
+by_distance_from_zero = sorted(offsets, key=abs)
+
+print(by_length)
+print(by_distance_from_zero)
+```
+
+## 6. Mixed incomparable types should fail visibly
+
+Python does not invent an ordering between unrelated types:
+
+```python
+mixed = [3, "12", 7]
+print(sorted(mixed))
+```
+
+This raises `TypeError` because integer and string ordering is undefined. Do not
+silently sort everything by `str` unless lexicographic display text is genuinely
+the required policy:
+
+```python
+display_order = sorted(mixed, key=str)
+print(display_order)
+```
+
+The key strings are `"3"`, `"12"`, and `"7"`, so this is not numeric order. A
+better data boundary often converts all inputs to one intentional type before
+storing them.
+
+Missing values need an explicit policy too:
+
+```python
+scores = [91, None, 74]
+print(sorted(scores))
+```
+
+The error asks you to decide whether `None` belongs first, last, or outside the
+ranked data. Sorting cannot infer domain meaning.
+
+## 7. Sort records by fields with `itemgetter`
+
+`operator.itemgetter()` creates a key callable that retrieves dictionary fields:
+
+```python
+from operator import itemgetter
+
+results = [
+    {"pilot": "Nova", "score": 91, "seconds": 74},
+    {"pilot": "Mira", "score": 96, "seconds": 83},
+    {"pilot": "Sol", "score": 91, "seconds": 68},
+]
+
+by_score = sorted(results, key=itemgetter("score"), reverse=True)
+
+for record in by_score:
+    print(record["pilot"], record["score"])
+```
+
+Complete dictionaries move together; no pilot becomes disconnected from a score
+or time.
+
+`itemgetter()` can retrieve several fields as a tuple key:
+
+```python
+alphabetical_score_groups = sorted(
+    results,
+    key=itemgetter("score", "pilot"),
+)
+```
+
+Python compares the score first and uses pilot only when scores are equal. The
+complete tuple key is ascending unless `reverse=True` reverses all of it.
+
+An optional lambda spelling is common in Python code:
+
+```python
+by_time = sorted(results, key=lambda record: record["seconds"])
+```
+
+Read this as a tiny unnamed function that receives one record and returns its
+seconds. You do not need to write lambdas in this unit; `itemgetter()` and built-in
+functions cover the lessons. Unit 5 teaches function values and lambdas in
+context.
+
+### Checkpoint: key selection and type boundaries
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-sorting-keys-types",
+  "title": "Sort-key checkpoint",
+  "instructions": "Choose a key that represents the stated domain order.",
+  "questions": [
+    {
+      "id": "casefold-policy",
+      "prompt": "Which call sorts string names without treating case differences as the primary order?",
+      "options": ["`sorted(names, key=str.casefold)`", "`sorted(names).casefold()`", "`names.sort(key=len)`", "`reversed(names)`"],
+      "answer_index": 0,
+      "explanation": "The key computes a casefolded comparison value while the result retains each original string."
+    },
+    {
+      "id": "record-field",
+      "prompt": "Which key sorts dictionary records by their `'score'` field?",
+      "options": ["`key='score'`", "`key=itemgetter('score')`", "`key=records['score']`", "`key=dict.sort`"],
+      "answer_index": 1,
+      "explanation": "itemgetter('score') returns a callable that retrieves the score from each supplied record."
+    },
+    {
+      "id": "mixed-failure",
+      "prompt": "Why does `sorted([3, '12', 7])` raise `TypeError`?",
+      "options": ["Lists cannot contain three values.", "Strings cannot be stored in lists.", "Python has no default ordering comparison between integers and strings.", "The list must be a tuple first."],
+      "answer_index": 2,
+      "explanation": "The values are legal list members but do not share a defined ordering relation."
+    },
+    {
+      "id": "str-key-warning",
+      "prompt": "Why can `sorted(numbers, key=str)` produce the wrong numeric policy?",
+      "options": ["str() removes all digits.", "It mutates each number into a list.", "It always sorts descending.", "It compares text lexicographically, so `'12'` can appear before `'3'`."],
+      "answer_index": 3,
+      "explanation": "A string key orders character sequences, which is a different rule from numeric magnitude."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Stable sorting preserves earlier decisions among ties
+
+Python’s sort is **stable**: records with equal keys retain their relative order
+from the input.
+
+```python
+from operator import itemgetter
+
+results = [
+    {"pilot": "Nova", "score": 91, "arrival": 1},
+    {"pilot": "Mira", "score": 96, "arrival": 2},
+    {"pilot": "Sol", "score": 91, "arrival": 3},
+    {"pilot": "Ivo", "score": 91, "arrival": 4},
+]
+
+ranked = sorted(results, key=itemgetter("score"), reverse=True)
+
+assert [record["pilot"] for record in ranked] == [
+    "Mira",
+    "Nova",
+    "Sol",
+    "Ivo",
+]
+```
+
+Nova, Sol, and Ivo all have score 91, so their arrival order remains intact. The
+list comprehension in this assertion is supplied only to inspect names; Unit 4
+teaches comprehensions. An equivalent beginner-readable inspection is:
+
+```python
+ranked_names = []
+
+for record in ranked:
+    ranked_names.append(record["pilot"])
+
+assert ranked_names == ["Mira", "Nova", "Sol", "Ivo"]
+```
+
+### Use stable passes for mixed directions
+
+Suppose higher scores rank first, but equal scores use fewer seconds first. One
+tuple key with `reverse=True` would reverse both score and seconds, making slower
+times win ties. Stable passes express the mixed directions:
+
+```python
+results = [
+    {"pilot": "Nova", "score": 91, "seconds": 74},
+    {"pilot": "Mira", "score": 96, "seconds": 83},
+    {"pilot": "Sol", "score": 91, "seconds": 68},
+    {"pilot": "Ivo", "score": 91, "seconds": 74},
+]
+
+ranked = sorted(results, key=itemgetter("seconds"))
+ranked = sorted(ranked, key=itemgetter("score"), reverse=True)
+
+ranked_names = []
+for record in ranked:
+    ranked_names.append(record["pilot"])
+
+assert ranked_names == ["Mira", "Sol", "Nova", "Ivo"]
+```
+
+Apply the less important rule first (`seconds` ascending), then the most important
+rule (`score` descending). Stability preserves time order inside equal-score
+groups, and Nova remains ahead of Ivo because both key fields tie and Nova appeared
+first.
+
+### Sort dictionary items, not just keys
+
+```python
+score_by_pilot = {"Nova": 91, "Mira": 96, "Sol": 91}
+score_pairs = sorted(score_by_pilot.items(), key=itemgetter(1), reverse=True)
+
+print(score_pairs)
+```
+
+Each item is `(key, value)`, so `itemgetter(1)` selects the score. Equal scores
+retain dictionary insertion order. The source dictionary remains unchanged.
+
+::: {.callout-note title="Do not sort more often than the output requires"}
+Sorting performs more work than one traversal. Sort once when the program needs an
+ordered view, retain the result while it remains valid, and avoid sorting the same
+unchanged collection inside another traversal. Unit 7 will give this comparison a
+formal vocabulary.
+:::
+
+### Checkpoint: stable record ordering
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-sorting-stability-records",
+  "title": "Stable record sorting checkpoint",
+  "instructions": "Preserve record relationships and apply tie rules deliberately.",
+  "questions": [
+    {
+      "id": "stable-ties",
+      "prompt": "What does sort stability guarantee for records with equal keys?",
+      "options": ["They retain their relative input order.", "They are removed as duplicates.", "They become dictionaries.", "They are ordered randomly."],
+      "answer_index": 0,
+      "explanation": "A stable sort does not reverse or shuffle the earlier relative order of equal-key items."
+    },
+    {
+      "id": "complete-record",
+      "prompt": "Why should a leaderboard sort complete records rather than a separate score list?",
+      "options": ["Scores cannot be integers.", "Each pilot, score, and time remains connected as one moving item.", "Dictionaries are automatically immutable.", "Separate score lists always raise errors."],
+      "answer_index": 1,
+      "explanation": "Moving complete records preserves the meaning of related fields."
+    },
+    {
+      "id": "mixed-directions",
+      "prompt": "For score descending and time ascending, which stable-pass order works?",
+      "options": ["Score ascending, then time descending", "Score descending twice", "Time ascending first, then score descending", "Reverse the source without sorting"],
+      "answer_index": 2,
+      "explanation": "Apply the secondary time rule first, then the primary score rule; stability retains time order within score ties."
+    },
+    {
+      "id": "dictionary-items",
+      "prompt": "What should be sorted to retain both keys and values from a dictionary?",
+      "options": ["Only `mapping.keys()`", "Only `mapping.values()`", "The dictionary length", "`mapping.items()` tuples"],
+      "answer_index": 3,
+      "explanation": "Items supply complete key-value tuples, which remain connected during sorting."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Produce the tournament leaderboard
+
+Preserve the submitted result order and build two ranked views.
+
+```python
+from operator import itemgetter
+
+source_results = [
+    {"pilot": "Nova", "score": 91, "seconds": 74},
+    {"pilot": "Mira", "score": 96, "seconds": 83},
+    {"pilot": "Sol", "score": 91, "seconds": 68},
+    {"pilot": "Ivo", "score": 91, "seconds": 74},
+]
+
+alphabetical = None
+ranked = None
+leaderboard_lines = []
+```
+
+Requirements:
+
+1. create an `alphabetical` list by pilot name without case-sensitive surprises;
+2. create a `ranked` list where higher score wins, fewer seconds breaks a score
+   tie, and original submission order breaks a complete tie;
+3. append one display line per ranked record with a one-based place; and
+4. leave the source list and every record unchanged.
+
+```python
+assert [record["pilot"] for record in alphabetical] == [
+    "Ivo",
+    "Mira",
+    "Nova",
+    "Sol",
+]
+assert [record["pilot"] for record in ranked] == [
+    "Mira",
+    "Sol",
+    "Nova",
+    "Ivo",
+]
+assert leaderboard_lines == [
+    "1. Mira — 96 points — 83s",
+    "2. Sol — 91 points — 68s",
+    "3. Nova — 91 points — 74s",
+    "4. Ivo — 91 points — 74s",
+]
+assert source_results == [
+    {"pilot": "Nova", "score": 91, "seconds": 74},
+    {"pilot": "Mira", "score": 96, "seconds": 83},
+    {"pilot": "Sol", "score": 91, "seconds": 68},
+    {"pilot": "Ivo", "score": 91, "seconds": 74},
+]
+```
+
+Boundary variation: append `{"pilot": "ada", "score": 96, "seconds": 83}` to
+the source. Predict its alphabetical position and how the complete leaderboard tie
+uses submission order. Rerun from the source cell rather than mutating an already
+ranked result.
+
+<details>
+<summary>Hint: separate the alphabetic and competition policies</summary>
+
+`itemgetter("pilot")` is case-sensitive, so use an optional supplied lambda for
+the alphabetical view: `key=lambda record: record["pilot"].casefold()`. For mixed
+competition directions, sort by seconds ascending first and then by score
+descending. Enumerate the ranked records from one for display.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the leaderboard</summary>
+
+```python
+alphabetical = sorted(
+    source_results,
+    key=lambda record: record["pilot"].casefold(),
+)
+
+ranked = sorted(source_results, key=itemgetter("seconds"))
+ranked = sorted(ranked, key=itemgetter("score"), reverse=True)
+
+leaderboard_lines = []
+for place, record in enumerate(ranked, start=1):
+    line = (
+        f"{place}. {record['pilot']} — "
+        f"{record['score']} points — {record['seconds']}s"
+    )
+    leaderboard_lines.append(line)
+```
+
+Both `sorted()` calls create outer lists and move references to complete records;
+they do not mutate the source records. The stable second pass preserves the
+seconds rule and original order where the full ranking key ties.
+
+</details>
+
+## 10. Explain the ordering policy
+
+1. Why is `items = items.sort()` a bug even though the sort itself occurs?
+2. When is reverse traversal different from descending sorting?
+3. What does a key callable return, and what values appear in the final list?
+4. Why should mixed types or missing values trigger a policy decision?
+5. How do stable passes express one descending and one ascending field?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- `sorted()` returns a new list; `.sort()` mutates a list and returns `None`.
+- `reverse=True` reverses sort order; `.reverse()` and `reversed()` reverse current
+  traversal order without calculating rank.
+- A key callable produces the comparison value while complete original items move
+  into the result.
+- Normalize or reject mixed data deliberately; sorting cannot invent domain rules.
+- Python sorting is stable, so equal-key items retain their earlier relative order.
+- Sort complete records to preserve relationships, and use stable passes for mixed
+  ascending and descending field requirements.
+:::
+
+## References
+
+- [Python sorting techniques](https://docs.python.org/3/howto/sorting.html)
+- [Python built-in function: `sorted`](https://docs.python.org/3/library/functions.html#sorted)
+- [Python tutorial: list method `sort`](https://docs.python.org/3/tutorial/datastructures.html#more-on-lists)
+- [Python `operator.itemgetter`](https://docs.python.org/3/library/operator.html#operator.itemgetter)
+- [Python built-in function: `reversed`](https://docs.python.org/3/library/functions.html#reversed)

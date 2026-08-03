@@ -1,0 +1,688 @@
+---
+title: Visiting Items in a Collection
+lesson_id: collections-iteration.traversing-collections
+lesson_order: 50
+description: Trace what simple for loops receive from strings, lists, tuples, dictionaries, sets, ranges, enumerate, and zip while preserving order and alignment.
+course_id: python-foundations
+unit_id: collections-iteration
+unit_number: 3
+execute:
+  echo: true
+categories:
+- python-foundations
+- collections-iteration
+- traversal
+- range
+- enumerate
+- zip
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/collections-iteration/traversing-collections.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 3
+- **Estimated time:** 3–4.5 hours
+- **You will learn:** Trace each value supplied during simple collection traversal and use `range()`, `enumerate()`, and `zip()` without losing position or alignment.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Visit every route stop without manual repetition
+
+A route manifest contains stops in travel order:
+
+```python
+route = ["dock", "garden", "tower", "vault"]
+
+for stop in route:
+    print(f"Scanning {stop}")
+```
+
+The `for` statement asks `route` to supply items one at a time. Before each
+indented execution, Python binds the next item to `stop`. The list itself remains
+unchanged.
+
+You could write four separate `print()` calls, but the repeated structure would
+break as soon as the route changed. Traversal connects one stated action to every
+currently supplied item.
+
+An **iterable** is a value that can supply a sequence of items for this kind of
+visit. This lesson focuses on what each built-in collection supplies. Unit 5
+later opens the iterator protocol and explains generators.
+
+The practical questions are:
+
+- What value does the loop target receive from each collection family?
+- When do positions matter enough to use `range()` or `enumerate()`?
+- How does `zip()` preserve alignment, and how can unequal lengths hide data?
+- Why can structural mutation make an active traversal invalid or misleading?
+
+::: {.concept-diagram}
+A `for` loop repeatedly asks an iterable for a next item, binds the target name,
+and executes the body until no items remain.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+    A["iterable"] --> B["next supplied item"]
+    B --> C["bind loop target"]
+    C --> D["run indented body"]
+    D --> A
+    A --> E["no items remain"]
+```
+
+:::
+
+## 2. Sequences supply values in sequence order
+
+Lists, tuples, and strings preserve a deliberate order:
+
+```python
+items = ["map", "rope"]
+coordinate = (12, 7)
+code = "NOVA"
+
+for item in items:
+    print(item)
+
+for number in coordinate:
+    print(number)
+
+for character in code:
+    print(character)
+```
+
+The three loop targets receive strings, integers, and one-character strings,
+respectively. The target name is ordinary: after traversal it remains bound to
+the last supplied value.
+
+```python
+for character in "NOVA":
+    print(character)
+
+print(f"Last character: {character}")
+```
+
+That behavior is sometimes useful for tracing but usually should not be the way
+later code obtains the final item. `code[-1]` states that position directly.
+
+An empty iterable runs the body zero times:
+
+```python
+empty_route = []
+
+for stop in empty_route:
+    print("This line does not run")
+
+print("Traversal finished")
+```
+
+If `stop` had not existed before, using it after this empty loop would raise
+`NameError`. Do not rely on a loop target as the only source of a result that must
+exist for empty input.
+
+### Rebinding the target does not replace a sequence item
+
+```python
+names = ["nova", "mira"]
+
+for name in names:
+    name = name.title()
+
+print(names)
+```
+
+The list still contains lowercase strings. Assignment changes which string the
+local name `name` references; it does not assign through a list position.
+
+## 3. Dictionaries can supply keys, values, or pairs
+
+Direct traversal of a dictionary supplies its keys in insertion order:
+
+```python
+energy_by_pilot = {"Nova": 80, "Mira": 65, "Sol": 90}
+
+for pilot in energy_by_pilot:
+    print(pilot)
+```
+
+Use the chosen key to retrieve a value:
+
+```python
+for pilot in energy_by_pilot:
+    energy = energy_by_pilot[pilot]
+    print(f"{pilot}: {energy}")
+```
+
+Or ask a view to supply exactly what the body needs:
+
+```python
+for energy in energy_by_pilot.values():
+    print(energy)
+
+for pilot, energy in energy_by_pilot.items():
+    print(f"{pilot}: {energy}")
+```
+
+Each `.items()` value is a two-item tuple. Tuple unpacking assigns its key to
+`pilot` and value to `energy` before running the body.
+
+```python
+pairs = list(energy_by_pilot.items())
+print(pairs)
+```
+
+This makes the supplied shape visible.
+
+## 4. Sets supply members without a positional promise
+
+```python
+skills = {"mapping", "repair", "translation"}
+
+for skill in skills:
+    print(skill)
+```
+
+Every current member is supplied once. The display order is not a stable program
+contract, so this would be fragile:
+
+```python
+observed_order = []
+
+for skill in skills:
+    observed_order.append(skill)
+
+print(observed_order)
+```
+
+The traversal is valid, but comparing `observed_order` with one hard-coded order
+is not. Sort for presentation or preserve an ordered source list when sequence
+meaning matters.
+
+### Checkpoint: what each collection supplies
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-traversal-collection-values",
+  "title": "Collection traversal checkpoint",
+  "instructions": "Identify the value bound to the target on each iteration.",
+  "questions": [
+    {
+      "id": "list-target",
+      "prompt": "What values does `for stop in ['dock', 'vault']` bind to `stop`?",
+      "options": ["First `'dock'`, then `'vault'`", "First index 0, then index 1", "The complete list twice", "Only the final string"],
+      "answer_index": 0,
+      "explanation": "Direct list traversal supplies list items in their sequence order."
+    },
+    {
+      "id": "dict-items",
+      "prompt": "Which expression supplies key-value tuples from dictionary `d`?",
+      "options": ["`d.values()`", "`d.items()`", "`d.keys()[0]`", "`d.index()`"],
+      "answer_index": 1,
+      "explanation": "The items view supplies a two-item tuple for each mapping pair."
+    },
+    {
+      "id": "empty-loop",
+      "prompt": "How many times does the body of `for item in []:` execute?",
+      "options": ["Once with `None`", "Once with an empty list", "Zero times", "Forever"],
+      "answer_index": 2,
+      "explanation": "An empty list supplies no items, so the body does not execute."
+    },
+    {
+      "id": "set-order",
+      "prompt": "Which fact is safe to rely on when traversing a set?",
+      "options": ["The first inserted member is always first.", "Members are supplied alphabetically.", "Numeric indexes choose members.", "Every current member is supplied, but positional display order is not promised."],
+      "answer_index": 3,
+      "explanation": "Set traversal covers current membership without establishing a sequence-position contract."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. `range()` supplies an arithmetic progression
+
+`range(stop)` starts at zero and excludes the stop:
+
+```python
+for index in range(4):
+    print(index)
+```
+
+The values are `0`, `1`, `2`, and `3`. This aligns naturally with four list
+indexes, although direct item traversal is clearer when the body needs only each
+item.
+
+`range(start, stop)` chooses the beginning:
+
+```python
+print(list(range(2, 6)))
+```
+
+The small inspection list is `[2, 3, 4, 5]`.
+
+`range(start, stop, step)` chooses the distance and direction:
+
+```python
+evens = range(2, 11, 2)
+countdown = range(5, 0, -1)
+
+print(list(evens))
+print(list(countdown))
+```
+
+The stop remains excluded. A negative step needs a start greater than the stop.
+Bounds pointing in the wrong direction produce an empty range:
+
+```python
+assert list(range(2, 8, -1)) == []
+assert list(range(8, 2, 1)) == []
+```
+
+A zero step cannot make progress:
+
+```python
+invalid = range(1, 5, 0)
+```
+
+Python raises `ValueError: range() arg 3 must not be zero`.
+
+### A range is not first built as a large list
+
+```python
+positions = range(1_000_000)
+
+print(type(positions).__name__)
+print(len(positions))
+print(positions[999_999])
+```
+
+The range stores its boundary rules compactly and calculates members as needed.
+Use `list(range(...))` to inspect only small progressions; converting a million
+positions defeats that advantage.
+
+## 6. `enumerate()` adds positions to values
+
+Manual bookkeeping creates two state changes to keep synchronized:
+
+```python
+route = ["dock", "garden", "vault"]
+index = 0
+
+for stop in route:
+    print(index, stop)
+    index = index + 1
+```
+
+`enumerate()` supplies `(position, value)` tuples directly:
+
+```python
+for index, stop in enumerate(route):
+    print(index, stop)
+```
+
+Choose a custom start for human-facing numbering:
+
+```python
+for stop_number, stop in enumerate(route, start=1):
+    print(f"Stop {stop_number}: {stop}")
+```
+
+The list indexes have not changed; `start=1` changes only the numbers supplied by
+`enumerate()`. Do not use `stop_number` to index the list unless you account for
+that offset.
+
+Inspect the shape:
+
+```python
+numbered = list(enumerate(["dock", "vault"], start=1))
+assert numbered == [(1, "dock"), (2, "vault")]
+```
+
+### Checkpoint: range and enumerate
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-traversal-range-enumerate",
+  "title": "Range and enumerate checkpoint",
+  "instructions": "Trace excluded stops, step direction, and supplied positions.",
+  "questions": [
+    {
+      "id": "range-stop",
+      "prompt": "What values does `range(3)` supply?",
+      "options": ["`0, 1, 2`", "`1, 2, 3`", "`0, 1, 2, 3`", "Only `3`"],
+      "answer_index": 0,
+      "explanation": "range(stop) starts at zero and excludes the stop."
+    },
+    {
+      "id": "countdown",
+      "prompt": "Which expression supplies `5, 4, 3, 2, 1`?",
+      "options": ["`range(1, 5)`", "`range(5, 0, -1)`", "`range(5, 1)`", "`range(0, 5, -1)`"],
+      "answer_index": 1,
+      "explanation": "A negative step descends from 5 and the excluded stop 0 leaves 1 as the final value."
+    },
+    {
+      "id": "enumerate-shape",
+      "prompt": "What does `enumerate(route)` supply on each iteration?",
+      "options": ["Only a stop string", "Only a list index", "A tuple containing an index and the corresponding value", "A dictionary mapping every index at once"],
+      "answer_index": 2,
+      "explanation": "enumerate supplies (index, value) tuples, commonly unpacked into two names."
+    },
+    {
+      "id": "custom-start",
+      "prompt": "What does `start=1` change in `enumerate(route, start=1)`?",
+      "options": ["It removes route index 0.", "It mutates the route.", "It starts traversal at the second item.", "It changes the counter values, not the underlying list positions."],
+      "answer_index": 3,
+      "explanation": "enumerate still visits every item; start controls only the first supplied counter."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. `zip()` aligns values by traversal position
+
+Two collections may describe the same stops:
+
+```python
+stops = ["dock", "garden", "vault"]
+distances = [0, 4, 9]
+
+for stop, distance in zip(stops, distances):
+    print(f"{stop}: {distance} km")
+```
+
+`zip()` asks each input for one next item and supplies the grouped tuple. The first
+stop aligns with the first distance, then the second with the second.
+
+```python
+pairs = list(zip(stops, distances))
+assert pairs == [("dock", 0), ("garden", 4), ("vault", 9)]
+```
+
+More than two iterables can be aligned:
+
+```python
+statuses = ["clear", "caution", "locked"]
+rows = list(zip(stops, distances, statuses, strict=True))
+
+assert rows[1] == ("garden", 4, "caution")
+```
+
+### Default zip stops at the shortest input
+
+```python
+stops = ["dock", "garden", "vault"]
+distances = [0, 4]
+
+pairs = list(zip(stops, distances))
+print(pairs)
+```
+
+The unpaired `"vault"` disappears from the result without an error. That can be
+useful when shortest-input behavior is intended, but dangerous when unequal
+lengths mean corrupted alignment.
+
+Use strictness for equal-length data contracts:
+
+```python
+pairs = list(zip(stops, distances, strict=True))
+```
+
+Python raises `ValueError` when one iterable ends before the others.
+
+### Prefer records when fields belong together
+
+Parallel lists are easy to misalign:
+
+```python
+stops = ["dock", "garden", "vault"]
+distances = [0, 4, 9]
+statuses = ["clear", "caution", "locked"]
+```
+
+A list of complete records keeps each relationship local:
+
+```python
+route_records = [
+    {"stop": "dock", "distance": 0, "status": "clear"},
+    {"stop": "garden", "distance": 4, "status": "caution"},
+    {"stop": "vault", "distance": 9, "status": "locked"},
+]
+```
+
+Use `zip(strict=True)` when parallel inputs arrive separately and equal length is
+a contract. Prefer records when the program owns the model and the values always
+travel together.
+
+## 8. Do not invalidate an active traversal
+
+Removing list items while visiting the same list can skip values because later
+items shift left:
+
+```python
+stops = ["dock", "closed", "closed", "vault"]
+
+for stop in stops:
+    if stop == "closed":
+        stops.remove(stop)
+
+print(stops)
+```
+
+One `"closed"` may remain. After the first removal, the second shifts into the
+position the loop has already passed.
+
+When intentional removal is small and already decided, traverse an outer copy:
+
+```python
+stops = ["dock", "closed", "closed", "vault"]
+
+for stop in stops.copy():
+    if stop == "closed":
+        stops.remove(stop)
+
+assert stops == ["dock", "vault"]
+```
+
+Unit 4 develops clearer filtering patterns that build a new list rather than
+repeatedly removing.
+
+Changing a dictionary’s size during traversal raises a direct error:
+
+```python
+energy = {"Nova": 80, "Mira": 0}
+
+for pilot in energy:
+    if energy[pilot] == 0:
+        del energy[pilot]
+```
+
+Python raises `RuntimeError: dictionary changed size during iteration`. Traverse a
+snapshot such as `list(energy)` for a deliberate small removal, or plan a separate
+result. Updating an existing value without changing dictionary size is permitted,
+but mixing traversal and mutation can still obscure the state transition.
+
+### Checkpoint: zip, alignment, and mutation
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit3-traversal-zip-mutation",
+  "title": "Alignment and mutation checkpoint",
+  "instructions": "Preserve related values and keep traversal state valid.",
+  "questions": [
+    {
+      "id": "zip-pair",
+      "prompt": "What is the first tuple from `zip(['dock', 'vault'], [0, 9])`?",
+      "options": ["`('dock', 0)`", "`('dock', 'vault')`", "`(0, 9)`", "`['dock', 0, 'vault', 9]`"],
+      "answer_index": 0,
+      "explanation": "zip groups the next value from each iterable by traversal position."
+    },
+    {
+      "id": "strict-mismatch",
+      "prompt": "How can code make unequal zip input lengths fail instead of silently truncating?",
+      "options": ["Use `reverse=True`.", "Pass `strict=True` to `zip()`.", "Convert both inputs to sets.", "Start enumerate at one."],
+      "answer_index": 1,
+      "explanation": "zip(..., strict=True) raises ValueError if an input ends before the others."
+    },
+    {
+      "id": "parallel-risk",
+      "prompt": "Why can one list of record dictionaries be safer than three parallel lists?",
+      "options": ["Dictionaries always sort records.", "Records remove every duplicate.", "Each record keeps related fields together instead of relying on synchronized positions.", "Lists cannot contain strings."],
+      "answer_index": 2,
+      "explanation": "Local records preserve each relationship even when records are inserted, removed, or moved."
+    },
+    {
+      "id": "list-removal-skip",
+      "prompt": "Why can removing from a list while traversing it skip an adjacent matching item?",
+      "options": ["remove() changes strings into sets.", "The loop runs backward.", "Python ignores duplicate values.", "Remaining items shift into positions the traversal has already advanced beyond."],
+      "answer_index": 3,
+      "explanation": "Structural mutation changes the position layout being traversed, so the next logical item can be skipped."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Assemble the expedition route manifest
+
+Build predictable display lines from related collections. Use the named helpers
+instead of manual index bookkeeping.
+
+```python
+stops = ["dock", "garden", "tower", "vault"]
+distances = [0, 4, 7, 11]
+status_by_stop = {
+    "dock": "clear",
+    "garden": "caution",
+    "tower": "clear",
+    "vault": "locked",
+}
+
+numbered_stops = None
+aligned_route = None
+manifest_lines = []
+status_lines = []
+inspection_positions = None
+```
+
+Complete these stages:
+
+1. make `numbered_stops` a list of `(1, stop)` tuples using `enumerate()`;
+2. make `aligned_route` a list of stop-distance tuples with strict zip;
+3. traverse the aligned tuples with human-facing numbers and append exactly the
+   required manifest lines;
+4. traverse dictionary items and append status lines in insertion order; and
+5. create odd zero-based inspection positions below the route length with one
+   `range()`.
+
+```python
+assert numbered_stops == [
+    (1, "dock"),
+    (2, "garden"),
+    (3, "tower"),
+    (4, "vault"),
+]
+assert aligned_route == [
+    ("dock", 0),
+    ("garden", 4),
+    ("tower", 7),
+    ("vault", 11),
+]
+assert manifest_lines == [
+    "Stop 1: dock (0 km)",
+    "Stop 2: garden (4 km)",
+    "Stop 3: tower (7 km)",
+    "Stop 4: vault (11 km)",
+]
+assert status_lines == [
+    "dock=clear",
+    "garden=caution",
+    "tower=clear",
+    "vault=locked",
+]
+assert inspection_positions == [1, 3]
+assert stops == ["dock", "garden", "tower", "vault"]
+assert distances == [0, 4, 7, 11]
+```
+
+Boundary variation: remove the last distance and verify that strict zip fails.
+Restore the data, then add a complete fifth stop and distance and update the status
+mapping. A clean rerun should include it without another hard-coded append.
+
+<details>
+<summary>Hint: materialize only the values the assertions ask to retain</summary>
+
+Use `list(enumerate(stops, start=1))` and
+`list(zip(stops, distances, strict=True))`. A second `enumerate(..., start=1)` can
+number the already aligned `(stop, distance)` tuples. Dictionary `.items()`
+supplies status pairs. `range(1, len(stops), 2)` supplies odd indexes.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+numbered_stops = list(enumerate(stops, start=1))
+aligned_route = list(zip(stops, distances, strict=True))
+
+manifest_lines = []
+for stop_number, route_pair in enumerate(aligned_route, start=1):
+    stop, distance = route_pair
+    manifest_lines.append(f"Stop {stop_number}: {stop} ({distance} km)")
+
+status_lines = []
+for stop, status in status_by_stop.items():
+    status_lines.append(f"{stop}={status}")
+
+inspection_positions = list(range(1, len(stops), 2))
+```
+
+The first two results are retained because the contract asks for them. The output
+lists are built separately, so none of the source collections change.
+
+</details>
+
+## 10. Keep the boundary with Unit 4 clear
+
+This lesson establishes what an iterable supplies and how values align. Unit 4
+will build the fuller control-flow toolkit:
+
+- choosing different actions with `if`, `elif`, and `else`;
+- accumulating totals and filtered results;
+- `break`, `continue`, and loop `else`;
+- nested traversal and grid algorithms;
+- condition-controlled `while` loops; and
+- comprehensions.
+
+You do not need those techniques to explain the collection contracts on this
+page.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A simple `for` loop binds each item supplied by an iterable and runs its body.
+- Sequences supply values in order; dictionaries directly supply keys; sets supply
+  every current member without a positional-order promise.
+- `range()` represents an excluded-stop arithmetic progression without first
+  building a complete list.
+- `enumerate()` supplies `(counter, value)` tuples and can start its counter at a
+  custom number.
+- `zip()` aligns inputs by traversal position; default zip truncates to the
+  shortest input, while `strict=True` enforces equal exhaustion.
+- Keep related fields in records when parallel positions are fragile.
+- Avoid changing collection size while traversing that same structure.
+:::
+
+## References
+
+- [Python tutorial: `for` statements and `range`](https://docs.python.org/3/tutorial/controlflow.html#for-statements)
+- [Python built-in function: `enumerate`](https://docs.python.org/3/library/functions.html#enumerate)
+- [Python built-in function: `zip`](https://docs.python.org/3/library/functions.html#zip)
+- [Python standard types: ranges](https://docs.python.org/3/library/stdtypes.html#ranges)
+- [Python glossary: iterable](https://docs.python.org/3/glossary.html#term-iterable)
