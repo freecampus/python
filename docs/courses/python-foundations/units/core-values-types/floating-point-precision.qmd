@@ -1,0 +1,623 @@
+---
+title: Floating-Point Numbers and Precision
+lesson_id: core-values-types.floating-point-precision
+lesson_order: 30
+description: Use floats for measured quantities, compare approximate results with suitable tolerances, and separate rounded displays from stored values.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+- floats
+- precision
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/floating-point-precision.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 3–4 hours
+- **You will learn:** Model measured quantities with floats, explain binary approximation, compare with tolerances, and format results without mistaking display rounding for exactness.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Floats model quantities between whole numbers
+
+A trail can be `4.75` kilometers long, a sensor can report `21.6` degrees, and an
+experiment can take `0.003` seconds. Python normally represents these measured or
+fractional values with `float`:
+
+```python
+trail_km = 4.75
+temperature_c = 21.6
+elapsed_seconds = 0.003
+
+print(type(trail_km).__name__)
+print(type(temperature_c).__name__)
+print(type(elapsed_seconds).__name__)
+```
+
+The name “floating point” refers to a representation whose decimal point can
+effectively move as the magnitude changes. It covers very small and very large
+values with a finite amount of storage.
+
+### Scientific notation keeps scale readable
+
+```python
+speed_of_light = 2.99792458e8
+proton_width_m = 8.4e-16
+
+print(speed_of_light)
+print(proton_width_m)
+```
+
+`2.99792458e8` means \(2.99792458 \times 10^8\). `8.4e-16` means
+\(8.4 \times 10^{-16}\). These are float literals, not strings.
+
+### Integer and float arithmetic can mix
+
+```python
+distance_km = 15
+hours = 2.5
+average_speed = distance_km / hours
+
+print(average_speed)
+print(type(average_speed).__name__)
+```
+
+Python converts the integer to a compatible numeric representation for the
+operation. The result is the float `6.0`. The original name `distance_km` still
+refers to an integer; the conversion for the calculation does not reassign it.
+
+### A float carries limited precision
+
+```python
+print(1.5 + 2.25)
+print(9.0 / 4.0)
+print(2.0 ** -3)
+```
+
+These results are `3.75`, `2.25`, and `0.125`. Fractions whose denominator is a
+power of two can often be represented exactly in binary. Many familiar decimal
+fractions cannot.
+
+## 2. Why `0.1 + 0.2` is not exactly `0.3`
+
+Run the classic comparison:
+
+```python
+result = 0.1 + 0.2
+
+print(result)
+print(result == 0.3)
+```
+
+Python commonly prints `0.30000000000000004`, and the equality comparison is
+`False`. This is not random. A float stores a number in binary using a finite
+number of bits. Just as decimal `1 / 3` becomes the repeating
+`0.333333...`, decimal `0.1` repeats in binary.
+
+::: {.concept-diagram}
+The written decimal is converted to the nearest available binary float. Arithmetic
+uses those stored approximations.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  written["source text: 0.1"] --> convert["nearest binary float"]
+  written2["source text: 0.2"] --> convert2["nearest binary float"]
+  convert --> add["floating-point addition"]
+  convert2 --> add
+  add --> shown["shortest useful display<br/>0.30000000000000004"]
+```
+:::
+
+Python's normal display chooses the shortest decimal text that identifies the
+stored float. It does not display every internal binary digit, but it sometimes
+shows enough digits to reveal the approximation.
+
+### Inspect more digits with formatting
+
+```python
+value = 0.1
+print(f"{value:.20f}")
+```
+
+The output is close to `0.10000000000000000555`. The final digits make clear that
+the stored value is near one tenth, not the exact decimal fraction one tenth.
+
+Compare a binary-friendly value:
+
+```python
+value = 0.125
+print(f"{value:.20f}")
+```
+
+One eighth is exactly representable in binary, so the displayed digits after
+`125` are zeros.
+
+### Approximation is usually appropriate for measurements
+
+A ruler reading such as `12.4 cm` is already limited by the instrument and human
+reading. A nearby binary representation is normally much more precise than the
+measurement itself. The mistake is not using floats; the mistake is demanding
+exact decimal behavior when the problem requires it.
+
+### Checkpoint: float representation
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-floats-representation-check",
+  "title": "Float representation checkpoint",
+  "instructions": "Choose the explanation that matches Python's stored values.",
+  "questions": [
+    {
+      "id": "float-purpose",
+      "prompt": "Which value is a natural use of `float`?",
+      "options": ["A measured temperature of 21.6 °C", "An exact count of 12 seats", "A missing delivery date", "A person's name"],
+      "answer_index": 0,
+      "explanation": "A measured quantity commonly accepts a nearby floating-point representation."
+    },
+    {
+      "id": "point-one",
+      "prompt": "Why can `0.1 + 0.2 == 0.3` be `False`?",
+      "options": ["Python sometimes skips addition.", "Those decimal fractions are stored as nearby finite binary values.", "Equality cannot compare floats.", "The result is converted to text first."],
+      "answer_index": 1,
+      "explanation": "The arithmetic combines stored binary approximations, which need not equal the stored approximation of 0.3 exactly."
+    },
+    {
+      "id": "binary-friendly",
+      "prompt": "Which decimal fraction is exactly representable as a finite binary fraction?",
+      "options": ["`0.1`", "`0.2`", "`0.125`", "`0.3`"],
+      "answer_index": 2,
+      "explanation": "0.125 is one eighth, and its denominator is a power of two."
+    },
+    {
+      "id": "scientific-notation",
+      "prompt": "What does `1.2e3` represent?",
+      "options": ["`1.23`", "`123`", "The text `\"1.2e3\"`", "The float `1200.0`"],
+      "answer_index": 3,
+      "explanation": "The exponent notation means 1.2 multiplied by ten to the third power."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Compare measurements with a stated tolerance
+
+Exact equality asks whether two floats are the same stored number:
+
+```python
+calculated = 0.1 + 0.2
+expected = 0.3
+
+print(calculated == expected)
+print(abs(calculated - expected))
+```
+
+The difference is extremely small but nonzero. For approximate quantities, ask
+whether the difference is acceptable for the task.
+
+Python's `math.isclose()` implements a clear tolerance comparison:
+
+```python
+import math
+
+calculated = 0.1 + 0.2
+expected = 0.3
+
+print(math.isclose(calculated, expected))
+```
+
+The default tolerances consider these values close, so the output is `True`.
+Default settings are convenient for demonstrations, but real tolerances should
+come from a requirement such as instrument accuracy.
+
+### Relative tolerance scales with magnitude
+
+```python
+import math
+
+expected_distance = 1_000.0
+measured_distance = 1_000.5
+
+print(math.isclose(measured_distance, expected_distance, rel_tol=0.001))
+print(math.isclose(measured_distance, expected_distance, rel_tol=0.0001))
+```
+
+A relative tolerance of `0.001` allows roughly one part in a thousand, which is
+about `1.0` at this scale. A tolerance of `0.0001` allows roughly `0.1`, so the
+half-unit difference is too large.
+
+### Absolute tolerance matters near zero
+
+Relative comparison alone is not useful when the expected value is zero:
+
+```python
+import math
+
+sensor_offset = 0.0004
+
+print(math.isclose(sensor_offset, 0.0))
+print(math.isclose(sensor_offset, 0.0, abs_tol=0.001))
+```
+
+The second comparison states that offsets within `0.001` of zero are acceptable.
+Choose the unit and tolerance together: `0.001` meters is not the same requirement
+as `0.001` kilometers.
+
+::: {.callout-warning title="Tolerance is a domain rule"}
+Do not add an enormous tolerance merely to make a test pass. State what difference
+the instrument, user, or calculation is allowed to have, then encode that rule.
+:::
+
+### Exact equality is still useful
+
+Float equality is appropriate when testing an exact sentinel that your own code
+assigned, or when the contract truly requires the same stored value. The rule is
+not “never use `==` with floats.” It is “do not use exact equality to express an
+approximate requirement.”
+
+```python
+reading = 0.0
+not_started = reading == 0.0
+print(not_started)
+```
+
+If `reading` came from a physical sensor, an absolute tolerance might be the
+better meaning. Context decides.
+
+## 4. Rounding and formatting do different jobs
+
+`round()` creates a numeric result:
+
+```python
+measurement = 12.34567
+rounded_measurement = round(measurement, 2)
+
+print(rounded_measurement)
+print(type(rounded_measurement).__name__)
+print(measurement)
+```
+
+The result is a float near `12.35`. The original value remains unchanged.
+
+Formatting creates text for display:
+
+```python
+measurement = 12.34567
+display_text = f"{measurement:.2f}"
+
+print(display_text)
+print(type(display_text).__name__)
+print(measurement)
+```
+
+`display_text` is the string `"12.35"`. The stored measurement is still the
+original float. Use formatting when the need is “show two decimal places.”
+
+### Display precision does not change later arithmetic
+
+```python
+distance = 2.675
+print(f"Displayed: {distance:.2f}")
+print(distance * 10)
+```
+
+The formatted output does not feed back into `distance`. Later arithmetic uses the
+stored float, not the characters shown to a person.
+
+### `round()` follows the stored value and a tie rule
+
+```python
+print(round(2.5))
+print(round(3.5))
+```
+
+Python normally uses “round half to even” for exact halfway cases: the results are
+`2` and `4`. With values such as `2.675`, binary approximation means the stored
+value may not lie on the decimal halfway point you imagine.
+
+```python
+print(round(2.675, 2))
+```
+
+Do not build legal or financial rules from an assumed school-rounding behavior.
+The next lesson uses `Decimal` with an explicit rounding mode.
+
+### Checkpoint: comparisons and display
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-floats-comparison-check",
+  "title": "Float comparison and display checkpoint",
+  "instructions": "Match the operation to the promise the program needs to make.",
+  "questions": [
+    {
+      "id": "isclose-use",
+      "prompt": "Which check best expresses that a measured value may differ from zero by at most 0.01 units?",
+      "options": ["`math.isclose(value, 0.0, abs_tol=0.01)`", "`value == 0.01`", "`round(value) == value`", "`str(value) == \"0\"`"],
+      "answer_index": 0,
+      "explanation": "An absolute tolerance directly states the allowed distance from zero."
+    },
+    {
+      "id": "format-result",
+      "prompt": "What type does `f\"{3.14159:.2f}\"` produce?",
+      "options": ["`float`", "`str`", "`int`", "`bool`"],
+      "answer_index": 1,
+      "explanation": "An f-string always produces text; the format specification controls that text's appearance."
+    },
+    {
+      "id": "round-source",
+      "prompt": "After `shown = f\"{value:.1f}\"`, which value is used by `value * 2`?",
+      "options": ["The characters in `shown`", "A value rounded to an integer", "The original float bound to `value`", "`None`"],
+      "answer_index": 2,
+      "explanation": "Formatting creates a separate string and does not modify the source float."
+    },
+    {
+      "id": "tolerance-choice",
+      "prompt": "Who should determine whether a difference of 0.5 is acceptable?",
+      "options": ["The shortest code", "The `print()` function", "The float type alone", "The measurement or application requirement"],
+      "answer_index": 3,
+      "explanation": "Tolerance is a domain decision expressed in the value's units."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Repeated operations can accumulate error
+
+Adding one tenth ten times illustrates accumulation:
+
+```python
+total = 0.0
+total = total + 0.1
+total = total + 0.1
+total = total + 0.1
+total = total + 0.1
+total = total + 0.1
+total = total + 0.1
+total = total + 0.1
+total = total + 0.1
+total = total + 0.1
+total = total + 0.1
+
+print(total)
+print(total == 1.0)
+```
+
+This intentionally repeats statements because loops are taught later. The stored
+result may be `0.9999999999999999`. Compare it according to the requirement:
+
+```python
+import math
+
+print(math.isclose(total, 1.0))
+```
+
+For long sums, Python's `math.fsum()` can reduce accumulated rounding error. It
+accepts a collection, so this example previews a list without requiring you to
+modify it:
+
+```python
+import math
+
+values = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+print(sum(values))
+print(math.fsum(values))
+```
+
+Unit 3 will teach lists and iteration. For now, observe that algorithm choice can
+affect accumulated error even when every input is the same.
+
+## 6. Recognize infinity and NaN at numeric boundaries
+
+Some calculations or external numeric systems produce special floats:
+
+```python
+positive_infinity = float("inf")
+not_a_number = float("nan")
+
+print(positive_infinity)
+print(not_a_number)
+```
+
+Infinity is larger than ordinary finite floats:
+
+```python
+print(float("inf") > 1e308)
+```
+
+NaN means “not a number” and deliberately does not compare equal to itself:
+
+```python
+not_a_number = float("nan")
+print(not_a_number == not_a_number)
+```
+
+The result is `False`. Do not use equality to detect NaN. The `math` module has
+explicit checks:
+
+```python
+import math
+
+print(math.isfinite(12.5))
+print(math.isfinite(float("inf")))
+print(math.isnan(float("nan")))
+```
+
+Ordinary division by zero in Python still raises `ZeroDivisionError`; it does not
+automatically produce infinity:
+
+```python
+result = 1.0 / 0.0
+```
+
+Special values often arrive from scientific libraries or external data. Recognize
+them now; later data and scientific courses will establish policies for them.
+
+### Checkpoint: numeric boundaries
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-floats-boundaries-check",
+  "title": "Floating-point boundaries checkpoint",
+  "instructions": "Choose the result or check that Python actually provides.",
+  "questions": [
+    {
+      "id": "finite-check",
+      "prompt": "Which expression is true only for an ordinary finite float?",
+      "options": ["`math.isfinite(value)`", "`value == float(\"nan\")`", "`str(value) != value`", "`round(value) is value`"],
+      "answer_index": 0,
+      "explanation": "`math.isfinite()` rejects both positive/negative infinity and NaN."
+    },
+    {
+      "id": "nan-equality",
+      "prompt": "What is the reliable way to detect a NaN value?",
+      "options": ["Compare it with itself.", "Use `math.isnan(value)`.", "Round it to zero.", "Convert it to an integer."],
+      "answer_index": 1,
+      "explanation": "NaN is intentionally unequal to every value, including itself; `math.isnan()` is explicit."
+    },
+    {
+      "id": "float-zero-division",
+      "prompt": "What does ordinary Python evaluate for `1.0 / 0.0`?",
+      "options": ["Positive infinity", "NaN", "It raises `ZeroDivisionError`", "The integer zero"],
+      "answer_index": 2,
+      "explanation": "Python's built-in float division raises rather than silently producing infinity."
+    },
+    {
+      "id": "accumulation",
+      "prompt": "Why can repeatedly adding `0.1` finish slightly away from the expected decimal total?",
+      "options": ["Assignment sometimes skips a line.", "Addition changes the source code.", "Python converts every sum to an integer.", "Each operation works with finite binary approximations whose errors can accumulate."],
+      "answer_index": 3,
+      "explanation": "Small representation and rounding effects can build across repeated operations."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Build a sensor calibration report
+
+An observatory expects a calibration weight of `10.0` grams. Three repeated
+readings are `10.004`, `9.998`, and `10.002` grams. For this instrument, a mean
+within `0.005` grams of the target is acceptable.
+
+Use the supplied names without a loop:
+
+```python
+target_grams = 10.0
+reading_1 = 10.004
+reading_2 = 9.998
+reading_3 = 10.002
+tolerance_grams = 0.005
+
+mean_grams = None
+difference_grams = None
+calibrated = None
+```
+
+Calculate the mean, absolute difference, and calibration fact. Then display the
+mean and difference to three decimal places.
+
+Use these assertions:
+
+```python
+import math
+
+assert math.isclose(mean_grams, 10.001333333333333)
+assert math.isclose(difference_grams, 0.0013333333333331865)
+assert calibrated is True
+assert f"{mean_grams:.3f}" == "10.001"
+assert f"{difference_grams:.3f}" == "0.001"
+```
+
+::: {.callout-note title="Keep values and displays separate"}
+Calculate `calibrated` from the unformatted mean and the stated tolerance. Do not
+compare display strings or round the measurements first.
+:::
+
+After the ordinary case passes, change `reading_3` to `10.030`. Predict whether the
+mean stays within tolerance, then recalculate from the top.
+
+<details>
+<summary>Hint: translate the requirement directly</summary>
+
+The mean is the sum divided by `3`. The difference is `abs(mean_grams -
+target_grams)`. `math.isclose()` can compare the two values with
+`abs_tol=tolerance_grams` and `rel_tol=0.0` because the requirement is stated as an
+absolute difference in grams.
+
+</details>
+
+<details class="solution">
+<summary>Show one solution after testing your report</summary>
+
+```python
+import math
+
+target_grams = 10.0
+reading_1 = 10.004
+reading_2 = 9.998
+reading_3 = 10.002
+tolerance_grams = 0.005
+
+mean_grams = (reading_1 + reading_2 + reading_3) / 3
+difference_grams = abs(mean_grams - target_grams)
+calibrated = math.isclose(
+    mean_grams,
+    target_grams,
+    rel_tol=0.0,
+    abs_tol=tolerance_grams,
+)
+
+print(f"Mean: {mean_grams:.3f} g")
+print(f"Difference: {difference_grams:.3f} g")
+print(f"Calibrated: {calibrated}")
+```
+
+The multiline call is one expression inside open parentheses. The four-space
+continuation indentation makes its arguments easy to inspect.
+
+</details>
+
+## 8. Check your precision decisions
+
+Before moving on, answer these questions from the sensor artifact:
+
+1. Why is float appropriate for measured grams but not automatically for exact
+   decimal currency?
+2. What tolerance did the requirement state, and in which unit?
+3. Why should formatting happen after the calibration comparison?
+4. How would the contract change if the tolerance were a percentage of the target?
+5. Which explicit function detects a non-finite reading?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Floats are finite binary approximations suitable for many measured quantities.
+- Familiar decimal fractions such as `0.1` may not have exact finite binary forms.
+- `math.isclose()` expresses approximate equality with relative and absolute
+  tolerances.
+- A tolerance belongs to the problem and must use the value's unit.
+- `round()` produces a numeric result; formatting produces display text.
+- Rounded output does not change the stored float used by later arithmetic.
+- `math.isfinite()` and `math.isnan()` recognize special floating-point values.
+:::
+
+## References
+
+- [Python tutorial: floating-point arithmetic and its limitations](https://docs.python.org/3/tutorial/floatingpoint.html)
+- [Python `math.isclose()` documentation](https://docs.python.org/3/library/math.html#math.isclose)
+- [Python `math` checks for finite, infinite, and NaN values](https://docs.python.org/3/library/math.html#number-theoretic-and-representation-functions)
+- [Python format-specification mini-language](https://docs.python.org/3/library/string.html#formatspec)

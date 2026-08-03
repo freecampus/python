@@ -1,0 +1,650 @@
+---
+title: Input, Output, and Clear Formatting
+lesson_id: core-values-types.input-output-formatting
+lesson_order: 60
+description: Read console text, clean and convert it at an explicit boundary, and present values clearly with print and f-string formatting.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+- input-output
+- formatting
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/input-output-formatting.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 3–4 hours
+- **You will learn:** Read console input as text, convert it deliberately, and format readable human and diagnostic output.
+- **Practice in:** Google Colab, JupyterLab, or a local terminal
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. A console program is a small conversation
+
+An interactive program follows a simple path:
+
+1. display a useful prompt;
+2. receive text from the person;
+3. clean or convert that text;
+4. perform the calculation; and
+5. display a result with enough context to understand it.
+
+::: {.concept-diagram}
+`input()` always crosses into the program as text. Conversion is a separate,
+visible step.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  prompt["prompt<br/>How many tickets?"] --> typed["person types<br/>4"]
+  typed --> raw["string value<br/>'4'"]
+  raw --> convert["int(ticket_text)"]
+  convert --> number["integer value<br/>4"]
+  number --> format["formatted reply<br/>Tickets: 4"]
+```
+:::
+
+Run this cell and type your name:
+
+```python
+name = input("What is your name? ")
+print(f"Hello, {name}!")
+```
+
+`input()` displays the prompt, pauses, and returns the characters typed before
+Enter. Assignment binds that returned string to `name`. `print()` displays the
+reply.
+
+### Prompts should state the expected value
+
+Compare:
+
+```python
+value_text = input("Value: ")
+```
+
+with:
+
+```python
+temperature_text = input("Temperature in °C (for example, 21.5): ")
+```
+
+The second prompt communicates the meaning, unit, and one accepted shape. It does
+not guarantee valid input, but it gives the person a fair contract.
+
+## 2. `print()` can display several values
+
+`print()` accepts multiple arguments and inserts a space between them:
+
+```python
+name = "Mina"
+score = 42
+
+print("Observer", name, "scored", score)
+```
+
+Python converts each argument to display text for this output operation. The
+integer `score` remains an integer afterward.
+
+### Choose a separator with `sep`
+
+```python
+year = 2026
+month = 8
+day = 3
+
+print(year, month, day, sep="-")
+print("north", "east", "south", "west", sep=" | ")
+```
+
+`sep` is inserted **between** arguments, not after the final one.
+
+### Choose what follows with `end`
+
+`print()` normally ends with a newline. Override it deliberately:
+
+```python
+print("Loading", end="")
+print(".", end="")
+print(".", end="")
+print(". done")
+```
+
+The output appears on one line. Use `end` sparingly; output that never moves to a
+new line can be difficult to read in notebooks or terminals.
+
+### Print an empty line
+
+```python
+print("Section A")
+print()
+print("Section B")
+```
+
+Calling `print()` with no arguments writes only its ending newline, creating one
+blank line.
+
+### Display is not storage
+
+```python
+quantity = 4
+print("Quantity:", quantity)
+print(type(quantity).__name__)
+```
+
+The first call displays a textual representation of `quantity`. It does not
+replace the stored integer with text.
+
+## 3. `input()` always returns a string
+
+Run this cell and type `5`:
+
+```python
+number = input("Type a whole number: ")
+
+print(number)
+print(type(number).__name__)
+print(number + number)
+```
+
+The type is `str`, and the final output is `55`. The keyboard sends characters;
+Python does not infer a numeric type from their appearance.
+
+Convert at a named boundary:
+
+```python
+number_text = input("Type a whole number: ")
+number = int(number_text)
+doubled = number * 2
+
+print(f"Doubled: {doubled}")
+```
+
+The suffix `_text` makes the raw representation visible. `number` holds the
+converted integer, and later arithmetic no longer needs to wonder whether the
+value is text.
+
+### Clean surrounding whitespace first
+
+```python
+city_text = input("City: ")
+city = city_text.strip()
+
+print(f"Raw: {city_text!r}")
+print(f"Clean: {city!r}")
+```
+
+`!r` asks the f-string to use a diagnostic representation, so quotes and edge
+spaces are visible. Keep both values while investigating input problems.
+
+Numeric constructors already accept ordinary surrounding whitespace:
+
+```python
+quantity = int("  12  ")
+measurement = float("  3.5  ")
+
+print(quantity)
+print(measurement)
+```
+
+Cleaning explicitly can still make the boundary and later empty checks easier to
+explain.
+
+### Invalid input should fail visibly at this stage
+
+```python
+age_text = "twelve"
+age = int(age_text)
+```
+
+Python raises `ValueError`. Do not replace it with a default age just to continue.
+Unit 8 will teach how to catch an anticipated conversion failure, display a useful
+message, and retry. Until then, use fixed valid values for the complete program
+and inspect invalid cases in separate cells.
+
+### Checkpoint: the console boundary
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-io-boundary-check",
+  "title": "Console input and output checkpoint",
+  "instructions": "Follow the value as it crosses the console boundary.",
+  "questions": [
+    {
+      "id": "input-return",
+      "prompt": "What type does `input()` return when a person types `42`?",
+      "options": ["`str`", "`int`", "`float`", "`bool`"],
+      "answer_index": 0,
+      "explanation": "Console input returns the typed characters as a string."
+    },
+    {
+      "id": "print-separator",
+      "prompt": "What does `print(2026, 8, 3, sep=\"-\")` display?",
+      "options": ["`2026 8 3`", "`2026-8-3`", "`202683`", "Three unrelated lines"],
+      "answer_index": 1,
+      "explanation": "`sep` is placed between the three displayed arguments."
+    },
+    {
+      "id": "numeric-input",
+      "prompt": "Why use `quantity = int(quantity_text)` before `quantity * 2`?",
+      "options": ["To erase the prompt", "To make the name uppercase", "To create an integer whose multiplication means arithmetic", "To add quotation marks"],
+      "answer_index": 2,
+      "explanation": "The raw input is text; explicit conversion gives later arithmetic a numeric operand."
+    },
+    {
+      "id": "end-parameter",
+      "prompt": "What does `end=\"\"` change in a `print()` call?",
+      "options": ["The type of every argument", "The separator between arguments", "The stored variables", "The text written after the final argument"],
+      "answer_index": 3,
+      "explanation": "An empty end string suppresses the usual trailing newline for that call."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. F-strings place values inside readable messages
+
+Prefix a string literal with `f` and place expressions inside braces:
+
+```python
+observer = "Mina"
+objects_seen = 7
+
+message = f"{observer} recorded {objects_seen} objects."
+print(message)
+```
+
+Python evaluates each expression, converts its result for display, and constructs
+one new string.
+
+Forgetting the `f` leaves braces as ordinary characters:
+
+```python
+observer = "Mina"
+print("Observer: {observer}")
+```
+
+The output is literally `Observer: {observer}`. Add the prefix:
+
+```python
+print(f"Observer: {observer}")
+```
+
+### Keep expressions understandable
+
+Simple calculations can appear inside braces:
+
+```python
+completed = 8
+remaining = 3
+
+print(f"Total tasks: {completed + remaining}")
+```
+
+When an expression contains several operations or has meaning worth naming,
+calculate it first:
+
+```python
+completed = 8
+remaining = 3
+total_tasks = completed + remaining
+
+print(f"Total tasks: {total_tasks}")
+```
+
+The second version makes `total_tasks` available for checks and later output.
+
+### Show the expression and value while debugging
+
+The `=` debug form includes the expression text:
+
+```python
+temperature = 21.5
+print(f"{temperature=}")
+```
+
+The output resembles `temperature=21.5`. This is useful while investigating, but
+a user-facing report should usually have a human label.
+
+### Use `!r` to reveal whitespace and escapes
+
+```python
+raw_name = "  Mina\n"
+
+print(f"Human display: {raw_name}")
+print(f"Diagnostic: {raw_name!r}")
+```
+
+The diagnostic representation shows quotes and `\n`. It is evidence for a
+developer, not necessarily a friendly message for the person using the program.
+
+## 5. Format specifications control appearance
+
+Place a colon after the expression to add a format specification:
+
+```python
+distance = 12.34567
+print(f"Distance: {distance:.2f} km")
+```
+
+`.2f` means fixed-point notation with two digits after the decimal point. The
+f-string result is text; `distance` remains the original float.
+
+### Add grouping separators
+
+```python
+visitors = 1250000
+budget = 9876543.21
+
+print(f"Visitors: {visitors:,}")
+print(f"Budget: {budget:,.2f}")
+```
+
+The comma improves an English-style numeric display. Localization rules vary;
+later applications may use a locale-aware presentation library.
+
+### Display percentages
+
+```python
+completion = 0.875
+print(f"Complete: {completion:.1%}")
+```
+
+Percentage formatting multiplies by 100 for display and adds `%`, producing
+`87.5%`. The stored value remains `0.875`.
+
+### Align fields into columns
+
+```python
+label = "Temperature"
+value = 21.5
+
+print(f"{label:<16} | {value:>8.2f}")
+print(f"{'Humidity':<16} | {0.62:>8.1%}")
+```
+
+- `<16` left-aligns text in a field 16 characters wide;
+- `>8.2f` right-aligns a two-decimal number in a field eight characters wide.
+
+Fill and center a heading:
+
+```python
+print(f"{' NIGHT REPORT ':=^32}")
+```
+
+`=` is the fill character, `^` centers, and `32` is the field width.
+
+### Display signs explicitly
+
+```python
+change = 4.2
+loss = -1.7
+
+print(f"Change: {change:+.1f}")
+print(f"Change: {loss:+.1f}")
+```
+
+`+` in the specification displays a sign for both positive and negative values.
+
+### Checkpoint: formatting promises
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-io-formatting-check",
+  "title": "Clear formatting checkpoint",
+  "instructions": "Choose the format that makes the requested display promise.",
+  "questions": [
+    {
+      "id": "two-decimals",
+      "prompt": "Which f-string displays `price` with exactly two digits after the decimal point?",
+      "options": ["`f\"{price:.2f}\"`", "`f\"{price:2}\"`", "`f\"price.2f\"`", "`f\"{price}%\"`"],
+      "answer_index": 0,
+      "explanation": "The colon begins the specification and `.2f` requests two fixed-point decimal places."
+    },
+    {
+      "id": "percentage",
+      "prompt": "What does `f\"{0.375:.1%}\"` display?",
+      "options": ["`0.4%`", "`37.5%`", "`375.0%`", "`0.375`"],
+      "answer_index": 1,
+      "explanation": "Percentage formatting scales by 100 and shows one decimal place."
+    },
+    {
+      "id": "right-align",
+      "prompt": "Which alignment marker right-aligns a value inside its field?",
+      "options": ["`^`", "`<`", "`>`", "`=` by itself"],
+      "answer_index": 2,
+      "explanation": "The greater-than marker points toward the right edge of the field."
+    },
+    {
+      "id": "format-storage",
+      "prompt": "After `shown = f\"{value:.2f}\"`, what is `shown`?",
+      "options": ["The original float mutated in place", "An integer", "A Decimal", "A new string containing a formatted representation"],
+      "answer_index": 3,
+      "explanation": "F-strings produce text and do not modify the source value."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Human output and diagnostic output serve different readers
+
+`str()` aims for a readable representation. `repr()` aims for an unambiguous or
+developer-oriented representation when possible:
+
+```python
+message = "line one\nline two"
+
+print(str(message))
+print(repr(message))
+```
+
+The first output contains a real line break. The second includes quotes and the
+visible escape `\n`.
+
+F-strings use the same distinction:
+
+```python
+message = "line one\nline two"
+
+print(f"User sees:\n{message}")
+print(f"Developer inspects: {message!r}")
+```
+
+Do not show raw diagnostic representations as unexplained error messages to a
+beginner user. Do use them while tracking invisible whitespace, newlines, and
+unexpected types.
+
+### Avoid formatting too early
+
+```python
+price = 3.25
+price_text = f"{price:.2f}"
+
+print(price_text)
+print(type(price_text).__name__)
+```
+
+`price_text` is suitable for display but not for later numeric arithmetic. Keep
+`price` for calculation and create display text at the output boundary.
+
+## 7. Build an interactive night-sky ticket
+
+Create a small program that asks for:
+
+- the visitor's name;
+- the number of tickets; and
+- the price per ticket.
+
+Use Decimal for the exact base-ten price:
+
+```python
+from decimal import Decimal
+
+name_text = input("Visitor name: ")
+quantity_text = input("Number of tickets (whole number): ")
+price_text = input("Price per ticket (for example, 7.50): ")
+
+name = None
+quantity = None
+unit_price = None
+total = None
+```
+
+Create a three-line ticket with this shape:
+
+```text
+========== NIGHT-SKY TICKET ==========
+Visitor         Mina
+Tickets            3
+Total          22.50 credits
+```
+
+Your exact spacing may vary, but the values must be cleaned, typed, and formatted
+deliberately.
+
+### Use fixed values for repeatable checks
+
+Interactive cells are useful for a person, but assertions should not require
+retyping input. Put this equivalent data in a second cell:
+
+```python
+from decimal import Decimal
+
+name_text = "  Mina  "
+quantity_text = "3"
+price_text = "7.50"
+
+name = name_text.strip()
+quantity = int(quantity_text)
+unit_price = Decimal(price_text)
+total = unit_price * quantity
+
+assert name == "Mina"
+assert quantity == 3
+assert unit_price == Decimal("7.50")
+assert total == Decimal("22.50")
+```
+
+Then build the output from those typed values.
+
+<details>
+<summary>Hint: give each output field a width</summary>
+
+Try a left-aligned width for labels and a right-aligned width for values:
+`f"{'Visitor':<12}{name:>12}"`. Decimal supports fixed-point formatting such as
+`{total:.2f}`.
+
+</details>
+
+<details class="solution">
+<summary>Show one output path after your checks pass</summary>
+
+```python
+from decimal import Decimal
+
+name_text = "  Mina  "
+quantity_text = "3"
+price_text = "7.50"
+
+name = name_text.strip()
+quantity = int(quantity_text)
+unit_price = Decimal(price_text)
+total = unit_price * quantity
+
+print(f"{' NIGHT-SKY TICKET ':=^38}")
+print(f"{'Visitor':<14}{name:>24}")
+print(f"{'Tickets':<14}{quantity:>24}")
+print(f"{'Total':<14}{total:>18.2f} credits")
+```
+
+</details>
+
+Test one invalid value in a separate cell, record its error, and restore the valid
+program. Do not add a `try`/`except` copied from elsewhere; exception handling will
+be taught with enough context in Unit 8.
+
+## 8. Check your program's conversation
+
+Review the ticket from two perspectives:
+
+1. Does each prompt state the meaning and expected shape?
+2. Is every raw input retained as text until a visible conversion or cleanup step?
+3. Are numeric calculations performed on numbers rather than formatted strings?
+4. Do field widths improve scanning without removing meaningful text?
+5. Can a developer reveal whitespace with `!r` without showing that diagnostic
+   view to the visitor?
+
+### Final checkpoint
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-io-final-check",
+  "title": "Input-to-output checkpoint",
+  "instructions": "Choose the design that keeps conversion, calculation, and display separate.",
+  "questions": [
+    {
+      "id": "raw-name",
+      "prompt": "Why keep a name such as `quantity_text` before creating `quantity`?",
+      "options": ["It makes the external text boundary visible.", "It forces all arithmetic to concatenate.", "It prevents conversion.", "It changes the keyboard input to a float."],
+      "answer_index": 0,
+      "explanation": "Distinct names let a reader inspect the source text and the converted value independently."
+    },
+    {
+      "id": "repr-view",
+      "prompt": "Which f-string conversion reveals edge spaces and newline escapes while debugging?",
+      "options": ["`f\"{value:%}\"`", "`f\"{value!r}\"`", "`f\"{value:,}\"`", "`f\"{{value}}\"`"],
+      "answer_index": 1,
+      "explanation": "`!r` requests the diagnostic `repr()` representation."
+    },
+    {
+      "id": "calculation-value",
+      "prompt": "Which name should a later multiplication use after `total_text = f\"{total:.2f}\"`?",
+      "options": ["`total_text`, because text is exact arithmetic", "Both names are automatically updated", "The numeric `total`, not its display string", "Neither; formatting deletes the value"],
+      "answer_index": 2,
+      "explanation": "Keep numeric values for arithmetic and create text only for presentation."
+    },
+    {
+      "id": "invalid-input-stage",
+      "prompt": "Before exception handling is taught, how should this lesson investigate `int(\"twelve\")`?",
+      "options": ["Replace every invalid input with zero silently.", "Ignore the conversion line.", "Copy an unexplained retry loop.", "Run it separately, read the `ValueError`, record the boundary, and restore valid data."],
+      "answer_index": 3,
+      "explanation": "A separate failure experiment preserves useful evidence without introducing an unexplained recovery mechanism."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- `input()` returns text, even when the characters look numeric.
+- Clean and convert input at an explicit boundary before calculation.
+- `print()` accepts multiple values and configurable `sep` and `end` text.
+- F-strings produce strings and can include readable value expressions.
+- Format specifications control precision, percentage, grouping, width, alignment,
+  fill, and sign in the display.
+- Formatting does not change the stored numeric value.
+- Human-facing `str()` output and diagnostic `repr()` output serve different
+  readers.
+- Keep a fixed-data version of an interactive example so checks are reproducible.
+:::
+
+## References
+
+- [Python built-in functions: `input`, `print`, `str`, and `repr`](https://docs.python.org/3/library/functions.html)
+- [Python formatted string literals](https://docs.python.org/3/reference/lexical_analysis.html#f-strings)
+- [Python format-specification mini-language](https://docs.python.org/3/library/string.html#formatspec)
+- [Python tutorial: formatted string literals](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals)

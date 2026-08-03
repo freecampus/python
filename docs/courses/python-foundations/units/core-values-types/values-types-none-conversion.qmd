@@ -1,0 +1,673 @@
+---
+title: Values, Types, Conversion, and None
+lesson_id: core-values-types.values-types-none-conversion
+lesson_order: 10
+description: Inspect Python values, convert text and numbers deliberately, recognize information loss, and represent missing information with None.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+- values
+- conversion
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/values-types-none-conversion.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 2.5–4 hours
+- **You will learn:** Inspect value types, convert deliberately, identify lossy conversions, and distinguish missing, empty, and zero values.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The text `"12"` and the number `12` behave differently
+
+A concert form sends a ticket quantity as text:
+
+```python
+quantity_text = "12"
+print(quantity_text + quantity_text)
+```
+
+Before running it, decide whether the output will be `24`, `1212`, or an error.
+Python prints `1212`. The `+` operator joins two strings because both values are
+text. Quotation marks in source code are not decoration; they tell Python which
+kind of value to create.
+
+Compare the integer version:
+
+```python
+quantity = 12
+print(quantity + quantity)
+```
+
+This time `+` performs arithmetic and prints `24`. The visible digits are the
+same, but the **types** support different operations.
+
+Run a wider comparison:
+
+```python
+whole = 12
+measurement = 12.0
+label = "12"
+approved = True
+missing = None
+
+print(type(whole))
+print(type(measurement))
+print(type(label))
+print(type(approved))
+print(type(missing))
+```
+
+`type(value)` returns the value's type. Python displays `<class 'int'>`,
+`<class 'float'>`, `<class 'str'>`, `<class 'bool'>`, and `<class 'NoneType'>`.
+You do not need to memorize the angle-bracket display. The important names are
+`int`, `float`, `str`, `bool`, and `NoneType`.
+
+::: {.concept-diagram}
+A name refers to a value. The value—not the spelling of the name—has a type.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  name["name: quantity_text"] --> value["value: '12'"]
+  value --> kind["type: str"]
+  converted["int(quantity_text)"] --> number["new value: 12"]
+  number --> numberkind["type: int"]
+```
+:::
+
+### Ask for a compact type name
+
+Types themselves have a `__name__` attribute:
+
+```python
+temperature = 21.5
+print(type(temperature).__name__)
+```
+
+Python first evaluates `type(temperature)`, which produces the `float` type.
+Then `.__name__` obtains the text name `"float"`. `print()` displays it without
+the `<class ...>` wrapper.
+
+### A value is not automatically converted to match an operation
+
+Python refuses to guess how to combine unrelated types:
+
+```python
+ticket_count = 4
+message = "Tickets: "
+print(message + ticket_count)
+```
+
+The last line raises `TypeError`. The message explains that Python can concatenate
+a string only with another string. Automatic guessing could conceal bad data, so
+the program must state the intended conversion.
+
+## 2. Inspect a category with `isinstance()`
+
+`type()` answers “what is the direct type of this value?” Another built-in,
+`isinstance()`, answers “does this value belong to this type or category?”
+
+```python
+distance = 7.5
+
+print(type(distance).__name__)
+print(isinstance(distance, float))
+print(isinstance(distance, str))
+```
+
+The results are `float`, `True`, and `False`. The second argument to
+`isinstance()` is a type, so it is written as `float` without quotes. The string
+`"float"` would merely be text, not the type itself.
+
+Use `type()` while investigating an unexpected value. Use `isinstance()` when a
+program needs to ask whether a value belongs to an accepted type category.
+
+::: {.callout-note title="A detail to recognize, not exploit"}
+`bool` is a specialized kind of integer in Python, so `isinstance(True, int)` is
+`True` even though `type(True)` is `bool`. Write Boolean facts as `True` and
+`False`; do not use that relationship as a shortcut for arithmetic. Lesson 7
+examines Boolean boundaries in detail.
+:::
+
+### Check the value you actually received
+
+Predict all four results:
+
+```python
+participant_count = "8"
+
+print(type(participant_count) is str)
+print(isinstance(participant_count, str))
+print(type(participant_count) is int)
+print(isinstance(participant_count, int))
+```
+
+The first two are `True`; the last two are `False`. Both approaches agree for
+this ordinary string. The code does **not** prove that the text contains a valid
+participant count. Type inspection and content validation answer different
+questions.
+
+### Checkpoint: types and behavior
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-values-types-check",
+  "title": "Types and behavior checkpoint",
+  "instructions": "Predict Python's result before choosing.",
+  "questions": [
+    {
+      "id": "quoted-digits",
+      "prompt": "What does `\"7\" + \"3\"` produce?",
+      "options": ["The string `\"73\"`", "The integer `10`", "The float `10.0`", "`None`"],
+      "answer_index": 0,
+      "explanation": "Both operands are strings, so `+` concatenates their characters."
+    },
+    {
+      "id": "type-name",
+      "prompt": "What does `type(4.5).__name__` produce?",
+      "options": ["The number `4.5`", "The string `\"float\"`", "The string `\"number\"`", "`True`"],
+      "answer_index": 1,
+      "explanation": "`4.5` has type `float`, and that type's `__name__` is the string `\"float\"`."
+    },
+    {
+      "id": "type-versus-content",
+      "prompt": "What does `isinstance(\"eight\", str)` prove?",
+      "options": ["The text can be converted to `8`.", "The text is valid form input.", "The value is a string, but not what its characters mean.", "The value is an integer."],
+      "answer_index": 2,
+      "explanation": "A type check identifies the value category; it does not validate the text's meaning."
+    },
+    {
+      "id": "mixed-addition",
+      "prompt": "Why does `\"Total: \" + 4` fail?",
+      "options": ["The integer is too small.", "`+` never works on text.", "The string is missing punctuation.", "Python will not guess whether to convert the string or the integer."],
+      "answer_index": 3,
+      "explanation": "The program must explicitly choose text formatting or numeric conversion instead of relying on a guess."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Conversion creates a result; it does not rewrite the source
+
+Python's built-in type names can also act as conversion functions:
+
+```python
+quantity_text = "12"
+quantity = int(quantity_text)
+
+print(quantity_text, type(quantity_text).__name__)
+print(quantity, type(quantity).__name__)
+```
+
+What Python does on each line:
+
+1. `quantity_text = "12"` creates a string and binds the name.
+2. `int(quantity_text)` reads the characters and creates the integer `12`.
+3. Assignment binds the new integer to `quantity`.
+4. Nothing reassigns `quantity_text`, so it still refers to the original string.
+
+This distinction matters whenever the raw input is useful for error messages or
+auditing. You can preserve the source and give the converted value a new name.
+
+### Convert common numeric text
+
+`int()` accepts optional surrounding whitespace and a sign:
+
+```python
+print(int("  42 "))
+print(int("-7"))
+print(int("+18"))
+```
+
+`float()` accepts decimal and scientific notation:
+
+```python
+print(float("3.75"))
+print(float("-0.5"))
+print(float("1.2e3"))
+```
+
+The final text means \(1.2 \times 10^3\), so Python prints `1200.0`.
+
+### Convert a value for display
+
+`str()` creates text:
+
+```python
+attempts = 3
+attempts_text = str(attempts)
+
+print("Attempts: " + attempts_text)
+print(type(attempts).__name__)
+print(type(attempts_text).__name__)
+```
+
+The integer remains an integer. The new string is useful for text concatenation,
+although f-strings in Lesson 6 usually make mixed-value messages clearer.
+
+### Parse a non-decimal integer when the contract says so
+
+The optional second argument to `int()` states the numeral base:
+
+```python
+binary_flags = int("1011", 2)
+hex_color_part = int("ff", 16)
+
+print(binary_flags)
+print(hex_color_part)
+```
+
+Python prints `11` and `255`. Do this only when the input contract actually says
+binary or hexadecimal. `int("1011")` normally means the decimal number one
+thousand eleven.
+
+## 4. A successful conversion can still lose information
+
+Conversion does not promise that every detail survives:
+
+```python
+measurement = 8.9
+whole_part = int(measurement)
+
+print(whole_part)
+print(measurement)
+```
+
+`int(8.9)` produces `8`. It truncates toward zero; it does not round to the
+nearest integer. The original `measurement` remains `8.9`, but `whole_part` no
+longer records the fractional part.
+
+Compare positive and negative values:
+
+```python
+print(int(3.9))
+print(int(-3.9))
+```
+
+The results are `3` and `-3`. Both move toward zero. If a ticket rule says “always
+use another seat for any partial group,” `int()` is the wrong operation. Lesson 2
+will distinguish truncation, floor division, and rounding rules.
+
+### Numeric conversions can change the available precision
+
+```python
+large_count = 10_000_000_000_000_001
+approximate_count = float(large_count)
+restored_count = int(approximate_count)
+
+print(large_count)
+print(approximate_count)
+print(restored_count)
+print(restored_count == large_count)
+```
+
+On standard Python, converting this large integer to a float cannot preserve every
+digit. Converting it back does not recover the lost information. A round trip is
+not evidence of safety unless the representation can express the original value.
+
+### `bool()` answers truthiness, not human yes/no text
+
+```python
+print(bool("yes"))
+print(bool("no"))
+print(bool("False"))
+print(bool(""))
+```
+
+The first three are `True` because every non-empty string is truthy. Only the empty
+string is false. Do not use `bool(user_text)` to parse a human answer. Lesson 7
+builds an explicit yes/no rule.
+
+### Checkpoint: conversion boundaries
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-values-conversion-check",
+  "title": "Conversion boundaries checkpoint",
+  "instructions": "Choose the result that follows from the exact conversion.",
+  "questions": [
+    {
+      "id": "source-survives",
+      "prompt": "After `number = int(text)` with `text = \"15\"`, what does `text` refer to?",
+      "options": ["The original string `\"15\"`", "The integer `15`", "`None`", "A deleted value"],
+      "answer_index": 0,
+      "explanation": "Conversion creates a result; it does not reassign or mutate the source string."
+    },
+    {
+      "id": "truncate-negative",
+      "prompt": "What is `int(-4.8)`?",
+      "options": ["`-5`", "`-4`", "`4`", "A `ValueError`"],
+      "answer_index": 1,
+      "explanation": "Converting a float to int truncates toward zero, so the fractional part is discarded."
+    },
+    {
+      "id": "bool-false-text",
+      "prompt": "What is `bool(\"False\")`?",
+      "options": ["`False`, because the word says false", "`None`", "`True`, because the string is non-empty", "A `TypeError`"],
+      "answer_index": 2,
+      "explanation": "String truthiness depends on emptiness, not on interpreting the characters as a human Boolean answer."
+    },
+    {
+      "id": "binary-conversion",
+      "prompt": "What does `int(\"101\", 2)` produce?",
+      "options": ["The decimal integer `101`", "The string `\"5\"`", "The float `5.0`", "The decimal integer `5`"],
+      "answer_index": 3,
+      "explanation": "With base 2, the digits represent four plus zero plus one, which is decimal 5."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Read conversion failures before repairing them
+
+Try this valid Python code in its own cell:
+
+```python
+participants = int("twelve")
+```
+
+Python raises `ValueError`. The call received the expected broad type—a string—but
+the characters are not a valid base-ten integer literal.
+
+Now try:
+
+```python
+participants = int(None)
+```
+
+This raises `TypeError`. `None` is not an accepted source for `int()`.
+
+The distinction helps you describe the failure:
+
+- **`ValueError`:** this kind of input is accepted, but this particular value
+  cannot be interpreted as requested;
+- **`TypeError`:** the operation does not accept this kind of value here.
+
+Unit 8 will teach how to catch anticipated exceptions. For now, read the final
+line, identify the conversion call, and fix either the source data or the program's
+contract. Do not replace every failure with a made-up default.
+
+### Decimal-looking text is not an integer literal
+
+```python
+whole = int("12.5")
+```
+
+This raises `ValueError`. If the contract permits decimal measurements, parse a
+float first:
+
+```python
+measurement = float("12.5")
+print(measurement)
+```
+
+Avoid writing `int(float("12.5"))` unless discarding the fractional part is an
+explicit rule. Making an error disappear is not the same as preserving meaning.
+
+### Test a conversion separately from a domain rule
+
+```python
+quantity_text = "-2"
+quantity = int(quantity_text)
+
+print(quantity)
+print(quantity >= 0)
+```
+
+Conversion succeeds: `"-2"` is valid integer text. The comparison is `False`
+because a negative ticket quantity violates this example's domain rule. Keep the
+questions separate:
+
+1. Can Python interpret the characters as an integer?
+2. Does this program permit that integer?
+
+## 6. `None` records deliberate absence
+
+Suppose a registration form allows a nickname but does not require one:
+
+```python
+nickname = None
+print(nickname is None)
+```
+
+`None` is a single special value used to represent “no value here” according to
+the program's contract. It is not the text `"None"`, not zero, and not an empty
+string.
+
+Compare four possible states:
+
+```python
+unknown_score = None
+zero_score = 0
+blank_note = ""
+literal_word = "None"
+
+print(unknown_score is None)
+print(zero_score is None)
+print(blank_note is None)
+print(literal_word is None)
+```
+
+Only the first result is `True`. Zero may be a real score. An empty string may mean
+the person submitted a blank note. The word `"None"` is ordinary text.
+
+### Check `None` with identity
+
+Use:
+
+```python
+delivery_date = None
+has_delivery_date = delivery_date is not None
+print(has_delivery_date)
+```
+
+Python documentation and style guidance recommend `is None` and `is not None`.
+Lesson 6 of the course later examines equality and identity in depth. For now,
+treat this spelling as the standard `None` check.
+
+### Do not convert absence into misleading text
+
+```python
+special_request = None
+request_text = str(special_request)
+print(request_text)
+print(type(request_text).__name__)
+```
+
+The output looks like `None`, but `request_text` is now a four-character string.
+It no longer represents absence. Convert to display text only at the display
+boundary, and choose a human message deliberately:
+
+```python
+special_request = None
+display_request = "No special request"
+print(display_request)
+```
+
+Later decision lessons will select that display based on the value. The key idea
+here is that representation carries meaning.
+
+### Checkpoint: missing, empty, and invalid
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-values-none-check",
+  "title": "Missing and invalid values checkpoint",
+  "instructions": "Choose the check or explanation that preserves the stated meaning.",
+  "questions": [
+    {
+      "id": "none-check",
+      "prompt": "Which expression checks whether `coupon_code` is deliberately missing?",
+      "options": ["`coupon_code is None`", "`coupon_code == 0`", "`coupon_code == \"None\"`", "`int(coupon_code)`"],
+      "answer_index": 0,
+      "explanation": "`is None` directly checks for Python's missing-value marker."
+    },
+    {
+      "id": "zero-meaning",
+      "prompt": "Why should a score of `0` not automatically be replaced by `None`?",
+      "options": ["Zero is always text.", "Zero can be a real measured score, while `None` means no score is present.", "`None` supports more arithmetic.", "Python converts zero to `None`."],
+      "answer_index": 1,
+      "explanation": "The domain can assign zero a real meaning; absence is a different state."
+    },
+    {
+      "id": "value-error",
+      "prompt": "Why does `int(\"twelve\")` raise `ValueError`?",
+      "options": ["`int` never accepts strings.", "The result would be too large.", "A string is accepted, but these characters are not an integer literal.", "The name `int` is missing."],
+      "answer_index": 2,
+      "explanation": "The source type is accepted, but the string's contents cannot be interpreted as a base-ten integer."
+    },
+    {
+      "id": "conversion-validation",
+      "prompt": "`int(\"-2\")` succeeds for a ticket quantity. What remains to check?",
+      "options": ["Whether the string was deleted", "Whether `int` returned a float", "Whether quotes appear in output", "Whether the program permits a negative quantity"],
+      "answer_index": 3,
+      "explanation": "Conversion answers whether the text can become an integer; validation answers whether that integer is allowed."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Build a typed registration summary
+
+The observatory receives these fixed raw fields:
+
+```python
+visitor_text = "  mina  "
+group_size_text = "4"
+donation_text = "12.50"
+special_request_text = ""
+```
+
+Your task is to preserve the raw fields and create these new names:
+
+- `visitor` — cleaned text with surrounding whitespace removed;
+- `group_size` — an integer;
+- `donation` — a float for this exercise;
+- `special_request` — `None`, because the supplied text is empty; and
+- `group_size_is_valid` — a Boolean showing whether the size is at least one.
+
+You have not studied full decision structures yet, so use this starter for the
+optional field:
+
+```python
+visitor = visitor_text.strip().title()
+group_size = int(group_size_text)
+donation = float(donation_text)
+special_request = special_request_text.strip() or None
+group_size_is_valid = group_size >= 1
+
+print(f"Visitor: {visitor}")
+print(f"Group size: {group_size}")
+print(f"Donation: {donation}")
+print(f"Request missing: {special_request is None}")
+print(f"Group size valid: {group_size_is_valid}")
+```
+
+The expression `special_request_text.strip() or None` is a preview of Boolean
+operator behavior. Because the cleaned string is empty, the expression produces
+`None`. Lesson 7 will explain that rule; you only need to use the supplied line in
+this lab.
+
+### Verify each promise
+
+Run these assertions after your code:
+
+```python
+assert visitor_text == "  mina  "
+assert visitor == "Mina"
+assert type(group_size) is int
+assert group_size == 4
+assert type(donation) is float
+assert donation == 12.5
+assert special_request is None
+assert group_size_is_valid is True
+```
+
+Then make one controlled variation at a time:
+
+1. Change `group_size_text` to `"0"`. Which conversion still succeeds, and which
+   domain fact changes?
+2. Change `special_request_text` to `"  wheelchair access  "`. For this variation,
+   assign `special_request = special_request_text.strip()` and verify the result.
+3. Change `donation_text` to `"free"`. Record the exception type and the exact
+   conversion that raises it.
+4. Restore the ordinary data and rerun all assertions from a clean state.
+
+<details class="solution">
+<summary>Show the ordinary solution after completing your own version</summary>
+
+```python
+visitor_text = "  mina  "
+group_size_text = "4"
+donation_text = "12.50"
+special_request_text = ""
+
+visitor = visitor_text.strip().title()
+group_size = int(group_size_text)
+donation = float(donation_text)
+special_request = special_request_text.strip() or None
+group_size_is_valid = group_size >= 1
+
+print(f"Visitor: {visitor}")
+print(f"Group size: {group_size}")
+print(f"Donation: {donation}")
+print(f"Request missing: {special_request is None}")
+print(f"Group size valid: {group_size_is_valid}")
+```
+
+The raw names remain available. Each converted or cleaned value has a new name,
+so a reader can see where the program crosses from external text into values used
+by the program.
+
+</details>
+
+## 8. Check your typed boundary
+
+Before leaving the lesson, explain these points without running the code again:
+
+1. Why does `int(quantity_text)` not change `quantity_text`?
+2. Which information does `int(8.9)` discard?
+3. Why can `int("-2")` succeed even when `-2` is invalid for a particular form?
+4. How do `None`, `0`, and `""` represent different states?
+5. Which exception do you expect from `int("four")`, and what evidence supports
+   that prediction?
+
+If any answer feels uncertain, rerun the smallest relevant example rather than
+rereading the entire page.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A Python value has a type that determines which operations it supports.
+- `type()` identifies a direct type; `isinstance()` asks whether a value belongs
+  to a type category.
+- Conversion creates a result and does not rewrite the source value.
+- Successful conversion can discard information, so the domain must choose the
+  rule.
+- `ValueError` often signals unacceptable contents; `TypeError` often signals an
+  unsupported kind of value.
+- `None` represents deliberate absence and is normally checked with `is None`.
+- Conversion and domain validation answer different questions.
+:::
+
+## References
+
+- [Python built-in functions: `type`, `isinstance`, `int`, `float`, and `str`](https://docs.python.org/3/library/functions.html)
+- [Python built-in constants: `None`, `True`, and `False`](https://docs.python.org/3/library/constants.html)
+- [Python standard types: truth-value testing](https://docs.python.org/3/library/stdtypes.html#truth-value-testing)
+- [PEP 8 guidance for comparisons to `None`](https://peps.python.org/pep-0008/#programming-recommendations)

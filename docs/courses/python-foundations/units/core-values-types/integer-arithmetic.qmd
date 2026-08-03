@@ -1,0 +1,611 @@
+---
+title: Integers and Everyday Arithmetic
+lesson_id: core-values-types.integer-arithmetic
+lesson_order: 20
+description: Use Python integers to model exact counts, groups, leftovers, powers, ranges, and signed quantities without choosing the wrong arithmetic rule.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+- integers
+- arithmetic
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/integer-arithmetic.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 2.5–4 hours
+- **You will learn:** Choose integer operations for exact counts, complete groups, leftovers, powers, and signed values.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Integers model exact whole quantities
+
+An **integer** is a whole number with no fractional part. Counts, scores, row
+numbers, inventory changes, and elapsed whole seconds are natural integer values:
+
+```python
+visitors = 128
+temperature_change = -3
+empty_seats = 0
+
+print(type(visitors).__name__)
+print(type(temperature_change).__name__)
+print(type(empty_seats).__name__)
+```
+
+All three values have type `int`. Zero and negative numbers are integers too.
+The minus sign is an operator applied to the literal `3`; the resulting value is
+negative three.
+
+### Digit separators improve large-number readability
+
+Python lets source code contain underscores between digits:
+
+```python
+city_population = 1_250_000
+same_population = 1250000
+
+print(city_population)
+print(city_population == same_population)
+```
+
+The underscore is for the person reading the code. It does not appear in the
+value or printed output, and the comparison is `True`.
+
+Try grouping identifiers by meaning:
+
+```python
+binary_mask = 0b1111_0000
+hex_color = 0xFF_88_00
+
+print(binary_mask)
+print(hex_color)
+```
+
+The `0b` and `0x` prefixes create binary and hexadecimal integer literals. They
+are still ordinary integers after Python reads them. Use these forms only when
+the domain naturally speaks in bits or hexadecimal; decimal remains clearer for
+ordinary counts.
+
+### Python integers are not limited to 32 bits
+
+```python
+large_power = 2 ** 200
+print(large_power)
+print(type(large_power).__name__)
+```
+
+Python expands an integer to hold the result, limited by available memory rather
+than a fixed 32-bit or 64-bit boundary. That does not make huge calculations free,
+but it prevents silent wraparound in ordinary integer arithmetic.
+
+## 2. Choose an operator from the question
+
+Read this event-supply calculation from the inside out:
+
+```python
+adult_tickets = 18
+child_tickets = 7
+ticket_price = 6
+
+ticket_count = adult_tickets + child_tickets
+ticket_income = ticket_count * ticket_price
+
+print(ticket_count)
+print(ticket_income)
+```
+
+`+` combines the two counts, producing `25`. `*` repeats the price for each
+ticket, producing `150`. Giving intermediate results names makes both questions
+visible.
+
+The core integer operators are:
+
+| Operator | Question it can answer | Example | Result |
+|---|---|---:|---:|
+| `+` | What is the combined amount? | `8 + 3` | `11` |
+| `-` | What is the difference or change? | `8 - 3` | `5` |
+| `*` | How many across equal groups? | `8 * 3` | `24` |
+| `/` | What is the exact ratio as a float? | `8 / 3` | `2.666...` |
+| `//` | How many complete groups fit? | `8 // 3` | `2` |
+| `%` | What remains after complete groups? | `8 % 3` | `2` |
+| `**` | What is repeated multiplication? | `8 ** 3` | `512` |
+
+The table is a map, not a substitute for deciding what the program means.
+
+### Parentheses state the intended order
+
+```python
+weekday_visitors = 40
+weekend_visitors = 65
+weeks = 3
+
+total_visitors = (weekday_visitors + weekend_visitors) * weeks
+print(total_visitors)
+```
+
+The parentheses combine one weekday and weekend before multiplying by three.
+Without them, multiplication would happen before addition and answer a different
+question.
+
+### Useful built-ins keep intent visible
+
+```python
+altitude_change = -240
+scores = (72, 91, 84)
+
+print(abs(altitude_change))
+print(min(72, 91, 84))
+print(max(72, 91, 84))
+print(pow(3, 4))
+```
+
+`abs()` gives distance from zero, `min()` and `max()` select boundary values, and
+`pow(3, 4)` is another spelling of `3 ** 4`. The tuple assigned to `scores` is a
+preview of Unit 3; the `min()` and `max()` calls above deliberately use separate
+arguments so no collection work is required.
+
+### Checkpoint: exact arithmetic
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-integers-arithmetic-check",
+  "title": "Exact arithmetic checkpoint",
+  "instructions": "Choose the operation that answers the stated question.",
+  "questions": [
+    {
+      "id": "combined-count",
+      "prompt": "Which expression calculates the total people in groups of 8 and 5?",
+      "options": ["`8 + 5`", "`8 // 5`", "`8 % 5`", "`8 ** 5`"],
+      "answer_index": 0,
+      "explanation": "Addition combines the two independent counts."
+    },
+    {
+      "id": "absolute-change",
+      "prompt": "Which expression reports the size of a change stored as `-12`, ignoring direction?",
+      "options": ["`min(-12)`", "`abs(-12)`", "`-12 % 2`", "`str(-12)`"],
+      "answer_index": 1,
+      "explanation": "`abs()` returns the distance from zero, which is 12."
+    },
+    {
+      "id": "parentheses",
+      "prompt": "Which expression doubles the combined values `a` and `b`?",
+      "options": ["`a + b ** 2`", "`a + b * 2`", "`(a + b) * 2`", "`a ** b + 2`"],
+      "answer_index": 2,
+      "explanation": "Parentheses combine `a` and `b` first; multiplication then doubles that result."
+    },
+    {
+      "id": "large-integers",
+      "prompt": "What normally happens when a Python integer grows beyond 64 bits?",
+      "options": ["It becomes a string.", "It silently becomes zero.", "It always becomes a float.", "Python allocates a larger integer, subject to available resources."],
+      "answer_index": 3,
+      "explanation": "Python integers use arbitrary precision rather than silently wrapping at a fixed machine-word size."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. How many complete boxes can we fill?
+
+Suppose `29` notebooks must be packed in boxes that hold `6` each:
+
+```python
+notebooks = 29
+box_capacity = 6
+
+complete_boxes = notebooks // box_capacity
+leftover_notebooks = notebooks % box_capacity
+
+print(complete_boxes)
+print(leftover_notebooks)
+```
+
+Four complete boxes use `24` notebooks and leave `5`. Floor division `//` and
+remainder `%` describe two connected parts of the same grouping.
+
+Verify the relationship:
+
+```python
+rebuilt_total = complete_boxes * box_capacity + leftover_notebooks
+print(rebuilt_total)
+print(rebuilt_total == notebooks)
+```
+
+For a positive capacity, the remainder is at least zero and smaller than the
+capacity. The equation
+
+```text
+total = quotient * divisor + remainder
+```
+
+is a useful way to check your model.
+
+### Get quotient and remainder together with `divmod()`
+
+```python
+complete_boxes, leftover_notebooks = divmod(29, 6)
+print(complete_boxes)
+print(leftover_notebooks)
+```
+
+`divmod(a, b)` returns both `a // b` and `a % b`. The two-name assignment is a
+small preview of tuple unpacking in Unit 3. Use the longer spelling if it is more
+readable at this point; the arithmetic is the same.
+
+### Convert seconds into minutes and seconds
+
+```python
+total_seconds = 367
+minutes = total_seconds // 60
+seconds = total_seconds % 60
+
+print(minutes)
+print(seconds)
+```
+
+Python prints `6` and `7`. Six complete minutes use `360` seconds, leaving seven.
+Change the total to `360`, `59`, and `0`. Predict each pair before running.
+
+### Count containers needed, including a partial one
+
+Complete boxes and boxes needed are different questions. With 29 notebooks, five
+boxes are needed even though only four are full.
+
+For positive integers:
+
+```python
+notebooks = 29
+box_capacity = 6
+boxes_needed = (notebooks + box_capacity - 1) // box_capacity
+print(boxes_needed)
+```
+
+Adding `box_capacity - 1` moves any positive remainder into the next complete
+floor-division group. Test `30` notebooks: the formula still produces exactly
+five, not six.
+
+::: {.callout-warning title="Do not reuse the ceiling formula blindly"}
+`(amount + size - 1) // size` assumes positive integer amounts and sizes. A
+negative amount or zero size needs a different contract. Later lessons will show
+`math.ceil()` for general numeric values.
+:::
+
+## 4. `/` and `//` answer different questions
+
+Even when both operands are integers, `/` produces a float:
+
+```python
+print(12 / 3)
+print(type(12 / 3).__name__)
+print(12 // 3)
+print(type(12 // 3).__name__)
+```
+
+The outputs are `4.0`, `float`, `4`, and `int`. Use `/` for a ratio or average and
+`//` for complete floor-division groups.
+
+### Average is not a complete-group count
+
+```python
+total_points = 25
+players = 4
+
+average_points = total_points / players
+complete_points_each = total_points // players
+
+print(average_points)
+print(complete_points_each)
+```
+
+The average is `6.25`. If points must be indivisible objects distributed equally,
+each player can receive six complete points with one left over. The correct
+operator comes from the requirement.
+
+### Division by zero has no numeric result
+
+Run this in its own cell:
+
+```python
+groups = 0
+items_per_group = 12 // groups
+```
+
+Python raises `ZeroDivisionError`. Changing `groups` to `1` removes the exception,
+but a real program must ask why zero reached a value used as a divisor. Unit 8
+will teach controlled handling; for now, preserve the message and repair the
+source or stated rule.
+
+The remainder operator also rejects a zero divisor:
+
+```python
+remainder = 12 % 0
+```
+
+The failure belongs to the operation, not to the integer `12` by itself.
+
+### Checkpoint: groups, ratios, and leftovers
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-integers-groups-check",
+  "title": "Groups and leftovers checkpoint",
+  "instructions": "Translate the question into the matching integer operation.",
+  "questions": [
+    {
+      "id": "complete-groups",
+      "prompt": "How many complete groups of 6 fit in 29?",
+      "options": ["`29 // 6`", "`29 / 6`", "`29 % 6`", "`6 ** 29`"],
+      "answer_index": 0,
+      "explanation": "Floor division counts complete groups and produces 4."
+    },
+    {
+      "id": "leftover",
+      "prompt": "Which expression finds the notebooks left after packing complete boxes of 6?",
+      "options": ["`notebooks / 6`", "`notebooks % 6`", "`notebooks ** 6`", "`6 - notebooks`"],
+      "answer_index": 1,
+      "explanation": "Remainder reports what is left after complete groups."
+    },
+    {
+      "id": "true-ratio",
+      "prompt": "Which expression calculates a possibly fractional average for `total` across `people`?",
+      "options": ["`total % people`", "`total // people`", "`total / people`", "`people / total // 1`"],
+      "answer_index": 2,
+      "explanation": "True division `/` preserves the fractional part of a ratio."
+    },
+    {
+      "id": "divmod-result",
+      "prompt": "What two values does `divmod(367, 60)` return?",
+      "options": ["`367` and `60`", "`6.116...` and `0`", "`7` and `6`", "`6` and `7`"],
+      "answer_index": 3,
+      "explanation": "There are six complete groups of 60 with seven remaining."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Negative floor division follows the lower integer
+
+For positive values, floor division often looks like discarding the fractional
+part. Negative values reveal the real rule:
+
+```python
+print(7 / 3)
+print(7 // 3)
+print(-7 / 3)
+print(-7 // 3)
+```
+
+`-7 / 3` is about `-2.333`. The mathematical floor is the next lower integer,
+`-3`, so `-7 // 3` is `-3`. It does not truncate toward zero.
+
+Compare `int()` from Lesson 1:
+
+```python
+print(int(-7 / 3))
+print(-7 // 3)
+```
+
+`int(-2.333...)` truncates toward zero and gives `-2`. Floor division gives `-3`.
+The operations implement different rules.
+
+### Remainder keeps the grouping equation true
+
+```python
+quotient = -7 // 3
+remainder = -7 % 3
+
+print(quotient)
+print(remainder)
+print(quotient * 3 + remainder)
+```
+
+Python prints `-3`, `2`, and `-7`. The remainder has the same sign as the positive
+divisor and keeps the reconstruction equation true.
+
+A clock-style use makes this behavior helpful:
+
+```python
+hour = 1
+hours_back = 5
+wrapped_hour = (hour - hours_back) % 24
+print(wrapped_hour)
+```
+
+The result is `20`, representing 20:00 on a 24-hour clock. Modulo wraps a negative
+intermediate value into the range from `0` through `23`.
+
+## 6. Powers grow faster than repeated addition
+
+Exponentiation models repeated multiplication:
+
+```python
+square_side = 12
+square_area = square_side ** 2
+cube_volume = 3 ** 3
+
+print(square_area)
+print(cube_volume)
+```
+
+`12 ** 2` means twelve squared, while `3 ** 3` means three multiplied by itself
+three times.
+
+Operator precedence matters around a negative sign:
+
+```python
+print(-3 ** 2)
+print((-3) ** 2)
+```
+
+Exponentiation happens before the leading negative operator, so `-3 ** 2` is
+`-(3 ** 2)`, or `-9`. Parentheses make the negative value itself the base, giving
+`9`.
+
+### Checkpoint: signed arithmetic
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-integers-signed-check",
+  "title": "Signed arithmetic checkpoint",
+  "instructions": "Trace the exact rule rather than relying on a visual shortcut.",
+  "questions": [
+    {
+      "id": "negative-floor",
+      "prompt": "What is `-7 // 3`?",
+      "options": ["`-3`", "`-2`", "`2`", "`3`"],
+      "answer_index": 0,
+      "explanation": "Floor division chooses the lower integer below approximately -2.333, which is -3."
+    },
+    {
+      "id": "negative-remainder",
+      "prompt": "What is `-7 % 3` in Python?",
+      "options": ["`-1`", "`2`", "`-2`", "`1`"],
+      "answer_index": 1,
+      "explanation": "The result 2 satisfies `-7 == (-3 * 3) + 2`."
+    },
+    {
+      "id": "negative-power",
+      "prompt": "What is `(-3) ** 2`?",
+      "options": ["`-9`", "`-6`", "`9`", "`6`"],
+      "answer_index": 2,
+      "explanation": "Parentheses make -3 the base, and multiplying -3 by -3 produces 9."
+    },
+    {
+      "id": "truncate-versus-floor",
+      "prompt": "Why can `int(-2.8)` differ from `-28 // 10`?",
+      "options": ["Only integers can be negative.", "`//` converts text.", "`int` always rounds to the nearest integer.", "`int` truncates toward zero, while `//` floors toward the lower integer."],
+      "answer_index": 3,
+      "explanation": "The two operations use different rules for negative fractional values."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Build a festival crate planner
+
+A community festival has `367` water bottles. A crate holds `24` bottles, and a
+volunteer cart can carry `5` crates per trip. Build a summary that reports:
+
+- full crates;
+- bottles left outside full crates;
+- total crates needed to carry every bottle;
+- complete cart trips;
+- crates on the final partial trip; and
+- total cart trips needed.
+
+Start with these names:
+
+```python
+bottles = 367
+crate_capacity = 24
+crates_per_trip = 5
+
+full_crates = None
+leftover_bottles = None
+crates_needed = None
+complete_trips = None
+crates_on_partial_trip = None
+trips_needed = None
+```
+
+Replace each `None` with an integer expression. Keep the two questions separate:
+`full_crates` counts only completely filled crates, while `crates_needed` includes
+the partially filled final crate.
+
+Use these checks:
+
+```python
+assert full_crates == 15
+assert leftover_bottles == 7
+assert crates_needed == 16
+assert complete_trips == 3
+assert crates_on_partial_trip == 1
+assert trips_needed == 4
+assert full_crates * crate_capacity + leftover_bottles == bottles
+```
+
+Then format a short report:
+
+```python
+print(f"Bottles: {bottles}")
+print(f"Crates needed: {crates_needed}")
+print(f"Cart trips needed: {trips_needed}")
+```
+
+### Test the exact-boundary case
+
+Change `bottles` to `360`. Recalculate every derived value rather than editing the
+assertions until they pass. Predict which remainders become zero and whether the
+crate/trip totals still need a partial group.
+
+<details>
+<summary>Hint 1: separate full groups from groups needed</summary>
+
+Use `//` and `%` for the full-crate facts. Use the positive-integer ceiling formula
+for crates and trips needed.
+
+</details>
+
+<details class="solution">
+<summary>Show one solution after your assertions pass</summary>
+
+```python
+bottles = 367
+crate_capacity = 24
+crates_per_trip = 5
+
+full_crates = bottles // crate_capacity
+leftover_bottles = bottles % crate_capacity
+crates_needed = (bottles + crate_capacity - 1) // crate_capacity
+complete_trips = crates_needed // crates_per_trip
+crates_on_partial_trip = crates_needed % crates_per_trip
+trips_needed = (crates_needed + crates_per_trip - 1) // crates_per_trip
+```
+
+`complete_trips` is `3` because three carts can be completely filled with five
+crates. `trips_needed` is `4` because the remaining crate still needs transport.
+
+</details>
+
+## 8. Check your arithmetic model
+
+Explain these choices in your own words:
+
+1. Why does `/` produce the wrong type of answer for a complete-box count?
+2. How do `//` and `%` describe the same grouping?
+3. Why does `int(-2.8)` not implement mathematical floor?
+4. Which assumption makes the positive-integer ceiling formula safe?
+5. How would you detect a zero divisor before attempting division?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Integers model exact whole quantities and can grow beyond fixed machine-word
+  sizes.
+- Choose `+`, `-`, `*`, `/`, `//`, `%`, and `**` from the question being answered.
+- `/` returns a floating-point ratio; `//` returns the floor-division result.
+- Quotient and remainder satisfy `total == quotient * divisor + remainder`.
+- Negative floor division moves toward the lower integer, not toward zero.
+- A complete-group count and the number of containers needed are different facts.
+- Zero cannot be used as a divisor.
+:::
+
+## References
+
+- [Python tutorial: using Python as a calculator](https://docs.python.org/3/tutorial/introduction.html#using-python-as-a-calculator)
+- [Python standard types: numeric operations](https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex)
+- [Python reference: arithmetic conversions and operations](https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations)
+- [Python built-in functions: `abs`, `divmod`, `min`, `max`, and `pow`](https://docs.python.org/3/library/functions.html)

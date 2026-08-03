@@ -1,6 +1,6 @@
 ---
-title: Core Values and Scalar Types Overview
-description: Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
+title: Numbers, Text, and Other Values Overview
+description: Learn how Python represents counts, measurements, money, text, truth, missing information, and time before combining them in practical programs.
 course_id: python-foundations
 unit_id: core-values-types
 unit_number: 2
@@ -13,56 +13,154 @@ colab_notebook: notebooks/courses/python-foundations/units/core-values-types/ind
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 2
-- **Estimated time:** 6–12 hours including the challenge
-- **Unit outcome:** Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 22–34 hours including the challenge
+- **Unit outcome:** Choose suitable values for counts, measurements, money, text, truth, missing information, and time; convert and format them deliberately; and explain important precision, parsing, and comparison boundaries.
+- **Practice in:** Generated Colab notebooks or a local Python environment
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. The values behind everyday Python programs
 
-Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
+Unit 1 taught you to read Python's words and symbols, follow assignment, trace an
+expression, recognize blocks, and repair syntax. You can now ask a deeper
+question: **what kind of value should each name hold?**
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+Consider the beginning of a ticket for an imaginary observatory visit:
 
-## 2. Before you start
+```python
+visitor = "Mina"
+group_size = 4
+ticket_price = 7.50
+has_evening_access = True
+special_request = None
+visit_date = "2026-08-14"
+```
 
-**Prior knowledge:** Complete Unit 1 and bring its challenge notes and debugging record.
+These values look simple, but each one makes a promise:
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+- `"Mina"` is text whose characters can be inspected and transformed.
+- `4` is an exact count that can be divided into groups.
+- `7.50` is a floating-point measurement-like number; exact money may need a
+  different representation.
+- `True` records a fact that can participate in a decision.
+- `None` records that no special request was supplied.
+- `"2026-08-14"` is still text. Python cannot safely do calendar arithmetic with
+  it until the program parses it as a date.
 
-## 3. Lessons
+This unit is about choosing those representations on purpose. A program becomes
+more trustworthy when its values match the questions it must answer.
 
-| Step | Lesson | Purpose |
+## 2. One spelling can describe different values
+
+The text `"12"`, integer `12`, and floating-point number `12.0` may display
+similarly, but Python gives them different operations and boundaries. The same is
+true of an empty string, zero, `False`, and `None`: all can signal “nothing” in
+casual conversation, yet they do not mean the same thing in a program.
+
+You will learn to ask four questions whenever data enters a program:
+
+1. **What does this value represent in the real task?**
+2. **Which Python type supports the operations the task needs?**
+3. **What information could conversion or rounding lose?**
+4. **How should the program display the result without changing its meaning?**
+
+Those questions connect every lesson in this unit.
+
+## 3. Your path through the unit
+
+| Step | Lesson | What it adds |
 |---:|---|---|
-| 1 | [Objects, Types, None, and Conversion](objects-types-none-conversion.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Integers, Floats, Operators, and Precision](integers-floats-precision.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Exact and Specialized Numbers: Decimal, Fraction, and Complex](decimal-fraction-complex.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Strings, Unicode, Input, and Formatting](strings-unicode-input-formatting.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Booleans, Comparisons, and Truth Values](booleans-comparisons-truth-values.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [Dates, Times, Durations, and Parsing](dates-times-durations-parsing.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 7 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+| 1 | [Values, Types, Conversion, and `None`](values-types-none-conversion.qmd) | Inspect types, convert deliberately, recognize lost information, and distinguish missing data from zero or empty text. |
+| 2 | [Integers and Everyday Arithmetic](integer-arithmetic.qmd) | Model exact counts, complete groups, leftovers, powers, and signed quantities. |
+| 3 | [Floating-Point Numbers and Precision](floating-point-precision.qmd) | Work with measurements, compare approximate results, and separate stored values from rounded displays. |
+| 4 | [Money, Exact Ratios, and Complex Numbers](money-ratios-complex-numbers.qmd) | Choose `Decimal`, `Fraction`, or `complex` when ordinary integer or float rules do not match the task. |
+| 5 | [Strings and Unicode Text](strings-unicode-text.qmd) | Inspect, slice, search, clean, transform, and combine human text. |
+| 6 | [Input, Output, and Clear Formatting](input-output-formatting.qmd) | Turn console text into usable values and present results with readable formatting. |
+| 7 | [Booleans, Comparisons, and Truth](booleans-comparisons-truth.qmd) | Produce named facts, combine them, and distinguish truthiness from explicit comparisons. |
+| 8 | [Dates, Times, and Durations](dates-times-durations.qmd) | Parse calendar values, calculate durations, and recognize timezone-aware timestamps. |
+| 9 | [Unit Challenge](challenge.qmd) | Repair a time-travel supply record and unlock its final clearance message. |
 
-## 4. How to study this unit
+The order matters. Conversion prepares values for arithmetic. Integer arithmetic
+makes the contrast with floats clearer. The two text lessons separate manipulating
+text from interacting with a person. Boolean facts then describe what is true
+about those values, and the date lesson adds calendar-aware behavior.
 
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
+## 4. What Unit 1 already gave you
 
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+Bring these skills forward rather than waiting to feel that you have memorized
+everything:
+
+- read an assignment from right to left: calculate the value, then bind the name;
+- distinguish a value-producing expression from a statement that performs a step;
+- follow function calls from their inner arguments outward;
+- use parentheses to make calculation order explicit;
+- recognize strings by their quotes and calls by their parentheses;
+- read the final line of an error report and inspect the indicated source line;
+- change one cause at a time when an output surprises you; and
+- write comments that explain a decision rather than narrating obvious syntax.
+
+You will see small `if` examples only when they clarify a boundary already
+introduced in Unit 1. Unit 4 will teach complete decision-making programs. Lists,
+loops, functions, exception handlers, and files also have their own later units;
+this unit will not require those concepts silently.
+
+## 5. Set up one Unit 2 notebook
+
+Open the generated Colab notebook or create a notebook named
+`unit-2-values.ipynb`. Use one heading for each lesson and keep four kinds of
+cells:
+
+1. **Original example** — the unchanged code from the lesson.
+2. **Prediction and output** — what you expected and what Python actually did.
+3. **Your modification** — one meaningful change with a short explanation.
+4. **Lab** — the complete artifact you can rerun from a clean state.
+
+When an example is intentionally broken, retain the error long enough to record
+its type, message, and cause. Then repair a copy. A notebook containing only final
+successful code hides some of the most useful learning.
+
+::: {.callout-tip title="Reset before blaming Python"}
+Notebook cells can be run out of order. When a name seems to have an impossible
+value, restart the runtime and run the relevant cells from top to bottom. A clean
+rerun separates the visible program from forgotten notebook state.
 :::
 
-## 5. Unit evidence
+## 6. Choose a pace that leaves room for experiments
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+Most lessons in this unit need several sessions. A useful rhythm is:
+
+- **Session A:** read and run the first half, including its checkpoint;
+- **Session B:** finish the operations and boundary cases;
+- **Session C:** complete the lab without revealing the solution immediately;
+- **Session D:** correct quiz answers in your own words and rerun from a clean
+  state.
+
+Stop after a checkpoint or complete example rather than in the middle of a
+failure investigation. The estimated time includes typing, making mistakes,
+reading errors, and trying modifications. Those are part of the course, not delays
+outside it.
+
+## 7. Before you continue
+
+Run this short comparison and explain every printed value:
+
+```python
+quantity_text = "4"
+quantity = int(quantity_text)
+missing_note = None
+
+print(type(quantity_text).__name__)
+print(type(quantity).__name__)
+print(quantity + 1)
+print(missing_note is None)
+```
+
+You are ready for the first lesson when you can identify which line creates text,
+which line creates an integer, why `quantity + 1` works, and why the final check
+does not confuse missing information with an empty note.
+
+Continue to [Values, Types, Conversion, and `None`](values-types-none-conversion.qmd).
 
 <!-- fcpython-chapter-lab: end -->

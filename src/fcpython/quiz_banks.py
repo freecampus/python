@@ -104,9 +104,9 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         ),
         (
             "core-values-types",
-            "Core Values and Scalar Types",
-            "choose and convert values while explaining precision, text, truth, "
-            "and time boundaries",
+            "Numbers, Text, and Other Values",
+            "choose values for counts, measurements, money, text, truth, missing "
+            "information, and time while explaining their boundaries",
         ),
         (
             "collections-iteration",

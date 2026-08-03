@@ -1,0 +1,712 @@
+---
+title: Booleans, Comparisons, and Truth
+lesson_id: core-values-types.booleans-comparisons-truth
+lesson_order: 70
+description: Produce and combine Boolean facts, distinguish truthiness from explicit comparison, and avoid common traps involving None, text, and numbers.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+- booleans
+- comparisons
+order: 70
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/booleans-comparisons-truth.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 3–4 hours
+- **You will learn:** Create, name, combine, and inspect Boolean facts while choosing explicit comparisons when truthiness would hide meaning.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. A comparison produces a value
+
+A program often needs facts before it can make decisions. Comparisons produce the
+two Boolean values `True` and `False`:
+
+```python
+temperature = 18
+
+print(temperature >= 15)
+print(temperature < 10)
+print(type(temperature >= 15).__name__)
+```
+
+The outputs are `True`, `False`, and `bool`. A comparison is an expression, so its
+result can be given a meaningful name:
+
+```python
+temperature = 18
+minimum_temperature = 15
+
+is_warm_enough = temperature >= minimum_temperature
+print(is_warm_enough)
+```
+
+`is_warm_enough` exposes the question better than repeating a numeric expression
+in every later output.
+
+### Six ordinary comparison operators
+
+| Operator | Meaning |
+|---|---|
+| `==` | equal values |
+| `!=` | unequal values |
+| `<` | less than |
+| `<=` | less than or equal |
+| `>` | greater than |
+| `>=` | greater than or equal |
+
+Do not confuse equality with assignment:
+
+```python
+score = 80
+at_target = score == 80
+
+print(score)
+print(at_target)
+```
+
+The single `=` binds a name. The double `==` compares two values and produces a
+Boolean result.
+
+### Boundary symbols change the accepted set
+
+```python
+age = 18
+
+print(age > 18)
+print(age >= 18)
+```
+
+At exactly 18, the first comparison is `False` and the second is `True`. Translate
+“older than” and “at least” carefully; one character changes the rule.
+
+### Chain a range comparison
+
+Python can express a closed range directly:
+
+```python
+score = 84
+minimum = 60
+maximum = 100
+
+in_range = minimum <= score <= maximum
+print(in_range)
+```
+
+This means `score` is at least `minimum` **and** at most `maximum`. It is usually
+clearer than writing both comparisons separately.
+
+Test the boundaries:
+
+```python
+print(60 <= 60 <= 100)
+print(60 <= 100 <= 100)
+print(60 <= 101 <= 100)
+```
+
+The inclusive endpoints are accepted; `101` is not.
+
+## 2. Compare compatible meanings, not merely compatible syntax
+
+Python can compare integers and floats numerically:
+
+```python
+print(4 == 4.0)
+print(3 < 3.5)
+```
+
+Both are `True`. The types differ, but they participate in a common numeric
+comparison.
+
+Boolean values have a historical numeric relationship:
+
+```python
+print(True == 1)
+print(False == 0)
+print(True + True)
+```
+
+The results are `True`, `True`, and `2`. Recognize this behavior, but do not use
+Boolean arithmetic when the program means a count. Give counts integer names and
+facts Boolean names.
+
+### String ordering is lexicographic by Unicode code points
+
+```python
+print("apple" < "banana")
+print("Zoo" < "apple")
+print("10" < "2")
+```
+
+Python compares the first differing character. Uppercase and lowercase code
+points have their own order, and digit strings are compared as text. `"10" <
+"2"` is `True` because the first character `"1"` comes before `"2"`.
+
+Convert numeric text before a numeric comparison:
+
+```python
+left_text = "10"
+right_text = "2"
+
+print(int(left_text) < int(right_text))
+```
+
+The result is `False`, matching the numeric question.
+
+### Unrelated ordering raises an error
+
+```python
+print("10" < 2)
+```
+
+Python raises `TypeError` rather than guessing whether to compare text or numbers.
+Equality has a different contract and normally returns `False` for such unrelated
+values:
+
+```python
+print("10" == 10)
+```
+
+That does not mean the values are “nearly equal.” It means they are not equal
+under Python's value rules.
+
+### Float comparisons need the precision contract
+
+```python
+import math
+
+calculated = 0.1 + 0.2
+
+print(calculated == 0.3)
+print(math.isclose(calculated, 0.3))
+```
+
+Lesson 3 established the distinction: exact equality and closeness answer
+different questions.
+
+### Checkpoint: comparison facts
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-booleans-comparisons-check",
+  "title": "Comparison facts checkpoint",
+  "instructions": "Translate the exact boundary and value meanings.",
+  "questions": [
+    {
+      "id": "inclusive-boundary",
+      "prompt": "Which expression means `age` is at least 18?",
+      "options": ["`age >= 18`", "`age > 18`", "`age == 17`", "`age = 18`"],
+      "answer_index": 0,
+      "explanation": "Greater-than-or-equal includes the boundary value 18."
+    },
+    {
+      "id": "closed-range",
+      "prompt": "Which expression accepts every `score` from 0 through 100, including both endpoints?",
+      "options": ["`score < 0 > 100`", "`0 <= score <= 100`", "`score == 0 == 100`", "`0 < 100 < score`"],
+      "answer_index": 1,
+      "explanation": "The chained comparison states both inclusive boundaries around score."
+    },
+    {
+      "id": "text-numeric",
+      "prompt": "Why is `\"10\" < \"2\"` true?",
+      "options": ["Python adds the digits.", "Ten is numerically smaller.", "Strings compare character order, and `1` comes before `2`.", "Every non-empty string is less than another."],
+      "answer_index": 2,
+      "explanation": "The operands remain text, so lexicographic character order applies."
+    },
+    {
+      "id": "float-equality",
+      "prompt": "Which comparison states that two measurements may differ within a tolerance?",
+      "options": ["`left is right`", "`str(left) == str(right)`", "`left = right`", "`math.isclose(left, right, ...)`"],
+      "answer_index": 3,
+      "explanation": "`math.isclose()` expresses relative and/or absolute tolerance rather than exact stored equality."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Truthiness asks whether a value counts as false in context
+
+`bool(value)` reveals a value's truthiness:
+
+```python
+print(bool(0))
+print(bool(7))
+print(bool(-2))
+print(bool(0.0))
+```
+
+Numeric zero is falsy. Other numbers are truthy, including negative numbers.
+
+Strings follow emptiness:
+
+```python
+print(bool(""))
+print(bool("hello"))
+print(bool(" "))
+print(bool("False"))
+```
+
+Only the empty string is falsy. A space is a character, and the word `"False"`
+is non-empty text; both are truthy.
+
+`None` is falsy:
+
+```python
+print(bool(None))
+```
+
+Collections use emptiness too. These are previews of Unit 3:
+
+```python
+print(bool([]))
+print(bool([0]))
+print(bool({}))
+print(bool({"ready": False}))
+```
+
+An empty list or dictionary is falsy. A collection containing a falsy item is
+still non-empty and therefore truthy.
+
+### Truthiness can collapse different meanings
+
+```python
+unknown_score = None
+zero_score = 0
+blank_score = ""
+
+print(bool(unknown_score))
+print(bool(zero_score))
+print(bool(blank_score))
+```
+
+All three are falsy, but they can mean “not measured,” “measured as zero,” and
+“submitted as blank.” Use an explicit comparison when the distinction matters:
+
+```python
+score = 0
+
+has_score = score is not None
+score_is_positive = score > 0
+
+print(has_score)
+print(score_is_positive)
+```
+
+The program has a score, but it is not positive.
+
+### Parse human Boolean text with an explicit rule
+
+This is wrong for yes/no input:
+
+```python
+answer_text = "no"
+answer = bool(answer_text)
+print(answer)
+```
+
+It prints `True`. Instead, clean and compare the accepted spelling:
+
+```python
+answer_text = "  YES "
+answer = answer_text.strip().casefold() == "yes"
+print(answer)
+```
+
+This simple rule recognizes only `yes` as true; every other spelling produces
+`False`. A production form may need to reject unknown answers rather than treating
+them as no. Exception and validation units will design that boundary explicitly.
+
+### Checkpoint: truthiness versus meaning
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-booleans-truthiness-check",
+  "title": "Truthiness checkpoint",
+  "instructions": "Distinguish emptiness from a domain-specific fact.",
+  "questions": [
+    {
+      "id": "zero-truth",
+      "prompt": "What is `bool(0)`?",
+      "options": ["`False`", "`True`", "`None`", "A `TypeError`"],
+      "answer_index": 0,
+      "explanation": "Numeric zero is falsy in a Boolean context."
+    },
+    {
+      "id": "space-truth",
+      "prompt": "What is `bool(\" \" )` for a string containing one space?",
+      "options": ["`False` because spaces are invisible", "`True` because the string is non-empty", "`None`", "A `ValueError`"],
+      "answer_index": 1,
+      "explanation": "Truthiness checks string emptiness, and one space is one character."
+    },
+    {
+      "id": "false-word",
+      "prompt": "Why is `bool(\"False\")` true?",
+      "options": ["Python interprets the English word backwards.", "`False` is an integer.", "The string contains characters and is therefore non-empty.", "Every string is false."],
+      "answer_index": 2,
+      "explanation": "`bool()` does not parse human Boolean words; it checks whether the string is empty."
+    },
+    {
+      "id": "zero-versus-none",
+      "prompt": "Which check distinguishes a real score of zero from a missing score?",
+      "options": ["`bool(score)`", "`not score`", "`score == False`", "`score is not None`"],
+      "answer_index": 3,
+      "explanation": "Identity with None preserves zero as a present value."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Combine facts with `not`, `and`, and `or`
+
+`not` reverses truthiness:
+
+```python
+is_cloudy = False
+is_clear = not is_cloudy
+
+print(is_clear)
+```
+
+`and` requires both sides to be truthy:
+
+```python
+has_ticket = True
+has_id = True
+
+can_enter = has_ticket and has_id
+print(can_enter)
+```
+
+`or` requires at least one side to be truthy:
+
+```python
+has_member_pass = False
+has_day_ticket = True
+
+has_admission = has_member_pass or has_day_ticket
+print(has_admission)
+```
+
+### Name intermediate facts
+
+```python
+age = 17
+has_permission = True
+has_ticket = True
+
+is_adult = age >= 18
+age_requirement_met = is_adult or has_permission
+can_enter = age_requirement_met and has_ticket
+
+print(is_adult)
+print(age_requirement_met)
+print(can_enter)
+```
+
+The names show the rule in parts. A reader can inspect which fact changed instead
+of decoding one long expression.
+
+### Precedence is `not`, then `and`, then `or`
+
+```python
+result = True or False and False
+print(result)
+```
+
+`and` runs first, so the expression is `True or False`, which is `True`.
+Parentheses can state a different rule:
+
+```python
+result = (True or False) and False
+print(result)
+```
+
+Now the result is `False`. Prefer named facts or parentheses whenever a reader
+could reasonably group the rule another way.
+
+### Short-circuiting can skip the right operand
+
+For `and`, a falsy left side already determines the result:
+
+```python
+quantity = 0
+safe_to_divide = quantity != 0 and 100 / quantity > 2
+
+print(safe_to_divide)
+```
+
+Python does not evaluate `100 / quantity`, so no division-by-zero error occurs.
+
+For `or`, a truthy left side already determines the result:
+
+```python
+has_ticket = True
+allowed = has_ticket or undefined_backup_pass
+
+print(allowed)
+```
+
+The undefined name is not evaluated because `has_ticket` is already truthy.
+Short-circuiting is useful, but Unit 4 will teach how to design larger decision
+rules without hiding unsafe operations.
+
+## 5. `and` and `or` return operands, not always Booleans
+
+Try these expressions:
+
+```python
+print("Ada" and "ready")
+print("" and "ready")
+print("Ada" or "anonymous")
+print("" or "anonymous")
+```
+
+The results are `"ready"`, `""`, `"Ada"`, and `"anonymous"`.
+
+- `a and b` returns the first falsy operand, or the final operand if all are
+  truthy.
+- `a or b` returns the first truthy operand, or the final operand if all are
+  falsy.
+
+This explains the earlier optional-text pattern:
+
+```python
+coupon_text = "   "
+coupon_code = coupon_text.strip() or None
+
+print(coupon_code)
+print(coupon_code is None)
+```
+
+The cleaned empty string is falsy, so `or` returns `None`.
+
+Use this behavior for a deliberate fallback, not as a substitute for every
+validation rule. A legitimate value such as zero would also trigger an `or`
+fallback:
+
+```python
+recorded_score = 0
+display_score = recorded_score or "not recorded"
+print(display_score)
+```
+
+The output is misleading because zero is a real score. An explicit `is None`
+decision is required; Unit 4 will implement it with a conditional.
+
+### Checkpoint: Boolean operators
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-booleans-operators-check",
+  "title": "Boolean operators checkpoint",
+  "instructions": "Trace evaluation order and the operand each expression returns.",
+  "questions": [
+    {
+      "id": "not-false",
+      "prompt": "What is `not False`?",
+      "options": ["`True`", "`False`", "`None`", "`0` only"],
+      "answer_index": 0,
+      "explanation": "`not` reverses the truth value."
+    },
+    {
+      "id": "and-rule",
+      "prompt": "When are two Boolean facts `left and right` true?",
+      "options": ["When either one is true", "Only when both are true", "Only when both are false", "Whenever `left` is false"],
+      "answer_index": 1,
+      "explanation": "`and` requires both Boolean conditions to hold."
+    },
+    {
+      "id": "or-operand",
+      "prompt": "What does `\"\" or \"anonymous\"` return?",
+      "options": ["`False`", "The empty string", "The string `\"anonymous\"`", "A `TypeError`"],
+      "answer_index": 2,
+      "explanation": "The first operand is falsy, so `or` evaluates and returns the second operand."
+    },
+    {
+      "id": "short-circuit",
+      "prompt": "Why does `False and (1 / 0)` not raise `ZeroDivisionError`?",
+      "options": ["Division by zero equals false.", "Parentheses disable division.", "`and` converts zero to one.", "A falsy left operand determines the result, so the right operand is skipped."],
+      "answer_index": 3,
+      "explanation": "`and` short-circuits as soon as it finds a falsy operand."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Use `is` only for the identity question you mean
+
+For missing values, use:
+
+```python
+review_date = None
+
+print(review_date is None)
+print(review_date is not None)
+```
+
+Do not use `is` as a substitute for equality with ordinary numbers or strings:
+
+```python
+left = "moon"
+right = "".join(["m", "o", "o", "n"])
+
+print(left == right)
+print(left is right)
+```
+
+The values compare equal, but identity is an implementation-level object question
+and may be false. Unit 6 will teach references and identity. Until then:
+
+- use `==` and `!=` for ordinary value equality;
+- use `is None` and `is not None` for the missing-value singleton.
+
+## 7. Build an observatory readiness panel
+
+Use these fixed values:
+
+```python
+temperature_c = 12.5
+wind_kph = 18
+cloud_cover = 0.20
+dome_status = "OPEN"
+operator_name = "  Mina  "
+emergency_stop = False
+```
+
+The observatory can begin a viewing session when all of these facts are true:
+
+- temperature is from `-10` through `30` °C;
+- wind is no more than `25` km/h;
+- cloud cover is below `0.35`;
+- cleaned dome status equals `"open"` without case sensitivity;
+- the cleaned operator name is non-empty; and
+- the emergency stop is not active.
+
+Create these names:
+
+```python
+temperature_ok = None
+wind_ok = None
+sky_clear_enough = None
+dome_open = None
+operator_present = None
+emergency_clear = None
+ready = None
+```
+
+Then run:
+
+```python
+assert temperature_ok is True
+assert wind_ok is True
+assert sky_clear_enough is True
+assert dome_open is True
+assert operator_present is True
+assert emergency_clear is True
+assert ready is True
+```
+
+Print every named fact before the combined result. If `ready` becomes false after
+a modification, the individual facts should reveal why.
+
+<details>
+<summary>Hint: translate each bullet before combining them</summary>
+
+Use a chained comparison for temperature, `<=` for wind, `<` for cloud cover,
+`.strip().casefold()` for text, `bool(operator_name.strip())` for non-empty cleaned
+text, and `not` for the emergency stop.
+
+</details>
+
+<details class="solution">
+<summary>Show one solution after checking every named fact</summary>
+
+```python
+temperature_c = 12.5
+wind_kph = 18
+cloud_cover = 0.20
+dome_status = "OPEN"
+operator_name = "  Mina  "
+emergency_stop = False
+
+temperature_ok = -10 <= temperature_c <= 30
+wind_ok = wind_kph <= 25
+sky_clear_enough = cloud_cover < 0.35
+dome_open = dome_status.strip().casefold() == "open"
+operator_present = bool(operator_name.strip())
+emergency_clear = not emergency_stop
+ready = (
+    temperature_ok
+    and wind_ok
+    and sky_clear_enough
+    and dome_open
+    and operator_present
+    and emergency_clear
+)
+
+print(f"Temperature acceptable: {temperature_ok}")
+print(f"Wind acceptable:        {wind_ok}")
+print(f"Sky clear enough:       {sky_clear_enough}")
+print(f"Dome open:              {dome_open}")
+print(f"Operator present:       {operator_present}")
+print(f"Emergency clear:        {emergency_clear}")
+print(f"Ready to observe:       {ready}")
+```
+
+</details>
+
+Change one boundary at a time:
+
+1. Set `wind_kph` to exactly `25`, then `26`.
+2. Set `operator_name` to three spaces.
+3. Set `dome_status` to `" closed "`.
+4. Set `emergency_stop` to `True`.
+
+Predict the individual fact and final readiness before each clean rerun.
+
+## 8. Check the meaning of every fact
+
+Before moving on, explain:
+
+1. Why `bool("False")` does not parse a human answer.
+2. When a chained comparison includes both boundaries.
+3. Why `score is not None` differs from `bool(score)` for zero.
+4. Which operand short-circuiting can skip.
+5. Why `a or fallback` can mishandle a legitimate zero.
+6. Why equality, not identity, compares ordinary string values.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Comparisons produce Boolean values that can be named and inspected.
+- Boundary operators such as `<` and `<=` express different accepted sets.
+- String ordering compares characters, not numeric meaning.
+- Truthiness collapses several empty or zero-like values; explicit comparisons
+  preserve distinctions.
+- `bool()` does not parse human yes/no text.
+- `not`, `and`, and `or` combine facts and short-circuit evaluation.
+- `and` and `or` return operands, so fallbacks must respect legitimate falsy
+  values.
+- Use `==` for ordinary value equality and `is None` for missing-value identity.
+:::
+
+## References
+
+- [Python standard types: truth-value testing](https://docs.python.org/3/library/stdtypes.html#truth-value-testing)
+- [Python reference: comparisons](https://docs.python.org/3/reference/expressions.html#comparisons)
+- [Python reference: Boolean operations](https://docs.python.org/3/reference/expressions.html#boolean-operations)
+- [PEP 8 guidance for Boolean and `None` comparisons](https://peps.python.org/pep-0008/#programming-recommendations)

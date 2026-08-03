@@ -1,0 +1,646 @@
+---
+title: Money, Exact Ratios, and Complex Numbers
+lesson_id: core-values-types.money-ratios-complex-numbers
+lesson_order: 40
+description: Choose Decimal, Fraction, or complex when a problem needs exact base-ten rules, exact ratios, or real and imaginary components.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+- decimal
+- fractions
+- complex-numbers
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/money-ratios-complex-numbers.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 3–4.5 hours
+- **You will learn:** Choose and use `Decimal`, `Fraction`, and `complex` values according to the numeric rules of a task.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Choose a number type from the rule you must preserve
+
+Python has more than one useful numeric representation because different problems
+make different promises:
+
+| Requirement | Useful representation | Example |
+|---|---|---|
+| Exact whole count | `int` | 27 participants |
+| Measured approximation | `float` | 21.6 °C |
+| Base-ten arithmetic and explicit decimal rounding | `Decimal` | 19.95 credits |
+| Exact ratio of integers | `Fraction` | 2/3 of a recipe |
+| Real and imaginary components | `complex` | 3 + 4j |
+
+No type is “the most accurate” for every job. Accuracy means preserving the rule
+the program promises.
+
+Start by comparing three representations of one tenth:
+
+```python
+from decimal import Decimal
+from fractions import Fraction
+
+binary_approximation = 0.1
+decimal_tenth = Decimal("0.1")
+fraction_tenth = Fraction(1, 10)
+
+print(binary_approximation)
+print(decimal_tenth)
+print(fraction_tenth)
+```
+
+The output looks like `0.1`, `0.1`, and `1/10`, but the stored rules differ.
+The float is the nearest available binary value. The Decimal stores the supplied
+base-ten digits. The Fraction stores an exact numerator and denominator.
+
+::: {.callout-note title="Choose once at the boundary"}
+Read the input contract, choose the representation, and keep arithmetic in that
+representation. Casual mixing can produce errors or quietly carry an earlier
+approximation into a supposedly exact calculation.
+:::
+
+## 2. `Decimal` follows base-ten arithmetic
+
+`Decimal` lives in Python's standard-library `decimal` module:
+
+```python
+from decimal import Decimal
+
+unit_price = Decimal("3.25")
+quantity = 4
+subtotal = unit_price * quantity
+
+print(subtotal)
+print(type(subtotal).__name__)
+```
+
+The result is `13.00`. Decimal preserves the two written fractional digits during
+this multiplication. It can multiply by an integer without changing numeric
+systems.
+
+### Construct decimals from strings
+
+Compare two constructors:
+
+```python
+from decimal import Decimal
+
+from_text = Decimal("0.1")
+from_float = Decimal(0.1)
+
+print(from_text)
+print(from_float)
+print(from_text == from_float)
+```
+
+The float already contains a binary approximation. `Decimal(0.1)` faithfully
+converts that approximation, exposing many digits. It cannot reconstruct the
+exact decimal characters that were lost earlier. When external data states
+base-ten digits, construct from the original string.
+
+### Ordinary Decimal arithmetic
+
+```python
+from decimal import Decimal
+
+price = Decimal("7.40")
+discount = Decimal("1.25")
+quantity = 3
+
+subtotal = price * quantity
+discounted_total = subtotal - discount
+share = discounted_total / Decimal("2")
+
+print(subtotal)
+print(discounted_total)
+print(share)
+```
+
+Every non-integer numeric operand is a Decimal. This makes the arithmetic rule
+visible to a reader.
+
+### Quantize to a declared money unit
+
+Many currencies use a smallest displayed/accounted unit such as `0.01`. The
+program must also choose how halfway values round:
+
+```python
+from decimal import Decimal, ROUND_HALF_UP
+
+raw_total = Decimal("19.995")
+cent = Decimal("0.01")
+money_total = raw_total.quantize(cent, rounding=ROUND_HALF_UP)
+
+print(money_total)
+```
+
+The result is `20.00`. `quantize()` shapes the result to the exponent of `0.01`,
+and `ROUND_HALF_UP` states the tie rule. Do not assume this rule is correct for
+every currency, tax authority, or organization; make the domain policy explicit.
+
+### Round at the right stage
+
+```python
+from decimal import Decimal, ROUND_HALF_UP
+
+unit_price = Decimal("1.235")
+quantity = 3
+cent = Decimal("0.01")
+
+round_each_first = unit_price.quantize(cent, rounding=ROUND_HALF_UP) * quantity
+round_total_last = (unit_price * quantity).quantize(
+    cent,
+    rounding=ROUND_HALF_UP,
+)
+
+print(round_each_first)
+print(round_total_last)
+```
+
+The results differ: `3.72` versus `3.71`. Both calculations run correctly; only
+the invoice rule can say which stage is correct. Record whether the contract
+rounds each line item, each unit, tax, or only the final total.
+
+### Decimal precision is a context
+
+Decimal arithmetic has a current precision setting:
+
+```python
+from decimal import Decimal, localcontext
+
+one = Decimal("1")
+seven = Decimal("7")
+
+with localcontext() as context:
+    context.prec = 8
+    print(one / seven)
+
+print(one / seven)
+```
+
+The `with` block temporarily uses eight significant digits. The surrounding
+context is restored afterward. `with` will be taught in depth with resources;
+here it provides a safe local demonstration rather than changing the entire
+notebook's Decimal settings.
+
+### Do not mix Decimal and float casually
+
+Run this in its own cell:
+
+```python
+from decimal import Decimal
+
+total = Decimal("2.50") + 0.5
+```
+
+Python raises `TypeError` for Decimal-plus-float arithmetic. Decide whether the
+source is decimal text or an approximate measurement, then convert at the
+boundary. The error prevents an ambiguous promise.
+
+### Checkpoint: decimal rules
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-special-decimal-check",
+  "title": "Decimal arithmetic checkpoint",
+  "instructions": "Choose the representation or operation that preserves the stated base-ten rule.",
+  "questions": [
+    {
+      "id": "decimal-source",
+      "prompt": "A form sends the exact price text `\"0.10\"`. Which constructor preserves those stated digits?",
+      "options": ["`Decimal(\"0.10\")`", "`Decimal(0.10)`", "`float(Decimal(\"0.10\"))`", "`int(\"0.10\")`"],
+      "answer_index": 0,
+      "explanation": "Constructing directly from text avoids creating a binary float approximation first."
+    },
+    {
+      "id": "quantize-purpose",
+      "prompt": "What does `value.quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP)` make explicit?",
+      "options": ["A binary bit width", "A two-decimal quantum and a tie-breaking rule", "A currency symbol", "An integer-only result"],
+      "answer_index": 1,
+      "explanation": "The quantum controls the decimal exponent, and the named rounding mode controls halfway behavior."
+    },
+    {
+      "id": "rounding-stage",
+      "prompt": "Who decides whether each item or only the final invoice total should be rounded?",
+      "options": ["The shortest expression", "The `Decimal` class name", "The invoice or domain contract", "The number of print statements"],
+      "answer_index": 2,
+      "explanation": "Both stages are computable; the business rule determines which result is meaningful."
+    },
+    {
+      "id": "decimal-float-mix",
+      "prompt": "Why does Python reject `Decimal(\"1.0\") + 0.5`?",
+      "options": ["Decimal cannot add.", "The values have different signs.", "The result would always be zero.", "The expression mixes decimal and binary-float arithmetic without an explicit conversion decision."],
+      "answer_index": 3,
+      "explanation": "The program must choose a representation rather than silently merging two precision models."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. `Fraction` keeps ratios exact
+
+`Fraction` stores an integer numerator over an integer denominator:
+
+```python
+from fractions import Fraction
+
+recipe_share = Fraction(2, 3)
+
+print(recipe_share)
+print(recipe_share.numerator)
+print(recipe_share.denominator)
+```
+
+Python displays `2/3`. The attributes expose the normalized numerator and
+denominator.
+
+### Fractions reduce automatically
+
+```python
+from fractions import Fraction
+
+half = Fraction(6, 12)
+negative_half = Fraction(3, -6)
+
+print(half)
+print(negative_half)
+```
+
+The results are `1/2` and `-1/2`. Python reduces common factors and places the
+sign in the numerator.
+
+### Arithmetic remains exact
+
+```python
+from fractions import Fraction
+
+morning = Fraction(1, 3)
+afternoon = Fraction(1, 6)
+combined = morning + afternoon
+remaining = 1 - combined
+
+print(combined)
+print(remaining)
+```
+
+Both results are exactly `1/2`. The integer `1` can participate without losing the
+fraction representation.
+
+Use multiplication and division for scaling:
+
+```python
+from fractions import Fraction
+
+original_cups = Fraction(3, 4)
+scale = Fraction(5, 2)
+scaled_cups = original_cups * scale
+
+print(scaled_cups)
+print(float(scaled_cups))
+```
+
+The exact result is `15/8`. Conversion to float produces `1.875` for a measuring
+display. Keep the Fraction for later exact calculations.
+
+### Build from text or Decimal when possible
+
+```python
+from fractions import Fraction
+
+print(Fraction("0.125"))
+print(Fraction("3/8"))
+```
+
+These produce exact `1/8` and `3/8`. Constructing from a float preserves the exact
+binary float ratio, which may be surprising:
+
+```python
+from fractions import Fraction
+
+print(Fraction(0.1))
+```
+
+The numerator and denominator are large because the input was already a binary
+approximation.
+
+### Recover a simple nearby ratio deliberately
+
+```python
+from fractions import Fraction
+
+approximation = Fraction(0.3333333333333333)
+simple_ratio = approximation.limit_denominator(100)
+
+print(approximation)
+print(simple_ratio)
+```
+
+`limit_denominator(100)` asks for the closest fraction whose denominator is at
+most 100, producing `1/3`. That limit is a policy: a stricter or larger limit can
+produce a different rational approximation.
+
+### Zero cannot be a denominator
+
+```python
+from fractions import Fraction
+
+invalid_ratio = Fraction(3, 0)
+```
+
+Python raises `ZeroDivisionError`. A Fraction represents a numeric ratio, and
+division by zero has no finite rational value.
+
+### Checkpoint: exact ratios
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-special-fraction-check",
+  "title": "Exact ratios checkpoint",
+  "instructions": "Trace how Fraction preserves and normalizes a ratio.",
+  "questions": [
+    {
+      "id": "reduction",
+      "prompt": "What does `Fraction(6, 12)` display?",
+      "options": ["`1/2`", "`6/12` only, with no normalization", "`0`", "`12/6`"],
+      "answer_index": 0,
+      "explanation": "Fraction reduces the numerator and denominator by their common factor."
+    },
+    {
+      "id": "fraction-sum",
+      "prompt": "What is `Fraction(1, 3) + Fraction(1, 6)`?",
+      "options": ["`2/9`", "`1/2`", "Approximately `0.4` only", "`2/6` without reduction"],
+      "answer_index": 1,
+      "explanation": "One third is two sixths; adding one sixth gives three sixths, normalized to one half."
+    },
+    {
+      "id": "float-source",
+      "prompt": "Why can `Fraction(0.1)` have a large numerator and denominator?",
+      "options": ["Fraction chooses random digits.", "The denominator is always a power of ten.", "It exactly represents the already-approximate binary float.", "Fractions cannot represent tenths."],
+      "answer_index": 2,
+      "explanation": "The constructor receives the stored float value, not the original source characters."
+    },
+    {
+      "id": "limit-denominator",
+      "prompt": "What rule does `value.limit_denominator(100)` add?",
+      "options": ["The numerator must be zero.", "The result must be an integer.", "The value must become a Decimal.", "Choose a nearby fraction whose denominator is at most 100."],
+      "answer_index": 3,
+      "explanation": "The maximum denominator constrains how simple the approximating ratio may be."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. `complex` combines real and imaginary components
+
+Complex numbers are common in electrical engineering, waves, rotations, and
+scientific models. Python writes the imaginary component with `j`:
+
+```python
+position = 3 + 4j
+
+print(position)
+print(type(position).__name__)
+print(position.real)
+print(position.imag)
+```
+
+The real component is `3.0` and the imaginary component is `4.0`. These attributes
+are floats even when the literal components look like integers.
+
+### Magnitude is distance from the origin
+
+```python
+position = 3 + 4j
+distance = abs(position)
+print(distance)
+```
+
+The magnitude is `5.0`, following the right-triangle relationship between the
+real and imaginary components.
+
+### Arithmetic follows complex-number rules
+
+```python
+signal_a = 2 + 3j
+signal_b = 1 - 1j
+
+print(signal_a + signal_b)
+print(signal_a * signal_b)
+```
+
+Addition combines corresponding components. Multiplication uses `j * j == -1`.
+Predict the components before running, then calculate them by hand.
+
+### Conjugates reverse the imaginary sign
+
+```python
+signal = 2 + 3j
+conjugate = signal.conjugate()
+
+print(conjugate)
+print(signal * conjugate)
+```
+
+The conjugate is `2 - 3j`. Multiplying a complex value by its conjugate produces
+the real value corresponding to magnitude squared—in this case `(13+0j)`.
+
+### Ordering complex numbers is not defined
+
+```python
+print((2 + 1j) < (3 + 0j))
+```
+
+Python raises `TypeError`. Complex values do not have one natural less-than order.
+Compare a meaningful derived quantity such as magnitude if the domain defines that
+rule:
+
+```python
+first = 2 + 1j
+second = 3 + 0j
+print(abs(first) < abs(second))
+```
+
+The comparison now has an explicit meaning: which value is farther from the
+origin.
+
+### Checkpoint: complex components
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-special-complex-check",
+  "title": "Complex-number checkpoint",
+  "instructions": "Choose the result that follows from real and imaginary components.",
+  "questions": [
+    {
+      "id": "imaginary-syntax",
+      "prompt": "Which Python literal has real part 3 and imaginary part 4?",
+      "options": ["`3 + 4j`", "`3 + 4i`", "`complex[3, 4]`", "`\"3 + 4j\"`"],
+      "answer_index": 0,
+      "explanation": "Python uses `j` for the imaginary unit in a complex literal."
+    },
+    {
+      "id": "magnitude",
+      "prompt": "What is `abs(3 + 4j)`?",
+      "options": ["`7.0`", "`5.0`", "`1.0`", "`12.0`"],
+      "answer_index": 1,
+      "explanation": "The magnitude is the square root of 3 squared plus 4 squared, which is 5."
+    },
+    {
+      "id": "conjugate",
+      "prompt": "What is `(2 + 3j).conjugate()`?",
+      "options": ["`-2 - 3j`", "`3 + 2j`", "`2 - 3j`", "`2 + 3j`"],
+      "answer_index": 2,
+      "explanation": "The conjugate retains the real component and reverses the imaginary sign."
+    },
+    {
+      "id": "complex-order",
+      "prompt": "How should a program compare two complex values when it needs 'closer to the origin'?",
+      "options": ["Use `<` directly on the complex values.", "Convert both to strings.", "Compare only their real parts without saying so.", "Compare their magnitudes with `abs()`."],
+      "answer_index": 3,
+      "explanation": "Magnitude supplies the domain-specific ordering that direct complex less-than does not define."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Complete a three-station number lab
+
+This lab asks you to make three representation decisions. Keep each station in a
+separate notebook cell.
+
+### Station A: price the astronomy kits
+
+Three kits cost `19.995` credits each. The shop rule says multiply first, then
+round the invoice total to `0.01` with `ROUND_HALF_UP`.
+
+```python
+from decimal import Decimal, ROUND_HALF_UP
+
+unit_price = Decimal("19.995")
+quantity = 3
+cent = Decimal("0.01")
+
+raw_total = None
+invoice_total = None
+```
+
+Your checks:
+
+```python
+assert raw_total == Decimal("59.985")
+assert invoice_total == Decimal("59.99")
+```
+
+### Station B: scale a fuel mixture
+
+A model mixture uses fuel and stabilizer in a `5/8` ratio. A trial batch uses
+`14` units of stabilizer. Calculate the exact fuel amount and then a float display.
+
+```python
+from fractions import Fraction
+
+fuel_ratio = Fraction(5, 8)
+stabilizer_units = 14
+
+fuel_units = None
+fuel_display = None
+```
+
+Your checks:
+
+```python
+assert fuel_units == Fraction(35, 4)
+assert fuel_display == 8.75
+```
+
+### Station C: locate a signal
+
+A signal coordinate is `-3 + 4j`. Record its magnitude and conjugate.
+
+```python
+signal = -3 + 4j
+
+signal_distance = None
+reflected_signal = None
+```
+
+Your checks:
+
+```python
+assert signal_distance == 5.0
+assert reflected_signal == -3 - 4j
+```
+
+<details class="solution">
+<summary>Show the three calculations after attempting every station</summary>
+
+```python
+from decimal import Decimal, ROUND_HALF_UP
+from fractions import Fraction
+
+unit_price = Decimal("19.995")
+quantity = 3
+cent = Decimal("0.01")
+raw_total = unit_price * quantity
+invoice_total = raw_total.quantize(cent, rounding=ROUND_HALF_UP)
+
+fuel_ratio = Fraction(5, 8)
+stabilizer_units = 14
+fuel_units = fuel_ratio * stabilizer_units
+fuel_display = float(fuel_units)
+
+signal = -3 + 4j
+signal_distance = abs(signal)
+reflected_signal = signal.conjugate()
+```
+
+</details>
+
+For each station, write one sentence explaining why an integer or ordinary float
+alone would not express the full requirement as clearly.
+
+## 6. Check your representation choices
+
+Given a new numeric requirement, ask:
+
+1. Is the value a count, a measurement, a base-ten amount, an exact ratio, or a
+   real/imaginary pair?
+2. Did the data already pass through a float before exact construction?
+3. Which rounding or denominator constraint belongs to the domain?
+4. Is conversion needed only for display, or will later arithmetic use it?
+5. Am I mixing representations without documenting why?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Choose a numeric type from the rule the program must preserve.
+- Construct Decimal values from decimal strings and state the rounding stage and
+  mode.
+- Fraction stores normalized integer ratios and keeps their arithmetic exact.
+- Constructing Decimal or Fraction from a float carries the float's earlier
+  approximation forward.
+- Complex values contain real and imaginary components; `abs()` gives magnitude
+  and `.conjugate()` reverses the imaginary sign.
+- Convert deliberately at a boundary rather than mixing numeric systems casually.
+:::
+
+## References
+
+- [Python `decimal` module](https://docs.python.org/3/library/decimal.html)
+- [Python `fractions.Fraction` documentation](https://docs.python.org/3/library/fractions.html#fractions.Fraction)
+- [Python standard numeric types, including complex numbers](https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex)
+- [Python `cmath` module for complex-number functions](https://docs.python.org/3/library/cmath.html)

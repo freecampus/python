@@ -1,0 +1,699 @@
+---
+title: Dates, Times, and Durations
+lesson_id: core-values-types.dates-times-durations
+lesson_order: 80
+description: Represent calendar dates, clock times, timestamps, and durations with datetime types while parsing, formatting, and retaining timezone meaning.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+- dates
+- time
+order: 80
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/dates-times-durations.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 3–4.5 hours
+- **You will learn:** Choose among `date`, `time`, `datetime`, and `timedelta`; parse and format timestamps; calculate calendar boundaries; and recognize timezone-aware values.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Calendar text is not yet a calendar value
+
+These strings look like dates:
+
+```python
+first_text = "2026-08-03"
+second_text = "2026-08-14"
+
+print(first_text)
+print(second_text)
+print(type(first_text).__name__)
+```
+
+They are still `str` values. ISO-formatted dates happen to sort sensibly as text,
+but text cannot reliably validate leap days, add durations, or expose calendar
+parts.
+
+Python's `datetime` standard-library module supplies four core value types:
+
+| Type | Represents | Example question |
+|---|---|---|
+| `date` | calendar year, month, and day | Which day is the visit? |
+| `time` | wall-clock time without a date | What time does the gate open? |
+| `datetime` | date and time together | When did the event occur? |
+| `timedelta` | elapsed duration | How long until review? |
+
+Construct them directly:
+
+```python
+from datetime import date, datetime, time, timedelta
+
+visit_day = date(2026, 8, 3)
+gate_opens = time(19, 30)
+check_in = datetime(2026, 8, 3, 19, 15)
+session_length = timedelta(hours=2, minutes=30)
+
+print(visit_day)
+print(gate_opens)
+print(check_in)
+print(session_length)
+```
+
+The constructor arguments are integers, not human-formatted strings.
+
+::: {.concept-diagram}
+Parsing crosses from external text into a value with calendar behavior. Formatting
+crosses back to text for a person or external system.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  source["ISO text<br/>2026-08-03"] -->|fromisoformat| calendar["date object<br/>calendar rules"]
+  calendar -->|+ timedelta| deadline["new date<br/>2026-08-13"]
+  deadline -->|isoformat / strftime| display["output text"]
+```
+:::
+
+### Inspect calendar components
+
+```python
+from datetime import date, datetime
+
+visit_day = date(2026, 8, 3)
+check_in = datetime(2026, 8, 3, 19, 15, 30)
+
+print(visit_day.year)
+print(visit_day.month)
+print(visit_day.day)
+print(check_in.hour)
+print(check_in.minute)
+print(check_in.second)
+```
+
+These attributes are integers. They let a program reason about parts without
+slicing guessed character positions.
+
+## 2. ISO text provides a dependable simple boundary
+
+ISO 8601 places larger units before smaller ones:
+
+```text
+date:      YYYY-MM-DD
+datetime:  YYYY-MM-DDTHH:MM:SS+offset
+```
+
+Parse with `fromisoformat()`:
+
+```python
+from datetime import date, datetime, time
+
+visit_day = date.fromisoformat("2026-08-03")
+gate_opens = time.fromisoformat("19:30:00")
+check_in = datetime.fromisoformat("2026-08-03T19:15:30")
+
+print(visit_day)
+print(gate_opens)
+print(check_in)
+```
+
+The result types now support date/time operations.
+
+### Return to stable ISO text
+
+```python
+from datetime import date, datetime
+
+visit_day = date(2026, 8, 3)
+check_in = datetime(2026, 8, 3, 19, 15, 30)
+
+print(visit_day.isoformat())
+print(check_in.isoformat())
+```
+
+`isoformat()` produces strings. Keep the objects for calculation; format at an
+output boundary.
+
+### Invalid calendar values fail during construction
+
+Run each case separately:
+
+```python
+from datetime import date
+
+impossible = date(2026, 2, 30)
+```
+
+```python
+from datetime import date
+
+impossible = date.fromisoformat("2026-13-01")
+```
+
+Both raise `ValueError`. The type enforces month/day relationships instead of
+storing an impossible date. Exception handling comes later; preserve and read the
+message now.
+
+### Leap years are part of the calendar rule
+
+```python
+from datetime import date
+
+leap_day = date.fromisoformat("2024-02-29")
+print(leap_day)
+```
+
+Change the year to `2023` and predict the failure. Do not implement leap-year
+logic by manually checking divisibility; the date constructor already owns that
+calendar rule.
+
+### Checkpoint: choosing and parsing types
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-dates-types-check",
+  "title": "Date and time types checkpoint",
+  "instructions": "Choose the value type or boundary operation that matches the requirement.",
+  "questions": [
+    {
+      "id": "date-type",
+      "prompt": "Which type represents a calendar day without a clock time?",
+      "options": ["`date`", "`time`", "`timedelta`", "`str` only"],
+      "answer_index": 0,
+      "explanation": "A `date` contains year, month, and day."
+    },
+    {
+      "id": "duration-type",
+      "prompt": "Which type represents an elapsed span of 90 minutes?",
+      "options": ["`date`", "`timedelta`", "`time`", "`bool`"],
+      "answer_index": 1,
+      "explanation": "A timedelta stores a duration that can be added to or subtracted from calendar values."
+    },
+    {
+      "id": "parse-iso-date",
+      "prompt": "Which expression parses ISO date text into a calendar value?",
+      "options": ["`str(\"2026-08-03\")`", "`time(\"2026-08-03\")`", "`date.fromisoformat(\"2026-08-03\")`", "`int(\"2026-08-03\")`"],
+      "answer_index": 2,
+      "explanation": "`date.fromisoformat()` validates and constructs a date from supported ISO text."
+    },
+    {
+      "id": "invalid-date",
+      "prompt": "What happens when `date(2026, 2, 30)` runs?",
+      "options": ["It silently changes to March 2.", "It creates text.", "It returns `None`.", "It raises `ValueError` because the calendar date is impossible."],
+      "answer_index": 3,
+      "explanation": "The date constructor validates the relationship among year, month, and day."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. `timedelta` represents elapsed duration
+
+Add a duration to a date:
+
+```python
+from datetime import date, timedelta
+
+start = date(2026, 8, 3)
+review_delay = timedelta(days=10)
+review_day = start + review_delay
+
+print(review_day)
+```
+
+The result is August 13. Python handles the month or year boundary when necessary:
+
+```python
+from datetime import date, timedelta
+
+start = date(2026, 12, 28)
+review_day = start + timedelta(days=10)
+
+print(review_day)
+```
+
+The result is in 2027 without any manual month calculation.
+
+### Subtract calendar values to obtain a duration
+
+```python
+from datetime import date
+
+arrival = date(2026, 8, 14)
+departure = date(2026, 8, 3)
+stay = arrival - departure
+
+print(stay)
+print(stay.days)
+print(type(stay).__name__)
+```
+
+The difference is a `timedelta` whose `.days` attribute is `11`.
+
+### Durations can include smaller units
+
+```python
+from datetime import timedelta
+
+duration = timedelta(days=1, hours=2, minutes=30, seconds=15)
+
+print(duration)
+print(duration.total_seconds())
+```
+
+`.total_seconds()` includes every component. The `.seconds` attribute does **not**
+mean the same thing:
+
+```python
+from datetime import timedelta
+
+duration = timedelta(days=1, seconds=30)
+
+print(duration.days)
+print(duration.seconds)
+print(duration.total_seconds())
+```
+
+The results are `1`, `30`, and `86430.0`. `.seconds` is the leftover seconds after
+whole days, not the entire duration converted to seconds.
+
+### Negative durations keep normalized parts
+
+```python
+from datetime import timedelta
+
+duration = timedelta(seconds=-1)
+print(duration)
+print(duration.days)
+print(duration.seconds)
+print(duration.total_seconds())
+```
+
+Python may display `-1 day, 23:59:59`. The normalized `.days` and `.seconds`
+components look surprising, while `.total_seconds()` clearly reports `-1.0`.
+
+### Thirty days is not one calendar month
+
+```python
+from datetime import date, timedelta
+
+start = date(2026, 1, 31)
+later = start + timedelta(days=30)
+
+print(later)
+```
+
+This calculates exactly 30 elapsed days. It does **not** implement “the same day
+next month,” which is ambiguous when the next month lacks day 31. If a requirement
+says “one calendar month,” obtain a precise business rule or use an appropriate
+calendar-aware tool later. Do not silently substitute 30 days.
+
+### Compare dates directly
+
+```python
+from datetime import date
+
+today_for_example = date(2026, 8, 3)
+deadline = date(2026, 8, 14)
+
+print(today_for_example < deadline)
+print(today_for_example == deadline)
+```
+
+Fixed dates make this example reproducible. `date.today()` is useful in real code,
+but an assertion tied to the learner's current day will eventually fail.
+
+## 4. Custom text formats need an explicit format contract
+
+Not every external system sends ISO text. Parse a known custom format with
+`datetime.strptime()`:
+
+```python
+from datetime import datetime
+
+text = "03/08/2026 19:30"
+moment = datetime.strptime(text, "%d/%m/%Y %H:%M")
+
+print(moment)
+```
+
+The format codes describe the input:
+
+| Code | Meaning in this example |
+|---|---|
+| `%d` | zero-padded day |
+| `%m` | zero-padded month |
+| `%Y` | four-digit year |
+| `%H` | 24-hour clock hour |
+| `%M` | minute |
+
+The exact punctuation and spaces are part of the contract.
+
+### Ambiguous human dates require a policy
+
+The text `03/08/2026` could mean 3 August or March 8. Python cannot infer the
+sender's locale. The format string above explicitly chooses day/month/year.
+Prefer ISO text between systems whenever you control both ends.
+
+### Format a calendar value for a person
+
+```python
+from datetime import datetime
+
+moment = datetime(2026, 8, 3, 19, 30)
+
+print(moment.strftime("%Y-%m-%d %H:%M"))
+print(moment.strftime("%A, %d %B %Y at %H:%M"))
+```
+
+`strftime()` returns a string. Names such as Monday and August can depend on the
+process locale, so do not assert English month names in a multilingual
+environment unless locale is part of the setup.
+
+### A mismatched format fails visibly
+
+```python
+from datetime import datetime
+
+moment = datetime.strptime("2026-08-03", "%d/%m/%Y")
+```
+
+Python raises `ValueError` because the characters do not match the declared
+format. Fix the source or format contract; do not keep adding formats without
+knowing which input the system promises.
+
+### Checkpoint: durations and formats
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-dates-duration-check",
+  "title": "Duration and parsing checkpoint",
+  "instructions": "Choose the operation that preserves elapsed and calendar meaning.",
+  "questions": [
+    {
+      "id": "date-difference",
+      "prompt": "What type results from subtracting one `date` from another?",
+      "options": ["`timedelta`", "`time`", "`str`", "`bool`"],
+      "answer_index": 0,
+      "explanation": "Date subtraction produces the elapsed duration between the calendar days."
+    },
+    {
+      "id": "total-seconds",
+      "prompt": "Which expression includes both whole days and leftover seconds in one duration total?",
+      "options": ["`duration.seconds`", "`duration.total_seconds()`", "`duration.day`", "`str(duration).seconds`"],
+      "answer_index": 1,
+      "explanation": "`total_seconds()` converts the complete duration, while `.seconds` is only the normalized leftover component."
+    },
+    {
+      "id": "custom-parse",
+      "prompt": "What does the format string passed to `strptime()` describe?",
+      "options": ["Only the desired output color", "The computer's current date", "The expected fields, order, punctuation, and spacing of the input text", "A duration to add"],
+      "answer_index": 2,
+      "explanation": "Parsing succeeds only when the source characters match the declared format contract."
+    },
+    {
+      "id": "month-rule",
+      "prompt": "Why is `timedelta(days=30)` not automatically 'one calendar month'?",
+      "options": ["A timedelta cannot contain days.", "Every month has 30 days.", "Dates cannot cross months.", "Calendar months have different lengths and end-of-month rules need a policy."],
+      "answer_index": 3,
+      "explanation": "Thirty elapsed days is precise, but a calendar-month requirement needs separate rules."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. A timestamp needs a timezone policy
+
+This datetime has no offset or timezone information:
+
+```python
+from datetime import datetime
+
+naive = datetime.fromisoformat("2026-08-03T19:30:00")
+
+print(naive)
+print(naive.tzinfo)
+```
+
+Python calls it **naive**. It may represent a local wall-clock time, but the value
+alone cannot identify one instant worldwide.
+
+Parse an explicit UTC offset:
+
+```python
+from datetime import datetime
+
+aware = datetime.fromisoformat("2026-08-03T19:30:00+00:00")
+
+print(aware)
+print(aware.tzinfo)
+print(aware.utcoffset())
+```
+
+This value is **aware**. The `+00:00` offset identifies UTC at that moment.
+
+### Construct an aware UTC datetime directly
+
+```python
+from datetime import datetime, timezone
+
+moment = datetime(2026, 8, 3, 19, 30, tzinfo=timezone.utc)
+
+print(moment.isoformat())
+```
+
+The ISO output includes `+00:00`.
+
+### Convert an instant to a named region
+
+The standard-library `zoneinfo` module uses IANA timezone rules:
+
+```python
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+utc_moment = datetime.fromisoformat("2026-08-03T19:30:00+00:00")
+new_york = utc_moment.astimezone(ZoneInfo("America/New_York"))
+
+print(utc_moment.isoformat())
+print(new_york.isoformat())
+```
+
+The wall-clock hour changes, but both values describe the same instant. A named
+zone carries historical and daylight-saving rules that a fixed offset alone does
+not.
+
+Some minimal systems may not include timezone data. If `ZoneInfo` reports missing
+data locally, use the Colab environment for this example and treat timezone data
+as a declared runtime dependency in a real project.
+
+### Do not compare naive and aware datetimes
+
+```python
+from datetime import datetime
+
+naive = datetime.fromisoformat("2026-08-03T19:30:00")
+aware = datetime.fromisoformat("2026-08-03T19:30:00+00:00")
+
+print(naive < aware)
+```
+
+Python raises `TypeError` for ordering because the naive value has no location on
+the global timeline. Do not fix this by attaching an arbitrary timezone. Find the
+source's intended timezone policy.
+
+### Current time is useful but not deterministic
+
+```python
+from datetime import datetime, timezone
+
+current_utc = datetime.now(timezone.utc)
+print(current_utc.isoformat())
+```
+
+This is appropriate when the task truly needs the current instant. Lessons and
+assertions should use fixed values so they remain reproducible tomorrow and in
+another region.
+
+### Checkpoint: timezone meaning
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-dates-timezone-check",
+  "title": "Timezone meaning checkpoint",
+  "instructions": "Choose the value or operation that preserves the instant's meaning.",
+  "questions": [
+    {
+      "id": "aware-sign",
+      "prompt": "Which ISO text contains explicit timezone information?",
+      "options": ["`2026-08-03T19:30:00+00:00`", "`2026-08-03T19:30:00`", "`2026-08-03`", "`19:30:00`"],
+      "answer_index": 0,
+      "explanation": "The +00:00 offset makes the datetime aware and identifies its relationship to UTC."
+    },
+    {
+      "id": "zone-convert",
+      "prompt": "Which method converts one aware instant for display in another timezone?",
+      "options": ["`.strip()`", "`.astimezone(...)`", "`.total_seconds()`", "`.removeprefix()`"],
+      "answer_index": 1,
+      "explanation": "`astimezone()` preserves the instant while calculating the target zone's wall-clock representation."
+    },
+    {
+      "id": "naive-meaning",
+      "prompt": "What information is missing from a naive datetime?",
+      "options": ["Its year", "Its minute", "The offset or timezone policy needed to place it on a global timeline", "Its Python type"],
+      "answer_index": 2,
+      "explanation": "A naive datetime has calendar and clock fields but no unambiguous global-time relationship."
+    },
+    {
+      "id": "fixed-test",
+      "prompt": "Why should a lesson assertion prefer a fixed datetime over `datetime.now()`?",
+      "options": ["Fixed dates cannot be parsed.", "Current time is always naive.", "A fixed value uses less source code.", "The expected result stays reproducible across runs and locations."],
+      "answer_index": 3,
+      "explanation": "A changing clock makes exact expected values unstable."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Build an aware observatory booking
+
+An observatory receives this fixed booking data:
+
+```python
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+visitor = "Mina"
+starts_at_text = "2026-08-03T23:30:00+00:00"
+session_minutes_text = "150"
+reminder_days_text = "2"
+display_zone_name = "America/New_York"
+
+starts_at = None
+session_length = None
+ends_at = None
+reminder_at = None
+local_start = None
+summary = None
+```
+
+Create an aware timestamp from the ISO text, convert the duration strings to
+integers, calculate the end and reminder instants, and convert the start to the
+named display zone.
+
+Build this stable summary from the UTC-aware values:
+
+```text
+Mina: 2026-08-03 23:30 UTC → 2026-08-04 02:00 UTC
+Reminder: 2026-08-01 23:30 UTC
+```
+
+Use these assertions:
+
+```python
+from datetime import datetime, timedelta, timezone
+
+assert starts_at == datetime(2026, 8, 3, 23, 30, tzinfo=timezone.utc)
+assert session_length == timedelta(minutes=150)
+assert ends_at == datetime(2026, 8, 4, 2, 0, tzinfo=timezone.utc)
+assert reminder_at == datetime(2026, 8, 1, 23, 30, tzinfo=timezone.utc)
+assert local_start.tzinfo is not None
+assert local_start.hour == 19
+assert summary == (
+    "Mina: 2026-08-03 23:30 UTC → 2026-08-04 02:00 UTC\n"
+    "Reminder: 2026-08-01 23:30 UTC"
+)
+```
+
+<details>
+<summary>Hint: keep arithmetic in aware datetime values</summary>
+
+Parse with `datetime.fromisoformat()`. Create timedeltas from the converted minute
+and day counts. Use `.astimezone(ZoneInfo(display_zone_name))` only for the local
+display value. Format the stable summary with `strftime("%Y-%m-%d %H:%M UTC")`
+because its source values are explicitly UTC.
+
+</details>
+
+<details class="solution">
+<summary>Show one solution after the booking checks pass</summary>
+
+```python
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+visitor = "Mina"
+starts_at_text = "2026-08-03T23:30:00+00:00"
+session_minutes_text = "150"
+reminder_days_text = "2"
+display_zone_name = "America/New_York"
+
+starts_at = datetime.fromisoformat(starts_at_text)
+session_length = timedelta(minutes=int(session_minutes_text))
+ends_at = starts_at + session_length
+reminder_at = starts_at - timedelta(days=int(reminder_days_text))
+local_start = starts_at.astimezone(ZoneInfo(display_zone_name))
+summary = (
+    f"{visitor}: {starts_at:%Y-%m-%d %H:%M UTC} → "
+    f"{ends_at:%Y-%m-%d %H:%M UTC}\n"
+    f"Reminder: {reminder_at:%Y-%m-%d %H:%M UTC}"
+)
+
+print(summary)
+print(f"Local start: {local_start.isoformat()}")
+```
+
+</details>
+
+Change the start to `2026-12-31T23:30:00+00:00` and predict the end date. Then
+change `display_zone_name` to `"Asia/Tokyo"` and explain why the local calendar
+date may differ even though the instant has not changed.
+
+## 7. Check every time boundary
+
+Before leaving the unit, explain:
+
+1. Why ISO date text must be parsed before calendar arithmetic.
+2. The difference between `.seconds` and `.total_seconds()` on a timedelta.
+3. Why 30 days is not a universal calendar-month rule.
+4. What a custom `strptime()` format promises.
+5. What makes a datetime aware.
+6. Why `astimezone()` changes the display fields but not the instant.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- `date`, `time`, `datetime`, and `timedelta` represent different temporal ideas.
+- Parse supported ISO text with `fromisoformat()` and return stable ISO text with
+  `isoformat()`.
+- Calendar constructors reject impossible dates.
+- Date subtraction produces a duration; adding a duration crosses calendar
+  boundaries safely.
+- `.total_seconds()` covers the complete duration, unlike the normalized
+  `.seconds` component.
+- `strptime()` and `strftime()` use an explicit text-format contract.
+- An aware datetime has an offset or timezone policy; a naive datetime cannot
+  identify one global instant by itself.
+- Use fixed timestamps for reproducible examples and assertions.
+:::
+
+## References
+
+- [Python `datetime` module](https://docs.python.org/3/library/datetime.html)
+- [Python `zoneinfo` module](https://docs.python.org/3/library/zoneinfo.html)
+- [Python `strftime()` and `strptime()` format codes](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes)
+- [Python documentation: aware and naive datetime objects](https://docs.python.org/3/library/datetime.html#aware-and-naive-objects)

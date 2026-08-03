@@ -1,10 +1,10 @@
 ---
 title: 'Unit Challenge: Build a Date-Aware Purchase Summary'
-description: Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
+description: Repair a time-travel supply record by converting raw text, choosing numeric representations, checking facts, calculating an aware review date, and formatting a clearance message.
 challenge_id: core-values-types.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 2
+assessment_version: 3
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,8 +19,8 @@ unit_number: 2
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 2 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
-- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+- **Outcome assessed:** Choose, convert, compare, calculate, and format text, numeric, Boolean, missing, and timezone-aware values in one reproducible artifact.
+- **Evidence:** Progressive checks, a decoded clearance message, one boundary rerun, and one debugging record
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
@@ -28,67 +28,213 @@ unit_number: 2
 <!-- fcpython-unit-challenge: practical -->
 ## 1. Challenge outcome
 
-The program converts the supplied text, uses decimal arithmetic, parses the ISO date, calculates the review date, and formats one stable summary.
+The Chrononaut Supply Kiosk has recovered a purchase record from a damaged time
+capsule. Every field survived as text, several values carry extra whitespace, and
+the cargo scanner stored the familiar floating-point result of `0.1 + 0.2`.
 
-**Scenario:** A community supply table stores a price, quantity, and purchase date as text. Produce an exact subtotal and a date-aware summary without confusing strings, floats, and parsed values.
+Repair the record and unlock its clearance message. Your program must preserve the
+raw evidence, create values with deliberate types, calculate exact credit totals,
+confirm the measured cargo mass with a tolerance, retain the timestamp's UTC
+offset, derive a small launch code, and produce one stable summary.
 
-::: {.callout-note title="Work independently, but not without support"}
-Use the starter contract, run one group of checks at a time, and open hints only
-after you can state the evidence blocking your next step.
+The challenge is a puzzle, but its rules are all on this page. You do not need
+collections, loops, functions, conditional statements, or exception handlers.
+
+::: {.callout-note title="Mission rule"}
+Run one assertion group at a time. When a group fails, read the first failure and
+repair the value that group describes. Do not edit expected values merely to open
+the next stage.
 :::
 
 ## 2. Understand the acceptance example
 
-Before implementation, restate the normal input, expected result, important
-boundary, and one anticipated failure in your own words.
+The repaired record must produce exactly this clearance message:
+
+```text
+=== CHRONONAUT SUPPLY CLEARANCE ===
+Traveler: Ada Byron [AS0803]
+Cargo: 4 × Quantum Compass
+Credits: 13.00 + 0.98 = 13.98
+Mass check: PASS | Priority: True
+Review: 2026-09-02 14:30 UTC
+```
+
+The launch code is not random:
+
+- `A` is the first character of the cleaned traveler name;
+- `S` is the final character of the cleaned item name; and
+- `0803` is the purchase month and day.
+
+Before writing code, identify which displayed values should remain strings, which
+should become `int`, `float`, `Decimal`, `bool`, `None`, or `datetime`, and which
+values exist only for formatted output.
 
 ### Constraints
 
-1. Construct `Decimal` from text, not from a float.
-2. Keep the supplied public names.
-3. Use `date.fromisoformat` and `timedelta`.
-4. Do not hard-code the expected subtotal or review date.
+1. Preserve every supplied name ending in `_text` unchanged.
+2. Keep the supplied public names so the progressive assertions can inspect them.
+3. Construct `Decimal` values directly from text, not through `float`.
+4. Use `ROUND_HALF_UP` and quantize the service fee to `Decimal("0.01")`.
+5. Parse priority by cleaning and comparing text; do not use
+   `bool(priority_text)`.
+6. Represent the blank coupon code with `None` and check it with `is None`.
+7. Use `math.isclose()` with the supplied absolute tolerance for the mass check.
+8. Parse the aware ISO timestamp rather than slicing its date characters.
+9. Derive the launch code from the cleaned values and parsed timestamp.
+10. Do not hard-code calculated totals, the review timestamp, code, status, or
+    complete summary.
 
 ## 3. Start from the contract
 
+Copy this starter into a fresh cell. The names set to `None` are the values you
+must calculate.
+
 ```python
-from datetime import date, timedelta
-from decimal import Decimal
+import math
+import unicodedata
+from datetime import datetime, timedelta
+from decimal import Decimal, ROUND_HALF_UP
 
-item = "Notebook"
-unit_price_text = "3.25"
+# Recovered external fields: preserve these exact source values.
+traveler_text = "  aDA BYRON  "
+item_text = "quantum compass"
 quantity_text = "4"
-purchased_on_text = "2026-08-03"
+unit_price_text = "3.25"
+service_rate_text = "0.075"
+mass_text = "0.30000000000000004"
+priority_text = " YES "
+coupon_text = "   "
+purchased_at_text = "2026-08-03T14:30:00+00:00"
+review_days_text = "30"
 
-unit_price = None
+# Supplied scanner policy.
+expected_mass = 0.3
+mass_tolerance = 0.000001
+cent = Decimal("0.01")
+
+# Stage A: cleaned and converted values.
+traveler = None
+traveler_key = None
+item = None
 quantity = None
-purchased_on = None
+unit_price = None
+service_rate = None
+measured_mass = None
+is_priority = None
+coupon_code = None
+purchased_at = None
+review_days = None
+
+# Stage B: calculated mission facts.
 subtotal = None
-review_on = None
+service_fee = None
+total = None
+mass_matches = None
+mass_status = None
+review_at = None
+launch_code = None
+record_ready = None
+
+# Stage C: final artifact.
 summary = None
 ```
 
 ## 4. Build in small stages
 
-1. Make the smallest normal case observable.
-2. Run the nearest check and read its complete failure evidence.
-3. Add one boundary behavior without weakening earlier checks.
-4. Restart and run the complete artifact from top to bottom.
+### Stage A: restore typed values
+
+1. Strip and title-case the traveler and item display values.
+2. Build `traveler_key` by stripping, NFC-normalizing, and casefolding the raw
+   traveler text. This key is evidence that you can prepare text for matching
+   without replacing the display name.
+3. Convert the quantity and review-day count to integers.
+4. Construct the price and service rate as Decimals from their source strings.
+5. Convert the measured mass to float.
+6. Parse priority with an explicit cleaned-text comparison.
+7. Clean the coupon text and use `or None` to represent its absence.
+8. Parse the ISO timestamp with `datetime.fromisoformat()`.
+
+Run assertion group A before continuing.
+
+### Stage B: recover the purchase and time facts
+
+1. Multiply unit price by quantity for the exact subtotal.
+2. Calculate the raw service fee, then quantize it to cents with
+   `ROUND_HALF_UP`.
+3. Add subtotal and fee for the total.
+4. Compare the measured and expected masses using an absolute tolerance and no
+   relative tolerance.
+5. Use the supplied expression below to turn the Boolean mass fact into display
+   text without introducing a conditional statement:
+
+   ```python
+   mass_status = ("FAIL", "PASS")[mass_matches]
+   ```
+
+6. Add the converted review-day duration to the aware purchase timestamp.
+7. Derive the launch code from the two characters and `strftime("%m%d")`.
+8. Combine the important Boolean facts into `record_ready`.
+
+Run assertion group B before formatting the summary.
+
+### Stage C: assemble the clearance message
+
+Use adjacent f-strings inside parentheses. Format every Decimal credit value with
+two decimal places and the review timestamp with `%Y-%m-%d %H:%M UTC`. Preserve
+the exact line breaks and labels shown in the acceptance example.
 
 ## 5. Run progressive assertions
 
+### Group A: cleaned and converted values
+
 ```python
-assert unit_price == Decimal("3.25")
-assert quantity == 4
-assert purchased_on == date(2026, 8, 3)
-assert subtotal == Decimal("13.00")
-assert review_on == date(2026, 9, 2)
-assert summary == "Notebook: 4 × $3.25 = $13.00; review 2026-09-02"
+assert traveler_text == "  aDA BYRON  "
+assert (traveler, traveler_key) == ("Ada Byron", "ada byron")
+assert item == "Quantum Compass"
+assert type(quantity) is int and quantity == 4
+assert (unit_price, service_rate) == (Decimal("3.25"), Decimal("0.075"))
+assert math.isclose(measured_mass, 0.3, rel_tol=0.0, abs_tol=mass_tolerance)
+assert is_priority is True and coupon_code is None
+assert purchased_at == datetime.fromisoformat("2026-08-03T14:30:00+00:00")
+assert purchased_at.tzinfo is not None
+assert review_days == 30
 ```
 
-::: {.callout-warning title="Do not edit expected values to create a pass"}
-If a check appears wrong, explain the contract conflict before changing either
-side. Otherwise, repair the implementation and preserve the check.
+### Group B: purchase, scanner, and time calculations
+
+```python
+assert (subtotal, service_fee, total) == (
+    Decimal("13.00"),
+    Decimal("0.98"),
+    Decimal("13.98"),
+)
+assert mass_matches is True
+assert mass_status == "PASS"
+assert review_at == datetime.fromisoformat("2026-09-02T14:30:00+00:00")
+assert launch_code == "AS0803"
+assert record_ready is True
+```
+
+### Group C: final clearance artifact
+
+```python
+expected_summary = (
+    "=== CHRONONAUT SUPPLY CLEARANCE ===\n"
+    "Traveler: Ada Byron [AS0803]\n"
+    "Cargo: 4 × Quantum Compass\n"
+    "Credits: 13.00 + 0.98 = 13.98\n"
+    "Mass check: PASS | Priority: True\n"
+    "Review: 2026-09-02 14:30 UTC"
+)
+
+assert summary == expected_summary
+print(summary)
+```
+
+::: {.callout-warning title="A later pass does not erase an earlier failure"}
+If group B fails because `service_fee` is `0.975`, the Decimal conversion is not
+the problem. The missing step is the stated cent-quantization rule. Diagnose the
+first mismatched promise before changing other values.
 :::
 
 ## 6. Use the hint ladder only when needed
@@ -96,87 +242,215 @@ side. Otherwise, repair the implementation and preserve the check.
 <details>
 <summary>Hint 1</summary>
 
-Convert each external text value once at the boundary.
+Return to the lesson that owns the blocked boundary:
+
+- Lessons 1 and 5 for conversion, `None`, cleanup, normalization, and slices;
+- Lessons 3 and 4 for `math.isclose()`, Decimal construction, and quantization;
+- Lesson 7 for explicit yes/no comparison and combined Boolean facts; and
+- Lesson 8 for aware ISO parsing and `timedelta` arithmetic.
+
+Run only the nearest assertion group after making one change.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-The review date is the parsed purchase date plus `timedelta(days=30)`.
+The central calculations have these shapes:
+
+```python
+subtotal = unit_price * quantity
+service_fee = (subtotal * service_rate).quantize(...)
+total = subtotal + service_fee
+mass_matches = math.isclose(...)
+review_at = purchased_at + timedelta(days=review_days)
+```
+
+Supply the named rounding mode and tolerance arguments from the constraints.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-A Decimal supports the same `.2f` formatting used for a two-decimal money display.
+The launch code and final readiness can be decomposed as follows:
+
+```python
+traveler_letter = traveler[0].upper()
+item_letter = item[-1].upper()
+date_digits = purchased_at.strftime("%m%d")
+launch_code = traveler_letter + item_letter + date_digits
+
+record_ready = (
+    quantity > 0
+    and mass_matches
+    and purchased_at.tzinfo is not None
+    and coupon_code is None
+)
+```
+
+Build the summary one line at a time and compare `repr(summary)` with
+`repr(expected_summary)` if a hidden space or newline prevents the final pass.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing check. Record its inputs, actual result or exception,
-expected result, one hypothesis, one controlled change, and the verified rerun.
+Preserve one failed assertion or exception from your work. Record the exact source
+value, observed result, expected result, one explanation, the single change you
+made, and the assertion group that passed afterward.
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+| Failure | Exact evidence | One hypothesis | Controlled change | Verified rerun |
 |---|---|---|---|---|
-| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+| What was the first failure? | Include actual and expected values or the final exception line. | Which representation, operation, or format rule explains it? | What one line changed? | Which unchanged group now passes? |
 
-## 8. Compare with a solution path
+Useful puzzle evidence includes:
 
-<details>
-<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+- `bool(" YES ")` unexpectedly producing `True` for the wrong reason;
+- `Decimal(0.075)` carrying a float approximation;
+- a service fee left at three decimal places;
+- exact float equality rejecting the scanner mass;
+- a missing UTC offset; or
+- an invisible newline mismatch in the summary.
+
+## 8. Test the damaged-scanner variation
+
+After the ordinary challenge passes from a clean state, copy your implementation
+to a new cell and change only:
 
 ```python
-unit_price = Decimal(unit_price_text)
-quantity = int(quantity_text)
-purchased_on = date.fromisoformat(purchased_on_text)
-subtotal = unit_price * quantity
-review_on = purchased_on + timedelta(days=30)
-summary = (
-    f"{item}: {quantity} × ${unit_price:.2f} = ${subtotal:.2f}; "
-    f"review {review_on.isoformat()}"
-)
+mass_text = "0.42"
 ```
 
-Compare contracts and decisions, not only line-for-line syntax. If your solution
-also satisfies the constraints and checks, explain one trade-off between the
-approaches.
+Recalculate every derived value. For this variation:
+
+```python
+assert mass_matches is False
+assert mass_status == "FAIL"
+assert record_ready is False
+```
+
+The purchase totals and review timestamp should remain unchanged. Explain why the
+mass display and readiness fact change while Decimal arithmetic and calendar
+arithmetic do not.
+
+## 9. Compare with a solution path
+
+<details class="solution">
+<summary>Reveal after all three hint levels have been used or your own checks pass</summary>
+
+```python
+import math
+import unicodedata
+from datetime import datetime, timedelta
+from decimal import Decimal, ROUND_HALF_UP
+
+traveler_text = "  aDA BYRON  "
+item_text = "quantum compass"
+quantity_text = "4"
+unit_price_text = "3.25"
+service_rate_text = "0.075"
+mass_text = "0.30000000000000004"
+priority_text = " YES "
+coupon_text = "   "
+purchased_at_text = "2026-08-03T14:30:00+00:00"
+review_days_text = "30"
+
+expected_mass = 0.3
+mass_tolerance = 0.000001
+cent = Decimal("0.01")
+
+traveler = traveler_text.strip().title()
+traveler_key = unicodedata.normalize("NFC", traveler_text.strip()).casefold()
+item = item_text.strip().title()
+quantity = int(quantity_text)
+unit_price = Decimal(unit_price_text)
+service_rate = Decimal(service_rate_text)
+measured_mass = float(mass_text)
+is_priority = priority_text.strip().casefold() == "yes"
+coupon_code = coupon_text.strip() or None
+purchased_at = datetime.fromisoformat(purchased_at_text)
+review_days = int(review_days_text)
+
+subtotal = unit_price * quantity
+service_fee = (subtotal * service_rate).quantize(
+    cent,
+    rounding=ROUND_HALF_UP,
+)
+total = subtotal + service_fee
+mass_matches = math.isclose(
+    measured_mass,
+    expected_mass,
+    rel_tol=0.0,
+    abs_tol=mass_tolerance,
+)
+mass_status = ("FAIL", "PASS")[mass_matches]
+review_at = purchased_at + timedelta(days=review_days)
+launch_code = (
+    traveler[0].upper()
+    + item[-1].upper()
+    + purchased_at.strftime("%m%d")
+)
+record_ready = (
+    quantity > 0
+    and mass_matches
+    and purchased_at.tzinfo is not None
+    and coupon_code is None
+)
+
+summary = (
+    "=== CHRONONAUT SUPPLY CLEARANCE ===\n"
+    f"Traveler: {traveler} [{launch_code}]\n"
+    f"Cargo: {quantity} × {item}\n"
+    f"Credits: {subtotal:.2f} + {service_fee:.2f} = {total:.2f}\n"
+    f"Mass check: {mass_status} | Priority: {is_priority}\n"
+    f"Review: {review_at:%Y-%m-%d %H:%M UTC}"
+)
+
+print(summary)
+```
+
+This path keeps external text visible, performs calculations on typed values, and
+creates display text only at the end. A different implementation is valid when it
+preserves the names, constraints, and unchanged assertions.
 
 </details>
 
-## 9. Check your understanding
+## 10. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-core-values-types-challenge",
-  "title": "Build a Date-Aware Purchase Summary readiness check",
-  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "title": "Chrononaut supply clearance checkpoint",
+  "instructions": "Connect each answer to the behavior of your completed artifact.",
   "questions": [
     {
-      "id": "design-boundary",
-      "prompt": "Why should `unit_price` be built from `unit_price_text`?",
-      "options": [
-        "Text automatically selects a currency symbol.",
-        "It preserves the intended decimal digits without first creating a binary float.",
-        "Decimal values cannot be multiplied.",
-        "A string makes every calculation approximate."
-      ],
-      "answer_index": 1,
-      "explanation": "It preserves the intended decimal digits without first creating a binary float."
+      "id": "decimal-boundary",
+      "prompt": "Why is `unit_price` constructed from `unit_price_text` rather than from a float?",
+      "options": ["The text preserves the stated base-ten digits before Decimal construction.", "Floats cannot be positive.", "Text automatically applies a currency symbol.", "Decimal accepts no arithmetic."],
+      "answer_index": 0,
+      "explanation": "Constructing from source text avoids carrying an earlier binary-float approximation into Decimal arithmetic."
     },
     {
-      "id": "clean-evidence",
-      "prompt": "What should happen before recording this challenge as complete?",
-      "options": [
-        "The unchanged checks pass from a clean state and the important decisions can be explained.",
-        "The expected values are edited to match the current output.",
-        "Only the final successful line is kept.",
-        "Several unrelated features are added."
-      ],
-      "answer_index": 0,
-      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+      "id": "mass-boundary",
+      "prompt": "Why does the scanner check use `math.isclose()`?",
+      "options": ["It converts the mass to text.", "The measured float may be acceptably close without being exactly the same stored value.", "It rounds the Decimal price.", "It adds the review duration."],
+      "answer_index": 1,
+      "explanation": "The supplied absolute tolerance expresses the acceptable measurement difference."
+    },
+    {
+      "id": "aware-time",
+      "prompt": "Which evidence shows that `purchased_at` retains timezone meaning?",
+      "options": ["Its year is 2026.", "Its text contains a hyphen.", "`purchased_at.tzinfo is not None`", "The quantity is positive."],
+      "answer_index": 2,
+      "explanation": "A non-None tzinfo indicates an aware datetime with offset or timezone information."
+    },
+    {
+      "id": "format-boundary",
+      "prompt": "Why is `summary` assembled after the numeric and datetime checks?",
+      "options": ["Strings perform more exact arithmetic.", "Assertions cannot inspect numbers.", "Formatting mutates every source value.", "Calculation stays in typed values, while the final boundary turns results into display text."],
+      "answer_index": 3,
+      "explanation": "Separating calculation from presentation preserves useful types until the artifact is ready to display."
     }
   ]
 }
@@ -184,20 +458,22 @@ approaches.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 10. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | Acceptance examples and progressive checks pass unchanged. |
-| Scope | The artifact follows the constraints without unrelated features. |
-| Reasoning | Important values, boundaries, and design choices can be traced. |
-| Debugging | One record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+| Typed boundaries | Raw text remains unchanged and every converted value has the promised type and meaning. |
+| Numeric rules | Decimal totals, float tolerance, and rounding stage match the unchanged assertions. |
+| Text and truth | Cleanup, normalization, `None`, priority parsing, code derivation, and readiness facts can be explained. |
+| Time | The parsed timestamp is aware and duration arithmetic produces the expected review instant. |
+| Artifact | The clearance message matches exactly from a clean top-to-bottom run. |
+| Boundary | The damaged-scanner variation changes only the relevant facts. |
+| Debugging | One record connects a real failure to evidence, one hypothesis, one change, and a verified rerun. |
 
-This button stores a self-reported marker only in this browser. It does not
-submit work, grade it, verify identity, or issue a certificate.
+This control stores a self-reported marker in this browser. It does not submit
+work, verify identity, grade the artifact, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -211,7 +487,13 @@ submit work, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows design choices without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- A playful artifact can still require precise representation choices.
+- Preserving raw text makes every conversion and cleanup boundary inspectable.
+- Decimal money, float measurements, Boolean facts, missing values, and aware
+  timestamps each need their own rules.
+- Progressive assertions reveal the first broken promise without exposing the
+  whole solution.
+- A boundary variation tests whether one changed input affects only the facts that
+  depend on it.
+- The final message is evidence of earlier typed calculations, not a replacement
+  for them.

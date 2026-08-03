@@ -1,0 +1,838 @@
+---
+title: Strings and Unicode Text
+lesson_id: core-values-types.strings-unicode-text
+lesson_order: 50
+description: Create, inspect, slice, search, clean, transform, and combine Unicode strings while understanding immutability and important text boundaries.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+- strings
+- unicode
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/strings-unicode-text.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 2
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Create, inspect, slice, clean, search, transform, and combine Unicode text without assuming that every visible character has a simple representation.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Quotation marks define a string in source code
+
+Python strings hold text: names, labels, messages, identifiers, emoji, whitespace,
+and line breaks. Create ordinary strings with single or double quotes:
+
+```python
+language = "Python"
+greeting = 'Hello'
+
+print(language)
+print(greeting)
+print(type(language).__name__)
+```
+
+The quote characters mark the beginning and end in source code. They are not part
+of the displayed value.
+
+Choose a quote style that avoids unnecessary escapes:
+
+```python
+message = "Mina's telescope is ready."
+quotation = 'The display says "READY".'
+
+print(message)
+print(quotation)
+```
+
+Python treats single- and double-quoted strings the same after parsing them.
+Readability determines the choice.
+
+### Escape characters with a backslash
+
+When the chosen quote appears inside the text, prefix it with `\`:
+
+```python
+message = 'Mina\'s telescope is ready.'
+quotation = "The display says \"READY\"."
+
+print(message)
+print(quotation)
+```
+
+Common escape sequences include:
+
+```python
+two_lines = "north\nsouth"
+tabbed = "name\tscore"
+backslash = "C:\\observatory\\logs"
+
+print(two_lines)
+print(tabbed)
+print(backslash)
+```
+
+`\n` is one newline character, `\t` is one tab character, and `\\` is one
+literal backslash.
+
+### Raw strings reduce backslash noise
+
+A raw-string prefix makes most backslashes literal:
+
+```python
+pattern_text = r"\d{4}-\d{2}-\d{2}"
+windows_folder = r"C:\observatory\logs"
+
+print(pattern_text)
+print(windows_folder)
+```
+
+Raw strings are useful for regular-expression patterns and Windows-style paths.
+They are not a separate runtime type:
+
+```python
+print(type(r"raw text").__name__)
+```
+
+The answer is still `str`. A raw string also cannot end with one unmatched
+backslash because that backslash would escape the closing quote in source code.
+
+### Triple quotes hold multiline text
+
+```python
+instructions = """Observatory checklist:
+1. Open the dome.
+2. Check the weather.
+3. Record the start time."""
+
+print(instructions)
+```
+
+Line breaks inside the delimiters become part of the string. Triple-quoted strings
+are also used as docstrings when they appear in a documented position. Unit 1
+explained that placement, not the quote count alone, makes a docstring.
+
+## 2. `len()` and indexes reveal a string's sequence
+
+A string is an ordered sequence of Unicode code points. `len()` counts its current
+sequence elements:
+
+```python
+word = "Python"
+
+print(len(word))
+print(word[0])
+print(word[1])
+print(word[-1])
+```
+
+The length is `6`. Index `0` selects `P`, index `1` selects `y`, and index `-1`
+selects the final `n`.
+
+Think of a nonnegative index as distance from the beginning:
+
+```text
+text:      P  y  t  h  o  n
+index:     0  1  2  3  4  5
+negative: -6 -5 -4 -3 -2 -1
+```
+
+### An index must exist
+
+```python
+word = "Python"
+print(word[10])
+```
+
+Python raises `IndexError` because the only nonnegative indexes are `0` through
+`5`. The error is evidence that the string is shorter than the program assumed.
+
+An empty string has no valid character index:
+
+```python
+empty = ""
+print(len(empty))
+print(empty[0])
+```
+
+The first output is `0`; the second line raises `IndexError`.
+
+### Slice a range of characters
+
+A slice uses `start:stop`, including `start` and excluding `stop`:
+
+```python
+word = "Python"
+
+print(word[0:2])
+print(word[2:6])
+print(word[:3])
+print(word[3:])
+```
+
+The results are `Py`, `thon`, `Pyt`, and `hon`. Omitting a bound means “from the
+beginning” or “through the end.”
+
+Unlike a single index, a slice safely clips at the string boundary:
+
+```python
+word = "Python"
+print(word[0:100])
+```
+
+The result is the whole word, not an error.
+
+### Add a step to a slice
+
+```python
+alphabet = "abcdefghij"
+
+print(alphabet[::2])
+print(alphabet[1::2])
+print(alphabet[::-1])
+```
+
+The third slice uses a step of `-1`, producing the characters in reverse order.
+This is convenient for small text exercises; do not assume reversing code points
+always preserves the way a human writing system should display.
+
+### Checkpoint: string boundaries
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-strings-boundaries-check",
+  "title": "String boundaries checkpoint",
+  "instructions": "Trace the exact characters selected by each expression.",
+  "questions": [
+    {
+      "id": "first-index",
+      "prompt": "What is `\"Python\"[0]`?",
+      "options": ["`\"P\"`", "`\"y\"`", "`\"n\"`", "`0`"],
+      "answer_index": 0,
+      "explanation": "The first sequence element is zero positions from the beginning."
+    },
+    {
+      "id": "stop-exclusive",
+      "prompt": "What is `\"Python\"[1:4]`?",
+      "options": ["`\"Pyt\"`", "`\"yth\"`", "`\"ytho\"`", "`\"thon\"`"],
+      "answer_index": 1,
+      "explanation": "The slice includes indexes 1, 2, and 3, but excludes stop index 4."
+    },
+    {
+      "id": "negative-index",
+      "prompt": "What does index `-1` select from a non-empty string?",
+      "options": ["The first character", "No character", "The final character", "The string length"],
+      "answer_index": 2,
+      "explanation": "Negative indexes count backward from the end; -1 is the last element."
+    },
+    {
+      "id": "oversized-slice",
+      "prompt": "What does `\"cat\"[:100]` produce?",
+      "options": ["An `IndexError`", "An empty string", "One hundred characters", "`\"cat\"`"],
+      "answer_index": 3,
+      "explanation": "A slice clips at the available boundary instead of requiring every index to exist."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Strings are immutable
+
+Once created, a string's sequence of characters cannot be changed in place:
+
+```python
+word = "cat"
+word[0] = "b"
+```
+
+Python raises `TypeError`: a string does not support item assignment. Build a new
+string instead:
+
+```python
+word = "cat"
+new_word = "b" + word[1:]
+
+print(word)
+print(new_word)
+```
+
+The original remains `"cat"`; the new value is `"bat"`.
+
+String methods follow the same pattern:
+
+```python
+name = "  mina  "
+cleaned_name = name.strip()
+
+print(repr(name))
+print(repr(cleaned_name))
+```
+
+`repr()` shows quotes and otherwise invisible surrounding spaces. `.strip()`
+returns a new string; it does not update `name` automatically.
+
+This common mistake discards the result:
+
+```python
+name = "  mina  "
+name.strip()
+print(repr(name))
+```
+
+The method ran, but no name kept its returned value. Reassign when that is the
+intention:
+
+```python
+name = "  mina  "
+name = name.strip()
+print(repr(name))
+```
+
+## 4. Combine and test text with small operators
+
+`+` concatenates strings:
+
+```python
+first_name = "Ada"
+last_name = "Lovelace"
+full_name = first_name + " " + last_name
+
+print(full_name)
+```
+
+`*` repeats a string an integer number of times:
+
+```python
+divider = "-" * 24
+print(divider)
+```
+
+For messages that mix values, f-strings are usually clearer than repeated `+`.
+Lesson 6 explores their format options.
+
+### Membership asks whether text occurs inside text
+
+```python
+filename = "observations.csv"
+
+print(".csv" in filename)
+print(".json" not in filename)
+```
+
+Both results are Boolean values. Membership is case-sensitive:
+
+```python
+message = "Launch Ready"
+print("ready" in message)
+```
+
+The result is `False` because lowercase `r` and uppercase `R` are different code
+points.
+
+## 5. Clean boundaries with strip and prefix methods
+
+External text often carries whitespace:
+
+```python
+raw_code = "\n  AX-42 \t"
+
+print(repr(raw_code.strip()))
+print(repr(raw_code.lstrip()))
+print(repr(raw_code.rstrip()))
+```
+
+- `.strip()` removes whitespace from both ends;
+- `.lstrip()` removes it from the left; and
+- `.rstrip()` removes it from the right.
+
+They do not remove whitespace from the middle:
+
+```python
+name = "Ada   Lovelace"
+print(name.strip())
+```
+
+The internal spaces remain because they may be meaningful.
+
+### Strip removes a set of edge characters, not a word
+
+```python
+label = "xy-report-yx"
+print(label.strip("xy-"))
+```
+
+`.strip("xy-")` removes any of those individual characters repeatedly from both
+edges. It does not look for the exact substring `"xy-"`.
+
+Use explicit prefix/suffix methods when the contract names an exact marker:
+
+```python
+filename = "draft-observations.csv"
+
+without_status = filename.removeprefix("draft-")
+without_extension = without_status.removesuffix(".csv")
+
+print(without_status)
+print(without_extension)
+```
+
+If the exact prefix or suffix is absent, the method returns the original string.
+
+### Empty and whitespace-only strings are different source values
+
+```python
+empty = ""
+spaces = "   "
+
+print(len(empty))
+print(len(spaces))
+print(spaces.strip() == "")
+```
+
+The raw lengths are `0` and `3`, but cleaning the spaces produces an empty string.
+A form rule may treat both as blank while still preserving the raw source for
+diagnosis.
+
+## 6. Change case for display or comparison
+
+Python provides several case transformations:
+
+```python
+label = "mOON BASE"
+
+print(label.lower())
+print(label.upper())
+print(label.capitalize())
+print(label.title())
+```
+
+These methods return new strings. `.title()` can be convenient for simple display
+labels, but it is not a universal person-name formatter. Names and writing systems
+have rules that a generic casing algorithm cannot infer.
+
+For case-insensitive matching, `.casefold()` is more aggressive and
+Unicode-aware than `.lower()`:
+
+```python
+first = "Straße"
+second = "STRASSE"
+
+print(first.lower() == second.lower())
+print(first.casefold() == second.casefold())
+```
+
+The casefolded comparison is `True`. Keep the original strings for display; use a
+normalized comparison form for matching.
+
+### Checkpoint: immutability and cleanup
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-strings-methods-check",
+  "title": "String cleanup checkpoint",
+  "instructions": "Choose the operation that preserves the original text and states the intended boundary.",
+  "questions": [
+    {
+      "id": "strip-result",
+      "prompt": "After `cleaned = raw.strip()`, what happens to `raw`?",
+      "options": ["It still refers to the original string.", "It becomes `None`.", "It is always empty.", "It changes type to a list."],
+      "answer_index": 0,
+      "explanation": "Strings are immutable; `strip()` returns a separate value."
+    },
+    {
+      "id": "remove-prefix",
+      "prompt": "Which expression removes the exact leading marker `\"draft-\"` if present?",
+      "options": ["`name.strip(\"draft-\")`", "`name.removeprefix(\"draft-\")`", "`name.replace(\"draft-\", \"\")`", "`name[\"draft-\"]`"],
+      "answer_index": 1,
+      "explanation": "`removeprefix()` states an exact beginning marker; `strip()` treats its argument as individual edge characters."
+    },
+    {
+      "id": "method-discarded",
+      "prompt": "Why does calling `name.upper()` alone not change `name`?",
+      "options": ["Uppercase is not Unicode.", "The method prints instead of returning.", "The method returns a new string, and the code did not bind it.", "Names cannot refer to text."],
+      "answer_index": 2,
+      "explanation": "An immutable string operation produces a result that must be stored if it is needed later."
+    },
+    {
+      "id": "casefold-purpose",
+      "prompt": "When is `casefold()` especially useful?",
+      "options": ["Calculating a numeric average", "Mutating one character in place", "Encoding bytes for a file", "Preparing Unicode text for a case-insensitive comparison"],
+      "answer_index": 3,
+      "explanation": "Casefolding creates a comparison-oriented form across a wider range of Unicode case behavior."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Search, count, and replace deliberately
+
+Use `in` for a yes/no membership question and `.find()` when the position matters:
+
+```python
+message = "weather station ready"
+
+print("station" in message)
+print(message.find("station"))
+print(message.find("missing"))
+```
+
+`.find()` returns the starting index or `-1` when no match exists. Do not mistake
+`-1` for a valid result position in later slicing.
+
+If absence should be an error, `.index()` has a different contract:
+
+```python
+message = "weather station ready"
+print(message.index("station"))
+```
+
+Calling `.index("missing")` would raise `ValueError`. Choose between a sentinel
+result and an exception based on what absence means to the program.
+
+### Count non-overlapping matches
+
+```python
+report = "rain rain sun rain"
+print(report.count("rain"))
+print(report.count("ai"))
+```
+
+The method counts non-overlapping occurrences. It does not understand words or
+language boundaries; it searches exact character sequences.
+
+### Test beginnings and endings
+
+```python
+filename = "observations.csv"
+
+print(filename.startswith("observ"))
+print(filename.endswith(".csv"))
+```
+
+These methods communicate intent more directly than manually slicing and
+comparing a guessed number of characters.
+
+### Replace exact character sequences
+
+```python
+status = "draft: telescope draft"
+updated = status.replace("draft", "ready")
+
+print(status)
+print(updated)
+```
+
+Every non-overlapping match is replaced. Limit the number when the contract says
+only the first occurrence:
+
+```python
+status = "draft: telescope draft"
+print(status.replace("draft", "ready", 1))
+```
+
+Replacement is literal and case-sensitive; it is not a grammar-aware editing
+tool.
+
+## 8. Split text apart and join it again
+
+`.split()` separates text and returns a list. Lists are the next unit, so treat the
+container as supplied output here:
+
+```python
+raw_tags = "moon, stars, weather"
+tags = raw_tags.split(",")
+
+print(tags)
+print(type(tags).__name__)
+```
+
+Spaces remain because the delimiter is only the comma. A later loop could clean
+each item; for now, observe the boundary.
+
+Splitting on no explicit separator treats runs of whitespace as one boundary:
+
+```python
+sentence = "  clear   dark sky  "
+words = sentence.split()
+print(words)
+```
+
+The result is `['clear', 'dark', 'sky']`.
+
+`.join()` belongs to the delimiter string:
+
+```python
+words = ["clear", "dark", "sky"]
+message = " | ".join(words)
+print(message)
+```
+
+The output is `clear | dark | sky`. Every item must be a string:
+
+```python
+values = ["temperature", 21.5]
+print(", ".join(values))
+```
+
+Python raises `TypeError` because joining does not guess how the float should be
+formatted. Lesson 6 shows deliberate formatting.
+
+## 9. Unicode text can have more than one code-point spelling
+
+Python strings are Unicode text. `ord()` maps one character to its code point;
+`chr()` maps a code point back:
+
+```python
+symbol = "A"
+code_point = ord(symbol)
+
+print(code_point)
+print(chr(code_point))
+print(ord("🌙"))
+```
+
+Code points are numeric identities in the Unicode standard. They are not the same
+as encoded bytes; Unit 9 will teach UTF-8 and other encodings.
+
+### Visually identical text can use different sequences
+
+The character `é` can be one code point or an `e` followed by a combining accent:
+
+```python
+composed = "é"
+decomposed = "e\u0301"
+
+print(composed)
+print(decomposed)
+print(composed == decomposed)
+print(len(composed))
+print(len(decomposed))
+```
+
+The strings usually look alike, but equality is `False` and their lengths differ.
+Normalize when the program's matching rule treats canonically equivalent Unicode
+sequences as the same:
+
+```python
+import unicodedata
+
+composed = "é"
+decomposed = "e\u0301"
+
+left = unicodedata.normalize("NFC", composed)
+right = unicodedata.normalize("NFC", decomposed)
+
+print(left == right)
+```
+
+NFC normalization converts both to a standard composed form where possible.
+
+### Human-visible characters are not always one string element
+
+Some emoji and writing-system clusters contain multiple code points joined for
+display. `len()` counts Python string elements, not necessarily what a person
+perceives as one symbol. Do not design cursor movement, text truncation, or user
+name limits from `len()` alone without understanding the product's language and
+display requirements.
+
+### Normalize for matching, preserve originals for display
+
+```python
+import unicodedata
+
+submitted = "  CAFÉ "
+stored_label = "cafe\u0301"
+
+submitted_key = unicodedata.normalize("NFC", submitted.strip()).casefold()
+stored_key = unicodedata.normalize("NFC", stored_label).casefold()
+
+print(submitted_key == stored_key)
+print(submitted.strip())
+```
+
+The comparison succeeds while the original submitted capitalization remains
+available. A comparison key is a tool, not a replacement for the person's chosen
+display text.
+
+### Checkpoint: searching and Unicode
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit2-strings-unicode-check",
+  "title": "Searching and Unicode checkpoint",
+  "instructions": "Choose the operation that matches the text contract.",
+  "questions": [
+    {
+      "id": "membership",
+      "prompt": "Which expression asks only whether `\".csv\"` occurs in `filename`?",
+      "options": ["`\".csv\" in filename`", "`filename.find(\".csv\") + 1`", "`filename[\".csv\"]`", "`int(filename)`"],
+      "answer_index": 0,
+      "explanation": "Membership directly produces the Boolean fact the question asks for."
+    },
+    {
+      "id": "find-missing",
+      "prompt": "What does `text.find(needle)` return when `needle` is absent?",
+      "options": ["`None`", "`-1`", "An empty list", "Always `0`"],
+      "answer_index": 1,
+      "explanation": "`find()` uses -1 as its not-found sentinel."
+    },
+    {
+      "id": "normalization",
+      "prompt": "Why might two visually identical strings compare unequal?",
+      "options": ["Python compares only their fonts.", "One must be an integer.", "They can contain different but canonically equivalent Unicode code-point sequences.", "Equality ignores Unicode."],
+      "answer_index": 2,
+      "explanation": "A composed character and a base-plus-combining sequence can render alike while containing different code points."
+    },
+    {
+      "id": "join-requirement",
+      "prompt": "Why does `\", \".join([\"score\", 10])` fail?",
+      "options": ["The delimiter is too short.", "Lists can contain only one item.", "Commas cannot appear in strings.", "`join()` requires every item to already be a string."],
+      "answer_index": 3,
+      "explanation": "Joining text does not guess how non-string values should be converted or formatted."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Build an observatory badge label
+
+The badge printer receives these values:
+
+```python
+import unicodedata
+
+raw_name = "  aDA loVELACE  "
+raw_role = "guest-observer"
+raw_interests = "moon,stars,weather"
+comparison_name = "ada lovelace"
+```
+
+Create these names:
+
+- `display_name` — surrounding whitespace removed and simple title casing applied;
+- `display_role` — the exact `"guest-"` prefix removed, hyphens replaced by
+  spaces, then title cased;
+- `interest_text` — commas replaced by `" · "` for display;
+- `name_key` — NFC-normalized, stripped, casefolded text for comparison;
+- `expected_key` — the same comparison transformation for `comparison_name`;
+- `same_person_text` — the string `"MATCH"` supplied below when the keys are
+  equal; and
+- `badge` — a two-line string with the name/role on the first line and interests
+  on the second.
+
+Because full conditional selection belongs to Unit 4, use this supplied line:
+
+```python
+same_person_text = ("NO MATCH", "MATCH")[name_key == expected_key]
+```
+
+The indexing expression selects position `1` when the Boolean comparison is
+`True`. Unit 3 will explain tuples; you only need the provided selection line for
+this lab.
+
+Use these checks:
+
+```python
+assert raw_name == "  aDA loVELACE  "
+assert display_name == "Ada Lovelace"
+assert display_role == "Observer"
+assert interest_text == "moon · stars · weather"
+assert name_key == expected_key
+assert same_person_text == "MATCH"
+assert badge == (
+    "Ada Lovelace — Observer\n"
+    "Interests: moon · stars · weather"
+)
+```
+
+<details>
+<summary>Hint: build one display component at a time</summary>
+
+Use `.strip().title()` for the simple display name. Chain `.removeprefix()`,
+`.replace()`, and `.title()` for the role. Normalize the stripped string before
+casefolding the comparison key.
+
+</details>
+
+<details class="solution">
+<summary>Show one solution after the assertions pass</summary>
+
+```python
+import unicodedata
+
+raw_name = "  aDA loVELACE  "
+raw_role = "guest-observer"
+raw_interests = "moon,stars,weather"
+comparison_name = "ada lovelace"
+
+display_name = raw_name.strip().title()
+display_role = raw_role.removeprefix("guest-").replace("-", " ").title()
+interest_text = raw_interests.replace(",", " · ")
+name_key = unicodedata.normalize("NFC", raw_name.strip()).casefold()
+expected_key = unicodedata.normalize("NFC", comparison_name).casefold()
+same_person_text = ("NO MATCH", "MATCH")[name_key == expected_key]
+badge = (
+    f"{display_name} — {display_role}\n"
+    f"Interests: {interest_text}"
+)
+
+print(badge)
+print(f"Comparison: {same_person_text}")
+```
+
+</details>
+
+Now change exactly one input:
+
+1. Add spaces around `raw_role` and decide where `.strip()` belongs.
+2. Use the decomposed string `"Ame\u0301lie"` and compare it with `"Amélie"`.
+3. Remove all interests and decide what an empty display should mean. Do not invent
+   a default silently; write the rule beside your code.
+
+## 11. Check your text decisions
+
+Explain these differences:
+
+1. An index versus a slice beyond the end.
+2. `.strip("abc")` versus `.removeprefix("abc")`.
+3. Calling a string method versus storing its returned string.
+4. `.lower()` versus `.casefold()` for matching.
+5. Unicode text versus encoded bytes.
+6. A preserved display string versus a normalized comparison key.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Quotes delimit strings in source; escape sequences and raw strings control how
+  backslashes are interpreted.
+- Strings are ordered, support indexing and slicing, and are immutable.
+- String methods return new values; keep the result when it matters.
+- Choose cleanup, prefix, search, replacement, split, and join methods from the
+  exact text boundary.
+- Python strings hold Unicode text, not encoded bytes.
+- Visually identical text can contain different code-point sequences; normalize
+  when the matching contract requires it.
+- Preserve a person's original display text even when you create a normalized
+  comparison key.
+:::
+
+## References
+
+- [Python tutorial: strings](https://docs.python.org/3/tutorial/introduction.html#strings)
+- [Python standard string methods](https://docs.python.org/3/library/stdtypes.html#string-methods)
+- [Python lexical rules for string and bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals)
+- [Python `unicodedata` module](https://docs.python.org/3/library/unicodedata.html)
+- [Unicode Standard Annex #15: normalization forms](https://unicode.org/reports/tr15/)

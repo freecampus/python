@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 6
+curriculum_version: 7
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -8,15 +8,15 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 82
-    estimated_effort: 125–195 hours
+    lesson_count: 84
+    estimated_effort: 145–220 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 6
-      rule_version: 6
+      curriculum_version: 7
+      rule_version: 7
       recognition: local-self-reported
       lesson_ids:
         - get-started.programming-python-ai
@@ -30,12 +30,14 @@ courses:
         - python-syntax.writing-code-across-lines
         - python-syntax.comments-docstrings
         - python-syntax.reading-fixing-syntax-errors
-        - core-values-types.objects-types-none-conversion
-        - core-values-types.integers-floats-precision
-        - core-values-types.decimal-fraction-complex
-        - core-values-types.strings-unicode-input-formatting
-        - core-values-types.booleans-comparisons-truth-values
-        - core-values-types.dates-times-durations-parsing
+        - core-values-types.values-types-none-conversion
+        - core-values-types.integer-arithmetic
+        - core-values-types.floating-point-precision
+        - core-values-types.money-ratios-complex-numbers
+        - core-values-types.strings-unicode-text
+        - core-values-types.input-output-formatting
+        - core-values-types.booleans-comparisons-truth
+        - core-values-types.dates-times-durations
         - collections-iteration.lists
         - collections-iteration.tuples-ranges-packing
         - collections-iteration.dictionaries
@@ -181,9 +183,9 @@ courses:
         kind: instructional
       - number: 2
         id: core-values-types
-        title: Core Values and Scalar Types
+        title: Numbers, Text, and Other Values
         directory: courses/python-foundations/units/core-values-types
-        lesson_count: 6
+        lesson_count: 8
         kind: instructional
       - number: 3
         id: collections-iteration
