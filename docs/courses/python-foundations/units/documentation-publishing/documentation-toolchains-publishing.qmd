@@ -1,0 +1,156 @@
+---
+title: Documentation Toolchains and Publishing
+lesson_id: documentation-publishing.documentation-toolchains-publishing
+lesson_order: 40
+description: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+course_id: python-foundations
+unit_id: documentation-publishing
+unit_number: 15
+execute:
+  echo: true
+categories:
+- python-foundations
+- documentation-publishing
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/documentation-toolchains-publishing.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+Documentation source is not the published site. A reliable toolchain renders navigation and links in a clean build, then deploys exactly the reviewed artifact.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+from pathlib import Path
+
+
+def markdown_links_exist(document, root):
+    """Return missing local Markdown targets from simple link tuples."""
+    missing = []
+    for label, target in document:
+        if not (root / target).exists():
+            missing.append((label, target))
+    return missing
+
+
+links = [("Guide", "guide.md"), ("API", "api.md")]
+root = Path("docs")
+print(markdown_links_exist(links, root))
+```
+
+### Step-by-step explanation
+
+1. Documentation links are data that a build can verify.
+2. The function receives the documentation root instead of assuming a working directory.
+3. Each missing target retains its label and path as actionable evidence.
+4. A publishing workflow should fail before deployment when internal navigation is broken.
+
+::: {.callout-note title="Make one controlled change"}
+Create a temporary directory with one target file and assert that only the other target remains missing.
+:::
+
+## 2. Investigate the important boundary
+
+This course uses Quarto for the complete path. Sphinx is especially established for Python API/reference documentation, while MkDocs emphasizes Markdown sites. Compare their roles, but do not maintain three parallel builds.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+commands = [
+    "quarto render docs",
+    "pytest -q",
+    "python scripts/build_colab_notebooks.py",
+]
+
+for command in commands:
+    print(f"quality step: {command}")
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "documentation-publishing-documentation-toolchains-publishing",
+  "title": "Documentation Toolchains and Publishing checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "What should a documentation deployment publish?",
+      "options": [
+        "Unrendered local cache files from one developer's machine.",
+        "A site built even when link checks fail.",
+        "Different source than the reviewed commit.",
+        "The artifact produced by a clean, successful, reviewed build."
+      ],
+      "answer_index": 3,
+      "explanation": "Publishing the verified build artifact connects deployed documentation to reviewable source and reproducible checks."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "Only a screenshot of the final output.",
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "Several simultaneous edits with no earlier result.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 1,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Treat documentation source, build configuration, checks, and deployment as one pipeline.
+- Teach Quarto completely and compare Sphinx/MkDocs by use case.
+- Verify navigation, links, accessibility, snippets, and generated artifacts before publishing.
+:::
+
+## References
+
+- https://quarto.org/docs/websites/
+- https://www.sphinx-doc.org/
+- https://www.mkdocs.org/

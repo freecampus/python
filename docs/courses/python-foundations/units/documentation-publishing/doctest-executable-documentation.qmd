@@ -1,0 +1,157 @@
+---
+title: Doctest and Executable Documentation
+lesson_id: documentation-publishing.doctest-executable-documentation
+lesson_order: 30
+description: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+course_id: python-foundations
+unit_id: documentation-publishing
+unit_number: 15
+execute:
+  echo: true
+categories:
+- python-foundations
+- documentation-publishing
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/doctest-executable-documentation.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+Examples become misleading when code changes but displayed output does not. Doctest can execute small deterministic transcript examples as one layer of documentation evidence.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+import doctest
+
+
+def double(value):
+    """Return value multiplied by two.
+
+    >>> double(4)
+    8
+    >>> double(-1)
+    -2
+    """
+    return value * 2
+
+
+result = doctest.testmod()
+print(result.failed, result.attempted)
+```
+
+### Step-by-step explanation
+
+1. The `>>>` lines represent interactive input in the docstring.
+2. The following lines state exact expected output.
+3. `doctest.testmod` discovers and executes the examples in this module.
+4. The final pair reports zero failures and two attempted examples.
+
+::: {.callout-note title="Make one controlled change"}
+Temporarily change one expected result, observe the diff, then restore it and rerun cleanly.
+:::
+
+## 2. Investigate the important boundary
+
+Doctest compares textual output, so timestamps, unordered representations, memory addresses, and large formatting changes make brittle examples. Use pytest for complex setup and behavior that is clearer as ordinary assertions.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+def label(name):
+    """Return a normalized display label.
+
+    >>> label("  ada lovelace ")
+    'Ada Lovelace'
+    """
+    return name.strip().title()
+
+
+assert label("  ada lovelace ") == "Ada Lovelace"
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "documentation-publishing-doctest-executable-documentation",
+  "title": "Doctest and Executable Documentation checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "When is doctest a good fit?",
+      "options": [
+        "When output includes unpredictable timestamps and addresses.",
+        "When setup requires an entire deployed service.",
+        "When a small deterministic example clearly teaches the public behavior and exact output.",
+        "When no reader should see the example."
+      ],
+      "answer_index": 2,
+      "explanation": "Doctest is strongest when the readable example and stable textual assertion are the same artifact."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Executable examples reduce drift only when they run in automation.
+- Keep doctest examples small, deterministic, and public-interface focused.
+- Prefer normal tests when setup or assertions need richer structure.
+:::
+
+## References
+
+- https://docs.python.org/3/library/doctest.html

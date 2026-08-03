@@ -1,0 +1,148 @@
+---
+title: Aliasing, Shallow Copies, and Deep Copies
+lesson_id: mutability-identity-copying.aliasing-shallow-deep-copies
+lesson_order: 30
+description: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+course_id: python-foundations
+unit_id: mutability-identity-copying
+unit_number: 6
+execute:
+  echo: true
+categories:
+- python-foundations
+- mutability-identity-copying
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/mutability-identity-copying/aliasing-shallow-deep-copies.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+Copying an outer container may still leave nested objects shared. The needed copy depth depends on which later mutations must remain independent.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+from copy import deepcopy
+
+original = {"student": "Ada", "topics": ["loops"]}
+shallow = original.copy()
+independent = deepcopy(original)
+
+shallow["topics"].append("files")
+independent["topics"].append("testing")
+
+print(original["topics"])
+print(independent["topics"])
+```
+
+### Step-by-step explanation
+
+1. `dict.copy` creates a new outer dictionary but reuses the nested list reference.
+2. Appending through `shallow` therefore changes the list visible through `original`.
+3. `deepcopy` recursively creates an independent nested list.
+4. Its later append does not change the original's topics.
+
+::: {.callout-note title="Make one controlled change"}
+Add an immutable integer field and modify it in each copy. Explain why rebinding that field does not require a deep copy.
+:::
+
+## 2. Investigate the important boundary
+
+Deep copying everything can be expensive and can duplicate objects that represent shared resources. Draw the references and copy only the ownership boundary the contract requires.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+template = {"tags": [], "published": False}
+record = {**template, "tags": template["tags"].copy()}
+
+record["tags"].append("python")
+print(template)
+print(record)
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "mutability-identity-copying-aliasing-shallow-deep-copies",
+  "title": "Aliasing, Shallow Copies, and Deep Copies checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "What does a shallow dictionary copy do with a nested list value?",
+      "options": [
+        "It recursively copies every nested object.",
+        "It converts the list to a tuple.",
+        "It copies the outer dictionary but keeps a reference to the same nested list.",
+        "It deletes the nested value."
+      ],
+      "answer_index": 2,
+      "explanation": "Shallow copies duplicate one container level; contained references are reused."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Assignment creates another reference, not a copy.
+- A shallow copy duplicates one container level.
+- Choose deep copying only when the ownership contract requires independent nested objects.
+:::
+
+## References
+
+- https://docs.python.org/3/library/copy.html

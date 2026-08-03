@@ -92,113 +92,63 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
     """
     units = (
         (
-            "learning-workflow-tools",
-            "Learning Workflow and Tools",
-            "predict, run, explain, change, and cleanly rerun a small example",
+            "get-started",
+            "Get Started",
+            "predict, run, explain, modify, and cleanly rerun a small example",
         ),
         (
-            "numeric-foundations",
-            "Values, Names, and Numeric Computation",
-            "trace numeric values and justify the operation and rounding rule",
+            "python-syntax",
+            "Reading and Writing Python Syntax",
+            "identify expressions, statements, keywords, and blocks before "
+            "reasoning about behavior",
         ),
         (
-            "text-input-output",
-            "Text, Unicode, Input, and Output",
-            "preserve text while distinguishing characters, code points, "
-            "and encoded bytes",
+            "core-values-types",
+            "Core Values and Scalar Types",
+            "choose and convert values while explaining precision, text, truth, "
+            "and time boundaries",
         ),
         (
-            "decisions",
-            "Boolean Logic and Decisions",
-            "translate a rule table into branches with verified boundaries",
+            "collections-iteration",
+            "Collections and Iteration",
+            "choose a collection from its order, lookup, uniqueness, mutability, "
+            "and data-shape needs",
         ),
         (
-            "loops-and-state",
-            "Loops, Tracing, and State",
-            "show how loop state progresses toward a stopping condition",
+            "decisions-repetition",
+            "Decisions and Repetition",
+            "translate rules and repeated work into traceable control flow",
+        ),
+        (
+            "functions-call-behavior",
+            "Functions and Call Behavior",
+            "design function contracts and trace values through calls",
+        ),
+        (
+            "mutability-identity-copying",
+            "Mutability, Identity, and Copying",
+            "explain and repair accidental shared-state mutation",
         ),
         (
             "problem-solving-algorithms",
-            "Problem Decomposition and Basic Algorithms",
-            "derive a small algorithm from acceptance examples and pseudocode",
+            "Problem Solving and Basic Algorithms",
+            "derive and check a small algorithm from acceptance examples",
         ),
         (
-            "sequences",
-            "Sequences: Lists and Tuples",
-            "preserve order while choosing deliberate mutable and immutable "
-            "representations",
+            "errors-exceptions-debugging",
+            "Errors, Exceptions, and Debugging",
+            "read a failure, handle anticipated exceptions, and test one "
+            "evidence-based hypothesis",
         ),
         (
-            "mappings-and-sets",
-            "Mappings, Sets, and Nested Data",
-            "model lookup, uniqueness, counting, and nested records with "
-            "suitable containers",
+            "files-paths-external-data",
+            "Files, Paths, and External Data",
+            "cross file, text, binary, and structured-data boundaries explicitly",
         ),
         (
-            "mutability-and-copying",
-            "Mutability, Identity, and Copying",
-            "explain and repair an accidental shared-state mutation",
-        ),
-        (
-            "functions-and-interfaces",
-            "Functions and Interfaces",
-            "implement a focused function contract with independent checks",
-        ),
-        (
-            "scope-and-call-stacks",
-            "Scope, Call Stacks, and Functions as Values",
-            "trace call-local state and returned values through nested calls",
-        ),
-        (
-            "debugging",
-            "Debugging and Reproducible Failures",
-            "reduce a failure and test one evidence-based hypothesis",
-        ),
-        (
-            "files-and-paths",
-            "Files, Paths, and Encodings",
-            "perform an idempotent UTF-8 file transformation with portable paths",
-        ),
-        (
-            "structured-data-and-patterns",
-            "Structured Data and Text Patterns",
-            "parse, validate, transform, and report structured input in stages",
-        ),
-        (
-            "exceptions-and-validation",
-            "Exceptions and Defensive Programming",
-            "reject invalid input and handle only anticipated failures",
-        ),
-        (
-            "modules-and-standard-library",
-            "Modules, Imports, and Standard Library",
-            "organize importable code and justify a standard-library choice",
-        ),
-        (
-            "reproducible-projects",
-            "Reproducible Python Projects",
-            "recreate an isolated project from its declared configuration",
-        ),
-        (
-            "git-and-collaboration",
-            "Git and Collaboration",
-            "produce a clean, reviewable history of focused commits",
-        ),
-        (
-            "command-line-applications",
-            "Command-Line Applications",
-            "separate command parsing, domain behavior, output streams, and "
-            "exit status",
-        ),
-        (
-            "testing-with-pytest",
-            "Testing with pytest",
-            "write tests whose failures identify a violated behavior boundary",
-        ),
-        (
-            "maintainable-code",
-            "Documentation, Style, Linting, and Typing",
-            "improve clarity while preserving behavior with automated checks",
+            "modules-environments-projects",
+            "Modules, Environments, and Python Projects",
+            "organize and clean-install a versioned multi-file project",
         ),
         (
             "object-oriented-python",
@@ -206,14 +156,24 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
             "model cohesive state and behavior without unnecessary abstraction",
         ),
         (
-            "pythonic-iteration",
-            "Pythonic Iteration and Resource Control",
-            "select eager or lazy iteration and make resource lifetime explicit",
+            "command-line-applications",
+            "Command-Line Applications",
+            "separate command parsing, domain behavior, streams, and exit status",
         ),
         (
-            "reliable-project-operations",
-            "Operating a Reliable Project",
-            "run one documented quality workflow with useful operational evidence",
+            "testing-python-programs",
+            "Testing Python Programs",
+            "choose test boundaries whose failures identify violated behavior",
+        ),
+        (
+            "code-quality-maintainability",
+            "Code Quality and Maintainability",
+            "improve clarity while preserving behavior with automated checks",
+        ),
+        (
+            "documentation-publishing",
+            "Documentation as Part of the Product",
+            "build and publish documentation whose examples and links are verified",
         ),
     )
     quizzes = []

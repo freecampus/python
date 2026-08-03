@@ -1,0 +1,257 @@
+---
+title: Formatting, Linting, and Configuration
+lesson_id: code-quality-maintainability.formatting-linting-configuration
+lesson_order: 30
+description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+execute:
+  echo: true
+categories:
+- python-foundations
+- code-quality-maintainability
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintainability/formatting-linting-configuration.ipynb
+course_id: python-foundations
+unit_id: code-quality-maintainability
+unit_number: 14
+---
+::: {.lesson-meta}
+- **Level:** Beginner to intermediate
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Use PEP 8 and Ruff to keep Python readable and consistent.
+- **Practice in:** VS Code, terminal, pytest, and ruff
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Use PEP 8 and Ruff to keep Python readable and consistent. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+
+::: {.callout-note title="Questions to answer with evidence"}
+- What problem does **Style, Formatting, and Linting** solve?
+- What value, output, or failure demonstrates that it works?
+- Which boundary or misuse would expose an incorrect implementation?
+:::
+
+## 2. PEP 8
+
+Use Python's style guide to make code easier to read with other Python users.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+PEP 8 is like road markings: everyone moves more safely when conventions are predictable.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** PEP 8 is a community style guide for naming, spacing, imports, and readability.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+def calculate_total(price, quantity):
+    return price * quantity
+```
+
+### Trace it line by line
+
+1. `def calculate_total(price, quantity):` — Python creates the function `calculate_total`; the indented body runs only when the function is called.
+2. `return price * quantity` — Python evaluates the expression and sends that value back to the caller, ending this call.
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Style is not about decoration. Consistent code lowers the mental effort of reading.
+:::
+
+### Practice pep 8
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **PEP 8**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "code-quality-maintainability-style-formatting-and-linting-pep-8",
+  "title": "PEP 8 checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to PEP 8?",
+      "options": [
+        "A formatter rewrites spacing and layout according to consistent rules.",
+        "PEP 8 is a community style guide for naming, spacing, imports, and readability.",
+        "A linter scans code for likely mistakes and style problems.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+      ],
+      "answer_index": 1,
+      "explanation": "PEP 8 is a community style guide for naming, spacing, imports, and readability."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Formatting with Ruff
+
+Automatically format Python code so humans can focus on meaning.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+A formatter is like an automatic dishwasher: you still cook, but cleanup is consistent.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** A formatter rewrites spacing and layout according to consistent rules.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+
+```
+
+### Trace it line by line
+
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Formatting changes layout, not program logic. Review diffs, but do not hand-fight every spacing rule.
+:::
+
+### Practice formatting with ruff
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Formatting with Ruff**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "code-quality-maintainability-style-formatting-and-linting-formatting-with-ruff",
+  "title": "Formatting with Ruff checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Formatting with Ruff?",
+      "options": [
+        "PEP 8 is a community style guide for naming, spacing, imports, and readability.",
+        "A linter scans code for likely mistakes and style problems.",
+        "A formatter rewrites spacing and layout according to consistent rules.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+      ],
+      "answer_index": 2,
+      "explanation": "A formatter rewrites spacing and layout according to consistent rules."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Linting with Ruff
+
+Find suspicious code patterns before they become bugs.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+A linter is a spellchecker for code: it cannot understand everything, but it catches many slips quickly.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** A linter scans code for likely mistakes and style problems.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+
+```
+
+### Trace it line by line
+
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Ignoring all linter warnings trains you to miss useful feedback. Fix or intentionally configure rules.
+:::
+
+### Practice linting with ruff
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Linting with Ruff**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "code-quality-maintainability-style-formatting-and-linting-linting-with-ruff",
+  "title": "Linting with Ruff checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Linting with Ruff?",
+      "options": [
+        "PEP 8 is a community style guide for naming, spacing, imports, and readability.",
+        "A formatter rewrites spacing and layout according to consistent rules.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "A linter scans code for likely mistakes and style problems."
+      ],
+      "answer_index": 3,
+      "explanation": "A linter scans code for likely mistakes and style problems."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Integrate the lesson
+
+Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+
+## 6. Key points
+
+- **PEP 8:** PEP 8 is a community style guide for naming, spacing, imports, and readability.
+- **Formatting with Ruff:** A formatter rewrites spacing and layout according to consistent rules.
+- **Linting with Ruff:** A linter scans code for likely mistakes and style problems.
+- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

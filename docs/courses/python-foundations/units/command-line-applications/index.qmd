@@ -1,15 +1,20 @@
 ---
-title: "Command-Line Applications Overview"
-description: "Build commands with explicit arguments, standard streams, exit codes, and testable core behavior."
-categories: [python-foundations, command-line-applications, overview]
+title: Command-Line Applications Overview
+description: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
+course_id: python-foundations
+unit_id: command-line-applications
+unit_number: 12
+categories:
+- python-foundations
+- command-line-applications
+- overview
 order: 0
 colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/index.ipynb
 ---
-
 ::: {.lesson-meta}
-- **Level:** Python Foundations · Unit 19
-- **Estimated time:** 3–6 hours including the challenge
-- **Unit outcome:** Build commands with explicit arguments, standard streams, exit codes, and testable core behavior.
+- **Level:** Python Foundations · Unit 12
+- **Estimated time:** 4–8 hours including the challenge
+- **Unit outcome:** Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
 - **Practice in:** Generated Colab notebooks and, when introduced, a local project
 :::
 
@@ -18,46 +23,44 @@ colab_notebook: notebooks/courses/python-foundations/units/command-line-applicat
 <!-- fcpython-chapter-lab: start -->
 ## 1. The capability you are building
 
-Build commands with explicit arguments, standard streams, exit codes, and testable core behavior.
+Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
 
-This unit is a learning sequence rather than a reference list. In every lesson,
+This is a connected learning sequence, not a reference list. In every lesson,
 write a prediction, run the smallest complete example, explain the evidence,
 make one controlled change, and retain one useful failure.
 
 ## 2. Before you start
 
-**Prior knowledge:** Complete Unit 18 and bring its challenge notes, especially one debugging record.
+**Prior knowledge:** Complete Unit 11 and bring its challenge notes and debugging record.
 
-Prepare one notebook or project folder for the unit. Keep a small evidence log
-with four columns: prediction, observed result, explanation, and next change.
+Prepare one notebook or project folder for the unit. Keep a four-column evidence
+log: prediction, observed result, explanation, and next controlled change.
 
 ## 3. Lessons
 
 | Step | Lesson | Purpose |
 |---:|---|---|
-| 1 | [Command-Line Programs](command-line-programs.qmd) | Run scripts and accept command-line arguments with argparse. |
-| 2 | [Streams and Exit Codes](streams-and-exit-codes.qmd) | Separate normal output, diagnostics, and process status. |
-| 3 | [Unit Challenge](challenge.qmd) | Combine the unit skills in a guided 60–120 minute task. |
+| 1 | [Designing a Command and Parsing Arguments with argparse](argparse-command-design.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 2 | [Standard Input, Output, Errors, and Exit Codes](streams-errors-exit-codes.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 3 | [Configuration, Environment Variables, Logging, and Secrets](configuration-logging-secrets.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 4 | [CLI Ecosystem and Testable Architecture](cli-ecosystem-testable-architecture.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
 
 ## 4. How to study this unit
 
-1. Attempt the prediction prompts before revealing output.
-2. Type or adapt the examples rather than only reading them.
-3. Use quizzes as diagnosis: explain why each distractor fails.
-4. Complete the challenge from a clean state and keep the debugging evidence.
+1. Attempt prediction prompts before executing code.
+2. Type or adapt examples instead of only reading them.
+3. Treat quiz errors as diagnoses and explain why each distractor fails.
+4. Complete the challenge from a clean state and retain debugging evidence.
 
 ::: {.callout-tip title="Do not optimize for speed"}
-A fast first run is not the goal. Aim to explain why the program behaved as it
-did and how one change caused the new result.
+The goal is not a fast first run. Aim to explain why the program behaved as it
+did and how one controlled change produced new evidence.
 :::
 
 ## 5. Unit evidence
 
-By the end, keep:
-
-- working lesson exercises and their controlled modifications;
-- quiz corrections written in your own words;
-- one complete debugging record; and
-- the challenge solution with passing checks and a clean rerun.
+By the end, retain working exercises, quiz corrections in your own words, one
+debugging record, and a challenge solution that passes from a clean state.
 
 <!-- fcpython-chapter-lab: end -->

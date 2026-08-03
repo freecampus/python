@@ -1,15 +1,20 @@
 ---
-title: "Object-Oriented Python and Dataclasses Overview"
-description: "Model cohesive state and behavior with classes and dataclasses while avoiding unnecessary abstraction."
-categories: [python-foundations, object-oriented-python, overview]
+title: Object-Oriented Python and Dataclasses Overview
+description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+course_id: python-foundations
+unit_id: object-oriented-python
+unit_number: 11
+categories:
+- python-foundations
+- object-oriented-python
+- overview
 order: 0
 colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/index.ipynb
 ---
-
 ::: {.lesson-meta}
-- **Level:** Python Foundations · Unit 22
-- **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Model cohesive state and behavior with classes and dataclasses while avoiding unnecessary abstraction.
+- **Level:** Python Foundations · Unit 11
+- **Estimated time:** 5–10 hours including the challenge
+- **Unit outcome:** Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
 - **Practice in:** Generated Colab notebooks and, when introduced, a local project
 :::
 
@@ -18,47 +23,45 @@ colab_notebook: notebooks/courses/python-foundations/units/object-oriented-pytho
 <!-- fcpython-chapter-lab: start -->
 ## 1. The capability you are building
 
-Model cohesive state and behavior with classes and dataclasses while avoiding unnecessary abstraction.
+Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
 
-This unit is a learning sequence rather than a reference list. In every lesson,
+This is a connected learning sequence, not a reference list. In every lesson,
 write a prediction, run the smallest complete example, explain the evidence,
 make one controlled change, and retain one useful failure.
 
 ## 2. Before you start
 
-**Prior knowledge:** Complete Unit 21 and bring its challenge notes, especially one debugging record.
+**Prior knowledge:** Complete Unit 10 and bring its challenge notes and debugging record.
 
-Prepare one notebook or project folder for the unit. Keep a small evidence log
-with four columns: prediction, observed result, explanation, and next change.
+Prepare one notebook or project folder for the unit. Keep a four-column evidence
+log: prediction, observed result, explanation, and next controlled change.
 
 ## 3. Lessons
 
 | Step | Lesson | Purpose |
 |---:|---|---|
-| 1 | [Object-Oriented Basics](oop-basics.qmd) | Define classes, create objects, store attributes, write methods, and use self. |
-| 2 | [Dataclasses](dataclasses.qmd) | Create simple data-focused classes with less boilerplate. |
-| 3 | [Object-Oriented Design](oop-design.qmd) | Choose composition, inheritance, or simpler functions based on the relationship you need. |
-| 4 | [Unit Challenge](challenge.qmd) | Combine the unit skills in a guided 60–120 minute task. |
+| 1 | [Objects, Classes, Instances, and self](objects-classes-instances-self.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 2 | [Initialization, Invariants, Properties, and Behavior](initialization-invariants-properties.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 3 | [Dataclasses, Representation, and Equality](dataclasses-representation-equality.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 4 | [Composition, Inheritance, and Object-Oriented Design](composition-inheritance-design.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 5 | [Case Study: A Small Road-Crossing Game Model](road-crossing-game-model.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 6 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
 
 ## 4. How to study this unit
 
-1. Attempt the prediction prompts before revealing output.
-2. Type or adapt the examples rather than only reading them.
-3. Use quizzes as diagnosis: explain why each distractor fails.
-4. Complete the challenge from a clean state and keep the debugging evidence.
+1. Attempt prediction prompts before executing code.
+2. Type or adapt examples instead of only reading them.
+3. Treat quiz errors as diagnoses and explain why each distractor fails.
+4. Complete the challenge from a clean state and retain debugging evidence.
 
 ::: {.callout-tip title="Do not optimize for speed"}
-A fast first run is not the goal. Aim to explain why the program behaved as it
-did and how one change caused the new result.
+The goal is not a fast first run. Aim to explain why the program behaved as it
+did and how one controlled change produced new evidence.
 :::
 
 ## 5. Unit evidence
 
-By the end, keep:
-
-- working lesson exercises and their controlled modifications;
-- quiz corrections written in your own words;
-- one complete debugging record; and
-- the challenge solution with passing checks and a clean rerun.
+By the end, retain working exercises, quiz corrections in your own words, one
+debugging record, and a challenge solution that passes from a clean state.
 
 <!-- fcpython-chapter-lab: end -->

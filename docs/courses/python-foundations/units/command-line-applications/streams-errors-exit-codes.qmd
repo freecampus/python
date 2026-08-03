@@ -1,0 +1,154 @@
+---
+title: Standard Input, Output, Errors, and Exit Codes
+lesson_id: command-line-applications.streams-errors-exit-codes
+lesson_order: 20
+description: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
+execute:
+  echo: true
+categories:
+- python-foundations
+- command-line-applications
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/streams-errors-exit-codes.ipynb
+course_id: python-foundations
+unit_id: command-line-applications
+unit_number: 12
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Separate normal output, diagnostics, and process status.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Command-line programs return data on stdout, diagnostics on stderr, and success/failure through an integer exit status. Keeping them separate makes commands composable and testable.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+import sys
+def main(argv=None):
+    args = sys.argv[1:] if argv is None else argv
+    if len(args) != 1:
+        print("usage: report FILE", file=sys.stderr)
+        return 2
+    print(f"processing {args[0]}")
+    return 0
+```
+
+### What Python does
+
+1. Injected arguments support direct tests.
+2. Usage diagnostics go to stderr.
+3. Zero means success; nonzero identifies failure.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This version is valid Python but does not satisfy the lesson's intended contract:
+
+```python
+def parse_count(text: str) -> int:
+    try:
+        return int(text)
+    except ValueError as error:
+        print(f"error: {error}")
+        return 0
+```
+
+A focused repair is:
+
+```python
+def parse_count(text: str) -> int:
+    try:
+        return int(text)
+    except ValueError as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Capture stdout and stderr separately.
+2. Return 2 for usage and 1 for domain failure.
+3. Keep logs out of pipeable stdout data.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "command-line-applications-streams-and-exit-codes",
+  "title": "Streams and Exit Codes checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "out",
+      "prompt": "What belongs on stdout?",
+      "options": [
+        "Debug traceback",
+        "Password",
+        "Requested normal data",
+        "Editor state"
+      ],
+      "answer_index": 2,
+      "explanation": "Stdout is the result stream."
+    },
+    {
+      "id": "err",
+      "prompt": "Where do usage diagnostics go?",
+      "options": [
+        "stdin",
+        "source code",
+        "a list",
+        "stderr"
+      ],
+      "answer_index": 3,
+      "explanation": "Stderr carries diagnostics."
+    },
+    {
+      "id": "status",
+      "prompt": "Which means success?",
+      "options": [
+        "0",
+        "1",
+        "2",
+        "255 only"
+      ],
+      "answer_index": 0,
+      "explanation": "Zero is conventional success."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

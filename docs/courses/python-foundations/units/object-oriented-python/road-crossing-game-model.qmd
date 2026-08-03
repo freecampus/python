@@ -1,0 +1,167 @@
+---
+title: 'Case Study: A Small Road-Crossing Game Model'
+lesson_id: object-oriented-python.road-crossing-game-model
+lesson_order: 50
+description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+course_id: python-foundations
+unit_id: object-oriented-python
+unit_number: 11
+execute:
+  echo: true
+categories:
+- python-foundations
+- object-oriented-python
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/road-crossing-game-model.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+A small game model gives classes a concrete job: preserve positions, apply moves, and decide whether a collision or successful crossing occurred—without mixing in a graphical framework.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass
+class Player:
+    lane: int = 0
+
+    def move_forward(self):
+        self.lane += 1
+
+
+@dataclass(frozen=True)
+class Vehicle:
+    lane: int
+    column: int
+
+
+def collided(player, vehicles, player_column=2):
+    return any(
+        vehicle.lane == player.lane and vehicle.column == player_column
+        for vehicle in vehicles
+    )
+
+
+player = Player()
+player.move_forward()
+traffic = [Vehicle(lane=1, column=4)]
+print(player.lane, collided(player, traffic))
+```
+
+### Step-by-step explanation
+
+1. `Player` owns the state that changes when the player moves.
+2. A frozen `Vehicle` is a simple immutable record for this turn.
+3. The collision function receives collaborators explicitly rather than reading globals.
+4. The player reaches lane 1 at column 2; the vehicle is at column 4, so the result is false.
+
+::: {.callout-note title="Make one controlled change"}
+Move the vehicle to column 2 and predict the collision result. Then add a finish-lane constant and a function that recognizes a win.
+:::
+
+## 2. Investigate the important boundary
+
+This model is complete enough to run and test but deliberately excludes animation, keyboard events, timing, and rendering. Those are separate responsibilities and would obscure the object-design lesson.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+def has_won(player, finish_lane):
+    """Return whether the player reached or passed the finish lane."""
+    return player.lane >= finish_lane
+
+
+test_player = Player(lane=3)
+assert has_won(test_player, finish_lane=3)
+assert not collided(test_player, [Vehicle(2, 2)])
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "object-oriented-python-road-crossing-game-model",
+  "title": "Case Study: A Small Road-Crossing Game Model checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "Why is collision detection a function that receives the player and vehicles?",
+      "options": [
+        "Classes cannot participate in functions.",
+        "Functions automatically draw graphics.",
+        "Its dependencies are explicit, so the rule is easy to test without hidden global state.",
+        "Dataclasses prohibit methods."
+      ],
+      "answer_index": 2,
+      "explanation": "Explicit inputs keep the domain rule deterministic and independently testable."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Give each class a cohesive state and behavior responsibility.
+- Use immutable records where an entity should not change during an operation.
+- Keep rendering and input systems outside the domain model.
+:::
+
+## References
+
+- https://docs.python.org/3/library/dataclasses.html

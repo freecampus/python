@@ -1,0 +1,148 @@
+---
+title: Booleans, Comparisons, and Truth Values
+lesson_id: core-values-types.booleans-comparisons-truth-values
+lesson_order: 50
+description: Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/booleans-comparisons-truth-values.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+Programs must turn facts into `True` or `False` before a later unit can use those results to choose a branch.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+age = 19
+has_ticket = True
+name = "Ada"
+
+is_adult = age >= 18
+can_enter = is_adult and has_ticket
+has_name = bool(name)
+
+print(is_adult, can_enter, has_name)
+```
+
+### Step-by-step explanation
+
+1. `age >= 18` evaluates to `True`.
+2. `and` is `True` because both operands are true.
+3. A non-empty string is truthy, so `bool(name)` is `True`.
+4. The three stored Boolean results make the later decision easy to inspect.
+
+::: {.callout-note title="Make one controlled change"}
+Set `name` to an empty string and `has_ticket` to `False`. Predict which results change independently.
+:::
+
+## 2. Investigate the important boundary
+
+Truthiness is convenient, but explicit checks can communicate a different contract. `if count:` treats zero as false; `if count is not None:` distinguishes a real zero from missing data.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+score = 80
+minimum = 60
+maximum = 100
+
+in_range = minimum <= score <= maximum
+print(in_range)
+print(score != minimum)
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "core-values-types-booleans-comparisons-truth-values",
+  "title": "Booleans, Comparisons, and Truth Values checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "Which check distinguishes the integer `0` from a missing value represented by `None`?",
+      "options": [
+        "`bool(value)`",
+        "`value is not None`",
+        "`value == False`",
+        "`not value`"
+      ],
+      "answer_index": 1,
+      "explanation": "Zero is falsy, so a truthiness check cannot distinguish it from absence; identity with `None` can."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A copied solution whose behavior was not rerun.",
+        "A written prediction, the observed result, and an explanation tied to the changed line."
+      ],
+      "answer_index": 3,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Comparisons produce Boolean values that can be named and inspected.
+- Truthiness maps many values to a Boolean context.
+- Choose an explicit comparison when zero, emptiness, and absence mean different things.
+:::
+
+## References
+
+- https://docs.python.org/3/library/stdtypes.html#truth-value-testing
+- https://docs.python.org/3/reference/expressions.html#comparisons

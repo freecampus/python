@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Create a Converter CLI'
-description: Wrap reusable conversion logic in a predictable command-line interface.
+title: 'Unit Challenge: Ship a Record-Conversion CLI'
+description: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
 challenge_id: command-line-applications.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 2
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -12,105 +12,93 @@ categories:
 - unit-challenge
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/challenge.ipynb
+course_id: python-foundations
+unit_id: command-line-applications
+unit_number: 12
 ---
-
 ::: {.lesson-meta .challenge-meta}
-- **Level:** Python Foundations · Unit 19 challenge
+- **Level:** Python Foundations · Unit 12 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Wrap reusable conversion logic in a predictable command-line interface.
-- **Evidence:** Complete the checks and explain the result in your own words.
+- **Outcome assessed:** Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
+- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-
 <!-- fcpython-unit-challenge: practical -->
 ## 1. Challenge outcome
 
-Build an `argparse` CLI that converts temperatures while keeping parsing, calculation, and output separable.
+The core conversion is directly testable, `main` accepts an argument list, streams are injectable, and ordinary data problems do not produce raw tracebacks.
 
-**Scenario:** A learner needs `python converter.py 100 --from-unit c --to-unit f` to print `212.0`. Tests should pass arguments directly without changing global process arguments.
+**Scenario:** Ship a command that reads JSON records, normalizes each name and score, writes valid records to stdout, reports rejected records to stderr, and returns a meaningful exit code.
 
 ::: {.callout-note title="Work independently, but not without support"}
-This challenge should take about one or two focused hours. Use the starter
-contract, run one group of assertions at a time, and open hints only after you
-can state what evidence is blocking you.
+Use the starter contract, run one group of checks at a time, and open hints only
+after you can state the evidence blocking your next step.
 :::
 
 ## 2. Understand the acceptance example
 
-Before writing code, predict the important values and the exact final result.
-For the supplied input, the expected evidence is:
-
-`main(["100", "--from-unit", "c", "--to-unit", "f"])` returns `0` and prints `212.0`.
-
-Write your prediction in a notebook text cell or project note. Do not change
-the sample input until the matching assertions pass.
+Before implementation, restate the normal input, expected result, important
+boundary, and one anticipated failure in your own words.
 
 ### Constraints
 
-1. Keep the exact three supplied function signatures.
-2. Limit this challenge to Celsius and Fahrenheit conversions.
-3. Let `argparse` reject unsupported unit choices.
-4. Do not perform the conversion calculation inside `build_parser` or `main`.
+1. Keep `convert_record` independent of argparse and streams.
+2. Keep `main(argv, stdout, stderr)` injectable.
+3. Return `0` when all records convert and `2` when any record is rejected.
+4. Do not print inside `convert_record`.
 
 ## 3. Start from the contract
 
-Copy this scaffold into the generated notebook or the indicated local project
-files. Preserve the supplied public names and docstrings so the checks can guide
-you.
-
 ```python
 import argparse
+import json
+import sys
 
 
-def build_parser():
-    """Return the configured command-line argument parser."""
+def convert_record(record):
+    """Return a normalized name/score record."""
     raise NotImplementedError
 
 
-def convert_value(value, from_unit, to_unit):
-    """Convert value between c and f, or return it when units match."""
-    raise NotImplementedError
-
-
-def main(argv=None):
-    """Parse argv, print the converted value, and return exit status zero."""
+def main(argv=None, stdout=sys.stdout, stderr=sys.stderr):
+    """Run the records command and return an exit code."""
     raise NotImplementedError
 ```
 
 ## 4. Build in small stages
 
-1. Implement and assert the pure conversion function first.
-2. Build a parser with the value and two required unit options.
-3. Parse the supplied `argv`, call the conversion, print it, and return zero.
-4. Run one real terminal command and one invalid-unit command.
-
-After each stage, rerun only the smallest relevant check. When it passes, run
-all earlier checks before moving forward.
+1. Make the smallest normal case observable.
+2. Run the nearest check and read its complete failure evidence.
+3. Add one boundary behavior without weakening earlier checks.
+4. Restart and run the complete artifact from top to bottom.
 
 ## 5. Run progressive assertions
 
-These checks describe observable behavior. A failed assertion is a
-location signal: read its message, inspect the actual value, and change one
-cause rather than weakening the assertion.
-
 ```python
-parser = build_parser()
-arguments = parser.parse_args(["100", "--from-unit", "c", "--to-unit", "f"])
-assert arguments.value == 100.0
-assert arguments.from_unit == "c"
-assert arguments.to_unit == "f"
-assert convert_value(100, "c", "f") == 212
-assert convert_value(32, "f", "c") == 0
-assert convert_value(12, "c", "c") == 12
-assert main(["100", "--from-unit", "c", "--to-unit", "f"]) == 0
+from io import StringIO
+
+assert convert_record({"name": " Ada ", "score": "9"}) == {
+    "name": "Ada",
+    "score": 9,
+}
+
+stdout = StringIO()
+stderr = StringIO()
+status = main(
+    ["--record", '{"name": " Ada ", "score": "9"}'],
+    stdout=stdout,
+    stderr=stderr,
+)
+assert status == 0
+assert json.loads(stdout.getvalue()) == {"name": "Ada", "score": 9}
+assert stderr.getvalue() == ""
 ```
 
-::: {.callout-warning title="Do not edit the expected values to create a pass"}
-Change the implementation until the stated behavior is true. If you believe an
-assertion is wrong, explain the contract conflict in writing before changing
-either side.
+::: {.callout-warning title="Do not edit expected values to create a pass"}
+If a check appears wrong, explain the contract conflict before changing either
+side. Otherwise, repair the implementation and preserve the check.
 :::
 
 ## 6. Use the hint ladder only when needed
@@ -118,70 +106,99 @@ either side.
 <details>
 <summary>Hint 1</summary>
 
-Configure `value` with `type=float` and unit options with `choices=("c", "f")`.
+Let argparse collect repeatable `--record` text values.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Handle equal units first, then one Celsius-to-Fahrenheit branch and one Fahrenheit-to-Celsius branch.
+Parse and convert one record inside a narrow error boundary in `main`.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-`main` calls `build_parser().parse_args(argv)`, passes the parsed names to `convert_value`, and prints the returned number.
+Use `print(..., file=stderr)` for anticipated errors and accumulate whether any row failed.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Keep one invalid invocation and its parser message. Explain whether the failure belongs to argument parsing or conversion logic and why.
-
-Use this short record:
+Preserve one failing check. Record its inputs, actual result or exception,
+expected result, one hypothesis, one controlled change, and the verified rerun.
 
 | Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
 |---|---|---|---|---|
-| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
 
-## 8. Check your understanding
+## 8. Compare with a solution path
 
-::: {.quiz-box}
-Answer these questions before recording the challenge. The quiz runs directly
-in your browser.
-:::
+<details>
+<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+
+```python
+def convert_record(record):
+    name = record["name"].strip()
+    if not name:
+        raise ValueError("name is empty")
+    return {"name": name, "score": int(record["score"])}
+
+
+def main(argv=None, stdout=sys.stdout, stderr=sys.stderr):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--record", action="append", default=[])
+    args = parser.parse_args(argv)
+    failed = False
+    for text in args.record:
+        try:
+            converted = convert_record(json.loads(text))
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+            print(f"invalid record: {error}", file=stderr)
+            failed = True
+        else:
+            print(json.dumps(converted, ensure_ascii=False), file=stdout)
+    return 2 if failed else 0
+```
+
+Compare contracts and decisions, not only line-for-line syntax. If your solution
+also satisfies the constraints and checks, explain one trade-off between the
+approaches.
+
+</details>
+
+## 9. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-command-line-applications-challenge",
-  "title": "Converter CLI readiness check",
-  "instructions": "Choose an answer, then check your work.",
+  "title": "Ship a Record-Conversion CLI readiness check",
+  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
   "questions": [
     {
-      "id": "argv-test",
-      "prompt": "Why let main accept argv=None?",
+      "id": "design-boundary",
+      "prompt": "Why does `main` accept `stdout` and `stderr` parameters?",
       "options": [
-        "Tests can pass a known argument list while normal runs use command-line arguments.",
-        "It prevents argparse from validating input.",
-        "It converts all arguments to numbers.",
-        "It removes the need for a parser."
-      ],
-      "answer_index": 0,
-      "explanation": "An injectable argument list makes parsing behavior reproducible in checks."
-    },
-    {
-      "id": "logic-separation",
-      "prompt": "Where should the numeric conversion calculation live?",
-      "options": [
-        "Only in the help text.",
-        "In a reusable function separate from printing and parsing.",
-        "Inside every assertion as copied code.",
-        "In a global exception handler."
+        "It makes JSON parsing unnecessary.",
+        "Tests can observe each stream without replacing global process streams.",
+        "It forces every result to be an error.",
+        "It prevents the command from returning an exit code."
       ],
       "answer_index": 1,
-      "explanation": "Separating calculation from the interface makes both easier to explain and test."
+      "explanation": "Tests can observe each stream without replacing global process streams."
+    },
+    {
+      "id": "clean-evidence",
+      "prompt": "What should happen before recording this challenge as complete?",
+      "options": [
+        "The unchanged checks pass from a clean state and the important decisions can be explained.",
+        "The expected values are edited to match the current output.",
+        "Only the final successful line is kept.",
+        "Several unrelated features are added."
+      ],
+      "answer_index": 0,
+      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
     }
   ]
 }
@@ -189,28 +206,20 @@ in your browser.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 10. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
-
-Record completion only when every statement is true:
-
-- [ ] All supplied assertions pass without editing their expected values.
-- [ ] The work runs from a clean notebook state or documented project root.
-- [ ] I can explain the important state changes and boundaries in my own words.
-- [ ] I kept one complete debugging record.
-- [ ] I predicted and verified one controlled modification.
+| Behavior | Acceptance examples and progressive checks pass unchanged. |
+| Scope | The artifact follows the constraints without unrelated features. |
+| Reasoning | Important values, boundaries, and design choices can be traced. |
+| Debugging | One record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The artifact works from a clean notebook state or documented project root. |
 
 This button stores a self-reported marker only in this browser. It does not
-submit the artifact, grade it, verify identity, or issue a certificate.
+submit work, grade it, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -224,7 +233,7 @@ submit the artifact, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows the design without supplying the implementation.
+- The starter contract narrows design choices without supplying the implementation.
 - Progressive assertions turn a large task into observable behaviors.
 - Hints support the next decision; they do not replace prediction and evidence.
 - A clean rerun and explanation matter as much as the final output.

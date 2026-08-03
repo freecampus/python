@@ -80,9 +80,9 @@ def test_lesson_header_exposes_course_and_progress_identity() -> None:
     assert "$completion_label$" not in title_block
     assert "data-fc-complete" in title_block
     assert "data-fc-lesson-progress" in title_block
-    assert "fcpython.progress.v5" in course_ui
-    assert "fcpython.last-lesson.v5" in course_ui
-    assert "fcpython.progress.v4" not in course_ui
+    assert "fcpython.progress.v6" in course_ui
+    assert "fcpython.last-lesson.v6" in course_ui
+    assert "fcpython.progress.v5" not in course_ui
     assert "legacyProgressKey" not in course_ui
     assert "lessonIdFromKey" in course_ui
     assert "completed_challenges" in course_ui
@@ -148,7 +148,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
     lesson_ids: set[str] = set()
 
     assert catalog["schema_version"] == 2
-    assert catalog["curriculum_version"] == 5
+    assert catalog["curriculum_version"] == 6
     for course in courses:
         assert "modules" not in course
         course_total = 0
@@ -167,6 +167,9 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
             assert metadata["course_id"] == course["id"]
             assert metadata["unit_id"] == unit["id"]
             assert "module_id" not in metadata
+            if course["id"] == "python-foundations":
+                assert unit["number"] >= 0
+                assert metadata["unit_number"] == unit["number"]
             assert len(pages) == unit["lesson_count"]
             assert len({_front_matter(page)["lesson_order"] for page in pages}) == len(
                 pages
@@ -176,6 +179,9 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
                 front_matter = _front_matter(page)
                 lesson_id = front_matter["lesson_id"]
                 assert lesson_id.startswith(f"{unit['id']}.")
+                if course["id"] == "python-foundations":
+                    assert front_matter["unit_id"] == unit["id"]
+                    assert front_matter["unit_number"] == unit["number"]
                 assert lesson_id not in lesson_ids
                 assert page not in owned_paths
                 lesson_ids.add(lesson_id)
@@ -190,7 +196,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
         if _front_matter(page).get("lesson_id")
     }
     assert owned_paths == expected
-    assert len(lesson_ids) == 77
+    assert len(lesson_ids) == 94
 
 
 def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
@@ -217,6 +223,27 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         "debugging-files-validation",
         "reliable-python-projects",
         "abstraction-and-reusable-patterns",
+        "learning-workflow-tools",
+        "numeric-foundations",
+        "text-input-output",
+        "decisions",
+        "loops-and-state",
+        "sequences",
+        "mappings-and-sets",
+        "mutability-and-copying",
+        "functions-and-interfaces",
+        "scope-and-call-stacks",
+        "debugging",
+        "files-and-paths",
+        "structured-data-and-patterns",
+        "exceptions-and-validation",
+        "modules-and-standard-library",
+        "reproducible-projects",
+        "git-and-collaboration",
+        "testing-with-pytest",
+        "maintainable-code",
+        "pythonic-iteration",
+        "reliable-project-operations",
     }
     assert not any(
         (foundations_root / "units" / directory).exists()
@@ -236,8 +263,8 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         assert notebook not in notebook_paths, page
         notebook_paths.add(notebook)
 
-    assert len(public_pages) == 110
-    assert len(notebook_paths) == 110
+    assert len(public_pages) == 111
+    assert len(notebook_paths) == 111
 
 
 def test_course_homes_and_sidebars_match_catalog() -> None:
@@ -286,7 +313,10 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
             for challenge in course.get("completion", {}).get("challenges", [])
         }
 
-        for number, unit in enumerate(course["units"], start=1):
+        for unit in course["units"]:
+            number = unit.get("number")
+            if number is None:
+                number = course["units"].index(unit) + 1
             directory = Path(unit["directory"])
             unit_root = Path("docs") / directory
             unit_home = unit_root / "index.qmd"
@@ -353,10 +383,10 @@ def test_foundations_has_versioned_course_sequence() -> None:
     completion = foundations["completion"]
     lesson_ids = set(completion["lesson_ids"])
 
-    assert completion["curriculum_version"] == 5
-    assert completion["rule_version"] == 5
+    assert completion["curriculum_version"] == 6
+    assert completion["rule_version"] == 6
     assert completion["recognition"] == "local-self-reported"
-    assert len(lesson_ids) == foundations["lesson_count"] == 62
+    assert len(lesson_ids) == foundations["lesson_count"] == 79
     assert "required_lesson_count" not in foundations
     assert "optional_lesson_count" not in foundations
 
@@ -377,7 +407,7 @@ def test_foundations_has_versioned_course_sequence() -> None:
         unit["id"] for unit in foundations["units"] if unit["kind"] == "instructional"
     }
     challenges = completion["challenges"]
-    assert len(challenges) == len(instructional_units) == 24
+    assert len(challenges) == len(instructional_units) == 16
     assert {challenge["unit_id"] for challenge in challenges} == instructional_units
     assert {challenge["id"] for challenge in challenges} == {
         f"{unit_id}.challenge" for unit_id in instructional_units
@@ -432,7 +462,7 @@ def test_foundations_unit_challenges_are_guided_and_self_checking() -> None:
         Path("docs/courses/python-foundations/units").glob("*/challenge.qmd")
     )
 
-    assert len(challenge_pages) == 24
+    assert len(challenge_pages) == 16
     for path in challenge_pages:
         front_matter = _front_matter(path)
         text = path.read_text()
@@ -449,7 +479,7 @@ def test_foundations_unit_challenges_are_guided_and_self_checking() -> None:
         assert "ojs-quiz.qmd" in text
         assert "colab-link.qmd" in text
 
-        if unit_id == "learning-workflow-tools":
+        if unit_id == "get-started":
             assert front_matter["challenge_format"] == "quiz"
             assert "<!-- fcpython-unit-challenge: quiz -->" in text
             assert "8 of 10" in text
@@ -474,33 +504,26 @@ def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None
     intermediate = by_id["intermediate-python"]
     advanced = by_id["advanced-python"]
 
-    assert foundations["lesson_count"] == 62
+    assert foundations["lesson_count"] == 79
     assert [unit["id"] for unit in foundations["units"]] == [
-        "learning-workflow-tools",
-        "numeric-foundations",
-        "text-input-output",
-        "decisions",
-        "loops-and-state",
+        "get-started",
+        "python-syntax",
+        "core-values-types",
+        "collections-iteration",
+        "decisions-repetition",
+        "functions-call-behavior",
+        "mutability-identity-copying",
         "problem-solving-algorithms",
-        "sequences",
-        "mappings-and-sets",
-        "mutability-and-copying",
-        "functions-and-interfaces",
-        "scope-and-call-stacks",
-        "debugging",
-        "files-and-paths",
-        "structured-data-and-patterns",
-        "exceptions-and-validation",
-        "modules-and-standard-library",
-        "reproducible-projects",
-        "git-and-collaboration",
-        "command-line-applications",
-        "testing-with-pytest",
-        "maintainable-code",
+        "errors-exceptions-debugging",
+        "files-paths-external-data",
+        "modules-environments-projects",
         "object-oriented-python",
-        "pythonic-iteration",
-        "reliable-project-operations",
+        "command-line-applications",
+        "testing-python-programs",
+        "code-quality-maintainability",
+        "documentation-publishing",
     ]
+    assert [unit["number"] for unit in foundations["units"]] == list(range(16))
     assert intermediate["title"] == "Intermediate Python: Applied Problem Solving"
     assert advanced["title"] == "Advanced Python: Complex Problem Solving"
     for course in (intermediate, advanced):
@@ -517,11 +540,11 @@ def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None
     assert "Planned challenge format" in advanced_home
 
 
-def test_progress_v5_tracks_unit_challenges_without_legacy_migration() -> None:
+def test_progress_v6_tracks_unit_challenges_without_legacy_migration() -> None:
     old_storage = {
-        "fcpython.progress.v4": json.dumps(
+        "fcpython.progress.v5": json.dumps(
             {
-                "schema_version": 4,
+                "schema_version": 5,
                 "courses": {
                     "python-foundations": {
                         "completed_checkpoints": {"core-programming": "old-record"}
@@ -540,10 +563,10 @@ window.__fcTest = {
   lessonId,
   progress,
     unitChallengeId: challengeIdFromKey(
-    "courses/python-foundations/units/numeric-foundations/challenge"
+    "courses/python-foundations/units/python-syntax/challenge"
   ),
   challengeIsLesson: isLessonKey(
-    "courses/python-foundations/units/numeric-foundations/challenge"
+    "courses/python-foundations/units/python-syntax/challenge"
   ),
 };
 })();
@@ -551,11 +574,11 @@ window.__fcTest = {
     )
     lesson_url = (
         "https://freecampus.github.io/python/courses/python-foundations/units/"
-        "numeric-foundations/values-variables-types.html"
+        "python-syntax/values-names-expressions-statements.html"
     )
     lesson_path = (
-        "/python/courses/python-foundations/units/numeric-foundations/"
-        "values-variables-types.html"
+        "/python/courses/python-foundations/units/python-syntax/"
+        "values-names-expressions-statements.html"
     )
     harness = f"""
 const storage = new Map(Object.entries({json.dumps(old_storage)}));
@@ -578,8 +601,8 @@ global.document = {{
 {script}
 process.stdout.write(JSON.stringify({{
   state: window.__fcTest,
-  oldProgress: JSON.parse(storage.get("fcpython.progress.v4")),
-  newProgress: storage.get("fcpython.progress.v5") || null,
+  oldProgress: JSON.parse(storage.get("fcpython.progress.v5")),
+  newProgress: storage.get("fcpython.progress.v6") || null,
 }}));
 """
     result = subprocess.run(
@@ -588,15 +611,15 @@ process.stdout.write(JSON.stringify({{
     observed = json.loads(result.stdout)
 
     assert observed["state"]["currentKey"] == (
-        "courses/python-foundations/units/numeric-foundations/values-variables-types"
+        "courses/python-foundations/units/python-syntax/values-names-expressions-statements"
     )
     assert observed["state"]["lessonId"] == (
-        "numeric-foundations.values-variables-types"
+        "python-syntax.values-names-expressions-statements"
     )
-    assert observed["state"]["unitChallengeId"] == ("numeric-foundations.challenge")
+    assert observed["state"]["unitChallengeId"] == ("python-syntax.challenge")
     assert observed["state"]["challengeIsLesson"] is False
-    assert observed["state"]["progress"] == {"schema_version": 5, "courses": {}}
-    assert observed["oldProgress"]["schema_version"] == 4
+    assert observed["state"]["progress"] == {"schema_version": 6, "courses": {}}
+    assert observed["oldProgress"]["schema_version"] == 5
     assert observed["newProgress"] is None
 
 
@@ -649,3 +672,19 @@ def test_faq_is_search_first_and_sidebar_free() -> None:
     )
     assert "data-fc-faq-search" in faq_index
     assert "sidebar: false" in faq_metadata
+
+
+def test_internal_qmd_links_resolve() -> None:
+    missing = []
+    link_pattern = re.compile(r"\[[^\]]*\]\((?P<target>[^)]+\.qmd(?:#[^)]*)?)\)")
+
+    for page in sorted(Path("docs").rglob("*.qmd")):
+        if "_site" in page.parts:
+            continue
+        for match in link_pattern.finditer(page.read_text()):
+            raw_target = match.group("target").split("#", 1)[0]
+            target = (page.parent / raw_target).resolve()
+            if not target.exists():
+                missing.append(f"{page}: {raw_target}")
+
+    assert missing == []

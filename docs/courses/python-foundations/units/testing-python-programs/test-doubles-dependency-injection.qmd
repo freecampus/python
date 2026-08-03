@@ -1,0 +1,153 @@
+---
+title: Test Doubles, Mocking, Monkeypatching, and Dependency Injection
+lesson_id: testing-python-programs.test-doubles-dependency-injection
+lesson_order: 40
+description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
+execute:
+  echo: true
+categories:
+- python-foundations
+- testing-python-programs
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/test-doubles-dependency-injection.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+Tests become slow or unreliable when code directly reaches clocks, networks, randomness, or user input. An explicit dependency lets a focused test supply controlled behavior.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+def welcome_message(name, clock):
+    hour = clock()
+    period = "morning" if hour < 12 else "afternoon"
+    return f"Good {period}, {name}!"
+
+
+def morning_clock():
+    return 9
+
+
+assert welcome_message("Ada", morning_clock) == "Good morning, Ada!"
+```
+
+### Step-by-step explanation
+
+1. The function receives a callable clock dependency.
+2. The fake clock returns a controlled hour without reading the real system clock.
+3. The function selects the morning branch deterministically.
+4. The assertion verifies visible behavior, not how many internal lines ran.
+
+::: {.callout-note title="Make one controlled change"}
+Supply an `afternoon_clock` returning 15 and add the matching behavior assertion.
+:::
+
+## 2. Investigate the important boundary
+
+Monkeypatch where the code under test looks up a dependency, not where that object was originally defined. Prefer an explicit parameter when it also makes the production design clearer.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+class FakeReader:
+    def read_text(self):
+        return " Ada "
+
+
+def load_name(reader):
+    return reader.read_text().strip()
+
+
+assert load_name(FakeReader()) == "Ada"
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "testing-python-programs-test-doubles-dependency-injection",
+  "title": "Test Doubles, Mocking, Monkeypatching, and Dependency Injection checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "What makes `morning_clock` a useful test double?",
+      "options": [
+        "It provides controlled clock behavior through the same callable interface the function needs.",
+        "It disables every assertion.",
+        "It changes the production source file during the test.",
+        "It makes time globally constant for all programs."
+      ],
+      "answer_index": 0,
+      "explanation": "The fake dependency is small, deterministic, and satisfies the required interface."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 2,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A test double replaces an external collaborator with controlled behavior.
+- Dependency injection can improve both testability and design clarity.
+- Patch the reference used by the code, and assert meaningful outcomes rather than incidental calls.
+:::
+
+## References
+
+- https://docs.pytest.org/en/stable/how-to/monkeypatch.html
+- https://docs.python.org/3/library/unittest.mock.html

@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Model an Equipment Rental Desk'
-description: Model cohesive equipment state and rental behavior with dataclasses and composition.
+title: 'Unit Challenge: Complete a Road-Crossing Simulation Model'
+description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
 challenge_id: object-oriented-python.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 2
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -12,124 +12,99 @@ categories:
 - unit-challenge
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/challenge.ipynb
+course_id: python-foundations
+unit_id: object-oriented-python
+unit_number: 11
 ---
-
 ::: {.lesson-meta .challenge-meta}
-- **Level:** Python Foundations · Unit 22 challenge
+- **Level:** Python Foundations · Unit 11 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Model cohesive equipment state and rental behavior with dataclasses and composition.
-- **Evidence:** Complete the checks and explain the result in your own words.
+- **Outcome assessed:** Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-
 <!-- fcpython-unit-challenge: practical -->
 ## 1. Challenge outcome
 
-Implement an equipment record and a rental desk that protects checkout and return invariants.
+The model enforces valid construction, moves the player, detects collisions through composition, and recognizes the finish lane without a GUI or hidden global state.
 
-**Scenario:** A community media desk owns equipment items. The desk looks up items and coordinates state changes; each item owns its ID, name, and current borrower.
+**Scenario:** Complete the state model for a text-based road-crossing simulation. The player advances through lanes, vehicles occupy lane/column positions, and the game reports running, collision, or victory.
 
 ::: {.callout-note title="Work independently, but not without support"}
-This challenge should take about one or two focused hours. Use the starter
-contract, run one group of assertions at a time, and open hints only after you
-can state what evidence is blocking you.
+Use the starter contract, run one group of checks at a time, and open hints only
+after you can state the evidence blocking your next step.
 :::
 
 ## 2. Understand the acceptance example
 
-Before writing code, predict the important values and the exact final result.
-For the supplied input, the expected evidence is:
-
-Checkout records a borrower, a second checkout fails clearly, return clears the borrower, and unknown IDs fail clearly.
-
-Write your prediction in a notebook text cell or project note. Do not change
-the sample input until the matching assertions pass.
+Before implementation, restate the normal input, expected result, important
+boundary, and one anticipated failure in your own words.
 
 ### Constraints
 
-1. Keep the supplied dataclass fields and rental-desk public methods.
-2. Use composition: `RentalDesk` owns equipment objects rather than inheriting from them.
-3. Protect invalid state transitions with `ValueError` or `KeyError` at the responsible boundary.
-4. Do not expose a second mutable copy of item state.
+1. Keep the supplied classes, function names, and docstrings.
+2. Use dataclasses for `Player` and `Vehicle`.
+3. Keep `Vehicle` immutable.
+4. Do not add rendering, timing, or keyboard libraries.
 
 ## 3. Start from the contract
-
-Copy this scaffold into the generated notebook or the indicated local project
-files. Preserve the supplied public names and docstrings so the checks can guide
-you.
 
 ```python
 from dataclasses import dataclass
 
 
 @dataclass
-class Equipment:
-    item_id: str
-    name: str
-    borrower: str | None = None
+class Player:
+    """A player with a lane and fixed column."""
 
-    def is_available(self) -> bool:
-        """Return whether this item is not currently borrowed."""
+    lane: int = 0
+    column: int = 2
+
+    def move_forward(self):
+        """Advance the player by one lane."""
         raise NotImplementedError
 
 
-class RentalDesk:
-    def __init__(self, items: list[Equipment]) -> None:
-        """Create a desk indexed by each equipment item ID."""
-        raise NotImplementedError
+@dataclass(frozen=True)
+class Vehicle:
+    """An immutable vehicle position."""
 
-    def checkout(self, item_id: str, borrower: str) -> None:
-        """Loan an available item or raise a clear error."""
-        raise NotImplementedError
+    lane: int
+    column: int
 
-    def return_item(self, item_id: str) -> None:
-        """Return a borrowed item or raise a clear error."""
-        raise NotImplementedError
+
+def game_status(player, vehicles, finish_lane):
+    """Return 'collision', 'won', or 'running'."""
+    raise NotImplementedError
 ```
 
 ## 4. Build in small stages
 
-1. Implement and check `Equipment.is_available` on both states.
-2. Build the desk lookup and decide how an unknown ID is reported.
-3. Implement checkout, then assert both the successful and unavailable paths.
-4. Implement return and verify the same object becomes available again.
-
-After each stage, rerun only the smallest relevant check. When it passes, run
-all earlier checks before moving forward.
+1. Make the smallest normal case observable.
+2. Run the nearest check and read its complete failure evidence.
+3. Add one boundary behavior without weakening earlier checks.
+4. Restart and run the complete artifact from top to bottom.
 
 ## 5. Run progressive assertions
 
-These checks describe observable behavior. A failed assertion is a
-location signal: read its message, inspect the actual value, and change one
-cause rather than weakening the assertion.
-
 ```python
-camera = Equipment("cam-1", "Camera")
-desk = RentalDesk([camera])
-assert camera.is_available() is True
+player = Player()
+traffic = [Vehicle(lane=1, column=4), Vehicle(lane=2, column=2)]
 
-desk.checkout("cam-1", "Ari")
-assert camera.borrower == "Ari"
-assert camera.is_available() is False
-
-try:
-    desk.checkout("cam-1", "Bo")
-except ValueError as error:
-    assert str(error) == "cam-1 is already borrowed"
-else:
-    raise AssertionError("a borrowed item must not be checked out again")
-
-desk.return_item("cam-1")
-assert camera.borrower is None
-assert camera.is_available() is True
+assert game_status(player, traffic, finish_lane=3) == "running"
+player.move_forward()
+assert player.lane == 1
+assert game_status(player, traffic, finish_lane=3) == "running"
+player.move_forward()
+assert game_status(player, traffic, finish_lane=3) == "collision"
+assert game_status(Player(lane=3), [], finish_lane=3) == "won"
 ```
 
-::: {.callout-warning title="Do not edit the expected values to create a pass"}
-Change the implementation until the stated behavior is true. If you believe an
-assertion is wrong, explain the contract conflict in writing before changing
-either side.
+::: {.callout-warning title="Do not edit expected values to create a pass"}
+If a check appears wrong, explain the contract conflict before changing either
+side. Otherwise, repair the implementation and preserve the check.
 :::
 
 ## 6. Use the hint ladder only when needed
@@ -137,70 +112,92 @@ either side.
 <details>
 <summary>Hint 1</summary>
 
-`is_available` compares `borrower` with `None`; the desk can index items by ID in its constructor.
+Moving forward changes only the player's lane by one.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Checkout first obtains the item, then asks the item state whether the transition is valid.
+Use `any` to ask whether a vehicle shares both coordinates with the player.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-Mutate the composed `Equipment` object rather than replacing it with an unrelated dictionary copy.
+Check collision before victory so the rule ordering is explicit at a boundary.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Keep one invalid transition and its exact exception. Explain which object owns the relevant state and why the repaired boundary belongs there.
-
-Use this short record:
+Preserve one failing check. Record its inputs, actual result or exception,
+expected result, one hypothesis, one controlled change, and the verified rerun.
 
 | Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
 |---|---|---|---|---|
-| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
 
-## 8. Check your understanding
+## 8. Compare with a solution path
 
-::: {.quiz-box}
-Answer these questions before recording the challenge. The quiz runs directly
-in your browser.
-:::
+<details>
+<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+
+```python
+def move_forward(self):
+    self.lane += 1
+
+
+def game_status(player, vehicles, finish_lane):
+    collision = any(
+        vehicle.lane == player.lane and vehicle.column == player.column
+        for vehicle in vehicles
+    )
+    if collision:
+        return "collision"
+    if player.lane >= finish_lane:
+        return "won"
+    return "running"
+```
+
+Compare contracts and decisions, not only line-for-line syntax. If your solution
+also satisfies the constraints and checks, explain one trade-off between the
+approaches.
+
+</details>
+
+## 9. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-object-oriented-python-challenge",
-  "title": "Equipment Rental readiness check",
-  "instructions": "Choose an answer, then check your work.",
+  "title": "Complete a Road-Crossing Simulation Model readiness check",
+  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
   "questions": [
     {
-      "id": "composition",
-      "prompt": "What should the rental service own?",
+      "id": "design-boundary",
+      "prompt": "Why are vehicles supplied to `game_status` as an argument?",
       "options": [
-        "A collection of equipment objects it coordinates.",
-        "Copies of every method as strings.",
-        "Only one unrelated global number.",
-        "The Python interpreter."
+        "The dependency is explicit, so the rule can be tested without hidden global state.",
+        "Dataclasses cannot store vehicles globally.",
+        "Arguments automatically draw the game.",
+        "It makes every vehicle mutable."
       ],
       "answer_index": 0,
-      "explanation": "Composition lets the service coordinate cohesive item objects without pretending it is an item."
+      "explanation": "The dependency is explicit, so the rule can be tested without hidden global state."
     },
     {
-      "id": "class-invariant",
-      "prompt": "Where should an item's unavailable-state rule be protected?",
+      "id": "clean-evidence",
+      "prompt": "What should happen before recording this challenge as complete?",
       "options": [
-        "Only in the README.",
-        "At the method boundary that changes checkout state.",
-        "In a caller's comment.",
-        "By renaming the class."
+        "The unchanged checks pass from a clean state and the important decisions can be explained.",
+        "The expected values are edited to match the current output.",
+        "Only the final successful line is kept.",
+        "Several unrelated features are added."
       ],
-      "answer_index": 1,
-      "explanation": "The object that owns the state should keep invalid transitions from being represented silently."
+      "answer_index": 0,
+      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
     }
   ]
 }
@@ -208,28 +205,20 @@ in your browser.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 10. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
-
-Record completion only when every statement is true:
-
-- [ ] All supplied assertions pass without editing their expected values.
-- [ ] The work runs from a clean notebook state or documented project root.
-- [ ] I can explain the important state changes and boundaries in my own words.
-- [ ] I kept one complete debugging record.
-- [ ] I predicted and verified one controlled modification.
+| Behavior | Acceptance examples and progressive checks pass unchanged. |
+| Scope | The artifact follows the constraints without unrelated features. |
+| Reasoning | Important values, boundaries, and design choices can be traced. |
+| Debugging | One record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The artifact works from a clean notebook state or documented project root. |
 
 This button stores a self-reported marker only in this browser. It does not
-submit the artifact, grade it, verify identity, or issue a certificate.
+submit work, grade it, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -243,7 +232,7 @@ submit the artifact, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows the design without supplying the implementation.
+- The starter contract narrows design choices without supplying the implementation.
 - Progressive assertions turn a large task into observable behaviors.
 - Hints support the next decision; they do not replace prediction and evidence.
 - A clean rerun and explanation matter as much as the final output.

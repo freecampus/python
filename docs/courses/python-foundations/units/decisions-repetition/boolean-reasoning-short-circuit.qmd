@@ -1,0 +1,147 @@
+---
+title: Boolean Reasoning and Short-Circuit Evaluation
+lesson_id: decisions-repetition.boolean-reasoning-short-circuit
+lesson_order: 20
+description: Translate rules and repeated work into traceable control flow that handles boundaries and makes visible progress toward stopping.
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/boolean-reasoning-short-circuit.ipynb
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Trace compound rules, short-circuit behavior, truthiness, and identity checks.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Real decisions combine missing values, thresholds, and overrides. Named Boolean decisions and guard clauses make each boundary visible instead of hiding policy inside one long expression.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+def can_publish(title, tags, reviewer):
+    if not title.strip():
+        return False
+    if not tags:
+        return False
+    return reviewer is not None
+
+print(can_publish("Loops", ["python"], "Ada"))
+```
+
+### What Python does
+
+1. Empty strings and collections are falsy.
+2. Guard clauses stop on the first unmet requirement.
+3. `is None` distinguishes missing data from valid falsy values such as zero.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This version is valid Python but does not satisfy the lesson's intended contract:
+
+```python
+score = 120
+if score < 0 and score > 100:
+    print("invalid")
+```
+
+A focused repair is:
+
+```python
+if score < 0 or score > 100:
+    print("invalid")
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Write a truth table for `active and (owner or admin)`.
+2. Rewrite a compound rule with named intermediate values.
+3. Prove that `0` and `None` need different checks in one domain.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "decisions-repetition-boolean-reasoning",
+  "title": "Truthiness and Boolean Reasoning checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "short",
+      "prompt": "When does `left and right` skip `right`?",
+      "options": [
+        "When left is truthy",
+        "Never",
+        "Only for None",
+        "When left is falsy"
+      ],
+      "answer_index": 3,
+      "explanation": "A falsy left side decides `and`."
+    },
+    {
+      "id": "none",
+      "prompt": "Which check targets missing data?",
+      "options": [
+        "value is None",
+        "not value",
+        "value == 0",
+        "value == False"
+      ],
+      "answer_index": 0,
+      "explanation": "None is a sentinel checked by identity."
+    },
+    {
+      "id": "range",
+      "prompt": "Which identifies a value outside 0–100?",
+      "options": [
+        "x < 0 and x > 100",
+        "x < 0 or x > 100",
+        "0 < x > 100",
+        "x is 0"
+      ],
+      "answer_index": 1,
+      "explanation": "Either outside boundary is invalid."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

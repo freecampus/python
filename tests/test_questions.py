@@ -97,7 +97,7 @@ def test_show_quiz_returns_widget_container() -> None:
 
 def test_lesson_ojs_quiz_config_matches_quiz_bank() -> None:
     lesson_path = (
-        FOUNDATIONS_ROOT / "units/numeric-foundations/values-variables-types.qmd"
+        FOUNDATIONS_ROOT / "units/python-syntax/values-names-expressions-statements.qmd"
     )
     lesson = lesson_path.read_text()
     match = re.search(
@@ -128,33 +128,25 @@ def _first_quiz_payload(path: Path) -> dict[str, object]:
 def test_foundations_assessment_pages_match_quiz_banks() -> None:
     quizzes = python_foundations_unit_challenge_quizzes()
     expected_units = (
-        "learning-workflow-tools",
-        "numeric-foundations",
-        "text-input-output",
-        "decisions",
-        "loops-and-state",
+        "get-started",
+        "python-syntax",
+        "core-values-types",
+        "collections-iteration",
+        "decisions-repetition",
+        "functions-call-behavior",
+        "mutability-identity-copying",
         "problem-solving-algorithms",
-        "sequences",
-        "mappings-and-sets",
-        "mutability-and-copying",
-        "functions-and-interfaces",
-        "scope-and-call-stacks",
-        "debugging",
-        "files-and-paths",
-        "structured-data-and-patterns",
-        "exceptions-and-validation",
-        "modules-and-standard-library",
-        "reproducible-projects",
-        "git-and-collaboration",
-        "command-line-applications",
-        "testing-with-pytest",
-        "maintainable-code",
+        "errors-exceptions-debugging",
+        "files-paths-external-data",
+        "modules-environments-projects",
         "object-oriented-python",
-        "pythonic-iteration",
-        "reliable-project-operations",
+        "command-line-applications",
+        "testing-python-programs",
+        "code-quality-maintainability",
+        "documentation-publishing",
     )
 
-    assert len(quizzes) == len(expected_units) == 24
+    assert len(quizzes) == len(expected_units) == 16
     assert all(len(quiz.questions) >= 2 for quiz in quizzes)
     assert (
         tuple(
@@ -218,7 +210,7 @@ def test_assessable_pages_include_ojs_quiz() -> None:
 def test_foundations_unit_overviews_do_not_include_quizzes() -> None:
     overview_pages = sorted(FOUNDATIONS_ROOT.glob("units/*/index.qmd"))
 
-    assert len(overview_pages) == 24
+    assert len(overview_pages) == 16
     for path in overview_pages:
         text = path.read_text()
         assert 'class="fcpython-ojs-quiz-config"' not in text, path
@@ -492,7 +484,9 @@ def test_colab_notebook_paths_are_unique_and_follow_course_structure() -> None:
 
 
 def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
-    path = FOUNDATIONS_ROOT / "units/numeric-foundations/values-variables-types.qmd"
+    path = (
+        FOUNDATIONS_ROOT / "units/python-syntax/values-names-expressions-statements.qmd"
+    )
     notebook = notebook_builder.qmd_to_notebook(path)
     code_sources = [
         "".join(cell["source"])
@@ -507,8 +501,8 @@ def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
 def test_build_colab_notebooks_writes_expected_files(tmp_path: Path) -> None:
     written = notebook_builder.build_notebooks(output_root=tmp_path)
     expected = (
-        tmp_path / "courses/python-foundations/units/numeric-foundations/"
-        "values-variables-types.ipynb"
+        tmp_path / "courses/python-foundations/units/python-syntax/"
+        "values-names-expressions-statements.ipynb"
     )
 
     # The legacy docs/lessons/index.qmd support notebook is also generated.
@@ -565,16 +559,21 @@ def test_lessons_use_clean_numbered_section_headings() -> None:
 
 def test_selected_lessons_include_mermaid_diagrams() -> None:
     expected = {
-        FOUNDATIONS_ROOT / "units/numeric-foundations/values-variables-types.qmd",
-        FOUNDATIONS_ROOT / "units/decisions/booleans-and-conditionals.qmd",
-        FOUNDATIONS_ROOT / "units/loops-and-state/loops-and-tracing.qmd",
-        FOUNDATIONS_ROOT / "units/functions-and-interfaces/function-basics.qmd",
-        FOUNDATIONS_ROOT / "units/sequences/lists.qmd",
-        FOUNDATIONS_ROOT / "units/mappings-and-sets/dictionaries.qmd",
-        FOUNDATIONS_ROOT / "units/mappings-and-sets/nested-data.qmd",
-        FOUNDATIONS_ROOT / "units/debugging/error-messages.qmd",
         FOUNDATIONS_ROOT
-        / "units/reproducible-projects/environments-and-dependencies.qmd",
+        / "units/python-syntax/values-names-expressions-statements.qmd",
+        FOUNDATIONS_ROOT
+        / "units/decisions-repetition/conditionals-decision-tables.qmd",
+        FOUNDATIONS_ROOT / "units/decisions-repetition/for-loops-traversal.qmd",
+        FOUNDATIONS_ROOT
+        / "units/functions-call-behavior/defining-calling-returning.qmd",
+        FOUNDATIONS_ROOT / "units/collections-iteration/lists.qmd",
+        FOUNDATIONS_ROOT / "units/collections-iteration/dictionaries.qmd",
+        FOUNDATIONS_ROOT
+        / "units/collections-iteration/nested-data-iterables-sorting.qmd",
+        FOUNDATIONS_ROOT
+        / "units/errors-exceptions-debugging/failure-categories-tracebacks.qmd",
+        FOUNDATIONS_ROOT
+        / "units/modules-environments-projects/virtual-environments-dependencies.qmd",
         DATA_ML_ROOT / "machine-learning-ai/training-and-evaluation.qmd",
     }
 

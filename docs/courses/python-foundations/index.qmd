@@ -1,7 +1,6 @@
 ---
 title: Python Foundations
-description: Start with zero programming experience and finish able to build, test, explain, and maintain
-  practical Python programs.
+description: Start with zero programming experience and finish able to build, test, explain, document, and maintain practical Python programs.
 categories:
 - python-foundations
 - beginner
@@ -13,98 +12,106 @@ course_level: Beginner
 course_status: available
 course_status_label: Available
 course_pathway: both
-course_keywords: beginner colab values text decisions loops algorithms lists dictionaries functions scope
-  debugging files regex exceptions modules environments git cli pytest typing oop generators logging ci
-lesson_count: 62
+course_keywords: beginner colab syntax values types collections control flow functions algorithms debugging files projects git cli testing typing oop documentation
+lesson_count: 79
 lesson_ids:
-- learning-workflow-tools.what-is-programming
-- learning-workflow-tools.google-colab
-- learning-workflow-tools.local-python-tools
-- numeric-foundations.values-variables-types
-- numeric-foundations.numeric-computation
-- text-input-output.strings-input-output
-- text-input-output.unicode-and-text-boundaries
-- decisions.booleans-and-conditionals
-- decisions.boolean-reasoning
-- loops-and-state.blocks-and-indentation
-- loops-and-state.loops-and-tracing
-- problem-solving-algorithms.specifications-and-examples
-- problem-solving-algorithms.decomposition-and-pseudocode
-- problem-solving-algorithms.search-count-transform
-- sequences.lists
-- sequences.tuples
-- mappings-and-sets.dictionaries
-- mappings-and-sets.sets
-- mappings-and-sets.nested-data
-- mutability-and-copying.identity-aliasing-copying
-- mutability-and-copying.mutation-across-boundaries
-- functions-and-interfaces.function-basics
-- functions-and-interfaces.function-contracts
-- functions-and-interfaces.function-decomposition-and-checks
-- scope-and-call-stacks.scope-and-call-stacks
-- scope-and-call-stacks.recursion-and-functions-as-values
-- debugging.error-messages
-- debugging.debugging-tools
-- debugging.minimal-reproducible-examples
-- files-and-paths.paths-and-text-files
-- files-and-paths.text-files-and-encodings
-- structured-data-and-patterns.structured-files
-- structured-data-and-patterns.regular-expressions
-- structured-data-and-patterns.validation-pipelines
-- exceptions-and-validation.exceptions-and-validation
-- exceptions-and-validation.exception-design
-- modules-and-standard-library.modules-and-packages
-- modules-and-standard-library.standard-library-fluency
-- reproducible-projects.project-layout
-- reproducible-projects.environments-and-dependencies
-- reproducible-projects.packaging-with-pyproject
-- git-and-collaboration.repositories-and-commits
-- git-and-collaboration.branches-and-merges
-- git-and-collaboration.remotes-and-collaboration
-- command-line-applications.command-line-programs
-- command-line-applications.streams-and-exit-codes
-- testing-with-pytest.testing-with-pytest
-- testing-with-pytest.test-design-and-failures
-- testing-with-pytest.fixtures-parametrization-and-boundaries
-- maintainable-code.style-formatting-and-linting
-- maintainable-code.type-checking
-- maintainable-code.documentation-and-refactoring
-- object-oriented-python.oop-basics
-- object-oriented-python.dataclasses
-- object-oriented-python.oop-design
-- pythonic-iteration.comprehensions
-- pythonic-iteration.iterables-and-generators
-- pythonic-iteration.decorators
-- pythonic-iteration.context-managers
-- reliable-project-operations.logging-and-configuration
-- reliable-project-operations.pre-commit-and-ci
-- reliable-project-operations.project-operations-and-secrets
+- get-started.programming-python-ai
+- get-started.learning-loop-ai
+- get-started.notebooks-literate-workflows
+- get-started.local-python-environment
+- python-syntax.values-names-expressions-statements
+- python-syntax.keywords-operators-vocabulary
+- python-syntax.indentation-blocks-multiline
+- python-syntax.comments-docstrings-syntax-errors
+- core-values-types.objects-types-none-conversion
+- core-values-types.integers-floats-precision
+- core-values-types.decimal-fraction-complex
+- core-values-types.strings-unicode-input-formatting
+- core-values-types.booleans-comparisons-truth-values
+- core-values-types.dates-times-durations-parsing
+- collections-iteration.lists
+- collections-iteration.tuples-ranges-packing
+- collections-iteration.dictionaries
+- collections-iteration.sets-frozen-sets
+- collections-iteration.nested-data-iterables-sorting
+- decisions-repetition.conditionals-decision-tables
+- decisions-repetition.boolean-reasoning-short-circuit
+- decisions-repetition.for-loops-traversal
+- decisions-repetition.while-loops-state-termination
+- decisions-repetition.loop-control-comprehensions
+- functions-call-behavior.defining-calling-returning
+- functions-call-behavior.parameters-stable-interfaces
+- functions-call-behavior.contracts-decomposition-side-effects
+- functions-call-behavior.scope-name-resolution-call-stack
+- functions-call-behavior.recursion-recursive-tracing
+- functions-call-behavior.functions-values-callbacks
+- functions-call-behavior.iterators-generators-lazy-values
+- functions-call-behavior.decorators-function-contracts
+- mutability-identity-copying.equality-identity-references
+- mutability-identity-copying.mutable-immutable-hashable
+- mutability-identity-copying.aliasing-shallow-deep-copies
+- mutability-identity-copying.mutation-function-boundaries
+- problem-solving-algorithms.problems-examples-acceptance
+- problem-solving-algorithms.decomposition-pseudocode-implementation
+- problem-solving-algorithms.core-algorithm-patterns
+- problem-solving-algorithms.correctness-boundaries-efficiency
+- errors-exceptions-debugging.failure-categories-tracebacks
+- errors-exceptions-debugging.raising-handling-exceptions
+- errors-exceptions-debugging.repeatable-debugging-method
+- errors-exceptions-debugging.debugger-minimal-reproductions
+- files-paths-external-data.paths-text-files-resources
+- files-paths-external-data.unicode-encodings-newlines
+- files-paths-external-data.csv-json-yaml-records
+- files-paths-external-data.text-patterns-validation-pipelines
+- files-paths-external-data.bytes-binary-memory-streams
+- modules-environments-projects.builtins-standard-library-help
+- modules-environments-projects.modules-imports-entry-points
+- modules-environments-projects.packages-public-interfaces
+- modules-environments-projects.project-layout-git-essentials
+- modules-environments-projects.virtual-environments-dependencies
+- modules-environments-projects.pyproject-builds-tools
+- object-oriented-python.objects-classes-instances-self
+- object-oriented-python.initialization-invariants-properties
+- object-oriented-python.dataclasses-representation-equality
+- object-oriented-python.composition-inheritance-design
+- object-oriented-python.road-crossing-game-model
+- command-line-applications.argparse-command-design
+- command-line-applications.streams-errors-exit-codes
+- command-line-applications.configuration-logging-secrets
+- command-line-applications.cli-ecosystem-testable-architecture
+- testing-python-programs.what-tests-prove
+- testing-python-programs.pytest-discovery-failures
+- testing-python-programs.fixtures-parametrization-boundaries
+- testing-python-programs.test-doubles-dependency-injection
+- testing-python-programs.test-levels
+- testing-python-programs.properties-regressions-tdd
+- code-quality-maintainability.readable-python-pep8
+- code-quality-maintainability.type-annotations-static-checking
+- code-quality-maintainability.formatting-linting-configuration
+- code-quality-maintainability.precommit-quality-gates
+- code-quality-maintainability.evidence-driven-refactoring
+- documentation-publishing.documentation-audiences-readme
+- documentation-publishing.docstrings-api-documentation
+- documentation-publishing.doctest-executable-documentation
+- documentation-publishing.documentation-toolchains-publishing
 challenge_ids:
-- learning-workflow-tools.challenge
-- numeric-foundations.challenge
-- text-input-output.challenge
-- decisions.challenge
-- loops-and-state.challenge
+- get-started.challenge
+- python-syntax.challenge
+- core-values-types.challenge
+- collections-iteration.challenge
+- decisions-repetition.challenge
+- functions-call-behavior.challenge
+- mutability-identity-copying.challenge
 - problem-solving-algorithms.challenge
-- sequences.challenge
-- mappings-and-sets.challenge
-- mutability-and-copying.challenge
-- functions-and-interfaces.challenge
-- scope-and-call-stacks.challenge
-- debugging.challenge
-- files-and-paths.challenge
-- structured-data-and-patterns.challenge
-- exceptions-and-validation.challenge
-- modules-and-standard-library.challenge
-- reproducible-projects.challenge
-- git-and-collaboration.challenge
-- command-line-applications.challenge
-- testing-with-pytest.challenge
-- maintainable-code.challenge
+- errors-exceptions-debugging.challenge
+- files-paths-external-data.challenge
+- modules-environments-projects.challenge
 - object-oriented-python.challenge
-- pythonic-iteration.challenge
-- reliable-project-operations.challenge
-estimated_effort: 85–135 hours
+- command-line-applications.challenge
+- testing-python-programs.challenge
+- code-quality-maintainability.challenge
+- documentation-publishing.challenge
+estimated_effort: 110–175 hours
 prerequisite_label: None
 page-layout: full
 toc: false
@@ -112,16 +119,16 @@ body-classes: course-home course-foundations
 ---
 ::: {.lesson-meta}
 - **Level:** Beginner to project-ready
-- **Estimated effort:** 85–135 hours
+- **Estimated effort:** 110–175 hours
 - **Prerequisite:** None
-- **Status:** Available; project and certificate planned
+- **Status:** Available; final project and certificate planned
 :::
 
 ::: {.fc-course-intro}
 ::: {.callout-tip title="Start here if programming is new to you"}
-This course assumes no programming experience. Begin in Google Colab and
-progress through one connected sequence. Every published lesson and challenge
-belongs to that sequence.
+This course assumes no programming experience. Begin with the learning method,
+then progress through one connected sequence. Every published lesson and
+challenge belongs to that sequence.
 :::
 
 ```{=html}
@@ -129,19 +136,19 @@ belongs to that sequence.
   class="fc-course-overview fc-completion-overview"
   data-fc-course-overview
   data-course-id="python-foundations"
-  data-course-total="62"
-  data-course-lesson-ids="learning-workflow-tools.what-is-programming learning-workflow-tools.google-colab learning-workflow-tools.local-python-tools numeric-foundations.values-variables-types numeric-foundations.numeric-computation text-input-output.strings-input-output text-input-output.unicode-and-text-boundaries decisions.booleans-and-conditionals decisions.boolean-reasoning loops-and-state.blocks-and-indentation loops-and-state.loops-and-tracing problem-solving-algorithms.specifications-and-examples problem-solving-algorithms.decomposition-and-pseudocode problem-solving-algorithms.search-count-transform sequences.lists sequences.tuples mappings-and-sets.dictionaries mappings-and-sets.sets mappings-and-sets.nested-data mutability-and-copying.identity-aliasing-copying mutability-and-copying.mutation-across-boundaries functions-and-interfaces.function-basics functions-and-interfaces.function-contracts functions-and-interfaces.function-decomposition-and-checks scope-and-call-stacks.scope-and-call-stacks scope-and-call-stacks.recursion-and-functions-as-values debugging.error-messages debugging.debugging-tools debugging.minimal-reproducible-examples files-and-paths.paths-and-text-files files-and-paths.text-files-and-encodings structured-data-and-patterns.structured-files structured-data-and-patterns.regular-expressions structured-data-and-patterns.validation-pipelines exceptions-and-validation.exceptions-and-validation exceptions-and-validation.exception-design modules-and-standard-library.modules-and-packages modules-and-standard-library.standard-library-fluency reproducible-projects.project-layout reproducible-projects.environments-and-dependencies reproducible-projects.packaging-with-pyproject git-and-collaboration.repositories-and-commits git-and-collaboration.branches-and-merges git-and-collaboration.remotes-and-collaboration command-line-applications.command-line-programs command-line-applications.streams-and-exit-codes testing-with-pytest.testing-with-pytest testing-with-pytest.test-design-and-failures testing-with-pytest.fixtures-parametrization-and-boundaries maintainable-code.style-formatting-and-linting maintainable-code.type-checking maintainable-code.documentation-and-refactoring object-oriented-python.oop-basics object-oriented-python.dataclasses object-oriented-python.oop-design pythonic-iteration.comprehensions pythonic-iteration.iterables-and-generators pythonic-iteration.decorators pythonic-iteration.context-managers reliable-project-operations.logging-and-configuration reliable-project-operations.pre-commit-and-ci reliable-project-operations.project-operations-and-secrets"
-  data-course-challenge-ids="learning-workflow-tools.challenge numeric-foundations.challenge text-input-output.challenge decisions.challenge loops-and-state.challenge problem-solving-algorithms.challenge sequences.challenge mappings-and-sets.challenge mutability-and-copying.challenge functions-and-interfaces.challenge scope-and-call-stacks.challenge debugging.challenge files-and-paths.challenge structured-data-and-patterns.challenge exceptions-and-validation.challenge modules-and-standard-library.challenge reproducible-projects.challenge git-and-collaboration.challenge command-line-applications.challenge testing-with-pytest.challenge maintainable-code.challenge object-oriented-python.challenge pythonic-iteration.challenge reliable-project-operations.challenge"
+  data-course-total="79"
+  data-course-lesson-ids="get-started.programming-python-ai get-started.learning-loop-ai get-started.notebooks-literate-workflows get-started.local-python-environment python-syntax.values-names-expressions-statements python-syntax.keywords-operators-vocabulary python-syntax.indentation-blocks-multiline python-syntax.comments-docstrings-syntax-errors core-values-types.objects-types-none-conversion core-values-types.integers-floats-precision core-values-types.decimal-fraction-complex core-values-types.strings-unicode-input-formatting core-values-types.booleans-comparisons-truth-values core-values-types.dates-times-durations-parsing collections-iteration.lists collections-iteration.tuples-ranges-packing collections-iteration.dictionaries collections-iteration.sets-frozen-sets collections-iteration.nested-data-iterables-sorting decisions-repetition.conditionals-decision-tables decisions-repetition.boolean-reasoning-short-circuit decisions-repetition.for-loops-traversal decisions-repetition.while-loops-state-termination decisions-repetition.loop-control-comprehensions functions-call-behavior.defining-calling-returning functions-call-behavior.parameters-stable-interfaces functions-call-behavior.contracts-decomposition-side-effects functions-call-behavior.scope-name-resolution-call-stack functions-call-behavior.recursion-recursive-tracing functions-call-behavior.functions-values-callbacks functions-call-behavior.iterators-generators-lazy-values functions-call-behavior.decorators-function-contracts mutability-identity-copying.equality-identity-references mutability-identity-copying.mutable-immutable-hashable mutability-identity-copying.aliasing-shallow-deep-copies mutability-identity-copying.mutation-function-boundaries problem-solving-algorithms.problems-examples-acceptance problem-solving-algorithms.decomposition-pseudocode-implementation problem-solving-algorithms.core-algorithm-patterns problem-solving-algorithms.correctness-boundaries-efficiency errors-exceptions-debugging.failure-categories-tracebacks errors-exceptions-debugging.raising-handling-exceptions errors-exceptions-debugging.repeatable-debugging-method errors-exceptions-debugging.debugger-minimal-reproductions files-paths-external-data.paths-text-files-resources files-paths-external-data.unicode-encodings-newlines files-paths-external-data.csv-json-yaml-records files-paths-external-data.text-patterns-validation-pipelines files-paths-external-data.bytes-binary-memory-streams modules-environments-projects.builtins-standard-library-help modules-environments-projects.modules-imports-entry-points modules-environments-projects.packages-public-interfaces modules-environments-projects.project-layout-git-essentials modules-environments-projects.virtual-environments-dependencies modules-environments-projects.pyproject-builds-tools object-oriented-python.objects-classes-instances-self object-oriented-python.initialization-invariants-properties object-oriented-python.dataclasses-representation-equality object-oriented-python.composition-inheritance-design object-oriented-python.road-crossing-game-model command-line-applications.argparse-command-design command-line-applications.streams-errors-exit-codes command-line-applications.configuration-logging-secrets command-line-applications.cli-ecosystem-testable-architecture testing-python-programs.what-tests-prove testing-python-programs.pytest-discovery-failures testing-python-programs.fixtures-parametrization-boundaries testing-python-programs.test-doubles-dependency-injection testing-python-programs.test-levels testing-python-programs.properties-regressions-tdd code-quality-maintainability.readable-python-pep8 code-quality-maintainability.type-annotations-static-checking code-quality-maintainability.formatting-linting-configuration code-quality-maintainability.precommit-quality-gates code-quality-maintainability.evidence-driven-refactoring documentation-publishing.documentation-audiences-readme documentation-publishing.docstrings-api-documentation documentation-publishing.doctest-executable-documentation documentation-publishing.documentation-toolchains-publishing"
+  data-course-challenge-ids="get-started.challenge python-syntax.challenge core-values-types.challenge collections-iteration.challenge decisions-repetition.challenge functions-call-behavior.challenge mutability-identity-copying.challenge problem-solving-algorithms.challenge errors-exceptions-debugging.challenge files-paths-external-data.challenge modules-environments-projects.challenge object-oriented-python.challenge command-line-applications.challenge testing-python-programs.challenge code-quality-maintainability.challenge documentation-publishing.challenge"
 >
   <div><strong data-fc-course-progress-value>0%</strong><span>course work recorded</span></div>
   <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
     <span data-fc-course-progress-bar></span>
   </div>
   <div class="fc-requirement-grid">
-    <div><strong data-fc-course-lessons>0/62</strong><span>lessons</span></div>
-    <div><strong data-fc-course-challenges>0/24</strong><span>unit challenges</span></div>
+    <div><strong data-fc-course-lessons>0/79</strong><span>lessons</span></div>
+    <div><strong data-fc-course-challenges>0/16</strong><span>unit challenges</span></div>
   </div>
-  <span data-fc-course-progress-label>86 course activities remaining</span>
+  <span data-fc-course-progress-label>95 course activities remaining</span>
   <strong class="fc-completion-status" data-fc-course-completion-status>Course in progress</strong>
 </div>
 ```
@@ -151,60 +158,55 @@ belongs to that sequence.
 
 - **Designed for:** learners with little or no programming experience.
 - **You are ready when:** you can use a browser and are willing to predict, run,
-  explain, and change small examples. No mathematics prerequisite is assumed.
-- **Practice setup:** start with generated Colab notebooks. Unit 1 compares the
-  browser and local workflows before later units use projects and command-line tools.
-- **Assessment:** lesson checks diagnose understanding; each unit challenge asks
-  you to combine its skills in a guided task with assertions and hints.
+  explain, modify, quiz, and debug small examples. No mathematics prerequisite
+  is assumed.
+- **Practice setup:** begin with generated Colab notebooks. Unit 0 compares
+  notebook and local workflows before later units introduce full projects.
+- **Assessment:** lesson checkpoints diagnose understanding; each unit challenge
+  asks you to integrate its ideas with assertions, hints, and debugging evidence.
 
 ## What you will be able to do
 
-- trace values, state, decisions, loops, collections, calls, and failures;
-- turn a problem statement into examples, small algorithms, and testable functions;
-- process Unicode text, files, paths, structured data, and invalid input safely;
-- organize a reproducible Git-backed project with a CLI, tests, typing, and CI;
-- choose classes, generators, decorators, and context managers based on design needs;
-- explain and defend program behavior with tests, logs, and debugging evidence.
+- read Python syntax and trace values, state, decisions, loops, calls, and object relationships;
+- choose representations for numbers, text, time, collections, files, and external records;
+- turn requirements into small algorithms, functions, modules, packages, and classes;
+- diagnose failures from tracebacks and controlled experiments;
+- build a reproducible Git-backed project with a CLI and layered tests;
+- improve behavior safely with typing, formatting, linting, quality gates, and refactoring; and
+- create verified README, API, executable, and published documentation.
 
 ## Learning sequence
 
-Python Foundations curriculum version 5 contains **24 units** and **62 cohesive
-lessons**. Each unit begins with an Overview and ends with a guided challenge.
+Python Foundations curriculum version 6 contains **16 units** and
+**79 cohesive lessons**. Each unit begins with an Overview and
+ends with a challenge.
 
 | Unit | Focus | Outcome | Apply it |
 |---:|---|---|---|
-| 1 | [Learning Workflow and Tools](units/learning-workflow-tools/index.qmd) | Choose a dependable practice environment and use prediction, clean reruns, and evidence to learn deliberately. | [Challenge](units/learning-workflow-tools/challenge.qmd) |
-| 2 | [Values, Names, and Numeric Computation](units/numeric-foundations/index.qmd) | Represent quantities, trace assignments, choose numeric operations, and explain rounding decisions. | [Challenge](units/numeric-foundations/challenge.qmd) |
-| 3 | [Text, Unicode, Input, and Output](units/text-input-output/index.qmd) | Create, transform, validate, encode, and display text without confusing strings with numbers or bytes. | [Challenge](units/text-input-output/challenge.qmd) |
-| 4 | [Boolean Logic and Decisions](units/decisions/index.qmd) | Translate rules into Boolean expressions and branches whose boundary behavior can be traced. | [Challenge](units/decisions/challenge.qmd) |
-| 5 | [Loops, Tracing, and State](units/loops-and-state/index.qmd) | Repeat work safely, trace changing state, and prove that a loop makes progress toward stopping. | [Challenge](units/loops-and-state/challenge.qmd) |
-| 6 | [Problem Decomposition and Basic Algorithms](units/problem-solving-algorithms/index.qmd) | Turn a written problem into examples, pseudocode, small steps, and a correct search, count, or transformation. | [Challenge](units/problem-solving-algorithms/challenge.qmd) |
-| 7 | [Sequences: Lists and Tuples](units/sequences/index.qmd) | Model ordered information, choose mutable or immutable sequences, and use indexing and slicing safely. | [Challenge](units/sequences/challenge.qmd) |
-| 8 | [Mappings, Sets, and Nested Data](units/mappings-and-sets/index.qmd) | Choose dictionaries and sets for lookup, uniqueness, counting, and nested records. | [Challenge](units/mappings-and-sets/challenge.qmd) |
-| 9 | [Mutability, Identity, and Copying](units/mutability-and-copying/index.qmd) | Predict aliasing and mutation, copy at the intended depth, and avoid accidental shared state. | [Challenge](units/mutability-and-copying/challenge.qmd) |
-| 10 | [Functions and Interfaces](units/functions-and-interfaces/index.qmd) | Design focused functions with explicit inputs, return values, contracts, and independent checks. | [Challenge](units/functions-and-interfaces/challenge.qmd) |
-| 11 | [Scope, Call Stacks, and Functions as Values](units/scope-and-call-stacks/index.qmd) | Trace names across calls, read stack-shaped execution, and use recursion or function values deliberately. | [Challenge](units/scope-and-call-stacks/challenge.qmd) |
-| 12 | [Debugging and Reproducible Failures](units/debugging/index.qmd) | Use tracebacks, controlled experiments, tools, and minimal reproductions to investigate failures from evidence. | [Challenge](units/debugging/challenge.qmd) |
-| 13 | [Files, Paths, and Encodings](units/files-and-paths/index.qmd) | Read and write files with explicit paths, encodings, resource lifetimes, and failure expectations. | [Challenge](units/files-and-paths/challenge.qmd) |
-| 14 | [Structured Data and Text Patterns](units/structured-data-and-patterns/index.qmd) | Parse structured files and text patterns through a staged, testable validation pipeline. | [Challenge](units/structured-data-and-patterns/challenge.qmd) |
-| 15 | [Exceptions and Defensive Programming](units/exceptions-and-validation/index.qmd) | Validate boundaries, raise useful exceptions, and catch only failures the program can handle. | [Challenge](units/exceptions-and-validation/challenge.qmd) |
-| 16 | [Modules, Imports, and Standard Library](units/modules-and-standard-library/index.qmd) | Split code across modules, reason about imports, and select standard-library tools before adding dependencies. | [Challenge](units/modules-and-standard-library/challenge.qmd) |
-| 17 | [Reproducible Python Projects](units/reproducible-projects/index.qmd) | Arrange source and tests, isolate dependencies, and describe a buildable project with pyproject.toml. | [Challenge](units/reproducible-projects/challenge.qmd) |
-| 18 | [Git and Collaboration](units/git-and-collaboration/index.qmd) | Create meaningful commits, work safely with branches and merges, and collaborate through remotes. | [Challenge](units/git-and-collaboration/challenge.qmd) |
-| 19 | [Command-Line Applications](units/command-line-applications/index.qmd) | Build commands with explicit arguments, standard streams, exit codes, and testable core behavior. | [Challenge](units/command-line-applications/challenge.qmd) |
-| 20 | [Testing with pytest](units/testing-with-pytest/index.qmd) | Turn contracts and boundaries into readable tests, then use failures, fixtures, and parametrization as design feedback. | [Challenge](units/testing-with-pytest/challenge.qmd) |
-| 21 | [Documentation, Style, Linting, and Typing](units/maintainable-code/index.qmd) | Improve code safely with documentation, refactoring, formatting, linting, and useful type information. | [Challenge](units/maintainable-code/challenge.qmd) |
-| 22 | [Object-Oriented Python and Dataclasses](units/object-oriented-python/index.qmd) | Model cohesive state and behavior with classes and dataclasses while avoiding unnecessary abstraction. | [Challenge](units/object-oriented-python/challenge.qmd) |
-| 23 | [Pythonic Iteration and Resource Control](units/pythonic-iteration/index.qmd) | Choose comprehensions, generators, decorators, and context managers when they make intent and lifecycles clearer. | [Challenge](units/pythonic-iteration/challenge.qmd) |
-| 24 | [Operating a Reliable Project](units/reliable-project-operations/index.qmd) | Combine configuration, logging, secrets, local quality gates, and CI into an observable project workflow. | [Challenge](units/reliable-project-operations/challenge.qmd) |
+| 0 | [Get Started](units/get-started/index.qmd) | Choose a dependable learning environment and use prediction, execution, explanation, modification, debugging, and responsible AI assistance as a repeatable learning loop. | [Challenge](units/get-started/challenge.qmd) |
+| 1 | [Reading and Writing Python Syntax](units/python-syntax/index.qmd) | Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior. | [Challenge](units/python-syntax/challenge.qmd) |
+| 2 | [Core Values and Scalar Types](units/core-values-types/index.qmd) | Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries. | [Challenge](units/core-values-types/challenge.qmd) |
+| 3 | [Collections and Iteration](units/collections-iteration/index.qmd) | Choose a data structure based on order, lookup, uniqueness, mutability, and data shape, then traverse it without losing meaning. | [Challenge](units/collections-iteration/challenge.qmd) |
+| 4 | [Decisions and Repetition](units/decisions-repetition/index.qmd) | Translate rules and repeated work into traceable control flow that handles boundaries and makes visible progress toward stopping. | [Challenge](units/decisions-repetition/challenge.qmd) |
+| 5 | [Functions and Call Behavior](units/functions-call-behavior/index.qmd) | Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns. | [Challenge](units/functions-call-behavior/challenge.qmd) |
+| 6 | [Mutability, Identity, and Copying](units/mutability-identity-copying/index.qmd) | Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary. | [Challenge](units/mutability-identity-copying/challenge.qmd) |
+| 7 | [Problem Solving and Basic Algorithms](units/problem-solving-algorithms/index.qmd) | Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries. | [Challenge](units/problem-solving-algorithms/challenge.qmd) |
+| 8 | [Errors, Exceptions, and Debugging](units/errors-exceptions-debugging/index.qmd) | Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time. | [Challenge](units/errors-exceptions-debugging/challenge.qmd) |
+| 9 | [Files, Paths, and External Data](units/files-paths-external-data/index.qmd) | Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely. | [Challenge](units/files-paths-external-data/challenge.qmd) |
+| 10 | [Modules, Environments, and Python Projects](units/modules-environments-projects/index.qmd) | Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution. | [Challenge](units/modules-environments-projects/challenge.qmd) |
+| 11 | [Object-Oriented Python and Dataclasses](units/object-oriented-python/index.qmd) | Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling. | [Challenge](units/object-oriented-python/challenge.qmd) |
+| 12 | [Command-Line Applications](units/command-line-applications/index.qmd) | Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core. | [Challenge](units/command-line-applications/challenge.qmd) |
+| 13 | [Testing Python Programs](units/testing-python-programs/index.qmd) | Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia. | [Challenge](units/testing-python-programs/challenge.qmd) |
+| 14 | [Code Quality and Maintainability](units/code-quality-maintainability/index.qmd) | Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone. | [Challenge](units/code-quality-maintainability/challenge.qmd) |
+| 15 | [Documentation as Part of the Product](units/documentation-publishing/index.qmd) | Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API. | [Challenge](units/documentation-publishing/challenge.qmd) |
 
 ## Assessment and progress
 
-Treat each lesson as a lab: predict, run, explain, modify, quiz, and debug. The
-unit challenge then asks you to select and combine ideas rather than repeat the
-lesson example. Except for the Unit 1 methodology quiz, challenges are designed
-for 60–120 minutes and provide a public contract, progressive checks, three
-levels of hints, and a debugging-evidence record.
+Treat each lesson as a lab: predict, run, explain, modify, quiz, and debug. A
+unit challenge then asks you to select and combine ideas rather than repeat a
+lesson example. Unit 0 concludes with a methodology and setup quiz. The other
+challenges are designed for 60–120 minutes and provide a public contract,
+progressive checks, three hint levels, and a debugging-evidence record.
 
 The progress dashboard is private, self-reported browser storage. It does not
 submit work, grade artifacts, verify identity, or issue credentials.
@@ -216,8 +218,8 @@ availability, and participation details will be announced soon.
 
 ## Start learning
 
-Begin with the learning method, then move through the sequence in order. Return
-to earlier evidence whenever a later task exposes a gap.
+Begin with the learning method, then move through the units in order. Return to
+earlier evidence whenever a later task exposes a gap.
 
-[Start Unit 1](units/learning-workflow-tools/what-is-programming.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
+[Start Unit 0](units/get-started/programming-python-ai.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
 [Review the full pathway](../../pathways/index.qmd){.btn .btn-outline-primary}

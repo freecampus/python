@@ -2,8 +2,8 @@
   (() => {
     "use strict";
 
-    const progressKey = "fcpython.progress.v5";
-    const lastLessonKey = "fcpython.last-lesson.v5";
+    const progressKey = "fcpython.progress.v6";
+    const lastLessonKey = "fcpython.last-lesson.v6";
 
     function readJson(key, fallback) {
       try {
@@ -94,12 +94,12 @@
     }
 
     function emptyProgress() {
-      return { schema_version: 5, courses: {} };
+      return { schema_version: 6, courses: {} };
     }
 
     function readProgress() {
       const saved = readJson(progressKey, null);
-      if (!saved || saved.schema_version !== 5 || !saved.courses) {
+      if (!saved || saved.schema_version !== 6 || !saved.courses) {
         return emptyProgress();
       }
       return saved;
@@ -137,8 +137,8 @@
       }
       if (!progress.courses[id] && create) {
         progress.courses[id] = {
-          curriculum_version: 5,
-          completion_rule_version: 5,
+          curriculum_version: 6,
+          completion_rule_version: 6,
           completed_lessons: {},
           completed_challenges: {},
           capstone_status: "not_started",
@@ -149,8 +149,8 @@
       }
       const state = progress.courses[id] || null;
       if (state) {
-        state.curriculum_version = 5;
-        state.completion_rule_version = 5;
+        state.curriculum_version = 6;
+        state.completion_rule_version = 6;
         state.completed_lessons = state.completed_lessons || {};
         state.completed_challenges = state.completed_challenges || {};
         state.capstone_status = state.capstone_status || "not_started";
@@ -517,7 +517,7 @@
       }
 
       const saved = readJson(lastLessonKey, {
-        schema_version: 5,
+        schema_version: 6,
         global: null,
         courses: {},
       });

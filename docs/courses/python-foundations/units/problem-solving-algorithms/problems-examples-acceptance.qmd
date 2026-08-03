@@ -1,0 +1,148 @@
+---
+title: From a Problem Statement to Examples and Acceptance Rules
+lesson_id: problem-solving-algorithms.problems-examples-acceptance
+lesson_order: 10
+description: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+execute:
+  echo: true
+categories:
+- python-foundations
+- problem-solving-algorithms
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algorithms/problems-examples-acceptance.ipynb
+course_id: python-foundations
+unit_id: problem-solving-algorithms
+unit_number: 7
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Turn a vague request into observable inputs, outputs, boundaries, and failures.
+- **Practice in:** Colab, Jupyter, or a local Python project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+“Summarize the readings” is not yet a specification. It must define accepted input, exact output shape, rounding, empty input, and invalid values. Small acceptance examples reveal disagreement before implementation.
+
+::: {.callout-note title="Prediction"}
+Trace the example by hand. Record the important value, output, or failure before running it.
+:::
+
+## 2. Read and trace a complete case
+
+```python
+readings = [12, 18, 15]
+expected = {"count": 3, "total": 45, "average": 15.0}
+actual = {
+    "count": len(readings),
+    "total": sum(readings),
+    "average": sum(readings) / len(readings),
+}
+assert actual == expected
+```
+
+### What Python does
+
+1. The input shape is concrete.
+2. Expected results are independently calculated.
+3. Internal code may change while observable behavior remains stable.
+
+Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+
+## 3. Debug the boundary
+
+This version is valid Python but does not satisfy the lesson's intended contract:
+
+```python
+def average(values):
+    return sum(values) / len(values) if values else 0
+```
+
+A focused repair is:
+
+```python
+def average(values):
+    if not values:
+        raise ValueError("values must not be empty")
+    return sum(values) / len(values)
+```
+
+Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+
+## 4. Practice from trace to transfer
+
+1. Write acceptance examples for a temperature converter.
+2. Specify empty and one-item behavior for an average.
+3. Turn “fast enough” into a measurable requirement or remove it.
+
+<details class="solution">
+<summary>Show a solution strategy after attempting the tasks</summary>
+
+Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-algorithms-specifications-and-examples",
+  "title": "Specifications and Acceptance Examples checkpoint",
+  "instructions": "Trace the situation before choosing.",
+  "questions": [
+    {
+      "id": "example",
+      "prompt": "What belongs in an acceptance example?",
+      "options": [
+        "Editor colors",
+        "Private local names",
+        "Input and expected observable result",
+        "A package cache"
+      ],
+      "answer_index": 2,
+      "explanation": "Examples make behavior observable."
+    },
+    {
+      "id": "empty",
+      "prompt": "Why specify empty input?",
+      "options": [
+        "It is always valid",
+        "Python cannot store it",
+        "It disables tests",
+        "Its meaning depends on the product rule"
+      ],
+      "answer_index": 3,
+      "explanation": "The contract must choose."
+    },
+    {
+      "id": "change",
+      "prompt": "What may change while behavior stays stable?",
+      "options": [
+        "Internal algorithm",
+        "Expected output",
+        "Valid input",
+        "Failure contract"
+      ],
+      "answer_index": 0,
+      "explanation": "Implementation may be refactored."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- Make the behavior and boundary explicit before implementation.
+- Trace values and preserve useful failure evidence.
+- Prefer an interface that can be checked independently.
+- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

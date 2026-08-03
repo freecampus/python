@@ -1,0 +1,269 @@
+---
+title: Virtual Environments and Dependencies
+lesson_id: modules-environments-projects.virtual-environments-dependencies
+lesson_order: 50
+description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+execute:
+  echo: true
+categories:
+- python-foundations
+- modules-environments-projects
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/modules-environments-projects/virtual-environments-dependencies.ipynb
+course_id: python-foundations
+unit_id: modules-environments-projects
+unit_number: 10
+---
+::: {.lesson-meta}
+- **Level:** Beginner to intermediate
+- **Estimated time:** 35–50 minutes
+- **You will learn:** Use virtual environments, install packages, and understand pyproject.toml.
+- **Practice in:** VS Code and the terminal
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Use virtual environments, install packages, and understand pyproject.toml. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+
+::: {.callout-note title="Questions to answer with evidence"}
+- What problem does **Environments and Dependencies** solve?
+- What value, output, or failure demonstrates that it works?
+- Which boundary or misuse would expose an incorrect implementation?
+:::
+
+::: {.concept-diagram}
+An isolated environment connects one project to an explicit interpreter and dependency set.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  project["Project configuration"] --> environment["Virtual environment"]
+  environment --> python["Python interpreter"]
+  environment --> dependencies["Declared dependencies"]
+  python --> checks["Repeatable project checks"]
+  dependencies --> checks
+```
+:::
+
+## 2. Virtual Environments
+
+Create isolated Python environments for project dependencies.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+A virtual environment is a separate lunchbox: one project's ingredients do not spill into another's.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** A virtual environment gives one project its own installed packages.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+
+```
+
+### Trace it line by line
+
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Installing packages before activating the environment often installs them in the wrong place. Check which python.
+:::
+
+### Practice virtual environments
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Virtual Environments**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "modules-environments-projects-environments-and-dependencies-virtual-environments",
+  "title": "Virtual Environments checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Virtual Environments?",
+      "options": [
+        "Packages extend Python with code written by other people.",
+        "pyproject.toml records project metadata, dependencies, and tool configuration.",
+        "A virtual environment gives one project its own installed packages.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+      ],
+      "answer_index": 2,
+      "explanation": "A virtual environment gives one project its own installed packages."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Installing Packages
+
+Install third-party libraries and record what your project needs.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+Installing a package is borrowing a specialized tool from a community workshop.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** Packages extend Python with code written by other people.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+
+```
+
+### Trace it line by line
+
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Use python -m pip so pip belongs to the Python interpreter you are using.
+:::
+
+### Practice installing packages
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **Installing Packages**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "modules-environments-projects-environments-and-dependencies-installing-packages",
+  "title": "Installing Packages checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to Installing Packages?",
+      "options": [
+        "A virtual environment gives one project its own installed packages.",
+        "pyproject.toml records project metadata, dependencies, and tool configuration.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
+        "Packages extend Python with code written by other people."
+      ],
+      "answer_index": 3,
+      "explanation": "Packages extend Python with code written by other people."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. pyproject.toml
+
+Understand the configuration file used by modern Python projects.
+
+::: {.callout-tip title="A useful analogy—and its limit"}
+pyproject.toml is a project recipe card: name, ingredients, tools, and rules in one place.
+
+The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
+:::
+
+**Contract:** pyproject.toml records project metadata, dependencies, and tool configuration.
+
+### Read and predict the example
+
+Before running it, write the values or output you expect and identify the line that produces each one.
+
+```python
+
+```
+
+### Trace it line by line
+
+
+Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+
+::: {.callout-warning title="Common mistake"}
+Configuration files are read by tools. A typo may not fail until that tool runs.
+:::
+
+### Practice pyproject.toml
+
+1. Recreate the example and annotate the value or state produced by each line.
+2. Choose one input or boundary that matters specifically to **pyproject.toml**. Predict and test it.
+3. Introduce the common mistake above, capture the evidence, and repair one cause.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the practice</summary>
+
+Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+
+</details>
+
+### Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "modules-environments-projects-environments-and-dependencies-pyproject-toml",
+  "title": "pyproject.toml checkpoint",
+  "instructions": "Choose the description that matches the code and contract in this section.",
+  "questions": [
+    {
+      "id": "contract",
+      "prompt": "Which description belongs to pyproject.toml?",
+      "options": [
+        "pyproject.toml records project metadata, dependencies, and tool configuration.",
+        "A virtual environment gives one project its own installed packages.",
+        "Packages extend Python with code written by other people.",
+        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+      ],
+      "answer_index": 0,
+      "explanation": "pyproject.toml records project metadata, dependencies, and tool configuration."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Integrate the lesson
+
+Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+
+## 6. Key points
+
+- **Virtual Environments:** A virtual environment gives one project its own installed packages.
+- **Installing Packages:** Packages extend Python with code written by other people.
+- **pyproject.toml:** pyproject.toml records project metadata, dependencies, and tool configuration.
+- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

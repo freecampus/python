@@ -1,0 +1,68 @@
+---
+title: Testing Python Programs Overview
+description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
+categories:
+- python-foundations
+- testing-python-programs
+- overview
+order: 0
+colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/index.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 13
+- **Estimated time:** 6–12 hours including the challenge
+- **Unit outcome:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-chapter-lab: start -->
+## 1. The capability you are building
+
+Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+
+This is a connected learning sequence, not a reference list. In every lesson,
+write a prediction, run the smallest complete example, explain the evidence,
+make one controlled change, and retain one useful failure.
+
+## 2. Before you start
+
+**Prior knowledge:** Complete Unit 12 and bring its challenge notes and debugging record.
+
+Prepare one notebook or project folder for the unit. Keep a four-column evidence
+log: prediction, observed result, explanation, and next controlled change.
+
+## 3. Lessons
+
+| Step | Lesson | Purpose |
+|---:|---|---|
+| 1 | [What a Test Proves—and What It Does Not](what-tests-prove.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 2 | [pytest Discovery, Assertions, and Failure Reports](pytest-discovery-failures.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 3 | [Fixtures, Parametrization, Temporary Paths, and Boundaries](fixtures-parametrization-boundaries.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 4 | [Test Doubles, Mocking, Monkeypatching, and Dependency Injection](test-doubles-dependency-injection.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 5 | [Unit, Integration, Smoke, and End-to-End Tests](test-levels.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 6 | [Properties, Regression Tests, and Test-Driven Development](properties-regressions-tdd.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 7 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+
+## 4. How to study this unit
+
+1. Attempt prediction prompts before executing code.
+2. Type or adapt examples instead of only reading them.
+3. Treat quiz errors as diagnoses and explain why each distractor fails.
+4. Complete the challenge from a clean state and retain debugging evidence.
+
+::: {.callout-tip title="Do not optimize for speed"}
+The goal is not a fast first run. Aim to explain why the program behaved as it
+did and how one controlled change produced new evidence.
+:::
+
+## 5. Unit evidence
+
+By the end, retain working exercises, quiz corrections in your own words, one
+debugging record, and a challenge solution that passes from a clean state.
+
+<!-- fcpython-chapter-lab: end -->

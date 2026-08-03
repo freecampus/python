@@ -1,0 +1,141 @@
+---
+title: Type Annotations and Static Checking
+lesson_id: code-quality-maintainability.type-annotations-static-checking
+lesson_order: 20
+description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+execute:
+  echo: true
+categories:
+- python-foundations
+- code-quality-maintainability
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintainability/type-annotations-static-checking.ipynb
+course_id: python-foundations
+unit_id: code-quality-maintainability
+unit_number: 14
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Use type hints and a checker to catch mismatched value types early.
+- **Practice in:** Generated Colab notebook and a local project when appropriate
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+Type hints document the values that cross a boundary and let static tools compare implementations with those contracts. They supplement runtime tests; they do not validate external data automatically.
+
+::: {.callout-note title="Prediction"}
+Before running the example, write the output or failure you expect and identify the line that will produce it.
+:::
+
+## 2. Type a record summarizer without replacing input validation.
+
+```python
+from collections.abc import Iterable
+
+def total_minutes(values: Iterable[int]) -> int:
+    """Return the sum of non-negative minute counts."""
+    total = 0
+    for value in values:
+        if value < 0:
+            raise ValueError("minutes cannot be negative")
+        total += value
+    return total
+
+assert total_minutes([20, 35]) == 55
+```
+
+### Step-by-step explanation
+
+1. `Iterable[int]` accepts any iterable producing integers rather than demanding one concrete container.
+2. The return annotation states that successful calls produce an integer.
+3. The explicit comparison still enforces the runtime domain rule; annotations alone do not reject negative values.
+
+Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
+
+## 3. Debug a contract violation
+
+This version is syntactically valid but communicates or implements the wrong contract:
+
+```python
+def repeat(word: str, times: int) -> str:
+    return word * times
+
+repeat("ha", "3")
+```
+
+A focused repair is:
+
+```python
+def repeat(word: str, times: int) -> str:
+    return word * times
+
+assert repeat("ha", 3) == "hahaha"
+```
+
+Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
+
+## 4. Practice from trace to transfer
+
+1. Add annotations to a function that may return `None`.
+2. Use a dataclass or TypedDict to describe a structured record.
+3. Run mypy on a deliberate argument mismatch, then repair the caller rather than hiding the error.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the tasks</summary>
+
+Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
+
+</details>
+
+## 5. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "code-quality-maintainability-type-checking",
+  "title": "Type Checking checkpoint",
+  "instructions": "Trace the code and contract before choosing.",
+  "questions": [
+    {
+      "id": "runtime",
+      "prompt": "What happens to annotations during an ordinary Python call?",
+      "options": [
+        "They do not automatically convert or validate arguments",
+        "They convert every string to the annotated type",
+        "They prevent exceptions",
+        "They run pytest"
+      ],
+      "answer_index": 0,
+      "explanation": "Static tools inspect annotations, but ordinary calls still receive the supplied runtime objects."
+    },
+    {
+      "id": "abstract",
+      "prompt": "Why accept `Iterable[int]` instead of `list[int]` when only iteration is needed?",
+      "options": [
+        "It forces the result to be a tuple",
+        "It documents the smallest useful input interface",
+        "It makes values immutable",
+        "It disables generators"
+      ],
+      "answer_index": 1,
+      "explanation": "A narrow behavioral interface supports more valid callers without weakening the contract."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Key points
+
+- State the behavior contract before selecting syntax or tools.
+- Trace the values and boundaries that provide observable evidence.
+- Preserve one useful failure and verify the repair from a clean state.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)

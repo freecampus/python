@@ -1,0 +1,146 @@
+---
+title: Properties, Regression Tests, and Test-Driven Development
+lesson_id: testing-python-programs.properties-regressions-tdd
+lesson_order: 60
+description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
+execute:
+  echo: true
+categories:
+- python-foundations
+- testing-python-programs
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/properties-regressions-tdd.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+A few hand-picked examples can miss entire classes of inputs. Properties express relationships that should hold across many generated cases, while regression tests preserve evidence from real failures.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+def normalize_name(name):
+    return " ".join(name.split()).casefold()
+
+
+examples = [" Ada ", "ADA", "Ada"]
+for example in examples:
+    normalized = normalize_name(example)
+    assert normalize_name(normalized) == normalized
+```
+
+### Step-by-step explanation
+
+1. Normalization strips repeated whitespace and case differences.
+2. The assertion states idempotence: normalizing twice equals normalizing once.
+3. Each example exercises the same relationship rather than one exact hard-coded result.
+4. A property tool such as Hypothesis can generate far more strings for this contract.
+
+::: {.callout-note title="Make one controlled change"}
+Write a second property stating that normalized output has no leading/trailing whitespace, then try empty and whitespace-only text.
+:::
+
+## 2. Investigate the important boundary
+
+Properties do not replace concrete examples. Keep examples that explain the contract and regression cases that reproduce past bugs; add generated inputs where a broad invariant supplies extra evidence.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+def test_regression_for_tabs():
+    # This case records a bug that once preserved a tab between names.
+    assert normalize_name("Ada	Lovelace") == "ada lovelace"
+
+
+test_regression_for_tabs()
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "testing-python-programs-properties-regressions-tdd",
+  "title": "Properties, Regression Tests, and Test-Driven Development checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "What does idempotence mean for `normalize_name`?",
+      "options": [
+        "Every input becomes an empty string.",
+        "Normalization changes its result on every call.",
+        "Applying normalization again does not change an already normalized result.",
+        "The function must read random global state."
+      ],
+      "answer_index": 2,
+      "explanation": "Idempotence is the property `f(f(x)) == f(x)` for inputs in the function's contract."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Properties describe relationships across many valid inputs.
+- Regression tests preserve a minimal example of a past failure.
+- The TDD loop is failing evidence, the smallest behavior change, then safe refactoring.
+:::
+
+## References
+
+- https://hypothesis.readthedocs.io/en/latest/
+- https://docs.pytest.org/en/stable/getting-started.html

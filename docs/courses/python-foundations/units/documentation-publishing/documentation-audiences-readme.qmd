@@ -1,0 +1,149 @@
+---
+title: Documentation Audiences and a Useful README
+lesson_id: documentation-publishing.documentation-audiences-readme
+lesson_order: 10
+description: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+course_id: python-foundations
+unit_id: documentation-publishing
+unit_number: 15
+execute:
+  echo: true
+categories:
+- python-foundations
+- documentation-publishing
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/documentation-audiences-readme.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+One long document cannot serve every reader equally. A useful documentation set separates learning, task completion, explanation, and exact reference while the README gives a verified entry path.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+README_SECTIONS = [
+    "Purpose",
+    "Installation",
+    "Quick start",
+    "Common failures",
+    "Support",
+]
+
+for position, section in enumerate(README_SECTIONS, start=1):
+    print(f"{position}. {section}")
+```
+
+### Step-by-step explanation
+
+1. The list names the minimum journey a new reader needs.
+2. `enumerate` adds human-facing numbering without manual index state.
+3. Purpose and quick start answer different questions.
+4. Failures and support prevent the happy path from being the only documented path.
+
+::: {.callout-note title="Make one controlled change"}
+Add a `Limitations` section and write one sentence explaining what the package deliberately does not do.
+:::
+
+## 2. Investigate the important boundary
+
+A tutorial teaches through a guided learning path; a how-to solves a concrete task; explanation develops understanding; reference states exact facts. Mixing all four into every page makes each task harder to scan.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+quick_start = """from studytools import total_minutes
+
+print(total_minutes([20, 35]))
+"""
+
+compile(quick_start, "README quick start", "exec")
+print("Quick-start Python parses successfully.")
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "documentation-publishing-documentation-audiences-readme",
+  "title": "Documentation Audiences and a Useful README checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "What should a README quick start optimize for?",
+      "options": [
+        "The shortest verified path from installation to a meaningful result.",
+        "A complete dump of every internal function.",
+        "An undocumented command that only works on the author's machine.",
+        "A history of every source-code edit."
+      ],
+      "answer_index": 0,
+      "explanation": "A quick start establishes early success and a dependable entry point before readers choose deeper documentation."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 2,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Write for a named audience and task.
+- Separate tutorials, how-to guides, explanations, and reference by purpose.
+- Run README commands and examples instead of trusting copied output.
+:::
+
+## References
+
+- https://documentation.divio.com/
+- https://www.writethedocs.org/guide/writing/beginners-guide-to-docs/

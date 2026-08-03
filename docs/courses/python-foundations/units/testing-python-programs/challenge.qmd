@@ -1,0 +1,222 @@
+---
+title: 'Unit Challenge: Protect the Record Converter'
+description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+challenge_id: testing-python-programs.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 2
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- testing-python-programs
+- unit-challenge
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/challenge.ipynb
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
+---
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 13 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+The suite covers ordinary, boundary, invalid, parametrized, integration, regression, and property behavior with failures that identify the violated contract.
+
+**Scenario:** Protect the record converter from Unit 12 with a layered pytest suite. Preserve one past whitespace bug, exercise invalid records, isolate stream output, and add a property over normalized names.
+
+::: {.callout-note title="Work independently, but not without support"}
+Use the starter contract, run one group of checks at a time, and open hints only
+after you can state the evidence blocking your next step.
+:::
+
+## 2. Understand the acceptance example
+
+Before implementation, restate the normal input, expected result, important
+boundary, and one anticipated failure in your own words.
+
+### Constraints
+
+1. Test public behavior instead of private implementation lines.
+2. Use pytest parametrization for related examples.
+3. Use `StringIO` or pytest capture for streams.
+4. Keep Selenium and external services out of this project.
+
+## 3. Start from the contract
+
+```python
+import pytest
+
+from record_converter import convert_record
+
+
+@pytest.mark.parametrize(
+    ("record", "expected"),
+    [
+        ({"name": " Ada ", "score": "9"}, {"name": "Ada", "score": 9}),
+        ({"name": "Lin", "score": 0}, {"name": "Lin", "score": 0}),
+    ],
+)
+def test_convert_record_examples(record, expected):
+    """Protect ordinary and boundary conversion behavior."""
+    raise NotImplementedError
+```
+
+## 4. Build in small stages
+
+1. Make the smallest normal case observable.
+2. Run the nearest check and read its complete failure evidence.
+3. Add one boundary behavior without weakening earlier checks.
+4. Restart and run the complete artifact from top to bottom.
+
+## 5. Run progressive assertions
+
+```python
+def test_convert_record_rejects_empty_name():
+    with pytest.raises(ValueError, match="name"):
+        convert_record({"name": "   ", "score": "8"})
+
+
+def test_regression_repeated_whitespace():
+    converted = convert_record({"name": "Ada   Lovelace", "score": "9"})
+    assert converted["name"] == "Ada Lovelace"
+
+
+# Property to implement with Hypothesis:
+# normalized = convert_record({"name": generated_name, "score": "1"})["name"]
+# assert normalized == " ".join(normalized.split())
+```
+
+::: {.callout-warning title="Do not edit expected values to create a pass"}
+If a check appears wrong, explain the contract conflict before changing either
+side. Otherwise, repair the implementation and preserve the check.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+The parametrized test body needs one equality assertion.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Use a regression name with multiple internal spaces so the old failure is reproducible.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+For a CLI integration check, call `main` with injected `StringIO` streams before considering a subprocess smoke test.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Preserve one failing check. Record its inputs, actual result or exception,
+expected result, one hypothesis, one controlled change, and the verified rerun.
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+
+## 8. Compare with a solution path
+
+<details>
+<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+
+```python
+def test_convert_record_examples(record, expected):
+    assert convert_record(record) == expected
+
+
+# The complete solution adds the supplied invalid/regression cases, a bounded
+# Hypothesis property, and one `main` integration test with isolated streams.
+```
+
+Compare contracts and decisions, not only line-for-line syntax. If your solution
+also satisfies the constraints and checks, explain one trade-off between the
+approaches.
+
+</details>
+
+## 9. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-testing-python-programs-challenge",
+  "title": "Protect the Record Converter readiness check",
+  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "questions": [
+    {
+      "id": "design-boundary",
+      "prompt": "Why retain the repeated-whitespace regression case?",
+      "options": [
+        "It replaces every other test level.",
+        "It proves all possible strings work.",
+        "It reproduces a real past failure and prevents a later refactor from restoring it.",
+        "It requires a browser automation framework."
+      ],
+      "answer_index": 2,
+      "explanation": "It reproduces a real past failure and prevents a later refactor from restoring it."
+    },
+    {
+      "id": "clean-evidence",
+      "prompt": "What should happen before recording this challenge as complete?",
+      "options": [
+        "The unchanged checks pass from a clean state and the important decisions can be explained.",
+        "The expected values are edited to match the current output.",
+        "Only the final successful line is kept.",
+        "Several unrelated features are added."
+      ],
+      "answer_index": 0,
+      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | Acceptance examples and progressive checks pass unchanged. |
+| Scope | The artifact follows the constraints without unrelated features. |
+| Reasoning | Important values, boundaries, and design choices can be traced. |
+| Debugging | One record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+
+This button stores a self-reported marker only in this browser. It does not
+submit work, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows design choices without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

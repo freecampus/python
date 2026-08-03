@@ -1,0 +1,158 @@
+---
+title: Unit, Integration, Smoke, and End-to-End Tests
+lesson_id: testing-python-programs.test-levels
+lesson_order: 50
+description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
+execute:
+  echo: true
+categories:
+- python-foundations
+- testing-python-programs
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/test-levels.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+One test level cannot provide every kind of confidence. Choose the smallest boundary that can reveal the failure you care about, then add a few broader checks for integration risk.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+import json
+
+
+def summarize(payload):
+    records = json.loads(payload)
+    return sum(record["minutes"] for record in records)
+
+
+# Focused unit-style behavior check.
+assert summarize('[{"minutes": 20}, {"minutes": 15}]') == 35
+
+# Boundary check for malformed serialized input.
+try:
+    summarize("not json")
+except json.JSONDecodeError:
+    malformed_is_rejected = True
+
+assert malformed_is_rejected
+```
+
+### Step-by-step explanation
+
+1. The first assertion checks the composed parsing-and-summing behavior in memory.
+2. The second case crosses the JSON parser boundary.
+3. The anticipated decoder exception is part of the observed contract.
+4. Neither test needs a browser, subprocess, or network service.
+
+::: {.callout-note title="Make one controlled change"}
+Move the calculation into `total_minutes(records)` and decide which assertion is now a unit test and which remains an integration test.
+:::
+
+## 2. Investigate the important boundary
+
+A smoke test asks whether the main path starts and completes at all. End-to-end tests cross the full deployed interface and cost more to diagnose. Selenium is deferred because Foundations does not build a browser application.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+def total_minutes(records):
+    return sum(record["minutes"] for record in records)
+
+
+assert total_minutes([]) == 0
+assert total_minutes([{"minutes": 5}]) == 5
+
+# The parser plus calculation can be checked separately as an integration boundary.
+assert total_minutes(json.loads('[{"minutes": 7}]')) == 7
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "testing-python-programs-test-levels",
+  "title": "Unit, Integration, Smoke, and End-to-End Tests checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "When is an integration test preferable to a smaller unit test?",
+      "options": [
+        "Whenever a function has more than one line.",
+        "When the risk lies in whether multiple real components agree at their boundary.",
+        "Only when no assertions are available.",
+        "When the goal is to avoid reading failure output."
+      ],
+      "answer_index": 1,
+      "explanation": "Integration tests provide evidence about collaboration contracts that isolated tests cannot prove."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A copied solution whose behavior was not rerun.",
+        "A written prediction, the observed result, and an explanation tied to the changed line."
+      ],
+      "answer_index": 3,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Unit tests isolate focused behavior; integration tests exercise real component boundaries.
+- Smoke tests provide shallow evidence that a main path operates.
+- Use a small number of costly end-to-end tests for risks only the full interface can expose.
+:::
+
+## References
+
+- https://docs.pytest.org/en/stable/explanation/goodpractices.html

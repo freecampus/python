@@ -1,15 +1,20 @@
 ---
-title: "Problem Decomposition and Basic Algorithms Overview"
-description: "Turn a written problem into examples, pseudocode, small steps, and a correct search, count, or transformation."
-categories: [python-foundations, problem-solving-algorithms, overview]
+title: Problem Solving and Basic Algorithms Overview
+description: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+course_id: python-foundations
+unit_id: problem-solving-algorithms
+unit_number: 7
+categories:
+- python-foundations
+- problem-solving-algorithms
+- overview
 order: 0
 colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algorithms/index.ipynb
 ---
-
 ::: {.lesson-meta}
-- **Level:** Python Foundations · Unit 6
+- **Level:** Python Foundations · Unit 7
 - **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Turn a written problem into examples, pseudocode, small steps, and a correct search, count, or transformation.
+- **Unit outcome:** Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
 - **Practice in:** Generated Colab notebooks and, when introduced, a local project
 :::
 
@@ -18,47 +23,44 @@ colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algor
 <!-- fcpython-chapter-lab: start -->
 ## 1. The capability you are building
 
-Turn a written problem into examples, pseudocode, small steps, and a correct search, count, or transformation.
+Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
 
-This unit is a learning sequence rather than a reference list. In every lesson,
+This is a connected learning sequence, not a reference list. In every lesson,
 write a prediction, run the smallest complete example, explain the evidence,
 make one controlled change, and retain one useful failure.
 
 ## 2. Before you start
 
-**Prior knowledge:** Complete Unit 5 and bring its challenge notes, especially one debugging record.
+**Prior knowledge:** Complete Unit 6 and bring its challenge notes and debugging record.
 
-Prepare one notebook or project folder for the unit. Keep a small evidence log
-with four columns: prediction, observed result, explanation, and next change.
+Prepare one notebook or project folder for the unit. Keep a four-column evidence
+log: prediction, observed result, explanation, and next controlled change.
 
 ## 3. Lessons
 
 | Step | Lesson | Purpose |
 |---:|---|---|
-| 1 | [Specifications and Acceptance Examples](specifications-and-examples.qmd) | Turn a vague request into observable inputs, outputs, boundaries, and failures. |
-| 2 | [Decomposition and Pseudocode](decomposition-and-pseudocode.qmd) | Split a task into named, checkable responsibilities before choosing syntax. |
-| 3 | [Search, Count, and Transform Patterns](search-count-transform.qmd) | Recognize common loop patterns and reason about correctness and basic cost. |
-| 4 | [Unit Challenge](challenge.qmd) | Combine the unit skills in a guided 60–120 minute task. |
+| 1 | [From a Problem Statement to Examples and Acceptance Rules](problems-examples-acceptance.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 2 | [Decomposition, Pseudocode, and Incremental Implementation](decomposition-pseudocode-implementation.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 3 | [Search, Count, Aggregate, Filter, and Transform Patterns](core-algorithm-patterns.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 4 | [Correctness, Boundaries, and Practical Efficiency](correctness-boundaries-efficiency.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
+| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
 
 ## 4. How to study this unit
 
-1. Attempt the prediction prompts before revealing output.
-2. Type or adapt the examples rather than only reading them.
-3. Use quizzes as diagnosis: explain why each distractor fails.
-4. Complete the challenge from a clean state and keep the debugging evidence.
+1. Attempt prediction prompts before executing code.
+2. Type or adapt examples instead of only reading them.
+3. Treat quiz errors as diagnoses and explain why each distractor fails.
+4. Complete the challenge from a clean state and retain debugging evidence.
 
 ::: {.callout-tip title="Do not optimize for speed"}
-A fast first run is not the goal. Aim to explain why the program behaved as it
-did and how one change caused the new result.
+The goal is not a fast first run. Aim to explain why the program behaved as it
+did and how one controlled change produced new evidence.
 :::
 
 ## 5. Unit evidence
 
-By the end, keep:
-
-- working lesson exercises and their controlled modifications;
-- quiz corrections written in your own words;
-- one complete debugging record; and
-- the challenge solution with passing checks and a clean rerun.
+By the end, retain working exercises, quiz corrections in your own words, one
+debugging record, and a challenge solution that passes from a clean state.
 
 <!-- fcpython-chapter-lab: end -->

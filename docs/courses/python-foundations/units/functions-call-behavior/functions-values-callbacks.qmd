@@ -1,0 +1,154 @@
+---
+title: Functions as Values and Callbacks
+lesson_id: functions-call-behavior.functions-values-callbacks
+lesson_order: 60
+description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+course_id: python-foundations
+unit_id: functions-call-behavior
+unit_number: 5
+execute:
+  echo: true
+categories:
+- python-foundations
+- functions-call-behavior
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/functions-values-callbacks.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+A traversal algorithm should not need rewriting whenever the caller changes how values are selected, sorted, or transformed. Passing behavior as a value separates mechanism from policy.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+def by_minutes(session):
+    return session["minutes"]
+
+
+sessions = [
+    {"topic": "loops", "minutes": 25},
+    {"topic": "lists", "minutes": 40},
+]
+
+selector = by_minutes
+longest = max(sessions, key=selector)
+print(longest["topic"])
+```
+
+### Step-by-step explanation
+
+1. The function definition creates a callable object named `by_minutes`.
+2. Assignment stores that same function object in `selector`; no call happens yet.
+3. `max` calls the selector once for each record.
+4. The record whose key result is `40` wins, so `lists` is displayed.
+
+::: {.callout-note title="Make one controlled change"}
+Write `by_topic` returning the topic text and pass it to `sorted`. Predict the alphabetical order.
+:::
+
+## 2. Investigate the important boundary
+
+`key=by_minutes` passes the function. `key=by_minutes(session)` calls it immediately and passes its result, which is not the callable interface `max` expects.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+def apply_twice(operation, value):
+    """Return the result of applying operation two times."""
+    return operation(operation(value))
+
+
+def add_one(number):
+    return number + 1
+
+
+print(apply_twice(add_one, 3))
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "functions-call-behavior-functions-values-callbacks",
+  "title": "Functions as Values and Callbacks checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "Why is there no pair of parentheses after `by_minutes` in `key=by_minutes`?",
+      "options": [
+        "`max` needs the function object so it can call it for each candidate.",
+        "Functions can never be called with parentheses.",
+        "The dictionary calls the function automatically.",
+        "Parentheses would convert the function into text."
+      ],
+      "answer_index": 0,
+      "explanation": "Functions are values; passing the function and calling the function are distinct operations."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 2,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A function object can be assigned, stored, passed, and returned.
+- Callbacks let callers supply policy to reusable mechanics.
+- Use a small lambda only when it remains clearer than a named function.
+:::
+
+## References
+
+- https://docs.python.org/3/tutorial/controlflow.html#lambda-expressions
+- https://docs.python.org/3/library/functions.html#max

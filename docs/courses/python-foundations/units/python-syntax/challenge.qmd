@@ -1,0 +1,219 @@
+---
+title: 'Unit Challenge: Repair and Annotate a Broken Python Program'
+description: Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
+challenge_id: python-syntax.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 2
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- python-syntax
+- unit-challenge
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/python-syntax/challenge.ipynb
+course_id: python-foundations
+unit_id: python-syntax
+unit_number: 1
+---
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 1 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
+- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+The repaired source compiles, creates the specified names, chooses the focused-session message, and contains a module docstring.
+
+**Scenario:** A study-session script was copied from a message and no longer parses. Repair its tokens and indentation, then annotate what each statement contributes.
+
+::: {.callout-note title="Work independently, but not without support"}
+Use the starter contract, run one group of checks at a time, and open hints only
+after you can state the evidence blocking your next step.
+:::
+
+## 2. Understand the acceptance example
+
+Before implementation, restate the normal input, expected result, important
+boundary, and one anticipated failure in your own words.
+
+### Constraints
+
+1. Edit only the text assigned to `program_source`.
+2. Keep the names `course`, `minutes`, and `message`.
+3. Use a docstring, not a comment, as the first statement.
+4. Do not remove the conditional block.
+
+## 3. Start from the contract
+
+```python
+program_source = '''
+"""Describe one focused study session."""
+course = "Python Foundations"
+minutes = 45
+
+if minutes >= 30
+message = course + ": focused session"
+else:
+message = course + ": short session"
+'''
+
+# Keep these names; the checks compile and run the repaired source.
+compiled_program = None
+namespace = {}
+```
+
+## 4. Build in small stages
+
+1. Make the smallest normal case observable.
+2. Run the nearest check and read its complete failure evidence.
+3. Add one boundary behavior without weakening earlier checks.
+4. Restart and run the complete artifact from top to bottom.
+
+## 5. Run progressive assertions
+
+```python
+compiled_program = compile(program_source, "study_session.py", "exec")
+exec(compiled_program, namespace)
+
+assert namespace["course"] == "Python Foundations"
+assert namespace["minutes"] == 45
+assert namespace["message"] == "Python Foundations: focused session"
+assert namespace["__doc__"] == "Describe one focused study session."
+```
+
+::: {.callout-warning title="Do not edit expected values to create a pass"}
+If a check appears wrong, explain the contract conflict before changing either
+side. Otherwise, repair the implementation and preserve the check.
+:::
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+The `if` header needs a delimiter that announces an indented suite.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+Both assignments to `message` belong inside their corresponding blocks.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+A module docstring is the first string expression in the repaired source.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Preserve one failing check. Record its inputs, actual result or exception,
+expected result, one hypothesis, one controlled change, and the verified rerun.
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+
+## 8. Compare with a solution path
+
+<details>
+<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+
+```python
+program_source = '''
+"""Describe one focused study session."""
+course = "Python Foundations"
+minutes = 45
+
+if minutes >= 30:
+    message = course + ": focused session"
+else:
+    message = course + ": short session"
+'''
+```
+
+Compare contracts and decisions, not only line-for-line syntax. If your solution
+also satisfies the constraints and checks, explain one trade-off between the
+approaches.
+
+</details>
+
+## 9. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-python-syntax-challenge",
+  "title": "Repair and Annotate a Broken Python Program readiness check",
+  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "questions": [
+    {
+      "id": "design-boundary",
+      "prompt": "Why does the assignment after `if` need indentation?",
+      "options": [
+        "Indentation marks that statement as part of the conditional block.",
+        "Indentation changes the string into an integer.",
+        "Every assignment must begin with eight spaces.",
+        "The variable name requires whitespace."
+      ],
+      "answer_index": 0,
+      "explanation": "Indentation marks that statement as part of the conditional block."
+    },
+    {
+      "id": "clean-evidence",
+      "prompt": "What should happen before recording this challenge as complete?",
+      "options": [
+        "The unchanged checks pass from a clean state and the important decisions can be explained.",
+        "The expected values are edited to match the current output.",
+        "Only the final successful line is kept.",
+        "Several unrelated features are added."
+      ],
+      "answer_index": 0,
+      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | Acceptance examples and progressive checks pass unchanged. |
+| Scope | The artifact follows the constraints without unrelated features. |
+| Reasoning | Important values, boundaries, and design choices can be traced. |
+| Debugging | One record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+
+This button stores a self-reported marker only in this browser. It does not
+submit work, grade it, verify identity, or issue a certificate.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The starter contract narrows design choices without supplying the implementation.
+- Progressive assertions turn a large task into observable behaviors.
+- Hints support the next decision; they do not replace prediction and evidence.
+- A clean rerun and explanation matter as much as the final output.

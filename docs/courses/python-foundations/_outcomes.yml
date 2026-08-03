@@ -1,283 +1,222 @@
 schema_version: 1
-curriculum_version: 5
+curriculum_version: 6
 course_id: python-foundations
 graduate_outcomes:
-  trace-and-explain: Trace Python execution and explain values, state, control flow, calls, and failures.
-  decompose-problems: Turn concrete examples and constraints into small algorithms and interfaces.
-  model-data: Choose and transform text, sequences, mappings, sets, objects, and persistent data safely.
-  design-functions: Design functions with explicit contracts, return values, scope, and independent checks.
-  debug-from-evidence: Reduce failures and test one hypothesis at a time using reproducible evidence.
-  handle-boundaries: Validate external input, handle anticipated errors, and preserve useful context.
-  build-reproducibly: Organize, configure, install, and run a Python project from declared metadata.
-  collaborate-with-git: Create reviewable Git history and integrate changes through branches and remotes.
-  verify-quality: Use pytest, documentation, formatting, linting, and typing to protect behavior.
-  operate-reliably: Choose suitable abstractions and operate observable commands, resources, and CI workflows.
+  learn-independently: Use prediction, clean execution, documentation, deliberate practice, and responsible AI assistance to learn from evidence.
+  trace-and-explain: Trace Python execution and explain values, state, control flow, calls, object relationships, and failures.
+  model-data: Choose and transform scalar values, collections, text, time, objects, and persistent data safely.
+  design-abstractions: Design functions, modules, packages, and objects with explicit contracts and cohesive responsibilities.
+  solve-problems: Turn requirements and examples into small algorithms whose boundaries and practical costs can be explained.
+  debug-from-evidence: Reduce failures and test one hypothesis at a time using tracebacks, tools, reproductions, and controlled experiments.
+  handle-boundaries: Validate external input, manage resources, handle anticipated errors, and preserve useful context.
+  build-projects: Organize, version, configure, install, package, and operate a reproducible Python project.
+  verify-quality: Use assertions, pytest, property checks, typing, formatting, linting, and quality gates to protect behavior.
+  communicate: Explain software through useful names, contracts, READMEs, API documentation, executable examples, and published sites.
 units:
+  - number: 0
+    id: get-started
+    outcome: Choose a dependable learning environment and use prediction, execution, explanation, modification, debugging, and responsible AI assistance as a repeatable learning loop.
+    graduate_outcome_ids:
+      - learn-independently
+      - trace-and-explain
+    lesson_ids:
+      - get-started.programming-python-ai
+      - get-started.learning-loop-ai
+      - get-started.notebooks-literate-workflows
+      - get-started.local-python-environment
+    challenge_id: get-started.challenge
   - number: 1
-    id: learning-workflow-tools
-    outcome:
-      Choose a dependable practice environment and use prediction, clean reruns, and evidence to
-      learn deliberately.
+    id: python-syntax
+    outcome: Read a small Python program as tokens, expressions, statements, and blocks; identify what is syntactically valid before reasoning about behavior.
     graduate_outcome_ids:
       - trace-and-explain
+      - learn-independently
     lesson_ids:
-      - learning-workflow-tools.what-is-programming
-      - learning-workflow-tools.google-colab
-      - learning-workflow-tools.local-python-tools
-    challenge_id: learning-workflow-tools.challenge
+      - python-syntax.values-names-expressions-statements
+      - python-syntax.keywords-operators-vocabulary
+      - python-syntax.indentation-blocks-multiline
+      - python-syntax.comments-docstrings-syntax-errors
+    challenge_id: python-syntax.challenge
   - number: 2
-    id: numeric-foundations
-    outcome: Represent quantities, trace assignments, choose numeric operations, and explain rounding decisions.
+    id: core-values-types
+    outcome: Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
     graduate_outcome_ids:
       - trace-and-explain
       - model-data
     lesson_ids:
-      - numeric-foundations.values-variables-types
-      - numeric-foundations.numeric-computation
-    challenge_id: numeric-foundations.challenge
+      - core-values-types.objects-types-none-conversion
+      - core-values-types.integers-floats-precision
+      - core-values-types.decimal-fraction-complex
+      - core-values-types.strings-unicode-input-formatting
+      - core-values-types.booleans-comparisons-truth-values
+      - core-values-types.dates-times-durations-parsing
+    challenge_id: core-values-types.challenge
   - number: 3
-    id: text-input-output
-    outcome:
-      Create, transform, validate, encode, and display text without confusing strings with numbers
-      or bytes.
+    id: collections-iteration
+    outcome: Choose a data structure based on order, lookup, uniqueness, mutability, and data shape, then traverse it without losing meaning.
     graduate_outcome_ids:
       - model-data
-      - handle-boundaries
+      - trace-and-explain
     lesson_ids:
-      - text-input-output.strings-input-output
-      - text-input-output.unicode-and-text-boundaries
-    challenge_id: text-input-output.challenge
+      - collections-iteration.lists
+      - collections-iteration.tuples-ranges-packing
+      - collections-iteration.dictionaries
+      - collections-iteration.sets-frozen-sets
+      - collections-iteration.nested-data-iterables-sorting
+    challenge_id: collections-iteration.challenge
   - number: 4
-    id: decisions
-    outcome: Translate rules into Boolean expressions and branches whose boundary behavior can be traced.
+    id: decisions-repetition
+    outcome: Translate rules and repeated work into traceable control flow that handles boundaries and makes visible progress toward stopping.
     graduate_outcome_ids:
       - trace-and-explain
-      - decompose-problems
+      - solve-problems
     lesson_ids:
-      - decisions.booleans-and-conditionals
-      - decisions.boolean-reasoning
-    challenge_id: decisions.challenge
+      - decisions-repetition.conditionals-decision-tables
+      - decisions-repetition.boolean-reasoning-short-circuit
+      - decisions-repetition.for-loops-traversal
+      - decisions-repetition.while-loops-state-termination
+      - decisions-repetition.loop-control-comprehensions
+    challenge_id: decisions-repetition.challenge
   - number: 5
-    id: loops-and-state
-    outcome: Repeat work safely, trace changing state, and prove that a loop makes progress toward stopping.
+    id: functions-call-behavior
+    outcome: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
     graduate_outcome_ids:
+      - design-abstractions
       - trace-and-explain
-      - decompose-problems
     lesson_ids:
-      - loops-and-state.blocks-and-indentation
-      - loops-and-state.loops-and-tracing
-    challenge_id: loops-and-state.challenge
+      - functions-call-behavior.defining-calling-returning
+      - functions-call-behavior.parameters-stable-interfaces
+      - functions-call-behavior.contracts-decomposition-side-effects
+      - functions-call-behavior.scope-name-resolution-call-stack
+      - functions-call-behavior.recursion-recursive-tracing
+      - functions-call-behavior.functions-values-callbacks
+      - functions-call-behavior.iterators-generators-lazy-values
+      - functions-call-behavior.decorators-function-contracts
+    challenge_id: functions-call-behavior.challenge
   - number: 6
-    id: problem-solving-algorithms
-    outcome:
-      Turn a written problem into examples, pseudocode, small steps, and a correct search, count,
-      or transformation.
+    id: mutability-identity-copying
+    outcome: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
     graduate_outcome_ids:
-      - decompose-problems
+      - model-data
       - debug-from-evidence
     lesson_ids:
-      - problem-solving-algorithms.specifications-and-examples
-      - problem-solving-algorithms.decomposition-and-pseudocode
-      - problem-solving-algorithms.search-count-transform
-    challenge_id: problem-solving-algorithms.challenge
+      - mutability-identity-copying.equality-identity-references
+      - mutability-identity-copying.mutable-immutable-hashable
+      - mutability-identity-copying.aliasing-shallow-deep-copies
+      - mutability-identity-copying.mutation-function-boundaries
+    challenge_id: mutability-identity-copying.challenge
   - number: 7
-    id: sequences
-    outcome:
-      Model ordered information, choose mutable or immutable sequences, and use indexing and slicing
-      safely.
+    id: problem-solving-algorithms
+    outcome: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
     graduate_outcome_ids:
-      - model-data
+      - solve-problems
+      - verify-quality
     lesson_ids:
-      - sequences.lists
-      - sequences.tuples
-    challenge_id: sequences.challenge
+      - problem-solving-algorithms.problems-examples-acceptance
+      - problem-solving-algorithms.decomposition-pseudocode-implementation
+      - problem-solving-algorithms.core-algorithm-patterns
+      - problem-solving-algorithms.correctness-boundaries-efficiency
+    challenge_id: problem-solving-algorithms.challenge
   - number: 8
-    id: mappings-and-sets
-    outcome: Choose dictionaries and sets for lookup, uniqueness, counting, and nested records.
+    id: errors-exceptions-debugging
+    outcome: Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
     graduate_outcome_ids:
-      - model-data
+      - debug-from-evidence
+      - handle-boundaries
     lesson_ids:
-      - mappings-and-sets.dictionaries
-      - mappings-and-sets.sets
-      - mappings-and-sets.nested-data
-    challenge_id: mappings-and-sets.challenge
+      - errors-exceptions-debugging.failure-categories-tracebacks
+      - errors-exceptions-debugging.raising-handling-exceptions
+      - errors-exceptions-debugging.repeatable-debugging-method
+      - errors-exceptions-debugging.debugger-minimal-reproductions
+    challenge_id: errors-exceptions-debugging.challenge
   - number: 9
-    id: mutability-and-copying
-    outcome: Predict aliasing and mutation, copy at the intended depth, and avoid accidental shared state.
+    id: files-paths-external-data
+    outcome: Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
     graduate_outcome_ids:
       - model-data
-      - debug-from-evidence
+      - handle-boundaries
     lesson_ids:
-      - mutability-and-copying.identity-aliasing-copying
-      - mutability-and-copying.mutation-across-boundaries
-    challenge_id: mutability-and-copying.challenge
+      - files-paths-external-data.paths-text-files-resources
+      - files-paths-external-data.unicode-encodings-newlines
+      - files-paths-external-data.csv-json-yaml-records
+      - files-paths-external-data.text-patterns-validation-pipelines
+      - files-paths-external-data.bytes-binary-memory-streams
+    challenge_id: files-paths-external-data.challenge
   - number: 10
-    id: functions-and-interfaces
-    outcome: Design focused functions with explicit inputs, return values, contracts, and independent checks.
+    id: modules-environments-projects
+    outcome: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
     graduate_outcome_ids:
-      - design-functions
-      - decompose-problems
+      - build-projects
+      - design-abstractions
     lesson_ids:
-      - functions-and-interfaces.function-basics
-      - functions-and-interfaces.function-contracts
-      - functions-and-interfaces.function-decomposition-and-checks
-    challenge_id: functions-and-interfaces.challenge
+      - modules-environments-projects.builtins-standard-library-help
+      - modules-environments-projects.modules-imports-entry-points
+      - modules-environments-projects.packages-public-interfaces
+      - modules-environments-projects.project-layout-git-essentials
+      - modules-environments-projects.virtual-environments-dependencies
+      - modules-environments-projects.pyproject-builds-tools
+    challenge_id: modules-environments-projects.challenge
   - number: 11
-    id: scope-and-call-stacks
-    outcome:
-      Trace names across calls, read stack-shaped execution, and use recursion or function values
-      deliberately.
-    graduate_outcome_ids:
-      - design-functions
-      - trace-and-explain
-    lesson_ids:
-      - scope-and-call-stacks.scope-and-call-stacks
-      - scope-and-call-stacks.recursion-and-functions-as-values
-    challenge_id: scope-and-call-stacks.challenge
-  - number: 12
-    id: debugging
-    outcome:
-      Use tracebacks, controlled experiments, tools, and minimal reproductions to investigate failures
-      from evidence.
-    graduate_outcome_ids:
-      - debug-from-evidence
-    lesson_ids:
-      - debugging.error-messages
-      - debugging.debugging-tools
-      - debugging.minimal-reproducible-examples
-    challenge_id: debugging.challenge
-  - number: 13
-    id: files-and-paths
-    outcome: Read and write files with explicit paths, encodings, resource lifetimes, and failure expectations.
-    graduate_outcome_ids:
-      - model-data
-      - handle-boundaries
-    lesson_ids:
-      - files-and-paths.paths-and-text-files
-      - files-and-paths.text-files-and-encodings
-    challenge_id: files-and-paths.challenge
-  - number: 14
-    id: structured-data-and-patterns
-    outcome: Parse structured files and text patterns through a staged, testable validation pipeline.
-    graduate_outcome_ids:
-      - model-data
-      - handle-boundaries
-    lesson_ids:
-      - structured-data-and-patterns.structured-files
-      - structured-data-and-patterns.regular-expressions
-      - structured-data-and-patterns.validation-pipelines
-    challenge_id: structured-data-and-patterns.challenge
-  - number: 15
-    id: exceptions-and-validation
-    outcome: Validate boundaries, raise useful exceptions, and catch only failures the program can handle.
-    graduate_outcome_ids:
-      - handle-boundaries
-      - debug-from-evidence
-    lesson_ids:
-      - exceptions-and-validation.exceptions-and-validation
-      - exceptions-and-validation.exception-design
-    challenge_id: exceptions-and-validation.challenge
-  - number: 16
-    id: modules-and-standard-library
-    outcome:
-      Split code across modules, reason about imports, and select standard-library tools before adding
-      dependencies.
-    graduate_outcome_ids:
-      - build-reproducibly
-      - design-functions
-    lesson_ids:
-      - modules-and-standard-library.modules-and-packages
-      - modules-and-standard-library.standard-library-fluency
-    challenge_id: modules-and-standard-library.challenge
-  - number: 17
-    id: reproducible-projects
-    outcome: Arrange source and tests, isolate dependencies, and describe a buildable project with pyproject.toml.
-    graduate_outcome_ids:
-      - build-reproducibly
-    lesson_ids:
-      - reproducible-projects.project-layout
-      - reproducible-projects.environments-and-dependencies
-      - reproducible-projects.packaging-with-pyproject
-    challenge_id: reproducible-projects.challenge
-  - number: 18
-    id: git-and-collaboration
-    outcome: Create meaningful commits, work safely with branches and merges, and collaborate through remotes.
-    graduate_outcome_ids:
-      - collaborate-with-git
-    lesson_ids:
-      - git-and-collaboration.repositories-and-commits
-      - git-and-collaboration.branches-and-merges
-      - git-and-collaboration.remotes-and-collaboration
-    challenge_id: git-and-collaboration.challenge
-  - number: 19
-    id: command-line-applications
-    outcome: Build commands with explicit arguments, standard streams, exit codes, and testable core behavior.
-    graduate_outcome_ids:
-      - operate-reliably
-      - design-functions
-    lesson_ids:
-      - command-line-applications.command-line-programs
-      - command-line-applications.streams-and-exit-codes
-    challenge_id: command-line-applications.challenge
-  - number: 20
-    id: testing-with-pytest
-    outcome:
-      Turn contracts and boundaries into readable tests, then use failures, fixtures, and parametrization
-      as design feedback.
-    graduate_outcome_ids:
-      - verify-quality
-      - debug-from-evidence
-    lesson_ids:
-      - testing-with-pytest.testing-with-pytest
-      - testing-with-pytest.test-design-and-failures
-      - testing-with-pytest.fixtures-parametrization-and-boundaries
-    challenge_id: testing-with-pytest.challenge
-  - number: 21
-    id: maintainable-code
-    outcome: Improve code safely with documentation, refactoring, formatting, linting, and useful type information.
-    graduate_outcome_ids:
-      - verify-quality
-    lesson_ids:
-      - maintainable-code.style-formatting-and-linting
-      - maintainable-code.type-checking
-      - maintainable-code.documentation-and-refactoring
-    challenge_id: maintainable-code.challenge
-  - number: 22
     id: object-oriented-python
-    outcome: Model cohesive state and behavior with classes and dataclasses while avoiding unnecessary abstraction.
+    outcome: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
     graduate_outcome_ids:
+      - design-abstractions
       - model-data
-      - operate-reliably
     lesson_ids:
-      - object-oriented-python.oop-basics
-      - object-oriented-python.dataclasses
-      - object-oriented-python.oop-design
+      - object-oriented-python.objects-classes-instances-self
+      - object-oriented-python.initialization-invariants-properties
+      - object-oriented-python.dataclasses-representation-equality
+      - object-oriented-python.composition-inheritance-design
+      - object-oriented-python.road-crossing-game-model
     challenge_id: object-oriented-python.challenge
-  - number: 23
-    id: pythonic-iteration
-    outcome:
-      Choose comprehensions, generators, decorators, and context managers when they make intent and
-      lifecycles clearer.
+  - number: 12
+    id: command-line-applications
+    outcome: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
     graduate_outcome_ids:
-      - operate-reliably
-      - design-functions
+      - build-projects
+      - handle-boundaries
     lesson_ids:
-      - pythonic-iteration.comprehensions
-      - pythonic-iteration.iterables-and-generators
-      - pythonic-iteration.decorators
-      - pythonic-iteration.context-managers
-    challenge_id: pythonic-iteration.challenge
-  - number: 24
-    id: reliable-project-operations
-    outcome:
-      Combine configuration, logging, secrets, local quality gates, and CI into an observable project
-      workflow.
+      - command-line-applications.argparse-command-design
+      - command-line-applications.streams-errors-exit-codes
+      - command-line-applications.configuration-logging-secrets
+      - command-line-applications.cli-ecosystem-testable-architecture
+    challenge_id: command-line-applications.challenge
+  - number: 13
+    id: testing-python-programs
+    outcome: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
     graduate_outcome_ids:
-      - operate-reliably
       - verify-quality
-      - build-reproducibly
+      - debug-from-evidence
     lesson_ids:
-      - reliable-project-operations.logging-and-configuration
-      - reliable-project-operations.pre-commit-and-ci
-      - reliable-project-operations.project-operations-and-secrets
-    challenge_id: reliable-project-operations.challenge
+      - testing-python-programs.what-tests-prove
+      - testing-python-programs.pytest-discovery-failures
+      - testing-python-programs.fixtures-parametrization-boundaries
+      - testing-python-programs.test-doubles-dependency-injection
+      - testing-python-programs.test-levels
+      - testing-python-programs.properties-regressions-tdd
+    challenge_id: testing-python-programs.challenge
+  - number: 14
+    id: code-quality-maintainability
+    outcome: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+    graduate_outcome_ids:
+      - verify-quality
+      - communicate
+    lesson_ids:
+      - code-quality-maintainability.readable-python-pep8
+      - code-quality-maintainability.type-annotations-static-checking
+      - code-quality-maintainability.formatting-linting-configuration
+      - code-quality-maintainability.precommit-quality-gates
+      - code-quality-maintainability.evidence-driven-refactoring
+    challenge_id: code-quality-maintainability.challenge
+  - number: 15
+    id: documentation-publishing
+    outcome: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+    graduate_outcome_ids:
+      - communicate
+      - build-projects
+    lesson_ids:
+      - documentation-publishing.documentation-audiences-readme
+      - documentation-publishing.docstrings-api-documentation
+      - documentation-publishing.doctest-executable-documentation
+      - documentation-publishing.documentation-toolchains-publishing
+    challenge_id: documentation-publishing.challenge

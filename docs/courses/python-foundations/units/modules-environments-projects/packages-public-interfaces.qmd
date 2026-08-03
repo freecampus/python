@@ -1,0 +1,152 @@
+---
+title: Packages and Public Interfaces
+lesson_id: modules-environments-projects.packages-public-interfaces
+lesson_order: 30
+description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+course_id: python-foundations
+unit_id: modules-environments-projects
+unit_number: 10
+execute:
+  echo: true
+categories:
+- python-foundations
+- modules-environments-projects
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/modules-environments-projects/packages-public-interfaces.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+A directory of Python files does not automatically communicate which names callers should rely on. A package needs an intentional import structure and public interface.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+# Imagine these definitions live in studytools/durations.py.
+def total_minutes(values):
+    """Return the total number of study minutes."""
+    return sum(values)
+
+
+# studytools/__init__.py could re-export the stable public function:
+# from .durations import total_minutes
+
+print(total_minutes([20, 35]))
+```
+
+### Step-by-step explanation
+
+1. A package groups related modules under one import namespace.
+2. The implementation can live in a focused `durations` module.
+3. An intentional re-export offers callers a stable package-level name.
+4. Callers should not depend on private helper placement without a documented contract.
+
+::: {.callout-note title="Make one controlled change"}
+Sketch a `studytools` tree with `durations.py`, `records.py`, and `__init__.py`; assign one responsibility to each file.
+:::
+
+## 2. Investigate the important boundary
+
+An import package is the code namespace used by `import`. A distribution is the installable artifact described by project metadata. Their names often match, but they solve different problems.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+from pathlib import Path
+
+package_files = [
+    Path("src/studytools/__init__.py"),
+    Path("src/studytools/durations.py"),
+    Path("tests/test_durations.py"),
+]
+
+for path in package_files:
+    print(path.parent, path.name)
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "modules-environments-projects-packages-public-interfaces",
+  "title": "Packages and Public Interfaces checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "Why might a package re-export a name from `__init__.py`?",
+      "options": [
+        "To provide a deliberate stable import path for public behavior.",
+        "To execute every test during import.",
+        "To turn Python files into binary data.",
+        "To avoid declaring any dependencies."
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled package surface lets implementation modules change without forcing every caller to change imports."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 2,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Modules organize implementation; packages organize import namespaces.
+- Public imports are contracts that deserve deliberate design.
+- Import packages and installable distributions are related but distinct concepts.
+:::
+
+## References
+
+- https://docs.python.org/3/tutorial/modules.html#packages
+- https://packaging.python.org/en/latest/discussions/distribution-package-vs-import-package/

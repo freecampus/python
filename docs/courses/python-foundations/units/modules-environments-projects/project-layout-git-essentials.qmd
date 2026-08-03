@@ -1,0 +1,174 @@
+---
+title: Project Layout and Git Essentials
+lesson_id: modules-environments-projects.project-layout-git-essentials
+lesson_order: 40
+description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+execute:
+  echo: true
+categories:
+- python-foundations
+- modules-environments-projects
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/modules-environments-projects/project-layout-git-essentials.ipynb
+course_id: python-foundations
+unit_id: modules-environments-projects
+unit_number: 10
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 60–90 minutes
+- **You will learn:** Arrange source code, tests, notebooks, and documentation in predictable folders.
+- **Practice in:** Generated Colab notebook and a local project when appropriate
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. The problem this lesson solves
+
+A predictable project layout separates importable source, behavior checks, documentation, and tool configuration. That structure lets people and automation run the same commands from the repository root.
+
+::: {.callout-note title="Prediction"}
+Before running the example, write the output or failure you expect and identify the line that will produce it.
+:::
+
+## 2. Classify project files by responsibility and verify that no import depends on the current working directory.
+
+```python
+from pathlib import Path
+
+project_files = [
+    Path("pyproject.toml"),
+    Path("src/study_tools/__init__.py"),
+    Path("src/study_tools/report.py"),
+    Path("tests/test_report.py"),
+    Path("README.md"),
+]
+
+for path in project_files:
+    print(path.parts[0], "->", path)
+```
+
+### Step-by-step explanation
+
+1. `pyproject.toml` declares project and tool configuration at the repository root.
+2. `src/study_tools` owns importable application code instead of mixing it with tests.
+3. The test directory mirrors behavior from outside the installed package, exposing missing packaging configuration.
+
+Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
+
+## 3. Debug a contract violation
+
+This version is syntactically valid but communicates or implements the wrong contract:
+
+```python
+from pathlib import Path
+
+# This only works when the process starts from one special directory.
+config = Path("../config.json")
+```
+
+A focused repair is:
+
+```python
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+config = PROJECT_ROOT / "config.json"
+```
+
+Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
+
+## 4. Practice from trace to transfer
+
+1. Sketch a tree for a package with two modules and two test files.
+2. Explain the difference between repository, distribution, package, and module.
+3. Run tests from the repository root and from an installed editable environment.
+
+<details class="solution">
+<summary>Show a verification strategy after attempting the tasks</summary>
+
+Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
+
+</details>
+
+## 5. Put the layout under version control
+
+Git records selected snapshots and the changes between them. It does not
+automatically save every file in the directory. Use a short observation cycle
+before each commit:
+
+```bash
+git status --short
+git diff
+git add src/study_tools/report.py tests/test_report.py
+git diff --staged
+git commit -m "Add study report total"
+```
+
+1. `status` classifies untracked, modified, and staged paths.
+2. `diff` shows unstaged changes; `diff --staged` shows the exact proposed
+   snapshot.
+3. `add` selects related source and test evidence rather than blindly staging
+   the whole working tree.
+4. A focused commit message explains one completed behavior change.
+
+Add generated builds, virtual environments, caches, and local secrets to
+`.gitignore` **before** they are tracked. Ignoring a path does not erase an
+already committed credential from history.
+
+Branches are movable names for commits; remotes are named locations for sharing
+history. At this stage, practice `switch -c`, make focused commits, inspect the
+log, and push the branch. Conflict-heavy integration and repository
+administration belong in later applied work.
+
+## 6. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "modules-environments-projects-project-layout",
+  "title": "Project Layout checkpoint",
+  "instructions": "Trace the code and contract before choosing.",
+  "questions": [
+    {
+      "id": "source",
+      "prompt": "Why use a `src` directory?",
+      "options": [
+        "Python requires every project to use it",
+        "It stores generated test reports",
+        "Tests exercise the installed package instead of accidentally importing from the repository root",
+        "It replaces pyproject.toml"
+      ],
+      "answer_index": 2,
+      "explanation": "A src layout helps expose packaging and import mistakes during development."
+    },
+    {
+      "id": "root",
+      "prompt": "Which file normally centralizes build and tool configuration?",
+      "options": [
+        "__pycache__",
+        "a notebook output cell",
+        "site-packages",
+        "pyproject.toml"
+      ],
+      "answer_index": 3,
+      "explanation": "Modern Python projects declare build metadata and many tool settings in pyproject.toml."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Key points
+
+- State the behavior contract before selecting syntax or tools.
+- Trace the values and boundaries that provide observable evidence.
+- Preserve one useful failure and verify the repair from a clean state.
+- Inspect both unstaged and staged diffs before creating a focused commit.
+- Keep environments, generated artifacts, and secrets out of version history.
+
+## References
+
+- [The Python Tutorial](https://docs.python.org/3/tutorial/)
+- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Software Carpentry: Version Control with Git](https://swcarpentry.github.io/git-novice/)

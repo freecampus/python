@@ -1,0 +1,145 @@
+---
+title: Dates, Times, Durations, and Parsing
+lesson_id: core-values-types.dates-times-durations-parsing
+lesson_order: 60
+description: Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
+course_id: python-foundations
+unit_id: core-values-types
+unit_number: 2
+execute:
+  echo: true
+categories:
+- python-foundations
+- core-values-types
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/core-values-types/dates-times-durations-parsing.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Beginner
+- **Estimated time:** 45–70 minutes
+- **You will learn:** Select and convert value types deliberately, applying common operations while explaining precision, formatting, truth, text, and time boundaries.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## The problem this lesson solves
+
+Dates are not ordinary strings: ordering, durations, and formatting require calendar-aware objects and an explicit parsing boundary.
+
+Write a prediction before running the example. A useful prediction names the
+value or failure you expect and the line responsible for it.
+
+## 1. Read and predict a complete case
+
+```python
+from datetime import date, timedelta
+
+start = date.fromisoformat("2026-08-03")
+duration = timedelta(days=10)
+deadline = start + duration
+
+print(deadline.isoformat())
+print((deadline - start).days)
+```
+
+### Step-by-step explanation
+
+1. `fromisoformat` parses a standard date string into a `date` object.
+2. `timedelta(days=10)` represents a duration rather than a calendar date.
+3. Adding the duration creates the deadline date.
+4. Subtracting the dates returns a duration whose `.days` value is `10`.
+
+::: {.callout-note title="Make one controlled change"}
+Change the start date to the last week of a month and predict the deadline before running; let the date type handle the month boundary.
+:::
+
+## 2. Investigate the important boundary
+
+A `datetime` without timezone information is naive. When an external timestamp identifies a real instant across regions, parse and retain its offset or attach an intentional timezone policy.
+
+::: {.callout-warning title="Common mistake"}
+Changing several inputs or rules before rerunning destroys the connection
+between cause and evidence. Restore the last understood state, change one cause,
+and run the smallest relevant check.
+:::
+
+## 3. Practice from prediction to explanation
+
+Run this smaller case from a clean state:
+
+```python
+from datetime import datetime
+
+timestamp_text = "2026-08-03T14:30:00+00:00"
+timestamp = datetime.fromisoformat(timestamp_text)
+print(timestamp.tzinfo is not None)
+print(timestamp.strftime("%Y-%m-%d %H:%M %Z"))
+```
+
+Then complete the learning loop:
+
+1. Record the output or exception before changing anything.
+2. Explain which line establishes each important value.
+3. Change one input or boundary named in this lesson.
+4. Rerun and explain why the new evidence differs.
+
+<details>
+<summary>Check your practice process</summary>
+
+Your record should contain the original prediction, actual result, one
+controlled change, new result, and a sentence connecting the changed line to the
+new behavior. If it contains only successful output, reproduce and explain one
+boundary or failure case as well.
+
+</details>
+
+## 4. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "core-values-types-dates-times-durations-parsing",
+  "title": "Dates, Times, Durations, and Parsing checkpoint",
+  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "questions": [
+    {
+      "id": "concept",
+      "prompt": "Which object represents an elapsed duration rather than a calendar date?",
+      "options": [
+        "`date`",
+        "`str`",
+        "`timedelta`",
+        "`bool`"
+      ],
+      "answer_index": 2,
+      "explanation": "`timedelta` stores a difference or duration that can be added to and subtracted from date/time objects."
+    },
+    {
+      "id": "evidence",
+      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
+      "options": [
+        "A written prediction, the observed result, and an explanation tied to the changed line.",
+        "Only a screenshot of the final output.",
+        "Several simultaneous edits with no earlier result.",
+        "A copied solution whose behavior was not rerun."
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Parse external text once and then compute with date/time objects.
+- Use `timedelta` for durations.
+- Recognize timezone-aware versus naive datetimes at system boundaries.
+:::
+
+## References
+
+- https://docs.python.org/3/library/datetime.html

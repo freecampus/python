@@ -1,0 +1,192 @@
+---
+title: 'Unit Challenge: Repair a Shared Study Planner'
+description: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+challenge_id: mutability-identity-copying.challenge
+assessment_type: unit-challenge
+challenge_format: guided-programming
+assessment_version: 1
+estimated_time: 60–120 minutes
+categories:
+- python-foundations
+- mutability-identity-copying
+- unit-challenge
+order: 90
+colab_notebook: notebooks/courses/python-foundations/units/mutability-identity-copying/challenge.ipynb
+course_id: python-foundations
+unit_id: mutability-identity-copying
+unit_number: 6
+---
+::: {.lesson-meta .challenge-meta}
+- **Level:** Python Foundations · Unit 6 challenge
+- **Estimated time:** 60–120 minutes
+- **Outcome assessed:** Diagnose aliasing, choose shallow or deep copying, and stop edits from leaking between plans.
+- **Evidence:** Passing checks, a clean rerun, and a short debugging record
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+<!-- fcpython-unit-challenge: practical -->
+## 1. Challenge outcome
+
+Two learners start from the same weekly plan. Editing one learner’s nested task list must not change the template or the other learner’s plan.
+
+::: {.callout-note title="Work independently, but not without support"}
+Plan for one or two focused hours. Start with the contract, run the smallest
+relevant check after each change, and open a hint only after naming the evidence
+that has blocked you.
+:::
+
+## 2. Understand the acceptance examples
+
+Before writing implementation code, write one ordinary example, one boundary,
+and one invalid or empty case. Predict the result for each. These examples are
+the specification you will compare against while working.
+
+### Constraints
+
+1. Demonstrate the aliasing failure before repairing it.
+2. Preserve the original nested template.
+3. Choose the minimum copy depth that actually isolates nested tasks.
+4. Record one identity comparison that explains the result.
+
+## 3. Start from the contract
+
+Preserve the supplied public names and comments so that each assertion gives a
+useful location signal.
+
+```python
+from copy import deepcopy
+
+template = {"Monday": ["read", "quiz"], "Tuesday": ["practice"]}
+ana_plan = template  # Repair this alias.
+bo_plan = template  # Repair this alias.
+
+ana_plan["Monday"].append("review")
+```
+
+## 4. Build in small stages
+
+1. Make the ordinary example pass without adding behavior for every case.
+2. Trace the important state after each step and compare it with your prediction.
+3. Add the boundary case, then the empty or invalid case.
+4. Restart the notebook or process and run the complete solution from the top.
+
+## 5. Run progressive assertions
+
+Do not weaken an expected value to make a check pass. If a check appears wrong,
+write down the contract conflict before changing either side.
+
+```python
+assert template["Monday"] == ["read", "quiz"]
+assert ana_plan["Monday"] == ["read", "quiz", "review"]
+assert bo_plan["Monday"] == ["read", "quiz"]
+assert ana_plan is not template
+assert ana_plan["Monday"] is not template["Monday"]
+```
+
+## 6. Use the hint ladder only when needed
+
+<details>
+<summary>Hint 1</summary>
+
+Assignment copies a reference, not the nested structure.
+
+</details>
+
+<details>
+<summary>Hint 2</summary>
+
+A shallow dictionary copy still shares the lists stored as values.
+
+</details>
+
+<details>
+<summary>Hint 3</summary>
+
+`deepcopy(template)` recursively creates separate nested containers.
+
+</details>
+
+## 7. Keep debugging evidence
+
+Keep one failure that helped you understand the program. Record the actual
+value or message, your single-cause hypothesis, the controlled change, and the
+clean rerun that confirmed or rejected it.
+
+| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+|---|---|---|---|---|
+| What did not work? | What did you observe? | Which cause fits? | What one thing changed? | Which check now passes? |
+
+## 8. Check your understanding
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "foundations-mutability-identity-copying-challenge",
+  "title": "Repair a Shared Study Planner readiness check",
+  "instructions": "Trace the situation before choosing an answer.",
+  "questions": [
+    {
+      "id": "alias",
+      "prompt": "What does `ana_plan = template` create?",
+      "options": [
+        "A deep copy",
+        "An immutable dictionary",
+        "A serialized plan",
+        "A second name for the same dictionary"
+      ],
+      "answer_index": 3,
+      "explanation": "Assignment binds another name to the same object."
+    },
+    {
+      "id": "depth",
+      "prompt": "Why is a shallow dictionary copy insufficient here?",
+      "options": [
+        "Its nested lists remain shared.",
+        "It removes the keys.",
+        "It converts lists to strings.",
+        "It cannot be compared."
+      ],
+      "answer_index": 0,
+      "explanation": "Shallow copying duplicates the outer dictionary, not nested lists."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Decide whether the challenge is complete
+
+### Evidence rubric
+
+| Evidence | Ready to record when |
+|---|---|
+| Behavior | The acceptance examples and progressive checks pass unchanged. |
+| Scope | The solution follows the stated constraints without unrelated features. |
+| Reasoning | You can trace the important values, boundaries, and design choices. |
+| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
+| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+
+- [ ] The acceptance examples and supplied checks pass.
+- [ ] The work runs from a clean state.
+- [ ] I can explain the important state changes and boundaries.
+- [ ] I kept one debugging record and verified a controlled modification.
+
+This button stores a self-reported marker only in this browser. It does not
+submit or grade the artifact.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+  <button class="fc-complete-button" type="button" data-fc-challenge-complete aria-pressed="false">
+    <span class="fc-complete-icon" aria-hidden="true">✓</span>
+    <span data-fc-challenge-complete-label>Record challenge complete</span>
+  </button>
+  <p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+## Key points
+
+- The contract narrows the design without supplying the implementation.
+- Progressive checks turn the task into observable behavior.
+- A clean rerun and explanation are part of the evidence.
