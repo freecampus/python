@@ -1,67 +1,225 @@
 ---
 title: Object-Oriented Python and Dataclasses Overview
-description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
-course_id: python-foundations
-unit_id: object-oriented-python
-unit_number: 11
+description: Learn when an object makes a program clearer, how classes protect evolving state, and how small collaborating objects form a dependable model.
 categories:
 - python-foundations
 - object-oriented-python
 - overview
 order: 0
 colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/index.ipynb
+course_id: python-foundations
+unit_id: object-oriented-python
+unit_number: 11
 ---
 ::: {.lesson-meta}
-- **Level:** Python Foundations · Unit 11
-- **Estimated time:** 5–10 hours including the challenge
-- **Unit outcome:** Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Level:** Python Foundations
+- **Estimated time:** 45–60 minutes
+- **Unit outcome:** Choose between functions, collections, dataclasses, and stateful classes; build objects that preserve valid state; explain instance attributes and bound methods; compose replaceable collaborators; and use inheritance only when a subtype can honor the same behavioral contract.
+- **Practice in:** Google Colab, JupyterLab, or a local Python interpreter
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
 
-Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+Imagine that you are tracking a hiking expedition. On the first morning, two
+values may be enough:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+```python
+expedition_name = "Dawn Trail"
+distance_km = 0
+```
 
-## 2. Before you start
+Soon you add a list of checkpoints, a maximum distance, and functions that
+record progress. Then a second expedition begins. Every function must receive
+the right dictionary, every dictionary must contain the right keys, and every
+update must respect the same rules. The code can still work, but the program now
+has a useful question to answer:
 
-**Prior knowledge:** Complete Unit 10 and bring its challenge notes and debugging record.
+> Which part of the program owns this state and keeps it valid as it changes?
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+A class is one possible answer. It creates a new kind of object whose data and
+allowed operations can be understood together. It is not automatically the
+best answer, and this unit will not ask you to turn every noun into a class.
+Instead, you will learn to choose the smallest structure that makes the rules
+clear.
 
-## 3. Lessons
+## 1. Choose an abstraction because it earns its place
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Objects, Classes, Instances, and self](objects-classes-instances-self.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Initialization, Invariants, Properties, and Behavior](initialization-invariants-properties.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Dataclasses, Representation, and Equality](dataclasses-representation-equality.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Composition, Inheritance, and Object-Oriented Design](composition-inheritance-design.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Case Study: A Small Road-Crossing Game Model](road-crossing-game-model.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+Python gives you several ways to organize a solution. They overlap, so the
+decision begins with the behavior you need rather than a slogan:
 
-## 4. How to study this unit
+| Need | Good first choice | Why |
+|---|---|---|
+| one value | string, number, tuple, or another value | no extra structure is needed |
+| passive named data | dictionary or small dataclass | fields travel together |
+| a transformation with no owned state | function | inputs and output make the contract visible |
+| a value-like record with representation and equality | dataclass | Python can generate repetitive field-based methods |
+| evolving state that must obey rules | regular class | one object can own valid transitions |
+| several responsibilities that cooperate | composed objects | each object can own one coherent part |
+| interchangeable specialized behavior | composition first; inheritance only for an honest subtype | callers depend on behavior rather than implementation |
 
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
+::: {.concept-diagram}
+This decision ladder has an intentional path back to simple code. More
+abstraction is not the definition of better design.
 
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  start[What must the program represent?] --> passive{Does state change through domain rules?}
+  passive -- No --> fields{Do named fields and value equality help?}
+  fields -- No --> simple[Use values, collections, and functions]
+  fields -- Yes --> record[Use a dataclass]
+  passive -- Yes --> owner[Use a class that owns valid transitions]
+  owner --> partners{Are there separate responsibilities?}
+  partners -- No --> keep[Keep one cohesive class]
+  partners -- Yes --> compose[Compose collaborating objects]
+  compose --> subtype{Can every variant honor one behavioral contract?}
+  subtype -- No --> inject[Inject replaceable collaborators]
+  subtype -- Yes --> consider[Consider shallow inheritance]
+```
 :::
 
-## 5. Unit evidence
+The arrows are questions, not laws. A dictionary and functions can be an
+excellent final design. A dataclass can contain methods. A regular class can be
+value-like. The point is to make a conscious choice and explain its trade-offs.
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+## 2. Connect new syntax to Python you already know
 
-<!-- fcpython-chapter-lab: end -->
+Classes do not replace the ideas from earlier units. They combine them:
+
+- **Names and assignment:** `self.distance = 3` binds a name in one instance's
+  namespace.
+- **Functions:** a method begins as a function defined in a class body. Accessing
+  it through an instance binds that instance to the call.
+- **Identity and mutation:** two equal-looking instances can be different
+  objects, and mutable instance state can be shared accidentally if it is stored
+  in the wrong place.
+- **Exceptions:** constructors and methods raise precise errors when an
+  operation would violate a rule.
+- **Modules:** a class belongs in the module that owns its responsibility; it is
+  not a reason to put an entire project in one file.
+
+Unit 6 prepared you to reason about identity, aliases, copying, and hashability.
+Unit 8 prepared you to define failure contracts. Unit 10 prepared you to
+separate public interfaces from implementation files. This unit applies those
+skills to objects.
+
+We will use plain assertions to check behavior. Unit 13 later introduces pytest,
+fixtures, parametrization, and test doubles. For now, a short assertion keeps
+attention on the object's contract:
+
+```python
+assert tracker.distance_km == 5
+```
+
+## 3. Follow one idea from a record to a system
+
+The lessons build in five deliberate steps:
+
+| Lesson | Design question | Evidence you will produce |
+|---:|---|---|
+| 1. [Build Your First Useful Class](objects-classes-instances-self.qmd) | When does grouping state and behavior improve a working dictionary design? | independent instances, inspected namespaces, bound-method traces, and a repaired shared-state bug |
+| 2. [Keep Objects in Valid States](initialization-invariants-properties.qmd) | How can every construction and update path preserve the same rules? | atomic methods, useful properties, an alternate constructor, and failed operations that leave state unchanged |
+| 3. [Use Dataclasses for Value-Like Objects](dataclasses-representation-equality.qmd) | Which field-based behavior should Python generate, and what must you still design? | safe defaults, meaningful representation/equality, post-initialization validation, and frozen-value updates |
+| 4. [Choose Composition Before Inheritance](composition-inheritance-design.qmd) | How can objects cooperate without a brittle hierarchy? | injected collaborators, delegation, duck-typed substitution, one honest subtype, and one rejected inheritance design |
+| 5. [Model a Complete Road-Crossing Game](road-crossing-game-model.qmd) | How do value objects, entities, policies, and an orchestrator produce one deterministic turn? | acceptance examples, an object graph, a full turn result, and a changed rule placed in the correct owner |
+
+Focused examples use expeditions, batteries, map tiles, and museum tours. The
+last lesson combines the ideas in a road-crossing game model. It deliberately
+keeps keyboard input, drawing, timing, and randomness outside the rules so that
+you can predict and verify every turn.
+
+## 4. Learn four roles without forcing four base classes
+
+The unit uses a small vocabulary for responsibilities:
+
+**Value object**
+: Represents a value whose fields determine what it means. Coordinates and move
+  descriptions are good candidates. Frozen dataclasses often fit.
+
+**Stateful entity**
+: Has an identity and changes over time while preserving rules. A battery or
+  player can own methods that perform valid transitions.
+
+**Collaborator**
+: Provides behavior another object uses. A route planner can be replaced by a
+  different planner if both understand the same request.
+
+**Orchestrator**
+: Coordinates a small workflow without taking over every responsibility. A game
+  can ask a player to move, lanes to advance, and rules to report the result.
+
+These are reasoning labels, not mandatory parent classes. Creating
+`ValueObjectBase`, `EntityBase`, and `ManagerBase` would add machinery before it
+adds understanding. First make the responsibility visible in ordinary Python.
+
+## 5. Expect to investigate bad designs, not only polished ones
+
+Premium practice includes mistakes that real programs make:
+
+- a mutable list stored on a class and unexpectedly shared by every instance;
+- a method missing `self` and receiving a surprising positional argument;
+- a constructor that accepts impossible state;
+- an update that changes one field before discovering another input is invalid;
+- a dataclass field whose default list is shared or rejected;
+- a frozen dataclass that still contains a mutable list;
+- an object that creates its own random collaborator and cannot be checked
+  deterministically;
+- a subclass that refuses an operation its base type promises;
+- a game method that prints, reads input, mutates global state, and applies rules
+  in one inseparable block.
+
+For each mistake, you will observe the error or incorrect state, form one
+hypothesis, repair the owner of the rule, and rerun a focused check. The repair
+matters, but the explanation is the transferable skill.
+
+## 6. Finish with a different world
+
+The [unit challenge](challenge.qmd) asks you to run a tiny robot tournament. It
+does not reuse the road-crossing classes. You will create immutable moves and
+turn results, robots that protect energy and shield values, and an arena that
+alternates accepted turns. Progressive assertions reveal one contract at a
+time, while three hints provide increasingly direct support.
+
+The final rule change adds a combo spotlight for a repeated move. That change
+tests whether history belongs to the arena, whether rejected turns stay atomic,
+and whether the existing classes can evolve without a rewrite.
+
+Plan **24–34 hours** for this unit, including typing examples, making
+predictions, completing checkpoints, debugging, and building the challenge.
+Useful stopping points are the end of each numbered section or checkpoint. The
+challenge itself is designed for approximately 60–120 focused minutes after the
+five lessons.
+
+## 7. Evidence that you are ready to continue
+
+By the end, you should be able to show and explain:
+
+- two instances whose changes remain independent;
+- the difference between an instance attribute and an intentional class
+  attribute;
+- where `self` comes from in an instance method call;
+- an invariant and every public operation that can affect it;
+- why one interface is a property and another is a method;
+- exactly which methods a dataclass generated;
+- why `default_factory` prevents shared state;
+- why `frozen=True` is not deep immutability;
+- one replaceable collaborator used through behavior rather than a shared base
+  class;
+- one inheritance relationship that passes a behavioral substitution test;
+- a deterministic game turn whose state changes and result can be asserted; and
+- a class you deliberately chose **not** to create.
+
+That last item is important. Object-oriented design is successful when the
+program's responsibilities become easier to see and change—not when the class
+count increases.
+
+## References
+
+- [Python tutorial: Classes](https://docs.python.org/3/tutorial/classes.html)
+- [Python data model](https://docs.python.org/3/reference/datamodel.html)
+- [Python `dataclasses`](https://docs.python.org/3/library/dataclasses.html)
+- [CS50P: Object-Oriented Programming](https://cs50.harvard.edu/python/weeks/8/)
+- [University of Helsinki Python Programming MOOC: Objects and methods](https://programming-26.mooc.fi/part-8/)

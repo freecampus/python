@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Complete a Road-Crossing Simulation Model'
-description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+title: 'Unit Challenge: Run the Tiny Robot Tournament'
+description: Build immutable moves and results, robots with protected energy and shield state, and an arena whose atomic turns include a playful combo spotlight.
 challenge_id: object-oriented-python.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 2
+assessment_version: 3
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,185 +19,774 @@ unit_number: 11
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 11 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
-- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+- **Outcome assessed:** Choose value objects, stateful entities, and composition deliberately; preserve valid robot state; process rejected turns atomically; and evolve arena-owned history without adding an unnecessary hierarchy.
+- **Evidence:** Thirty progressive assertions, a complete two-robot tournament, one changed rule, and a short responsibility map
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
 
-The model enforces valid construction, moves the player, detects collisions through composition, and recognizes the finish lane without a GUI or hidden global state.
+## 1. Enter the Tiny Robot Tournament
 
-**Scenario:** Complete the state model for a text-based road-crossing simulation. The player advances through lanes, vehicles occupy lane/column positions, and the game reports running, collision, or victory.
+The workshop lights dim. **Bolt** and **Nova** roll into a tabletop arena, each
+with an energy meter and a shield. A move costs the acting robot energy and
+reduces the opponent's shield. Accepted turns alternate between the two robots.
+The first robot to reduce the other shield to zero wins.
 
-::: {.callout-note title="Work independently, but not without support"}
-Use the starter contract, run one group of checks at a time, and open hints only
-after you can state the evidence blocking your next step.
+Your model must answer every turn with data, not print statements. A notebook,
+CLI, or graphical interface can decide later how to announce the result.
+
+The challenge is deliberately smaller than a commercial battle system. There
+are no inventories, teams, animations, artificial intelligence, or networked
+players. Those features would hide the object-design decisions beneath unrelated
+work. The fun comes from making a compact rules engine behave exactly as the
+thirty checks predict.
+
+After the base tournament works, add the **combo spotlight**: when the same robot
+successfully repeats the same named move on its next turn, that move applies one
+extra point of impact. Rejected turns do not change the active robot, spend
+energy, damage a shield, or update combo history.
+
+You do not need inheritance. `Arena` composes two `Robot` objects and uses
+immutable `Move` and `TurnResult` values. Choosing not to create `AttackRobot`,
+`DefendRobot`, or `ComboRobot` subclasses is part of the design.
+
+::: {.callout-note title="Advance one green check at a time"}
+Implement the types in dependency order: `Move`, `Robot`, `TurnResult`, then
+`Arena`. Run the check harness after each stage. The first failure names the
+earliest contract that still needs work.
 :::
 
-## 2. Understand the acceptance example
+## 2. Translate the tournament rules into contracts
 
-Before implementation, restate the normal input, expected result, important
-boundary, and one anticipated failure in your own words.
+### `Move` is an immutable value
 
-### Constraints
+- Strip surrounding whitespace from `name` and reject a blank result.
+- `energy_cost` and `impact` are non-negative integers; booleans do not count as
+  integers for this model.
+- A move cannot have both zero cost and zero impact.
+- Two moves with the same normalized field values compare equal.
+- Ordinary field assignment after construction is rejected.
 
-1. Keep the supplied classes, function names, and docstrings.
-2. Use dataclasses for `Player` and `Vehicle`.
-3. Keep `Vehicle` immutable.
-4. Do not add rendering, timing, or keyboard libraries.
+### `Robot` owns valid changing state
+
+- Strip `name`; reject blank names.
+- Initial `energy` and `shield` are integers from 1 through 20.
+- Expose read-only `energy`, `shield`, and `active` properties.
+- `spend_energy(amount)` accepts a non-negative integer no greater than current
+  energy, then subtracts it.
+- `absorb_impact(amount)` accepts a non-negative integer and reduces shield with
+  a floor at zero.
+- Every rejected operation leaves the robot unchanged.
+- A robot is active exactly while shield is greater than zero.
+
+### `TurnResult` is immutable evidence
+
+Record:
+
+- actor and target names;
+- normalized move name;
+- applied impact, including any combo point;
+- whether the spotlight combo activated;
+- actor energy after spending;
+- target shield after impact; and
+- status: `"running"` or `"finished"`.
+
+### `Arena` coordinates the workflow
+
+- Receive two different robot objects with different names.
+- The left robot acts first; accepted turns alternate.
+- Expose the current robot as a read-only property.
+- `winner` is `None` while both shields are active and the winning robot's name
+  after completion.
+- Reject a turn after completion.
+- Reject a move the actor cannot afford before changing any object or history.
+- On success: calculate combo, spend energy, apply impact, record history,
+  advance the active side, and return `TurnResult`.
+- Combo history belongs to the arena because it compares successful turns
+  across time; neither `Move` nor `Robot` needs tournament-specific history.
+
+::: {.concept-diagram}
+Rejected requests return to the same state. Only an accepted turn can update
+robots, history, and the current side.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+stateDiagram-v2
+  [*] --> LeftTurn
+  LeftTurn --> LeftTurn: unaffordable move rejected
+  LeftTurn --> RightTurn: accepted move and both active
+  RightTurn --> RightTurn: unaffordable move rejected
+  RightTurn --> LeftTurn: accepted move and both active
+  LeftTurn --> Finished: accepted move lowers shield to zero
+  RightTurn --> Finished: accepted move lowers shield to zero
+  Finished --> Finished: later turn rejected
+```
+:::
 
 ## 3. Start from the contract
+
+Copy this starter into one cell or Python file. Replace each `...` without
+renaming the public classes, properties, or methods.
 
 ```python
 from dataclasses import dataclass
 
 
-@dataclass
-class Player:
-    """A player with a lane and fixed column."""
+@dataclass(frozen=True)
+class Move:
+    """A named tournament move with an energy cost and shield impact."""
 
-    lane: int = 0
-    column: int = 2
+    name: str
+    energy_cost: int
+    impact: int
 
-    def move_forward(self):
-        """Advance the player by one lane."""
-        raise NotImplementedError
+    def __post_init__(self):
+        ...
+
+
+class Robot:
+    """A tournament robot that protects its energy and shield state."""
+
+    def __init__(self, name, *, energy=10, shield=10):
+        ...
+
+    @property
+    def energy(self):
+        ...
+
+    @property
+    def shield(self):
+        ...
+
+    @property
+    def active(self):
+        ...
+
+    def spend_energy(self, amount):
+        """Spend an affordable non-negative amount and return energy left."""
+        ...
+
+    def absorb_impact(self, amount):
+        """Reduce shield to no less than zero and return shield left."""
+        ...
 
 
 @dataclass(frozen=True)
-class Vehicle:
-    """An immutable vehicle position."""
+class TurnResult:
+    """An immutable report of one accepted tournament turn."""
 
-    lane: int
-    column: int
+    actor: str
+    target: str
+    move: str
+    impact: int
+    combo: bool
+    energy_left: int
+    shield_left: int
+    status: str
 
 
-def game_status(player, vehicles, finish_lane):
-    """Return 'collision', 'won', or 'running'."""
-    raise NotImplementedError
+class Arena:
+    """Coordinate two robots and the rules for accepted tournament turns."""
+
+    def __init__(self, left, right):
+        ...
+
+    @property
+    def current_robot(self):
+        ...
+
+    @property
+    def winner(self):
+        ...
+
+    def play_turn(self, move):
+        """Apply one affordable move atomically and return its result."""
+        ...
 ```
 
-## 4. Build in small stages
+Do not add `input`, `print`, randomness, files, or global tournament state to
+these classes. You may add private helper methods or attributes when they make
+one responsibility clearer.
 
-1. Make the smallest normal case observable.
-2. Run the nearest check and read its complete failure evidence.
-3. Add one boundary behavior without weakening earlier checks.
-4. Restart and run the complete artifact from top to bottom.
+## 4. Build one responsibility at a time
+
+Work through four short stages:
+
+1. **Move values:** normalize and validate `Move`, then prove equality,
+   hashability, and frozen assignment before touching robot state.
+2. **Robot invariants:** construct one robot, spend energy, absorb impact, and
+   prove every rejected operation preserves the before snapshot.
+3. **Base arena:** compose two fresh robots, process one turn from each side,
+   reject unaffordable work, and finish a tournament.
+4. **Combo spotlight:** remember the last successful move independently for
+   each robot, then prove rejected work never enters that history.
+
+After a failure, keep the smallest stage in view. A broken `Move` invariant
+cannot be repaired by changing turn alternation, and an incorrect winner should
+not lead you to rewrite dataclass equality.
 
 ## 5. Run progressive assertions
 
-```python
-player = Player()
-traffic = [Vehicle(lane=1, column=4), Vehicle(lane=2, column=2)]
+Run this harness below your implementation. It deliberately uses ordinary
+assertions rather than pytest.
 
-assert game_status(player, traffic, finish_lane=3) == "running"
-player.move_forward()
-assert player.lane == 1
-assert game_status(player, traffic, finish_lane=3) == "running"
-player.move_forward()
-assert game_status(player, traffic, finish_lane=3) == "collision"
-assert game_status(Player(lane=3), [], finish_lane=3) == "won"
+```python
+from dataclasses import FrozenInstanceError
+
+
+checks_run = 0
+
+
+def check(condition, message):
+    """Count one passing tournament contract or raise its message."""
+    global checks_run
+    assert condition, message
+    checks_run += 1
+
+
+def raises(exception_type, action):
+    """Return whether calling action raises the expected exception type."""
+    try:
+        action()
+    except exception_type:
+        return True
+    return False
+
+
+# Move contracts: checks 1–7
+pulse = Move(" Pulse ", energy_cost=2, impact=3)
+check(pulse == Move("Pulse", 2, 3), "Move should normalize and compare by value")
+check(pulse in {Move("Pulse", 2, 3)}, "a fully hashable frozen Move should hash")
+
+
+def rename_pulse():
+    pulse.name = "Other"
+
+
+check(raises(FrozenInstanceError, rename_pulse), "Move should be frozen")
+check(raises(ValueError, lambda: Move("   ", 1, 1)), "blank move should fail")
+check(raises(ValueError, lambda: Move("Bad", -1, 1)), "negative cost should fail")
+check(raises(ValueError, lambda: Move("Bad", 1, -1)), "negative impact should fail")
+check(raises(ValueError, lambda: Move("Nap", 0, 0)), "a move must do something")
+
+
+# Robot contracts: checks 8–15
+probe = Robot(" Bolt ", energy=10, shield=8)
+check(
+    (probe.name, probe.energy, probe.shield) == ("Bolt", 10, 8),
+    "Robot should normalize its name and expose initial state",
+)
+check(probe.active is True, "a positive shield should be active")
+check(probe.spend_energy(3) == 7, "spending should return remaining energy")
+check(
+    probe.absorb_impact(20) == 0 and probe.active is False,
+    "impact should floor shield at zero and deactivate the robot",
+)
+probe_state = (probe.energy, probe.shield)
+check(
+    raises(ValueError, lambda: probe.spend_energy(8)),
+    "overspending should fail",
+)
+check((probe.energy, probe.shield) == probe_state, "failed spending should be atomic")
+check(
+    raises(ValueError, lambda: probe.absorb_impact(-1)),
+    "negative impact should fail",
+)
+
+
+def assign_energy():
+    probe.energy = 99
+
+
+check(raises(AttributeError, assign_energy), "energy should be read-only")
+
+
+# Arena and combo contracts: checks 16–30
+solo = Robot("Solo")
+check(raises(ValueError, lambda: Arena(solo, solo)), "one object cannot fill both slots")
+check(
+    raises(ValueError, lambda: Arena(Robot("Echo"), Robot(" Echo "))),
+    "robot names must differ",
+)
+
+left = Robot("Bolt", energy=8, shield=8)
+right = Robot("Nova", energy=8, shield=8)
+arena = Arena(left, right)
+check(arena.current_robot is left and arena.winner is None, "left should act first")
+
+jab = Move("Jab", energy_cost=2, impact=3)
+first = arena.play_turn(jab)
+check(
+    first == TurnResult("Bolt", "Nova", "Jab", 3, False, 6, 5, "running"),
+    "first turn result is wrong",
+)
+check(
+    (left.energy, right.shield, arena.current_robot) == (6, 5, right),
+    "first turn state or alternation is wrong",
+)
+
+
+def rewrite_result():
+    first.combo = True
+
+
+check(raises(FrozenInstanceError, rewrite_result), "TurnResult should be frozen")
+
+spark = Move("Spark", energy_cost=1, impact=2)
+second = arena.play_turn(spark)
+check(
+    second == TurnResult("Nova", "Bolt", "Spark", 2, False, 7, 6, "running"),
+    "second robot turn is wrong",
+)
+
+before_rejection = (
+    left.energy,
+    left.shield,
+    right.energy,
+    right.shield,
+    arena.current_robot,
+)
+check(
+    raises(ValueError, lambda: arena.play_turn(Move("Nova Beam", 99, 1)))
+    and before_rejection
+    == (
+        left.energy,
+        left.shield,
+        right.energy,
+        right.shield,
+        arena.current_robot,
+    ),
+    "an unaffordable turn should change nothing",
+)
+
+third = arena.play_turn(jab)
+check(
+    third == TurnResult("Bolt", "Nova", "Jab", 4, True, 4, 1, "running"),
+    "Bolt's repeated move should receive the combo point",
+)
+fourth = arena.play_turn(spark)
+check(
+    fourth == TurnResult("Nova", "Bolt", "Spark", 3, True, 6, 3, "running"),
+    "Nova's repeated move should track its own combo",
+)
+final = arena.play_turn(jab)
+check(
+    final == TurnResult("Bolt", "Nova", "Jab", 4, True, 2, 0, "finished")
+    and arena.winner == "Bolt"
+    and right.active is False,
+    "finishing turn or winner is wrong",
+)
+
+finished_state = (left.energy, left.shield, right.energy, right.shield, arena.winner)
+check(
+    raises(RuntimeError, lambda: arena.play_turn(Move("Tap", 0, 1)))
+    and finished_state
+    == (left.energy, left.shield, right.energy, right.shield, arena.winner),
+    "a finished arena should reject later turns without mutation",
+)
+
+other_left = Robot("Tin", energy=4, shield=4)
+other_right = Robot("Copper", energy=4, shield=4)
+other_arena = Arena(other_left, other_right)
+check(
+    other_arena.current_robot is other_left
+    and (other_left.energy, other_right.shield) == (4, 4),
+    "a separate arena should own independent participants and turn state",
+)
+
+low = Robot("Low", energy=1, shield=4)
+steady = Robot("Steady", energy=4, shield=4)
+rejection_arena = Arena(low, steady)
+rejection_state = (low.energy, steady.shield, rejection_arena.current_robot)
+check(
+    raises(ValueError, lambda: rejection_arena.play_turn(Move("Heavy", 2, 2)))
+    and rejection_state
+    == (low.energy, steady.shield, rejection_arena.current_robot),
+    "rejection should not advance state or current robot",
+)
+tap = rejection_arena.play_turn(Move("Tap", 0, 1))
+check(
+    tap.combo is False and tap.impact == 1 and rejection_arena.current_robot is steady,
+    "a rejected move must not create combo history",
+)
+
+print(f"Tournament ready: {checks_run} checks passed")
 ```
 
-::: {.callout-warning title="Do not edit expected values to create a pass"}
-If a check appears wrong, explain the contract conflict before changing either
-side. Otherwise, repair the implementation and preserve the check.
-:::
+Expected final output:
+
+```text
+Tournament ready: 30 checks passed
+```
+
+### Checks 1–7: move values
+
+- [ ] names normalize and equal fields compare equal;
+- [ ] an all-hashable frozen move can participate in a set;
+- [ ] field assignment is rejected;
+- [ ] blank name is rejected;
+- [ ] negative energy cost is rejected;
+- [ ] negative impact is rejected; and
+- [ ] a zero-cost, zero-impact move is rejected.
+
+### Checks 8–15: robot invariants
+
+- [ ] name and initial state are normalized/exposed;
+- [ ] positive shield means active;
+- [ ] spending returns remaining energy;
+- [ ] impact floors shield at zero and updates active state;
+- [ ] overspending raises;
+- [ ] failed spending preserves state;
+- [ ] negative impact raises; and
+- [ ] public energy assignment is unavailable.
+
+### Checks 16–30: arena composition and history
+
+- [ ] one robot object cannot occupy both slots;
+- [ ] names must identify different competitors;
+- [ ] the left robot begins;
+- [ ] first result has exact field values;
+- [ ] first mutation and alternation are correct;
+- [ ] results are frozen;
+- [ ] the right robot's first turn is correct;
+- [ ] an unaffordable move is atomic;
+- [ ] Bolt's repeat earns its own combo;
+- [ ] Nova's repeat earns a separate combo;
+- [ ] the finishing result, winner, and inactive target agree;
+- [ ] finished play is rejected atomically;
+- [ ] another arena remains independent;
+- [ ] rejection does not advance the current robot; and
+- [ ] rejection does not create combo history.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
 <summary>Hint 1</summary>
 
-Moving forward changes only the player's lane by one.
+Map responsibilities before filling methods:
+
+```text
+Move and TurnResult -> frozen field-based values
+Robot               -> validates and owns energy/shield mutation
+Arena               -> owns left/right order, winner, and last move per robot
+```
+
+Normalize frozen `Move.name` in `__post_init__` with
+`object.__setattr__(self, "name", cleaned)`. Store robot state in `_energy` and
+`_shield`, then expose read-only properties.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Use `any` to ask whether a vehicle shares both coordinates with the player.
+In `play_turn`, choose actor and target from a two-item tuple. Before mutation,
+check completion and affordability. A dictionary keyed by each robot object can
+store its last successful normalized move name. Combo is
+`last_moves.get(actor) == move.name`.
+
+Do not write history or change the active index until validation has passed.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-Check collision before victory so the rule ordering is explicit at a boundary.
+The successful order is:
+
+1. reject a finished arena;
+2. select actor and target;
+3. reject an unaffordable move;
+4. calculate `combo` and `applied_impact`;
+5. call `actor.spend_energy`;
+6. call `target.absorb_impact`;
+7. remember the actor's move;
+8. alternate the current index;
+9. derive status from `winner`; and
+10. return all final values in `TurnResult`.
+
+Clamp shield inside `Robot.absorb_impact` with `max(0, ...)`.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing check. Record its inputs, actual result or exception,
-expected result, one hypothesis, one controlled change, and the verified rerun.
+Record one failure that improved your understanding:
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
-|---|---|---|---|---|
-| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+| Evidence | Your record |
+|---|---|
+| Earliest failing check | number and exact assertion message |
+| Before state | actor energy, both shields, current robot, and known winner |
+| Expected contract | one sentence describing what should happen |
+| Hypothesis | the specific validation, ordering, or ownership rule involved |
+| Controlled repair | one method or responsibility changed |
+| After state | passing check plus one nearby regression check |
 
-## 8. Compare with a solution path
+For example, if an unaffordable turn switches the current robot, the defect is
+not in `Robot.spend_energy`: the arena advanced its index before completing
+validation. If a repeated move never gains impact, inspect when and under which
+robot key successful history is stored. Preserve the failing observation rather
+than replacing it with “it did not work.”
 
-<details>
-<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+## 8. Compare a complete tournament model
+
+<details class="solution">
+<summary>Show the complete implementation after attempting all stages</summary>
 
 ```python
-def move_forward(self):
-    self.lane += 1
+from dataclasses import dataclass
 
 
-def game_status(player, vehicles, finish_lane):
-    collision = any(
-        vehicle.lane == player.lane and vehicle.column == player.column
-        for vehicle in vehicles
-    )
-    if collision:
-        return "collision"
-    if player.lane >= finish_lane:
-        return "won"
-    return "running"
+def require_non_negative_integer(value, label):
+    """Validate one tournament count."""
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise TypeError(f"{label} must be an integer")
+    if value < 0:
+        raise ValueError(f"{label} cannot be negative")
+
+
+@dataclass(frozen=True)
+class Move:
+    """A named tournament move with an energy cost and shield impact."""
+
+    name: str
+    energy_cost: int
+    impact: int
+
+    def __post_init__(self):
+        if not isinstance(self.name, str):
+            raise TypeError("name must be a string")
+        cleaned = self.name.strip()
+        if not cleaned:
+            raise ValueError("name cannot be blank")
+        require_non_negative_integer(self.energy_cost, "energy_cost")
+        require_non_negative_integer(self.impact, "impact")
+        if self.energy_cost == 0 and self.impact == 0:
+            raise ValueError("a move must cost energy or apply impact")
+        object.__setattr__(self, "name", cleaned)
+
+
+class Robot:
+    """A tournament robot that protects its energy and shield state."""
+
+    def __init__(self, name, *, energy=10, shield=10):
+        if not isinstance(name, str):
+            raise TypeError("name must be a string")
+        cleaned = name.strip()
+        if not cleaned:
+            raise ValueError("name cannot be blank")
+        require_non_negative_integer(energy, "energy")
+        require_non_negative_integer(shield, "shield")
+        if not 1 <= energy <= 20:
+            raise ValueError("energy must be between 1 and 20")
+        if not 1 <= shield <= 20:
+            raise ValueError("shield must be between 1 and 20")
+        self.name = cleaned
+        self._energy = energy
+        self._shield = shield
+
+    @property
+    def energy(self):
+        return self._energy
+
+    @property
+    def shield(self):
+        return self._shield
+
+    @property
+    def active(self):
+        return self._shield > 0
+
+    def spend_energy(self, amount):
+        require_non_negative_integer(amount, "amount")
+        if amount > self._energy:
+            raise ValueError("not enough energy")
+        self._energy -= amount
+        return self._energy
+
+    def absorb_impact(self, amount):
+        require_non_negative_integer(amount, "amount")
+        self._shield = max(0, self._shield - amount)
+        return self._shield
+
+
+@dataclass(frozen=True)
+class TurnResult:
+    """An immutable report of one accepted tournament turn."""
+
+    actor: str
+    target: str
+    move: str
+    impact: int
+    combo: bool
+    energy_left: int
+    shield_left: int
+    status: str
+
+
+class Arena:
+    """Coordinate two robots and the rules for accepted tournament turns."""
+
+    def __init__(self, left, right):
+        if not isinstance(left, Robot) or not isinstance(right, Robot):
+            raise TypeError("left and right must be Robot instances")
+        if left is right:
+            raise ValueError("left and right must be different objects")
+        if left.name == right.name:
+            raise ValueError("robot names must differ")
+        self._robots = (left, right)
+        self._current_index = 0
+        self._last_moves = {}
+
+    @property
+    def current_robot(self):
+        return self._robots[self._current_index]
+
+    @property
+    def winner(self):
+        left, right = self._robots
+        if not left.active:
+            return right.name
+        if not right.active:
+            return left.name
+        return None
+
+    def play_turn(self, move):
+        if not isinstance(move, Move):
+            raise TypeError("move must be a Move")
+        if self.winner is not None:
+            raise RuntimeError("tournament is already finished")
+
+        actor = self._robots[self._current_index]
+        target = self._robots[1 - self._current_index]
+
+        if move.energy_cost > actor.energy:
+            raise ValueError("not enough energy for this move")
+
+        combo = self._last_moves.get(actor) == move.name
+        applied_impact = move.impact + (1 if combo else 0)
+
+        actor.spend_energy(move.energy_cost)
+        target.absorb_impact(applied_impact)
+        self._last_moves[actor] = move.name
+        self._current_index = 1 - self._current_index
+
+        status = "finished" if self.winner is not None else "running"
+        return TurnResult(
+            actor=actor.name,
+            target=target.name,
+            move=move.name,
+            impact=applied_impact,
+            combo=combo,
+            energy_left=actor.energy,
+            shield_left=target.shield,
+            status=status,
+        )
 ```
 
-Compare contracts and decisions, not only line-for-line syntax. If your solution
-also satisfies the constraints and checks, explain one trade-off between the
-approaches.
+Run the unchanged thirty-check harness below this implementation. Notice the
+responsibility boundaries:
+
+- the validation helper owns a repeated primitive rule, not object state;
+- `Move` and `TurnResult` get field equality and frozen behavior;
+- `Robot` is a regular class because it owns guarded mutation and identity; and
+- `Arena` composes robots and owns tournament order/history.
 
 </details>
 
-## 9. Check your understanding
+## 9. Explain the combo change
+
+The base battle needs current robot, energy, shield, and winner. Combo adds one
+new question: “Which successful move did this same actor use on its previous
+personal turn?”
+
+That history belongs to `Arena` because:
+
+- a move value should describe one move, not remember who used it;
+- a robot may participate in a future game with different tournament rules;
+- the arena already owns alternation and accepted-turn order; and
+- rejected turns must not enter successful tournament history.
+
+The dictionary uses robot objects as keys. Regular `Robot` instances keep
+identity-based hashing and equality because the class does not define `__eq__`.
+Two robots named Bolt are still different objects, although this arena also
+rejects duplicate display names to keep results unambiguous.
+
+Try one more transfer variation after all checks pass:
+
+1. add a third move named `"Guard Tap"` with zero energy cost and one impact;
+2. confirm the first use is not a combo;
+3. let the other robot take an accepted turn;
+4. repeat `"Guard Tap"` and confirm impact becomes two; and
+5. replace it with a different move on the next personal turn and confirm the
+   combo resets.
+
+This modification needs no subclass. It changes arena-owned history and result
+evidence while robot invariants remain untouched.
+
+## 10. Draw the responsibility map
+
+Complete this short record in your own words:
+
+| Question | Your explanation |
+|---|---|
+| Which types are value objects? | |
+| Which type is a stateful entity? | |
+| Which type orchestrates collaborators? | |
+| Which function remains a plain function, and why? | |
+| Why is inheritance unnecessary? | |
+| Which fields must remain unchanged after rejection? | |
+| Why does combo history belong to the arena? | |
+
+A strong explanation names observable contracts. “Arena is the manager” is
+too vague. “Arena owns which robot acts, successful move history, winner
+calculation, and the order of atomic mutation” is specific enough to review.
+
+## 11. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-object-oriented-python-challenge",
-  "title": "Complete a Road-Crossing Simulation Model readiness check",
-  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "title": "Tiny Robot Tournament design check",
+  "instructions": "Connect every answer to the tournament's ownership and state contracts.",
   "questions": [
     {
-      "id": "design-boundary",
-      "prompt": "Why are vehicles supplied to `game_status` as an argument?",
-      "options": [
-        "The dependency is explicit, so the rule can be tested without hidden global state.",
-        "Dataclasses cannot store vehicles globally.",
-        "Arguments automatically draw the game.",
-        "It makes every vehicle mutable."
-      ],
-      "answer_index": 0,
-      "explanation": "The dependency is explicit, so the rule can be tested without hidden global state."
+      "id": "robot-state-owner",
+      "prompt": "Which object should reject spending more energy than is available?",
+      "options": ["The immutable result", "The `Robot` that owns current energy", "The move name string", "A global print function"],
+      "answer_index": 1,
+      "explanation": "Energy is robot state, so Robot protects its range on every public mutation path."
     },
     {
-      "id": "clean-evidence",
-      "prompt": "What should happen before recording this challenge as complete?",
-      "options": [
-        "The unchanged checks pass from a clean state and the important decisions can be explained.",
-        "The expected values are edited to match the current output.",
-        "Only the final successful line is kept.",
-        "Several unrelated features are added."
-      ],
+      "id": "unaffordable-atomic-turn",
+      "prompt": "An actor cannot afford a move. What must remain unchanged?",
+      "options": ["Both robots, current side, winner, and combo history", "Only the move's display name", "The target changes but the actor does not", "The current side advances anyway"],
       "answer_index": 0,
-      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+      "explanation": "Affordability is checked before mutation, so a rejected turn commits no part of the tournament transition."
+    },
+    {
+      "id": "combo-history-owner",
+      "prompt": "Why does combo history belong to `Arena`?",
+      "options": ["Frozen dataclasses cannot contain text.", "Every robot must inherit Arena.", "History is always global.", "The arena owns accepted turn order and compares each robot's successful moves across turns."],
+      "answer_index": 3,
+      "explanation": "Combo is a tournament workflow rule, not an intrinsic property of a move value or reusable robot."
+    },
+    {
+      "id": "move-dataclass-choice",
+      "prompt": "Why is `Move` a frozen dataclass?",
+      "options": ["It needs hidden changing identity.", "Its normalized fields define a stable value with useful equality and representation.", "It must read keyboard input.", "It controls both robots."],
+      "answer_index": 1,
+      "explanation": "Name, cost, and impact determine move value semantics, and accepted turns should not mutate the move description."
+    },
+    {
+      "id": "no-robot-hierarchy",
+      "prompt": "Why does the challenge not need `ComboRobot(Robot)`?",
+      "options": ["Python classes cannot inherit.", "Combos require files.", "Combo is arena-owned turn history; ordinary composed robots already honor the needed state behavior.", "Subclasses cannot have energy."],
+      "answer_index": 2,
+      "explanation": "A subtype would put a tournament coordination rule on the wrong object and add a relationship that callers do not need."
     }
   ]
 }
@@ -205,20 +794,21 @@ approaches.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 10. Decide whether the challenge is complete
+## 12. Record the challenge result
 
-### Evidence rubric
+Record completion after:
 
-| Evidence | Ready to record when |
-|---|---|
-| Behavior | Acceptance examples and progressive checks pass unchanged. |
-| Scope | The artifact follows the constraints without unrelated features. |
-| Reasoning | Important values, boundaries, and design choices can be traced. |
-| Debugging | One record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+- all thirty checks pass in one clean run;
+- your implementation contains no input, printing, global tournament state, or
+  unnecessary project-defined inheritance;
+- an unaffordable move and a finished-game move both preserve prior state;
+- both competitors can earn separate combos;
+- the result values exactly report base and combo impact;
+- the additional `Guard Tap` variation behaves as predicted; and
+- your responsibility map explains the choices in behavioral terms.
 
-This button stores a self-reported marker only in this browser. It does not
-submit work, grade it, verify identity, or issue a certificate.
+This button stores progress only in this browser. It does not submit code,
+grade identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -232,7 +822,15 @@ submit work, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows design choices without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- Immutable dataclasses fit move descriptions and accepted-turn evidence because
+  their declared fields determine value semantics.
+- A regular robot class owns identity and guarded mutation. Read-only properties
+  expose state without offering arbitrary replacement.
+- The arena composes two robots and owns the rules that cross them: active side,
+  affordability-before-commit, winner, and successful-move history.
+- Rejected operations are atomic: no energy, shield, current side, winner, or
+  combo fact changes.
+- The combo rule belongs to tournament history and can evolve without a robot
+  subclass.
+- Progressive assertions let a learner locate the earliest broken contract and
+  continue without a testing framework.

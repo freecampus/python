@@ -1,13 +1,15 @@
 ---
-title: Composition, Inheritance, and Object-Oriented Design
+title: Choose Composition Before Inheritance
 lesson_id: object-oriented-python.composition-inheritance-design
 lesson_order: 40
-description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+description: Split responsibilities among injected collaborators, delegate through shared behavior, test subtype promises, and replace brittle inheritance with clearer composition.
 execute:
   echo: true
 categories:
 - python-foundations
 - object-oriented-python
+- composition
+- inheritance
 order: 40
 colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/composition-inheritance-design.ipynb
 course_id: python-foundations
@@ -15,259 +17,314 @@ unit_id: object-oriented-python
 unit_number: 11
 ---
 ::: {.lesson-meta}
-- **Level:** Intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Choose composition, inheritance, or simpler functions based on the relationship you need.
-- **Practice in:** VS Code, Jupyter, or Colab
+- **Level:** Python Foundations
+- **Estimated time:** 5–6 hours
+- **You will learn:** Separate responsibilities, inject and replace collaborators, use duck typing and delegation, override behavior safely, and accept inheritance only when every subtype preserves the base contract.
+- **Practice in:** Google Colab, JupyterLab, or a local Python interpreter
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+An `Explorer` object begins by storing a name and energy. Then it chooses routes,
+formats messages, rolls random weather, saves progress, and sends notifications.
+The class now changes for unrelated reasons and is hard to exercise without the
+outside world.
 
-Choose composition, inheritance, or simpler functions based on the relationship you need. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+The solution is not automatically a family tree. First ask which
+responsibilities can collaborate through small, visible behaviors. Composition
+lets an object receive and use another object. Inheritance says something
+stronger: every specialized object can stand in for the base object without
+surprising its callers.
 
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Object-Oriented Design** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
+This lesson asks:
 
-## 2. Composition
+- Which object should own each decision?
+- What is the difference between containing, depending on, and delegating?
+- How can behavior vary without a shared parent class?
+- What promise must an inheritance relationship preserve?
+- When is a function, dictionary, or dataclass still the simpler choice?
 
-Build objects out of other objects.
+## 1. Split a class by reasons to change
 
-::: {.callout-tip title="A useful analogy—and its limit"}
-Composition is a bicycle made of wheels, frame, chain, and brakes: each part has a role inside the whole.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Composition models has-a relationships by placing one object inside another.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+Here is the beginning of an overloaded design:
 
 ```python
-class Engine:
-    def start(self):
-        print("engine on")
+class Explorer:
+    def __init__(self, name, energy=10):
+        self.name = name
+        self.energy = energy
 
-class Car:
+    def choose_route(self, routes):
+        return min(routes, key=lambda route: route["distance"])
+
+    def travel(self, route):
+        self.energy -= route["distance"]
+        return f"{self.name} travels to {route['name']}"
+
+    def format_status(self):
+        return f"{self.name}: {self.energy} energy"
+```
+
+This class is not yet enormous, but it already owns three decisions:
+
+1. explorer state and travel rules;
+2. route-selection policy; and
+3. presentation text.
+
+Counting methods is not enough. A class with twelve cohesive methods can be
+healthier than a class with three unrelated ones. Ask what would cause the code
+to change. A new route algorithm should not risk the energy invariant. A new
+display language should not alter travel.
+
+Move route choice to a collaborator:
+
+```python
+class ShortestRoutePlanner:
+    def choose(self, routes):
+        if not routes:
+            raise ValueError("routes cannot be empty")
+        return min(routes, key=lambda route: route["distance"])
+
+
+class Explorer:
+    def __init__(self, name, planner, energy=10):
+        if energy < 0:
+            raise ValueError("energy cannot be negative")
+        self.name = name
+        self._planner = planner
+        self._energy = energy
+
+    @property
+    def energy(self):
+        return self._energy
+
+    def choose_route(self, routes):
+        return self._planner.choose(routes)
+
+    def travel(self, route):
+        cost = route["distance"]
+        if cost > self._energy:
+            raise ValueError("not enough energy")
+        self._energy -= cost
+        return route["name"]
+```
+
+The constructor receives `planner` rather than constructing it. The explorer
+**depends on** an object with `choose(routes)` behavior. It stores that
+collaborator and **delegates** route choice to it.
+
+```python
+routes = [
+    {"name": "River Gate", "distance": 4, "scenic": 3},
+    {"name": "Hill Garden", "distance": 6, "scenic": 5},
+]
+
+explorer = Explorer("Mina", ShortestRoutePlanner(), energy=10)
+route = explorer.choose_route(routes)
+
+assert route["name"] == "River Gate"
+assert explorer.travel(route) == "River Gate"
+assert explorer.energy == 6
+```
+
+This is **dependency injection** in a simple form: the outside caller provides
+the collaborator. It makes the dependency visible and replaceable.
+
+## 2. Swap behavior without inventing a parent class
+
+Add a second planner:
+
+```python
+class ScenicRoutePlanner:
+    def choose(self, routes):
+        if not routes:
+            raise ValueError("routes cannot be empty")
+        return max(routes, key=lambda route: route["scenic"])
+```
+
+It does not inherit from `ShortestRoutePlanner`. It simply supports the
+behavior `Explorer` uses:
+
+```python
+scenic_explorer = Explorer("Sol", ScenicRoutePlanner(), energy=10)
+route = scenic_explorer.choose_route(routes)
+
+assert route["name"] == "Hill Garden"
+```
+
+Python commonly supports **duck typing**: code relies on available behavior
+rather than requiring an object's class to appear in one hierarchy. If both
+planners can accept the route collection and return one route under the stated
+failure contract, the explorer can collaborate with either.
+
+The behavior still needs a contract:
+
+| Planner operation | Promise |
+|---|---|
+| `choose(routes)` | accept a non-empty iterable of route records |
+| success | return one of the supplied records |
+| empty input | raise `ValueError("routes cannot be empty")` |
+| side effects | do not mutate the supplied records or explorer |
+
+A matching method name alone is not enough. This object has a `choose` method
+but violates the return contract:
+
+```python
+class BrokenPlanner:
+    def choose(self, routes):
+        return "surprise"
+```
+
+`Explorer.choose_route` can call it, but later code expecting `route["distance"]`
+will fail. Behavioral substitution includes inputs, outputs, failures, and side
+effects.
+
+### Distinguish ownership, reference, dependency, and delegation
+
+Object diagrams often draw the same arrow for several relationships. Name the
+relationship in prose so readers know what lifecycle and mutation to expect:
+
+- **Ownership:** a `Tour` copies and controls its internal stop sequence. The
+  sequence should not change because the caller appends to its original list.
+- **Reference:** a `TurnResult` may refer to an immutable position value without
+  controlling a separate lifecycle.
+- **Dependency:** an `Explorer` requires planner behavior to complete route
+  choice.
+- **Delegation:** `Explorer.choose_route` forwards the selection request to that
+  planner and returns its result.
+
+Composition does not automatically imply exclusive ownership. In the current
+constructor, the caller creates the planner and the explorer retains a reference
+to it. If two explorers receive the same stateful planner, they intentionally or
+accidentally share that collaborator:
+
+```python
+class CountingPlanner:
     def __init__(self):
-        self.engine = Engine()
+        self.calls = 0
 
-car = Car()
-car.engine.start()
+    def choose(self, routes):
+        self.calls += 1
+        return routes[0]
+
+
+shared = CountingPlanner()
+first_explorer = Explorer("Ari", shared)
+second_explorer = Explorer("Bo", shared)
+
+first_explorer.choose_route(routes)
+second_explorer.choose_route(routes)
+assert shared.calls == 2
 ```
 
-### Trace it line by line
+That can be useful for shared metrics, but the constructor and documentation
+should make the choice visible. Copying an arbitrary collaborator is rarely a
+safe fix: a copy may duplicate file handles, caches, or configuration in
+surprising ways. Decide lifecycle at the design boundary instead.
 
-1. `class Engine:` — Python begins the definition of class `Engine` and collects the indented attributes and methods.
-2. `def start(self):` — Python creates the function `start`; the indented body runs only when the function is called.
-3. `print("engine on")` — Python evaluates the arguments and writes their display form to standard output.
-4. `class Car:` — Python begins the definition of class `Car` and collects the indented attributes and methods.
-5. `def __init__(self):` — Python creates the function `__init__`; the indented body runs only when the function is called.
-6. `self.engine = Engine()` — Python evaluates the right-hand expression and binds or updates `self.engine` with the result.
-7. `car = Car()` — Python evaluates the right-hand expression and binds or updates `car` with the result.
-8. `car.engine.start()` — Python calls this operation with the supplied arguments and uses or discards its result as written.
-
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-If inheritance feels forced, composition is often simpler and clearer.
-:::
-
-### Practice composition
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Composition**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "object-oriented-python-oop-design-composition",
-  "title": "Composition checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to Composition?",
-      "options": [
-        "Inheritance models is-a relationships where a child class specializes a parent class.",
-        "Composition models has-a relationships by placing one object inside another.",
-        "Classes are useful when state and behavior stay together; otherwise they can hide simple ideas.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
-      "answer_index": 1,
-      "explanation": "Composition models has-a relationships by placing one object inside another."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 3. Inheritance
-
-Reuse and specialize behavior with parent and child classes.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-Inheritance is like a school form: all students share common fields, while exchange students may add extra fields.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Inheritance models is-a relationships where a child class specializes a parent class.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+The caller can also pass a simple fake object while investigating behavior:
 
 ```python
-class Animal:
-    def speak(self):
-        print("sound")
+class FirstRoute:
+    def choose(self, routes):
+        return routes[0]
 
-class Cat(Animal):
-    def speak(self):
-        print("meow")
 
-Cat().speak()
+predictable = Explorer("Cy", FirstRoute(), energy=10)
+assert predictable.choose_route(routes) is routes[0]
 ```
 
-### Trace it line by line
+No testing framework is required to benefit from a replaceable dependency. The
+small fake makes the explorer's delegation observable.
 
-1. `class Animal:` — Python begins the definition of class `Animal` and collects the indented attributes and methods.
-2. `def speak(self):` — Python creates the function `speak`; the indented body runs only when the function is called.
-3. `print("sound")` — Python evaluates the arguments and writes their display form to standard output.
-4. `class Cat(Animal):` — Python begins the definition of class `Cat` and collects the indented attributes and methods.
-5. `def speak(self):` — Python creates the function `speak`; the indented body runs only when the function is called.
-6. `print("meow")` — Python evaluates the arguments and writes their display form to standard output.
-7. `Cat().speak()` — Python calls this operation with the supplied arguments and uses or discards its result as written.
+### Inject uncertainty instead of hiding it
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Do not use inheritance only to share two lines of code. It should express a clear relationship.
-:::
-
-### Practice inheritance
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Inheritance**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "object-oriented-python-oop-design-inheritance",
-  "title": "Inheritance checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to Inheritance?",
-      "options": [
-        "Composition models has-a relationships by placing one object inside another.",
-        "Classes are useful when state and behavior stay together; otherwise they can hide simple ideas.",
-        "Inheritance models is-a relationships where a child class specializes a parent class.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
-      "answer_index": 2,
-      "explanation": "Inheritance models is-a relationships where a child class specializes a parent class."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 4. When Not to Use Classes
-
-Choose simple functions or data structures when classes add no clarity.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A class can be a backpack, but you do not need a backpack to carry one sticky note.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Classes are useful when state and behavior stay together; otherwise they can hide simple ideas.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+This version is hard to control:
 
 ```python
-def calculate_total(prices):
-    return sum(prices)
+import random
 
-print(calculate_total([3, 4, 5]))
+
+class HiddenWeatherExplorer:
+    def weather(self):
+        return random.choice(["clear", "rain"])
 ```
 
-### Trace it line by line
+The object constructs its uncertainty implicitly through the global `random`
+module. A small collaborator makes examples deterministic:
 
-1. `def calculate_total(prices):` — Python creates the function `calculate_total`; the indented body runs only when the function is called.
-2. `return sum(prices)` — Python evaluates the expression and sends that value back to the caller, ending this call.
-3. `print(calculate_total([3, 4, 5]))` — Python evaluates the arguments and writes their display form to standard output.
+```python
+class SequenceWeather:
+    def __init__(self, conditions):
+        self._conditions = iter(conditions)
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+    def next_condition(self):
+        return next(self._conditions)
 
-::: {.callout-warning title="Common mistake"}
-Creating a class for every noun can make beginner code harder to read. Start simple, then refactor when patterns appear.
+
+class Expedition:
+    def __init__(self, weather):
+        self._weather = weather
+
+    def begin_day(self):
+        return self._weather.next_condition()
+```
+
+```python
+expedition = Expedition(SequenceWeather(["clear", "rain"]))
+assert expedition.begin_day() == "clear"
+assert expedition.begin_day() == "rain"
+```
+
+The expedition owns the workflow; the collaborator owns condition selection.
+Unit 13 will use this same seam for test doubles. Here, it simply makes the
+design predictable.
+
+::: {.concept-diagram}
+Composition places the policy beside the object that uses it. The caller
+chooses which compatible policy to supply.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  caller[Caller] -->|injects| explorer[Explorer]
+  caller --> shortest[Shortest planner]
+  caller --> scenic[Scenic planner]
+  explorer -->|delegates choose| policy[Planner behavior]
+  shortest --> policy
+  scenic --> policy
+```
 :::
 
-### Practice when not to use classes
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **When Not to Use Classes**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
+### Checkpoint: compose through behavior
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "object-oriented-python-oop-design-when-not-to-use-classes",
-  "title": "When Not to Use Classes checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit11-composition-collaboration",
+  "title": "Trace injected collaborators",
+  "instructions": "Choose the design statement supported by the examples.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to When Not to Use Classes?",
-      "options": [
-        "Composition models has-a relationships by placing one object inside another.",
-        "Inheritance models is-a relationships where a child class specializes a parent class.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "Classes are useful when state and behavior stay together; otherwise they can hide simple ideas."
-      ],
+      "id": "delegation-owner",
+      "prompt": "Who decides which route is shortest after `Explorer` receives `ShortestRoutePlanner`?",
+      "options": ["The route dictionary mutates itself.", "The `Explorer` constructor chooses randomly.", "The display string chooses.", "The planner's `choose` method; Explorer delegates to it."],
       "answer_index": 3,
-      "explanation": "Classes are useful when state and behavior stay together; otherwise they can hide simple ideas."
+      "explanation": "Explorer owns the workflow but delegates selection policy to the injected collaborator."
+    },
+    {
+      "id": "duck-typed-planners",
+      "prompt": "Why can `ScenicRoutePlanner` work without inheriting from `ShortestRoutePlanner`?",
+      "options": ["It provides the `choose(routes)` behavior and contract the caller uses.", "Every class inherits from the nearest class name automatically.", "Dictionaries disable type checks.", "The explorer never calls the planner."],
+      "answer_index": 0,
+      "explanation": "Behavior-based collaboration does not require the two implementations to share a project-defined base class."
+    },
+    {
+      "id": "dependency-injection-benefit",
+      "prompt": "What does supplying a weather collaborator through the constructor make possible?",
+      "options": ["It removes every object from the design.", "The caller can choose a deterministic condition source without editing the expedition.", "It makes random output a class attribute.", "It guarantees internet access."],
+      "answer_index": 1,
+      "explanation": "An explicit seam allows controlled implementations to replace uncertain ones while the expedition workflow stays unchanged."
     }
   ]
 }
@@ -275,18 +332,524 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 5. Integrate the lesson
+## 3. Use inheritance only for a reliable subtype
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+Inheritance defines a new class from an existing class. A subtype receives base
+behavior and can add or override behavior:
 
-## 6. Key points
+```python
+class Notification:
+    def __init__(self, recipient, message):
+        if not recipient.strip():
+            raise ValueError("recipient cannot be blank")
+        self.recipient = recipient.strip()
+        self.message = message
 
-- **Composition:** Composition models has-a relationships by placing one object inside another.
-- **Inheritance:** Inheritance models is-a relationships where a child class specializes a parent class.
-- **When Not to Use Classes:** Classes are useful when state and behavior stay together; otherwise they can hide simple ideas.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+    def render(self):
+        return f"To {self.recipient}: {self.message}"
+
+
+class UrgentNotification(Notification):
+    def __init__(self, recipient, message, alarm="ALERT"):
+        super().__init__(recipient, message)
+        self.alarm = alarm
+
+    def render(self):
+        base_text = super().render()
+        return f"{self.alarm}! {base_text}"
+```
+
+`UrgentNotification(Notification)` declares inheritance. `super().__init__`
+continues to the base initializer so recipient validation and shared assignments
+remain in one place. Its `render` override extends the base result.
+
+```python
+ordinary = Notification("Ari", "Gate opened")
+urgent = UrgentNotification("Mina", "Bridge closing")
+
+assert ordinary.render() == "To Ari: Gate opened"
+assert urgent.render() == "ALERT! To Mina: Bridge closing"
+assert isinstance(urgent, Notification)
+```
+
+A caller that accepts a `Notification` and relies only on the public promise can
+use either:
+
+```python
+def display_notification(notification):
+    """Return displayable notification text."""
+    text = notification.render()
+    if not isinstance(text, str) or not text:
+        raise ValueError("notification must render non-empty text")
+    return text
+
+
+assert display_notification(ordinary) == "To Ari: Gate opened"
+assert display_notification(urgent).startswith("ALERT!")
+```
+
+The subtype changes formatting while preserving the operation's input and
+non-empty-string result. This is a small, honest hierarchy.
+
+### `super()` follows the class relationship
+
+`super()` is not “call my parent by name.” It creates a proxy that continues
+method lookup after the current class according to Python's method resolution
+order. In this shallow example, that reaches `Notification`. Using `super()`
+supports cooperative behavior better than hard-coding
+`Notification.__init__(self, ...)`.
+
+This unit stops at single, shallow inheritance. Multiple inheritance and deep
+method-resolution design need more context and belong in an advanced course.
+
+## 4. Reject a subtype that breaks the caller's promise
+
+Suppose a base `Storage` promises that `save(text)` accepts any string and
+returns the stored character count:
+
+```python
+class Storage:
+    def __init__(self):
+        self.items = []
+
+    def save(self, text):
+        self.items.append(text)
+        return len(text)
+```
+
+This subtype is tempting but dishonest:
+
+```python
+class NonEmptyStorage(Storage):
+    def save(self, text):
+        if not text:
+            raise ValueError("empty text is forbidden")
+        return super().save(text)
+```
+
+The base accepts `""`, but the subtype rejects it. Code written for the base
+contract can fail when handed the subtype:
+
+```python
+def archive_values(storage, values):
+    return [storage.save(value) for value in values]
+
+
+assert archive_values(Storage(), ["map", ""]) == [3, 0]
+
+try:
+    archive_values(NonEmptyStorage(), ["map", ""])
+except ValueError as error:
+    print(error)
+```
+
+An “is-a storage” sentence is not enough. The subtype strengthened the
+precondition and broke substitutability. Better options include:
+
+- change the base contract if all storage should reject empty text;
+- validate before calling storage, where that application rule belongs; or
+- compose a filtering/validation policy with storage rather than pretending it
+  is a subtype.
+
+Use a substitution review:
+
+| Contract part | Subtype question |
+|---|---|
+| accepted inputs | Does it accept everything the base promises? |
+| successful result | Does it return a result callers can use the same way? |
+| failure behavior | Does it introduce surprising failure for valid base input? |
+| state effects | Does it preserve the documented postconditions? |
+| public attributes/methods | Are inherited promises still meaningful? |
+
+Inheritance is a public relationship. A subclass can technically access
+underscore-prefixed base state, but depending on every internal detail makes
+the base fragile: a harmless refactor can break subclasses. Design extension
+points intentionally or prefer composition.
+
+### Checkpoint: test the subtype promise
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit11-composition-inheritance",
+  "title": "Accept or reject an inheritance relationship",
+  "instructions": "Choose the answer that preserves callers' behavioral expectations.",
+  "questions": [
+    {
+      "id": "super-initialization",
+      "prompt": "Why does `UrgentNotification.__init__` call `super().__init__(recipient, message)`?",
+      "options": ["To convert the instance into a function", "To skip base validation", "To reuse the base initialization contract before adding urgent state", "To create a global notification"],
+      "answer_index": 2,
+      "explanation": "The base owns shared validation and assignments; the subtype extends initialization after preserving them."
+    },
+    {
+      "id": "broken-storage-subtype",
+      "prompt": "Why is `NonEmptyStorage` not safely substitutable for the stated `Storage` contract?",
+      "options": ["It uses a list.", "Its class name is too long.", "It calls `super()`.", "It rejects an empty string that the base contract accepts."],
+      "answer_index": 3,
+      "explanation": "Strengthening the input precondition surprises callers that legitimately rely on all base-accepted strings."
+    },
+    {
+      "id": "honest-override",
+      "prompt": "Which override best preserves a base method that promises a non-empty display string?",
+      "options": ["Return another non-empty string with extra urgent context.", "Return `None` for urgent objects.", "Require an unrelated file argument.", "Delete the method after construction."],
+      "answer_index": 0,
+      "explanation": "The caller can continue using the result under the same contract even though the subtype specializes its content."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Replace a brittle hierarchy with a collaborator
+
+Suppose a game models movement this way:
+
+```python
+class MovingActor:
+    def move(self, position):
+        raise NotImplementedError
+
+
+class WalkingActor(MovingActor):
+    def move(self, position):
+        return position + 1
+
+
+class FlyingWalkingActor(WalkingActor):
+    def move(self, position):
+        return position + 3
+```
+
+The hierarchy mixes **what the actor is** with a movement rule that might
+change during the game. A power-up could make a walking actor fly temporarily.
+Changing the object's class at runtime is awkward.
+
+Compose a movement policy instead:
+
+```python
+class StepMovement:
+    def __init__(self, distance=1):
+        self.distance = distance
+
+    def move(self, position):
+        return position + self.distance
+
+
+class Actor:
+    def __init__(self, name, movement):
+        self.name = name
+        self.movement = movement
+        self.position = 0
+
+    def advance(self):
+        self.position = self.movement.move(self.position)
+        return self.position
+```
+
+```python
+actor = Actor("Pip", StepMovement(1))
+assert actor.advance() == 1
+
+actor.movement = StepMovement(3)
+assert actor.advance() == 4
+```
+
+The actor owns identity and current position. The policy owns how a position
+advances. This design supports a temporary change without a class explosion.
+
+Composition is not always better. If `UrgentNotification` is a stable semantic
+kind of notification and preserves the contract, inheritance communicates that
+relationship well. Prefer composition as the default for reuse and varying
+behavior; accept inheritance when substitutability makes the relationship true.
+
+::: {.concept-diagram}
+Inheritance fixes a subtype relationship. Composition attaches replaceable
+behavior to an object that keeps its own identity.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  sub[Urgent notification] -->|is substitutable for| base[Notification]
+  actor[Actor] -->|has movement policy| move[Step movement]
+  actor -->|policy can change| other[Other movement]
+```
+:::
+
+## 6. Use the smallest honest structure
+
+Before creating a class, walk through this table:
+
+| Structure | Strong signal | Warning sign |
+|---|---|---|
+| function | input becomes output; no owned evolving state | hidden global mutation |
+| dictionary/list | local, flexible data shape | many callers rely on magic keys and shared rules |
+| dataclass | fields define value, representation, equality | unique entity is accidentally equal by fields |
+| regular class | coherent state changes through guarded behavior | class only wraps one stateless function |
+| composition | separate responsibilities collaborate or vary | dozens of tiny objects only forward calls |
+| inheritance | stable subtype preserves one public contract | used only to borrow code or satisfy “is-a” wording |
+
+Watch for these smells:
+
+- every noun in a requirement becomes a class;
+- every field receives a getter and setter without a rule;
+- a `Manager`, `Controller`, or `System` owns every unrelated task;
+- a one-method class has no configuration, state, or replaceable behavior;
+- subclasses inspect and mutate several base underscore fields;
+- hierarchies grow a new subtype for every combination of features;
+- a class exists only to make two lines “object-oriented.”
+
+A module function can be a public, testable abstraction. A dictionary can be
+the clearest record. The aim is coherent ownership, not ceremony.
+
+### Review a design with change scenarios
+
+Static diagrams can make almost any decomposition look tidy. Test the design by
+asking where realistic changes land:
+
+1. **Add a third route strategy.** Ideally add one collaborator and selection
+   configuration, not edit every explorer method.
+2. **Change energy validation.** Ideally edit the entity that owns energy, not
+   each planner.
+3. **Display status in another language.** Ideally change a presenter or
+   formatter, not route algorithms.
+4. **Record planner calls.** Ideally decorate or compose the planner behavior,
+   not create subclasses for every explorer-policy combination.
+5. **Make a planner stateful.** Decide whether it is shared or independently
+   constructed; do not let that lifecycle be accidental.
+
+When one small requirement crosses most classes, either the requirement is
+inherently cross-cutting or responsibilities have been split along the wrong
+lines. Use the change scenario as evidence, not as proof that more classes are
+always needed.
+
+## 7. Design a museum tour with replaceable route policies
+
+Build these types:
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Stop:
+    name: str
+    floor: int
+    popularity: int
+
+
+class FloorOrder:
+    def arrange(self, stops):
+        """Return stops ordered by floor, then name."""
+        ...
+
+
+class PopularFirst:
+    def arrange(self, stops):
+        """Return stops by descending popularity, then name."""
+        ...
+
+
+class Tour:
+    def __init__(self, title, stops, policy):
+        """Store a non-empty title, copied stops, and an arrangement policy."""
+        ...
+
+    def itinerary(self):
+        """Delegate arrangement and return an independent list of stop names."""
+        ...
+```
+
+Contracts:
+
+- a stop name is non-blank, floor is non-negative, and popularity is 0–5;
+- `Tour` requires at least one stop and stores its own list copy;
+- each policy returns a new list without mutating the supplied collection;
+- `itinerary()` delegates to the current policy;
+- changing `tour.policy` changes arrangement, not tour identity or stop data;
+  and
+- no project-defined base class is needed for the two policies.
+
+Checks:
+
+```python
+stops = [
+    Stop("Moon Engine", 2, 5),
+    Stop("Clockwork Birds", 1, 3),
+    Stop("Amber Maps", 1, 4),
+]
+
+tour = Tour("Museum Sprint", stops, FloorOrder())
+assert tour.itinerary() == ["Amber Maps", "Clockwork Birds", "Moon Engine"]
+
+tour.policy = PopularFirst()
+assert tour.itinerary() == ["Moon Engine", "Amber Maps", "Clockwork Birds"]
+
+assert [stop.name for stop in stops] == [
+    "Moon Engine",
+    "Clockwork Birds",
+    "Amber Maps",
+]
+
+stops.append(Stop("New Exhibit", 0, 1))
+assert "New Exhibit" not in tour.itinerary()
+```
+
+Then write a five-sentence design note:
+
+1. Why is `Stop` a value-like dataclass?
+2. Why is `Tour` a stateful regular class?
+3. What behavior do both policies promise?
+4. Why is composition more useful than inheriting `PopularTour(Tour)` here?
+5. Which part could remain a function without harming the design?
+
+### Hint 1
+
+Validate `Stop` in `__post_init__`. In `Tour.__init__`, use
+`self.stops = list(stops)` so later mutation of the caller's list does not alter
+the tour.
+
+### Hint 2
+
+`FloorOrder.arrange` can use
+`sorted(stops, key=lambda stop: (stop.floor, stop.name))`. The popular policy
+can sort with `(-stop.popularity, stop.name)`.
+
+### Hint 3
+
+`Tour.itinerary` asks `self.policy.arrange(self.stops)` and converts the returned
+stops to names. It should not use `isinstance` to choose an algorithm; the
+collaborator owns that decision.
+
+<details class="solution">
+<summary>Compare a complete composed tour</summary>
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Stop:
+    name: str
+    floor: int
+    popularity: int
+
+    def __post_init__(self):
+        cleaned = self.name.strip()
+        if not cleaned:
+            raise ValueError("name cannot be blank")
+        if self.floor < 0:
+            raise ValueError("floor cannot be negative")
+        if not 0 <= self.popularity <= 5:
+            raise ValueError("popularity must be between 0 and 5")
+        object.__setattr__(self, "name", cleaned)
+
+
+class FloorOrder:
+    def arrange(self, stops):
+        return sorted(stops, key=lambda stop: (stop.floor, stop.name))
+
+
+class PopularFirst:
+    def arrange(self, stops):
+        return sorted(stops, key=lambda stop: (-stop.popularity, stop.name))
+
+
+class Tour:
+    def __init__(self, title, stops, policy):
+        cleaned = title.strip()
+        copied_stops = list(stops)
+        if not cleaned:
+            raise ValueError("title cannot be blank")
+        if not copied_stops:
+            raise ValueError("stops cannot be empty")
+        self.title = cleaned
+        self.stops = copied_stops
+        self.policy = policy
+
+    def itinerary(self):
+        arranged = self.policy.arrange(self.stops)
+        return [stop.name for stop in arranged]
+
+
+stops = [
+    Stop("Moon Engine", 2, 5),
+    Stop("Clockwork Birds", 1, 3),
+    Stop("Amber Maps", 1, 4),
+]
+tour = Tour("Museum Sprint", stops, FloorOrder())
+assert tour.itinerary() == ["Amber Maps", "Clockwork Birds", "Moon Engine"]
+tour.policy = PopularFirst()
+assert tour.itinerary() == ["Moon Engine", "Amber Maps", "Clockwork Birds"]
+```
+
+The two policies happen to be stateless and could be functions passed into the
+tour. The small policy classes are justified here because they make a named,
+replaceable behavior visible; a callable-function design would also be honest.
+
+</details>
+
+### Checkpoint: make the design choice explicit
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit11-composition-design",
+  "title": "Choose the smallest honest abstraction",
+  "instructions": "Choose the structure that best matches the stated responsibility.",
+  "questions": [
+    {
+      "id": "tour-policy-composition",
+      "prompt": "A tour may switch between floor order and popularity order at runtime. Which design fits best?",
+      "options": ["Create a deep subclass for every possible combination.", "Compose the tour with a replaceable arrangement policy.", "Store the algorithm in a global string.", "Duplicate the complete Tour class."],
+      "answer_index": 1,
+      "explanation": "The tour keeps identity and stop state while an injected policy owns the varying arrangement behavior."
+    },
+    {
+      "id": "simple-transformation",
+      "prompt": "A stateless operation converts Celsius to Fahrenheit. What is the best first structure?",
+      "options": ["Five inherited converter classes", "A mutable singleton", "A function with an explicit input and return value", "A manager object with getters"],
+      "answer_index": 2,
+      "explanation": "A pure transformation needs no owned evolving state, so a function communicates the complete contract."
+    },
+    {
+      "id": "inheritance-for-reuse",
+      "prompt": "Why is inheriting only to reuse three implementation lines risky?",
+      "options": ["Inheritance prevents methods.", "Python forbids short base classes.", "Composition cannot reuse behavior.", "Inheritance declares a substitutable public relationship that code reuse alone does not justify."],
+      "answer_index": 3,
+      "explanation": "A subtype must preserve caller expectations. Borrowing implementation is weaker and is often better served by a helper or collaborator."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Key points for collaborating objects
+
+- Split classes by coherent responsibilities and reasons to change, not an
+  arbitrary method-count limit.
+- Composition lets an object hold or receive another object. Delegation asks
+  that collaborator to perform the behavior it owns.
+- Constructor injection makes dependencies visible and lets callers supply a
+  deterministic or alternative implementation.
+- Duck typing relies on behavioral contracts: accepted inputs, results,
+  failures, and side effects—not just matching method names.
+- Inheritance states that a subtype can be used wherever callers expect the
+  base contract. An “is-a” sentence alone does not prove that promise.
+- Use `super()` to continue cooperative lookup and preserve base initialization
+  or behavior in an honest shallow hierarchy.
+- A subtype that rejects valid base input, weakens results, or breaks
+  postconditions is not safely substitutable.
+- Prefer composition for varying capabilities and code reuse. Accept
+  inheritance when the semantic subtype and behavioral contract are stable.
+- Functions, collections, and dataclasses remain valid alternatives. A class
+  should earn its state ownership or collaboration role.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: Inheritance](https://docs.python.org/3/tutorial/classes.html#inheritance)
+- [Python glossary: Duck typing](https://docs.python.org/3/glossary.html#term-duck-typing)
+- [Python built-in `super`](https://docs.python.org/3/library/functions.html#super)
+- [PEP 8: Designing for inheritance](https://peps.python.org/pep-0008/#designing-for-inheritance)
+- [Think Python: Classes and methods](https://greenteapress.com/thinkpython2/html/thinkpython2018.html)

@@ -1,152 +1,149 @@
 ---
-title: 'Case Study: A Small Road-Crossing Game Model'
+title: Model a Complete Road-Crossing Game
 lesson_id: object-oriented-python.road-crossing-game-model
 lesson_order: 50
-description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
-course_id: python-foundations
-unit_id: object-oriented-python
-unit_number: 11
+description: Grow explicit road-crossing rules into a deterministic model with value objects, protected entities, replaceable traffic policies, turn results, and no hidden input or randomness.
 execute:
   echo: true
 categories:
 - python-foundations
 - object-oriented-python
+- case-study
+- game-model
 order: 50
 colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/road-crossing-game-model.ipynb
+course_id: python-foundations
+unit_id: object-oriented-python
+unit_number: 11
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Level:** Python Foundations
+- **Estimated time:** 5–6 hours
+- **You will learn:** Translate game rules into acceptance examples, assign value/entity/policy/orchestrator responsibilities, process deterministic turns, return immutable snapshots, and place a changed rule in its proper owner.
+- **Practice in:** Google Colab, JupyterLab, or a local Python interpreter
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+A player begins at the bottom of a five-column board. Reaching the top row wins.
+Vehicles move horizontally after each accepted player move; landing on the same
+position as a vehicle loses.
 
-A small game model gives classes a concrete job: preserve positions, apply moves, and decide whether a collision or successful crossing occurred—without mixing in a graphical framework.
+That description is enough to imagine a game but not enough to implement one.
+Does traffic move before or after the player? Does an invalid direction consume
+a turn? Do vehicles wrap at the board edge? Can a finished game receive another
+move? A dependable object model begins by making those rules observable.
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+This case study combines the unit's ideas:
 
-## 1. Read and predict a complete case
+- frozen values represent positions, vehicles, and turn reports;
+- stateful objects own player and lane transitions;
+- a traffic policy varies behavior without inheritance;
+- a game composes the participants and owns turn order; and
+- input, printing, animation, timing, and randomness stay outside the rules.
 
-```python
-from dataclasses import dataclass
+## 1. Turn the story into acceptance examples
 
+Use this board convention:
 
-@dataclass
-class Player:
-    lane: int = 0
+- rows run from `0` at the start to `goal_row` at the finish;
+- columns run from `0` through `width - 1`;
+- directions are `"up"`, `"down"`, `"left"`, and `"right"`;
+- a move outside the board is rejected before anything changes;
+- after an accepted player move, every lane advances;
+- vehicles wrap horizontally;
+- collision is checked after traffic advances;
+- collision takes priority over winning if a future rule permits both; and
+- a finished game rejects later turns.
 
-    def move_forward(self):
-        self.lane += 1
+Write representative transitions before choosing classes:
 
+| Starting state | Request | Traffic after turn | Result |
+|---|---|---|---|
+| player `(0, 2)`, vehicle `(1, 4)` | `up` | vehicle wraps to `(1, 0)` | continue at `(1, 2)` |
+| player `(0, 2)`, vehicle `(1, 1)` | `up` | vehicle reaches `(1, 2)` | collision and loss |
+| player `(0, 0)` | `left` | unchanged | reject; no turn consumed |
+| player `(2, 2)`, goal row `3` | `up` | lanes advance | win at `(3, 2)` |
+| game already won | any direction | unchanged | reject finished game |
 
-@dataclass(frozen=True)
-class Vehicle:
-    lane: int
-    column: int
+Acceptance examples answer design arguments later. If collision results differ,
+inspect the agreed operation order instead of randomly moving code.
 
+## 2. Let the procedural sketch reveal its pressure points
 
-def collided(player, vehicles, player_column=2):
-    return any(
-        vehicle.lane == player.lane and vehicle.column == player_column
-        for vehicle in vehicles
-    )
-
-
-player = Player()
-player.move_forward()
-traffic = [Vehicle(lane=1, column=4)]
-print(player.lane, collided(player, traffic))
-```
-
-### Step-by-step explanation
-
-1. `Player` owns the state that changes when the player moves.
-2. A frozen `Vehicle` is a simple immutable record for this turn.
-3. The collision function receives collaborators explicitly rather than reading globals.
-4. The player reaches lane 1 at column 2; the vehicle is at column 4, so the result is false.
-
-::: {.callout-note title="Make one controlled change"}
-Move the vehicle to column 2 and predict the collision result. Then add a finish-lane constant and a function that recognizes a win.
-:::
-
-## 2. Investigate the important boundary
-
-This model is complete enough to run and test but deliberately excludes animation, keyboard events, timing, and rendering. Those are separate responsibilities and would obscure the object-design lesson.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+A dictionary version can process a simple move:
 
 ```python
-def has_won(player, finish_lane):
-    """Return whether the player reached or passed the finish lane."""
-    return player.lane >= finish_lane
+game = {
+    "width": 5,
+    "goal_row": 3,
+    "player": {"row": 0, "column": 2},
+    "vehicles": [{"row": 1, "column": 4, "speed": 1}],
+    "status": "running",
+    "turn": 0,
+}
 
 
-test_player = Player(lane=3)
-assert has_won(test_player, finish_lane=3)
-assert not collided(test_player, [Vehicle(2, 2)])
+def step_up(state):
+    state["player"]["row"] += 1
+    for vehicle in state["vehicles"]:
+        vehicle["column"] = (
+            vehicle["column"] + vehicle["speed"]
+        ) % state["width"]
+    state["turn"] += 1
 ```
 
-Then complete the learning loop:
+This is a reasonable spike: it proves wrapping arithmetic. It is not yet the
+complete contract. Any caller can insert a vehicle on the wrong row, set a
+negative width, misspell `"column"`, call after completion, or mutate the player
+without advancing traffic.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+Do not replace the dictionary merely because it looks “procedural.” Identify
+the responsibilities that have lasting rules:
 
-<details>
-<summary>Check your practice process</summary>
+| Concept | Role | Why |
+|---|---|---|
+| position | frozen value | row and column determine its meaning |
+| direction | plain string plus a small lookup | no independent identity or behavior needed |
+| player | stateful entity | owns current position and valid movement |
+| vehicle | frozen value | advancing can produce another vehicle value |
+| lane | stateful entity | owns vehicles and applies one traffic policy |
+| speed policy | collaborator | determines movement for a turn and can vary |
+| turn result | frozen value | records observable evidence from one turn |
+| game | orchestrator | owns ordering, status, collision, and win rules |
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+This list also records concepts that **do not** become classes. A direction can
+remain a string constrained by a dictionary. A small helper can flatten vehicle
+positions. Resisting unnecessary classes is part of the design.
 
-</details>
-
-## 4. Check your understanding
+### Checkpoint: classify the concepts
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "object-oriented-python-road-crossing-game-model",
-  "title": "Case Study: A Small Road-Crossing Game Model checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit11-road-game-concepts",
+  "title": "Assign each game responsibility",
+  "instructions": "Choose the structure whose semantics match the stated concept.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "Why is collision detection a function that receives the player and vehicles?",
-      "options": [
-        "Classes cannot participate in functions.",
-        "Functions automatically draw graphics.",
-        "Its dependencies are explicit, so the rule is easy to test without hidden global state.",
-        "Dataclasses prohibit methods."
-      ],
-      "answer_index": 2,
-      "explanation": "Explicit inputs keep the domain rule deterministic and independently testable."
+      "id": "position-value-object",
+      "prompt": "Why is a frozen `Position(row, column)` a useful value object?",
+      "options": ["Its fields determine the coordinate, and movement can produce another position without changing the original.", "It reads keyboard input automatically.", "It must own every lane.", "It needs a deep subclass tree."],
+      "answer_index": 0,
+      "explanation": "Coordinates have field-based meaning and benefit from equality, representation, and non-mutating derivation."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun."
-      ],
-      "answer_index": 0,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "id": "game-orchestrator",
+      "prompt": "Which responsibility most clearly belongs to `Game`?",
+      "options": ["Formatting every terminal color", "Choosing a random keyboard", "Coordinating player movement, traffic advancement, collision, and result order", "Implementing integer addition"],
+      "answer_index": 2,
+      "explanation": "The game owns the cross-object turn workflow and status rules while participants own their local transitions."
+    },
+    {
+      "id": "direction-simple-value",
+      "prompt": "Why can `\"up\"` remain a plain string in this foundation model?",
+      "options": ["Strings can inherit from Game.", "A small lookup fully maps the finite request to row/column changes; no separate identity is needed.", "Plain values cannot be validated.", "Every game must avoid classes."],
+      "answer_index": 1,
+      "explanation": "A class should earn a responsibility. A constrained string and lookup express this small request clearly."
     }
   ]
 }
@@ -154,14 +151,858 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## Key points
+## 3. Build immutable coordinates and vehicle values
 
-::: {.callout-tip title="Key points"}
-- Give each class a cohesive state and behavior responsibility.
-- Use immutable records where an entity should not change during an operation.
-- Keep rendering and input systems outside the domain model.
+Define a coordinate that rejects negative values and returns new positions:
+
+```python
+from dataclasses import dataclass, replace
+
+
+@dataclass(frozen=True)
+class Position:
+    row: int
+    column: int
+
+    def __post_init__(self):
+        if self.row < 0 or self.column < 0:
+            raise ValueError("position values cannot be negative")
+
+    def shifted(self, row_change=0, column_change=0):
+        return Position(
+            self.row + row_change,
+            self.column + column_change,
+        )
+```
+
+`shifted` does not mutate the source:
+
+```python
+start = Position(0, 2)
+next_position = start.shifted(row_change=1)
+
+assert start == Position(0, 2)
+assert next_position == Position(1, 2)
+```
+
+Represent a vehicle as another value. It owns horizontal wrapping because that
+rule determines the next vehicle value:
+
+```python
+@dataclass(frozen=True)
+class Vehicle:
+    position: Position
+
+    def advanced(self, distance, width):
+        if distance < 0:
+            raise ValueError("distance cannot be negative")
+        if width <= 0:
+            raise ValueError("width must be positive")
+        next_column = (self.position.column + distance) % width
+        return replace(
+            self,
+            position=Position(self.position.row, next_column),
+        )
+```
+
+```python
+vehicle = Vehicle(Position(1, 4))
+moved = vehicle.advanced(distance=1, width=5)
+
+assert moved == Vehicle(Position(1, 0))
+assert vehicle == Vehicle(Position(1, 4))
+```
+
+Returning a new vehicle makes before/after reasoning straightforward. A large
+real-time game might choose mutable vehicle entities for performance, but that
+need does not exist here.
+
+## 4. Give the player one valid movement entrance
+
+The player has identity and an evolving position, so use a regular class:
+
+```python
+DIRECTION_CHANGES = {
+    "up": (1, 0),
+    "down": (-1, 0),
+    "left": (0, -1),
+    "right": (0, 1),
+}
+
+
+class Player:
+    def __init__(self, name, position, *, width, goal_row):
+        cleaned = name.strip()
+        if not cleaned:
+            raise ValueError("name cannot be blank")
+        if width <= 0 or goal_row <= 0:
+            raise ValueError("board dimensions must be positive")
+        if not 0 <= position.column < width:
+            raise ValueError("player column is outside the board")
+        if not 0 <= position.row <= goal_row:
+            raise ValueError("player row is outside the board")
+        self.name = cleaned
+        self._position = position
+        self._width = width
+        self._goal_row = goal_row
+
+    @property
+    def position(self):
+        return self._position
+
+    def preview(self, direction):
+        try:
+            row_change, column_change = DIRECTION_CHANGES[direction]
+        except KeyError as error:
+            raise ValueError(f"unknown direction: {direction}") from error
+
+        candidate = self._position.shifted(row_change, column_change)
+        if not 0 <= candidate.column < self._width:
+            raise ValueError("move leaves the board columns")
+        if not 0 <= candidate.row <= self._goal_row:
+            raise ValueError("move leaves the board rows")
+        return candidate
+
+    def move(self, direction):
+        candidate = self.preview(direction)
+        self._position = candidate
+        return candidate
+```
+
+`preview` validates and calculates without changing state. `move` commits that
+candidate. The split lets `Game` validate the player request before the rest of
+the turn begins, while the player remains the owner of board-boundary rules.
+
+```python
+player = Player("Pip", Position(0, 2), width=5, goal_row=3)
+assert player.preview("up") == Position(1, 2)
+assert player.position == Position(0, 2)
+assert player.move("up") == Position(1, 2)
+```
+
+Try an invalid boundary and preserve state:
+
+```python
+edge = Player("Edge", Position(0, 0), width=5, goal_row=3)
+
+try:
+    edge.move("left")
+except ValueError as error:
+    print(error)
+
+assert edge.position == Position(0, 0)
+```
+
+## 5. Let a lane own traffic and receive its speed policy
+
+Start with two policies that share behavior but no project-defined parent:
+
+```python
+class FixedSpeed:
+    def __init__(self, distance):
+        if distance < 0:
+            raise ValueError("distance cannot be negative")
+        self.distance = distance
+
+    def distance_for(self, turn):
+        return self.distance
+
+
+class AlternatingSpeed:
+    def __init__(self, first, second):
+        if first < 0 or second < 0:
+            raise ValueError("distances cannot be negative")
+        self.first = first
+        self.second = second
+
+    def distance_for(self, turn):
+        return self.first if turn % 2 == 1 else self.second
+```
+
+A lane ensures every vehicle stays on its row and delegates speed selection:
+
+```python
+class Lane:
+    def __init__(self, row, width, vehicles, speed_policy):
+        if row <= 0:
+            raise ValueError("lane row must be positive")
+        if width <= 0:
+            raise ValueError("width must be positive")
+        copied = list(vehicles)
+        if any(vehicle.position.row != row for vehicle in copied):
+            raise ValueError("every vehicle must be on the lane row")
+        if any(vehicle.position.column >= width for vehicle in copied):
+            raise ValueError("vehicle column is outside the lane")
+        self.row = row
+        self.width = width
+        self._vehicles = copied
+        self._speed_policy = speed_policy
+
+    @property
+    def vehicles(self):
+        return tuple(self._vehicles)
+
+    def advance(self, turn):
+        distance = self._speed_policy.distance_for(turn)
+        if distance < 0:
+            raise ValueError("policy returned a negative distance")
+        self._vehicles = [
+            vehicle.advanced(distance, self.width)
+            for vehicle in self._vehicles
+        ]
+        return self.vehicles
+```
+
+Returning a tuple keeps callers from appending to the lane's internal list:
+
+```python
+lane = Lane(
+    row=1,
+    width=5,
+    vehicles=[Vehicle(Position(1, 4))],
+    speed_policy=FixedSpeed(1),
+)
+
+assert lane.advance(turn=1) == (Vehicle(Position(1, 0)),)
+assert lane.advance(turn=2) == (Vehicle(Position(1, 1)),)
+```
+
+`Lane` does not ask `isinstance(policy, FixedSpeed)`. It uses the
+`distance_for(turn)` behavior. An alternating policy can replace the fixed one
+without changing lane code.
+
+## 6. Return turn evidence instead of printing inside the model
+
+The game needs to communicate what happened. Printing from `step` would force
+every caller to parse text and mix presentation with rules. Use a frozen result:
+
+```python
+@dataclass(frozen=True)
+class TurnResult:
+    turn: int
+    status: str
+    player: Position
+    traffic: tuple[Position, ...]
+    message: str
+```
+
+The game can return this value to a notebook, command-line interface, web page,
+or graphical renderer. Those callers may present it differently while the
+model's evidence remains the same.
+
+Build the orchestrator:
+
+```python
+class Game:
+    def __init__(self, player, lanes, *, goal_row):
+        copied_lanes = list(lanes)
+        rows = [lane.row for lane in copied_lanes]
+        if len(rows) != len(set(rows)):
+            raise ValueError("lane rows must be unique")
+        if any(not 0 < row < goal_row for row in rows):
+            raise ValueError("lanes must be between start and goal")
+        self.player = player
+        self.lanes = copied_lanes
+        self.goal_row = goal_row
+        self.turn = 0
+        self.status = "running"
+
+    def _traffic_positions(self):
+        return tuple(
+            vehicle.position
+            for lane in self.lanes
+            for vehicle in lane.vehicles
+        )
+
+    def snapshot(self, message="Ready"):
+        return TurnResult(
+            turn=self.turn,
+            status=self.status,
+            player=self.player.position,
+            traffic=self._traffic_positions(),
+            message=message,
+        )
+
+    def step(self, direction):
+        if self.status != "running":
+            raise RuntimeError("game is already finished")
+
+        self.player.preview(direction)
+        self.turn += 1
+        self.player.move(direction)
+
+        for lane in self.lanes:
+            lane.advance(self.turn)
+
+        traffic = self._traffic_positions()
+        if self.player.position in traffic:
+            self.status = "lost"
+            message = "A vehicle reached the player."
+        elif self.player.position.row == self.goal_row:
+            self.status = "won"
+            message = "The player reached the goal."
+        else:
+            message = "The crossing continues."
+
+        return self.snapshot(message)
+```
+
+Why call `preview` and then `move`, which previews again? The first call rejects
+an invalid direction before the game increments its turn. The second asks the
+player to commit through its own public operation. In a larger model, `move`
+could accept the validated candidate or `Game` could use a command object. The
+small duplication is clear and keeps ownership intact here.
+
+::: {.concept-diagram}
+`Game` owns cross-object order. Each participant owns its local operation and
+the result captures evidence for the caller.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+sequenceDiagram
+  participant C as Caller
+  participant G as Game
+  participant P as Player
+  participant L as Lanes
+  C->>G: step direction
+  G->>P: preview and move
+  G->>L: advance turn
+  G->>G: collision then goal
+  G-->>C: immutable TurnResult
+```
 :::
+
+### Checkpoint: trace one complete turn
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit11-road-game-turn",
+  "title": "Follow the deterministic turn order",
+  "instructions": "Use the stated move-then-traffic-then-collision contract.",
+  "questions": [
+    {
+      "id": "collision-after-traffic",
+      "prompt": "The player moves to `(1, 2)` and a vehicle advances from `(1, 1)` to `(1, 2)`. What is the result?",
+      "options": ["The game ignores the shared position.", "The player wins immediately.", "Traffic moves back.", "The game reports a collision and becomes lost."],
+      "answer_index": 3,
+      "explanation": "Collision is checked after traffic advances, so the matching final positions produce a loss."
+    },
+    {
+      "id": "invalid-move-turn",
+      "prompt": "A player at column 0 requests `left`. What should happen to the turn and traffic?",
+      "options": ["Both advance anyway.", "The request is rejected before the turn increments or traffic moves.", "The player wraps to column 4.", "The game becomes won."],
+      "answer_index": 1,
+      "explanation": "Player preview validates board boundaries before the game commits any part of the turn."
+    },
+    {
+      "id": "result-record-role",
+      "prompt": "Why does `step` return a frozen `TurnResult` instead of printing?",
+      "options": ["Callers can inspect stable evidence and choose their own presentation.", "Frozen values read keyboard input faster.", "Printing is not valid Python.", "A result automatically saves to disk."],
+      "answer_index": 0,
+      "explanation": "The immutable result separates domain behavior from presentation and makes exact assertions possible."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Run a safe turn, a collision, and a win
+
+Build a helper so each scenario gets fresh objects:
+
+```python
+def make_game(vehicle_column=4):
+    player = Player("Pip", Position(0, 2), width=5, goal_row=3)
+    lane = Lane(
+        row=1,
+        width=5,
+        vehicles=[Vehicle(Position(1, vehicle_column))],
+        speed_policy=FixedSpeed(1),
+    )
+    return Game(player, [lane], goal_row=3)
+```
+
+Safe first turn:
+
+```python
+game = make_game(vehicle_column=4)
+result = game.step("up")
+
+assert result.turn == 1
+assert result.player == Position(1, 2)
+assert result.traffic == (Position(1, 0),)
+assert result.status == "running"
+```
+
+Trace that call in order:
+
+1. `Game.step("up")` confirms the game is running.
+2. `Player.preview("up")` maps the direction to `(1, 0)`, derives
+   `Position(1, 2)`, and proves it lies on the board without mutation.
+3. The game increments its turn from zero to one.
+4. `Player.move("up")` commits the same valid coordinate.
+5. `Lane.advance(1)` asks `FixedSpeed` for distance one.
+6. The vehicle at column four produces a new vehicle at column zero through
+   modulo wrapping.
+7. The player at `(1, 2)` is absent from the traffic tuple, so collision does
+   not change status.
+8. Row one is below goal row three, so the game remains running.
+9. `snapshot` returns final player and traffic values in a frozen result.
+
+This trace distinguishes the call stack from the domain sequence. The player
+and lane perform local operations, while the game decides their order. If a
+future animation wants to draw intermediate frames, it can receive additional
+events without moving presentation into these classes.
+
+Collision after traffic:
+
+```python
+collision_game = make_game(vehicle_column=1)
+result = collision_game.step("up")
+
+assert result.player == Position(1, 2)
+assert result.traffic == (Position(1, 2),)
+assert result.status == "lost"
+```
+
+Three safe upward turns reach the goal:
+
+```python
+winning_game = make_game(vehicle_column=4)
+
+first = winning_game.step("up")
+second = winning_game.step("up")
+third = winning_game.step("up")
+
+assert first.status == "running"
+assert second.status == "running"
+assert third.status == "won"
+assert third.player == Position(3, 2)
+
+try:
+    winning_game.step("left")
+except RuntimeError as error:
+    assert str(error) == "game is already finished"
+```
+
+The scenarios create independent games. Reusing one finished game's player or
+lane in another game would share mutable participants. The constructor accepts
+objects deliberately, so the caller owns that decision. A production model
+could reject reused ownership or construct from immutable configuration.
+
+The independence boundary deserves an explicit check:
+
+```python
+first_game = make_game(vehicle_column=4)
+second_game = make_game(vehicle_column=4)
+
+first_game.step("up")
+
+assert first_game.player.position == Position(1, 2)
+assert second_game.player.position == Position(0, 2)
+assert first_game.lanes[0] is not second_game.lanes[0]
+```
+
+`make_game` constructs a fresh player, lane, list, vehicle, and policy each time.
+If a helper cached and reused a mutable lane, game instances would not be
+independent even though their `Game` objects had different identities.
+
+## 8. Repair ownership mistakes before adding features
+
+### Global player state
+
+If `player_position` is global, two games silently share it. Put position on
+each `Player` instance and give each game its own player.
+
+### Rendering inside `Player.move`
+
+If `move` prints a board, a web caller and terminal caller cannot choose
+different views. Return position/result evidence. Presentation belongs outside.
+
+### `VehiclePlayer` inheritance for shared movement code
+
+A vehicle is not substitutable for a player: it wraps horizontally according to
+a lane policy, while a player accepts directions and respects board edges.
+Extract coordinate arithmetic into `Position.shifted` and keep the two domain
+contracts separate.
+
+### Random speed inside `Lane.advance`
+
+Hidden randomness makes the same input produce different output. Inject a
+policy or precomputed sequence. A graphical version may use a random policy,
+while checks use a deterministic one.
+
+## 9. Add a shelter row without scattering conditions
+
+Suppose row 1 contains a marked shelter. Traffic still advances through it, but
+the player cannot collide while standing on that row. This rule coordinates the
+player's final position with traffic, so `Game` owns it.
+
+Extend construction with a copied immutable set:
+
+```python
+# Inside Game.__init__ after validating lane rows:
+# self.shelter_rows = frozenset(shelter_rows)
+# if any(not 0 < row < goal_row for row in self.shelter_rows):
+#     raise ValueError("shelter rows must be between start and goal")
+```
+
+Change only the collision condition:
+
+```python
+# if (
+#     self.player.position.row not in self.shelter_rows
+#     and self.player.position in traffic
+# ):
+#     self.status = "lost"
+```
+
+Do not teach vehicles to inspect shelters; vehicles still move normally. Do not
+teach `Player` to inspect every lane; it still owns board-bounded movement. The
+size and location of the change are evidence that responsibilities are
+coherent.
+
+## 10. Complete the model and changed rule
+
+Recreate the complete model using these required names:
+
+- `Position`, `Vehicle`, `Player`, `FixedSpeed`, `AlternatingSpeed`, `Lane`,
+  `TurnResult`, and `Game`;
+- `Position.shifted`, `Vehicle.advanced`, `Player.preview`, `Player.move`,
+  `Lane.advance`, `Game.snapshot`, and `Game.step`; and
+- `shelter_rows=()` as an optional keyword in `Game.__init__`.
+
+Add these checks to the earlier scenarios:
+
+```python
+player = Player("Pip", Position(0, 2), width=5, goal_row=3)
+lane = Lane(
+    1,
+    5,
+    [Vehicle(Position(1, 1))],
+    FixedSpeed(1),
+)
+sheltered = Game(player, [lane], goal_row=3, shelter_rows={1})
+
+result = sheltered.step("up")
+assert result.player == Position(1, 2)
+assert result.traffic == (Position(1, 2),)
+assert result.status == "running"
+
+before = sheltered.snapshot()
+try:
+    sheltered.step("sideways")
+except ValueError:
+    pass
+after = sheltered.snapshot()
+
+assert after == before
+```
+
+Then explain:
+
+1. why `Position`, `Vehicle`, and `TurnResult` use value equality;
+2. why `Player`, `Lane`, and `Game` own changing identity;
+3. why traffic speed is injected rather than selected with `isinstance`;
+4. why direction remains a simple value;
+5. why the shelter rule belongs to `Game`; and
+6. how a CLI or graphical view could use `TurnResult` without changing rules.
+
+### Hint 1
+
+Build and check in dependency order: values, player, policies, lane, result,
+then game. Do not debug the whole object graph before its small parts pass.
+
+### Hint 2
+
+`Game.step` should preview first, increment the turn, commit player movement,
+advance each lane, flatten traffic positions, check non-sheltered collision,
+then check the goal.
+
+### Hint 3
+
+Store `shelter_rows` as a `frozenset` after verifying each row lies strictly
+between start and goal. Include no shelter details in `Player` or `Lane`; only
+the game's collision condition changes.
+
+<details class="solution">
+<summary>Compare the complete game model after running your scenarios</summary>
+
+```python
+from dataclasses import dataclass, replace
+
+
+DIRECTION_CHANGES = {
+    "up": (1, 0),
+    "down": (-1, 0),
+    "left": (0, -1),
+    "right": (0, 1),
+}
+
+
+@dataclass(frozen=True)
+class Position:
+    row: int
+    column: int
+
+    def __post_init__(self):
+        if self.row < 0 or self.column < 0:
+            raise ValueError("position values cannot be negative")
+
+    def shifted(self, row_change=0, column_change=0):
+        return Position(self.row + row_change, self.column + column_change)
+
+
+@dataclass(frozen=True)
+class Vehicle:
+    position: Position
+
+    def advanced(self, distance, width):
+        if distance < 0:
+            raise ValueError("distance cannot be negative")
+        if width <= 0:
+            raise ValueError("width must be positive")
+        column = (self.position.column + distance) % width
+        return replace(self, position=Position(self.position.row, column))
+
+
+class Player:
+    def __init__(self, name, position, *, width, goal_row):
+        cleaned = name.strip()
+        if not cleaned:
+            raise ValueError("name cannot be blank")
+        if width <= 0 or goal_row <= 0:
+            raise ValueError("board dimensions must be positive")
+        if not 0 <= position.column < width:
+            raise ValueError("player column is outside the board")
+        if not 0 <= position.row <= goal_row:
+            raise ValueError("player row is outside the board")
+        self.name = cleaned
+        self._position = position
+        self._width = width
+        self._goal_row = goal_row
+
+    @property
+    def position(self):
+        return self._position
+
+    def preview(self, direction):
+        try:
+            row_change, column_change = DIRECTION_CHANGES[direction]
+        except KeyError as error:
+            raise ValueError(f"unknown direction: {direction}") from error
+        candidate = self._position.shifted(row_change, column_change)
+        if not 0 <= candidate.column < self._width:
+            raise ValueError("move leaves the board columns")
+        if not 0 <= candidate.row <= self._goal_row:
+            raise ValueError("move leaves the board rows")
+        return candidate
+
+    def move(self, direction):
+        self._position = self.preview(direction)
+        return self._position
+
+
+class FixedSpeed:
+    def __init__(self, distance):
+        if distance < 0:
+            raise ValueError("distance cannot be negative")
+        self.distance = distance
+
+    def distance_for(self, turn):
+        return self.distance
+
+
+class AlternatingSpeed:
+    def __init__(self, first, second):
+        if first < 0 or second < 0:
+            raise ValueError("distances cannot be negative")
+        self.first = first
+        self.second = second
+
+    def distance_for(self, turn):
+        return self.first if turn % 2 == 1 else self.second
+
+
+class Lane:
+    def __init__(self, row, width, vehicles, speed_policy):
+        if row <= 0:
+            raise ValueError("lane row must be positive")
+        if width <= 0:
+            raise ValueError("width must be positive")
+        copied = list(vehicles)
+        if any(vehicle.position.row != row for vehicle in copied):
+            raise ValueError("every vehicle must be on the lane row")
+        if any(vehicle.position.column >= width for vehicle in copied):
+            raise ValueError("vehicle column is outside the lane")
+        self.row = row
+        self.width = width
+        self._vehicles = copied
+        self._speed_policy = speed_policy
+
+    @property
+    def vehicles(self):
+        return tuple(self._vehicles)
+
+    def advance(self, turn):
+        distance = self._speed_policy.distance_for(turn)
+        if distance < 0:
+            raise ValueError("policy returned a negative distance")
+        self._vehicles = [
+            vehicle.advanced(distance, self.width)
+            for vehicle in self._vehicles
+        ]
+        return self.vehicles
+
+
+@dataclass(frozen=True)
+class TurnResult:
+    turn: int
+    status: str
+    player: Position
+    traffic: tuple[Position, ...]
+    message: str
+
+
+class Game:
+    def __init__(self, player, lanes, *, goal_row, shelter_rows=()):
+        copied_lanes = list(lanes)
+        rows = [lane.row for lane in copied_lanes]
+        if len(rows) != len(set(rows)):
+            raise ValueError("lane rows must be unique")
+        if any(not 0 < row < goal_row for row in rows):
+            raise ValueError("lanes must be between start and goal")
+        shelters = frozenset(shelter_rows)
+        if any(not 0 < row < goal_row for row in shelters):
+            raise ValueError("shelter rows must be between start and goal")
+        self.player = player
+        self.lanes = copied_lanes
+        self.goal_row = goal_row
+        self.shelter_rows = shelters
+        self.turn = 0
+        self.status = "running"
+
+    def _traffic_positions(self):
+        return tuple(
+            vehicle.position
+            for lane in self.lanes
+            for vehicle in lane.vehicles
+        )
+
+    def snapshot(self, message="Ready"):
+        return TurnResult(
+            self.turn,
+            self.status,
+            self.player.position,
+            self._traffic_positions(),
+            message,
+        )
+
+    def step(self, direction):
+        if self.status != "running":
+            raise RuntimeError("game is already finished")
+        self.player.preview(direction)
+        self.turn += 1
+        self.player.move(direction)
+        for lane in self.lanes:
+            lane.advance(self.turn)
+        traffic = self._traffic_positions()
+        if (
+            self.player.position.row not in self.shelter_rows
+            and self.player.position in traffic
+        ):
+            self.status = "lost"
+            message = "A vehicle reached the player."
+        elif self.player.position.row == self.goal_row:
+            self.status = "won"
+            message = "The player reached the goal."
+        else:
+            message = "The crossing continues."
+        return self.snapshot(message)
+```
+
+Run the safe, collision, win, invalid-direction, and shelter scenarios against
+this definition. The result records make every transition inspectable without a
+renderer.
+
+</details>
+
+### Checkpoint: place a changed rule
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit11-road-game-change",
+  "title": "Change the model without tangling it",
+  "instructions": "Choose the owner whose responsibility already contains the rule.",
+  "questions": [
+    {
+      "id": "shelter-owner",
+      "prompt": "A shelter prevents collision on selected rows while traffic still moves. Which object should apply that cross-object rule?",
+      "options": ["`Vehicle`, because vehicles should inspect every player", "The direction string", "`Game`, where collision between player and traffic is already decided", "A global print function"],
+      "answer_index": 2,
+      "explanation": "The game already coordinates collision after player and traffic transitions; the shelter qualifies that same decision."
+    },
+    {
+      "id": "vehicle-player-inheritance",
+      "prompt": "Why should `Vehicle` not inherit from `Player` merely to reuse coordinate movement?",
+      "options": ["Frozen values cannot have methods.", "Players cannot have positions.", "Inheritance always uses global state.", "Their movement contracts differ; shared coordinate arithmetic belongs in `Position` or a helper."],
+      "answer_index": 3,
+      "explanation": "A vehicle wraps under lane policy while a player accepts directions and board bounds, so neither is a behavioral subtype of the other."
+    },
+    {
+      "id": "deterministic-policy",
+      "prompt": "What is the clearest way to add variable traffic speed while keeping exact scenarios repeatable?",
+      "options": ["Inject a policy with `distance_for(turn)` behavior.", "Call uncontrolled randomness inside every vehicle.", "Read keyboard input from `Lane.advance`.", "Create one global speed shared by all games."],
+      "answer_index": 0,
+      "explanation": "A supplied policy isolates variation and lets scenarios use a deterministic sequence or rule."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Review why each class exists
+
+- `Position` is a frozen value because row and column determine equality.
+- `Vehicle` is a frozen value in this small model; advancing returns a new
+  value and leaves before/after evidence intact.
+- `Player` is a stateful entity because one named participant owns a changing
+  position and board-bound movement.
+- `Lane` is a stateful entity because it owns a collection of current vehicle
+  values and applies one supplied traffic policy.
+- `FixedSpeed` and `AlternatingSpeed` are collaborators selected through
+  behavior, not subclasses created for ceremony.
+- `TurnResult` is an immutable event record that separates rules from views.
+- `Game` orchestrates one turn and owns rules that cross participant
+  boundaries: operation order, status, collision, shelter, and victory.
+- Directions remain simple strings because a small validated lookup fully
+  expresses their role.
+
+## 12. Key points from the case study
+
+- Write rules and acceptance examples before arguing about classes.
+- Let an initial procedural sketch expose pressure points; do not refactor only
+  to make the program look object-oriented.
+- Assign each concept value, entity, collaborator, orchestrator, collection, or
+  function semantics deliberately.
+- Keep domain transitions deterministic. Inject variable policies instead of
+  hiding randomness or input inside the model.
+- Validate an accepted turn before changing state, then make its operation order
+  explicit.
+- Return immutable evidence so callers can render, log, or assert behavior
+  without reaching into internal fields.
+- Do not use inheritance to share code between objects with different public
+  contracts.
+- A changed rule belongs with the object that already owns the affected
+  decision. Small focused changes are evidence of coherent responsibilities.
 
 ## References
 
-- https://docs.python.org/3/library/dataclasses.html
+- [Python `dataclasses`](https://docs.python.org/3/library/dataclasses.html)
+- [Python tutorial: Class and instance variables](https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables)
+- [Python glossary: Duck typing](https://docs.python.org/3/glossary.html#term-duck-typing)
+- [Python tutorial: Errors and exceptions](https://docs.python.org/3/tutorial/errors.html)
+- [Think Python: Classes and functions](https://greenteapress.com/thinkpython2/html/thinkpython2016.html)

@@ -1,13 +1,16 @@
 ---
-title: Objects, Classes, Instances, and self
+title: Build Your First Useful Class
 lesson_id: object-oriented-python.objects-classes-instances-self
 lesson_order: 10
-description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+description: Refactor a working dictionary into a class, create independent instances, inspect instance and class state, and trace how Python binds self to method calls.
 execute:
   echo: true
 categories:
 - python-foundations
 - object-oriented-python
+- classes
+- instances
+- methods
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/objects-classes-instances-self.ipynb
 course_id: python-foundations
@@ -15,93 +18,193 @@ unit_id: object-oriented-python
 unit_number: 11
 ---
 ::: {.lesson-meta}
-- **Level:** Intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Define classes, create objects, store attributes, write methods, and use self.
-- **Practice in:** VS Code, Jupyter, or Colab
+- **Level:** Python Foundations
+- **Estimated time:** 4–6 hours
+- **You will learn:** Compare a dictionary-plus-functions design with a class, create independent instances, distinguish instance and class attributes, and trace where `self` comes from in a bound method call.
+- **Practice in:** Google Colab, JupyterLab, or a local Python interpreter
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+An expedition team records its trail name, distance, and visited checkpoints.
+A dictionary and functions can solve that task well. We will begin there—not
+because the code is wrong, but because a useful class should improve a real
+design rather than appear only to demonstrate syntax.
 
-Define classes, create objects, store attributes, write methods, and use self. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+As you work, answer these questions:
 
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Object-Oriented Basics** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
+- What becomes easier when one object owns both state and valid operations?
+- Where does Python store an instance's attributes?
+- Why do two instances of the same class change independently?
+- How does `tracker.record_distance(3)` supply `self`?
+- When does a class attribute help, and when does it accidentally share state?
 
-## 2. Classes and Objects
+## 1. Start with a dictionary that works
 
-Define a new kind of object and create instances from it.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A class is a cookie cutter, and objects are the individual cookies.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A class is a blueprint; an object is one concrete instance built from that blueprint.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+The first version uses a dictionary for state and functions for behavior:
 
 ```python
-class Dog:
-    pass
+def create_expedition(name):
+    """Return a new expedition record."""
+    return {
+        "name": name,
+        "distance_km": 0.0,
+        "checkpoints": [],
+    }
 
-fido = Dog()
-print(type(fido))
+
+def record_distance(expedition, distance_km):
+    """Add a non-negative distance to an expedition."""
+    if distance_km < 0:
+        raise ValueError("distance_km cannot be negative")
+    expedition["distance_km"] += distance_km
+
+
+def visit_checkpoint(expedition, checkpoint):
+    """Record a non-empty checkpoint name."""
+    cleaned = checkpoint.strip()
+    if not cleaned:
+        raise ValueError("checkpoint cannot be blank")
+    expedition["checkpoints"].append(cleaned)
 ```
 
-### Trace it line by line
+Create two expeditions and use the functions:
 
-1. `class Dog:` — Python begins the definition of class `Dog` and collects the indented attributes and methods.
-2. `pass` — Python executes this statement in the current block; inspect the names it reads and the state it changes.
-3. `fido = Dog()` — Python evaluates the right-hand expression and binds or updates `fido` with the result.
-4. `print(type(fido))` — Python evaluates the arguments and writes their display form to standard output.
+```python
+dawn = create_expedition("Dawn Trail")
+dusk = create_expedition("Dusk Trail")
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+record_distance(dawn, 3.5)
+visit_checkpoint(dawn, "River Gate")
 
-::: {.callout-warning title="Common mistake"}
-A class describes many possible objects; an instance is one actual object.
+print(dawn)
+print(dusk)
+```
+
+The output shows that the dictionaries are independent:
+
+```text
+{'name': 'Dawn Trail', 'distance_km': 3.5, 'checkpoints': ['River Gate']}
+{'name': 'Dusk Trail', 'distance_km': 0.0, 'checkpoints': []}
+```
+
+This is valid procedural Python. Keep it when the data shape is small, the
+operations are few, and passing a record explicitly remains clear.
+
+Now imagine ten functions spread across several modules. Every caller must know
+the exact key spelling. Any code can assign
+`dawn["distance_km"] = -900`. A checkpoint function could accidentally receive
+a customer dictionary with similar keys. The design lacks a clear owner, even
+though every individual line is legal.
+
+::: {.callout-note title="A class is not automatically shorter"}
+The class version may contain more lines. Its value is a named kind of object, a
+clear call interface, and one place to keep related rules—not line-count
+reduction.
 :::
 
-### Practice classes and objects
+## 2. Move cohesive state and behavior together
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Classes and Objects**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+Define a class with the `class` statement:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```python
+class ExpeditionTracker:
+    """Track the progress of one expedition."""
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+    def __init__(self, name):
+        self.name = name
+        self.distance_km = 0.0
+        self.checkpoints = []
 
-</details>
+    def record_distance(self, distance_km):
+        if distance_km < 0:
+            raise ValueError("distance_km cannot be negative")
+        self.distance_km += distance_km
 
-### Check your understanding
+    def visit(self, checkpoint):
+        cleaned = checkpoint.strip()
+        if not cleaned:
+            raise ValueError("checkpoint cannot be blank")
+        self.checkpoints.append(cleaned)
+```
+
+Read the definition from the outside inward:
+
+1. `class ExpeditionTracker:` asks Python to execute a class body and bind the
+   resulting class object to the name `ExpeditionTracker`.
+2. Each `def` creates a function in the class namespace.
+3. `__init__` describes how to initialize one new instance.
+4. Assignments such as `self.name = name` store data on that instance.
+5. Later methods read or change the instance received as `self`.
+
+Calling the class produces instances:
+
+```python
+dawn = ExpeditionTracker("Dawn Trail")
+dusk = ExpeditionTracker("Dusk Trail")
+
+dawn.record_distance(3.5)
+dawn.visit("River Gate")
+dusk.record_distance(1.25)
+
+print(dawn.name, dawn.distance_km, dawn.checkpoints)
+print(dusk.name, dusk.distance_km, dusk.checkpoints)
+```
+
+```text
+Dawn Trail 3.5 ['River Gate']
+Dusk Trail 1.25 []
+```
+
+`dawn` and `dusk` are both `ExpeditionTracker` instances, but they are not the
+same object. Each call created a separate instance and `__init__` assigned a new
+checkpoint list to it.
+
+```python
+print(dawn is dusk)
+print(type(dawn).__name__)
+print(isinstance(dawn, ExpeditionTracker))
+```
+
+```text
+False
+ExpeditionTracker
+True
+```
+
+`type(dawn)` identifies the class that created the instance.
+`isinstance(dawn, ExpeditionTracker)` asks whether `dawn` is an instance of that
+class or one of its subclasses. The `is` expression asks the stricter identity
+question from Unit 6.
+
+### Checkpoint: instances own independent state
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "object-oriented-python-oop-basics-classes-and-objects",
-  "title": "Classes and Objects checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit11-first-class-instances",
+  "title": "Trace class calls and independent instances",
+  "instructions": "Choose the result supported by the class definition and calls.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Classes and Objects?",
-      "options": [
-        "Attributes describe what an object knows; methods describe what it can do.",
-        "__init__ runs when a new object is created; self refers to that object.",
-        "A class is a blueprint; an object is one concrete instance built from that blueprint.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
+      "id": "two-tracker-lists",
+      "prompt": "`dawn` and `dusk` are created by two separate `ExpeditionTracker(...)` calls. After `dawn.visit(\"Gate\")`, what is `dusk.checkpoints`?",
+      "options": ["`[]`", "`[\"Gate\"]`", "The class name", "A `TypeError`"],
+      "answer_index": 0,
+      "explanation": "Each `__init__` call assigns a new list to that instance, so changing Dawn's list does not change Dusk's list."
+    },
+    {
+      "id": "identity-question",
+      "prompt": "Which expression asks whether `dawn` and `dusk` are the exact same object?",
+      "options": ["`dawn == dusk`", "`dawn is dusk`", "`type(dawn)`", "`isinstance(dawn, ExpeditionTracker)`"],
+      "answer_index": 1,
+      "explanation": "`is` compares identity. Equality can be defined separately, while `type` and `isinstance` ask classification questions."
+    },
+    {
+      "id": "class-value-result",
+      "prompt": "What does executing a `class ExpeditionTracker:` statement bind to the name `ExpeditionTracker`?",
+      "options": ["The first expedition dictionary", "One hidden global instance", "A class object that can be called to produce instances", "Only the text of the class body"],
       "answer_index": 2,
-      "explanation": "A class is a blueprint; an object is one concrete instance built from that blueprint."
+      "explanation": "A class statement creates a class object. Calling that class begins construction and returns an instance."
     }
   ]
 }
@@ -109,80 +212,258 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. Attributes and Methods
+## 3. See what initialization does—and does not do
 
-Store object data in attributes and object behavior in methods.
+It is common to say “`__init__` creates the object,” but that shortcut causes
+confusion later. A more accurate beginner model is:
 
-::: {.callout-tip title="A useful analogy—and its limit"}
-Attributes are facts on an ID card; methods are actions the person can perform.
+1. calling `ExpeditionTracker("Dawn Trail")` starts Python's instance
+   construction machinery;
+2. Python obtains a new instance;
+3. Python passes that instance to `__init__` as `self` along with the supplied
+   arguments; and
+4. the class call returns the initialized instance.
 
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
+`__new__` participates in creating the instance, but customizing it is outside
+this foundation unit. The important correction is that `__init__` initializes
+an instance and must return `None`.
 
-**Contract:** Attributes describe what an object knows; methods describe what it can do.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+This mistake is legal to write but fails when the class is called:
 
 ```python
-class Counter:
-    value = 0
+class BrokenTracker:
+    def __init__(self, name):
+        self.name = name
+        return self
 
-    def show(self):
-        print(self.value)
 
-counter = Counter()
-counter.show()
+try:
+    BrokenTracker("Dawn Trail")
+except TypeError as error:
+    print(type(error).__name__)
+    print(error)
 ```
 
-### Trace it line by line
+Python reports that `__init__()` should return `None`, not a
+`BrokenTracker`. Remove the `return self`. The class call already returns the
+instance.
 
-1. `class Counter:` — Python begins the definition of class `Counter` and collects the indented attributes and methods.
-2. `value = 0` — Python evaluates the right-hand expression and binds or updates `value` with the result.
-3. `def show(self):` — Python creates the function `show`; the indented body runs only when the function is called.
-4. `print(self.value)` — Python evaluates the arguments and writes their display form to standard output.
-5. `counter = Counter()` — Python evaluates the right-hand expression and binds or updates `counter` with the result.
-6. `counter.show()` — Python calls this operation with the supplied arguments and uses or discards its result as written.
+### Inspect the instance namespace
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+Most ordinary instances keep their directly assigned attributes in a
+dictionary-like namespace. `vars` lets you inspect it:
 
-::: {.callout-warning title="Common mistake"}
-A method needs self as its first parameter so it can work with the specific object.
+```python
+tracker = ExpeditionTracker("Cloud Path")
+print(vars(tracker))
+
+tracker.record_distance(2)
+tracker.visit("Old Bridge")
+print(vars(tracker))
+```
+
+```text
+{'name': 'Cloud Path', 'distance_km': 0.0, 'checkpoints': []}
+{'name': 'Cloud Path', 'distance_km': 2.0, 'checkpoints': ['Old Bridge']}
+```
+
+`vars(tracker)` is powerful diagnostic evidence, but normal callers should use
+the object's public interface. Reaching into `vars` to bypass methods would
+defeat the rules those methods own.
+
+The class has a different namespace:
+
+```python
+print("record_distance" in vars(ExpeditionTracker))
+print("distance_km" in vars(ExpeditionTracker))
+print("distance_km" in vars(tracker))
+```
+
+The method name is defined on the class. `distance_km` is assigned to this
+instance by `__init__`. That distinction prepares us to understand method
+binding.
+
+### Catch misspelled and surprise attributes
+
+When lookup cannot find a requested name, Python raises `AttributeError`:
+
+```python
+tracker = ExpeditionTracker("Cloud Path")
+
+try:
+    print(tracker.distnace_km)
+except AttributeError as error:
+    print(type(error).__name__)
+    print(error)
+```
+
+Read the instance type and missing name in the message. Here, `distnace_km` is a
+typo; installing a package or recreating the notebook will not fix it. Compare
+the request with `vars(tracker)` and the class's documented interface.
+
+Ordinary Python instances also allow a caller to create a new attribute by
+assignment:
+
+```python
+tracker.distnace_km = 900
+
+print(tracker.distnace_km)
+print(tracker.distance_km)
+print(vars(tracker))
+```
+
+The typo now creates a second field while the real distance remains `0.0`.
+That flexibility is useful in exploratory Python, but it means naming discipline
+and focused checks matter. Later tools can restrict attributes or catch names
+statically, but this foundation course first makes the runtime behavior visible.
+
+Class bodies execute when Python reaches the class statement. Avoid placing
+input, network access, or demonstrations there. This small example prints while
+the class is being defined, before any instance exists:
+
+```python
+class NoisyDefinition:
+    print("defining NoisyDefinition")
+
+    def __init__(self, value):
+        self.value = value
+```
+
+Method bodies do not run during class definition; `print` is directly in the
+class body, so it does. Real class bodies normally contain method definitions,
+documented shared settings, and small declarative expressions—not program
+launch behavior.
+
+## 4. Watch Python bind a method to one instance
+
+Access the method through the class and through an instance:
+
+```python
+tracker = ExpeditionTracker("Cloud Path")
+
+print(ExpeditionTracker.record_distance)
+print(tracker.record_distance)
+```
+
+The exact addresses vary, but the first representation identifies a function
+and the second identifies a **bound method**. The bound method remembers both
+the underlying function and the instance:
+
+```python
+bound = tracker.record_distance
+
+print(bound.__self__ is tracker)
+print(bound.__func__ is ExpeditionTracker.record_distance)
+```
+
+Both results are `True`.
+
+These two calls have the same effect:
+
+```python
+tracker.record_distance(2.5)
+ExpeditionTracker.record_distance(tracker, 1.5)
+
+print(tracker.distance_km)
+```
+
+```text
+4.0
+```
+
+In `tracker.record_distance(2.5)`, Python obtains a bound method and supplies
+`tracker` as the first argument. The explicit form calls the underlying
+function through the class and supplies the instance manually. Prefer the first
+form in ordinary code; the second form is useful evidence for understanding
+`self`.
+
+`self` is not a keyword. It is the strong Python naming convention for the
+first parameter of an instance method. Calling it `this_object` would run, but
+would surprise every Python reader.
+
+### Diagnose a missing `self`
+
+Consider this definition:
+
+```python
+class Badge:
+    def label(prefix):
+        return f"{prefix}: explorer"
+```
+
+The syntax is valid. The problem appears at the call:
+
+```python
+badge = Badge()
+
+try:
+    print(badge.label("Lead"))
+except TypeError as error:
+    print(type(error).__name__)
+    print(error)
+```
+
+Python binds `badge` to the first parameter named `prefix`, then the explicit
+`"Lead"` becomes a second positional argument. The function only declares one,
+so Python reports that two were given.
+
+Repair the signature:
+
+```python
+class Badge:
+    def label(self, prefix):
+        return f"{prefix}: explorer"
+
+
+print(Badge().label("Lead"))
+```
+
+The fix is not “add `self` because methods always need magic.” It is “declare a
+parameter to receive the instance Python binds to this method call.”
+
+::: {.concept-diagram}
+An instance method lives on the class. Accessing it through an instance creates
+a bound method for that access.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  call[tracker record_distance 2] --> lookup[Find function on class]
+  lookup --> bind[Bind tracker as self]
+  bind --> run[Run function with tracker and 2]
+  run --> state[Update tracker distance]
+```
 :::
 
-### Practice attributes and methods
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Attributes and Methods**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
+### Checkpoint: trace `self` and initialization
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "object-oriented-python-oop-basics-attributes-and-methods",
-  "title": "Attributes and Methods checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit11-first-class-binding",
+  "title": "Follow an instance method call",
+  "instructions": "Choose the explanation that matches Python's observable behavior.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Attributes and Methods?",
-      "options": [
-        "A class is a blueprint; an object is one concrete instance built from that blueprint.",
-        "__init__ runs when a new object is created; self refers to that object.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "Attributes describe what an object knows; methods describe what it can do."
-      ],
+      "id": "bound-method-self",
+      "prompt": "What does `tracker.record_distance(2)` supply as `self`?",
+      "options": ["The number `2`", "The class name as text", "A new hidden tracker", "The existing object referenced by `tracker`"],
       "answer_index": 3,
-      "explanation": "Attributes describe what an object knows; methods describe what it can do."
+      "explanation": "Access through `tracker` binds that existing instance to the method before the explicit argument is supplied."
+    },
+    {
+      "id": "init-role",
+      "prompt": "Which statement describes `__init__` accurately for this lesson?",
+      "options": ["It initializes an instance obtained by Python's construction machinery.", "It must return the new instance.", "It runs only when an attribute is missing.", "It is a class attribute shared as mutable state."],
+      "answer_index": 0,
+      "explanation": "The class call handles construction and return. `__init__` receives and initializes the instance and returns `None`."
+    },
+    {
+      "id": "missing-self-error",
+      "prompt": "Why can `badge.label(\"Lead\")` report two arguments for `def label(prefix)`?",
+      "options": ["Strings always count twice.", "Python binds `badge` to the first parameter, then also supplies the explicit string.", "Every method receives its class name twice.", "The return value adds an argument."],
+      "answer_index": 1,
+      "explanation": "Instance access binds the instance. The signature needs one parameter for it plus one for the caller's prefix."
     }
   ]
 }
@@ -190,77 +471,319 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. __init__ and self
+## 5. Put shared settings on the class—not shared personal state
 
-Initialize each object with its own starting data.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-__init__ is the sign-up form each new club member fills out; self is the individual member's record.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** __init__ runs when a new object is created; self refers to that object.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+A class attribute is assigned in the class body rather than to `self`:
 
 ```python
-class Student:
+class ExpeditionTracker:
+    distance_unit = "km"
+
+    def __init__(self, name):
+        self.name = name
+        self.distance_km = 0.0
+        self.checkpoints = []
+
+    def record_distance(self, distance_km):
+        if distance_km < 0:
+            raise ValueError("distance_km cannot be negative")
+        self.distance_km += distance_km
+```
+
+The unit label is intentionally shared:
+
+```python
+dawn = ExpeditionTracker("Dawn")
+dusk = ExpeditionTracker("Dusk")
+
+print(dawn.distance_unit)
+print(dusk.distance_unit)
+print("distance_unit" in vars(dawn))
+print("distance_unit" in vars(ExpeditionTracker))
+```
+
+Python does not find `distance_unit` directly on `dawn`, so it finds the name on
+the class. This common lookup model explains why both instances see `"km"`.
+
+Assigning through one instance creates or changes an instance attribute; it
+does not rewrite the class attribute:
+
+```python
+dawn.distance_unit = "miles"
+
+print(dawn.distance_unit)
+print(dusk.distance_unit)
+print(ExpeditionTracker.distance_unit)
+print(vars(dawn))
+```
+
+`dawn` now has its own `distance_unit` that **shadows** the class value. `dusk`
+still finds `"km"` on the class. Deleting `dawn.distance_unit` would reveal the
+class value again.
+
+This is a useful simplified model for normal attributes. Properties and other
+managed attributes add lookup behavior, and inheritance adds base classes. We
+will observe properties next rather than pretending this simplified order is a
+complete implementation algorithm.
+
+::: {.concept-diagram}
+Each instance owns its direct state and refers to the same class for methods and
+shared settings.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart BT
+  dawn["dawn namespace: name, distance, unit=miles"] --> cls["ExpeditionTracker class: methods, unit=km"]
+  dusk["dusk namespace: name, distance"] --> cls
+```
+:::
+
+### Repair the shared-list trap
+
+Mutable class attributes often create an accidental connection:
+
+```python
+class BrokenExpedition:
+    checkpoints = []
+
     def __init__(self, name):
         self.name = name
 
-student = Student("Ada")
-print(student.name)
+    def visit(self, checkpoint):
+        self.checkpoints.append(checkpoint)
 ```
 
-### Trace it line by line
+Predict the second output before running it:
 
-1. `class Student:` — Python begins the definition of class `Student` and collects the indented attributes and methods.
-2. `def __init__(self, name):` — Python creates the function `__init__`; the indented body runs only when the function is called.
-3. `self.name = name` — Python evaluates the right-hand expression and binds or updates `self.name` with the result.
-4. `student = Student("Ada")` — Python evaluates the right-hand expression and binds or updates `student` with the result.
-5. `print(student.name)` — Python evaluates the arguments and writes their display form to standard output.
+```python
+north = BrokenExpedition("North")
+south = BrokenExpedition("South")
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+north.visit("Pine Gate")
 
-::: {.callout-warning title="Common mistake"}
-Forgetting self.name stores nothing on the object. name alone is just a local variable.
-:::
+print(north.checkpoints)
+print(south.checkpoints)
+print(north.checkpoints is south.checkpoints)
+```
 
-### Practice __init__ and self
+Both instances find the same list on the class, so both print
+`['Pine Gate']`, and the identity check is `True`.
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **__init__ and self**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+Repair the owner of the state:
+
+```python
+class Expedition:
+    def __init__(self, name):
+        self.name = name
+        self.checkpoints = []
+
+    def visit(self, checkpoint):
+        self.checkpoints.append(checkpoint)
+```
+
+Now each `__init__` call creates a fresh list and assigns it to that instance.
+Use class attributes for genuinely shared facts or behavior—course-wide units,
+protocol versions, fixed limits—not for each object's evolving collection.
+
+## 6. Notice the difference between returning and changing
+
+Methods are still functions. They can return values, cause side effects, or do
+both. Make that contract deliberate:
+
+```python
+class DistanceLog:
+    def __init__(self):
+        self._entries = []
+
+    def record(self, distance_km):
+        """Store a distance and return the new total."""
+        if distance_km < 0:
+            raise ValueError("distance_km cannot be negative")
+        self._entries.append(distance_km)
+        return sum(self._entries)
+
+    def total(self):
+        """Return the total without changing the log."""
+        return sum(self._entries)
+```
+
+`record` changes `_entries` and reports the new total. `total` only answers a
+question. A caller can verify both parts:
+
+```python
+log = DistanceLog()
+
+new_total = log.record(2.5)
+same_total = log.total()
+
+assert new_total == 2.5
+assert same_total == 2.5
+```
+
+Do not return `self` by habit just to chain calls. Fluent chains can obscure
+when mutation happens, especially for beginners. Return the result the caller
+needs, or return `None` when the action itself is the complete contract.
+
+## 7. Build a trail counter and explain why it is a class
+
+Create `TrailCounter` with these names and contracts:
+
+```python
+class TrailCounter:
+    distance_unit = "km"
+
+    def __init__(self, trail_name):
+        """Start one named trail with zero distance and no checkpoints."""
+        ...
+
+    def add_distance(self, amount):
+        """Add a non-negative amount and return the new total."""
+        ...
+
+    def reach(self, checkpoint):
+        """Store a non-blank checkpoint and return its one-based number."""
+        ...
+
+    def summary(self):
+        """Return `<trail>: <distance> km, <count> checkpoints`."""
+        ...
+```
+
+Your implementation must satisfy:
+
+```python
+ridge = TrailCounter("Ridge Run")
+marsh = TrailCounter("Marsh Walk")
+
+assert ridge.add_distance(2.5) == 2.5
+assert ridge.add_distance(1.0) == 3.5
+assert ridge.reach("Stone Arch") == 1
+assert ridge.reach("North Lookout") == 2
+assert ridge.summary() == "Ridge Run: 3.5 km, 2 checkpoints"
+
+assert marsh.summary() == "Marsh Walk: 0.0 km, 0 checkpoints"
+assert ridge.checkpoints is not marsh.checkpoints
+assert TrailCounter.distance_unit == "km"
+
+try:
+    ridge.add_distance(-1)
+except ValueError as error:
+    assert str(error) == "amount cannot be negative"
+else:
+    raise AssertionError("negative distance should fail")
+
+try:
+    ridge.reach("   ")
+except ValueError as error:
+    assert str(error) == "checkpoint cannot be blank"
+else:
+    raise AssertionError("blank checkpoint should fail")
+```
+
+After it passes, write four sentences:
+
+1. Which attributes belong to each instance?
+2. Why is `distance_unit` a class attribute?
+3. What instance becomes `self` in `ridge.reach("Stone Arch")`?
+4. What does the class improve compared with a dictionary and functions?
+
+### Hint 1
+
+In `__init__`, assign `trail_name`, `distance_km`, and a newly created
+`checkpoints` list to `self`. Do not place the list in the class body.
+
+### Hint 2
+
+Validate before assigning or appending. `reach` can strip the supplied text,
+append the cleaned value, and return `len(self.checkpoints)`.
+
+### Hint 3
+
+`summary` only reads state. An f-string can use `self.trail_name`,
+`self.distance_km`, `len(self.checkpoints)`, and `self.distance_unit`.
 
 <details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+<summary>Compare a complete implementation after attempting the lab</summary>
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+```python
+class TrailCounter:
+    distance_unit = "km"
+
+    def __init__(self, trail_name):
+        cleaned_name = trail_name.strip()
+        if not cleaned_name:
+            raise ValueError("trail_name cannot be blank")
+        self.trail_name = cleaned_name
+        self.distance_km = 0.0
+        self.checkpoints = []
+
+    def add_distance(self, amount):
+        if amount < 0:
+            raise ValueError("amount cannot be negative")
+        self.distance_km += amount
+        return self.distance_km
+
+    def reach(self, checkpoint):
+        cleaned = checkpoint.strip()
+        if not cleaned:
+            raise ValueError("checkpoint cannot be blank")
+        self.checkpoints.append(cleaned)
+        return len(self.checkpoints)
+
+    def summary(self):
+        return (
+            f"{self.trail_name}: {self.distance_km} {self.distance_unit}, "
+            f"{len(self.checkpoints)} checkpoints"
+        )
+
+
+ridge = TrailCounter("Ridge Run")
+marsh = TrailCounter("Marsh Walk")
+
+assert ridge.add_distance(2.5) == 2.5
+assert ridge.add_distance(1.0) == 3.5
+assert ridge.reach("Stone Arch") == 1
+assert ridge.reach("North Lookout") == 2
+assert ridge.summary() == "Ridge Run: 3.5 km, 2 checkpoints"
+assert marsh.summary() == "Marsh Walk: 0.0 km, 0 checkpoints"
+assert ridge.checkpoints is not marsh.checkpoints
+```
+
+The evolving fields belong to each instance. The immutable unit label is shared
+intentionally. `ridge` becomes `self` for its bound call. The class gives the
+state one named owner and makes valid operations discoverable at the call site.
 
 </details>
 
-### Check your understanding
+### Checkpoint: decide whether the class earns its place
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "object-oriented-python-oop-basics-init-and-self",
-  "title": "__init__ and self checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit11-first-class-design",
+  "title": "Choose state ownership deliberately",
+  "instructions": "Choose the design supported by the behavior and ownership described.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to __init__ and self?",
-      "options": [
-        "__init__ runs when a new object is created; self refers to that object.",
-        "A class is a blueprint; an object is one concrete instance built from that blueprint.",
-        "Attributes describe what an object knows; methods describe what it can do.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
+      "id": "shared-list-repair",
+      "prompt": "Every expedition must own a different mutable checkpoint list. Where should the empty list normally be assigned?",
+      "options": ["As a global variable", "In a comment above the class", "To `self.checkpoints` inside `__init__`", "To `checkpoints` in the class body"],
+      "answer_index": 2,
+      "explanation": "Assigning a new list to each instance during initialization prevents accidental shared mutable state."
+    },
+    {
+      "id": "shadowed-class-attribute",
+      "prompt": "`distance_unit = \"km\"` is on the class. What happens after `dawn.distance_unit = \"miles\"`?",
+      "options": ["Every instance changes to miles.", "Python deletes the class.", "The assignment is forbidden.", "`dawn` gets a shadowing instance attribute while other instances still find `km` on the class."],
+      "answer_index": 3,
+      "explanation": "Assignment through the ordinary instance creates an instance value; it does not rewrite the class attribute."
+    },
+    {
+      "id": "class-worthy-problem",
+      "prompt": "Which situation gives the strongest reason to introduce a class?",
+      "options": ["Several operations must maintain the valid evolving state of one expedition.", "One expression adds two numbers.", "A function converts one string to uppercase.", "A tuple holds two fixed coordinates and needs no named behavior."],
       "answer_index": 0,
-      "explanation": "__init__ runs when a new object is created; self refers to that object."
+      "explanation": "Cohesive evolving state plus repeated valid operations benefits from a named owner. Simple transformations and values do not require a class."
     }
   ]
 }
@@ -268,18 +791,29 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 5. Integrate the lesson
+## 8. Key points for your first useful class
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
-
-## 6. Key points
-
-- **Classes and Objects:** A class is a blueprint; an object is one concrete instance built from that blueprint.
-- **Attributes and Methods:** Attributes describe what an object knows; methods describe what it can do.
-- **__init__ and self:** __init__ runs when a new object is created; self refers to that object.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+- Begin with the simplest working design. Introduce a class when named state
+  ownership and related operations improve the program.
+- A class statement creates a class object. Calling the class returns an
+  instance after initialization.
+- `__init__` initializes an instance and returns `None`; it is not the method to
+  return `self` from.
+- Attributes assigned to `self` belong directly to that instance. Two class
+  calls can therefore produce independent state.
+- Functions defined on a class become bound methods when accessed through an
+  instance. The bound instance is supplied as `self`.
+- Class attributes are useful for intentionally shared settings and methods.
+  Mutable per-instance state belongs in initialization.
+- An instance attribute can shadow a class attribute. `vars` helps you inspect
+  where ordinary state is stored.
+- A useful class makes responsibilities and valid operations easier to see. It
+  does not earn its place merely by wrapping a dictionary.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: A first look at classes](https://docs.python.org/3/tutorial/classes.html#a-first-look-at-classes)
+- [Python tutorial: Class and instance variables](https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables)
+- [Python data model: Custom classes](https://docs.python.org/3/reference/datamodel.html#custom-classes)
+- [Python data model: Instance methods](https://docs.python.org/3/reference/datamodel.html#instance-methods)
+- [University of Helsinki: Defining classes](https://programming-26.mooc.fi/part-8/3-defining-classes)

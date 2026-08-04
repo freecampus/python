@@ -156,7 +156,7 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "object-oriented-python",
             "Object-Oriented Python and Dataclasses",
-            "model cohesive state and behavior without unnecessary abstraction",
+            "run a tiny robot tournament with valid state and composed objects",
         ),
         (
             "command-line-applications",

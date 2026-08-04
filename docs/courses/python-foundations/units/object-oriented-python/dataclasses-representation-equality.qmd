@@ -1,13 +1,15 @@
 ---
-title: Dataclasses, Representation, and Equality
+title: Use Dataclasses for Value-Like Objects
 lesson_id: object-oriented-python.dataclasses-representation-equality
 lesson_order: 30
-description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
+description: Replace repetitive field-based methods with dataclasses while controlling validation, defaults, representation, equality, frozen updates, and mutable boundaries.
 execute:
   echo: true
 categories:
 - python-foundations
 - object-oriented-python
+- dataclasses
+- equality
 order: 30
 colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/dataclasses-representation-equality.ipynb
 course_id: python-foundations
@@ -16,115 +18,185 @@ unit_number: 11
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Create simple data-focused classes with less boilerplate.
-- **Practice in:** Generated Colab notebook and a local project when appropriate
+- **Estimated time:** 4–5 hours
+- **You will learn:** Use a dataclass when field-based value semantics fit, inspect generated methods, create independent defaults, validate with `__post_init__`, and explain the limits of `frozen=True`.
+- **Practice in:** Google Colab, JupyterLab, or a local Python interpreter
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A map waypoint has a label, row, and column. Two waypoints with the same three
+values should compare equal, and a printed waypoint should reveal those values.
+You can implement all of that in a regular class. The question is whether the
+repetition expresses a unique design or merely repeats a common field-based
+pattern.
 
-Data-focused classes often repeat an initializer, representation, and comparison behavior. A dataclass generates that routine machinery while keeping fields and domain rules visible.
+In this lesson you will decide:
 
-::: {.callout-note title="Prediction"}
-Before running the example, write the output or failure you expect and identify the line that will produce it.
-:::
+- which methods a dataclass should generate;
+- which rules still belong to you;
+- how equality follows field declarations;
+- why mutable defaults need factories;
+- when representation should include or exclude a field; and
+- what “frozen” protects—and what it does not.
 
-## 2. Model an immutable course session and derive its duration through a method.
+## 1. Write the repetitive class once
+
+Begin without a decorator:
+
+```python
+class Waypoint:
+    def __init__(self, label, row, column):
+        self.label = label
+        self.row = row
+        self.column = column
+
+    def __repr__(self):
+        return (
+            f"Waypoint(label={self.label!r}, "
+            f"row={self.row!r}, column={self.column!r})"
+        )
+
+    def __eq__(self, other):
+        if not isinstance(other, Waypoint):
+            return NotImplemented
+        return (
+            self.label,
+            self.row,
+            self.column,
+        ) == (
+            other.label,
+            other.row,
+            other.column,
+        )
+```
+
+The methods are useful:
+
+```python
+first = Waypoint("River Gate", 2, 4)
+same = Waypoint("River Gate", 2, 4)
+other = Waypoint("Hill Gate", 2, 4)
+
+print(first)
+print(first == same)
+print(first == other)
+```
+
+```text
+Waypoint(label='River Gate', row=2, column=4)
+True
+False
+```
+
+`__repr__` supplies a developer-oriented representation used by `repr`, the
+interactive prompt, and containers. `!r` asks each field for its representation
+so strings retain quotes. `__eq__` defines value equality for `==`.
+
+None of this code validates what makes a coordinate meaningful. Most of it
+copies field names into predictable positions. That is the repetitive part a
+dataclass can generate.
+
+## 2. Let the field declarations drive generated methods
+
+Apply `@dataclass`:
 
 ```python
 from dataclasses import dataclass
 
-@dataclass(frozen=True)
-class Session:
-    title: str
-    minutes: int
-
-    def is_long(self) -> bool:
-        return self.minutes >= 90
-
-session = Session("Functions lab", 90)
-print(session.is_long())
-```
-
-### Step-by-step explanation
-
-1. `@dataclass(frozen=True)` asks Python to generate data-model methods and block field reassignment.
-2. The annotations declare two instance fields and document their expected types.
-3. Constructing `Session(...)` validates argument shape, not business rules; the method then compares the stored minutes.
-
-Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
-
-## 3. Debug a contract violation
-
-This version is syntactically valid but communicates or implements the wrong contract:
-
-```python
-from dataclasses import dataclass
 
 @dataclass
-class Session:
-    tags: list[str] = []
+class Waypoint:
+    label: str
+    row: int
+    column: int
 ```
 
-A focused repair is:
+The annotated lines declare dataclass fields in order. With its default
+settings, the decorator generates an initializer, representation, and equality
+method similar to the manual versions.
 
 ```python
-from dataclasses import dataclass, field
+import inspect
 
-@dataclass
-class Session:
-    title: str
-    tags: list[str] = field(default_factory=list)
+print(inspect.signature(Waypoint))
+
+first = Waypoint("River Gate", 2, 4)
+same = Waypoint("River Gate", 2, 4)
+
+print(first)
+print(first == same)
 ```
 
-Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
+The signature exposes `label`, `row`, and `column` in declaration order.
+The representation identifies the class and its field values. Equality is
+`True` because all compared fields match.
 
-## 4. Practice from trace to transfer
+The annotations are metadata. They improve documentation, editor support, and
+later static checking, but a dataclass does not enforce them at runtime:
 
-1. Add a `__post_init__` check that rejects non-positive minutes.
-2. Compare two equal frozen sessions and explain the generated equality behavior.
-3. Create two mutable sessions and prove that their default tag lists are independent.
+```python
+surprising = Waypoint(label=99, row="north", column=None)
+print(surprising)
+```
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the tasks</summary>
+Python creates the instance unless you add runtime validation. Unit 14 explores
+static type checking; this lesson will add domain validation with
+`__post_init__`.
 
-Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
+### Generated equality has an exact-type boundary
 
-</details>
+Dataclass equality requires both objects to have the identical concrete class:
 
-## 5. Check your understanding
+```python
+@dataclass
+class Destination:
+    label: str
+    row: int
+    column: int
+
+
+waypoint = Waypoint("River Gate", 2, 4)
+destination = Destination("River Gate", 2, 4)
+
+print(waypoint == destination)
+```
+
+The result is `False`. Matching field names and values do not erase the
+different meanings of `Waypoint` and `Destination`.
+
+Within the same class, every field with `compare=True` participates in
+declaration order. Adding a field can therefore change equality. That is an API
+decision, not a harmless formatting change.
+
+### Checkpoint: inspect generated behavior
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "object-oriented-python-dataclasses",
-  "title": "Dataclasses checkpoint",
-  "instructions": "Trace the code and contract before choosing.",
+  "id": "unit11-dataclasses-generated",
+  "title": "Identify what the decorator generated",
+  "instructions": "Choose the result defined by the dataclass field declarations.",
   "questions": [
     {
-      "id": "factory",
-      "prompt": "Why use `default_factory=list`?",
-      "options": [
-        "It converts lists to tuples",
-        "It skips initialization",
-        "Each instance receives a separate list",
-        "It sorts the field"
-      ],
+      "id": "default-generated-methods",
+      "prompt": "Which useful methods does a default `@dataclass` generate for the `Waypoint` fields?",
+      "options": ["Only `__str__`", "A file reader and writer", "An initializer, representation, and equality method", "Every domain validation rule"],
       "answer_index": 2,
-      "explanation": "A factory runs for each new instance, preventing a shared mutable default."
+      "explanation": "The decorator generates common field-based methods; it cannot invent the domain's valid-coordinate rules."
     },
     {
-      "id": "frozen",
-      "prompt": "What does `frozen=True` communicate?",
-      "options": [
-        "The class cannot have methods",
-        "Values are written to disk",
-        "All nested objects become immutable",
-        "Fields should not be reassigned after construction"
-      ],
+      "id": "annotation-runtime",
+      "prompt": "What happens by default if `Waypoint(row=\"north\", ...)` receives a string despite `row: int`?",
+      "options": ["The string is always converted to an integer.", "Python deletes the object.", "The decorator raises before `__init__`.", "Runtime construction can succeed unless validation is added."],
       "answer_index": 3,
-      "explanation": "Frozen dataclasses block field assignment but cannot recursively freeze nested values."
+      "explanation": "Annotations describe intended types but do not enforce runtime values on their own."
+    },
+    {
+      "id": "exact-class-equality",
+      "prompt": "A `Waypoint` and `Destination` declare identical fields and values. What does generated equality return?",
+      "options": ["`False`, because generated equality requires the same concrete class", "`True`, because field names are enough", "Their row difference", "A new combined object"],
+      "answer_index": 0,
+      "explanation": "Default dataclass equality compares field tuples only when the two operands have the identical type."
     }
   ]
 }
@@ -132,13 +204,611 @@ Write one ordinary acceptance example and one boundary before implementation. Ma
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 3. Put defaults after required fields
 
-- State the behavior contract before selecting syntax or tools.
-- Trace the values and boundaries that provide observable evidence.
-- Preserve one useful failure and verify the repair from a clean state.
+Fields without defaults must come before fields with defaults:
+
+```python
+@dataclass
+class Landmark:
+    name: str
+    row: int
+    column: int
+    discovered: bool = False
+```
+
+The constructor now allows both forms:
+
+```python
+hidden = Landmark("Moon Arch", 5, 8)
+known = Landmark("Old Bridge", 2, 1, discovered=True)
+
+print(hidden)
+print(known)
+```
+
+Placing `name: str` after `discovered: bool = False` would make a required
+parameter follow a defaulted one. The decorator reports a `TypeError`, matching
+the parameter-order rule for ordinary functions.
+
+## 4. Give every instance its own mutable default
+
+A route plan needs a list of stops. This definition is rejected by modern
+Python dataclasses:
+
+```python
+from dataclasses import dataclass
+
+
+try:
+    @dataclass
+    class BrokenRoute:
+        name: str
+        stops: list = []
+except ValueError as error:
+    print(type(error).__name__)
+    print(error)
+```
+
+The direct list default would be created once while the class is defined, not
+once per instance. It is the dataclass version of the shared class-list bug from
+Lesson 1.
+
+Use `field(default_factory=list)`:
+
+```python
+from dataclasses import dataclass, field
+
+
+@dataclass
+class RoutePlan:
+    name: str
+    stops: list[str] = field(default_factory=list)
+```
+
+The factory is the callable `list`, not the result `list()`. The generated
+initializer calls it when no value is supplied:
+
+```python
+north = RoutePlan("North Route")
+south = RoutePlan("South Route")
+
+north.stops.append("River Gate")
+
+print(north)
+print(south)
+print(north.stops is south.stops)
+```
+
+The second list remains empty and the identity check is `False`.
+
+A factory can also build a non-empty default when that default must be fresh:
+
+```python
+def starting_notes():
+    return ["Check supplies"]
+
+
+@dataclass
+class JourneyLog:
+    title: str
+    notes: list[str] = field(default_factory=starting_notes)
+```
+
+Keep the factory deterministic and side-effect free. A factory that reads a
+file or asks for input would hide important work inside ordinary construction.
+
+### Checkpoint: control field defaults
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit11-dataclasses-defaults",
+  "title": "Keep dataclass instances independent",
+  "instructions": "Choose the field declaration or effect that matches the default contract.",
+  "questions": [
+    {
+      "id": "list-factory",
+      "prompt": "Which declaration gives each `RoutePlan` its own empty list?",
+      "options": ["`stops: list = []`", "`stops: list = field(default_factory=list)`", "`stops = RoutePlan.stops`", "`stops: list = list`"],
+      "answer_index": 1,
+      "explanation": "`default_factory=list` calls `list()` for each construction that omits the field."
+    },
+    {
+      "id": "factory-identity",
+      "prompt": "After two default `RoutePlan` instances are created, what should `north.stops is south.stops` be?",
+      "options": ["`True`, because both are lists", "The route name", "`False`, because the factory created two lists", "A field-definition error"],
+      "answer_index": 2,
+      "explanation": "The two instances receive separate list objects, so mutation does not leak across them."
+    },
+    {
+      "id": "field-order",
+      "prompt": "Why must required dataclass fields normally appear before fields with defaults?",
+      "options": ["Representations sort alphabetically.", "Equality ignores the first field.", "Lists must be last in every class.", "The generated initializer follows Python's parameter rule against required arguments after defaults."],
+      "answer_index": 3,
+      "explanation": "Dataclass field order drives the generated signature, which must obey ordinary function parameter ordering."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Validate generated initialization with `__post_init__`
+
+The generated `__init__` assigns fields, then calls `__post_init__` when that
+method exists. Use it for domain relationships among fields:
+
+```python
+@dataclass
+class RouteSegment:
+    start: str
+    end: str
+    distance_km: float
+
+    def __post_init__(self):
+        self.start = self.start.strip()
+        self.end = self.end.strip()
+        if not self.start or not self.end:
+            raise ValueError("start and end cannot be blank")
+        if self.start == self.end:
+            raise ValueError("start and end must differ")
+        if self.distance_km <= 0:
+            raise ValueError("distance_km must be positive")
+```
+
+```python
+segment = RouteSegment(" River Gate ", "Hill Camp", 4.5)
+assert segment.start == "River Gate"
+
+try:
+    RouteSegment("Camp", "Camp", 2)
+except ValueError as error:
+    print(error)
+```
+
+Dataclasses remove method boilerplate; they do not remove invariant design.
+`__post_init__` still needs precise exceptions and boundary examples.
+
+If normalization changes the meaning supplied by the caller, document it. A
+different design may reject surrounding spaces instead. The class should not
+silently invent policy just because a hook is available.
+
+## 6. Shape diagnostic and user-facing representations
+
+Field representations are helpful until one field is noisy or sensitive:
+
+```python
+@dataclass
+class AccessBadge:
+    owner: str
+    zone: str
+    access_code: str = field(repr=False)
+```
+
+```python
+badge = AccessBadge("Ari", "Archive", "MOON-742")
+print(repr(badge))
+```
+
+The generated representation omits `access_code`. This avoids casual display;
+it is not encryption. The value still exists in memory and can be accessed by
+code.
+
+Use `compare=False` only when a field genuinely does not contribute to value
+meaning:
+
+```python
+@dataclass
+class Reading:
+    sensor: str
+    value: float
+    received_note: str = field(default="", compare=False)
+```
+
+Two readings with the same sensor and value compare equal even if their notes
+differ. That may be correct for a transient import note; it would be wrong if
+the timestamp or unit were essential to the reading's meaning.
+
+`__repr__` serves developers and diagnosis. Add `__str__` when a distinct
+user-facing display is useful:
+
+```python
+@dataclass
+class MapTile:
+    terrain: str
+    row: int
+    column: int
+
+    def __str__(self):
+        return f"{self.terrain} at ({self.row}, {self.column})"
+```
+
+```python
+tile = MapTile("forest", 3, 7)
+print(repr(tile))
+print(str(tile))
+```
+
+The diagnostic representation retains class and field names. The user-facing
+text reads as a sentence. Do not make `__repr__` vague solely to look pretty;
+debugging needs evidence.
+
+## 7. Freeze field rebinding without promising deep immutability
+
+Coordinates are useful immutable values:
+
+```python
+@dataclass(frozen=True)
+class Position:
+    row: int
+    column: int
+```
+
+Ordinary field assignment raises `FrozenInstanceError`:
+
+```python
+from dataclasses import FrozenInstanceError
+
+position = Position(2, 4)
+
+try:
+    position.row = 3
+except FrozenInstanceError as error:
+    print(type(error).__name__)
+```
+
+Create a changed value with `dataclasses.replace`:
+
+```python
+from dataclasses import replace
+
+moved = replace(position, row=position.row + 1)
+
+assert moved == Position(3, 4)
+assert position == Position(2, 4)
+```
+
+The old value remains unchanged. This style works well for coordinates,
+configuration values, and result records.
+
+“Frozen” is shallow. A frozen field can still refer to a mutable object:
+
+```python
+@dataclass(frozen=True)
+class FrozenRoute:
+    name: str
+    stops: list[str] = field(default_factory=list)
+
+
+route = FrozenRoute("North")
+route.stops.append("River Gate")
+print(route)
+```
+
+The field cannot be rebound normally, but the list object itself remains
+mutable. Use an immutable field value such as a tuple when the whole value must
+remain stable:
+
+```python
+@dataclass(frozen=True)
+class Route:
+    name: str
+    stops: tuple[str, ...] = ()
+```
+
+With equality enabled, a mutable dataclass is normally unhashable because
+changing compared fields after dictionary/set placement would break lookup.
+A frozen dataclass can receive a generated hash when all compared fields are
+hashable. A frozen dataclass containing a list is still unhashable. Connect this
+to Unit 6: hashability depends on the complete value graph, not the decorator's
+name alone.
+
+## 8. Choose between a record and an entity
+
+Use this decision table as a starting point:
+
+| Question | Likely choice |
+|---|---|
+| Is it only a short local bundle of values? | tuple or dictionary |
+| Do named fields, useful `repr`, and field equality express its meaning? | dataclass |
+| Should updates produce a new value? | frozen dataclass plus `replace` or a method returning a new value |
+| Does one identity evolve through several guarded operations? | regular stateful class, possibly a dataclass only if generated field behavior remains honest |
+| Would generated equality accidentally claim two entities are interchangeable? | regular class with identity semantics or deliberate equality |
+
+A player in a game may have identity and evolving state; two players with the
+same name and row are not necessarily interchangeable. A `Position(2, 4)` is a
+value; any other `Position(2, 4)` can mean the same coordinate. That difference
+matters more than the number of fields.
+
+### Do not generate ordering until the domain defines it
+
+`@dataclass(order=True)` can generate `<`, `<=`, `>`, and `>=` from the same
+field tuple used for equality. That convenience is safe only when declaration
+order matches the domain's one natural ordering.
+
+```python
+@dataclass(order=True, frozen=True)
+class RaceTime:
+    minutes: int
+    seconds: int
+
+    def __post_init__(self):
+        if self.minutes < 0 or not 0 <= self.seconds < 60:
+            raise ValueError("invalid race time")
+```
+
+```python
+assert RaceTime(4, 15) < RaceTime(5, 0)
+```
+
+Minutes followed by seconds forms the intended comparison key. Now consider a
+map tile declared as `terrain, row, column, danger`. Field-tuple ordering would
+put terrain spelling before location or danger, but the domain has no obvious
+reason to call `forest` less than `river`. Leave ordering disabled and use an
+explicit key for the particular question:
+
+```python
+tiles = [
+    MapTile("forest", 2, 1),
+    MapTile("river", 1, 4),
+]
+
+by_location = sorted(tiles, key=lambda tile: (tile.row, tile.column))
+```
+
+An explicit key names the current ordering purpose and can change without
+changing every comparison of the class.
+
+### Keep class settings out of generated fields
+
+Only annotated attributes are normally treated as dataclass fields. An
+unannotated class setting can document a shared fixed rule:
+
+```python
+@dataclass(frozen=True)
+class CappedTile:
+    MAX_DANGER = 5
+
+    terrain: str
+    danger: int
+
+    def __post_init__(self):
+        if not 0 <= self.danger <= self.MAX_DANGER:
+            raise ValueError("danger is outside the supported range")
+```
+
+`MAX_DANGER` does not appear in the initializer, representation, or equality
+tuple. Later typing lessons introduce `ClassVar`, which marks that intent for
+type checkers. For now, inspect the generated signature whenever a class mixes
+field declarations and shared settings.
+
+::: {.concept-diagram}
+The decorator derives mechanical behavior from field declarations. Domain
+validation, user display, and ordering policy remain explicit design choices.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  fields[Annotated fields] --> init[Generated initializer]
+  fields --> repr[Generated representation]
+  fields --> equality[Generated equality]
+  rules[Programmer rules] --> post[Post init validation]
+  rules --> display[Optional user display]
+  rules --> ordering[Explicit ordering decision]
+```
+:::
+
+## 9. Model a safe tile and a changing route plan
+
+Create two types with different semantics:
+
+```python
+@dataclass(frozen=True)
+class MapTile:
+    terrain: str
+    row: int
+    column: int
+    danger: int = 0
+
+    def __post_init__(self):
+        """Normalize terrain and require non-negative coordinates and danger 0–5."""
+        ...
+
+    def __str__(self):
+        """Return `<terrain> at (<row>, <column>)`."""
+        ...
+
+
+@dataclass
+class RoutePlan:
+    name: str
+    tiles: list[MapTile] = field(default_factory=list)
+
+    def add(self, tile):
+        """Append a MapTile once and return the number of tiles."""
+        ...
+
+    @property
+    def total_danger(self):
+        """Return the sum of danger values without storing duplicate state."""
+        ...
+```
+
+Checks:
+
+```python
+forest = MapTile(" Forest ", 1, 2, danger=2)
+same_forest = MapTile("forest", 1, 2, danger=2)
+bridge = MapTile("bridge", 1, 3, danger=1)
+
+assert forest == same_forest
+assert str(forest) == "forest at (1, 2)"
+
+north = RoutePlan("North")
+south = RoutePlan("South")
+assert north.tiles is not south.tiles
+assert north.add(forest) == 1
+assert north.add(bridge) == 2
+assert north.add(forest) == 2
+assert north.total_danger == 3
+assert south.tiles == []
+
+safer = replace(forest, danger=0)
+assert safer == MapTile("forest", 1, 2, danger=0)
+assert forest.danger == 2
+
+for bad_values in [
+    ("", 0, 0, 0),
+    ("forest", -1, 0, 0),
+    ("forest", 0, 0, 6),
+]:
+    try:
+        MapTile(*bad_values)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"should reject {bad_values}")
+```
+
+### Hint 1
+
+Because `MapTile` is frozen, normalization in `__post_init__` must use
+`object.__setattr__(self, "terrain", cleaned)` after validation. This is a
+controlled initialization technique, not permission for later mutation.
+
+### Hint 2
+
+Validate terrain after stripping, require both coordinates to be non-negative,
+and use `0 <= danger <= 5`. `RoutePlan.add` can use membership, which invokes
+the tile's generated equality.
+
+### Hint 3
+
+Create each route's list with `default_factory=list`. Compute
+`total_danger` with `sum(tile.danger for tile in self.tiles)` rather than storing
+a second total field.
+
+<details class="solution">
+<summary>Compare a complete value-and-entity solution</summary>
+
+```python
+from dataclasses import dataclass, field, replace
+
+
+@dataclass(frozen=True)
+class MapTile:
+    terrain: str
+    row: int
+    column: int
+    danger: int = 0
+
+    def __post_init__(self):
+        cleaned = self.terrain.strip().casefold()
+        if not cleaned:
+            raise ValueError("terrain cannot be blank")
+        if self.row < 0 or self.column < 0:
+            raise ValueError("coordinates cannot be negative")
+        if not 0 <= self.danger <= 5:
+            raise ValueError("danger must be between 0 and 5")
+        object.__setattr__(self, "terrain", cleaned)
+
+    def __str__(self):
+        return f"{self.terrain} at ({self.row}, {self.column})"
+
+
+@dataclass
+class RoutePlan:
+    name: str
+    tiles: list[MapTile] = field(default_factory=list)
+
+    def add(self, tile):
+        if not isinstance(tile, MapTile):
+            raise TypeError("tile must be a MapTile")
+        if tile not in self.tiles:
+            self.tiles.append(tile)
+        return len(self.tiles)
+
+    @property
+    def total_danger(self):
+        return sum(tile.danger for tile in self.tiles)
+
+
+forest = MapTile(" Forest ", 1, 2, danger=2)
+bridge = MapTile("bridge", 1, 3, danger=1)
+north = RoutePlan("North")
+assert north.add(forest) == 1
+assert north.add(bridge) == 2
+assert north.total_danger == 3
+assert replace(forest, danger=0).danger == 0
+```
+
+`MapTile` behaves as a value: fields define equality and changes produce another
+tile. `RoutePlan` owns a changing sequence and a meaningful `add` operation.
+Both use dataclass support, but for different reasons.
+
+</details>
+
+### Checkpoint: choose value semantics deliberately
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit11-dataclasses-semantics",
+  "title": "Decide what value-like means",
+  "instructions": "Choose the answer that respects equality, mutability, and representation.",
+  "questions": [
+    {
+      "id": "frozen-nested-list",
+      "prompt": "A frozen dataclass has a `stops: list[str]` field. What can still happen?",
+      "options": ["The list itself can still be mutated, because freezing is shallow.", "Python converts the list to a tuple automatically.", "Every instance shares the list.", "The dataclass loses its fields."],
+      "answer_index": 0,
+      "explanation": "Frozen instances reject normal field rebinding, but do not recursively freeze mutable objects referenced by fields."
+    },
+    {
+      "id": "replace-frozen",
+      "prompt": "How should code derive `Position(3, 4)` from frozen `Position(2, 4)` while keeping the original?",
+      "options": ["Assign directly to `position.row`.", "Use `replace(position, row=3)` to create a new value.", "Change the class attribute globally.", "Append the row to the instance."],
+      "answer_index": 1,
+      "explanation": "`dataclasses.replace` constructs a changed value while leaving the frozen source untouched."
+    },
+    {
+      "id": "record-versus-entity",
+      "prompt": "Which concept is the strongest frozen-dataclass candidate?",
+      "options": ["A service that reads keyboard input forever", "A manager that owns every project task", "A coordinate whose row and column completely determine its value", "A unique player whose health changes through many guarded actions"],
+      "answer_index": 2,
+      "explanation": "Coordinates have natural field-based value semantics. A changing unique player more naturally owns identity and transitions."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Key points for dataclass design
+
+- Use a dataclass when declared fields naturally drive initialization,
+  representation, and equality. It is not merely a shorter class syntax.
+- Type annotations describe fields but do not enforce runtime types by
+  themselves.
+- Generated equality compares fields marked for comparison and requires the
+  same concrete class.
+- Use `field(default_factory=...)` for a fresh mutable default per instance.
+- `__post_init__` owns validation and normalization after generated assignment.
+- `repr=False` and `compare=False` change important behavior; use them only with
+  a stated reason.
+- `__repr__` serves diagnosis, while `__str__` may provide a separate
+  user-facing display.
+- `frozen=True` prevents normal field rebinding, not mutation inside a referenced
+  list or dictionary.
+- Use `replace` to derive changed frozen values. Hashability still requires all
+  compared fields to be hashable.
+- A value-like dataclass and a stateful entity answer different design needs,
+  even when both use `@dataclass`.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python `dataclasses` documentation](https://docs.python.org/3/library/dataclasses.html)
+- [`dataclasses.field`](https://docs.python.org/3/library/dataclasses.html#dataclasses.field)
+- [`dataclasses.replace`](https://docs.python.org/3/library/dataclasses.html#dataclasses.replace)
+- [Python data model: `object.__repr__`](https://docs.python.org/3/reference/datamodel.html#object.__repr__)
+- [Python data model: `object.__eq__`](https://docs.python.org/3/reference/datamodel.html#object.__eq__)

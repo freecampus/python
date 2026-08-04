@@ -1,147 +1,158 @@
 ---
-title: Initialization, Invariants, Properties, and Behavior
+title: Keep Objects in Valid States
 lesson_id: object-oriented-python.initialization-invariants-properties
 lesson_order: 20
-description: Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
-course_id: python-foundations
-unit_id: object-oriented-python
-unit_number: 11
+description: Turn domain rules into constructor and method checks, make failed updates atomic, and choose plain attributes, properties, methods, and alternate constructors deliberately.
 execute:
   echo: true
 categories:
 - python-foundations
 - object-oriented-python
+- invariants
+- properties
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/object-oriented-python/initialization-invariants-properties.ipynb
+course_id: python-foundations
+unit_id: object-oriented-python
+unit_number: 11
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Decide when a class improves a model, design objects with valid state and clear behavior, and prefer composition when inheritance adds unnecessary coupling.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Level:** Python Foundations
+- **Estimated time:** 4–6 hours
+- **You will learn:** Define an object's invariants, validate construction and every mutation path, keep failed operations atomic, and choose among a plain attribute, property, method, and classmethod constructor.
+- **Practice in:** Google Colab, JupyterLab, or a local Python interpreter
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
-
-A class is useful only if its instances begin valid and operations cannot quietly place them in impossible states.
-
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
-
-## 1. Read and predict a complete case
+A field robot carries a battery rated for 100 energy units. The first class is
+easy to write:
 
 ```python
-class Thermostat:
-    def __init__(self, temperature):
-        self.temperature = temperature
-
-    @property
-    def temperature(self):
-        return self._temperature
-
-    @temperature.setter
-    def temperature(self, value):
-        if not 5 <= value <= 35:
-            raise ValueError("temperature must be between 5 and 35")
-        self._temperature = value
-
-
-room = Thermostat(20)
-room.temperature = 22
-print(room.temperature)
+class Battery:
+    def __init__(self, charge):
+        self.charge = charge
 ```
 
-### Step-by-step explanation
-
-1. Construction calls `__init__` with the proposed temperature.
-2. Assignment uses the property setter, which enforces the invariant.
-3. The valid value is stored in the implementation attribute `_temperature`.
-4. The later assignment uses the same boundary, and the getter returns `22`.
-
-::: {.callout-note title="Make one controlled change"}
-Try to construct `Thermostat(50)`, capture the exception, and explain why an invalid instance is never returned.
-:::
-
-## 2. Investigate the important boundary
-
-A property is not needed for every attribute. Use one when access must preserve an invariant or stable interface; otherwise a clear public attribute is simpler.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+It is also easy to put into impossible states:
 
 ```python
-class Counter:
-    def __init__(self, start=0):
-        if start < 0:
-            raise ValueError("start cannot be negative")
-        self.value = start
-
-    def increment(self):
-        self.value += 1
-
-
-counter = Counter(2)
-counter.increment()
-print(counter.value)
+battery = Battery(80)
+battery.charge = -20
+print(battery.charge)
 ```
 
-Then complete the learning loop:
+Python accepts `-20` because the class has not expressed any rule against it.
+This lesson turns rules such as “charge stays between zero and capacity” into a
+public interface that remains trustworthy after successful and failed calls.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+Answer these questions as you work:
 
-<details>
-<summary>Check your practice process</summary>
+- What must always be true about a valid object?
+- Which operations can change that truth?
+- How can a method reject a change without committing half of it?
+- When should callers read a property or call a method?
+- How can one class support a second input format without duplicating setup?
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+## 1. Write the rules before hiding the fields
 
-</details>
+An **invariant** is a condition that must be true after construction and after
+every public operation finishes. For this battery:
 
-## 4. Check your understanding
+1. capacity is greater than zero;
+2. charge is at least zero; and
+3. charge is no greater than capacity.
+
+Write representative examples before the implementation:
+
+```python
+# Valid examples
+# Battery(capacity=100, charge=60)
+# Battery(capacity=25, charge=0)
+# Battery(capacity=25, charge=25)
+
+# Invalid examples
+# Battery(capacity=0, charge=0)
+# Battery(capacity=100, charge=-1)
+# Battery(capacity=100, charge=101)
+```
+
+This list prevents an implementation from validating only the pleasant case.
+The boundary values zero and capacity are valid; values just outside them are
+not.
+
+Now validate before assigning state:
+
+```python
+class Battery:
+    def __init__(self, capacity, charge):
+        if capacity <= 0:
+            raise ValueError("capacity must be positive")
+        if not 0 <= charge <= capacity:
+            raise ValueError("charge must be between 0 and capacity")
+
+        self._capacity = capacity
+        self._charge = charge
+```
+
+The underscore in `_charge` communicates “implementation detail; use the
+public interface.” It does not make the value secret or inaccessible:
+
+```python
+battery = Battery(100, 60)
+print(battery._charge)
+```
+
+Python prints `60`. The underscore is a collaboration convention, not a
+security boundary. The class must still keep every public operation correct.
+
+### Construction should not begin invalid
+
+Try the boundaries deliberately:
+
+```python
+valid = [Battery(100, 0), Battery(100, 100)]
+print(len(valid))
+
+for capacity, charge in [(0, 0), (100, -1), (100, 101)]:
+    try:
+        Battery(capacity, charge)
+    except ValueError as error:
+        print(f"{capacity=}, {charge=}: {error}")
+```
+
+The constructor rejects each impossible combination. It validates local inputs
+before assigning any attributes, which also makes the order easy to reason
+about.
+
+### Checkpoint: state the invariant precisely
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "object-oriented-python-initialization-invariants-properties",
-  "title": "Initialization, Invariants, Properties, and Behavior checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit11-valid-state-invariants",
+  "title": "Identify valid construction",
+  "instructions": "Choose the answer that preserves every battery rule.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "Why does `__init__` validate constructor input?",
-      "options": [
-        "So methods no longer need `self`.",
-        "So every successfully created instance begins in a valid state.",
-        "So the class becomes a dictionary.",
-        "So every attribute is automatically immutable."
-      ],
+      "id": "valid-boundary-charge",
+      "prompt": "For a battery with capacity 20, which initial charge is valid?",
+      "options": ["-1", "20", "21", "Only 10 is valid"],
       "answer_index": 1,
-      "explanation": "Constructor validation establishes the invariant on which later methods may rely."
+      "explanation": "The inclusive invariant is `0 <= charge <= capacity`, so a full charge of 20 is valid."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun.",
-        "A written prediction, the observed result, and an explanation tied to the changed line."
-      ],
+      "id": "invariant-definition",
+      "prompt": "What makes `0 <= charge <= capacity` an invariant rather than only an input hint?",
+      "options": ["It appears in a comment.", "It applies only while printing.", "It must remain true after construction and every public operation.", "It is stored as a class name."],
+      "answer_index": 2,
+      "explanation": "An invariant is a lasting object rule, so every operation that can affect the fields must preserve it."
+    },
+    {
+      "id": "underscore-meaning",
+      "prompt": "What does the leading underscore in `_charge` communicate?",
+      "options": ["Python encrypts the value.", "The attribute can be read only once.", "Only subclasses may access it.", "It is a non-public implementation detail by convention, not enforced privacy."],
       "answer_index": 3,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "Python readers treat underscore-prefixed names as internal unless documented otherwise, but the runtime does not make them inaccessible."
     }
   ]
 }
@@ -149,15 +160,629 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## Key points
+## 2. Give every state change an intention-revealing operation
 
-::: {.callout-tip title="Key points"}
-- An invariant is a condition that every valid observable state preserves.
-- Initialization should reject values that cannot form a valid object.
-- Properties are boundary tools, not mandatory wrappers for every attribute.
+If callers assign `_charge` directly, they can bypass the rules. Give common
+changes names from the battery domain:
+
+```python
+class Battery:
+    def __init__(self, capacity, charge):
+        if capacity <= 0:
+            raise ValueError("capacity must be positive")
+        if not 0 <= charge <= capacity:
+            raise ValueError("charge must be between 0 and capacity")
+        self._capacity = capacity
+        self._charge = charge
+
+    def drain(self, amount):
+        if amount < 0:
+            raise ValueError("amount cannot be negative")
+        if amount > self._charge:
+            raise ValueError("not enough charge")
+        self._charge -= amount
+        return self._charge
+
+    def recharge(self, amount):
+        if amount < 0:
+            raise ValueError("amount cannot be negative")
+        if self._charge + amount > self._capacity:
+            raise ValueError("charge would exceed capacity")
+        self._charge += amount
+        return self._charge
+```
+
+The method names describe events, not storage mechanics. `drain(8)` is clearer
+than `set_charge(get_charge() - 8)`, and the class gets one chance to validate
+the whole transition.
+
+```python
+battery = Battery(100, 60)
+
+assert battery.drain(15) == 45
+assert battery.recharge(20) == 65
+```
+
+List every path that can affect the invariant:
+
+| Path | Precondition | State after success | Failure |
+|---|---|---|---|
+| construction | positive capacity; charge in range | supplied valid values | `ValueError`; no usable object |
+| `drain(amount)` | non-negative and available | charge decreases | `ValueError`; state unchanged |
+| `recharge(amount)` | non-negative and fits | charge increases | `ValueError`; state unchanged |
+
+If you later add `reset`, `transfer_to`, or a property setter, add that path to
+the audit. An invariant enforced in only one method is not an invariant.
+
+## 3. Validate the whole operation before committing any of it
+
+Suppose an expedition allocates energy from one battery to another. This
+implementation mutates too early:
+
+```python
+def broken_transfer(source, target, amount):
+    source.drain(amount)
+    target.recharge(amount)
+```
+
+If the source has enough charge but the target lacks capacity, `source.drain`
+succeeds before `target.recharge` fails:
+
+```python
+source = Battery(100, 50)
+target = Battery(100, 95)
+
+try:
+    broken_transfer(source, target, 10)
+except ValueError as error:
+    print(error)
+
+print(source._charge, target._charge)
+```
+
+The output is `40 95`. Ten units vanished. Each object preserved its local
+range invariant, but the transfer operation violated the larger rule that
+energy moves as one transaction.
+
+Put the operation with an owner that can validate both sides before mutation.
+For now a function is sufficient:
+
+```python
+def transfer(source, target, amount):
+    """Move energy atomically and return both new charges."""
+    if amount < 0:
+        raise ValueError("amount cannot be negative")
+    if amount > source._charge:
+        raise ValueError("source lacks charge")
+    if target._charge + amount > target._capacity:
+        raise ValueError("target lacks capacity")
+
+    source._charge -= amount
+    target._charge += amount
+    return source._charge, target._charge
+```
+
+Check first, commit second:
+
+```python
+source = Battery(100, 50)
+target = Battery(100, 95)
+
+before = (source._charge, target._charge)
+try:
+    transfer(source, target, 10)
+except ValueError:
+    pass
+
+after = (source._charge, target._charge)
+assert after == before
+```
+
+This is **atomic at the model level**: the operation either makes the complete
+valid change or makes no change. It is not a database transaction and does not
+address threads or processes. It is still a powerful design rule for ordinary
+Python objects.
+
+::: {.concept-diagram}
+Validation is a gate before mutation. A rejected request returns to the same
+state.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+stateDiagram-v2
+  [*] --> Ready
+  Ready --> Ready: valid drain or recharge
+  Ready --> Ready: invalid request rejected
+  Ready --> Empty: drain remaining charge
+  Empty --> Ready: recharge
+  Ready --> Full: recharge to capacity
+  Full --> Ready: drain
+```
 :::
+
+### Checkpoint: keep failure atomic
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit11-valid-state-atomic",
+  "title": "Protect state during failed operations",
+  "instructions": "Choose the repair or result that preserves the complete contract.",
+  "questions": [
+    {
+      "id": "validate-before-commit",
+      "prompt": "A transfer can fail because the target is full. What should happen before either battery changes?",
+      "options": ["Validate the amount, source charge, and target capacity.", "Drain the source and hope the target accepts it.", "Set both charges to zero.", "Print a warning and continue."],
+      "answer_index": 0,
+      "explanation": "Every condition that can reject the operation should be checked before the first mutation is committed."
+    },
+    {
+      "id": "failed-transfer-state",
+      "prompt": "A valid source has 50, a nearly full target has 95/100, and a 10-unit atomic transfer is rejected. What state should remain?",
+      "options": ["40 and 95", "50 and 95", "50 and 100", "40 and 100"],
+      "answer_index": 1,
+      "explanation": "A failed atomic operation leaves both participants exactly as they were."
+    },
+    {
+      "id": "new-mutation-path",
+      "prompt": "You add a public `reset()` method. What must the invariant audit do next?",
+      "options": ["Ignore it because construction already validates.", "Delete the invariant.", "Include `reset()` as another path that must finish with valid state.", "Move every field to the class."],
+      "answer_index": 2,
+      "explanation": "Every public path that can affect protected state must preserve the same lasting rules."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Use a property when attribute syntax tells the truth
+
+Callers need to read charge and capacity without depending on underscore names.
+Read-only properties expose those values:
+
+```python
+class Battery:
+    def __init__(self, capacity, charge):
+        if capacity <= 0:
+            raise ValueError("capacity must be positive")
+        if not 0 <= charge <= capacity:
+            raise ValueError("charge must be between 0 and capacity")
+        self._capacity = capacity
+        self._charge = charge
+
+    @property
+    def capacity(self):
+        return self._capacity
+
+    @property
+    def charge(self):
+        return self._charge
+
+    @property
+    def percentage(self):
+        return self._charge / self._capacity * 100
+
+    @property
+    def is_low(self):
+        return self.percentage < 20
+```
+
+The caller uses attribute syntax:
+
+```python
+battery = Battery(80, 12)
+
+print(battery.charge)
+print(battery.percentage)
+print(battery.is_low)
+```
+
+`percentage` and `is_low` are computed from source state. Storing them as
+separate fields would create synchronization work: every charge change would
+also need to update two derived fields.
+
+There is no `@charge.setter`, so ordinary assignment is rejected:
+
+```python
+try:
+    battery.charge = 500
+except AttributeError as error:
+    print(type(error).__name__)
+```
+
+This is useful because the domain operations are `drain` and `recharge`, not
+arbitrary replacement. A property setter would hide which kind of change the
+caller intends.
+
+### Do not manufacture getters and setters
+
+This interface adds ceremony without a rule:
+
+```python
+class Label:
+    def __init__(self, text):
+        self._text = text
+
+    def get_text(self):
+        return self._text
+
+    def set_text(self, text):
+        self._text = text
+```
+
+If any text is valid and no behavior accompanies assignment, start with
+`self.text = text`. Python can later migrate `text` to a property while keeping
+the caller's `label.text` syntax.
+
+A validating property setter can be appropriate when replacing the value is
+the honest operation:
+
+```python
+class TemperatureSetting:
+    def __init__(self, celsius):
+        self.celsius = celsius
+
+    @property
+    def celsius(self):
+        return self._celsius
+
+    @celsius.setter
+    def celsius(self, value):
+        if not -50 <= value <= 50:
+            raise ValueError("celsius must be between -50 and 50")
+        self._celsius = value
+```
+
+The constructor deliberately assigns through the property, reusing one
+validation path:
+
+```python
+setting = TemperatureSetting(18)
+setting.celsius = 21
+assert setting.celsius == 21
+```
+
+Choose by meaning:
+
+| Interface | Use when |
+|---|---|
+| plain attribute | direct reading/replacement is valid and needs no rule |
+| read-only property | callers need attribute-like derived or protected data |
+| property setter | replacing one value through attribute syntax is the honest operation |
+| method | the action has domain meaning, arguments, multiple effects, or important failure |
+
+## 5. Offer alternate construction without duplicating initialization
+
+Suppose configuration stores a battery as `"60/100"`: charge first, capacity
+second. Do not put parsing branches into every caller. A classmethod can provide
+a named alternate constructor:
+
+```python
+class Battery:
+    def __init__(self, capacity, charge=0):
+        if capacity <= 0:
+            raise ValueError("capacity must be positive")
+        if not 0 <= charge <= capacity:
+            raise ValueError("charge must be between 0 and capacity")
+        self._capacity = capacity
+        self._charge = charge
+
+    @classmethod
+    def from_text(cls, specification):
+        """Build a battery from `<charge>/<capacity>` text."""
+        charge_text, separator, capacity_text = specification.partition("/")
+        if not separator:
+            raise ValueError("specification must be <charge>/<capacity>")
+        try:
+            charge = int(charge_text)
+            capacity = int(capacity_text)
+        except ValueError as error:
+            raise ValueError("charge and capacity must be integers") from error
+        return cls(capacity=capacity, charge=charge)
+
+    @property
+    def charge(self):
+        return self._charge
+
+    @property
+    def capacity(self):
+        return self._capacity
+```
+
+```python
+battery = Battery.from_text("60/100")
+assert battery.charge == 60
+assert battery.capacity == 100
+```
+
+When `Battery.from_text(...)` is called, Python binds the receiving class to
+`cls`, just as an instance method binds an instance to `self`. Returning
+`cls(...)` reuses the primary constructor and supports subclasses that inherit
+the alternate constructor.
+
+A module-level `parse_battery(text)` function could also be clear. Use a
+classmethod when the operation's main promise is “construct this class through
+a named alternate format.” Use a function when parsing has a broader
+responsibility or produces several possible types.
+
+`staticmethod` exists for a function stored in a class namespace without
+receiving `self` or `cls`. Do not use it merely because a helper is vaguely
+related. A module-level function is often easier to find and reuse.
+
+## 6. Make failures and return values part of the interface
+
+Validation is not complete until callers know how failure appears. Use
+`TypeError` when an operation receives the wrong kind of value and `ValueError`
+when the kind is acceptable but the value violates the domain range. Do not
+write a broad `except Exception` inside the object and silently continue with
+old or partial state.
+
+For example, this helper separates an integer contract from its range:
+
+```python
+def require_non_negative_integer(value, label):
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise TypeError(f"{label} must be an integer")
+    if value < 0:
+        raise ValueError(f"{label} cannot be negative")
+```
+
+`bool` is technically a subclass of `int` in Python, so the explicit boolean
+check rejects `True` as one unit of energy when the domain does not want that
+surprise. Do not add such checks everywhere by reflex; add them when the public
+boundary truly promises an integer count.
+
+Return values also belong to the contract. A command-like method can return
+`None`, a new state value, or an event record. Pick one meaning and use it
+consistently. These two methods communicate different questions:
+
+```python
+class Meter:
+    def __init__(self, value=0):
+        self._value = value
+
+    def add(self, amount):
+        """Change the meter and return the new value."""
+        self._value += amount
+        return self._value
+
+    def is_above(self, boundary):
+        """Answer a question without changing the meter."""
+        return self._value > boundary
+```
+
+Callers should not have to guess whether `is_above` mutates or whether `add`
+returns the old value. Names, docstrings, examples, and assertions make that
+contract observable.
+
+When a public operation fails, verify three things separately:
+
+1. the exception type and message identify the violated rule;
+2. protected state matches its before snapshot; and
+3. a later valid operation still succeeds.
+
+The third check catches objects that leave behind a hidden “busy” flag or other
+partial transition even when visible fields appear unchanged.
+
+## 7. Build an energy cell with one trustworthy interface
+
+Implement `EnergyCell`:
+
+```python
+class EnergyCell:
+    def __init__(self, capacity, charge=0):
+        """Create a cell with positive capacity and charge in range."""
+        ...
+
+    @classmethod
+    def from_percentage(cls, capacity, percentage):
+        """Create a cell whose charge is the integer percentage of capacity."""
+        ...
+
+    @property
+    def capacity(self):
+        ...
+
+    @property
+    def charge(self):
+        ...
+
+    @property
+    def percentage(self):
+        ...
+
+    def drain(self, amount):
+        """Remove available charge and return the remaining charge."""
+        ...
+
+    def transfer_to(self, other, amount):
+        """Move charge atomically and return both remaining charges."""
+        ...
+```
+
+Rules:
+
+- capacity is a positive integer;
+- charge remains between zero and capacity;
+- percentage must be between zero and 100;
+- `from_percentage` uses `int(capacity * percentage / 100)`;
+- transfer validates both cells before either changes;
+- public properties are read-only; and
+- every rejected operation leaves all involved state unchanged.
+
+Use these checks:
+
+```python
+source = EnergyCell.from_percentage(80, 75)
+target = EnergyCell(50, 10)
+
+assert source.capacity == 80
+assert source.charge == 60
+assert source.percentage == 75.0
+assert source.drain(5) == 55
+assert source.transfer_to(target, 20) == (35, 30)
+assert (source.charge, target.charge) == (35, 30)
+
+before = (source.charge, target.charge)
+try:
+    source.transfer_to(target, 30)
+except ValueError as error:
+    assert str(error) == "target lacks capacity"
+else:
+    raise AssertionError("overfilling transfer should fail")
+assert (source.charge, target.charge) == before
+
+try:
+    source.charge = 70
+except AttributeError:
+    pass
+else:
+    raise AssertionError("charge should be read-only")
+```
+
+### Hint 1
+
+Store `_capacity` and `_charge` only after validating both. Properties simply
+return those source fields; `percentage` computes rather than stores.
+
+### Hint 2
+
+Let `from_percentage` validate the percentage, calculate charge, and call
+`cls(capacity, charge)`. Do not duplicate the capacity/charge invariant there.
+
+### Hint 3
+
+For `transfer_to`, validate amount, source charge, and
+`other.charge + amount <= other.capacity` before subtracting or adding. Commit
+the two assignments only after every check passes.
+
+<details class="solution">
+<summary>Compare a complete energy-cell implementation</summary>
+
+```python
+class EnergyCell:
+    def __init__(self, capacity, charge=0):
+        if not isinstance(capacity, int) or isinstance(capacity, bool):
+            raise TypeError("capacity must be an integer")
+        if capacity <= 0:
+            raise ValueError("capacity must be positive")
+        if not 0 <= charge <= capacity:
+            raise ValueError("charge must be between 0 and capacity")
+        self._capacity = capacity
+        self._charge = charge
+
+    @classmethod
+    def from_percentage(cls, capacity, percentage):
+        if not 0 <= percentage <= 100:
+            raise ValueError("percentage must be between 0 and 100")
+        charge = int(capacity * percentage / 100)
+        return cls(capacity, charge)
+
+    @property
+    def capacity(self):
+        return self._capacity
+
+    @property
+    def charge(self):
+        return self._charge
+
+    @property
+    def percentage(self):
+        return self._charge / self._capacity * 100
+
+    def drain(self, amount):
+        if amount < 0:
+            raise ValueError("amount cannot be negative")
+        if amount > self._charge:
+            raise ValueError("not enough charge")
+        self._charge -= amount
+        return self._charge
+
+    def transfer_to(self, other, amount):
+        if amount < 0:
+            raise ValueError("amount cannot be negative")
+        if amount > self._charge:
+            raise ValueError("source lacks charge")
+        if other.charge + amount > other.capacity:
+            raise ValueError("target lacks capacity")
+        self._charge -= amount
+        other._charge += amount
+        return self._charge, other._charge
+
+
+source = EnergyCell.from_percentage(80, 75)
+target = EnergyCell(50, 10)
+assert source.drain(5) == 55
+assert source.transfer_to(target, 20) == (35, 30)
+```
+
+The transfer reaches into another instance of the same class to commit the
+second field only after validation. A larger system could give transfer to a
+separate service that owns both participants. The important property is the
+same: one operation validates the complete transition before mutation.
+
+</details>
+
+### Checkpoint: choose the public interface
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit11-valid-state-interface",
+  "title": "Match behavior to an interface",
+  "instructions": "Choose the interface that communicates the stated operation most clearly.",
+  "questions": [
+    {
+      "id": "computed-percentage",
+      "prompt": "`percentage` is derived from current charge and capacity. What is the clearest default interface?",
+      "options": ["A mutable class list", "A method that also drains charge", "A global updated by every caller", "A read-only computed property"],
+      "answer_index": 3,
+      "explanation": "A property supports value-like reading and computes from the source fields, avoiding duplicate state."
+    },
+    {
+      "id": "domain-operation-method",
+      "prompt": "Why is `battery.drain(5)` usually clearer than assigning `battery.charge = battery.charge - 5`?",
+      "options": ["The method names the domain action and owns its validation.", "Properties cannot return numbers.", "Assignments never change objects.", "Methods automatically make code concurrent."],
+      "answer_index": 0,
+      "explanation": "The method communicates intent and centralizes the preconditions and state transition."
+    },
+    {
+      "id": "alternate-constructor",
+      "prompt": "What should `Battery.from_text(\"60/100\")` normally do after parsing the values?",
+      "options": ["Assign directly to unrelated globals.", "Return `cls(capacity=100, charge=60)` so primary validation is reused.", "Return the string unchanged.", "Call `__init__` without an instance and ignore its result."],
+      "answer_index": 1,
+      "explanation": "A classmethod alternate constructor parses its format, then delegates construction and invariant enforcement to `cls(...)`."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Key points for trustworthy object state
+
+- State an invariant as a rule that remains true after construction and every
+  public operation—not as validation on only one input path.
+- Validate all reasons an operation can fail before committing its first
+  mutation when the operation must be atomic.
+- Use underscore-prefixed attributes to communicate a non-public convention,
+  not to claim enforced privacy.
+- Prefer intention-revealing methods for domain actions such as draining or
+  transferring energy.
+- Use a plain attribute when unrestricted reading and assignment are honest.
+  Use properties for attribute-like computed, read-only, or validated access.
+- Compute derived state instead of storing a second value that every mutation
+  must synchronize.
+- A classmethod can name an alternate input format and return `cls(...)`,
+  reusing the primary constructor.
+- `__init__` initializes valid state and returns `None`.
+- A failed operation should leave the object—or all participating objects—in a
+  predictable state.
 
 ## References
 
-- https://docs.python.org/3/tutorial/classes.html
-- https://docs.python.org/3/library/functions.html#property
+- [Python built-in `property`](https://docs.python.org/3/library/functions.html#property)
+- [Python built-in `classmethod`](https://docs.python.org/3/library/functions.html#classmethod)
+- [Python tutorial: Private variables](https://docs.python.org/3/tutorial/classes.html#private-variables)
+- [Python data model: Object creation](https://docs.python.org/3/reference/datamodel.html#object.__new__)
+- [CS50P notes: Properties and class methods](https://cs50.harvard.edu/python/notes/8/)
