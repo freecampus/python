@@ -1,0 +1,677 @@
+---
+title: Turn Examples into Clear Parametrized Cases
+lesson_id: testing-python-programs.parametrization-boundary-cases
+lesson_order: 30
+description: Partition a behavioral contract into representative and boundary cases, express them as readable pytest parameter nodes, and avoid hidden loops, copied oracles, mutation leaks, and combinatorial noise.
+execute:
+  echo: true
+categories:
+- python-foundations
+- testing-python-programs
+- parametrization
+- boundaries
+- test-design
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/parametrization-boundary-cases.ipynb
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 3–4 hours
+- **You will learn:** Derive a compact case table from input partitions, create useful parametrized node IDs, and keep every expected value and failure independently understandable.
+- **Practice in:** A local pytest project for collection and failure IDs, with optional notebook work for designing case tables
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+The previous lesson produced several wind-risk tests with nearly identical
+shapes. Repetition is not automatically bad: every descriptive test made a
+boundary visible. Once the case design is sound, pytest parametrization can
+remove mechanical repetition while preserving a separate node and failure for
+each row.
+
+This lesson begins before the decorator. You will decide which cases represent
+the contract, why each expected value is trustworthy, and how a failed case can
+identify itself without reading a list index.
+
+Answer these questions as you build the suite:
+
+- Which inputs should behave alike, and where does behavior change?
+- Which just-below, exact, and just-above values expose a threshold?
+- How does parametrization differ from a loop inside one test?
+- What makes a parameter ID useful in a failure report?
+- When should cases remain separate rather than join one complicated table?
+
+## 1. Partition the input space before writing rows
+
+Meteor Watch now derives an alert level from wind and visibility:
+
+```python
+def alert_level(wind_kph, visibility_km):
+    """Return green, amber, or red for valid weather measurements."""
+    if wind_kph < 0:
+        raise ValueError("wind must be non-negative")
+    if visibility_km < 0:
+        raise ValueError("visibility must be non-negative")
+    if wind_kph >= 70 or visibility_km < 1:
+        return "red"
+    if wind_kph >= 40 or visibility_km < 5:
+        return "amber"
+    return "green"
+```
+
+The contract creates partitions:
+
+- wind: invalid below 0, green contribution below 40, amber contribution from
+  40 through just below 70, and red contribution from 70 upward;
+- visibility: invalid below 0, red contribution below 1, amber contribution
+  from 1 through just below 5, and green contribution from 5 upward; and
+- combination: the most severe triggered condition wins.
+
+An **equivalence partition** is a group of inputs that should follow the same
+rule. Testing one representative can support that class, while boundaries need
+special attention because comparison operators decide which neighboring class
+owns the exact value.
+
+Start with one variable at a time while keeping the other safely ordinary:
+
+| Case ID | Wind | Visibility | Expected | Reason |
+|---|---:|---:|---|---|
+| `calm-clear` | 12 | 10 | green | ordinary safe measurements |
+| `wind-below-amber` | 39.9 | 10 | green | just below wind 40 |
+| `wind-at-amber` | 40 | 10 | amber | exact wind 40 |
+| `wind-below-red` | 69.9 | 10 | amber | just below wind 70 |
+| `wind-at-red` | 70 | 10 | red | exact wind 70 |
+| `visibility-below-green` | 12 | 4.9 | amber | just below visibility 5 |
+| `visibility-at-green` | 12 | 5 | green | exact visibility 5 |
+| `visibility-below-amber` | 12 | 0.9 | red | just below visibility 1 |
+| `visibility-at-amber` | 12 | 1 | amber | exact visibility 1 |
+
+The IDs use the **resulting interval**, not an ambiguous phrase such as
+`visibility-boundary-2`. Read `visibility-at-green` as “at the lower boundary
+of the green visibility interval.” If that wording feels unclear to your team,
+prefer `visibility-five-is-green`. A useful ID needs no private legend.
+
+::: {.concept-diagram}
+Boundary values belong to one side of a comparison. The three observations
+around 40 reveal whether the implementation uses `<`, `<=`, or an incorrect
+threshold.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["39.9: green"] --> B["40: amber"] --> C["40.1: amber"]
+  D["wind below 40"] --> A
+  E["wind at least 40"] --> B
+  E --> C
+```
+:::
+
+## 2. Turn the table into separate pytest nodes
+
+`@pytest.mark.parametrize` supplies each row to the same test function:
+
+```python
+import pytest
+
+from meteor_watch.alerts import alert_level
+
+
+@pytest.mark.parametrize(
+    ("wind_kph", "visibility_km", "expected"),
+    [
+        (12, 10, "green"),
+        (39.9, 10, "green"),
+        (40, 10, "amber"),
+        (69.9, 10, "amber"),
+        (70, 10, "red"),
+        (12, 4.9, "amber"),
+        (12, 5, "green"),
+        (12, 0.9, "red"),
+        (12, 1, "amber"),
+    ],
+)
+def test_alert_level_boundaries(wind_kph, visibility_km, expected):
+    assert alert_level(wind_kph, visibility_km) == expected
+```
+
+Pytest collects nine cases, not one test containing nine hidden steps. Run:
+
+```bash
+python -m pytest --collect-only -q tests/test_alerts.py
+```
+
+Without explicit IDs, pytest creates IDs from values. They may be adequate for
+simple rows, but `test_alert_level_boundaries[12-10-green]` does not say why
+those numbers were chosen.
+
+Pass an `ids` list aligned with the rows:
+
+```python
+@pytest.mark.parametrize(
+    ("wind_kph", "visibility_km", "expected"),
+    [
+        (12, 10, "green"),
+        (39.9, 10, "green"),
+        (40, 10, "amber"),
+        (69.9, 10, "amber"),
+        (70, 10, "red"),
+    ],
+    ids=[
+        "calm-clear",
+        "wind-just-below-amber",
+        "wind-forty-is-amber",
+        "wind-just-below-red",
+        "wind-seventy-is-red",
+    ],
+)
+def test_alert_level_wind_boundaries(wind_kph, visibility_km, expected):
+    assert alert_level(wind_kph, visibility_km) == expected
+```
+
+Now a failure node can read:
+
+```text
+tests/test_alerts.py::test_alert_level_wind_boundaries[wind-seventy-is-red]
+```
+
+That node is directly selectable:
+
+```bash
+python -m pytest -q "tests/test_alerts.py::test_alert_level_wind_boundaries[wind-seventy-is-red]"
+```
+
+Shell quoting prevents brackets from being treated specially by some shells.
+
+### Put the ID beside a complicated row
+
+`pytest.param` keeps the explanation adjacent to its data:
+
+```python
+@pytest.mark.parametrize(
+    ("wind_kph", "visibility_km", "expected"),
+    [
+        pytest.param(12, 10, "green", id="calm-clear"),
+        pytest.param(40, 10, "amber", id="wind-forty-is-amber"),
+        pytest.param(70, 10, "red", id="wind-seventy-is-red"),
+        pytest.param(12, 1, "amber", id="visibility-one-is-amber"),
+        pytest.param(12, 0.9, "red", id="visibility-below-one-is-red"),
+    ],
+)
+def test_alert_level_selected_rules(wind_kph, visibility_km, expected):
+    assert alert_level(wind_kph, visibility_km) == expected
+```
+
+Choose one ID style and keep it consistent within a table. IDs should explain
+the scenario, not repeat every literal.
+
+### Checkpoint: read a parametrized node
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-params-nodes-checkpoint",
+  "title": "Turn contract rows into readable nodes",
+  "instructions": "Choose the table or node that preserves useful failure evidence.",
+  "questions": [
+    {
+      "id": "unit13-params-q19-boundary",
+      "prompt": "Which set best tests assignment of the 70-kph wind boundary?",
+      "options": ["10, 20, 30", "70, 80, 90", "69.9, 70, 70.1", "39.9, 40, 40.1"],
+      "answer_index": 2,
+      "explanation": "Just below, exactly at, and just above 70 reveal which interval owns the boundary and its immediate neighbors."
+    },
+    {
+      "id": "unit13-params-q20-id",
+      "prompt": "Which parameter ID gives the clearest evidence for the row (70, 10, 'red')?",
+      "options": ["case-5", "70-10-red", "test-data", "wind-seventy-is-red"],
+      "answer_index": 3,
+      "explanation": "The descriptive ID states why the row exists and what the contract promises, so a failed node is understandable by itself."
+    },
+    {
+      "id": "unit13-params-q21-collection",
+      "prompt": "A parametrized function has five rows. How many case nodes should pytest normally collect for it?",
+      "options": ["Five separate nodes", "One node with five invisible results", "Six nodes because the function is also counted", "Zero until the function is called manually"],
+      "answer_index": 0,
+      "explanation": "Each parameter row becomes a separately reported and selectable test case."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Keep expected values independent and visible
+
+This table looks compact but computes expected values using the same thresholds
+as production:
+
+```python
+wind_cases = [12, 40, 70]
+
+
+def expected_level(wind_kph):
+    if wind_kph < 40:
+        return "green"
+    if wind_kph < 70:
+        return "amber"
+    return "red"
+```
+
+If both functions accidentally use 71 as the red threshold, the tests agree
+with each other and disagree with the contract. Put small expected values
+directly in the rows. An independent reference model can be valuable for a
+complex algorithm, but then the model should be obviously simpler and tested
+or reviewed separately.
+
+Explicit rows also make changed requirements reviewable:
+
+```python
+wind_cases = [
+    pytest.param(39.9, "green", id="below-amber"),
+    pytest.param(40, "amber", id="forty-is-amber"),
+    pytest.param(69.9, "amber", id="below-red"),
+    pytest.param(70, "red", id="seventy-is-red"),
+]
+```
+
+If red risk later begins at 65, a reviewer can see which contract rows changed.
+Do not change production and every expected row before observing red. Update the
+test contract first, confirm the relevant case fails for the intended old
+behavior, then implement the new rule.
+
+## 4. Prefer parametrization to a loop that hides the case
+
+This test stops at the first failing iteration but reports only one node:
+
+```python
+def test_wind_cases_in_a_loop():
+    cases = [
+        (39.9, "green"),
+        (40, "amber"),
+        (70, "red"),
+    ]
+    for wind_kph, expected in cases:
+        assert alert_level(wind_kph, 10) == expected
+```
+
+Pytest can show the local values, but you cannot select only the `70` row by
+node ID, and a failure at `40` prevents the later case from running. A loop is
+appropriate when iteration itself is the behavior under test. Use
+parametrization when the loop is merely a test-data delivery mechanism.
+
+Do not compensate with a vague message:
+
+```python
+def test_wind_cases_with_a_message():
+    for wind_kph, expected in [(40, "amber"), (70, "red")]:
+        observed = alert_level(wind_kph, 10)
+        assert observed == expected, f"failed for {wind_kph}"
+```
+
+The message helps, but separate parameter nodes still provide selection,
+collection counts, and independent outcomes.
+
+## 5. Separate result and exception tables when they tell different stories
+
+Valid cases return a label. Invalid measurements raise a specific exception.
+Trying to represent both with `expected` values and branches inside one test
+makes the assertion path harder to read:
+
+```python
+@pytest.mark.parametrize(
+    ("wind_kph", "visibility_km", "expected_message"),
+    [
+        (-0.1, 10, "wind must be non-negative"),
+        (10, -0.1, "visibility must be non-negative"),
+    ],
+)
+def test_invalid_measurements(wind_kph, visibility_km, expected_message):
+    with pytest.raises(ValueError, match=expected_message):
+        alert_level(wind_kph, visibility_km)
+```
+
+The result table can remain a direct equality assertion. The invalid table can
+remain a direct exception assertion. The separation is useful because each
+group has one readable shape.
+
+If exception types vary meaningfully, add `expected_exception` as data:
+
+```python
+@pytest.mark.parametrize(
+    ("wind_kph", "expected_exception"),
+    [
+        pytest.param(-1, ValueError, id="negative-value"),
+        pytest.param("fast", TypeError, id="non-numeric-value"),
+    ],
+)
+def test_invalid_wind_types(wind_kph, expected_exception):
+    with pytest.raises(expected_exception):
+        validate_wind(wind_kph)
+```
+
+Only use this form when the production contract really distinguishes those
+types. Do not create a complicated universal table merely to avoid two clear
+test functions.
+
+### Checkpoint: keep each case understandable
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-params-clarity-checkpoint",
+  "title": "Keep case data and assertions clear",
+  "instructions": "Choose the design that preserves an independent oracle and useful failure.",
+  "questions": [
+    {
+      "id": "unit13-params-q22-oracle",
+      "prompt": "Why is recalculating expected with the same threshold code as alert_level risky?",
+      "options": ["Pytest cannot call helper functions", "The test oracle can repeat the same defect as production", "Expected values must always come from files", "Parametrization supports only strings"],
+      "answer_index": 1,
+      "explanation": "Shared decision logic can make both sides agree on the same wrong threshold. Explicit contract values are independent and reviewable."
+    },
+    {
+      "id": "unit13-params-q23-loop",
+      "prompt": "What important feature does parametrization provide that a loop inside one test does not?",
+      "options": ["It makes production functions asynchronous", "It removes every repeated value", "A separately reported and selectable node for each row", "It guarantees every expected value is correct"],
+      "answer_index": 2,
+      "explanation": "Separate nodes expose the failed row, allow focused reruns, and let later cases run independently."
+    },
+    {
+      "id": "unit13-params-q24-invalid",
+      "prompt": "Why can valid-result and invalid-exception cases use separate parametrized tests?",
+      "options": ["Pytest prohibits two decorators in one file", "Exceptions cannot have IDs", "Every file may contain only one assertion type", "Each table then has one direct, easy-to-read assertion shape"],
+      "answer_index": 3,
+      "explanation": "Separating distinct contracts avoids branches inside the test and makes each failed node's intent obvious."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Choose interacting cases without building the entire Cartesian product
+
+Two inputs create combinations. Nine wind cases multiplied by nine visibility
+cases would produce 81 nodes. More cases are not automatically better if most
+repeat the same rule and hide the important interactions.
+
+Use three layers:
+
+1. isolate each threshold while the other input is safely ordinary;
+2. add combinations where rules compete; and
+3. add a named regression when a real interaction failed.
+
+For example:
+
+```python
+@pytest.mark.parametrize(
+    ("wind_kph", "visibility_km", "expected"),
+    [
+        pytest.param(70, 10, "red", id="red-from-wind"),
+        pytest.param(12, 0.9, "red", id="red-from-visibility"),
+        pytest.param(70, 0.9, "red", id="both-red-rules"),
+        pytest.param(45, 0.9, "red", id="red-outranks-amber"),
+        pytest.param(12, 4, "amber", id="amber-from-visibility"),
+        pytest.param(45, 10, "amber", id="amber-from-wind"),
+    ],
+)
+def test_alert_level_competing_rules(wind_kph, visibility_km, expected):
+    assert alert_level(wind_kph, visibility_km) == expected
+```
+
+Each row adds a reason. `red-outranks-amber` checks rule priority. A dozen other
+red-plus-amber number pairs would not add the same amount of confidence.
+
+Nested parametrization intentionally creates a Cartesian product:
+
+```python
+@pytest.mark.parametrize("wind_kph", [10, 50, 80])
+@pytest.mark.parametrize("visibility_km", [0.5, 3, 10])
+def test_every_selected_weather_pair_returns_a_known_label(
+    wind_kph,
+    visibility_km,
+):
+    assert alert_level(wind_kph, visibility_km) in {
+        "green",
+        "amber",
+        "red",
+    }
+```
+
+This produces nine nodes and protects a broad vocabulary invariant. It does not
+replace exact expected results for priority and boundary rules. Use a Cartesian
+product when each combination is meaningful or the set is intentionally small.
+
+## 7. Prevent parameter mutation from leaking between cases
+
+Pytest passes parameter values as supplied; it does not copy mutable lists or
+dictionaries for each use. This production function mutates its argument:
+
+```python
+def add_risk(record):
+    record["risk"] = alert_level(
+        record["wind_kph"],
+        record["visibility_km"],
+    )
+    return record
+```
+
+Reusing the same dictionary object in more than one row can let the first case
+change the arrangement for the next. Prefer independent literals:
+
+```python
+@pytest.mark.parametrize(
+    ("record", "expected_risk"),
+    [
+        ({"wind_kph": 10, "visibility_km": 10}, "green"),
+        ({"wind_kph": 70, "visibility_km": 10}, "red"),
+    ],
+)
+def test_add_risk(record, expected_risk):
+    observed = add_risk(record)
+    assert observed["risk"] == expected_risk
+```
+
+If the same base object must generate variations, construct a fresh copy in the
+test or use a fixture factory in the next lesson. Do not use `deepcopy` by habit;
+first decide which nested objects the function is allowed to mutate.
+
+## 8. Keep a discovered bug visible as a named regression
+
+Suppose `alert_level(45, 0.9)` once returned `"amber"` because wind was checked
+before severe visibility. It could be another table row, but a dedicated test
+name preserves why the case matters:
+
+```python
+def test_red_visibility_outranks_amber_wind_regression():
+    assert alert_level(45, 0.9) == "red"
+```
+
+The separate name helps maintainers connect a future failure to the past bug.
+Use that visibility sparingly. If every ordinary row becomes a standalone
+“regression,” the suite loses its case-table structure.
+
+## 9. Test the changed requirement before changing production
+
+Imagine the wind red threshold changes from 70 to 65. Make this controlled
+change:
+
+1. replace the relevant table IDs and values so `64.9` is amber and `65` is
+   red;
+2. run the selected `wind-sixty-five-is-red` case against the old production
+   code;
+3. confirm it fails with amber versus red;
+4. change the production threshold once;
+5. run all wind rows and competing-rule rows; and
+6. inspect whether any former `69.9` expected value must change because the
+   contract changed.
+
+This order separates a requirement migration from an assertion edited only to
+make a current implementation pass.
+
+### Checkpoint: control combinations and shared data
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-params-risk-checkpoint",
+  "title": "Select interactions without creating noise",
+  "instructions": "Use risk, independence, and the written contract to choose cases.",
+  "questions": [
+    {
+      "id": "unit13-params-q25-combinations",
+      "prompt": "Which added row best checks that a red visibility rule outranks an amber wind rule?",
+      "options": ["wind=45, visibility=0.9, expected='red'", "wind=45, visibility=10, expected='amber'", "wind=10, visibility=10, expected='green'", "wind=80, visibility=0.5, expected='red'"],
+      "answer_index": 0,
+      "explanation": "The 45-kph input triggers amber while 0.9-km visibility triggers red, so the row specifically tests priority."
+    },
+    {
+      "id": "unit13-params-q26-mutable",
+      "prompt": "Why can reusing one dictionary object across parameter rows cause unreliable tests?",
+      "options": ["Dictionaries cannot be function arguments", "A case may mutate it and change the arrangement seen by another case", "Pytest always converts it to a tuple", "Dictionary equality is approximate"],
+      "answer_index": 1,
+      "explanation": "Parameter values are passed as supplied, not automatically copied. Shared mutable data can leak state between cases."
+    },
+    {
+      "id": "unit13-params-q27-regression",
+      "prompt": "When is a standalone named regression test especially useful?",
+      "options": ["For every row in every table", "When no contract exists", "When its name preserves the meaning of a real past failure", "When it avoids asserting an expected result"],
+      "answer_index": 2,
+      "explanation": "A meaningful regression name records why a formerly failing input must remain protected."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Map every storm-warning boundary
+
+Build `tests/test_alerts.py` from this contract:
+
+- negative wind or visibility raises `ValueError` naming the invalid field;
+- wind at least 70 or visibility below 1 produces `"red"`;
+- otherwise, wind at least 40 or visibility below 5 produces `"amber"`;
+- all other valid measurements produce `"green"`; and
+- red conditions outrank amber conditions.
+
+Your final suite should contain:
+
+1. a wind-boundary table with meaningful IDs;
+2. a visibility-boundary table with meaningful IDs;
+3. a compact interaction table showing red outranks amber;
+4. a separate invalid-input table using `pytest.raises`;
+5. one named regression for `wind=45, visibility=0.9`;
+6. no expected-value helper that repeats the production branches; and
+7. no loop used merely to deliver cases.
+
+Temporarily introduce two defects—`wind_kph > 70` and checking amber before
+red. Use the failed parameter IDs to identify each rule. Repair one defect at a
+time, run the focused node, then the whole file.
+
+<details>
+<summary>Hint 1: derive rows from each comparison</summary>
+
+For wind, hold visibility at 10 and cover `39.9`, `40`, `69.9`, and `70`. For
+visibility, hold wind at 10 and cover `0.9`, `1`, `4.9`, and `5`.
+</details>
+
+<details>
+<summary>Hint 2: make priority a competing pair</summary>
+
+Use wind `45` to trigger amber and visibility `0.9` to trigger red. The combined
+expected result is red because the more severe condition wins.
+</details>
+
+<details>
+<summary>Hint 3: keep invalid behavior in its own table</summary>
+
+Use rows containing wind, visibility, and a stable message fragment. One test
+body can put only the `alert_level(...)` call inside `pytest.raises`.
+</details>
+
+<details>
+<summary>Show a compact complete suite</summary>
+
+```python
+import pytest
+
+from meteor_watch.alerts import alert_level
+
+
+@pytest.mark.parametrize(
+    ("wind_kph", "expected"),
+    [
+        pytest.param(39.9, "green", id="below-amber"),
+        pytest.param(40, "amber", id="forty-is-amber"),
+        pytest.param(69.9, "amber", id="below-red"),
+        pytest.param(70, "red", id="seventy-is-red"),
+    ],
+)
+def test_wind_boundaries(wind_kph, expected):
+    assert alert_level(wind_kph, 10) == expected
+
+
+@pytest.mark.parametrize(
+    ("visibility_km", "expected"),
+    [
+        pytest.param(0.9, "red", id="below-one-is-red"),
+        pytest.param(1, "amber", id="one-is-amber"),
+        pytest.param(4.9, "amber", id="below-five-is-amber"),
+        pytest.param(5, "green", id="five-is-green"),
+    ],
+)
+def test_visibility_boundaries(visibility_km, expected):
+    assert alert_level(10, visibility_km) == expected
+
+
+@pytest.mark.parametrize(
+    ("wind_kph", "visibility_km", "expected"),
+    [
+        pytest.param(45, 0.9, "red", id="red-outranks-amber"),
+        pytest.param(70, 4, "red", id="red-wind-outranks-amber"),
+        pytest.param(45, 4, "amber", id="two-amber-rules"),
+    ],
+)
+def test_competing_rules(wind_kph, visibility_km, expected):
+    assert alert_level(wind_kph, visibility_km) == expected
+
+
+@pytest.mark.parametrize(
+    ("wind_kph", "visibility_km", "message"),
+    [
+        pytest.param(-0.1, 10, "wind", id="negative-wind"),
+        pytest.param(10, -0.1, "visibility", id="negative-visibility"),
+    ],
+)
+def test_negative_measurements(wind_kph, visibility_km, message):
+    with pytest.raises(ValueError, match=message):
+        alert_level(wind_kph, visibility_km)
+
+
+def test_red_visibility_outranks_amber_wind_regression():
+    assert alert_level(45, 0.9) == "red"
+```
+</details>
+
+## Key points
+
+- Partition inputs by behavior before deciding which rows to write.
+- Test just below, exactly at, and just above a meaningful boundary.
+- Parametrization creates an independent, selectable node for every row.
+- Give parameter cases IDs that explain why the input exists.
+- Keep expected values explicit and independent of production decisions.
+- Separate result, exception, and other differently shaped contracts when that
+  keeps assertions direct.
+- Add risk-driven interactions rather than an automatic huge Cartesian product.
+- Do not share mutable parameter objects unless sharing is the behavior.
+- Preserve a real past failure with a descriptive regression name when its
+  history matters.
+
+## Continue learning
+
+- [pytest documentation: parametrizing tests](https://docs.pytest.org/en/stable/how-to/parametrize.html)
+- [pytest API reference: `pytest.param`](https://docs.pytest.org/en/stable/reference/reference.html#pytest-param)
+- [pytest documentation: selecting tests by node ID and expression](https://docs.pytest.org/en/stable/how-to/usage.html#specifying-which-tests-to-run)
+- Next: [Build an Isolated Test World with Fixtures](fixtures-isolation-capture.qmd)

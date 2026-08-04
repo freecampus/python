@@ -1,0 +1,779 @@
+---
+title: Build an Isolated Test World with Fixtures
+lesson_id: testing-python-programs.fixtures-isolation-capture
+lesson_order: 40
+description: Use explicit pytest fixtures, fresh state, reliable teardown, temporary paths, fixture factories, captured streams, and captured logs to make failures reproducible and independent.
+execute:
+  echo: true
+categories:
+- python-foundations
+- testing-python-programs
+- fixtures
+- isolation
+- temporary-files
+- capture
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/fixtures-isolation-capture.ipynb
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Construct an explicit fresh test world, compose and tear down fixtures, isolate file work with `tmp_path`, and assert terminal or log evidence without leaking state.
+- **Practice in:** A local pytest project where fixture setup, teardown, temporary paths, capture, and logs can be observed
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+Meteor Watch can now classify observations. The next behavior writes an alert
+report. Testing it requires a directory, sample observations, and perhaps a
+captured message. If every test creates those resources by hand, important
+arrangement is repeated. If one global object is reused, mutations can make the
+suite order-dependent.
+
+Pytest fixtures provide requested dependencies. A test names what it needs in
+its arguments; pytest constructs that test world, passes values in, and manages
+cleanup. Fixtures should make dependencies visible and isolation reliable—not
+hide the scenario that explains an expected result.
+
+Keep these questions in view:
+
+- Which setup belongs in a reusable fixture and which values should stay in the
+  test?
+- When does a fixture return a value, and when does it need teardown after
+  `yield`?
+- How do fixture dependencies determine setup and reverse teardown order?
+- How do `tmp_path`, `capsys`, and `caplog` expose real boundaries safely?
+- Which signs reveal shared state, an overly broad scope, or a fixture that owns
+  too much behavior?
+
+## 1. Request a fresh value by naming the fixture
+
+Begin with a small dataclass and report function:
+
+```python
+from dataclasses import dataclass
+from pathlib import Path
+
+
+@dataclass
+class Observation:
+    station: str
+    wind_kph: float
+    risk: str
+
+
+def write_alert_report(path, observations):
+    """Write one pipe-delimited alert per line and return the line count."""
+    lines = [
+        f"{item.station}|{item.wind_kph:g}|{item.risk}"
+        for item in observations
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return len(lines)
+```
+
+A fixture is marked with `@pytest.fixture`:
+
+```python
+import pytest
+
+from meteor_watch.reports import Observation
+
+
+@pytest.fixture
+def observations():
+    return [
+        Observation("ridge-7", 72, "red"),
+        Observation("lake-2", 18, "green"),
+    ]
+```
+
+The test requests it by argument name:
+
+```python
+def test_observations_fixture_supplies_two_records(observations):
+    assert [item.station for item in observations] == [
+        "ridge-7",
+        "lake-2",
+    ]
+```
+
+Pytest sees the argument, finds the fixture, calls it before the test, and
+passes its returned list. The fixture is not called manually. Calling
+`observations()` from a test bypasses pytest's dependency and lifecycle
+management.
+
+The default scope is **function**: pytest calls the fixture separately for each
+test. This matters for mutable values:
+
+```python
+def test_first_case_can_remove_a_record(observations):
+    observations.pop()
+    assert len(observations) == 1
+
+
+def test_second_case_still_receives_two_records(observations):
+    assert len(observations) == 2
+```
+
+Both tests pass in either order because each receives a newly constructed list.
+If `observations` were a module-level list returned repeatedly from a
+module-scoped fixture, the first mutation could leak.
+
+### Keep behavior-defining values in the test
+
+This fixture hides the exact wind and expected label:
+
+```python
+@pytest.fixture
+def prepared_red_observation():
+    return Observation("ridge-7", 72, "red")
+```
+
+It may be useful when many tests need the same complete object. But a threshold
+test is clearer with the boundary visible:
+
+```python
+def test_report_preserves_exact_red_boundary(tmp_path):
+    observations = [Observation("ridge-7", 70, "red")]
+    report_path = tmp_path / "alerts.txt"
+
+    write_alert_report(report_path, observations)
+
+    assert report_path.read_text(encoding="utf-8") == "ridge-7|70|red\n"
+```
+
+Use fixtures for environmental setup, costly construction, or shared shape.
+Keep the values that explain a test's expected behavior near the assertion.
+
+## 2. Read the fixture dependency graph
+
+Fixtures can request other fixtures:
+
+```python
+@pytest.fixture
+def red_observation():
+    return Observation("ridge-7", 72, "red")
+
+
+@pytest.fixture
+def report_path(tmp_path):
+    return tmp_path / "alerts.txt"
+
+
+@pytest.fixture
+def written_report(report_path, red_observation):
+    write_alert_report(report_path, [red_observation])
+    return report_path
+
+
+def test_written_report_contains_station(written_report):
+    text = written_report.read_text(encoding="utf-8")
+    assert "ridge-7" in text
+```
+
+The test asks only for `written_report`. Pytest follows the dependency graph to
+`report_path`, `tmp_path`, and `red_observation`. Names describe resources;
+pytest determines a valid setup order from dependencies, scope, and request
+order rules. Do not rely on incidental definition order.
+
+::: {.concept-diagram}
+The requested fixture makes its dependencies visible. Teardown later proceeds
+in the reverse direction for fixtures that yielded resources.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A["test_written_report_contains_station"] --> B["written_report"]
+  B --> C["report_path"]
+  C --> D["tmp_path"]
+  B --> E["red_observation"]
+  D --> F["temporary directory"]
+  E --> G["fresh Observation"]
+```
+:::
+
+Inspect the graph rather than guessing:
+
+```bash
+python -m pytest --setup-show -q tests/test_reports.py
+```
+
+The output labels fixture setup and teardown around each test. This is useful
+when state appears earlier than expected or cleanup fails.
+
+### Checkpoint: request only the world the test needs
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-fixtures-request-checkpoint",
+  "title": "Read fixture requests and fresh state",
+  "instructions": "Choose the result that follows from pytest's fixture lifecycle.",
+  "questions": [
+    {
+      "id": "unit13-fixtures-q28-request",
+      "prompt": "How does a test normally obtain the value from a fixture named observations?",
+      "options": ["Import and call observations() manually", "Read a global named pytest", "Add @pytest.mark.observations", "Declare observations as a test-function argument"],
+      "answer_index": 3,
+      "explanation": "Pytest resolves a fixture from the requested argument, calls it within the lifecycle, and passes its result to the test."
+    },
+    {
+      "id": "unit13-fixtures-q29-fresh",
+      "prompt": "Two tests request a default function-scoped fixture that returns a new list. The first pops an item. What should the second normally receive?",
+      "options": ["A newly constructed full list", "The shortened list from the first test", "No value because fixtures run once", "A tuple created by pytest"],
+      "answer_index": 0,
+      "explanation": "Function scope creates a fixture instance for each requesting test, preventing that list mutation from leaking."
+    },
+    {
+      "id": "unit13-fixtures-q30-values",
+      "prompt": "Where should a wind value chosen specifically to prove the 70-kph boundary usually appear?",
+      "options": ["Hidden inside an unrelated session fixture", "Visible in the test or parameter row that asserts the boundary", "Only in conftest.py comments", "Inside pytest's cache"],
+      "answer_index": 1,
+      "explanation": "Behavior-defining case data should remain close to the assertion so a reader can understand the failure."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Use `yield` when the fixture owns cleanup
+
+Some resources need an action after the test. Code before `yield` is setup; the
+yielded value goes to the test; code after `yield` is teardown:
+
+```python
+import os
+
+import pytest
+
+
+@pytest.fixture
+def temporary_working_directory(tmp_path):
+    original = Path.cwd()
+    os.chdir(tmp_path)
+    yield tmp_path
+    os.chdir(original)
+```
+
+This example is educational, but pytest's `monkeypatch.chdir` is safer and will
+be introduced in Lesson 5. It automatically restores the original directory.
+The important structure is that a fixture which changes process state also owns
+its restoration.
+
+For an object with explicit open/close behavior:
+
+```python
+class AlertChannel:
+    def __init__(self):
+        self.opened = False
+
+    def open(self):
+        self.opened = True
+
+    def close(self):
+        self.opened = False
+
+
+@pytest.fixture
+def alert_channel():
+    channel = AlertChannel()
+    channel.open()
+    yield channel
+    channel.close()
+```
+
+Teardown runs even if the test assertion fails after the fixture yields. It
+cannot undo setup that failed before `yield`, so keep risky state-changing
+actions small and pair each with the nearest cleanup. A context manager is often
+even clearer when the resource already supports one.
+
+### Prove teardown rather than assume it
+
+Create an event list that a second fixture can inspect:
+
+```python
+@pytest.fixture
+def events():
+    return []
+
+
+@pytest.fixture
+def connected_channel(events):
+    events.append("open")
+    yield "channel"
+    events.append("close")
+
+
+def test_channel_is_open_during_call(connected_channel, events):
+    assert connected_channel == "channel"
+    assert events == ["open"]
+```
+
+To assert after teardown, a fixture or hook with a broader observation point is
+needed. For ordinary course code, `--setup-show` plus resource state after the
+test process is often enough. Do not contort production behavior merely to
+assert pytest's own tested lifecycle.
+
+::: {.concept-diagram}
+Teardown belongs to the fixture that performed setup and happens after the test
+call, even when the call is red.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["fixture setup"] --> B["yield resource"] --> C["test call"]
+  C -->|"pass"| D["fixture teardown"]
+  C -->|"failure"| D
+  D --> E["resource restored"]
+```
+:::
+
+## 4. Choose the narrowest useful fixture scope
+
+Fixtures support `function`, `class`, `module`, `package`, and `session` scopes.
+Broader scope can reduce expensive repeated setup, but it also expands shared
+state and the distance between cause and failure.
+
+```python
+@pytest.fixture(scope="session")
+def static_station_catalog():
+    return (
+        ("ridge-7", 1200),
+        ("lake-2", 340),
+    )
+```
+
+An immutable catalog is a reasonable session value. A mutable list of current
+alerts is not: one test can change what every later test sees. Start with
+function scope. Widen only after measurement shows setup cost matters and the
+resource has an explicit sharing/isolation contract.
+
+Scope dependencies also move in one direction: a broader-scoped fixture cannot
+depend on a narrower function-scoped value whose lifetime ends sooner. If pytest
+reports `ScopeMismatch`, redesign the resource lifetimes rather than randomly
+changing scope strings.
+
+## 5. Put shared fixtures near their consumers
+
+Pytest discovers fixtures in test modules, parent `conftest.py` files, and
+plugins. A fixture used by tests in one file can stay in that file. A fixture
+shared by one test package can move to the nearest `tests/conftest.py`:
+
+```text
+tests/
+├── conftest.py
+├── test_alerts.py
+└── test_reports.py
+```
+
+Example `conftest.py`:
+
+```python
+import pytest
+
+from meteor_watch.reports import Observation
+
+
+@pytest.fixture
+def observation_factory():
+    def build(
+        station="ridge-7",
+        wind_kph=72,
+        risk="red",
+    ):
+        return Observation(station, wind_kph, risk)
+
+    return build
+```
+
+A **fixture factory** supplies fresh variations without hiding the case:
+
+```python
+def test_report_preserves_station_order(tmp_path, observation_factory):
+    observations = [
+        observation_factory(station="ridge-7"),
+        observation_factory(station="tower-1", wind_kph=45, risk="amber"),
+    ]
+    path = tmp_path / "alerts.txt"
+
+    write_alert_report(path, observations)
+
+    assert path.read_text(encoding="utf-8").splitlines() == [
+        "ridge-7|72|red",
+        "tower-1|45|amber",
+    ]
+```
+
+Avoid a giant root `conftest.py` with unrelated application behavior. Hidden
+fixture availability makes it difficult to know where a value came from.
+Search should lead from the requesting test to the nearest owner.
+
+### Checkpoint: teardown, scope, and ownership
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-fixtures-lifecycle-checkpoint",
+  "title": "Choose safe fixture lifetimes",
+  "instructions": "Use setup ownership, cleanup, and mutability to choose the fixture design.",
+  "questions": [
+    {
+      "id": "unit13-fixtures-q31-yield",
+      "prompt": "In a yield fixture, when does code after yield normally run?",
+      "options": ["During test collection", "Before dependency setup", "During teardown after the test call, including after an assertion failure", "Only when every test passes"],
+      "answer_index": 2,
+      "explanation": "The fixture resumes after the test call to release or restore the resource even when the call failed."
+    },
+    {
+      "id": "unit13-fixtures-q32-scope",
+      "prompt": "Which resource is the safest candidate for session scope?",
+      "options": ["A list every test appends to", "The current working directory", "One temporary output file shared by writers", "An immutable station catalog that is expensive to load"],
+      "answer_index": 3,
+      "explanation": "Immutable shared reference data avoids mutation leaks. Mutable process or file state should usually have narrower isolation."
+    },
+    {
+      "id": "unit13-fixtures-q33-conftest",
+      "prompt": "Where should a fixture used only by tests/test_reports.py normally begin?",
+      "options": ["In test_reports.py near its consumers", "In the repository root conftest.py", "Inside production __init__.py", "In pytest's installed source"],
+      "answer_index": 0,
+      "explanation": "Start with the nearest understandable owner. Move it to a shared conftest.py only when multiple nearby test modules need it."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Use `tmp_path` for a real isolated filesystem boundary
+
+`tmp_path` is a built-in function-scoped fixture that supplies a unique
+`pathlib.Path` directory for each test. It lets production file code use real
+filesystem operations without writing into the repository or sharing output
+names.
+
+Test a complete write/read round trip:
+
+```python
+def test_write_alert_report_round_trips_utf8(tmp_path):
+    path = tmp_path / "alerts.txt"
+    observations = [Observation("serra-ç", 72, "red")]
+
+    count = write_alert_report(path, observations)
+    observed_text = path.read_text(encoding="utf-8")
+
+    assert count == 1
+    assert observed_text == "serra-ç|72|red\n"
+```
+
+The test owns the directory, chooses the filename, uses the production writer,
+and reads actual UTF-8 bytes through `Path`. This is an integration with the
+local filesystem, but it remains fast and deterministic.
+
+### Prove paths are different
+
+Do not assert an exact temporary directory name; it varies. Assert properties
+that matter:
+
+```python
+def test_tmp_path_is_an_empty_directory_for_this_test(tmp_path):
+    assert tmp_path.is_dir()
+    assert list(tmp_path.iterdir()) == []
+```
+
+A later test receives another path. Pytest retains several recent temporary
+roots to aid debugging, so tests should not assume the directory is deleted at
+the exact end of the call. Isolation—not immediate deletion—is the public
+fixture promise relevant here.
+
+Use `tmp_path_factory` when a genuinely expensive immutable file should be
+created once for a broader scope. Most beginner file tests should start with
+`tmp_path` because its per-test isolation is easier to trust.
+
+## 7. Capture stdout and stderr with `capsys`
+
+Suppose the application prints a short completion message:
+
+```python
+def announce_report(count):
+    noun = "alert" if count == 1 else "alerts"
+    print(f"Wrote {count} {noun}")
+```
+
+The built-in `capsys` fixture captures writes to Python's `sys.stdout` and
+`sys.stderr`:
+
+```python
+def test_announce_report_uses_singular(capsys):
+    announce_report(1)
+
+    captured = capsys.readouterr()
+
+    assert captured.out == "Wrote 1 alert\n"
+    assert captured.err == ""
+```
+
+`readouterr()` returns the output captured so far and resets the buffers for the
+next interval:
+
+```python
+def test_two_announcements_can_be_checked_separately(capsys):
+    announce_report(1)
+    first = capsys.readouterr()
+
+    announce_report(2)
+    second = capsys.readouterr()
+
+    assert first.out == "Wrote 1 alert\n"
+    assert second.out == "Wrote 2 alerts\n"
+```
+
+`capsys` captures Python-level text streams. `capfd` captures operating-system
+file descriptors and can observe output from some subprocesses or extension
+code. Choose the narrowest fixture that matches the actual output boundary.
+
+Pytest captures output by default and displays it with a failure. `capsys` is
+for asserting that output as public behavior or separating phases—not for
+printing more debug noise and hoping it appears.
+
+## 8. Capture logging records with `caplog`
+
+Logs are structured diagnostic records, not merely stderr text. Test their
+level and message through `caplog`:
+
+```python
+import logging
+
+
+logger = logging.getLogger("meteor_watch.reports")
+
+
+def log_rejected_station(station, reason):
+    logger.warning("rejected station=%s reason=%s", station, reason)
+
+
+def test_rejected_station_emits_warning(caplog):
+    with caplog.at_level(logging.WARNING, logger="meteor_watch.reports"):
+        log_rejected_station("ridge-7", "missing wind")
+
+    assert caplog.record_tuples == [
+        (
+            "meteor_watch.reports",
+            logging.WARNING,
+            "rejected station=ridge-7 reason=missing wind",
+        )
+    ]
+```
+
+Avoid asserting timestamps or default renderer punctuation unless the formatted
+log line itself is the external contract. Records expose stable fields. If the
+application removes or replaces handlers during a test, `caplog` may no longer
+see records; treat logging configuration as application-boundary behavior from
+Unit 12.
+
+### Checkpoint: choose the observable boundary
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-fixtures-boundaries-checkpoint",
+  "title": "Isolate files, output, and logs",
+  "instructions": "Choose the fixture that matches the evidence in the contract.",
+  "questions": [
+    {
+      "id": "unit13-fixtures-q34-tmp-path",
+      "prompt": "Why is tmp_path a strong default for testing a report writer?",
+      "options": ["It mocks every Path method", "It supplies a unique real Path directory for each test", "It forces all tests to share one output", "It prevents the production function from opening files"],
+      "answer_index": 1,
+      "explanation": "The test exercises real local file behavior while keeping paths isolated from the repository and other tests."
+    },
+    {
+      "id": "unit13-fixtures-q35-capsys",
+      "prompt": "After capsys.readouterr(), what do captured.out and captured.err represent?",
+      "options": ["The source code of print", "Only logging records", "Captured Python stdout and stderr text so far", "The child process exit status"],
+      "answer_index": 2,
+      "explanation": "capsys returns separate text captured from Python's stdout and stderr streams and resets its interval."
+    },
+    {
+      "id": "unit13-fixtures-q36-caplog",
+      "prompt": "Why prefer caplog records over an exact default rendered log line?",
+      "options": ["Records cannot include messages", "caplog disables levels", "Rendered logs are always empty", "Records expose stable logger, level, and message fields without incidental timestamp formatting"],
+      "answer_index": 3,
+      "explanation": "Structured record assertions protect the diagnostic contract without coupling to formatter details that are not promised."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Diagnose a leaking test world
+
+Order-dependent failures often appear only in the full suite. Look for:
+
+- a module or class variable mutated by a test;
+- a fixture whose scope is broader than its mutable value;
+- a temporary path stored globally and reused;
+- a working-directory or environment change without restoration;
+- a fixture that returns the same object repeatedly;
+- a cached production function whose cache is not part of the arrangement; or
+- a test that calls another test instead of arranging its own state.
+
+Use `--setup-show` to inspect lifecycle and run each failed node alone. If a node
+passes alone but fails after another node, run the two in that order and inspect
+what the first changes. Do not add sleeps or depend on a preferred order.
+
+This intentionally shared fixture is dangerous:
+
+```python
+@pytest.fixture(scope="module")
+def shared_records():
+    return []
+
+
+def test_adds_red_record(shared_records):
+    shared_records.append("red")
+    assert shared_records == ["red"]
+
+
+def test_starts_without_records(shared_records):
+    assert shared_records == []
+```
+
+Change it to default function scope, or return an immutable value and let each
+test create its own list. The correct choice follows the application contract:
+if shared history is not what you are testing, do not share it.
+
+## 10. Give every alert a clean workspace
+
+Create a final lab around `write_alert_report`, `announce_report`, and
+`log_rejected_station`. Your suite must:
+
+1. define an `observation_factory` fixture with useful defaults;
+2. prove two tests receive fresh mutable observation lists;
+3. write and read a UTF-8 report through `tmp_path`;
+4. prove two separately requested temporary paths are not assumed to match;
+5. capture exact singular and plural stdout without asserting unrelated output;
+6. capture one warning's logger name, level, and message;
+7. include one `yield` fixture for a small resource that records open/close
+   events;
+8. deliberately create the module-scoped list leak, reproduce it, and repair
+   it by correcting ownership or scope; and
+9. retain one `--setup-show` excerpt that explains setup and teardown order.
+
+Run the report file alone, then the complete suite in a new process. A passing
+preferred order is not sufficient evidence.
+
+<details>
+<summary>Hint 1: let the factory vary only meaningful fields</summary>
+
+Return an inner `build` function with defaults for station, wind, and risk. Each
+call should construct a new `Observation`; do not keep one instance in the
+outer fixture.
+</details>
+
+<details>
+<summary>Hint 2: read captured streams immediately after the action</summary>
+
+Call `captured = capsys.readouterr()` after each announcement. Assert
+`captured.out` and `captured.err` separately.
+</details>
+
+<details>
+<summary>Hint 3: pair state-changing setup with its teardown</summary>
+
+Append `"open"` before `yield` and `"close"` after it. Use `--setup-show` or a
+broader event observer to verify the sequence without making a later test depend
+on shared mutable history.
+</details>
+
+<details>
+<summary>Show the central file and capture checks</summary>
+
+```python
+import logging
+
+import pytest
+
+from meteor_watch.reports import (
+    Observation,
+    announce_report,
+    log_rejected_station,
+    write_alert_report,
+)
+
+
+@pytest.fixture
+def observation_factory():
+    def build(station="ridge-7", wind_kph=72, risk="red"):
+        return Observation(station, wind_kph, risk)
+
+    return build
+
+
+def test_report_round_trips_utf8(tmp_path, observation_factory):
+    path = tmp_path / "alerts.txt"
+    records = [observation_factory(station="serra-ç")]
+
+    count = write_alert_report(path, records)
+
+    assert count == 1
+    assert path.read_text(encoding="utf-8") == "serra-ç|72|red\n"
+
+
+@pytest.mark.parametrize(
+    ("count", "expected"),
+    [(1, "Wrote 1 alert\n"), (2, "Wrote 2 alerts\n")],
+)
+def test_announcement_pluralization(count, expected, capsys):
+    announce_report(count)
+    captured = capsys.readouterr()
+
+    assert captured.out == expected
+    assert captured.err == ""
+
+
+def test_rejection_is_a_warning_record(caplog):
+    with caplog.at_level(logging.WARNING, logger="meteor_watch.reports"):
+        log_rejected_station("ridge-7", "missing wind")
+
+    assert caplog.record_tuples == [
+        (
+            "meteor_watch.reports",
+            logging.WARNING,
+            "rejected station=ridge-7 reason=missing wind",
+        )
+    ]
+```
+
+The full lab should add the fresh-list, different-path, lifecycle, and repaired
+state-leak evidence described above.
+</details>
+
+## Key points
+
+- A test requests fixtures through arguments; pytest owns resolution and
+  lifecycle.
+- Function scope gives mutable fixtures fresh state by default.
+- Keep behavior-defining values visible in the test or parameter row.
+- Fixtures may depend on fixtures, creating an explicit setup graph.
+- A `yield` fixture owns teardown after the test call, including after a failed
+  assertion.
+- Widen scope only for a measured reason and a resource safe to share.
+- Place fixtures near their consumers and use factories for fresh variations.
+- `tmp_path` exercises a real isolated filesystem boundary.
+- `capsys` captures stdout/stderr text; `caplog` captures structured log
+  records.
+- Reproduce order-dependent failures and repair state ownership rather than
+  relying on execution order.
+
+## Continue learning
+
+- [pytest documentation: fixtures and dependency injection](https://docs.pytest.org/en/stable/how-to/fixtures.html)
+- [pytest documentation: temporary directories and files](https://docs.pytest.org/en/stable/how-to/tmp_path.html)
+- [pytest documentation: stdout and stderr capture](https://docs.pytest.org/en/stable/how-to/capture-stdout-stderr.html)
+- [pytest documentation: capturing log records](https://docs.pytest.org/en/stable/how-to/logging.html)
+- Next: [Control Dependencies Without Fragile Mocks](test-doubles-dependency-injection.qmd)
