@@ -1,6 +1,6 @@
 ---
-title: Problem Solving and Basic Algorithms Overview
-description: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+title: Solving Problems with Algorithms Overview
+description: Learn a repeatable route from an unclear request to a small, checkable algorithm whose result and practical cost you can explain.
 course_id: python-foundations
 unit_id: problem-solving-algorithms
 unit_number: 7
@@ -13,54 +13,233 @@ colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algor
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 7
-- **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 16–22 hours including the challenge
+- **Unit outcome:** Turn an unclear task into explicit examples and rules; decompose it into checkable functions; select, trace, and adapt common algorithms; and defend correctness, boundary behavior, and practical time and memory costs.
+- **Practice in:** Generated Colab notebooks or a local Python project
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. One request can hide several different programs
 
-Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+Imagine that a friend asks you to write a program that will **choose the best
+stargazing site**. Python cannot act on that sentence yet. Does *best* mean the
+site with the darkest sky, the shortest drive, the highest visitor rating, or
+some combination? If two sites are equally good, which one wins? What happens
+when every site is closed?
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+All of these answers are reasonable:
 
-## 2. Before you start
+```python
+sites = [
+    {"name": "Pine Ridge", "darkness": 9, "minutes": 55},
+    {"name": "Moon Lake", "darkness": 8, "minutes": 20},
+]
 
-**Prior knowledge:** Complete Unit 6 and bring its challenge notes and debugging record.
+best_darkness = "Pine Ridge"
+shortest_drive = "Moon Lake"
+```
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+The difficulty is not Python syntax. The request does not yet contain enough
+information to decide which result is correct. Unit 7 teaches you to notice that
+problem before assumptions become code.
 
-## 3. Lessons
-
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [From a Problem Statement to Examples and Acceptance Rules](problems-examples-acceptance.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Decomposition, Pseudocode, and Incremental Implementation](decomposition-pseudocode-implementation.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Search, Count, Aggregate, Filter, and Transform Patterns](core-algorithm-patterns.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Correctness, Boundaries, and Practical Efficiency](correctness-boundaries-efficiency.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
-
-## 4. How to study this unit
-
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
-
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+::: {.callout-important title="A correct program needs a checkable promise"}
+An algorithm is not correct merely because it runs or because its output looks
+reasonable. It is correct when its observable behavior agrees with an explicit
+contract for every supported input.
 :::
 
-## 5. Unit evidence
+## 2. A small example is the first design tool
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+Suppose the clarified rule is:
+
+> Choose the open site with the greatest darkness score. If scores tie, choose
+> the shorter drive. If no site is open, return `None`.
+
+Now a small example can reveal the decision:
+
+```python
+sites = [
+    {"name": "Pine Ridge", "darkness": 9, "minutes": 55, "open": True},
+    {"name": "Moon Lake", "darkness": 9, "minutes": 20, "open": True},
+]
+
+expected_name = "Moon Lake"
+```
+
+Both sites have the same darkness score, so the travel-time rule decides the
+result. A one-site example could not reveal that rule. A useful example is not
+necessarily large; it is just large enough to distinguish correct behavior from
+a tempting wrong behavior.
+
+During this unit, you will repeatedly use a table like this:
+
+| Case | Input feature | Expected result | Rule exposed |
+|---|---|---|---|
+| Ordinary | Different darkness scores | Darker site | Main priority |
+| Tie | Same darkness, different travel | Shorter drive | Tie rule |
+| Boundary | One open site | That site | Smallest result-bearing input |
+| No result | Every site closed | `None` | Empty candidate behavior |
+
+## 3. Follow the problem-solving loop
+
+You do not need a brilliant idea before you begin. You need a series of small,
+observable decisions.
+
+::: {.concept-diagram}
+The diagram follows an unclear request through specification, implementation,
+and review; a failed check sends you back to the earliest unsupported decision.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Unclear request] --> B[Examples and rules]
+  B --> C[Manual solution]
+  C --> D[Pseudocode and functions]
+  D --> E[Working algorithm]
+  E --> F[Checks and counterexamples]
+  F --> G[Cost review]
+  F -->|Rule or plan is wrong| B
+```
+
+:::
+
+The order matters:
+
+1. **Examples and rules** define what an answer means.
+2. **A manual solution** exposes the decisions and changing state.
+3. **Pseudocode and functions** give those responsibilities names.
+4. **A working algorithm** implements one checkable stage at a time.
+5. **Checks and counterexamples** challenge the result rather than admire it.
+6. **A cost review** asks how work and memory grow with larger inputs.
+
+You may move backward when new evidence reveals a missing rule. That is not
+failure. It is how a vague request becomes dependable software.
+
+## 4. Four lessons answer four different questions
+
+| Step | Lesson | Question answered | Work you will retain |
+|---:|---|---|---|
+| 1 | [Turn a Vague Idea into Testable Examples](problems-examples-acceptance.qmd) | What exactly must the program do? | Contract, acceptance table, and counterexamples |
+| 2 | [Turn a Plan into Working Python](decomposition-pseudocode-implementation.qmd) | How can a hand solution become small functions? | Trace, pseudocode, interfaces, and staged checks |
+| 3 | [Choose an Algorithm That Fits](core-algorithm-patterns.qmd) | Which traversal, state, and stopping rule match the result? | Pattern decision table and reusable implementations |
+| 4 | [Know It Works and Understand the Cost](correctness-boundaries-efficiency.qmd) | Why is the result correct, and how does the work grow? | Invariant, operation counts, and trade-off explanation |
+| 5 | [Unit Challenge](challenge.qmd) | Can you combine the complete method independently? | A working observatory puzzle and debugging record |
+
+Each lesson has its own main task. Short checkpoints appear near the ideas they
+assess, and the final lab asks you to combine the page rather than repeat its
+opening code.
+
+## 5. Bring the tools from Units 3–6
+
+You already know most of the Python vocabulary this unit needs:
+
+- **Unit 3** supplied lists, dictionaries, sets, sorting, and nested records.
+- **Unit 4** supplied decisions, loop state, stopping, searches, and
+  comprehensions.
+- **Unit 5** supplied function contracts, parameters, return values, and
+  decomposition.
+- **Unit 6** supplied ownership decisions, non-mutation promises, and ways to
+  recognize shared state.
+
+This unit changes the question. Instead of “How does a `for` loop execute?” you
+will ask “Does this result require every item, or may the loop stop?” Instead of
+“How do I define a function?” you will ask “Which responsibility can be checked
+independently?”
+
+::: {.callout-note title="Keep later tools in their later units"}
+Unit 8 develops exception handling, traceback reading, debugger use, and a full
+evidence-driven debugging process. Unit 13 develops pytest and test-suite
+design. Here you will use plain assertions, small counterexamples, and value
+traces so that those later tools have clear behavior to protect.
+:::
+
+## 6. Prepare a problem-solving notebook
+
+Create these headings in a new notebook or text file:
+
+```text
+1. Request
+2. Questions and chosen rules
+3. Acceptance examples
+4. Manual trace
+5. Pseudocode
+6. Function contracts
+7. Implementation
+8. Checks and counterexamples
+9. Time and extra-space notes
+10. Debugging record
+```
+
+Do not try to fill every section immediately. Move down the list as decisions
+become stable, and move back up when a check exposes ambiguity.
+
+Use assertions for exact observations:
+
+```python
+actual = 7
+expected = 7
+assert actual == expected
+```
+
+An assertion is useful only when `expected` came from the contract or a manual
+calculation. Writing `expected = actual` would make the check pass while proving
+nothing.
+
+## 7. Choose a realistic pace
+
+This unit contains about **16–22 hours of active work**. That estimate includes
+typing, predicting, tracing, quizzes, labs, and the challenge—not only reading.
+A useful pace is:
+
+- **Session 1:** clarify requirements and build acceptance examples;
+- **Session 2:** write pseudocode and implement a small pipeline;
+- **Sessions 3–4:** learn, compare, and combine algorithm patterns;
+- **Session 5:** reason about correctness and practical cost;
+- **Session 6:** complete the unit challenge from a clean state.
+
+Stop at a point where you can leave a short note describing the next check. On
+returning, rerun the notebook from the top before trusting old output.
+
+## 8. Preview the clockwork observatory
+
+The unit challenge gives you a signal and matching energy readings:
+
+```python
+signal = "AABCDEFAC"
+energy_readings = [2, 1, 3, 2, 4, 1, 5, 2, 1]
+```
+
+You will derive three pieces of a wake-up code:
+
+- the end position of the first fixed-width window containing distinct symbols;
+- the first step where accumulated energy reaches a target; and
+- the most frequent anchor symbol, with a stated tie rule.
+
+The challenge supplies function names, docstrings, progressive assertions,
+three hint levels, and a hidden solution. It does not choose the loop state or
+conditions for you. Completing the four lessons first should make each decision
+recognizable rather than mysterious.
+
+## 9. Start by making “best” precise
+
+You are ready when you can run ordinary list, loop, dictionary, set, and
+function examples from earlier units. You do not need to remember every method;
+you do need to inspect a small case carefully and explain what your code reads,
+changes, and returns.
+
+Continue to [Turn a Vague Idea into Testable Examples](problems-examples-acceptance.qmd).
+
+## Key points
+
+- Ambiguous requests must become observable rules before code can be judged.
+- Small examples are design tools when each one exposes a distinct rule.
+- Manual work, pseudocode, functions, checks, and cost reasoning form one
+  connected process.
+- This unit selects and defends algorithms; it does not repeat earlier syntax
+  lessons or anticipate later exception and testing tools.
 
 <!-- fcpython-chapter-lab: end -->

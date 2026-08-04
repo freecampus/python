@@ -1,13 +1,15 @@
 ---
-title: From a Problem Statement to Examples and Acceptance Rules
+title: Turn a Vague Idea into Testable Examples
 lesson_id: problem-solving-algorithms.problems-examples-acceptance
 lesson_order: 10
-description: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+description: Clarify an ambiguous request by defining inputs, outputs, rules, ties, boundaries, constraints, and independently calculated acceptance examples.
 execute:
   echo: true
 categories:
 - python-foundations
 - problem-solving-algorithms
+- specifications
+- acceptance-examples
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algorithms/problems-examples-acceptance.ipynb
 course_id: python-foundations
@@ -16,118 +18,305 @@ unit_number: 7
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Turn a vague request into observable inputs, outputs, boundaries, and failures.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 3–4 hours
+- **You will learn:** Turn a vague request into a compact, observable contract and a set of non-redundant acceptance examples.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A program can be beautifully formatted, run without errors, and still answer the
+wrong question. Before choosing a loop or function, you need to know what result
+would count as correct.
 
-“Summarize the readings” is not yet a specification. It must define accepted input, exact output shape, rounding, empty input, and invalid values. Small acceptance examples reveal disagreement before implementation.
+In this lesson, you will clarify a program that chooses a stargazing site. Keep
+these questions visible while you work:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+1. What information enters the program, and what exactly comes back?
+2. Which words in the request hide an unstated decision?
+3. Which small input would distinguish two competing interpretations?
+4. What happens at a tie, threshold, empty input, or no-result case?
+5. Can the expected result be calculated without trusting unfinished code?
+
+## 1. “Choose the best site” has more than one answer
+
+Start with two site records:
+
+```python
+sites = [
+    {
+        "name": "Pine Ridge",
+        "darkness": 9,
+        "minutes": 55,
+        "accessible": True,
+        "open": True,
+    },
+    {
+        "name": "Moon Lake",
+        "darkness": 8,
+        "minutes": 20,
+        "accessible": True,
+        "open": True,
+    },
+]
+```
+
+Read each key as a fact the program may use. `Pine Ridge` has a darker sky, but
+`Moon Lake` is closer. Either name could be a sensible answer to “best.” Running
+more Python will not settle a decision the request never made.
+
+Write two predictions before continuing:
+
+```python
+best_by_darkness = "Pine Ridge"
+best_by_travel_time = "Moon Lake"
+```
+
+Both predictions agree with the input. They disagree because they implement
+different rules.
+
+::: {.callout-warning title="A reasonable assumption is still an assumption"}
+When a rule affects observable output, record it or ask for clarification. Do
+not bury it inside a comparison and hope every reader would choose the same
+meaning.
 :::
 
-## 2. Read and trace a complete case
+## 2. Mark the data, action, and missing rules
+
+Consider this fuller request:
+
+> From the open, accessible sites, choose the site with the greatest darkness
+> score. If darkness ties, choose the shorter drive. Return its name. If no site
+> qualifies, return `None`. Do not change the supplied records.
+
+The nouns suggest data:
+
+- **sites**: a collection of candidate records;
+- **open** and **accessible**: eligibility facts;
+- **darkness** and **minutes**: comparison values;
+- **name**: the returned text.
+
+The verbs and comparison phrases suggest behavior:
+
+- **choose** one site;
+- **from** only qualifying candidates;
+- **greatest** darkness first;
+- **shorter** drive on a darkness tie;
+- **return** a name or `None`;
+- **do not change** the caller's data.
+
+This annotation does not determine the exact loop. It determines what any loop
+must accomplish.
+
+### Separate product rules from implementation choices
+
+These are product rules because changing them changes observable behavior:
 
 ```python
-readings = [12, 18, 15]
-expected = {"count": 3, "total": 45, "average": 15.0}
-actual = {
-    "count": len(readings),
-    "total": sum(readings),
-    "average": sum(readings) / len(readings),
-}
-assert actual == expected
+empty_result = None
+darkness_priority = "greatest"
+tie_priority = "shortest drive"
 ```
 
-### What Python does
-
-1. The input shape is concrete.
-2. Expected results are independently calculated.
-3. Internal code may change while observable behavior remains stable.
-
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
+These are implementation choices because several versions could preserve the
+same behavior:
 
 ```python
-def average(values):
-    return sum(values) / len(values) if values else 0
+possible_strategy_a = "keep a running best candidate"
+possible_strategy_b = "filter and sort a new list"
 ```
 
-A focused repair is:
+Lesson 3 compares strategies. For now, do not put an implementation detail such
+as “must sort” into the contract unless there is a real external reason.
+
+## 3. Ask questions before assumptions become code
+
+A short requirements interview can prevent a long repair. For the site chooser,
+ask:
+
+| Question | Why the answer matters |
+|---|---|
+| Is a larger darkness score always better? | Establishes comparison direction |
+| Must a site be both open and accessible? | Establishes eligibility logic |
+| What decides an exact tie on darkness and travel? | Prevents unstable output |
+| Is an empty list supported? | Establishes no-result behavior |
+| May the function reorder or edit the list? | Establishes ownership behavior |
+| Do all records contain the named keys? | Establishes a precondition |
+| About how many sites are expected? | May influence later cost choices |
+
+Assume the answer to the exact-tie question is: **keep the site that appears
+first in the input**. That rule matters even if the sample data has no exact tie.
+
+::: {.callout-tip title="Ask the question that could change an assertion"}
+A useful clarification changes an input, an expected result, or a supported
+behavior. Editor theme, internal variable names, and preferred line count do not
+belong in this contract.
+:::
+
+## 4. State the contract in observable language
+
+A compact contract can live in prose before it becomes a docstring:
+
+- **Input:** a list of site dictionaries containing `name`, `darkness`,
+  `minutes`, `accessible`, and `open`.
+- **Precondition:** the fields already contain supported values; detailed
+  validation is outside this function.
+- **Eligibility:** both `open` and `accessible` must be true.
+- **Selection:** greatest darkness, then shortest drive, then earliest input
+  position.
+- **Return:** the selected site's name, or `None` when no site qualifies.
+- **Ownership:** reading is allowed; changing the list or its records is not.
+
+A future function interface can express the same promise:
 
 ```python
-def average(values):
-    if not values:
-        raise ValueError("values must not be empty")
-    return sum(values) / len(values)
+def choose_site(sites):
+    """Return the best eligible site name, or None when no site qualifies."""
+    pass
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+`pass` is a placeholder, not an implementation. The valuable work at this
+stage is the promise surrounding it.
 
-## 4. Practice from trace to transfer
+## 5. Calculate one ordinary result by hand
 
-1. Write acceptance examples for a temperature converter.
-2. Specify empty and one-item behavior for an average.
-3. Turn “fast enough” into a measurable requirement or remove it.
+Use candidates with different darkness scores so the main rule decides:
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+```python
+ordinary_sites = [
+    {
+        "name": "Moon Lake",
+        "darkness": 7,
+        "minutes": 20,
+        "accessible": True,
+        "open": True,
+    },
+    {
+        "name": "Pine Ridge",
+        "darkness": 9,
+        "minutes": 55,
+        "accessible": True,
+        "open": True,
+    },
+]
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+ordinary_expected = "Pine Ridge"
+```
 
-</details>
+The manual calculation is:
 
-## 5. Check your understanding
+1. both records satisfy the two eligibility conditions;
+2. darkness scores are `7` and `9`;
+3. `9` is greater, so the travel-time tie rule is not used;
+4. the promised return shape is a name, so the result is `"Pine Ridge"`.
+
+Later, the acceptance check will be:
+
+```python
+assert choose_site(ordinary_sites) == ordinary_expected
+```
+
+The assertion may currently fail because `choose_site` contains only `pass`.
+That is expected. The check describes a target before the implementation exists.
+
+## 6. Use the smallest case that distinguishes two rules
+
+A one-site input can check return shape, but it cannot distinguish the main rule
+from the tie rule. Use two equally dark sites:
+
+```python
+tie_sites = [
+    {
+        "name": "Pine Ridge",
+        "darkness": 9,
+        "minutes": 55,
+        "accessible": True,
+        "open": True,
+    },
+    {
+        "name": "Moon Lake",
+        "darkness": 9,
+        "minutes": 20,
+        "accessible": True,
+        "open": True,
+    },
+]
+
+tie_expected = "Moon Lake"
+```
+
+If an implementation chooses only the greatest darkness value and keeps the
+first match, it returns `"Pine Ridge"`. This example exposes the missing travel
+rule with only two records.
+
+Now isolate the final tie rule:
+
+```python
+exact_tie_sites = [
+    {
+        "name": "North Field",
+        "darkness": 8,
+        "minutes": 30,
+        "accessible": True,
+        "open": True,
+    },
+    {
+        "name": "South Field",
+        "darkness": 8,
+        "minutes": 30,
+        "accessible": True,
+        "open": True,
+    },
+]
+
+exact_tie_expected = "North Field"
+```
+
+The cases are small because each one answers one design question.
+
+### Checkpoint: rules that produce observable results
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "problem-solving-algorithms-specifications-and-examples",
-  "title": "Specifications and Acceptance Examples checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "problem-solving-specifications-rules",
+  "title": "Rules and observable behavior",
+  "instructions": "Choose the answer that follows from the stated site contract.",
   "questions": [
     {
-      "id": "example",
-      "prompt": "What belongs in an acceptance example?",
+      "id": "darkness-travel-tie",
+      "prompt": "Two eligible sites both have darkness 9. One is 20 minutes away and one is 50 minutes away. Which rule decides?",
       "options": [
-        "Editor colors",
-        "Private local names",
-        "Input and expected observable result",
-        "A package cache"
+        "Input order immediately",
+        "The shorter-drive tie rule",
+        "Alphabetical name order",
+        "Whichever dictionary has more keys"
+      ],
+      "answer_index": 1,
+      "explanation": "Travel time is consulted after darkness ties and before input order."
+    },
+    {
+      "id": "implementation-detail",
+      "prompt": "Which statement is an implementation choice rather than an observable product rule?",
+      "options": [
+        "Closed sites are excluded.",
+        "No qualifying site returns None.",
+        "Use a running-best loop rather than sorting.",
+        "An exact tie keeps the earlier record."
       ],
       "answer_index": 2,
-      "explanation": "Examples make behavior observable."
+      "explanation": "A running-best loop and a non-mutating sorted approach could both preserve the stated behavior."
     },
     {
-      "id": "empty",
-      "prompt": "Why specify empty input?",
+      "id": "contract-output",
+      "prompt": "What does the site chooser return for a successful selection?",
       "options": [
-        "It is always valid",
-        "Python cannot store it",
-        "It disables tests",
-        "Its meaning depends on the product rule"
+        "The entire input list",
+        "The selected site's name",
+        "Every darkness score",
+        "A printed trace with no returned value"
       ],
-      "answer_index": 3,
-      "explanation": "The contract must choose."
-    },
-    {
-      "id": "change",
-      "prompt": "What may change while behavior stays stable?",
-      "options": [
-        "Internal algorithm",
-        "Expected output",
-        "Valid input",
-        "Failure contract"
-      ],
-      "answer_index": 0,
-      "explanation": "Implementation may be refactored."
+      "answer_index": 1,
+      "explanation": "The contract promises one name, not a record, list, or printed side effect."
     }
   ]
 }
@@ -135,14 +324,403 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 7. Boundaries appear where behavior can change
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+A boundary is not merely an unusual value. It is a point near which the rule or
+result may change. For eligibility, the boundary is the change from `False` to
+`True`. For a numeric threshold such as “darkness at least 7,” check values just
+below, exactly at, and just above the threshold.
+
+```python
+threshold_scores = [6, 7, 8]
+expected_eligible = [False, True, True]
+```
+
+For the current site contract, useful boundaries include:
+
+```python
+empty_sites = []
+empty_expected = None
+
+one_site = [
+    {
+        "name": "Solo Hill",
+        "darkness": 5,
+        "minutes": 10,
+        "accessible": True,
+        "open": True,
+    }
+]
+one_expected = "Solo Hill"
+```
+
+A no-result input need not be empty. It can contain records that all fail the
+eligibility rule:
+
+```python
+unavailable_sites = [
+    {
+        "name": "Closed Bluff",
+        "darkness": 10,
+        "minutes": 5,
+        "accessible": True,
+        "open": False,
+    },
+    {
+        "name": "Rough Trail",
+        "darkness": 10,
+        "minutes": 5,
+        "accessible": False,
+        "open": True,
+    },
+]
+
+unavailable_expected = None
+```
+
+These two no-result cases reach the same output through different input
+conditions. Both are useful because they can expose different mistakes.
+
+## 8. Counterexamples challenge an incomplete rule
+
+Suppose someone proposes:
+
+> Return the site with the greatest darkness score.
+
+This input is a counterexample:
+
+```python
+counterexample_sites = [
+    {
+        "name": "Locked Peak",
+        "darkness": 10,
+        "minutes": 15,
+        "accessible": True,
+        "open": False,
+    },
+    {
+        "name": "Open Meadow",
+        "darkness": 7,
+        "minutes": 25,
+        "accessible": True,
+        "open": True,
+    },
+]
+
+counterexample_expected = "Open Meadow"
+```
+
+The greatest darkness belongs to an ineligible site. The input is more useful
+than saying “remember eligibility” because it can be run against an
+implementation.
+
+A counterexample should be as small as practical. Extra records can hide the
+one relationship that disproves the rule.
+
+## 9. Expected values need an independent source
+
+This check looks official but proves nothing:
+
+```python
+actual_total = sum([4, 7, 9])
+expected_total = sum([4, 7, 9])
+assert actual_total == expected_total
+```
+
+If the calculation were wrong for a subtle reason, both sides would repeat the
+same mistake. Instead, calculate a small expected result separately:
+
+```python
+values = [4, 7, 9]
+expected_total = 20
+actual_total = sum(values)
+assert actual_total == expected_total
+```
+
+For a more complex rule, keep a short note beside the expected value:
+
+```python
+# Both are equally dark; 18 minutes beats 42 minutes.
+expected_name = "River Bend"
+```
+
+Independent does not mean another large program. It often means arithmetic by
+hand, a tiny table, an agreed example from a stakeholder, or a simpler reference
+method used only on small inputs.
+
+## 10. Constraints must be concrete enough to affect a design
+
+“Make it fast” gives no usable target. Compare these statements:
+
+- The program usually receives **fewer than 20 sites**.
+- The program may receive **one million sites**.
+- The result must be returned **without changing the input order**.
+- The program may use **one additional collection proportional to the input**.
+- The function is called **once per evening**, not thousands of times per
+  second.
+
+These facts can affect later choices. With 20 sites, a direct, easy-to-explain
+solution may be preferable even if another strategy has better growth. With one
+million records, repeated scans deserve closer attention.
+
+Do not confuse a constraint with a premature command:
+
+```text
+Useful: preserve the caller's order and support up to 100,000 records.
+Premature: use a set and exactly one loop.
+```
+
+The useful statement describes observable behavior and scale. The premature
+statement chooses tools before alternatives have been compared.
+
+### Checkpoint: boundaries and trustworthy expectations
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-specifications-boundaries",
+  "title": "Boundaries and acceptance evidence",
+  "instructions": "Identify the case that reveals the named behavior.",
+  "questions": [
+    {
+      "id": "threshold-boundary",
+      "prompt": "For the rule 'darkness must be at least 7,' which set best checks the numeric boundary?",
+      "options": [
+        "1, 2, and 3",
+        "7, 70, and 700",
+        "6, 7, and 8",
+        "Only 10"
+      ],
+      "answer_index": 2,
+      "explanation": "Values just below, exactly at, and just above 7 expose the inclusive threshold."
+    },
+    {
+      "id": "no-result-records",
+      "prompt": "Why keep both an empty case and a non-empty case where every site is ineligible?",
+      "options": [
+        "They exercise different paths that should reach the same promised result.",
+        "Python requires two None values.",
+        "The larger case always proves better performance.",
+        "They force the function to sort."
+      ],
+      "answer_index": 0,
+      "explanation": "An implementation may handle an empty list correctly while forgetting to exclude unavailable records."
+    },
+    {
+      "id": "independent-expected",
+      "prompt": "Which expected value is the strongest evidence for a small total?",
+      "options": [
+        "expected = actual",
+        "expected = the same unfinished function called again",
+        "expected = a random nearby number",
+        "expected = 20, calculated by hand for [4, 7, 9]"
+      ],
+      "answer_index": 3,
+      "explanation": "The hand-calculated value does not repeat the implementation being checked."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Build an acceptance table before implementation
+
+Combine the examples into one compact specification:
+
+| Case | Important input feature | Expected | Rule exercised |
+|---|---|---|---|
+| ordinary | eligible sites with different darkness | `"Pine Ridge"` | greatest darkness |
+| darkness tie | equal darkness, different travel | `"Moon Lake"` | shortest drive |
+| exact tie | equal darkness and travel | `"North Field"` | earliest input |
+| one site | one eligible record | `"Solo Hill"` | smallest successful input |
+| empty | no records | `None` | no candidate |
+| all unavailable | records exist but none qualify | `None` | eligibility |
+| closed but darker | ineligible record would otherwise win | `"Open Meadow"` | filter before selection |
+
+Ask whether each row could catch a bug that the others might miss. If not,
+combine or remove redundant cases. More cases are not automatically better;
+each should have a reason.
+
+Represent the stable table as data when you are ready to implement:
+
+```python
+acceptance_cases = [
+    (ordinary_sites, "Pine Ridge"),
+    (tie_sites, "Moon Lake"),
+    (exact_tie_sites, "North Field"),
+    (one_site, "Solo Hill"),
+    (empty_sites, None),
+    (unavailable_sites, None),
+    (counterexample_sites, "Open Meadow"),
+]
+```
+
+Lesson 2 will use this collection to guide incremental implementation.
+
+## 12. Repair specifications that cannot be checked
+
+Rewrite each weak statement before opening the suggested repair.
+
+### “Return a useful answer”
+
+<details class="solution">
+<summary>Show one checkable repair</summary>
+
+Return the selected site's `name` string, or `None` if no site is both open and
+accessible.
+
+</details>
+
+### “Choose the first good site”
+
+<details class="solution">
+<summary>Show the missing questions</summary>
+
+Define what *good* means, whether the input order is meaningful, and whether a
+later site can replace the first one. If the intended contract is first-match
+search, state the exact condition and no-match result.
+
+</details>
+
+### “The program should be efficient”
+
+<details class="solution">
+<summary>Show a measurable replacement</summary>
+
+State the expected input range and important resource constraint. For example:
+“Support up to 100,000 site records without modifying them; compare one-pass and
+sorted-copy strategies before choosing.”
+
+</details>
+
+## 13. Lab: specify a moon-base supply selector
+
+A moon base receives supply-pod records:
+
+```python
+pods = [
+    {"id": "LUNA-4", "oxygen": 8, "mass": 6, "damaged": False},
+    {"id": "NOVA-2", "oxygen": 8, "mass": 4, "damaged": False},
+    {"id": "DUST-9", "oxygen": 10, "mass": 3, "damaged": True},
+]
+```
+
+The request is deliberately vague:
+
+> Choose the best usable supply pod and show its ID.
+
+Do not implement the selector yet. Produce:
+
+1. a list of clarification questions;
+2. a chosen rule for usability;
+3. a primary comparison and at least two tie rules;
+4. an exact return shape and no-result behavior;
+5. a non-mutation promise;
+6. an expected input-size statement; and
+7. at least six acceptance examples covering ordinary, boundary, tie, and
+   counterexample behavior.
+
+::: {.callout-note title="One possible rule set"}
+If you need a starting direction, choose undamaged pods, prefer greater oxygen,
+then lower mass, then earlier input position. Return the ID or `None`.
+:::
+
+<details>
+<summary>Hint: choose cases that can disagree</summary>
+
+Include a damaged pod with the highest oxygen, two undamaged pods with equal
+oxygen and different mass, an exact tie, one usable pod, no records, and only
+damaged records.
+
+</details>
+
+<details class="solution">
+<summary>Show a model acceptance strategy</summary>
+
+A strong table states that a pod is usable when `damaged` is `False`; greater
+`oxygen` wins; lower `mass` breaks an oxygen tie; earlier input breaks an exact
+tie; the return value is an ID or `None`; and input records remain unchanged.
+Calculate every expected ID by hand and write one sentence naming the rule each
+case isolates.
+
+</details>
+
+## 14. Check the complete specification
+
+Run this checklist against both the site chooser and your supply selector:
+
+- [ ] The input and returned result have exact shapes.
+- [ ] Every comparison direction is stated.
+- [ ] Eligibility, ties, empty input, and no-result behavior are explicit.
+- [ ] Ownership and realistic scale are explicit.
+- [ ] Each acceptance example exposes a distinct rule.
+- [ ] Expected values were calculated independently.
+- [ ] Internal loop or sorting choices were not mistaken for product rules.
+
+### Checkpoint: a specification ready for implementation
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-specifications-ready",
+  "title": "Is the specification ready?",
+  "instructions": "Choose the statement that makes the future implementation checkable.",
+  "questions": [
+    {
+      "id": "supply-counterexample",
+      "prompt": "Which pod case best exposes an implementation that forgets to exclude damaged pods?",
+      "options": [
+        "A damaged pod has the greatest oxygen, while an undamaged pod has less.",
+        "Every pod has a different ID.",
+        "The list contains three undamaged pods in alphabetical order.",
+        "Every mass value is even."
+      ],
+      "answer_index": 0,
+      "explanation": "The damaged pod would win the score comparison unless eligibility is applied first."
+    },
+    {
+      "id": "exact-tie-rule",
+      "prompt": "Why must an exact tie rule be written even if the opening sample contains no exact tie?",
+      "options": [
+        "It makes dictionaries immutable.",
+        "It determines observable output for another supported input.",
+        "It guarantees constant-time execution.",
+        "It removes the need for a no-result case."
+      ],
+      "answer_index": 1,
+      "explanation": "A supported tie can otherwise produce an arbitrary or unstable choice."
+    },
+    {
+      "id": "useful-constraint",
+      "prompt": "Which statement gives the clearest design constraint?",
+      "options": [
+        "Make it elegant.",
+        "Use clever Python.",
+        "Never write more than five lines.",
+        "Support up to 100,000 records without changing their order."
+      ],
+      "answer_index": 3,
+      "explanation": "Input scale and order preservation can be checked and can influence an algorithm choice."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+- Clarify inputs, outputs, eligibility, priority, ties, no-result behavior,
+  ownership, and scale before choosing implementation details.
+- An acceptance example contains explicit input and an independently calculated
+  observable result.
+- Ordinary cases show intended behavior; boundaries and counterexamples expose
+  incomplete rules.
+- A small case is powerful when it distinguishes two plausible implementations.
+- Constraints should describe supported scale or behavior, not prescribe a
+  favorite tool without evidence.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: defining functions and documenting their behavior](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+- [Python reference: the `assert` statement](https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement)
+- [Python tutorial: comparing sequences and other values](https://docs.python.org/3/tutorial/datastructures.html#comparing-sequences-and-other-types)

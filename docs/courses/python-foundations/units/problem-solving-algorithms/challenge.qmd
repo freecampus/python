@@ -1,15 +1,16 @@
 ---
-title: 'Unit Challenge: Analyze a Delivery Event Stream'
-description: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+title: 'Unit Challenge: Wake the Clockwork Observatory'
+description: Derive an observatory wake-up code by decomposing a signal puzzle into frequency, selection, window-search, and running-total algorithms.
 challenge_id: problem-solving-algorithms.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 2
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
 - problem-solving-algorithms
 - unit-challenge
+- puzzle
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algorithms/challenge.ipynb
 course_id: python-foundations
@@ -19,135 +20,523 @@ unit_number: 7
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 7 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Move from acceptance examples to pseudocode and a one-pass counting algorithm.
-- **Evidence:** Passing checks, a clean rerun, and a short debugging record
+- **Outcome assessed:** Specify, decompose, implement, and defend several cooperating algorithms.
+- **Evidence:** Passing progressive assertions, a wake-up code, cost notes, a clean rerun, and one debugging record
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
+## 1. Wake the observatory with a code you derive
 
-A volunteer delivery desk receives a compact text stream. Valid codes are uppercase letters; `X` marks a failed delivery. Count valid deliveries, failures, and ignored characters without using collections.
+The hilltop clockwork observatory has slept through three meteor showers. Its
+brass dome will move only when a signal calibrator produces a three-part code:
+
+```text
+<sync position>-<power step>-<anchor symbol>
+```
+
+You receive a symbol signal and matching energy readings:
+
+```python
+signal = "AABCDEFAC"
+energy_readings = [2, 1, 3, 2, 4, 1, 5, 2, 1]
+window_width = 4
+power_target = 10
+```
+
+Your program must discover:
+
+1. where the first all-distinct symbol window ends;
+2. when accumulated energy first reaches the target; and
+3. which symbol occurs most often, with first appearance winning a tie.
+
+For the supplied data, the finished program should reveal:
+
+```text
+Observatory awake: 5-5-A
+```
+
+You will choose the state and conditions that produce that result. The page
+supplies names, docstrings, staged assertions, three hints, and a hidden solution
+for use after a serious attempt.
 
 ::: {.callout-note title="Work independently, but not without support"}
-Plan for one or two focused hours. Start with the contract, run the smallest
-relevant check after each change, and open a hint only after naming the evidence
-that has blocked you.
+Plan for one or two focused hours. Read one contract, make the matching small
+check pass, and rerun earlier checks before moving forward. Open a hint only
+after writing down the exact value or condition that blocks you.
 :::
 
-## 2. Understand the acceptance examples
+## 2. Read the signal rules and acceptance examples
 
-Before writing implementation code, write one ordinary example, one boundary,
-and one invalid or empty case. Predict the result for each. These examples are
-the specification you will compare against while working.
+### Frequency and anchor rules
 
-### Constraints
+- Count every symbol exactly as written.
+- The anchor is the symbol with the greatest count.
+- If counts tie, the symbol that appears earlier in the signal wins.
+- An empty signal has no anchor, represented by `None`.
 
-1. Write three acceptance examples before implementation.
-2. Make exactly one pass through the input text.
-3. Update named counters for each category.
-4. Explain the time and extra-space cost in plain language.
+```python
+assert {"A": 3, "B": 1, "C": 2, "D": 1, "E": 1, "F": 1} == {
+    "A": 3,
+    "B": 1,
+    "C": 2,
+    "D": 1,
+    "E": 1,
+    "F": 1,
+}
+
+# A and B both occur twice; A appears first.
+tie_signal = "ABBA"
+tie_anchor = "A"
+```
+
+The first assertion only confirms the hand-counted mapping is well formed. Your
+function checks begin in Section 5.
+
+### Synchronization-window rules
+
+A window is a consecutive slice with exactly `window_width` symbols. It is
+synchronized when every symbol inside it is distinct. Return the **1-based end
+position**, which is also the number of symbols processed when the window ends.
+Return `None` if no such window exists.
+
+For `"AABCDEFAC"` and width `4`:
+
+| End position | Window | All distinct? |
+|---:|---|---:|
+| 4 | `AABC` | no |
+| 5 | `ABCD` | yes |
+
+The synchronization result is therefore `5`.
+
+### Power rules
+
+Add readings from left to right. Return the **1-based step** where the running
+total first becomes greater than or equal to the target. Return `None` if all
+readings are consumed without reaching it.
+
+| Step | Reading | Running total | Reached 10? |
+|---:|---:|---:|---:|
+| 1 | 2 | 2 | no |
+| 2 | 1 | 3 | no |
+| 3 | 3 | 6 | no |
+| 4 | 2 | 8 | no |
+| 5 | 4 | 12 | yes |
+
+The power result is `5`. Stop there because the contract asks for the first
+reached step.
+
+### Input and output constraints
+
+1. `signal` is a finite string.
+2. `readings` is a finite list of non-negative numbers.
+3. `width` and `target` are positive integers.
+4. Functions must not modify supplied inputs.
+5. Use the supplied names and returned shapes.
+6. Do not hard-code `5`, `5`, `A`, or the final code.
+7. If the anchor, synchronization, or power result is missing, the complete
+   code is `None`.
+8. Explain time and extra-space growth in plain language after the checks pass.
+
+Before implementation, add one acceptance example of your own for each:
+
+- a frequency tie;
+- a window that never synchronizes; and
+- an energy sequence that never reaches its target.
 
 ## 3. Start from the contract
 
-Preserve the supplied public names and comments so that each assertion gives a
-useful location signal.
+Run this cell unchanged. Replace each `pass` while preserving the public names
+and docstrings.
 
 ```python
-stream = "ABX C!DX"
-valid_deliveries = 0
-failed_deliveries = 0
-ignored = 0
+def symbol_frequencies(signal):
+    """Return a dictionary that counts every symbol in signal."""
+    pass
 
-for symbol in stream:
-    # Classify one symbol and update exactly one counter.
+
+def choose_anchor(signal, frequencies):
+    """Return the most frequent symbol; the first appearance wins a tie."""
+    pass
+
+
+def first_sync_end(signal, width):
+    """Return the 1-based end of the first all-distinct window, or None."""
+    pass
+
+
+def first_power_step(readings, target):
+    """Return the 1-based step where the running total reaches target, or None."""
+    pass
+
+
+def build_wakeup_code(signal, readings, width, target):
+    """Return '<sync>-<power>-<anchor>', or None if calibration cannot finish."""
     pass
 ```
 
-## 4. Build in small stages
+Use this responsibility table before writing loops:
 
-1. Make the ordinary example pass without adding behavior for every case.
-2. Trace the important state after each step and compare it with your prediction.
-3. Add the boundary case, then the empty or invalid case.
-4. Restart the notebook or process and run the complete solution from the top.
+| Function | Result shape | State to consider | May stop early? |
+|---|---|---|---:|
+| `symbol_frequencies` | dictionary | counts by symbol | no |
+| `choose_anchor` | symbol or `None` | best symbol/count | yes only for empty input |
+| `first_sync_end` | integer or `None` | candidate window/end | yes on first match |
+| `first_power_step` | integer or `None` | running total/step | yes on reached target |
+| `build_wakeup_code` | string or `None` | returned helper results | after either failed result |
+
+You may implement `choose_anchor` by traversing `signal` and consulting the
+frequency mapping. That makes encounter-order tie behavior visible without
+sorting the dictionary.
+
+## 4. Calibrate one mechanism at a time
+
+### Stage A: count symbols
+
+Start with empty and repeated inputs. Do not work on anchor selection until both
+frequency checks pass.
+
+A useful trace for `"ABACA"` has columns for current symbol and mapping after the
+update.
+
+### Stage B: select the anchor
+
+Keep the current anchor when a candidate's count is equal. Replace only when the
+candidate count is strictly greater. Repeated visits to the same symbol should
+not change the result.
+
+### Stage C: find synchronization
+
+Name the meaning of `end` before coding. For an end-exclusive Python slice,
+`signal[end - width:end]`, the same `end` is already the promised 1-based count
+of processed symbols.
+
+### Stage D: accumulate power
+
+Use `enumerate(readings, start=1)` or convert a zero-based index deliberately.
+Add the current reading before asking whether the target has been reached.
+
+### Stage E: assemble the code
+
+Call the four helpers. If the sync result, power result, or anchor is `None`,
+return `None`. Otherwise return one formatted string.
+
+After every stage:
+
+1. run its smallest assertion;
+2. trace actual state if it fails;
+3. change one condition or update;
+4. rerun the stage; and
+5. rerun all earlier stages.
 
 ## 5. Run progressive assertions
 
-Do not weaken an expected value to make a check pass. If a check appears wrong,
-write down the contract conflict before changing either side.
+Do not change these expected values merely to make a check pass. If code and
+expectation disagree, compare both with the written rules and hand traces.
+
+### Symbol-frequency evidence
 
 ```python
-assert valid_deliveries == 4
-assert failed_deliveries == 3
-assert ignored == 3
-assert valid_deliveries + failed_deliveries + ignored == len(stream)
+assert symbol_frequencies("") == {}
+assert symbol_frequencies("A") == {"A": 1}
+assert symbol_frequencies("ABACA") == {"A": 3, "B": 1, "C": 1}
+assert symbol_frequencies(signal) == {
+    "A": 3,
+    "B": 1,
+    "C": 2,
+    "D": 1,
+    "E": 1,
+    "F": 1,
+}
 ```
+
+### Anchor and tie evidence
+
+```python
+assert choose_anchor("", {}) is None
+assert choose_anchor("A", {"A": 1}) == "A"
+assert choose_anchor("ABACA", {"A": 3, "B": 1, "C": 1}) == "A"
+assert choose_anchor("ABBA", {"A": 2, "B": 2}) == "A"
+assert choose_anchor("BAAB", {"B": 2, "A": 2}) == "B"
+```
+
+### Synchronization evidence
+
+```python
+assert first_sync_end("Z", 1) == 1
+assert first_sync_end("ABCD", 4) == 4
+assert first_sync_end("AABCDEF", 4) == 5
+assert first_sync_end("AAAA", 2) is None
+assert first_sync_end("ABC", 4) is None
+assert first_sync_end(signal, window_width) == 5
+```
+
+### Running-power evidence
+
+```python
+assert first_power_step([5], 5) == 1
+assert first_power_step([2, 3, 1], 5) == 2
+assert first_power_step([2, 3, 1], 7) is None
+assert first_power_step([], 1) is None
+assert first_power_step(energy_readings, power_target) == 5
+```
+
+### Complete wake-up evidence
+
+```python
+assert build_wakeup_code("ABCD", [2, 3], 4, 5) == "4-2-A"
+assert build_wakeup_code("AAAA", [2, 3], 2, 5) is None
+assert build_wakeup_code("ABCD", [1, 1], 4, 5) is None
+assert build_wakeup_code(signal, energy_readings, window_width, power_target) == (
+    "5-5-A"
+)
+```
+
+### Ownership and changed-input evidence
+
+```python
+readings_before = energy_readings.copy()
+signal_before = signal
+
+code = build_wakeup_code(signal, energy_readings, window_width, power_target)
+
+assert code == "5-5-A"
+assert energy_readings == readings_before
+assert signal == signal_before
+```
+
+Add one complete assertion with a new signal, new readings, a different width,
+and a different target. Calculate its expected code on paper first.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
 <summary>Hint 1</summary>
 
-Classify `X` before the general uppercase-letter rule.
+Match each helper to a pattern: frequency table, running-best selection,
+fixed-size window search, running-total search, and function composition.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-String methods such as `.isalpha()` and `.isupper()` can express the valid-code rule.
+For frequencies, update `frequencies.get(symbol, 0) + 1`. For the anchor, scan
+the original signal and replace only when a symbol's count is strictly greater
+than the current anchor's count. For synchronization, compare
+`len(set(window))` with `width`. For power, add before checking the target.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-The conservation assertion proves every input symbol entered exactly one category.
+Use these incomplete shapes:
+
+```python
+for symbol in signal:
+    frequencies[symbol] = ...
+
+for end in range(width, len(signal) + 1):
+    window = signal[end - width : end]
+    if ...:
+        return end
+
+for step, reading in enumerate(readings, start=1):
+    total += reading
+    if ...:
+        return step
+```
+
+Every search also needs a return after the loop for the no-result path.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Keep one failure that helped you understand the program. Record the actual
-value or message, your single-cause hypothesis, the controlled change, and the
-clean rerun that confirmed or rejected it.
+Keep one failure that helped you understand the puzzle. Record facts before
+changing code.
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+| Failure | Actual evidence | Single-cause hypothesis | Controlled change | Verified rerun |
 |---|---|---|---|---|
-| What did not work? | What did you observe? | Which cause fits? | What one thing changed? | Which check now passes? |
+| What failed? | Exact returned value, state, or message | Which one condition/update fits? | What one thing changed? | Which focused and earlier checks pass? |
 
-## 8. Check your understanding
+Useful failures include:
+
+- returning a zero-based start instead of a 1-based end;
+- replacing the anchor on an equal frequency and therefore choosing the last
+  tied symbol;
+- checking power before adding the current reading;
+- returning `None` from inside a loop after the first non-match; or
+- constructing a code containing the text `None` instead of returning `None`.
+
+Restart the notebook or Python process and run every cell from the contract
+through the complete assertions. A result that depends on hidden state is not a
+finished solution.
+
+## 8. Compare with a complete solution
+
+<details class="solution">
+<summary>Show the complete implementation after attempting every stage</summary>
+
+```python
+def symbol_frequencies(signal):
+    """Return a dictionary that counts every symbol in signal."""
+    frequencies = {}
+    for symbol in signal:
+        frequencies[symbol] = frequencies.get(symbol, 0) + 1
+    return frequencies
+
+
+def choose_anchor(signal, frequencies):
+    """Return the most frequent symbol; the first appearance wins a tie."""
+    anchor = None
+    for symbol in signal:
+        if anchor is None or frequencies[symbol] > frequencies[anchor]:
+            anchor = symbol
+    return anchor
+
+
+def first_sync_end(signal, width):
+    """Return the 1-based end of the first all-distinct window, or None."""
+    for end in range(width, len(signal) + 1):
+        window = signal[end - width : end]
+        if len(set(window)) == width:
+            return end
+    return None
+
+
+def first_power_step(readings, target):
+    """Return the 1-based step where the running total reaches target, or None."""
+    total = 0
+    for step, reading in enumerate(readings, start=1):
+        total += reading
+        if total >= target:
+            return step
+    return None
+
+
+def build_wakeup_code(signal, readings, width, target):
+    """Return '<sync>-<power>-<anchor>', or None if calibration cannot finish."""
+    frequencies = symbol_frequencies(signal)
+    anchor = choose_anchor(signal, frequencies)
+    sync_end = first_sync_end(signal, width)
+    power_step = first_power_step(readings, target)
+
+    if anchor is None or sync_end is None or power_step is None:
+        return None
+    return f"{sync_end}-{power_step}-{anchor}"
+```
+
+Why the main decisions work:
+
+- `choose_anchor` scans in encounter order and replaces only for a strictly
+  larger count, so an equal count keeps the earlier symbol.
+- `end` begins at `width`; `signal[end - width:end]` has the requested width, and
+  `end` is already the 1-based number of processed symbols.
+- `first_power_step` adds the current reading before comparing with the target,
+  so the returned step includes the reading that reaches it.
+- The composition function returns `None` rather than formatting an incomplete
+  code.
+
+For a signal of length `n`, frequency counting and anchor selection each grow
+linearly. With fixed window width `w`, the window search checks up to about `n`
+windows and builds a set of up to `w` symbols for each, so its time is
+`O(n × w)` and its temporary window space is `O(w)`. Power search is linear in
+its number of readings in the worst case. The frequency dictionary uses space
+proportional to the number of distinct symbols.
+
+</details>
+
+## 9. Predict a changed calibration rule
+
+The observatory engineer proposes two changes:
+
+1. on an anchor-frequency tie, choose the **later** symbol; and
+2. return the **zero-based window start** instead of the 1-based end.
+
+Before editing code, answer:
+
+- Which acceptance examples change?
+- Which comparison changes from strict to inclusive, and why can repeated visits
+  complicate that shortcut?
+- How is a start index calculated from the current `end` and `width`?
+- Does the wake-up code for the original input change?
+- Which docstrings and cost statements remain valid?
+
+A robust later-wins anchor strategy should compare distinct candidates or track
+the last position deliberately; blindly replacing on every equal count also
+replaces an anchor when the loop sees the **same** symbol again. Write a small
+tie trace before implementing the changed rule.
+
+## 10. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-problem-solving-algorithms-challenge",
-  "title": "Analyze a Delivery Code Stream readiness check",
-  "instructions": "Trace the situation before choosing an answer.",
+  "title": "Clockwork observatory calibration check",
+  "instructions": "Trace the supplied contract before choosing an answer.",
   "questions": [
     {
-      "id": "one-pass",
-      "prompt": "What makes this a one-pass algorithm?",
+      "id": "anchor-first-tie",
+      "prompt": "Why does choose_anchor replace only when a symbol's count is strictly greater?",
       "options": [
-        "Each input symbol is examined once.",
-        "It has only one variable.",
-        "It contains no decisions.",
-        "It always returns one."
+        "Strict comparison alphabetizes the signal.",
+        "Equal counts make every symbol invalid.",
+        "An equal count must keep the earlier selected symbol.",
+        "A dictionary cannot contain equal values."
       ],
-      "answer_index": 0,
-      "explanation": "One pass means work advances through the input once."
+      "answer_index": 2,
+      "explanation": "Not replacing on equality implements the first-appearance tie rule."
     },
     {
-      "id": "example-purpose",
-      "prompt": "Which example best exposes category overlap?",
+      "id": "window-end-position",
+      "prompt": "For signal 'AABCDEF' and width 4, window 'ABCD' uses slice 1:5. What does first_sync_end return?",
       "options": [
-        "An empty comment.",
-        "A stream containing `X` and another uppercase letter.",
-        "A variable rename.",
-        "A repeated print call."
+        "5",
+        "1",
+        "4",
+        "6"
+      ],
+      "answer_index": 0,
+      "explanation": "The contract returns the 1-based end, equal to the exclusive slice end and processed-symbol count."
+    },
+    {
+      "id": "no-sync-code",
+      "prompt": "What should build_wakeup_code return when no distinct window exists?",
+      "options": [
+        "A code containing the word missing",
+        "An empty dictionary",
+        "The last window",
+        "None"
+      ],
+      "answer_index": 3,
+      "explanation": "The complete calibration cannot finish, so the contract returns None."
+    },
+    {
+      "id": "power-check-order",
+      "prompt": "When should first_power_step compare the running total with the target?",
+      "options": [
+        "Before reading any values and never again",
+        "After adding the current reading",
+        "Only after all readings are consumed",
+        "Before adding the current reading"
       ],
       "answer_index": 1,
-      "explanation": "`X` is uppercase but has a more specific meaning, so it tests rule order."
+      "explanation": "The returned step must include the reading that first reaches the target."
+    },
+    {
+      "id": "window-cost",
+      "prompt": "Why can the straightforward window scan take work proportional to n times width?",
+      "options": [
+        "It sorts the entire signal for every symbol.",
+        "It recursively calls every helper.",
+        "It may build and inspect a width-sized set for many candidate windows.",
+        "Every string operation is quadratic."
+      ],
+      "answer_index": 2,
+      "explanation": "Up to about n candidates each require work tied to the window width."
     }
   ]
 }
@@ -155,25 +544,26 @@ clean rerun that confirmed or rejected it.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+| Behavior | All supplied assertions and one learner-created case pass unchanged. |
+| Decomposition | Each public function has one named responsibility and returned shape. |
+| Reasoning | Tie, index, stopping, no-result, time, and extra-space decisions can be explained. |
+| Debugging | One failure record connects exact evidence to one change and verified reruns. |
+| Reproducibility | The complete observatory program works from a clean notebook state. |
 
-- [ ] The acceptance examples and supplied checks pass.
-- [ ] The work runs from a clean state.
-- [ ] I can explain the important state changes and boundaries.
-- [ ] I kept one debugging record and verified a controlled modification.
+- [ ] Every supplied assertion passes without edited expected values.
+- [ ] I added and hand-calculated one complete changed-input case.
+- [ ] The inputs remain unchanged.
+- [ ] I can explain the anchor tie, sync indexes, power stopping, and costs.
+- [ ] I kept one debugging record and reran everything from a clean state.
 
 This button stores a self-reported marker only in this browser. It does not
-submit or grade the artifact.
+submit or grade the program.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -187,6 +577,11 @@ submit or grade the artifact.
 
 ## Key points
 
-- The contract narrows the design without supplying the implementation.
-- Progressive checks turn the task into observable behavior.
-- A clean rerun and explanation are part of the evidence.
+- The observatory puzzle becomes manageable when counting, selection, window
+  search, accumulation, and composition have separate contracts.
+- Progressive assertions reveal which responsibility is wrong without revealing
+  the implementation.
+- Tie rules, index meanings, stopping behavior, and no-result values belong in
+  examples before they become conditions.
+- Correct behavior, a clean rerun, and a plain-language cost explanation are all
+  part of the finished solution.

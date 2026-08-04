@@ -1,8 +1,8 @@
 ---
-title: Correctness, Boundaries, and Practical Efficiency
+title: Know It Works and Understand the Cost
 lesson_id: problem-solving-algorithms.correctness-boundaries-efficiency
 lesson_order: 40
-description: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+description: Explain why a small algorithm is correct, show that it terminates, and compare alternatives through input size, operation growth, and extra-space trade-offs.
 course_id: python-foundations
 unit_id: problem-solving-algorithms
 unit_number: 7
@@ -11,127 +11,250 @@ execute:
 categories:
 - python-foundations
 - problem-solving-algorithms
+- correctness
+- complexity
 order: 40
 colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algorithms/correctness-boundaries-efficiency.ipynb
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Use cases, counterexamples, invariants, termination, operation counts, and time/space growth to defend an algorithm choice.
 - **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+This lesson studies a trail-marker cleanup tool. Hikers record marker codes in
+encounter order, but some markers are repeated. The program must keep the first
+occurrence of each code and preserve order.
 
-A program can pass one example and still be wrong, or produce the right result with avoidable repeated work. Correctness comes from contracts and counterexamples before optimization.
+```python
+markers = ["oak", "river", "oak", "ridge", "river"]
+expected = ["oak", "river", "ridge"]
+```
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+Keep these questions beside the notebook:
 
-## 1. Read and predict a complete case
+1. Which cases could disprove a confident claim that the algorithm works?
+2. What remains true after each processed marker?
+3. Which changing value guarantees that the loop eventually stops?
+4. What does input size `n` count for this problem?
+5. How does work change when `n` doubles?
+6. What time, memory, order, and input-type promises differ among alternatives?
+
+## 1. One passing trail does not cover every route
+
+This implementation passes the opening sample:
+
+```python
+def remove_adjacent_repeats(values):
+    """Return values that differ from the immediately previous value."""
+    result = []
+
+    for value in values:
+        if not result or value != result[-1]:
+            result.append(value)
+
+    return result
+```
+
+Run it on adjacent duplicates:
+
+```python
+assert remove_adjacent_repeats(["oak", "oak", "river"]) == ["oak", "river"]
+```
+
+But the actual contract says remove **every later repeat**, not only adjacent
+repeats:
+
+```python
+actual = remove_adjacent_repeats(["oak", "river", "oak"])
+assert actual == ["oak", "river", "oak"]
+```
+
+The code does what its docstring says. It does not meet the trail cleanup
+contract. A program can be internally consistent and still solve the wrong
+problem.
+
+The small input `['oak', 'river', 'oak']` is a counterexample to the claim that
+neighbor comparison is sufficient.
+
+## 2. Give every case a reason to exist
+
+Build a behavior table before repairing the code:
+
+| Case | Input | Expected | Rule exposed |
+|---|---|---|---|
+| empty | `[]` | `[]` | output shape for no values |
+| one marker | `['oak']` | `['oak']` | smallest successful input |
+| all repeated | `['oak', 'oak', 'oak']` | `['oak']` | repeated-value removal |
+| all distinct | `['oak', 'river']` | `['oak', 'river']` | preserve every new value |
+| separated repeat | `['oak', 'river', 'oak']` | `['oak', 'river']` | duplicates need not be adjacent |
+| alternating | `['oak', 'river', 'oak', 'river']` | `['oak', 'river']` | repeated lookup over time |
+| order-sensitive | `['ridge', 'oak', 'ridge']` | `['ridge', 'oak']` | preserve first-seen order |
+
+Represent these cases with plain data and assertions:
+
+```python
+cleanup_cases = [
+    ([], []),
+    (["oak"], ["oak"]),
+    (["oak", "oak", "oak"], ["oak"]),
+    (["oak", "river"], ["oak", "river"]),
+    (["oak", "river", "oak"], ["oak", "river"]),
+    (["oak", "river", "oak", "river"], ["oak", "river"]),
+    (["ridge", "oak", "ridge"], ["ridge", "oak"]),
+]
+```
+
+Unit 13 will organize cases with pytest and parametrization. Here, the important
+skill is selecting cases that challenge distinct rules.
+
+## 3. Frame the claim with preconditions and postconditions
+
+A **precondition** describes supported input before the algorithm begins. A
+**postcondition** describes what must be true when it finishes.
+
+For a set-assisted cleanup algorithm:
+
+- **Precondition:** `values` is a finite iterable of hashable values.
+- **Postcondition 1:** the result contains each distinct input value once.
+- **Postcondition 2:** result order follows each value's first input occurrence.
+- **Postcondition 3:** the input is unchanged.
+
+Hashability is part of the precondition because a set needs hashable elements.
+The function does not need to catch or recover from unsupported values in this
+unit; Unit 8 teaches exception boundaries.
+
+A separate algorithm could support unhashable values such as lists by using list
+membership. The algorithms therefore do not have identical input contracts.
+That difference belongs in any comparison.
+
+## 4. Shrink a failure until one rule is visible
+
+Suppose a long trail fails:
+
+```python
+long_failure = [
+    "oak",
+    "river",
+    "ridge",
+    "field",
+    "oak",
+    "bridge",
+    "river",
+]
+```
+
+Remove irrelevant values while keeping the failure. If the adjacent-only
+algorithm still fails on this input, shrink again:
+
+```python
+smaller_failure = ["oak", "river", "oak"]
+```
+
+Now one relationship is visible: the repeated `oak` is separated from its first
+occurrence. This minimal counterexample suggests that the algorithm must remember
+more than the immediately previous value.
+
+::: {.callout-tip title="A counterexample is a design instrument"}
+Do not collect a large failing input only as proof that something went wrong.
+Reduce it until the missing state or rule becomes obvious enough to guide the
+next algorithm.
+:::
+
+## 5. State what is true for the processed prefix
+
+Use the stable-order implementation from Lesson 3:
 
 ```python
 def unique_in_order(values):
-    """Return first occurrences while preserving input order."""
+    """Return first occurrences in encounter order."""
     seen = set()
     result = []
+
     for value in values:
         if value not in seen:
             seen.add(value)
             result.append(value)
+
     return result
-
-
-print(unique_in_order(["a", "b", "a", "c"]))
 ```
 
-### Step-by-step explanation
+An **invariant** is a statement that remains true at a chosen point during the
+loop. Immediately after each iteration:
 
-1. `seen` supports membership lookup; `result` preserves encounter order.
-2. Before each iteration, `result` contains the first occurrence of every value already processed.
-3. A repeated `a` fails the membership guard and is not appended.
-4. The function returns `['a', 'b', 'c']` without changing the input.
+> `result` contains the first occurrence of every distinct value in the
+> processed prefix, in encounter order, and `seen` contains exactly the same
+> values.
 
-::: {.callout-note title="Make one controlled change"}
-Test empty input, one value, all duplicates, and already unique input. Write the invariant that remains true after each case.
-:::
+Trace the opening input:
 
-## 2. Investigate the important boundary
+| Processed prefix | `seen` | `result` | Invariant true? |
+|---|---|---|---:|
+| `[]` | `set()` | `[]` | yes |
+| `['oak']` | `{'oak'}` | `['oak']` | yes |
+| `['oak', 'river']` | `{'oak', 'river'}` | `['oak', 'river']` | yes |
+| `['oak', 'river', 'oak']` | unchanged | unchanged | yes |
+| `['oak', 'river', 'oak', 'ridge']` | adds `ridge` | appends `ridge` | yes |
 
-Do not replace a clear algorithm because a microbenchmark on tiny input differs by noise. First prove behavior, identify the repeated operation, and measure representative data when performance matters.
+Why this statement supports correctness:
 
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
+1. **Before the loop**, no values are processed; both structures are empty, so
+   the statement is true.
+2. **For a new value**, adding it to both structures preserves membership and
+   order.
+3. **For a repeated value**, changing neither structure preserves the first
+   occurrence only.
+4. **After the loop**, the processed prefix is the entire input, so the
+   invariant becomes the promised result.
 
-## 3. Practice from prediction to explanation
+This is a correctness argument in ordinary language, not formal proof notation.
 
-Run this smaller case from a clean state:
-
-```python
-cases = [
-    ([], []),
-    ([1], [1]),
-    ([1, 1, 1], [1]),
-    ([2, 1, 2], [2, 1]),
-]
-
-for values, expected in cases:
-    assert unique_in_order(values) == expected
-```
-
-Then complete the learning loop:
-
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
-
-<details>
-<summary>Check your practice process</summary>
-
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
-
-</details>
-
-## 4. Check your understanding
+### Checkpoint: cases, contracts, and invariants
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "problem-solving-algorithms-correctness-boundaries-efficiency",
-  "title": "Correctness, Boundaries, and Practical Efficiency checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "problem-solving-correctness-claims",
+  "title": "Build a correctness claim",
+  "instructions": "Choose the evidence that directly supports the cleanup contract.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "What is the loop invariant in `unique_in_order`?",
+      "id": "separated-counterexample",
+      "prompt": "Which smallest input disproves an algorithm that removes only adjacent duplicates?",
       "options": [
-        "The input list becomes sorted after every iteration.",
-        "Every value is appended exactly twice.",
-        "The set and list always have different values.",
-        "After each iteration, `result` contains first occurrences from the processed prefix in order."
-      ],
-      "answer_index": 3,
-      "explanation": "The invariant describes the partial result that remains true as the processed prefix grows."
-    },
-    {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun."
+        "['oak']",
+        "['oak', 'river', 'oak']",
+        "[]",
+        "['oak', 'oak']"
       ],
       "answer_index": 1,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "The repeated oak is not adjacent to its first occurrence, so neighbor comparison misses it."
+    },
+    {
+      "id": "hashable-precondition",
+      "prompt": "Why does the set-assisted version state that values must be hashable?",
+      "options": [
+        "Hashing automatically sorts the result.",
+        "Hashable values are always strings.",
+        "The result list cannot hold integers.",
+        "Set membership requires hashable elements."
+      ],
+      "answer_index": 3,
+      "explanation": "The algorithm's seen set can store only hashable values."
+    },
+    {
+      "id": "invariant-completion",
+      "prompt": "Why does the processed-prefix invariant describe the final result after the loop?",
+      "options": [
+        "The processed prefix has become the entire finite input.",
+        "Every invariant sorts its input.",
+        "The set is converted into a traceback.",
+        "The loop stops before reading any value."
+      ],
+      "answer_index": 0,
+      "explanation": "At completion, the statement about all processed values applies to every input value."
     }
   ]
 }
@@ -139,14 +262,587 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 6. Explain why the loop eventually stops
+
+Correct partial results are not enough if the algorithm can run forever.
+`unique_in_order` uses a `for` loop over a finite input. Each iteration consumes
+one next value, so the number of unprocessed values decreases by one. Eventually
+none remain.
+
+A `while` version makes the progress variable visible:
+
+```python
+def unique_in_order_by_index(values):
+    """Return first occurrences in encounter order."""
+    seen = set()
+    result = []
+    index = 0
+
+    while index < len(values):
+        value = values[index]
+        if value not in seen:
+            seen.add(value)
+            result.append(value)
+        index += 1
+
+    return result
+```
+
+`index += 1` is essential. Without it, the condition remains true for any
+non-empty input and the same value is processed repeatedly.
+
+For this loop, a **progress measure** is `len(values) - index`. It begins as a
+non-negative integer, decreases by one, and cannot decrease forever without
+reaching zero.
+
+You do not need that expression for every ordinary `for` loop. Use it when the
+stopping argument is unclear, especially for `while`, nested state, or a
+manually updated position.
+
+## 7. Preserve behavior while changing an implementation
+
+Complete the set-assisted function, then run every case:
+
+```python
+for values, expected in cleanup_cases:
+    assert unique_in_order(values) == expected
+```
+
+Check the ownership promise separately:
+
+```python
+source = ["oak", "river", "oak"]
+before = source.copy()
+result = unique_in_order(source)
+
+assert result == ["oak", "river"]
+assert source == before
+assert result is not source
+```
+
+Value equality checks behavior; identity checks that the function returned a
+separate list. Neither check replaces the other.
+
+If you later change the algorithm, keep these checks unchanged. A faster result
+that reorders markers or mutates the input does not preserve the same contract.
+
+## 8. Define the input size before discussing speed
+
+Use `n` for the number of input markers:
+
+```python
+values = ["oak", "river", "oak", "ridge"]
+n = len(values)
+assert n == 4
+```
+
+For other problems, `n` could mean characters, records, rows, or vertices. State
+it. A grid may need two sizes—rows `r` and columns `c`—rather than hiding both
+inside `n`.
+
+Wall-clock measurements of tiny inputs vary with the computer and background
+work. Begin by counting an operation whose repetition explains the algorithm.
+For cleanup, membership checks are important.
+
+```python
+def unique_with_membership_count(values):
+    seen = set()
+    result = []
+    membership_checks = 0
+
+    for value in values:
+        membership_checks += 1
+        if value not in seen:
+            seen.add(value)
+            result.append(value)
+
+    return result, membership_checks
+```
+
+Each input value causes one set-membership check:
+
+```python
+assert unique_with_membership_count([])[1] == 0
+assert unique_with_membership_count(["a"])[1] == 1
+assert unique_with_membership_count(["a", "b"])[1] == 2
+assert unique_with_membership_count(["a", "b", "c", "d"])[1] == 4
+```
+
+Doubling `n` doubles the number of membership checks in this loop.
+
+## 9. Describe growth before naming its category
+
+Consider four common shapes:
+
+### One lookup independent of collection traversal
+
+```python
+first = values[0]
+```
+
+For a non-empty list, retrieving index `0` does not scan all values. We call
+this **constant growth**, written `O(1)`.
+
+### Repeatedly halve the remaining search range
+
+If a sorted search space is cut roughly in half at each step, doubling its size
+adds about one additional step. This is **logarithmic growth**, written
+`O(log n)`. Binary search is a familiar example; its full implementation is not
+required in this unit.
+
+### Inspect every value once
+
+```python
+for value in values:
+    print(value)
+```
+
+The number of iterations grows with `n`. This is **linear growth**, `O(n)`.
+
+### Compare many pairs
+
+```python
+for left_index in range(len(values)):
+    for right_index in range(left_index + 1, len(values)):
+        print(values[left_index], values[right_index])
+```
+
+For an all-pairs comparison, doubled input approaches four times as many pairs.
+This is **quadratic growth**, `O(n²)`.
+
+Sorting comparison-based data belongs to another important category,
+`O(n log n)`. You already use `sorted`; implementing sorting algorithms is
+outside this Foundations unit.
+
+Big-O notation describes how growth behaves as input becomes large. It does not
+state exact seconds, and it intentionally ignores fixed multipliers and
+lower-order terms.
+
+## 10. Best and worst cases can differ
+
+A first-match search may stop immediately or inspect the whole input:
+
+```python
+def index_of(values, target):
+    """Return the first target index, or None."""
+    for index, value in enumerate(values):
+        if value == target:
+            return index
+    return None
+```
+
+Compare positions:
+
+```python
+values = ["a", "b", "c", "d"]
+
+assert index_of(values, "a") == 0
+assert index_of(values, "d") == 3
+assert index_of(values, "z") is None
+```
+
+- **Best case:** the target is first; one comparison.
+- **Worst case:** the target is last or absent; `n` comparisons.
+- **Ordinary observed case:** depends on real input distribution.
+
+When the function must support any listed input, worst-case growth is a useful
+shared comparison. It does not predict how often each case occurs in a specific
+product.
+
+### Checkpoint: input size and growth
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-efficiency-growth",
+  "title": "Reason about growing inputs",
+  "instructions": "Identify what grows and why before choosing a complexity label.",
+  "questions": [
+    {
+      "id": "one-pass-growth",
+      "prompt": "A loop performs one membership check per input marker. What happens to that count when n doubles?",
+      "options": [
+        "It stays exactly one.",
+        "It becomes half as large.",
+        "It roughly doubles.",
+        "It automatically becomes quadratic."
+      ],
+      "answer_index": 2,
+      "explanation": "One check per item gives a count proportional to n."
+    },
+    {
+      "id": "first-search-worst",
+      "prompt": "What is a worst case for first-match search?",
+      "options": [
+        "The target is last or absent.",
+        "The target is first.",
+        "The input contains one item that matches.",
+        "The function name is short."
+      ],
+      "answer_index": 0,
+      "explanation": "The algorithm must inspect every item when no earlier match ends the search."
+    },
+    {
+      "id": "big-o-meaning",
+      "prompt": "What does O(n²) communicate?",
+      "options": [
+        "The program always takes exactly n² seconds.",
+        "The algorithm cannot be correct.",
+        "The input must contain square numbers.",
+        "The important operation can grow proportionally to the square of input size."
+      ],
+      "answer_index": 3,
+      "explanation": "Big-O describes growth, not an exact wall-clock duration."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. A nested duplicate scan repeats earlier work
+
+A baseline algorithm can support equality-comparable values even when they are
+unhashable:
+
+```python
+def unique_with_list_membership(values):
+    """Return first occurrences using result-list membership."""
+    result = []
+
+    for value in values:
+        if value not in result:
+            result.append(value)
+
+    return result
+```
+
+It is correct for the stated order contract:
+
+```python
+assert unique_with_list_membership(["a", "b", "a"]) == ["a", "b"]
+assert unique_with_list_membership([[1], [2], [1]]) == [[1], [2]]
+```
+
+But `value not in result` can scan the growing result list. On all-distinct
+input, approximate equality comparisons grow like this:
+
+| `n` | Earlier result items inspected across iterations |
+|---:|---:|
+| 1 | 0 |
+| 2 | 1 |
+| 4 | 6 |
+| 8 | 28 |
+| 16 | 120 |
+
+The sum is `0 + 1 + 2 + ... + (n - 1)`. Doubling `n` makes the count approach
+four times as large. This worst case is `O(n²)`.
+
+“Only one visible `for` loop” does not imply linear time. The membership
+operation inside it performs its own work.
+
+## 12. A set trades extra memory for faster ordinary membership
+
+The set-assisted version performs one ordinary set lookup per item:
+
+```python
+def unique_with_set(values):
+    """Return first occurrences of hashable values in encounter order."""
+    seen = set()
+    result = []
+
+    for value in values:
+        if value not in seen:
+            seen.add(value)
+            result.append(value)
+
+    return result
+```
+
+For ordinary set behavior, lookup and insertion are treated as average `O(1)`,
+so the whole traversal has average `O(n)` time. The function also stores up to
+`n` values in `seen` in addition to the result, so its extra working space is
+`O(n)`.
+
+Be precise about the claim:
+
+- it is an ordinary/average hash-table cost, not a promise that every conceivable
+  lookup under every collision pattern takes identical time;
+- it requires hashable values;
+- it preserves order because `result`, not the set, is returned;
+- it does not mutate the input.
+
+The list-membership version supports a wider class of equality-comparable
+values and uses no separate membership collection, but its worst-case time grows
+quadratically. The “better” choice depends on the input contract and scale.
+
+## 13. Sorting, scanning, and hashing preserve different promises
+
+A sorted-copy strategy can group equal values together:
+
+```python
+def unique_sorted(values):
+    """Return distinct values in sorted order."""
+    ordered = sorted(values)
+    result = []
+
+    for value in ordered:
+        if not result or value != result[-1]:
+            result.append(value)
+
+    return result
+```
+
+It returns a different order:
+
+```python
+values = ["ridge", "oak", "ridge", "field"]
+assert unique_sorted(values) == ["field", "oak", "ridge"]
+assert unique_with_set(values) == ["ridge", "oak", "field"]
+```
+
+Compare the contracts before comparing speed:
+
+| Strategy | Order returned | Supported values | Typical/worst growth discussed here | Extra working space |
+|---|---|---|---|---|
+| result-list membership | first-seen | equality-comparable | worst `O(n²)` | result only |
+| set-assisted | first-seen | hashable | average `O(n)` | set plus result |
+| sorted copy + adjacent scan | sorted | mutually orderable | `O(n log n)` for sort plus scan | sorted copy plus result |
+
+The sorted version is not a faster replacement for a first-seen-order contract.
+It solves a different output-order problem.
+
+## 14. Big-O does not choose the program for you
+
+Suppose a configuration contains at most six marker codes and accepts small
+nested lists. The result-list version may be the clearest supported solution.
+Its theoretical quadratic worst case is unlikely to matter at that scale.
+
+Suppose a stream contains millions of hashable identifiers and order must be
+preserved. The set-assisted version avoids repeated scans and has a compelling
+trade-off.
+
+Ask:
+
+- What scale is actually supported?
+- Is the code on a frequent path?
+- Which input types must work?
+- Is first-seen order required?
+- May the program use additional memory?
+- Is the simpler alternative already comfortably within the constraint?
+
+Measured performance is useful after these questions. The standard-library
+`timeit` module and profiling tools appear naturally in later project/tooling
+work. A tiny timing run should not replace a correctness suite or a growth
+explanation.
+
+## 15. Improve only after behavior is protected
+
+Use this sequence:
+
+::: {.concept-diagram}
+The improvement cycle preserves the same contract while replacing one source
+of repeated work.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[State the contract] --> B[Run behavior cases]
+  B --> C[Count repeated work]
+  C --> D[Change one strategy]
+  D --> E[Rerun every case]
+  E --> F[Explain the tradeoff]
+  E -->|Behavior changed| A
+```
+
+:::
+
+For trail cleanup:
+
+1. freeze the first-seen-order, non-mutation contract;
+2. keep all acceptance cases unchanged;
+3. identify repeated result-list membership scanning;
+4. add a `seen` set for hashable inputs;
+5. rerun value, order, empty, repeat, and ownership checks;
+6. document average linear time and linear extra working space; and
+7. retain the baseline if unhashable values remain a supported requirement.
+
+An optimization is complete only when both behavior and trade-offs are explicit.
+
+### Checkpoint: compare complete contracts
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-efficiency-tradeoffs",
+  "title": "Choose a defensible trade-off",
+  "instructions": "Compare behavior, supported input, time growth, and extra space together.",
+  "questions": [
+    {
+      "id": "hidden-membership-work",
+      "prompt": "Why can one visible loop with 'value not in result' take quadratic time on all-distinct input?",
+      "options": [
+        "append sorts the input every time.",
+        "Python runs every loop twice.",
+        "The result list becomes immutable.",
+        "Each list-membership check may scan a growing result."
+      ],
+      "answer_index": 3,
+      "explanation": "The operation inside the loop repeats comparisons against more earlier values."
+    },
+    {
+      "id": "set-tradeoff",
+      "prompt": "What does the seen set add to the stable cleanup algorithm?",
+      "options": [
+        "Average fast membership at the cost of extra space and a hashable-value precondition",
+        "Automatic alphabetical result order with no memory",
+        "Support for every unhashable value",
+        "A guarantee that no equality checks occur"
+      ],
+      "answer_index": 0,
+      "explanation": "Hash-table membership improves ordinary lookup growth while requiring stored hashable keys."
+    },
+    {
+      "id": "sorted-contract",
+      "prompt": "Why is unique_sorted not a drop-in replacement for first-seen stable cleanup?",
+      "options": [
+        "sorted cannot process strings.",
+        "A for loop cannot follow sorted.",
+        "It changes the promised result order.",
+        "It always mutates the caller's list."
+      ],
+      "answer_index": 2,
+      "explanation": "Returning sorted distinct values violates a contract that preserves encounter order."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 16. Lab: compare campsite-conflict detectors
+
+A campsite request contains site IDs. A conflict exists when an ID appears more
+than once.
+
+```python
+requests = ["C12", "A03", "C12", "B07"]
+```
+
+Implement and compare three functions:
+
+```python
+def has_conflict_nested(site_ids):
+    """Return True when any two positions contain the same ID."""
+    pass
+
+
+def has_conflict_seen(site_ids):
+    """Return True when a hashable ID has appeared before."""
+    pass
+
+
+def has_conflict_sorted(site_ids):
+    """Return True when adjacent values in a sorted copy are equal."""
+    pass
+```
+
+### Behavior checks
+
+```python
+conflict_cases = [
+    ([], False),
+    (["A03"], False),
+    (["A03", "A03"], True),
+    (["A03", "B07", "A03"], True),
+    (["A03", "B07", "C12"], False),
+]
+
+for site_ids, expected in conflict_cases:
+    assert has_conflict_nested(site_ids) is expected
+    assert has_conflict_seen(site_ids) is expected
+    assert has_conflict_sorted(site_ids) is expected
+```
+
+### Ownership checks
+
+```python
+source = ["C12", "A03", "B07"]
+before = source.copy()
+
+has_conflict_nested(source)
+has_conflict_seen(source)
+has_conflict_sorted(source)
+
+assert source == before
+```
+
+### Reasoning tasks
+
+1. State the precondition for each function.
+2. Write an invariant for the `seen` version.
+3. Explain why each loop terminates.
+4. Add counters for equality or membership checks on all-distinct inputs of
+   length 4, 8, and 16.
+5. Classify worst-case time growth and extra working space.
+6. Recommend a version for at most six possibly unhashable IDs.
+7. Recommend a version for one million hashable string IDs where order is not
+   part of the Boolean result.
+
+<details>
+<summary>Hint: nested pairs need two indexes</summary>
+
+For each left index, compare only positions to its right. Return `True` on the
+first equal pair and `False` after every pair has been considered.
+
+</details>
+
+<details class="solution">
+<summary>Show a comparison strategy after attempting the lab</summary>
+
+The nested version uses two index ranges and no extra membership structure; it
+supports equality-comparable values but has quadratic worst-case comparisons.
+The seen version returns on the first repeated ID and has average linear time
+with linear extra set space for hashable IDs. The sorted-copy version sorts
+without mutating the input, then checks adjacent pairs; it needs mutually
+orderable values and `O(n log n)` sorting time. For six unhashable values, the
+nested version may be simplest. For one million hashable strings, the seen
+version is usually the strongest starting choice.
+
+</details>
+
+## 17. Defend the choice in plain language
+
+Finish the lab with six sentences:
+
+1. **Contract:** what behavior and input types the chosen function supports.
+2. **Cases:** which input most strongly challenges the implementation.
+3. **Invariant:** what remains true after each completed iteration.
+4. **Termination:** what progresses toward the stopping condition.
+5. **Cost:** how time and extra working space grow with `n`.
+6. **Trade-off:** why one rejected alternative is less suitable for this
+   contract and scale.
+
+This explanation is part of the result. It allows a future maintainer to decide
+whether a changed requirement invalidates the choice.
+
 ## Key points
 
-::: {.callout-tip title="Key points"}
-- Use normal, boundary, invalid, and counterexample cases.
-- State an invariant that connects each step to the promised result.
-- Improve efficiency only after locating repeated work and preserving behavior.
-:::
+- Passing one familiar example does not establish correctness; purposeful
+  boundaries and counterexamples challenge distinct rules.
+- Preconditions frame supported input, postconditions frame the result, and a
+  loop invariant connects partial work to the finished promise.
+- A termination argument identifies progress through a finite problem.
+- Define input size and count important repeated operations before naming a
+  growth category.
+- Compare time, extra space, supported values, ordering, and mutation behavior
+  together.
+- Improve an algorithm only while preserving the same behavior suite—or state
+  clearly that the contract changed.
 
 ## References
 
-- https://docs.python.org/3/tutorial/datastructures.html#sets
+- [Python reference: the `assert` statement](https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement)
+- [Python documentation: set and frozenset operations](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset)
+- [Python documentation: sequence membership operations](https://docs.python.org/3/library/stdtypes.html#common-sequence-operations)
+- [Python documentation: `sorted` and its returned list](https://docs.python.org/3/library/functions.html#sorted)
+- [Python sorting guide: keys and sort stability](https://docs.python.org/3/howto/sorting.html)

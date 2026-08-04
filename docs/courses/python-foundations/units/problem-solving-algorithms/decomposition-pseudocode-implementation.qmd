@@ -1,13 +1,15 @@
 ---
-title: Decomposition, Pseudocode, and Incremental Implementation
+title: Turn a Plan into Working Python
 lesson_id: problem-solving-algorithms.decomposition-pseudocode-implementation
 lesson_order: 20
-description: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+description: Move from a hand-solved case to traceable pseudocode, cohesive function contracts, and an incremental Python implementation with checks at every stage.
 execute:
   echo: true
 categories:
 - python-foundations
 - problem-solving-algorithms
+- decomposition
+- pseudocode
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algorithms/decomposition-pseudocode-implementation.ipynb
 course_id: python-foundations
@@ -16,115 +18,292 @@ unit_number: 7
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Split a task into named, checkable responsibilities before choosing syntax.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 3–4 hours
+- **You will learn:** Turn a manually solved case into pseudocode, cohesive functions, and a working program built one checkable behavior at a time.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+Lesson 1 ended with a contract for choosing a moon-base supply pod. A contract
+says what must be observable; it does not yet say how the program will reach the
+result. This lesson supplies that bridge.
 
-Parsing, validation, calculation, and presentation fail for different reasons. Decomposition gives each boundary a name and lets you test one stage before the whole application exists.
+Keep these questions near your code:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
-:::
+1. What did you do by hand to solve one small case?
+2. Which value must survive while you inspect later records?
+3. Where can the work be split into independently checkable responsibilities?
+4. Does the pseudocode show every decision, update, and stopping point?
+5. What is the smallest end-to-end behavior you can make pass now?
 
-## 2. Read and trace a complete case
+## 1. Solve one supply case without Python
+
+Use the rule set from Lesson 1:
+
+- ignore damaged pods;
+- prefer greater oxygen;
+- on an oxygen tie, prefer lower mass;
+- on an exact tie, keep the earlier pod;
+- return its ID, or `None` when no pod is usable;
+- do not modify the input.
+
+Start with three records:
 
 ```python
-def build_report(lines):
-    records = parse_lines(lines)
-    valid = validate_records(records)
-    totals = total_by_category(valid)
-    return format_report(totals)
+pods = [
+    {"id": "LUNA-4", "oxygen": 8, "mass": 6, "damaged": False},
+    {"id": "NOVA-2", "oxygen": 8, "mass": 4, "damaged": False},
+    {"id": "DUST-9", "oxygen": 10, "mass": 3, "damaged": True},
+]
 ```
 
-### What Python does
+Solve it on paper:
 
-1. Each function has one responsibility.
-2. Data changes shape at explicit boundaries.
-3. The earliest wrong boundary narrows debugging.
+1. `LUNA-4` is usable, so it becomes the current choice.
+2. `NOVA-2` is usable and ties on oxygen. Its lower mass replaces `LUNA-4`.
+3. `DUST-9` has more oxygen but is damaged, so it cannot replace the choice.
+4. Return `"NOVA-2"`.
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+The manual work reveals two responsibilities—eligibility and comparison—and one
+piece of persistent state: the current best usable pod.
 
-## 3. Debug the boundary
+## 2. Record what changes after every pod
 
-This version is valid Python but does not satisfy the lesson's intended contract:
+A trace table makes the state visible:
+
+| Current pod | Usable? | Best before | Replace? | Best after |
+|---|---:|---|---:|---|
+| `LUNA-4` | yes | `None` | yes | `LUNA-4` |
+| `NOVA-2` | yes | `LUNA-4` | yes: equal oxygen, lower mass | `NOVA-2` |
+| `DUST-9` | no | `NOVA-2` | no | `NOVA-2` |
+
+Notice what the table does **not** require. It does not need a second list of
+usable pods, and it does not need to sort all records. A running choice is enough
+for this contract.
+
+Try the exact-tie rule by changing the second record:
 
 ```python
-def do_everything(path):
-    # read, validate, calculate, print, and catch every error
+exact_tie_pods = [
+    {"id": "LUNA-4", "oxygen": 8, "mass": 6, "damaged": False},
+    {"id": "NOVA-2", "oxygen": 8, "mass": 6, "damaged": False},
+]
+
+exact_tie_expected = "LUNA-4"
+```
+
+The second pod is not better, so the state should remain unchanged. This detail
+will determine whether the comparison uses `<` or `<=` for mass.
+
+## 3. Name the shape after every stage
+
+A pipeline is easier to reason about when each arrow has a known data shape.
+
+::: {.concept-diagram}
+The supply selector reads pod records, makes a choice, and formats a message
+without mixing those responsibilities.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[List of pod records] --> B[Eligibility decisions]
+  B --> C[Selected pod or no result]
+  C --> D[Pod ID or None]
+  D --> E[Display message]
+```
+
+:::
+
+You could build a full list of eligible records, but it is not required to find
+one winner. The conceptual stages still matter even when one loop combines the
+first two:
+
+```text
+records -> eligibility decision -> running best -> returned ID -> message
+```
+
+Data-shape notes catch mismatches early. Returning an entire dictionary when the
+contract promises a string is wrong even if the selected record is correct.
+
+## 4. Write pseudocode around decisions and state
+
+Pseudocode describes the algorithm without demanding exact Python punctuation:
+
+```text
+SET best pod to no result
+FOR EACH pod in the input
+    IF the pod is damaged
+        SKIP it
+    IF there is no best pod yet
+        SET best pod to this pod
+    OTHERWISE IF this pod has more oxygen
+        SET best pod to this pod
+    OTHERWISE IF oxygen ties and this pod has lower mass
+        SET best pod to this pod
+IF there is no best pod
+    RETURN no result
+RETURN the best pod's ID
+```
+
+Useful pseudocode contains:
+
+- the order in which items are visited;
+- every decision that can change behavior;
+- the state that survives between items;
+- the update rule;
+- the no-result behavior; and
+- the returned result.
+
+This pseudocode is incomplete if it says only “find the best pod.” That phrase
+renames the goal without explaining how progress occurs.
+
+### Trace pseudocode before translating it
+
+Use the table from Section 2. At each row, point to the pseudocode condition that
+explains `Best after`. If no condition explains a row, the plan is incomplete.
+
+A damaged opening pod exposes another useful case:
+
+```python
+damaged_first = [
+    {"id": "DUST-9", "oxygen": 10, "mass": 3, "damaged": True},
+    {"id": "NOVA-2", "oxygen": 8, "mass": 4, "damaged": False},
+]
+
+damaged_first_expected = "NOVA-2"
+```
+
+The initial `None` must remain until an eligible record appears.
+
+## 5. Give each responsibility a checkable interface
+
+The pod program needs only a few functions:
+
+```python
+def is_usable(pod):
+    """Return True when pod is not damaged."""
+    return not pod["damaged"]
+
+
+def is_better(candidate, current):
+    """Return True when candidate should replace current."""
+    if candidate["oxygen"] != current["oxygen"]:
+        return candidate["oxygen"] > current["oxygen"]
+    return candidate["mass"] < current["mass"]
+
+
+def choose_pod(pods):
+    """Return the best usable pod ID, or None."""
+    pass
+
+
+def format_choice(pod_id):
+    """Return a message describing the selection result."""
     pass
 ```
 
-A focused repair is:
+Each docstring names observable behavior. `is_better` assumes both records are
+usable because `choose_pod` owns eligibility. An exact tie returns `False`
+because neither comparison uses equality as a reason to replace.
+
+Check the helpers before the whole selector:
 
 ```python
-def summarize(records):
-    valid = validate_records(records)
-    return total_by_category(valid)
+assert is_usable(pods[0]) is True
+assert is_usable(pods[2]) is False
+assert is_better(pods[1], pods[0]) is True
+assert is_better(pods[0], pods[1]) is False
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+A helper is valuable when its name identifies a real decision and its result can
+be checked independently.
 
-## 4. Practice from trace to transfer
+## 6. Avoid a giant function and meaningless fragments
 
-1. Write verb-first pseudocode for finding duplicate names.
-2. Separate input, calculation, and output in a receipt program.
-3. Draw the data shape after each pipeline stage.
+This function mixes selection, formatting, and display:
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+```python
+def announce_pod(pods):
+    best = None
+    for pod in pods:
+        if not pod["damaged"]:
+            if best is None or pod["oxygen"] > best["oxygen"]:
+                best = pod
+    if best is None:
+        print("No pod available")
+    else:
+        print(f"Dispatch {best['id']}")
+```
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+It also forgets the mass tie rule. A learner checking the printed message must
+determine whether the error came from eligibility, comparison, or formatting.
 
-</details>
+The opposite extreme is not better:
 
-## 5. Check your understanding
+```python
+def pod_oxygen(pod):
+    return pod["oxygen"]
+
+
+def greater_than(left, right):
+    return left > right
+
+
+def pod_id(pod):
+    return pod["id"]
+```
+
+These wrappers do not name domain decisions. They force a reader to jump among
+functions without making any responsibility clearer.
+
+A useful split is neither “one function” nor “as many functions as possible.”
+Split where a name expresses a distinct rule, side effect, or data boundary.
+
+### Checkpoint: hand traces and function boundaries
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "problem-solving-algorithms-decomposition-and-pseudocode",
-  "title": "Decomposition and Pseudocode checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "problem-solving-plans-boundaries",
+  "title": "From manual work to function boundaries",
+  "instructions": "Choose the design that preserves the stated pod contract.",
   "questions": [
     {
-      "id": "boundary",
-      "prompt": "Which boundary is valuable first?",
+      "id": "persistent-state",
+      "prompt": "What state must survive while a running-best algorithm examines later pods?",
       "options": [
-        "One function per line",
-        "A class per value",
-        "Separate I/O from calculation",
-        "One global dict"
-      ],
-      "answer_index": 2,
-      "explanation": "I/O and calculation have distinct failures."
-    },
-    {
-      "id": "pseudo",
-      "prompt": "What should pseudocode emphasize?",
-      "options": [
-        "Exact punctuation",
-        "Package versions",
-        "Line count",
-        "Decisions and data movement"
+        "A new copy of every string",
+        "Only the final printed sentence",
+        "The Python version number",
+        "The current best usable pod or None"
       ],
       "answer_index": 3,
-      "explanation": "It supports reasoning before syntax."
+      "explanation": "Each usable candidate is compared with the best candidate found so far."
     },
     {
-      "id": "debug",
-      "prompt": "Where should pipeline debugging start?",
+      "id": "useful-helper",
+      "prompt": "Which helper names a cohesive, independently checkable rule?",
       "options": [
-        "At the earliest incorrect output",
-        "At a random stage",
-        "At the last print",
-        "By rewriting all stages"
+        "is_usable(pod)",
+        "do_line_three(value)",
+        "greater_than(left, right) for every comparison",
+        "get_dictionary(record)"
       ],
       "answer_index": 0,
-      "explanation": "The first wrong stage narrows the cause."
+      "explanation": "Eligibility is a domain decision with a clear Boolean result."
+    },
+    {
+      "id": "tie-replacement",
+      "prompt": "Why should an exact oxygen-and-mass tie not replace the current pod?",
+      "options": [
+        "Every loop must skip its second item.",
+        "Dictionaries cannot be compared.",
+        "The contract says the earlier input record wins an exact tie.",
+        "None can store only one record."
+      ],
+      "answer_index": 2,
+      "explanation": "Keeping the existing candidate preserves the earlier-input tie rule."
     }
   ]
 }
@@ -132,14 +311,383 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 7. Separate calculation from display
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+A calculation function should return a result that another function can use:
+
+```python
+def format_choice(pod_id):
+    """Return a message describing the selection result."""
+    if pod_id is None:
+        return "No usable supply pod"
+    return f"Dispatch {pod_id}"
+```
+
+Now formatting has direct checks:
+
+```python
+assert format_choice("NOVA-2") == "Dispatch NOVA-2"
+assert format_choice(None) == "No usable supply pod"
+```
+
+Printing can remain at the outer edge:
+
+```python
+selected_id = "NOVA-2"
+message = format_choice(selected_id)
+print(message)
+```
+
+The displayed output is useful to a person, while the returned string is useful
+to assertions, a notebook, a command-line interface, or another function.
+
+## 8. Build the smallest complete path
+
+Begin with the smallest successful input:
+
+```python
+single_pod = [
+    {"id": "SOLO-1", "oxygen": 5, "mass": 9, "damaged": False}
+]
+```
+
+Implement only the structure needed to select it and handle no result:
+
+```python
+def choose_pod(pods):
+    """Return the best usable pod ID, or None."""
+    best = None
+
+    for pod in pods:
+        if not is_usable(pod):
+            continue
+        if best is None:
+            best = pod
+
+    if best is None:
+        return None
+    return best["id"]
+```
+
+Run the narrow checks:
+
+```python
+assert choose_pod(single_pod) == "SOLO-1"
+assert choose_pod([]) is None
+```
+
+This is a **vertical slice**: input enters the public function and the promised
+result comes out. The selector is not complete yet, but it has one complete,
+observable behavior.
+
+## 9. Add one acceptance rule at a time
+
+Extend the replacement decision without changing the public interface:
+
+```python
+def choose_pod(pods):
+    """Return the best usable pod ID, or None."""
+    best = None
+
+    for pod in pods:
+        if not is_usable(pod):
+            continue
+        if best is None or is_better(pod, best):
+            best = pod
+
+    if best is None:
+        return None
+    return best["id"]
+```
+
+Now run checks in an order that narrows failures:
+
+```python
+assert choose_pod(single_pod) == "SOLO-1"
+assert choose_pod([]) is None
+assert choose_pod(damaged_first) == "NOVA-2"
+assert choose_pod(pods) == "NOVA-2"
+assert choose_pod(exact_tie_pods) == "LUNA-4"
+```
+
+If the fourth check fails but the first three pass, the likely problem is in
+comparison rather than empty handling or basic eligibility. Progressive checks
+turn a long task into a sequence of smaller questions.
+
+## 10. Find the earliest stage with a wrong value
+
+Suppose the full result is `"LUNA-4"` instead of `"NOVA-2"`. Do not edit every
+function. Inspect in dependency order:
+
+```python
+print(is_usable(pods[1]))
+print(is_better(pods[1], pods[0]))
+print(choose_pod(pods))
+print(format_choice(choose_pod(pods)))
+```
+
+Expected observations are:
+
+```text
+True
+True
+NOVA-2
+Dispatch NOVA-2
+```
+
+The earliest wrong observation points to the smallest responsibility worth
+investigating. Unit 8 will add traceback reading and debugger tools; here the
+important habit is to inspect the data where it first becomes incorrect.
+
+::: {.callout-warning title="Do not change several stages at once"}
+If you rewrite eligibility, comparison, selection, and formatting together, a
+passing result will not reveal which change repaired the behavior. Restore the
+last understood state and change one cause.
+:::
+
+## 11. Protect the caller’s records
+
+The running-best implementation only reads `pods`. Confirm that promise:
+
+```python
+original_pods = [
+    {"id": "A", "oxygen": 4, "mass": 8, "damaged": False},
+    {"id": "B", "oxygen": 7, "mass": 6, "damaged": False},
+]
+
+before = [pod.copy() for pod in original_pods]
+choose_pod(original_pods)
+assert original_pods == before
+```
+
+A sorted approach can also preserve the input if it creates a new list:
+
+```python
+ordered = sorted(
+    original_pods,
+    key=lambda pod: (-pod["oxygen"], pod["mass"]),
+)
+```
+
+Calling `original_pods.sort(...)` would reorder the caller's list. Unit 6 taught
+why that difference matters; the current contract tells you which operation is
+allowed.
+
+The running-best version has another advantage: its state directly represents
+the result being built. Lesson 4 will compare its cost with alternatives.
+
+### Checkpoint: incremental implementation
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-plans-incremental",
+  "title": "Build and check one behavior at a time",
+  "instructions": "Choose the next action that gives the clearest evidence.",
+  "questions": [
+    {
+      "id": "vertical-slice",
+      "prompt": "What makes the single-usable-pod version a useful vertical slice?",
+      "options": [
+        "It implements every future feature.",
+        "A real input passes through the public function to the promised output shape.",
+        "It uses the most lines possible.",
+        "It avoids returning a value."
+      ],
+      "answer_index": 1,
+      "explanation": "The slice is small but complete from public input to observable result."
+    },
+    {
+      "id": "earliest-stage",
+      "prompt": "Eligibility checks pass, but is_better returns False for a candidate that should win. Where should investigation begin?",
+      "options": [
+        "Rewrite the entire notebook.",
+        "Change the expected final ID.",
+        "Add unrelated formatting.",
+        "Inspect is_better and its two inputs."
+      ],
+      "answer_index": 3,
+      "explanation": "The earliest incorrect stage is the narrowest useful place to inspect."
+    },
+    {
+      "id": "non-mutating-sort",
+      "prompt": "Which operation preserves the caller's list order?",
+      "options": [
+        "ordered = sorted(pods, key=...) ",
+        "pods.sort(key=...)",
+        "pods.reverse()",
+        "pods.clear()"
+      ],
+      "answer_index": 0,
+      "explanation": "sorted returns a new list, while the listed methods mutate the existing list."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 12. Carry a changed rule through every layer
+
+Change the mass tie rule from “lower mass wins” to “higher oxygen efficiency
+wins,” where efficiency is `oxygen / mass`.
+
+Do not begin by editing `is_better`. Update in this order:
+
+1. contract wording;
+2. a two-pod example whose winner changes;
+3. hand calculation;
+4. pseudocode comparison step;
+5. `is_better` implementation;
+6. progressive assertions; and
+7. explanation of the observed change.
+
+One possible distinguishing case is:
+
+```python
+changed_rule_pods = [
+    {"id": "WIDE-8", "oxygen": 8, "mass": 8, "damaged": False},
+    {"id": "LIGHT-6", "oxygen": 6, "mass": 3, "damaged": False},
+]
+```
+
+Under the original oxygen-first rule, `WIDE-8` wins. Under pure
+oxygen-per-mass efficiency, `LIGHT-6` wins because `6 / 3` is greater than
+`8 / 8`. If the intended new rule still prioritizes oxygen before efficiency,
+the winner would not change. The ambiguity must be resolved before code.
+
+## 13. Lab: build a festival schedule planner
+
+A small festival has performance records:
+
+```python
+performances = [
+    {"name": "Comet Choir", "rating": 8, "minutes": 45, "cancelled": False},
+    {"name": "Solar Drums", "rating": 9, "minutes": 60, "cancelled": True},
+    {"name": "Aurora Strings", "rating": 8, "minutes": 35, "cancelled": False},
+]
+```
+
+Use this contract:
+
+- ignore cancelled performances;
+- prefer a greater rating;
+- on a rating tie, prefer the shorter performance;
+- on an exact tie, keep the earlier record;
+- return the selected name or `None`;
+- do not mutate the input;
+- format the result as `"Next stage: <name>"` or `"No performance available"`.
+
+Complete these stages:
+
+1. solve the supplied input by hand;
+2. write verb-first pseudocode;
+3. draw a trace table with current record and running choice;
+4. define `is_available`, `is_better_performance`, `choose_performance`, and
+   `format_performance` contracts;
+5. implement one usable record and no-result behavior;
+6. add main comparison, tie, and cancellation rules one at a time;
+7. run at least six progressive assertions;
+8. prove the input remains equal to a preserved copy; and
+9. change the tie rule and update every affected layer.
+
+<details>
+<summary>Hint: make comparison independent</summary>
+
+Let `choose_performance` own traversal and eligibility. Put only the question
+“should this usable candidate replace the usable current choice?” inside
+`is_better_performance`.
+
+</details>
+
+<details class="solution">
+<summary>Show a complete strategy after attempting the lab</summary>
+
+Initialize the running choice to `None`. Skip cancelled records. Replace `None`
+with the first available record. For later available records, replace when the
+rating is greater or when ratings tie and duration is shorter. Do not replace an
+exact tie. Return `None` or the chosen name, then pass that value to a separate
+formatting function. Check cancellation with a record that would otherwise win.
+
+</details>
+
+## 14. Explain the route from input to message
+
+Use the completed supply selector or festival planner and answer aloud:
+
+- Which function reads the collection?
+- Which function owns each decision?
+- What value persists between iterations?
+- Which line changes that value?
+- Why does an exact tie keep the earlier item?
+- Which function returns data, and which edge displays it?
+- Which check would fail first if eligibility were reversed?
+- How do you know the input was not changed?
+
+### Checkpoint: a plan ready to adapt
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-plans-adapt",
+  "title": "Carry a plan into working Python",
+  "instructions": "Choose the statement that keeps decisions visible and checkable.",
+  "questions": [
+    {
+      "id": "changed-rule-order",
+      "prompt": "A tie rule changes. What should be updated before the comparison code?",
+      "options": [
+        "Only the printed message",
+        "The Python installation",
+        "The contract and a distinguishing expected example",
+        "Every unrelated helper"
+      ],
+      "answer_index": 2,
+      "explanation": "The changed behavior must be explicit and observable before implementation is edited."
+    },
+    {
+      "id": "calculation-display",
+      "prompt": "Why should choose_performance return a name instead of printing the final sentence itself?",
+      "options": [
+        "Returned data can be checked and reused independently from display.",
+        "Python functions cannot print.",
+        "A returned string always sorts the input.",
+        "Printing guarantees a correct tie rule."
+      ],
+      "answer_index": 0,
+      "explanation": "Separating calculation from display gives each responsibility a direct interface."
+    },
+    {
+      "id": "pseudocode-progress",
+      "prompt": "Which detail is essential in pseudocode for a running-best algorithm?",
+      "options": [
+        "The editor color scheme",
+        "The condition that replaces the current best value",
+        "The final number of Python lines",
+        "The package release date"
+      ],
+      "answer_index": 1,
+      "explanation": "Without the update condition, the plan does not explain how later candidates can change the result."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## Key points
+
+- Solve a small case manually to expose decisions, persistent state, and the
+  expected result.
+- Pseudocode should show traversal, conditions, updates, stopping, and return
+  behavior without depending on exact Python punctuation.
+- Split functions at meaningful rules and side-effect boundaries, not at every
+  line.
+- Build a narrow end-to-end behavior, then add one acceptance rule at a time.
+- Inspect the earliest incorrect stage and preserve the caller's ownership
+  contract while implementing.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: defining functions and return values](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+- [Python tutorial: looping techniques for sequences and mappings](https://docs.python.org/3/tutorial/datastructures.html#looping-techniques)
+- [Python documentation: `sorted` returns a new list](https://docs.python.org/3/library/functions.html#sorted)
+- [Python tutorial: function annotations and docstrings](https://docs.python.org/3/tutorial/controlflow.html#documentation-strings)

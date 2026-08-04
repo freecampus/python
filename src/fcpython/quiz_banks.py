@@ -134,8 +134,8 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         ),
         (
             "problem-solving-algorithms",
-            "Problem Solving and Basic Algorithms",
-            "derive and check a small algorithm from acceptance examples",
+            "Solving Problems with Algorithms",
+            "specify, decompose, select, and defend cooperating algorithms",
         ),
         (
             "errors-exceptions-debugging",

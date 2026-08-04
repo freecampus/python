@@ -1,13 +1,15 @@
 ---
-title: Search, Count, Aggregate, Filter, and Transform Patterns
+title: Choose an Algorithm That Fits
 lesson_id: problem-solving-algorithms.core-algorithm-patterns
 lesson_order: 30
-description: Convert an ambiguous task into examples, constraints, an algorithm, small functions, and evidence that the result handles important boundaries.
+description: Recognize common algorithm patterns from the promised result, then adapt their state, stopping, ordering, tie, and no-result rules to a concrete task.
 execute:
   echo: true
 categories:
 - python-foundations
 - problem-solving-algorithms
+- algorithm-patterns
+- searching
 order: 30
 colab_notebook: notebooks/courses/python-foundations/units/problem-solving-algorithms/core-algorithm-patterns.ipynb
 course_id: python-foundations
@@ -16,115 +18,296 @@ unit_number: 7
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Recognize common loop patterns and reason about correctness and basic cost.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 4–5 hours
+- **You will learn:** Select, trace, and adapt transform, filter, count, accumulation, search, selection, grouping, uniqueness, neighbor, and window patterns.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+You already know how `for`, `if`, lists, dictionaries, and sets behave. The new
+skill is choosing how those tools should work together when the solution has not
+been designed for you.
 
-Many tasks find one item, count matches, accumulate a result, or transform every item. Naming the pattern reduces blank-page pressure while the contract still determines sentinels, stopping behavior, and output shape.
+This lesson follows signals sent by lantern towers during a night festival. Keep
+six questions visible:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
-:::
+1. What shape must the result have?
+2. What state must survive between input items?
+3. Does every item matter, or may the algorithm stop early?
+4. What result represents “nothing found”?
+5. Must input order be preserved?
+6. Which small boundary would expose a wrong adaptation?
 
-## 2. Read and trace a complete case
+## 1. Let the promised result suggest a pattern
+
+Different requests need different result shapes:
+
+| Request | Result shape | State that usually persists | Stop early? |
+|---|---|---|---:|
+| Normalize every signal | one output per input | output collection | no |
+| Keep only active signals | selected subset | output collection | no |
+| Count red signals | one integer | counter | no |
+| Add energy readings | one combined value | running total | no |
+| Find the first alert | one item or no result | no result / found item | yes |
+| Choose the strongest tower | one best item or no result | running best | usually no |
+| Count each symbol | key-to-count mapping | frequency dictionary | no |
+| Group readings by tower | key-to-values mapping | group dictionary | no |
+| Keep first-seen symbols | ordered collection | result plus seen set | no |
+| Detect changes | relationship per adjacent pair | previous/current pair | no |
+| Find a sync sequence | position or no result | current window | yes |
+
+The table is not a code generator. Words such as *best*, *unique*, and *find*
+still hide decisions. The contract must specify ties, order, eligibility, and a
+no-result value.
+
+## 2. Transform when every input produces one output
+
+Lantern symbols arrive in mixed case:
 
 ```python
-temperatures = [18, 21, 25, 19]
-first_hot = None
-for temperature in temperatures:
-    if temperature >= 24:
-        first_hot = temperature
-        break
-print(first_hot)
+raw_symbols = ["r", "G", "b", "R"]
+normalized = []
+
+for symbol in raw_symbols:
+    normalized.append(symbol.upper())
+
+print(normalized)
 ```
 
-### What Python does
+The output is:
 
-1. `None` records that no match has been found yet.
-2. Items are inspected in order.
-3. Stopping is correct because the contract asks for the first match.
+```text
+['R', 'G', 'B', 'R']
+```
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+Trace the relationship:
 
-## 3. Debug the boundary
+| Input position | Input | Output | Output length |
+|---:|---|---|---:|
+| 0 | `"r"` | `"R"` | 1 |
+| 1 | `"G"` | `"G"` | 2 |
+| 2 | `"b"` | `"B"` | 3 |
+| 3 | `"R"` | `"R"` | 4 |
 
-This version is valid Python but does not satisfy the lesson's intended contract:
+A transformation normally preserves the number and order of items while
+changing each value. A comprehension expresses the same contract compactly:
 
 ```python
-known = ["a", "b", "c"]
-found = [item for item in items if item in known]
+normalized = [symbol.upper() for symbol in raw_symbols]
+assert normalized == ["R", "G", "B", "R"]
+assert len(normalized) == len(raw_symbols)
 ```
 
-A focused repair is:
+This version accidentally filters while transforming:
 
 ```python
-known = {"a", "b", "c"}
-found = [item for item in items if item in known]
+incomplete = [symbol.upper() for symbol in raw_symbols if symbol != "b"]
+assert incomplete == ["R", "G", "R"]
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+It is valid only if the contract says some inputs should disappear.
 
-## 4. Practice from trace to transfer
+## 3. Filter when only matching inputs survive
 
-1. Implement `find_first_negative` with `None` for no match.
-2. Count case-normalized words.
-3. Compare a nested duplicate search with a set-based trace.
+Each reading contains an activation flag:
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+```python
+readings = [
+    {"tower": "north", "energy": 4, "active": True},
+    {"tower": "west", "energy": 9, "active": False},
+    {"tower": "south", "energy": 6, "active": True},
+]
+```
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+Keep active records in encounter order:
 
-</details>
+```python
+active_readings = []
 
-## 5. Check your understanding
+for reading in readings:
+    if reading["active"]:
+        active_readings.append(reading)
+
+assert [reading["tower"] for reading in active_readings] == ["north", "south"]
+```
+
+Filtering asks a yes/no question for every item. The selected records do not
+need to be changed. A comprehension can remain readable when the predicate is
+short:
+
+```python
+active_readings = [reading for reading in readings if reading["active"]]
+```
+
+Check empty behavior:
+
+```python
+all_inactive = [
+    {"tower": "east", "energy": 8, "active": False}
+]
+
+assert [reading for reading in all_inactive if reading["active"]] == []
+```
+
+An empty selected subset is not the same shape as `None`. The contract promised
+a list, so an empty list is the natural result.
+
+## 4. Count matches with one explicit counter
+
+Count red symbols without keeping the red symbols themselves:
+
+```python
+symbols = "RGBRRY"
+red_count = 0
+
+for symbol in symbols:
+    if symbol == "R":
+        red_count += 1
+
+assert red_count == 3
+```
+
+The counter starts at zero because no input has been processed. Each match adds
+one. Non-matches leave the state unchanged.
+
+A useful invariant in plain language is:
+
+> After each iteration, `red_count` equals the number of `R` symbols in the
+> processed prefix.
+
+Do not confuse **counting items** with **adding their values**:
+
+```python
+energy_readings = [4, 9, 6]
+reading_count = len(energy_readings)
+energy_total = sum(energy_readings)
+
+assert reading_count == 3
+assert energy_total == 19
+```
+
+## 5. Accumulate with an initial value that fits the operation
+
+A running total begins at zero:
+
+```python
+energy_readings = [4, 9, 6]
+running_energy = 0
+
+for energy in energy_readings:
+    running_energy += energy
+
+assert running_energy == 19
+```
+
+A trace shows why:
+
+| Energy | Total before | Total after |
+|---:|---:|---:|
+| 4 | 0 | 4 |
+| 9 | 4 | 13 |
+| 6 | 13 | 19 |
+
+Joining text has a different practical pattern. Repeated `+=` can work for small
+text, but collecting pieces and joining once makes the intended separator
+explicit:
+
+```python
+symbols = ["R", "G", "B"]
+message = "-".join(symbols)
+assert message == "R-G-B"
+```
+
+An initial value must match the contract. Zero is suitable for addition, an
+empty list for collecting results, and `None` for “no candidate yet.” There is
+no universal initializer for every accumulation.
+
+## 6. Search for a first match and stop deliberately
+
+Find the first energy reading at or above an alert threshold:
+
+```python
+def first_alert(energies, threshold):
+    """Return the first alert value, or None when no value qualifies."""
+    for energy in energies:
+        if energy >= threshold:
+            return energy
+    return None
+```
+
+Run distinct cases:
+
+```python
+assert first_alert([3, 8, 12, 7], 10) == 12
+assert first_alert([10, 12], 10) == 10
+assert first_alert([2, 4, 6], 10) is None
+assert first_alert([], 10) is None
+```
+
+Returning immediately is correct because later matches cannot replace the
+**first** match. The return after the loop handles every no-match path.
+
+Compare three related questions:
+
+```python
+energies = [3, 8, 12, 7]
+
+has_alert = any(energy >= 10 for energy in energies)
+all_safe = all(energy < 15 for energy in energies)
+first_value = first_alert(energies, 10)
+
+assert has_alert is True
+assert all_safe is True
+assert first_value == 12
+```
+
+`any` promises a Boolean, `all` promises a Boolean, and `first_alert` promises a
+value or `None`. The request determines which shape is useful.
+
+### Checkpoint: transform, filter, count, accumulate, and search
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "problem-solving-algorithms-search-count-transform",
-  "title": "Search, Count, and Transform Patterns checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "problem-solving-patterns-linear",
+  "title": "Choose a single-traversal pattern",
+  "instructions": "Match the requested result to the state and stopping rule it needs.",
   "questions": [
     {
-      "id": "stop",
-      "prompt": "Why may first-match search stop?",
+      "id": "transform-shape",
+      "prompt": "A task must uppercase every symbol while preserving positions. Which pattern fits?",
       "options": [
-        "All loops need break",
-        "None stops loops",
-        "It changes scope",
-        "Later matches cannot replace the first"
+        "First-match search",
+        "Frequency counting",
+        "Transform",
+        "Running-best selection"
       ],
-      "answer_index": 3,
-      "explanation": "The contract is already satisfied."
+      "answer_index": 2,
+      "explanation": "Every input produces one output in the same position."
     },
     {
-      "id": "count",
-      "prompt": "What state does counting update?",
+      "id": "count-state",
+      "prompt": "What state is sufficient for counting red symbols?",
       "options": [
-        "A counter or mapping",
-        "A traceback",
-        "The Python version",
-        "A filename"
-      ],
-      "answer_index": 0,
-      "explanation": "Counts persist between iterations."
-    },
-    {
-      "id": "linear",
-      "prompt": "When input doubles, one full pass does roughly what?",
-      "options": [
-        "Half the work",
-        "Double the work",
-        "The same work",
-        "Four times the work"
+        "A sorted copy of every symbol",
+        "An integer initialized to zero",
+        "The last exception",
+        "A separate function for each position"
       ],
       "answer_index": 1,
-      "explanation": "One operation per item is linear intuition."
+      "explanation": "The counter records how many matches exist in the processed prefix."
+    },
+    {
+      "id": "first-search-stop",
+      "prompt": "Why may first_alert return as soon as one value qualifies?",
+      "options": [
+        "Return always skips the first item.",
+        "Thresholds make loops constant time.",
+        "None has already been returned.",
+        "Later values cannot change which qualifying value was encountered first."
+      ],
+      "answer_index": 3,
+      "explanation": "The contract is satisfied at the first qualifying encounter."
     }
   ]
 }
@@ -132,14 +315,590 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 7. Select the best item with an explicit tie rule
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+A strongest-tower request cannot usually stop at the first strong reading. A
+later tower may be stronger.
+
+```python
+def strongest_tower(readings):
+    """Return the active tower with greatest energy, or None."""
+    best = None
+
+    for reading in readings:
+        if not reading["active"]:
+            continue
+        if best is None or reading["energy"] > best["energy"]:
+            best = reading
+
+    return best
+```
+
+Trace the running best:
+
+```python
+tower_readings = [
+    {"tower": "north", "energy": 4, "active": True},
+    {"tower": "west", "energy": 20, "active": False},
+    {"tower": "south", "energy": 6, "active": True},
+    {"tower": "east", "energy": 6, "active": True},
+]
+
+winner = strongest_tower(tower_readings)
+assert winner["tower"] == "south"
+```
+
+`west` is ineligible. `south` replaces `north`. `east` ties `south` but does not
+replace it because the condition uses `>` rather than `>=`; the earlier active
+record wins.
+
+After understanding the contract, a built-in can express part of it:
+
+```python
+active = [reading for reading in tower_readings if reading["active"]]
+winner = max(active, key=lambda reading: reading["energy"], default=None)
+assert winner["tower"] == "south"
+```
+
+`max` keeps the first maximal item, but the filtering and no-result choice still
+come from your contract.
+
+## 8. Build a frequency table for every distinct symbol
+
+Counting only `R` needs one integer. Counting every symbol needs a mapping from
+symbol to count:
+
+```python
+def symbol_frequencies(signal):
+    """Return the occurrence count for every signal symbol."""
+    frequencies = {}
+
+    for symbol in signal:
+        frequencies[symbol] = frequencies.get(symbol, 0) + 1
+
+    return frequencies
+```
+
+Trace `"ABACA"`:
+
+| Symbol | Mapping before | Mapping after |
+|---|---|---|
+| `A` | `{}` | `{'A': 1}` |
+| `B` | `{'A': 1}` | `{'A': 1, 'B': 1}` |
+| `A` | `{'A': 1, 'B': 1}` | `{'A': 2, 'B': 1}` |
+| `C` | `{'A': 2, 'B': 1}` | `{'A': 2, 'B': 1, 'C': 1}` |
+| `A` | `{'A': 2, 'B': 1, 'C': 1}` | `{'A': 3, 'B': 1, 'C': 1}` |
+
+Check ordinary and empty behavior:
+
+```python
+assert symbol_frequencies("ABACA") == {"A": 3, "B": 1, "C": 1}
+assert symbol_frequencies("") == {}
+```
+
+`.get(symbol, 0)` supplies the count before a symbol has appeared. The stored
+count then becomes state for later occurrences.
+
+## 9. Group records when each key owns several values
+
+Frequency counting stores one integer per key. Grouping stores a collection or
+other aggregate per key.
+
+```python
+def energies_by_tower(readings):
+    """Return active energy values grouped by tower name."""
+    groups = {}
+
+    for reading in readings:
+        if not reading["active"]:
+            continue
+        tower = reading["tower"]
+        groups.setdefault(tower, []).append(reading["energy"])
+
+    return groups
+```
+
+Use repeated tower names:
+
+```python
+repeated_readings = [
+    {"tower": "north", "energy": 4, "active": True},
+    {"tower": "south", "energy": 6, "active": True},
+    {"tower": "north", "energy": 7, "active": True},
+    {"tower": "south", "energy": 9, "active": False},
+]
+
+assert energies_by_tower(repeated_readings) == {
+    "north": [4, 7],
+    "south": [6],
+}
+```
+
+Choose the stored value from the output contract:
+
+- counts per tower → integer;
+- energy values per tower → list;
+- energy total per tower → running numeric total;
+- latest reading per tower → one record.
+
+All use a dictionary, but they are different algorithms because their updates
+and output shapes differ.
+
+## 10. Remove duplicates without losing first-seen order
+
+A set can remove duplicates, but a set result does not promise encounter order.
+When order matters, keep both a membership structure and an output structure:
+
+```python
+def unique_in_order(values):
+    """Return first occurrences in their original order."""
+    seen = set()
+    result = []
+
+    for value in values:
+        if value not in seen:
+            seen.add(value)
+            result.append(value)
+
+    return result
+```
+
+Check cases that expose the contract:
+
+```python
+assert unique_in_order(["R", "G", "R", "B"]) == ["R", "G", "B"]
+assert unique_in_order([]) == []
+assert unique_in_order(["R", "R", "R"]) == ["R"]
+assert unique_in_order(["B", "R", "B"]) == ["B", "R"]
+```
+
+These structures have different jobs:
+
+- `seen` answers “has this value appeared?”;
+- `result` preserves “in what order did new values appear?”
+
+Returning `list(set(values))` does not express the order promise, even when one
+small run happens to look right.
+
+### Checkpoint: selection, frequencies, grouping, and uniqueness
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-patterns-mappings",
+  "title": "Choose state for selection and mappings",
+  "instructions": "Identify the state and update that preserve each contract.",
+  "questions": [
+    {
+      "id": "running-best-tie",
+      "prompt": "A running-best condition uses candidate_energy > best_energy. What happens on an equal-energy tie?",
+      "options": [
+        "The later item always replaces the earlier item.",
+        "The current earlier item remains selected.",
+        "Both items are removed.",
+        "The loop returns None."
+      ],
+      "answer_index": 1,
+      "explanation": "Equality does not satisfy >, so the existing first-seen best remains."
+    },
+    {
+      "id": "group-output",
+      "prompt": "The result must keep every energy value under its tower name. What should each dictionary value contain?",
+      "options": [
+        "Only True or False",
+        "The Python source line number",
+        "A list of that tower's energy values",
+        "One unrelated tower name"
+      ],
+      "answer_index": 2,
+      "explanation": "Grouping retains several values per key, so each tower maps to a collection."
+    },
+    {
+      "id": "stable-unique-state",
+      "prompt": "Why does unique_in_order need both seen and result?",
+      "options": [
+        "seen supports membership while result preserves first-seen order.",
+        "Every algorithm must create two collections.",
+        "result raises errors and seen catches them.",
+        "One stores code and the other runs it."
+      ],
+      "answer_index": 0,
+      "explanation": "The two structures protect two different promises: efficient membership and ordered output."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Compare neighbors without losing an endpoint
+
+Some questions concern relationships between adjacent values: Did energy rise?
+Where did the symbol change? How many equal pairs occur?
+
+An index-based scan names both positions:
+
+```python
+def rising_steps(values):
+    """Return indexes where a value is greater than its predecessor."""
+    rises = []
+
+    for index in range(1, len(values)):
+        if values[index] > values[index - 1]:
+            rises.append(index)
+
+    return rises
+```
+
+Check the first comparable index and small inputs:
+
+```python
+assert rising_steps([3, 5, 4, 8]) == [1, 3]
+assert rising_steps([]) == []
+assert rising_steps([7]) == []
+assert rising_steps([7, 7]) == []
+```
+
+Starting at `1` is deliberate: index `0` has no predecessor. A paired traversal
+can express the values rather than indexes:
+
+```python
+values = [3, 5, 4, 8]
+pairs = list(zip(values, values[1:]))
+assert pairs == [(3, 5), (5, 4), (4, 8)]
+```
+
+Use indexes when the position itself is part of the result. Use paired values
+when only the relationship matters.
+
+## 12. Scan a fixed-size window for a local pattern
+
+A synchronization marker is the first consecutive window whose symbols are all
+distinct. Return the **1-based end position** of that window:
+
+```python
+def first_sync_end(signal, width):
+    """Return the 1-based end of the first distinct window, or None."""
+    if width <= 0:
+        return None
+
+    for end in range(width, len(signal) + 1):
+        window = signal[end - width : end]
+        if len(set(window)) == width:
+            return end
+
+    return None
+```
+
+Trace `"AABCDEF"` with width `4`:
+
+| `end` | Slice indexes | Window | Distinct? |
+|---:|---|---|---:|
+| 4 | `0:4` | `AABC` | no |
+| 5 | `1:5` | `ABCD` | yes |
+
+The function returns `5`, meaning that five input symbols have been processed
+when the marker ends. It does not return the zero-based start index `1`.
+
+Check boundaries:
+
+```python
+assert first_sync_end("AABCDEF", 4) == 5
+assert first_sync_end("Z", 1) == 1
+assert first_sync_end("ABCD", 4) == 4
+assert first_sync_end("AAAA", 2) is None
+assert first_sync_end("ABC", 4) is None
+assert first_sync_end("ABC", 0) is None
+```
+
+Writing the slice and returned-position meanings beside the trace prevents a
+common off-by-one error.
+
+## 13. Combine patterns only when the contract connects them
+
+Suppose the task is: “From active readings, return normalized tower names.” A
+filter followed by a transform directly matches the words:
+
+```python
+active_names = [
+    reading["tower"].upper()
+    for reading in readings
+    if reading["active"]
+]
+
+assert active_names == ["NORTH", "SOUTH"]
+```
+
+A longer sequence may be clearer as named stages:
+
+```python
+active = [reading for reading in readings if reading["active"]]
+energies = [reading["energy"] for reading in active]
+total = sum(energies)
+
+assert total == 10
+```
+
+One loop can combine filter, transform, and accumulate:
+
+```python
+total = 0
+for reading in readings:
+    if reading["active"]:
+        total += reading["energy"]
+
+assert total == 10
+```
+
+Neither version is automatically superior. The staged form exposes reusable
+intermediate results. The combined form avoids building intermediate lists. Use
+the contract, scale, and clarity—not a slogan that fewer loops are always
+better.
+
+## 14. Built-ins express patterns but do not decide the contract
+
+Python provides concise operations:
+
+```python
+values = [4, 9, 6]
+
+assert sum(values) == 19
+assert min(values) == 4
+assert max(values) == 9
+assert any(value > 8 for value in values) is True
+assert all(value > 0 for value in values) is True
+assert sorted(values) == [4, 6, 9]
+```
+
+Before choosing one, identify the promised result:
+
+- `sum` accumulates numeric values;
+- `min` and `max` select one extreme value;
+- `any` and `all` return Booleans and may stop early;
+- `sorted` returns a complete ordered list.
+
+A built-in cannot infer eligibility or a product-specific tie rule. Provide
+those decisions explicitly:
+
+```python
+best_active = max(
+    (reading for reading in readings if reading["active"]),
+    key=lambda reading: reading["energy"],
+    default=None,
+)
+
+assert best_active["tower"] == "south"
+```
+
+This is concise only after the generator expression, `key`, and `default` are
+understood. A direct loop is preferable when it better exposes the current
+learning goal or complex tie behavior.
+
+## 15. Repair patterns chosen from one keyword
+
+### “Find all red signals”
+
+A first-match search is wrong because **all** matching values must appear in the
+result.
+
+```python
+red_positions = [
+    index
+    for index, symbol in enumerate("RGBRRY")
+    if symbol == "R"
+]
+
+assert red_positions == [0, 3, 4]
+```
+
+### “Return unique signals”
+
+The word *unique* is ambiguous. It might mean distinct values in first-seen
+order:
+
+```python
+assert unique_in_order("ABACA") == ["A", "B", "C"]
+```
+
+Or it might mean values that occur exactly once:
+
+```python
+frequencies = symbol_frequencies("ABACA")
+once_only = [symbol for symbol in "ABACA" if frequencies[symbol] == 1]
+assert once_only == ["B", "C"]
+```
+
+### “Choose the best reading”
+
+Define eligibility, comparison direction, tie rule, no-result behavior, returned
+shape, and whether every item must be inspected. Only then choose running-best,
+`max`, sorting, or another strategy.
+
+### Checkpoint: neighbors, windows, combinations, and built-ins
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "problem-solving-patterns-combinations",
+  "title": "Adapt and combine patterns",
+  "instructions": "Choose the implementation decision that matches the promised result.",
+  "questions": [
+    {
+      "id": "neighbor-start",
+      "prompt": "Why does an index-based adjacent-pair scan usually start at index 1?",
+      "options": [
+        "Index 0 is always invalid in Python.",
+        "Lists automatically remove index 0.",
+        "range cannot produce zero.",
+        "Index 1 is the first value that has a predecessor."
+      ],
+      "answer_index": 3,
+      "explanation": "The comparison uses values[index - 1], so the first valid pair ends at index 1."
+    },
+    {
+      "id": "sync-return",
+      "prompt": "first_sync_end('AABCDEF', 4) finds window 'ABCD' at slice 1:5. Why does it return 5?",
+      "options": [
+        "Five is the number of processed symbols at the window's 1-based end.",
+        "Every width-four window returns five.",
+        "The set contains five symbols.",
+        "Python slices include index 5."
+      ],
+      "answer_index": 0,
+      "explanation": "The contract returns the end position as a processed-symbol count, while the slice excludes index 5."
+    },
+    {
+      "id": "clear-passes",
+      "prompt": "When may several named passes be preferable to one combined loop?",
+      "options": [
+        "Whenever the input is empty",
+        "When intermediate results clarify responsibilities or are reused",
+        "Because several passes always use less memory",
+        "Because one loop cannot contain an if statement"
+      ],
+      "answer_index": 1,
+      "explanation": "Clear named stages can be worth their intermediate data when they communicate or support real reuse."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 16. Lab: decode the lantern relay
+
+Use this signal and reading sequence:
+
+```python
+relay_signal = "RRGYBGRY"
+relay_energy = [2, 5, 3, 8, 1, 4, 7, 2]
+```
+
+Implement these contracts:
+
+```python
+def count_symbols(signal):
+    """Return a frequency dictionary for signal."""
+    pass
+
+
+def first_energy_at_least(values, threshold):
+    """Return the first qualifying energy value, or None."""
+    pass
+
+
+def rising_energy_positions(values):
+    """Return indexes whose values are greater than their predecessors."""
+    pass
+
+
+def first_distinct_window_end(signal, width):
+    """Return the 1-based end of the first distinct window, or None."""
+    pass
+```
+
+Use these progressive checks:
+
+```python
+assert count_symbols("") == {}
+assert count_symbols("RRGYBGRY") == {"R": 3, "G": 2, "Y": 2, "B": 1}
+
+assert first_energy_at_least([], 6) is None
+assert first_energy_at_least(relay_energy, 6) == 8
+
+assert rising_energy_positions([]) == []
+assert rising_energy_positions([5]) == []
+assert rising_energy_positions(relay_energy) == [1, 3, 5, 6]
+
+assert first_distinct_window_end("AAAA", 2) is None
+assert first_distinct_window_end("RRGYBGRY", 4) == 5
+```
+
+For each function, record:
+
+- promised result shape;
+- persistent state;
+- stopping rule;
+- empty/no-result value;
+- order requirement; and
+- one boundary that could expose a mistake.
+
+<details>
+<summary>Hint: solve the window on paper</summary>
+
+For width four, list candidate windows in order. `RRGY` repeats `R`; the next
+window, `RGYB`, contains four distinct symbols and ends after five processed
+symbols.
+
+</details>
+
+<details class="solution">
+<summary>Show the window evidence</summary>
+
+The width-four windows begin `RRGY`, `RGYB`, `GYBG`, `YBGR`, and `BGRY`.
+`RGYB` is the first all-distinct window and ends after position 5, which agrees
+with the supplied assertion.
+
+</details>
+
+## 17. Name the state and stopping rule
+
+Complete this table for your lab before checking the summary:
+
+| Function | State | Stops early? | No-result/empty output |
+|---|---|---:|---|
+| `count_symbols` |  |  |  |
+| `first_energy_at_least` |  |  |  |
+| `rising_energy_positions` |  |  |  |
+| `first_distinct_window_end` |  |  |  |
+
+<details class="solution">
+<summary>Compare the pattern choices</summary>
+
+- `count_symbols`: frequency dictionary; no early stop; `{}` for empty input.
+- `first_energy_at_least`: no persistent collection, only current value; stops
+  on a match; `None` for no match.
+- `rising_energy_positions`: result list plus adjacent values/index; examines
+  all pairs; `[]` for fewer than two values.
+- `first_distinct_window_end`: current candidate window/end position; stops on a
+  match; `None` for invalid width or no matching window.
+
+</details>
+
+## Key points
+
+- Start from the promised result shape, then choose state, update, stopping,
+  order, tie, and no-result behavior.
+- Transform, filter, count, accumulate, search, select, group, deduplicate,
+  compare neighbors, and scan windows answer different questions.
+- Built-ins express familiar algorithms but cannot decide product rules.
+- Several clear passes can be better than one overloaded pass; one combined pass
+  can be better when intermediate collections add no value.
+- A pattern is only a starting structure. Acceptance examples determine whether
+  its adaptation is correct.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: looping techniques](https://docs.python.org/3/tutorial/datastructures.html#looping-techniques)
+- [Python tutorial: list comprehensions](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)
+- [Python documentation: `any`, `all`, `min`, `max`, `sum`, and other built-ins](https://docs.python.org/3/library/functions.html)
+- [Python documentation: dictionary `get` and `setdefault`](https://docs.python.org/3/library/stdtypes.html#mapping-types-dict)
+- [Python documentation: `enumerate` and `zip`](https://docs.python.org/3/library/functions.html#enumerate)
