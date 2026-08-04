@@ -140,8 +140,8 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "errors-exceptions-debugging",
             "Errors, Exceptions, and Debugging",
-            "read a failure, handle anticipated exceptions, and test one "
-            "evidence-based hypothesis",
+            "classify failures, preserve useful exception context, and repair one "
+            "evidence-backed cause at a time",
         ),
         (
             "files-paths-external-data",

@@ -148,7 +148,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
     lesson_ids: set[str] = set()
 
     assert catalog["schema_version"] == 2
-    assert catalog["curriculum_version"] == 12
+    assert catalog["curriculum_version"] == 13
     for course in courses:
         assert "modules" not in course
         course_total = 0
@@ -388,15 +388,15 @@ def test_foundations_has_versioned_course_sequence() -> None:
     course_ui = Path("docs/_includes/course-ui.html").read_text()
     progress_ids_match = re.search(r'data-course-lesson-ids="([^"]+)"', home_text)
 
-    assert completion["curriculum_version"] == 12
+    assert completion["curriculum_version"] == 13
     assert completion["rule_version"] == 9
     assert completion["recognition"] == "local-self-reported"
     assert len(lesson_ids) == foundations["lesson_count"] == 89
     assert home_metadata["lesson_ids"] == completion["lesson_ids"]
     assert progress_ids_match is not None
     assert progress_ids_match.group(1).split() == completion["lesson_ids"]
-    assert "curriculum_version: 12" in course_ui
-    assert "state.curriculum_version = 12" in course_ui
+    assert "curriculum_version: 13" in course_ui
+    assert "state.curriculum_version = 13" in course_ui
     assert "completion_rule_version: 9" in course_ui
     assert "state.completion_rule_version = 9" in course_ui
     assert "required_lesson_count" not in foundations

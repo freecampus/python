@@ -1,13 +1,15 @@
 ---
-title: Syntax Errors, Runtime Exceptions, and Logic Bugs
+title: Understand Failures and Read Tracebacks
 lesson_id: errors-exceptions-debugging.failure-categories-tracebacks
 lesson_order: 10
-description: Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
+description: Distinguish syntax failures, runtime exceptions, and wrong results, then use tracebacks and small inspections to find the next useful clue.
 execute:
   echo: true
 categories:
 - python-foundations
 - errors-exceptions-debugging
+- tracebacks
+- exceptions
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/errors-exceptions-debugging/failure-categories-tracebacks.ipynb
 course_id: python-foundations
@@ -15,284 +17,215 @@ unit_id: errors-exceptions-debugging
 unit_number: 8
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Read tracebacks and recognize common beginner error patterns.
-- **Practice in:** Colab, VS Code, and the terminal
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Classify failures, read traceback frames from the final line upward, inspect suspicious state, and distinguish a reported location from an earlier cause.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+A community festival uses a small program to total game scores. During setup,
+three versions arrive at the repair desk:
 
-Every programmer sees error messages. Beginners often read a traceback as a wall
-of red text, but it is actually a structured report. Python is telling you where
-it stopped, what kind of problem it found, and which clue to inspect first.
+1. one never starts because a colon is missing;
+2. one starts but stops while adding a score stored as text; and
+3. one prints a total that is too large but reports no error.
 
-An error message is not a judgment about you. It is feedback from the Python
-interpreter: "I followed your instructions until this point, and here is why I
-could not continue."
+The first useful question is not “Which line should I change?” It is “What kind
+of failure do I have, and what evidence comes with it?” Keep these investigation
+questions beside your notebook:
 
-## Tiny vocabulary
+- Did Python begin running the program?
+- If execution stopped, what are the exception type and message?
+- Which call-stack frames belong to code I control?
+- Which values and types were present at the deepest useful frame?
+- If no exception occurred, what independent rule proves the result is wrong?
 
-| Word | Beginner-friendly meaning |
-| --- | --- |
-| Program | The instructions you wrote. |
-| Interpreter | The tool that reads and runs Python code. |
-| Exception | Python's formal word for many runtime errors. |
-| Traceback | The multi-line report Python prints after many errors. |
-| Frame | One step in the traceback, often with file, line, function, and code. |
-| Error type | The label at the end, such as `TypeError` or `NameError`. |
+## 1. Three failures leave three kinds of evidence
 
-## How to read a traceback
+Python source passes through parsing before its statements can run. After it
+starts, an operation may raise an exception. Even when every operation succeeds,
+the algorithm may still produce the wrong answer.
+
+| Category | What happens | Typical evidence | First useful move |
+|---|---|---|---|
+| syntax failure | Python cannot parse the instructions | `SyntaxError` or `IndentationError`, a line, and sometimes a caret | inspect nearby punctuation and block structure |
+| runtime exception | execution starts, then an operation cannot continue | traceback, exception type, and message | read the final line, then inspect frames and values |
+| logic bug | execution finishes, but behavior violates a rule | wrong output, failed assertion, or user report | state expected versus actual and shrink the case |
+
+Here is a correct baseline:
+
+```python
+scores = [8, 10, 7]
+festival_total = sum(scores)
+print(festival_total)
+```
+
+Python creates a list of three integers, passes it to `sum`, stores `25`, and
+prints `25`. That normal path gives you something to compare with each failure.
 
 ::: {.concept-diagram}
-A traceback is easier to read when you use the same order every time: bottom
-clue, location, suspicious expression, small experiment.
+The failure category determines which evidence is available before you edit.
 
 ```{mermaid}
 %%| echo: false
 %%| eval: true
 flowchart TD
-  red["Python prints red traceback"] --> bottom["Read the bottom line<br/>error type + message"]
-  bottom --> location["Find file and line number"]
-  location --> code["Inspect the expression on that line"]
-  code --> values["Check names, values, and types"]
-  values --> experiment["Change one thing and run again"]
+  start["Run the smallest known case"] --> began{"Did execution begin?"}
+  began -->|no| syntax["Read parser location and nearby structure"]
+  began -->|yes| stopped{"Did an exception stop it?"}
+  stopped -->|yes| trace["Read final line, then useful frames"]
+  stopped -->|no| oracle{"Does behavior match the oracle?"}
+  oracle -->|no| logic["Compare expected and actual state"]
+  oracle -->|yes| normal["Observed case passes"]
 ```
 
-Do not start by rewriting the whole program. Start by extracting one clue.
+An oracle is any independent statement of expected behavior: an acceptance
+example, calculation, assertion, specification, or trusted comparison.
 :::
 
-## 1. Reading a traceback slowly
+## 2. Syntax failures happen before ordinary execution
 
-Consider this program:
+This intended program should announce a bonus for a score of at least ten. The
+missing colon prevents Python from forming the `if` statement:
 
+<!-- fcpython-intentional-invalid-python -->
 ```python
-# average.py
-
-def average(values):
-    total = sum(values)
-    return total / len(values)
-
-scores = [10, 8, "9", 7]
-print(average(scores))
+score = 10
+if score >= 10
+    print("Bonus round!")
 ```
 
-The list contains one string, `"9"`, mixed with integers. When Python tries to
-sum the list, it cannot add an integer and a string.
+A local run may report:
 
-A traceback may look like this:
+```text
+  File "festival.py", line 2
+    if score >= 10
+                  ^
+SyntaxError: expected ':'
+```
+
+Read it in three passes:
+
+1. `SyntaxError` names the category.
+2. `expected ':'` describes what the parser needed.
+3. The caret points near where parsing became impossible.
+
+The caret is a clue, not a guarantee that the root cause is exactly underneath
+it. An unclosed parenthesis on an earlier line can make a later, innocent line
+look suspicious. Inspect the reported line **and a few lines above it**.
+
+Indentation participates in Python's grammar. The next program has a colon, but
+the intended body is not indented:
+
+<!-- fcpython-intentional-invalid-python -->
+```python
+players = ["Ada", "Lin"]
+for player in players:
+print(player)
+```
+
+Python reports an `IndentationError`, which is a specialized syntax failure.
+The repair is to make block membership visible:
+
+```python
+players = ["Ada", "Lin"]
+for player in players:
+    print(player)
+```
+
+Do not wrap syntax failures in `try`/`except`. The file must be parsed before
+normal exception handling can run. Repair the source structure first.
+
+::: {.callout-tip title="Ask what Python was trying to finish"}
+For a parser failure, scan for a missing colon, quote, closing bracket, comma,
+or indented body. Then run again. One syntax repair can reveal the next parser
+failure that was previously unreachable.
+:::
+
+## 3. Runtime exceptions stop one path through valid code
+
+This program is valid Python, so execution begins:
+
+```python
+def total_scores(values):
+    """Return the sum of numeric scores."""
+    return sum(values)
+
+
+scores = [8, "10", 7]
+print(total_scores(scores))
+```
+
+The list mixes integers with the string `"10"`. A terminal traceback resembles:
 
 ```text
 Traceback (most recent call last):
-  File "average.py", line 7, in <module>
-    print(average(scores))
-  File "average.py", line 4, in average
-    total = sum(values)
+  File "festival.py", line 7, in <module>
+    print(total_scores(scores))
+          ^^^^^^^^^^^^^^^^^^^^
+  File "festival.py", line 3, in total_scores
+    return sum(values)
+           ^^^^^^^^^^^
 TypeError: unsupported operand type(s) for +: 'int' and 'str'
 ```
 
-### The two most useful places to look
+Start at the bottom, not at the first red line:
 
-1. **Look at the last line first.**
-   - `TypeError` is the error type.
-   - The message says Python tried to use `+` with an `int` and a `str`.
-2. **Look for a file and line number you recognize.**
-   - `File "average.py", line 4, in average` points to the line where Python
-     discovered the problem.
-   - The line is `total = sum(values)`.
+- **type:** `TypeError` says an operation received incompatible types;
+- **message:** `int` and `str` were combined with addition;
+- **deepest frame in our code:** `return sum(values)` is where Python noticed;
+- **caller frame:** `total_scores(scores)` shows how execution arrived there.
 
-The line number is not always the original cause. Here, the cause is earlier:
-`"9"` was put into the list as text. But the traceback still gives an excellent
-place to start investigating.
+The failing line is not necessarily the line that introduced the defect. `sum`
+correctly rejects the mixed list. The suspicious data was created earlier when
+`"10"` entered `scores`. Tracebacks tell you where execution could not continue;
+your investigation follows data backward to where the broken assumption began.
 
-### What to inspect next
-
-Ask small questions:
-
-- What is the error type?
-- Which line was Python running?
-- Which values were involved?
-- Are the types what I expected?
-
-A helpful temporary print would be:
-
-```python
-print(scores)
-print([type(score) for score in scores])
-```
-
-This reveals that one item is a string.
-
-### Check your understanding
+### Checkpoint: classify before repairing
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "traceback-reading-checkpoint",
-  "title": "Reading tracebacks checkpoint",
-  "instructions": "Choose an answer, then check your work.",
+  "id": "errors-tracebacks-categories",
+  "title": "Choose the first useful evidence",
+  "instructions": "Classify each situation before choosing a repair.",
   "questions": [
     {
-      "id": "last-line",
-      "prompt": "When reading a traceback, what should a beginner inspect first?",
+      "id": "missing-colon",
+      "prompt": "A missing colon prevents a file from starting. Which category and first move fit?",
       "options": [
-        "Only the first red line.",
-        "The editor theme.",
-        "The last line, because it names the error type and message.",
-        "Every installed package."
-      ],
-      "answer_index": 2,
-      "explanation": "The last line usually gives the most compact clue: error type plus message."
-    },
-    {
-      "id": "line-number",
-      "prompt": "What does a traceback line number usually tell you?",
-      "options": [
-        "The only line that could possibly be wrong.",
-        "How many times the program ran.",
-        "The Python version.",
-        "Where Python was running when it discovered the problem."
-      ],
-      "answer_index": 3,
-      "explanation": "The line number is the best starting point, though the cause can be earlier."
-    },
-    {
-      "id": "typeerror-clue",
-      "prompt": "In TypeError: unsupported operand type(s) for +: 'int' and 'str', what should you check?",
-      "options": [
-        "The types of the values being added.",
-        "Only indentation.",
-        "Whether the file has a README.",
-        "The order of import statements only."
-      ],
-      "answer_index": 0,
-      "explanation": "TypeError often means an operation received a value of the wrong type."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 2. Common beginner errors
-
-Different error types point to different first checks.
-
-| Error type | Beginner meaning | First thing to check |
-| --- | --- | --- |
-| `SyntaxError` | Python could not understand the code structure. | Missing colon, quote, parenthesis, or invalid `=` use. |
-| `IndentationError` | A block is not indented the way Python expects. | Lines after `if`, `for`, `while`, `def`, or `class`. |
-| `NameError` | Python does not know this name. | Spelling, assignment order, and scope. |
-| `TypeError` | A value is the wrong kind for this operation. | Use `type(...)` and check conversions. |
-| `ValueError` | The type is acceptable, but this specific value is not. | Bad conversion such as `int("twelve")`. |
-| `IndexError` | A list/string index is outside the valid range. | `len(...)` and the index being used. |
-| `KeyError` | A dictionary key is missing. | `dict.keys()`, spelling, and `.get(...)`. |
-| `AttributeError` | This value does not have the method/attribute used. | Type of the value and method spelling. |
-
-### Examples and fixes
-
-#### `NameError`
-
-Broken code:
-
-```python
-print(total)
-total = 10
-```
-
-Python reads top to bottom. At the first line, `total` does not exist yet. Fix:
-
-```python
-total = 10
-print(total)
-```
-
-#### `TypeError`
-
-Broken code:
-
-```python
-total = "2" + 3
-```
-
-`"2"` is text and `3` is an integer. Decide what you mean:
-
-```python
-print(int("2") + 3)   # arithmetic: 5
-print("2" + "3")      # text joining: 23
-```
-
-#### `IndexError`
-
-Broken code:
-
-```python
-numbers = [1, 2, 3]
-print(numbers[5])
-```
-
-The list has length `3`, so valid indexes are `0`, `1`, and `2`. Fix by using a
-valid index or by checking the length first.
-
-#### `KeyError`
-
-Broken code:
-
-```python
-person = {"name": "Ada"}
-print(person["email"])
-```
-
-The key `"email"` is missing. Fix with a check or `.get()`:
-
-```python
-print(person.get("email", "No email saved"))
-```
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "common-errors-checkpoint",
-  "title": "Common beginner errors checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
-    {
-      "id": "nameerror-meaning",
-      "prompt": "What does NameError usually mean?",
-      "options": [
-        "A list index is too large.",
-        "Python does not know the name you used.",
-        "A dictionary key is missing.",
-        "The program finished successfully."
+        "Logic bug; add a print at the end",
+        "Syntax failure; inspect the reported line and nearby structure",
+        "Runtime exception; catch Exception",
+        "Normal result; change the expected value"
       ],
       "answer_index": 1,
-      "explanation": "NameError points to spelling, assignment order, or scope."
+      "explanation": "The parser cannot form the statement, so inspect syntax before ordinary execution or exception handling."
     },
     {
-      "id": "indexerror-meaning",
-      "prompt": "What should you check first for IndexError?",
+      "id": "wrong-total",
+      "prompt": "The program finishes and prints 31, while an independent calculation says 25. What evidence is decisive?",
       "options": [
-        "Only whether the value is a dictionary.",
-        "Whether the function has a return statement.",
-        "The length of the sequence and the index being used.",
-        "The file extension."
-      ],
-      "answer_index": 2,
-      "explanation": "IndexError means an index is outside the valid range."
-    },
-    {
-      "id": "keyerror-meaning",
-      "prompt": "What should you check first for KeyError?",
-      "options": [
-        "Whether a loop has enough spaces.",
-        "Whether a string has quotes.",
-        "Whether Python is installed.",
-        "Whether the requested key exists in the dictionary."
+        "A SyntaxError",
+        "The color of the terminal output",
+        "A broader except block",
+        "The expected-versus-actual mismatch"
       ],
       "answer_index": 3,
-      "explanation": "KeyError means dictionary lookup could not find the key."
+      "explanation": "A logic bug needs an oracle. The independent expected value makes the silent mismatch observable."
+    },
+    {
+      "id": "traceback-first-read",
+      "prompt": "Where should you begin reading a normal runtime traceback?",
+      "options": [
+        "At the final line containing the exception type and message",
+        "At whichever filename is longest",
+        "At the first library frame only",
+        "By editing every frame at once"
+      ],
+      "answer_index": 0,
+      "explanation": "The final line identifies what stopped execution; frames then explain where and through which calls."
     }
   ]
 }
@@ -300,101 +233,253 @@ print(person.get("email", "No email saved"))
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. A calm debugging routine
+## 4. Traceback frames are a route through function calls
 
-When you see an error, use the same routine every time.
-
-### The five-step routine
-
-1. **Read the last line.** What is the error type and message?
-2. **Find your file and line.** Which line was Python running?
-3. **Inspect values and types.** What are the names on that line? What do they
-   contain?
-4. **Make one small change.** Do not rewrite the whole program.
-5. **Run again and compare.** Did the error move, disappear, or change type?
-
-### Example 1
-Broken code:
+More than one frame is useful when functions call other functions:
 
 ```python
-price = input("Price: ")
-quantity = input("Quantity: ")
-total = price * quantity
-print(total)
+def apply_bonus(score, multiplier):
+    """Return a score after applying a numeric multiplier."""
+    return score * multiplier
+
+
+def score_player(player):
+    """Return one player's adjusted score."""
+    return apply_bonus(player["score"], player["bonus"])
+
+
+def build_leaderboard(players):
+    """Return adjusted scores in input order."""
+    return [score_player(player) for player in players]
+
+
+players = [
+    {"name": "Ada", "score": 8, "bonus": 2},
+    {"name": "Lin", "score": 7, "bonus": None},
+]
+build_leaderboard(players)
 ```
 
-Likely error:
+The second player eventually triggers:
 
 ```text
-TypeError: can't multiply sequence by non-int of type 'str'
+Traceback (most recent call last):
+  File "leaderboard.py", line 20, in <module>
+    build_leaderboard(players)
+  File "leaderboard.py", line 13, in build_leaderboard
+    return [score_player(player) for player in players]
+  File "leaderboard.py", line 8, in score_player
+    return apply_bonus(player["score"], player["bonus"])
+  File "leaderboard.py", line 3, in apply_bonus
+    return score * multiplier
+TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'
 ```
 
-Apply the routine:
+Each frame is a paused layer of work:
 
-1. Last line says `TypeError`: wrong kind of value for multiplication.
-2. The suspicious line is `total = price * quantity`.
-3. `input()` returns strings, so both names hold text.
-4. Convert to numbers:
+1. module code called `build_leaderboard`;
+2. the comprehension called `score_player`;
+3. `score_player` supplied values to `apply_bonus`;
+4. multiplication discovered `7 * None` could not proceed.
+
+The deepest frame is often the most immediate failure. Move upward to learn who
+supplied its arguments and which application-level rule was violated. Skip deep
+library internals at first unless your own frames do not explain the inputs.
+
+## 5. Inspect values without changing the case
+
+Before repairing, make the suspicious values visible. `repr` is useful because
+quotes, escape characters, empty strings, and spaces remain visible:
 
 ```python
-price = float(input("Price: "))
-quantity = int(input("Quantity: "))
-total = price * quantity
-print(total)
+suspicious_score = " 10 "
+print(repr(suspicious_score))
+print(type(suspicious_score).__name__)
+print(len(suspicious_score))
 ```
 
-### A good debugging sentence
+Expected output:
 
-After fixing an error, write one sentence:
+```text
+' 10 '
+str
+4
+```
 
-> The error happened because `input()` returned text; converting `price` and
-> `quantity` before multiplication made the operation numeric.
+For mappings, inspect available keys rather than assuming one exists:
 
-If you can explain the fix, you are learning—not just guessing.
+```python
+player = {"name": "Ada", "points": 8}
+print(sorted(player.keys()))
+print(player.get("score", "<missing>"))
+```
 
-### Check your understanding
+For a collection, inspect shape and representative values:
+
+```python
+scores = [8, "10", 7]
+print("length:", len(scores))
+print("values:", repr(scores))
+print("types:", [type(score).__name__ for score in scores])
+```
+
+Temporary observations should answer a question. Printing twenty unrelated
+variables creates noise. A targeted observation such as “What are the type and
+representation of the score passed to `sum`?” can confirm or disprove a
+hypothesis.
+
+::: {.callout-warning title="Preserve the reproduction while observing it"}
+Do not call `.strip()`, replace a missing value, or convert a type merely to
+print it. That changes the case. First display the state as it exists; repair it
+only after the evidence supports a cause.
+:::
+
+## 6. Exception names narrow the search
+
+An exception name does not automatically tell you the repair, but it suggests
+which relationship to inspect.
+
+### `NameError`: a name is unavailable
+
+```python
+player_name = "Ada"
+
+try:
+    print(playre_name)
+except NameError as error:
+    print(type(error).__name__, "-", error)
+```
+
+Check spelling and scope. Do not create a second variable merely to match a
+typo; determine which name the program intended.
+
+### `TypeError`: an operation and its values do not fit
+
+```python
+score = "8"
+
+try:
+    print(score + 2)
+except TypeError as error:
+    print(type(score).__name__)
+    print(error)
+```
+
+Inspect both types and the domain rule. The repair might be conversion at an
+input boundary, or it might be rejecting text instead of silently converting
+it.
+
+### `ValueError`: the type is acceptable, the value is not
+
+```python
+raw_score = "many"
+
+try:
+    score = int(raw_score)
+except ValueError as error:
+    print(repr(raw_score), "cannot become an integer")
+    print(error)
+```
+
+The string type is a supported input for `int`, but these characters do not
+represent an integer.
+
+### `IndexError` and `KeyError`: a requested position or key is absent
+
+```python
+players = ["Ada", "Lin"]
+record = {"name": "Ada", "points": 8}
+
+try:
+    print(players[2])
+except IndexError as error:
+    print("length:", len(players), "requested index: 2")
+    print(error)
+
+try:
+    print(record["score"])
+except KeyError as error:
+    print("available keys:", sorted(record))
+    print(error)
+```
+
+Ask whether absence is a normal case. If it is, design that behavior explicitly.
+If the key is required by the contract, a default may hide corrupt data.
+
+### `AttributeError`: the object lacks the requested attribute
+
+```python
+name = "Ada"
+
+try:
+    print(name.apend("!"))
+except AttributeError as error:
+    print(type(name).__name__)
+    print(error)
+```
+
+Inspect the object type and spelling. Methods such as `append` belong to lists,
+and this example also misspells the intended method.
+
+### `ZeroDivisionError`: the divisor reached zero
+
+```python
+total_points = 0
+player_count = 0
+
+try:
+    print(total_points / player_count)
+except ZeroDivisionError as error:
+    print("player_count:", player_count)
+    print(error)
+```
+
+The useful question is how `player_count` became zero and what an empty
+tournament should mean—not how to suppress division itself.
+
+### Checkpoint: let the exception focus your inspection
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "errors-exceptions-debugging-routine-checkpoint",
-  "title": "Debugging routine checkpoint",
-  "instructions": "Choose an answer, then check your work.",
+  "id": "errors-tracebacks-types",
+  "title": "Use exception names as clues",
+  "instructions": "Choose the inspection that best matches the evidence.",
   "questions": [
     {
-      "id": "one-change",
-      "prompt": "Why should you change one thing at a time while debugging?",
+      "id": "missing-key",
+      "prompt": "A required `record[\"score\"]` lookup raises `KeyError`. What should you inspect first?",
       "options": [
-        "So you can tell which change affected the result.",
-        "So Python ignores all errors.",
-        "So the file becomes shorter automatically.",
-        "So variables become global."
-      ],
-      "answer_index": 0,
-      "explanation": "Small changes make cause and effect visible."
-    },
-    {
-      "id": "input-type-debug",
-      "prompt": "If code multiplies two input() results and raises TypeError, what is a likely issue?",
-      "options": [
-        "print() returned too many values.",
-        "input() returned strings that need conversion.",
-        "The if statement needs an else.",
-        "The file name is too short."
+        "Whether the terminal supports colors",
+        "The record's available keys and the required-data contract",
+        "Only the length of an unrelated list",
+        "How to catch every exception"
       ],
       "answer_index": 1,
-      "explanation": "input() always returns text, so arithmetic often needs int() or float()."
+      "explanation": "The mapping's keys show the actual shape, while the contract decides whether absence is normal or defective."
     },
     {
-      "id": "explain-fix",
-      "prompt": "What is a good habit after fixing an error?",
+      "id": "bad-int",
+      "prompt": "`int(\"many\")` raises which exception and why?",
       "options": [
-        "Delete the original code immediately.",
-        "Change several unrelated lines.",
-        "Write one sentence explaining the cause and the fix.",
-        "Assume the same fix works everywhere."
+        "TypeError, because strings are never accepted",
+        "IndexError, because the string is too short",
+        "NameError, because `int` is unavailable",
+        "ValueError, because the string type is accepted but its content is not an integer"
       ],
-      "answer_index": 2,
-      "explanation": "Explaining the fix turns debugging into learning."
+      "answer_index": 3,
+      "explanation": "`int` accepts strings, but `many` is not a valid integer representation."
+    },
+    {
+      "id": "reported-origin",
+      "prompt": "A traceback points at `sum(values)`, but `values` contains one unexpected string created earlier. Which statement is accurate?",
+      "options": [
+        "The reported line is where Python noticed; the defective value may have originated earlier",
+        "`sum` must be rewritten",
+        "The traceback proves the list was created correctly",
+        "Every frame should be edited simultaneously"
+      ],
+      "answer_index": 0,
+      "explanation": "A traceback localizes the failed operation; data flow may lead to an earlier source of the broken assumption."
     }
   ]
 }
@@ -402,18 +487,309 @@ If you can explain the fix, you are learning—not just guessing.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## Key points
+## 7. Chained tracebacks preserve two levels of truth
 
-::: {.callout-tip title="Key points"}
-- A traceback is a structured clue report, not a personal failure.
-- Start with the last line: it names the error type and message.
-- Then find a file and line number you recognize.
-- The reported line is where Python noticed the problem; the cause may be earlier.
-- Check values and types before making large changes.
-- Change one thing at a time and run again.
-:::
+Programs sometimes add domain context to a lower-level exception. The following
+function explains which festival field failed while preserving `int`'s original
+reason:
 
-## References
+```python
+def parse_score(raw_score, player_name):
+    """Return an integer score or raise a contextual ValueError."""
+    try:
+        return int(raw_score)
+    except ValueError as error:
+        raise ValueError(
+            f"invalid score for player {player_name!r}: {raw_score!r}"
+        ) from error
 
-- Python Tutorial: errors and exceptions: https://docs.python.org/3/tutorial/errors.html
-- Python built-in exceptions: https://docs.python.org/3/library/exceptions.html
+
+try:
+    parse_score("many", "Ada")
+except ValueError as error:
+    print(error)
+    print("original cause:", error.__cause__)
+```
+
+The resulting traceback contains the original conversion failure and the new
+festival-specific failure, connected by “the above exception was the direct
+cause.” Do not stop at the first final line when a traceback is chained. Read
+each exception and the relationship between them. Lesson 2 develops this design
+in depth.
+
+## 8. Logic bugs need an oracle because Python sees valid operations
+
+This bonus function runs successfully but awards the bonus twice:
+
+```python
+def final_score(base_score, bonus):
+    """Return the base score plus one bonus."""
+    subtotal = base_score + bonus
+    return subtotal + bonus
+
+
+actual = final_score(8, 2)
+expected = 10
+print("expected:", expected)
+print("actual:", actual)
+assert actual == expected
+```
+
+All values and operations are valid. Python has no way to infer that “one bonus”
+is the festival rule. The assertion turns a silent wrong result into precise
+evidence.
+
+Trace the state:
+
+| Step | `base_score` | `bonus` | `subtotal` | returned |
+|---|---:|---:|---:|---:|
+| expected rule | 8 | 2 | 10 | 10 |
+| actual code | 8 | 2 | 10 | 12 |
+
+The first divergence is the return expression, not the input and not the
+subtotal. That is a stronger localization than “something in `final_score` is
+wrong.” Lesson 3 turns first-divergence searches into a repeatable method.
+
+## 9. Notebook state can create a fourth kind of confusion
+
+Notebook cells can be run out of order. If you change a function cell but do
+not rerun it, later cells still use the old function object. If you delete a
+variable assignment from a cell, the old variable can remain in memory.
+
+Use this verification routine after a repair:
+
+1. save the notebook;
+2. restart the runtime or kernel;
+3. run all cells from top to bottom;
+4. confirm the original failure and nearby assertions;
+5. record the result only after that clean run.
+
+A clean rerun separates program behavior from accidental session history.
+
+## 10. Repair the festival scoreboard tickets
+
+Create an evidence table with one row per ticket. For each, record the category,
+decisive clue, one inspection, root cause, repair, and regression check.
+
+### Ticket 1: parser failure
+
+<!-- fcpython-intentional-invalid-python -->
+```python
+def announce_winner(name)
+    print(f"Winner: {name}")
+```
+
+Run or read the reported syntax failure, repair it, and explain why no function
+call could run before the repair.
+
+### Ticket 2: indentation failure
+
+<!-- fcpython-intentional-invalid-python -->
+```python
+for score in [8, 10, 7]:
+print(score)
+```
+
+Repair the block and predict the three output lines before running.
+
+### Ticket 3: incompatible score type
+
+```python
+def add_scores(left, right):
+    return left + right
+
+
+try:
+    add_scores(8, "10")
+except TypeError as error:
+    print(error)
+```
+
+Inspect `repr` and `type` for both arguments. Decide where conversion belongs if
+the string came from user input.
+
+### Ticket 4: unconvertible score
+
+```python
+raw_scores = ["8", "many", "7"]
+
+for position, raw_score in enumerate(raw_scores):
+    try:
+        print(int(raw_score))
+    except ValueError as error:
+        print("position:", position, "value:", repr(raw_score))
+        print(error)
+```
+
+Identify the exact element and preserve its raw representation.
+
+### Ticket 5: absent player
+
+```python
+players = ["Ada", "Lin"]
+
+try:
+    print(players[2])
+except IndexError as error:
+    print("length:", len(players))
+    print(error)
+```
+
+Explain why the maximum valid index is one when the length is two.
+
+### Ticket 6: changed record shape
+
+```python
+record = {"player": "Ada", "points": 8}
+
+try:
+    print(record["score"])
+except KeyError as error:
+    print("keys:", sorted(record))
+    print(error)
+```
+
+Do not add a default until you decide whether `score` is optional or the producer
+changed its field name.
+
+### Ticket 7: empty average
+
+```python
+def average_score(scores):
+    return sum(scores) / len(scores)
+
+
+try:
+    average_score([])
+except ZeroDivisionError as error:
+    print("empty input reached average_score")
+    print(error)
+```
+
+Write the intended empty-input behavior before changing the function.
+
+### Ticket 8: silent bonus defect
+
+```python
+def award_bonus(score, won_round):
+    if won_round:
+        score = score + 2
+    return score + 2
+
+
+assert award_bonus(8, False) == 8
+assert award_bonus(8, True) == 10
+```
+
+Use the two cases to identify the first rule violation. Repair the cause and keep
+both assertions as regression checks.
+
+<details class="solution">
+<summary>Compare a repair path after investigating all eight tickets</summary>
+
+Tickets 1 and 2 need a colon and an indented block before execution can begin.
+Tickets 3–7 need a contract decision as well as a technical fix: convert scores
+at the input boundary, decide whether absent positions/keys are expected, and
+define what an empty average means. For example, an explicit empty-input policy
+can be:
+
+```python
+def average_score(scores):
+    """Return the mean score; reject an empty score collection."""
+    if not scores:
+        raise ValueError("cannot average an empty score collection")
+    return sum(scores) / len(scores)
+```
+
+The double-bonus repair removes the unconditional extra addition:
+
+```python
+def award_bonus(score, won_round):
+    if won_round:
+        score = score + 2
+    return score
+
+
+assert award_bonus(8, False) == 8
+assert award_bonus(8, True) == 10
+```
+
+Compare the evidence that led you there. A matching final function without a
+category, first clue, and root-cause explanation is an incomplete repair record.
+
+</details>
+
+### Checkpoint: choose the next investigation move
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "errors-tracebacks-investigation",
+  "title": "Turn a failure into an investigation",
+  "instructions": "Choose the move that adds evidence without hiding the problem.",
+  "questions": [
+    {
+      "id": "logic-oracle",
+      "prompt": "Why does the double-bonus function need an assertion or other oracle?",
+      "options": [
+        "Because Python cannot execute addition",
+        "Because the program needs more syntax errors",
+        "Because valid operations can still violate a business rule that Python does not know",
+        "Because every function must raise an exception"
+      ],
+      "answer_index": 2,
+      "explanation": "Python checks language operations, not the unstated festival rule. An oracle makes the mismatch observable."
+    },
+    {
+      "id": "targeted-observation",
+      "prompt": "Which observation best investigates a suspected whitespace-and-type problem in `raw_score`?",
+      "options": [
+        "Print `repr(raw_score)` and `type(raw_score).__name__`",
+        "Print every global variable ten times",
+        "Immediately replace `raw_score` with zero",
+        "Catch all exceptions and continue"
+      ],
+      "answer_index": 0,
+      "explanation": "Representation and type directly test the hypothesis while preserving the failing value."
+    },
+    {
+      "id": "clean-notebook",
+      "prompt": "What is the strongest confirmation that a notebook repair does not depend on stale state?",
+      "options": [
+        "One cell happened to pass before the edit",
+        "The traceback color changed",
+        "The notebook contains many variables",
+        "Restart the runtime and run all cells in order, including regression checks"
+      ],
+      "answer_index": 3,
+      "explanation": "A clean top-to-bottom run recreates definitions and state from the saved source."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Key points for exception design
+
+- Syntax failures happen while parsing; inspect structure before ordinary
+  execution.
+- For a runtime traceback, read the final exception type and message, then move
+  through frames from the deepest useful application frame toward its callers.
+- The reported line shows where Python noticed a broken assumption, not always
+  where the bad value originated.
+- `repr`, `type`, lengths, keys, arguments, and small state traces turn guesses
+  into evidence.
+- Exception names narrow the relationship to inspect; they do not choose the
+  product rule for you.
+- A logic bug requires an oracle and an expected-versus-actual comparison.
+- A clean notebook restart is part of verification, not optional housekeeping.
+
+### References and next steps
+
+- [Python tutorial: Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html)
+- [Python language reference: Exceptions](https://docs.python.org/3/reference/executionmodel.html#exceptions)
+- [Python built-in exception hierarchy](https://docs.python.org/3/library/exceptions.html)
+
+Next, you will decide when your own functions should raise an exception, where
+an application can handle it responsibly, and how to preserve the original
+cause while adding useful context.

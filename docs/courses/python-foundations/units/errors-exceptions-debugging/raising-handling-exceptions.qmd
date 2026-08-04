@@ -1,13 +1,15 @@
 ---
-title: Raising and Handling Exceptions
+title: Raise Useful Errors and Handle Expected Failures
 lesson_id: errors-exceptions-debugging.raising-handling-exceptions
 lesson_order: 20
-description: Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
+description: Raise precise built-in exceptions, catch only anticipated failures at informed boundaries, and preserve causes while adding useful context.
 execute:
   echo: true
 categories:
 - python-foundations
 - errors-exceptions-debugging
+- exception-handling
+- validation
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/errors-exceptions-debugging/raising-handling-exceptions.ipynb
 course_id: python-foundations
@@ -16,148 +18,152 @@ unit_number: 8
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Raise contextual failures, preserve causes, and recover only at informed boundaries.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 4–5 hours
+- **You will learn:** Raise meaningful built-in exceptions, place narrow `try` blocks, handle only failures a boundary can resolve, and chain contextual errors to their original causes.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A text adventure receives commands such as `"OPEN chest"` and `"TAKE key"`.
+Malformed input is expected: a player may omit the target or type an unsupported
+action. A programming defect is not expected: if movement code uses an undefined
+name, the game should not pretend the player merely mistyped a command.
 
-Low-level code should add context without converting every failure into a vague message. Cleanup belongs in context managers or `finally`; recovery belongs where the program can choose a meaningful alternative.
+Good exception design preserves that difference. It answers four questions:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
-:::
+1. What does this function promise to return?
+2. Which inputs violate that promise, and which exception explains why?
+3. Where does the program know enough to recover, retry, report, or continue?
+4. Which failures must remain visible because this layer cannot handle them?
 
-## 2. Read and trace a complete case
+## 1. Return normal results and raise exceptional failures
+
+Start with a command parser whose normal result is one normalized tuple:
 
 ```python
-from pathlib import Path
-import json
-def load_settings(path):
-    try:
-        return json.loads(Path(path).read_text(encoding="utf-8"))
-    except json.JSONDecodeError as error:
-        raise ValueError(f"invalid settings JSON in {path}") from error
+def parse_quest_command(text):
+    """Return a normalized (action, target) command."""
+    parts = text.split()
+    if len(parts) != 2:
+        raise ValueError("command must contain an action and a target")
+
+    action, target = parts
+    return action.upper(), target.lower()
+
+
+print(parse_quest_command("OPEN Chest"))
 ```
 
-### What Python does
+Line by line:
 
-1. Only the understood JSON failure is translated.
-2. The path adds application context.
-3. Exception chaining preserves the original cause.
+1. `split()` turns whitespace-separated input into parts.
+2. The function checks the supported shape before unpacking.
+3. `raise ValueError(...)` stops this function call when the value violates its
+   contract, even though the input is still a string.
+4. The normal path returns normalized data with one predictable shape.
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
+Do not use a magic return such as `None`, `False`, or an empty tuple unless that
+value is a normal, documented result. A caller can accidentally pass a magic
+value deeper into the program and lose the original explanation.
 
 ```python
-try:
-    return int(text)
-except Exception:
-    print("something failed")
+def find_key(inventory):
+    """Return the key name if present, otherwise None."""
+    for item in inventory:
+        if item.endswith(" key"):
+            return item
     return None
 ```
 
-A focused repair is:
+Here, not finding a key is an ordinary search result, so `None` is reasonable.
+In contrast, a command with three words violates the parser's accepted shape,
+so `ValueError` makes the failed contract explicit.
+
+## 2. Choose an exception that describes the broken contract
+
+For foundation-level interfaces, built-in exceptions cover many useful cases:
+
+| Exception | Use it when | Example message |
+|---|---|---|
+| `TypeError` | the object type is unsupported | `command must be a string` |
+| `ValueError` | the type is acceptable but its value or shape is unsupported | `steps must be positive` |
+| `KeyError` | a required mapping key is absent and mapping-style lookup is the contract | Python's normal missing-key message |
+| `IndexError` | a requested sequence position is outside the supported range | Python's normal invalid-index message |
+| `RuntimeError` | the operation cannot proceed because of runtime state and no more specific exception fits | `quest has not started` |
+
+Validate type and value separately when the distinction helps the caller:
 
 ```python
-try:
-    return int(text)
-except ValueError as error:
-    raise ValueError(f"invalid count: {text!r}") from error
+def parse_repeat_count(raw_count):
+    """Return a positive repeat count from an integer string."""
+    if not isinstance(raw_count, str):
+        raise TypeError("repeat count must be text")
+
+    count = int(raw_count)
+    if count <= 0:
+        raise ValueError("repeat count must be positive")
+    return count
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+`parse_repeat_count(3)` violates the type contract. `parse_repeat_count("0")`
+has the accepted type but violates the range rule. `parse_repeat_count("many")`
+lets `int` raise its own `ValueError`; a later section adds command context.
 
-## 4. Practice from trace to transfer
-
-1. Use `try/except/else` for parsing then calculation.
-2. Add context to JSON failure while preserving cause.
-3. Decide whether missing optional file is recoverable.
-
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
-
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
-
-</details>
-
-## 5. Put recovery, success, and cleanup in the correct blocks
+Messages should help the reader act without leaking secrets. Mention the field,
+rule, or position; avoid dumping credentials or an entire private record.
 
 ```python
-def parse_positive_count(text):
-    try:
-        count = int(text)
-    except ValueError as error:
-        raise ValueError(f"count must be an integer: {text!r}") from error
-    else:
-        if count <= 0:
-            raise ValueError("count must be positive")
-        return count
-    finally:
-        # This represents unconditional cleanup or observation.
-        pass
+def require_energy(energy):
+    """Return energy if it can power one move."""
+    if energy < 1:
+        raise ValueError(f"energy must be at least 1; received {energy}")
+    return energy
 ```
 
-- Put only the conversion that can raise the anticipated `ValueError` in
-  `try`; a narrow block prevents unrelated defects from looking recoverable.
-- `except` translates the known boundary failure and chains its cause.
-- `else` runs only when the `try` body succeeds, so success-path validation is
-  not accidentally caught.
-- `finally` runs whether the operation returns or raises. Use it for
-  unconditional cleanup when a context manager is not the clearer solution.
-
-Catch an exception only where the program can choose a meaningful alternative,
-add context, or clean up. Otherwise, let it propagate with its traceback.
-
-## 6. Check your understanding
+### Checkpoint: design the function contract
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "errors-exceptions-debugging-exception-design",
-  "title": "Exception Design and Propagation checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "exceptions-contracts",
+  "title": "Separate normal results from contract failures",
+  "instructions": "Choose the interface behavior that communicates the rule most clearly.",
   "questions": [
     {
-      "id": "chain",
-      "prompt": "What does `raise ... from error` preserve?",
+      "id": "normal-none",
+      "prompt": "A search may normally find no matching item. Which design can be appropriate when documented?",
       "options": [
-        "Return value",
-        "Global state",
-        "Original cause",
-        "File contents"
-      ],
-      "answer_index": 2,
-      "explanation": "It preserves causal evidence."
-    },
-    {
-      "id": "finally",
-      "prompt": "When does finally run?",
-      "options": [
-        "Only success",
-        "Only ValueError",
-        "Before try",
-        "Whether success or failure"
+        "Raise `SyntaxError` from valid source",
+        "Catch every possible exception",
+        "Return several unrelated shapes",
+        "Return `None` for no match"
       ],
       "answer_index": 3,
-      "explanation": "Finally supports unconditional cleanup."
+      "explanation": "No match can be an ordinary search outcome, and a documented `None` makes that branch explicit."
     },
     {
-      "id": "narrow",
-      "prompt": "Why catch ValueError for int?",
+      "id": "positive-value",
+      "prompt": "A function accepts integers, but receives `0` where the contract requires a positive number. Which built-in exception fits?",
       "options": [
-        "It states expected conversion failure",
-        "It catches syntax errors",
-        "It prevents bugs",
-        "It returns zero"
+        "NameError",
+        "IndentationError",
+        "ImportError",
+        "ValueError"
       ],
-      "answer_index": 0,
-      "explanation": "Narrow handlers document known failures."
+      "answer_index": 3,
+      "explanation": "The integer type is acceptable, but zero violates the supported value range."
+    },
+    {
+      "id": "useful-message",
+      "prompt": "Which message best helps repair an invalid command without exposing unrelated data?",
+      "options": [
+        "bad",
+        "something failed somewhere",
+        "command at turn 4 must contain an action and a target",
+        "all user records and tokens: ..."
+      ],
+      "answer_index": 2,
+      "explanation": "The message supplies the location and broken rule without dumping private or irrelevant state."
     }
   ]
 }
@@ -165,16 +171,559 @@ add context, or clean up. Otherwise, let it propagate with its traceback.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 7. Key points
+## 3. Exceptions travel upward until a caller handles them
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
-- Keep `try` blocks narrow; separate anticipated recovery, success-only work,
-  and unconditional cleanup with `except`, `else`, and `finally`.
+When a function raises, its normal path stops. Python leaves that frame and
+returns control to its caller only if a matching `except` block exists there.
+Otherwise, unwinding continues up the call stack.
 
-## References
+::: {.concept-diagram}
+A low-level parser can report the violation while an outer interaction boundary
+decides what the player should see.
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart BT
+  parser["parse_quest_command raises ValueError"] --> turn["play_turn has no matching handler"]
+  turn --> loop["game loop catches anticipated ValueError"]
+  loop --> report["show feedback and request another command"]
+```
+
+Unexpected exceptions continue past this boundary and remain visible to the
+developer.
+:::
+
+Use a small example to observe propagation:
+
+```python
+def decode_steps(raw_steps):
+    return int(raw_steps)
+
+
+def build_move(raw_steps):
+    steps = decode_steps(raw_steps)
+    return {"action": "MOVE", "steps": steps}
+
+
+try:
+    build_move("many")
+except ValueError as error:
+    print("command rejected:", error)
+```
+
+`decode_steps` does not need to catch `ValueError` merely to raise the same
+thing. `build_move` cannot recover either. The outer boundary can turn an
+anticipated conversion failure into player feedback.
+
+Catch an exception only where you can make a responsible decision:
+
+- ask for another value;
+- skip one independently invalid item while recording why;
+- translate a technical failure into domain context;
+- release a resource and re-raise; or
+- end one operation cleanly.
+
+If a layer can do none of those, let the exception propagate.
+
+## 4. Keep the `try` block as narrow as the claim
+
+This handler is too broad in two ways:
+
+```python
+def play_turn_too_broad(text, inventory):
+    try:
+        action, target = parse_quest_command(text)
+        inventory.apend(target)
+        return f"completed {action} {target}"
+    except Exception:
+        return "invalid command"
+```
+
+The misspelled `.apend` raises `AttributeError`, a programming defect. The broad
+handler relabels it as player error. The program appears resilient while losing
+the very evidence needed to repair it.
+
+A better boundary surrounds only the anticipated operation:
+
+```python
+def play_turn(text, inventory):
+    try:
+        action, target = parse_quest_command(text)
+    except ValueError as error:
+        return f"command rejected: {error}"
+
+    inventory.append(target)
+    return f"completed {action} {target}"
+```
+
+Now the `except` claim is precise: “invalid command shape is expected here.” If
+inventory code raises `AttributeError`, the defect stays visible.
+
+::: {.callout-warning title="A passing program can still be hiding failures"}
+`except Exception: pass` does not prove recovery. It proves only that many
+failures were silenced. Handle a specific anticipated type, retain evidence,
+and keep the protected region narrow.
+:::
+
+## 5. Match specific exceptions before general ones
+
+Handlers are tested from top to bottom. Put more specific responses first:
+
+```python
+def parse_slot(raw_slot, slots):
+    """Return the item stored at a text index."""
+    try:
+        index = int(raw_slot)
+        return slots[index]
+    except ValueError as error:
+        return f"slot must be an integer: {error}"
+    except IndexError as error:
+        return f"slot is outside the inventory: {error}"
+```
+
+This example catches two anticipated failures from a deliberately small region.
+If the result is needed as data rather than UI text, a better design may let the
+exceptions propagate instead of returning mixed result shapes. Boundary design
+depends on who calls the function.
+
+You can group exceptions only when the same response is truly appropriate:
+
+```python
+def read_required_pair(mapping):
+    """Return two required integer fields or explain malformed input."""
+    try:
+        left = int(mapping["left"])
+        right = int(mapping["right"])
+    except (KeyError, ValueError) as error:
+        raise ValueError("pair needs integer 'left' and 'right' fields") from error
+    return left, right
+```
+
+Do not group types simply to write fewer lines. Ask whether the caller should
+react identically and whether the new message remains accurate for each cause.
+
+## 6. Use `else` and `finally` for different jobs
+
+An `else` suite runs only when the `try` suite finishes without a matching
+exception. It keeps success work outside the protected region:
+
+```python
+def describe_repeat(raw_count):
+    try:
+        count = int(raw_count)
+    except ValueError as error:
+        return f"invalid repeat count: {error}"
+    else:
+        return f"The spell will repeat {count} times."
+```
+
+If string formatting in `else` had a defect, this handler would not mislabel it
+as an integer-conversion problem.
+
+A `finally` suite runs whether the protected operation returns, raises, or is
+handled. Use it for cleanup that must happen:
+
+```python
+def demonstrate_cleanup(raw_count):
+    events = []
+    try:
+        events.append("start conversion")
+        count = int(raw_count)
+    except ValueError:
+        events.append("conversion rejected")
+    else:
+        events.append(f"converted {count}")
+    finally:
+        events.append("close turn record")
+    return events
+
+
+print(demonstrate_cleanup("3"))
+print(demonstrate_cleanup("many"))
+```
+
+Avoid `return` in `finally`. A return there can replace a normal return or
+suppress an active exception, erasing evidence:
+
+```python
+def safe_cleanup_pattern(raw_count):
+    try:
+        result = int(raw_count)
+    finally:
+        print("cleanup happened")
+    return result
+```
+
+Later units use context managers such as `with` for resource cleanup. The same
+principle applies: cleanup should not disguise the operation's outcome.
+
+### Checkpoint: place the boundary precisely
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "exceptions-boundaries",
+  "title": "Protect only the operation you understand",
+  "instructions": "Choose the boundary that preserves unexpected defects.",
+  "questions": [
+    {
+      "id": "narrow-try",
+      "prompt": "A game expects command conversion to fail, but an inventory method may contain a bug. What should the `try` block contain?",
+      "options": [
+        "The entire game loop",
+        "Only the anticipated command parsing or conversion operation",
+        "Every function in the program",
+        "No observable operation"
+      ],
+      "answer_index": 1,
+      "explanation": "A narrow block prevents unrelated programming defects from being mislabeled as invalid input."
+    },
+    {
+      "id": "else-role",
+      "prompt": "When does an `else` suite attached to `try` run?",
+      "options": [
+        "Only when the `try` suite finishes without an exception",
+        "Only after a syntax failure",
+        "Before the `try` suite",
+        "Instead of every `finally` suite"
+      ],
+      "answer_index": 0,
+      "explanation": "`else` separates the successful continuation from the operations covered by exception handlers."
+    },
+    {
+      "id": "finally-return",
+      "prompt": "Why should you generally avoid returning from `finally`?",
+      "options": [
+        "It makes integer conversion faster",
+        "It creates a syntax error in every Python version",
+        "It can replace another return or suppress an active exception",
+        "It forces all exceptions to be chained"
+      ],
+      "answer_index": 2,
+      "explanation": "Cleanup should run without erasing the original result or failure evidence."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Add context and preserve the original cause
+
+Low-level exceptions know technical details. Outer layers know domain details.
+Exception chaining preserves both:
+
+```python
+def parse_damage(raw_damage, turn_number):
+    """Return positive damage or raise a turn-specific ValueError."""
+    try:
+        damage = int(raw_damage)
+    except ValueError as error:
+        raise ValueError(
+            f"turn {turn_number}: damage must be an integer; got {raw_damage!r}"
+        ) from error
+
+    if damage <= 0:
+        raise ValueError(
+            f"turn {turn_number}: damage must be positive; got {damage}"
+        )
+    return damage
+```
+
+There are two `ValueError` paths, but only conversion chains an underlying
+cause. A nonpositive integer was parsed successfully; the function itself
+rejects the domain value, so there is no hidden conversion exception to invent.
+
+Inspect the chain:
+
+```python
+try:
+    parse_damage("many", 4)
+except ValueError as error:
+    print("context:", error)
+    print("cause type:", type(error.__cause__).__name__)
+    print("cause message:", error.__cause__)
+```
+
+Use a bare `raise` inside a handler when you record evidence but cannot actually
+recover:
+
+```python
+def parse_with_observation(raw_damage):
+    try:
+        return int(raw_damage)
+    except ValueError:
+        print("conversion failed for", repr(raw_damage))
+        raise
+```
+
+Bare `raise` preserves the current exception and traceback. `raise error` can
+alter traceback details; creating an unrelated new exception discards the
+causal link unless you chain it explicitly.
+
+## 8. Assertions check developer assumptions, not public input
+
+An assertion is excellent for an internal condition that should be true if the
+program is correct:
+
+```python
+def apply_quest_rewards(rewards):
+    total = sum(rewards)
+    assert total >= 0, "reward total should never be negative"
+    return total
+```
+
+Do not make `assert` the only validation for player input:
+
+```python
+def set_volume(volume):
+    """Return a supported game volume from 0 through 10."""
+    if not isinstance(volume, int):
+        raise TypeError("volume must be an integer")
+    if not 0 <= volume <= 10:
+        raise ValueError("volume must be between 0 and 10")
+    return volume
+```
+
+Assertions can be disabled with Python optimization settings, and
+`AssertionError` does not communicate the public input category as precisely.
+Use explicit exceptions for an interface contract; use assertions to make
+developer assumptions executable.
+
+## 9. EAFP and LBYL are choices, not slogans
+
+Python code often uses **EAFP**: attempt the operation and handle an anticipated
+exception (“easier to ask forgiveness than permission”). **LBYL** checks a
+condition first (“look before you leap”). Neither style means catch everything.
+
+LBYL can clearly express a domain rule:
+
+```python
+def spend_energy(energy, cost):
+    if cost < 0:
+        raise ValueError("cost cannot be negative")
+    if cost > energy:
+        raise ValueError("not enough energy")
+    return energy - cost
+```
+
+EAFP can avoid duplicating an operation's own validation:
+
+```python
+def convert_coordinates(raw_x, raw_y):
+    try:
+        return int(raw_x), int(raw_y)
+    except ValueError as error:
+        raise ValueError("coordinates must be integers") from error
+```
+
+Choose based on clarity, supported races or state changes, and the contract. Do
+not probe with an unreliable check and then assume the later operation cannot
+fail. Do not catch a broad type merely to call the code “Pythonic.”
+
+Custom exception classes become valuable when callers need to distinguish
+domain failures that built-in types cannot express cleanly. Unit 11 introduces
+classes; this unit deliberately practices precise built-in exceptions first.
+
+## 10. Build a reliable quest command boundary
+
+Use this input set:
+
+```python
+quest_commands = [
+    "OPEN chest",
+    "TAKE",
+    "MOVE north",
+    "CAST lantern",
+    "TAKE key",
+]
+```
+
+Implement the contract in stages:
+
+```python
+SUPPORTED_ACTIONS = {"OPEN", "TAKE", "MOVE"}
+
+
+def parse_quest_command(text, turn_number):
+    """Return normalized (action, target) or raise contextual ValueError."""
+    if not isinstance(text, str):
+        raise TypeError(f"turn {turn_number}: command must be text")
+
+    parts = text.split()
+    if len(parts) != 2:
+        raise ValueError(
+            f"turn {turn_number}: command needs exactly two words"
+        )
+
+    action, target = parts
+    action = action.upper()
+    target = target.lower()
+    if action not in SUPPORTED_ACTIONS:
+        raise ValueError(
+            f"turn {turn_number}: unsupported action {action!r}"
+        )
+    return action, target
+```
+
+Check the parser independently:
+
+```python
+assert parse_quest_command("open Chest", 1) == ("OPEN", "chest")
+assert parse_quest_command("TAKE key", 2) == ("TAKE", "key")
+
+try:
+    parse_quest_command("TAKE", 3)
+except ValueError as error:
+    assert "turn 3" in str(error)
+    assert "two words" in str(error)
+else:
+    raise AssertionError("one-word command should be rejected")
+```
+
+Then add the boundary that can continue after anticipated command mistakes:
+
+```python
+def collect_quest_commands(commands):
+    """Return accepted commands and player-readable rejection messages."""
+    accepted = []
+    rejected = []
+
+    for turn_number, text in enumerate(commands, start=1):
+        try:
+            command = parse_quest_command(text, turn_number)
+        except (TypeError, ValueError) as error:
+            rejected.append(str(error))
+        else:
+            accepted.append(command)
+
+    return accepted, rejected
+
+
+accepted, rejected = collect_quest_commands(quest_commands)
+assert accepted == [
+    ("OPEN", "chest"),
+    ("MOVE", "north"),
+    ("TAKE", "key"),
+]
+assert len(rejected) == 2
+assert all("turn" in message for message in rejected)
+```
+
+Try these controlled changes:
+
+1. replace one string with `None`; confirm `TypeError` is reported with its turn;
+2. add extra spaces around a valid command; explain why `split()` accepts it;
+3. introduce an `AttributeError` after parsing and verify this boundary does not
+   hide it;
+4. change the supported-action set and rerun all checks.
+
+<details class="solution">
+<summary>Show one way to verify the unexpected-defect boundary</summary>
+
+Use a temporary collaborator that fails **after** parsing, then confirm the
+failure is not converted into a command rejection:
+
+```python
+def apply_parsed_command(command):
+    """Represent later game behavior with a deliberate unexpected defect."""
+    action, target = command
+    raise AttributeError(f"unfinished handler for {action} {target}")
+
+
+def run_one_turn(text, turn_number):
+    try:
+        command = parse_quest_command(text, turn_number)
+    except (TypeError, ValueError) as error:
+        return f"command rejected: {error}"
+    return apply_parsed_command(command)
+
+
+try:
+    run_one_turn("OPEN chest", 1)
+except AttributeError as error:
+    print("unexpected defect remained visible:", error)
+```
+
+The parsing handler is still narrow. Remove the deliberate defect after the
+experiment; it is evidence about the boundary, not finished game behavior.
+
+</details>
+
+### Checkpoint: preserve the useful failure
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "exceptions-context",
+  "title": "Keep context without losing the cause",
+  "instructions": "Choose the design that makes failures actionable and honest.",
+  "questions": [
+    {
+      "id": "chain-conversion",
+      "prompt": "Why use `raise ValueError(\"turn 4: ...\") from error` after `int` fails?",
+      "options": [
+        "To hide the conversion failure",
+        "To add turn context while preserving the conversion error as the cause",
+        "To make the value valid",
+        "To continue from the failed line automatically"
+      ],
+      "answer_index": 1,
+      "explanation": "Chaining combines domain location with the original technical reason."
+    },
+    {
+      "id": "explicit-validation",
+      "prompt": "Why use explicit `TypeError` or `ValueError` rather than only `assert` for public input?",
+      "options": [
+        "Assertions always convert text",
+        "Assertions catch every exception",
+        "Explicit validation remains part of the interface and identifies the contract category",
+        "Explicit validation prevents all programming bugs"
+      ],
+      "answer_index": 2,
+      "explanation": "Public validation should not depend on assertion execution and should communicate type or value violations directly."
+    },
+    {
+      "id": "unexpected-defect",
+      "prompt": "The command parser succeeds, then inventory code raises an unexpected `AttributeError`. What should the command boundary do?",
+      "options": [
+        "Relabel it as invalid player input",
+        "Silence it and report success",
+        "Return an empty command",
+        "Let it propagate so the programming defect remains visible"
+      ],
+      "answer_index": 3,
+      "explanation": "The boundary only knows how to handle anticipated command failures; an unrelated defect requires investigation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Key points for debugging
+
+- Return ordinary outcomes; raise when a function cannot honor its documented
+  contract.
+- Choose a specific built-in exception and a safe message that names the broken
+  rule or location.
+- Let exceptions propagate until a boundary knows how to recover, report,
+  retry, skip, clean up, or terminate responsibly.
+- Keep `try` regions narrow and handlers specific so unrelated defects remain
+  visible.
+- Use `else` for success work and `finally` for unavoidable cleanup; do not erase
+  results or exceptions with a `finally` return.
+- Chain contextual exceptions with `raise ... from error`, and use bare `raise`
+  when recording evidence before re-raising the current exception.
+- Use explicit validation for public input and assertions for developer
+  assumptions.
+
+### References and next steps
+
+- [Python tutorial: Handling Exceptions](https://docs.python.org/3/tutorial/errors.html#handling-exceptions)
+- [Python tutorial: Raising Exceptions](https://docs.python.org/3/tutorial/errors.html#raising-exceptions)
+- [Python language reference: The `try` statement](https://docs.python.org/3/reference/compound_stmts.html#the-try-statement)
+- [Python built-in exceptions](https://docs.python.org/3/library/exceptions.html)
+
+The next lesson begins with a program that raises no exception at all. You will
+use expected-versus-actual evidence, state traces, minimal cases, and controlled
+experiments to locate the first wrong decision.

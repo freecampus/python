@@ -1,15 +1,16 @@
 ---
-title: 'Unit Challenge: Run a Data Import Bug Clinic'
-description: Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
+title: 'Unit Challenge: Repair the Glitched Arcade'
+description: Repair Pixel's command parser, movement rules, and exception boundary so valid moves reach the portal while rejected commands keep useful evidence.
 challenge_id: errors-exceptions-debugging.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 2
+assessment_version: 3
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
 - errors-exceptions-debugging
 - unit-challenge
+- debugging-puzzle
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/errors-exceptions-debugging/challenge.ipynb
 course_id: python-foundations
@@ -19,172 +20,560 @@ unit_number: 8
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 8 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
-- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+- **Outcome assessed:** Classify failure evidence, repair exception design and movement logic, and verify one cause at a time without hiding unexpected defects.
+- **Evidence:** Unchanged progressive assertions, a portal-opening round, three contextual rejection messages, one debugging record, and a clean rerun
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
+## 1. Get Pixel to the portal without hiding the glitches
 
-`parse_record` returns normalized valid data, raises contextual `ValueError` failures, and the supplied import loop separates accepted records from rejected evidence.
+An old arcade cabinet controls **Pixel**, a tiny character stranded behind a
+glitchy joystick. Every accepted command moves Pixel on a coordinate grid. The
+portal opens only when the final position is exactly `(2, 1)`.
 
-**Scenario:** A multilingual CSV import contains missing names, invalid scores, and malformed rows. Build a small parser that rejects anticipated record problems with useful context while preserving unexpected failures.
+The cabinet has this command tape:
 
-::: {.callout-note title="Work independently, but not without support"}
-Use the starter contract, run one group of checks at a time, and open hints only
-after you can state the evidence blocking your next step.
+```python
+commands = [
+    "UP 2",
+    "RIGHT 3",
+    "LEFT many",
+    "JUMP 1",
+    "DOWN 1",
+    "LEFT 1",
+    "RIGHT 0",
+]
+
+portal = (2, 1)
+```
+
+Some commands are valid moves. Others should be rejected with the turn number
+and a useful reason. The supplied implementation runs, but the portal stays
+dark. Your job is to use the staged evidence to repair the command boundary and
+the silent movement bug.
+
+At the end, the game should report:
+
+```text
+Pixel stopped at (2, 1).
+Rejected commands: 3
+Portal opened!
+```
+
+::: {.callout-note title="You have a repair manual, not an answer key"}
+Work on one subsystem at a time. Run the closest checks, state a hypothesis,
+make one change, and rerun earlier checks. Open hints only after you can name the
+exact assertion, exception, or value blocking you.
 :::
 
-## 2. Understand the acceptance example
+## 2. Read the command and movement rules
 
-Before implementation, restate the normal input, expected result, important
-boundary, and one anticipated failure in your own words.
+### Commands
 
-### Constraints
+- A command is a string containing exactly two whitespace-separated parts.
+- The first part is a direction. Input is case-insensitive and normalizes to
+  `UP`, `RIGHT`, `DOWN`, or `LEFT`.
+- The second part must convert to a **positive** integer. Zero is not positive.
+- Every rejected command raises a contextual `ValueError` containing its
+  1-based turn number.
+- When unpacking or integer conversion raises the original `ValueError`, the
+  contextual error preserves it as `__cause__` with `raise ... from error`.
+- Unsupported direction and non-positive steps are explicit rule failures, so
+  they have no invented lower-level cause.
 
-1. Keep the supplied signature and docstring.
-2. Catch only conversion/key failures that the function can explain.
-3. Chain the new `ValueError` from the original exception.
-4. Do not return partially valid records.
+### Movement
+
+Pixel begins at `(0, 0)`. Coordinates use `(x, y)`:
+
+| Direction | Coordinate change | Example from `(3, 2)` |
+|---|---|---|
+| `UP` | add steps to `y` | `UP 2` → `(3, 4)` |
+| `RIGHT` | add steps to `x` | `RIGHT 2` → `(5, 2)` |
+| `DOWN` | subtract steps from `y` | `DOWN 2` → `(3, 0)` |
+| `LEFT` | subtract steps from `x` | `LEFT 2` → `(1, 2)` |
+
+`move_pixel` receives a validated command and returns a **new tuple**. It does
+not mutate the supplied position.
+
+### Round recovery
+
+`play_round` parses each command in encounter order. It catches only an
+anticipated parser `ValueError`, records the message, and continues to the next
+turn. Movement happens outside that narrow `try` block. If movement code has an
+unexpected defect, that defect must remain visible instead of being called bad
+player input.
+
+For the supplied tape:
+
+- turns 3, 4, and 7 are rejected;
+- the four accepted moves are `UP 2`, `RIGHT 3`, `DOWN 1`, and `LEFT 1`;
+- accepted moves lead `(0, 0) → (0, 2) → (3, 2) → (3, 1) → (2, 1)`; and
+- the input list and strings remain unchanged.
 
 ## 3. Start from the contract
 
+Run this starter unchanged. It is valid Python and intentionally looks
+plausible. Let the assertions reveal which promises it violates before editing.
+Preserve the three public names, signatures, and docstrings.
+
 ```python
-def parse_record(record, line_number):
-    """Return a normalized name/score record or raise contextual ValueError."""
-    raise NotImplementedError
+VALID_DIRECTIONS = {"UP", "RIGHT", "DOWN", "LEFT"}
 
 
-rows = [
-    {"name": " Ada ", "score": "9"},
-    {"name": "", "score": "7"},
-    {"name": "Lin", "score": "many"},
-]
+def parse_command(text, turn):
+    """Return a normalized (direction, steps) tuple or raise contextual ValueError."""
+    try:
+        direction, raw_steps = text.split()
+    except ValueError:
+        raise ValueError(f"turn {turn}: command needs exactly two parts")
 
-accepted = []
-rejected = []
+    direction = direction.upper()
+    if direction not in VALID_DIRECTIONS:
+        raise ValueError(f"turn {turn}: unsupported direction {direction!r}")
+
+    try:
+        steps = int(raw_steps)
+    except ValueError:
+        raise ValueError(f"turn {turn}: steps must be an integer")
+
+    if steps < 0:
+        raise ValueError(f"turn {turn}: steps must be positive")
+    return direction, steps
+
+
+def move_pixel(position, command):
+    """Return Pixel's new position after one validated command."""
+    x, y = position
+    direction, steps = command
+
+    if direction == "UP":
+        y += steps
+    elif direction == "RIGHT":
+        x += steps
+    elif direction == "DOWN":
+        y -= steps
+    elif direction == "LEFT":
+        x += steps
+    return x, y
+
+
+def play_round(commands, portal):
+    """Return final position, rejected messages, and whether the portal opened."""
+    position = (0, 0)
+    rejected = []
+
+    for turn, text in enumerate(commands, start=1):
+        try:
+            command = parse_command(text, turn)
+            position = move_pixel(position, command)
+        except Exception as error:
+            rejected.append(str(error))
+
+    return position, rejected, position == portal
 ```
 
-## 4. Build in small stages
+Do not list possible repairs yet. First run the parser checks in Section 5 and
+keep the first failure. A failed check is a map to one contract boundary.
 
-1. Make the smallest normal case observable.
-2. Run the nearest check and read its complete failure evidence.
-3. Add one boundary behavior without weakening earlier checks.
-4. Restart and run the complete artifact from top to bottom.
+## 4. Isolate one arcade subsystem at a time
+
+Treat the arcade as three cooperating systems:
+
+| Subsystem | Input | Normal result | Anticipated failure | Focused evidence |
+|---|---|---|---|---|
+| parser | text and turn | normalized tuple | contextual `ValueError` | return value, message, `__cause__` |
+| movement | position and validated command | new position | none for valid commands | before/after coordinates |
+| round runner | command sequence and portal | final tuple, messages, opened flag | parser rejection and continuation | accepted path, rejection count, final state |
+
+Follow this order:
+
+1. **Normalization:** make valid lower/mixed-case commands return uppercase
+   directions and integer steps.
+2. **Command shape and conversion:** inspect the new error and its original
+   cause separately.
+3. **Domain validation:** reject unsupported directions, zero, and negatives.
+4. **Coordinates:** verify one direction at a time from the same starting point.
+5. **Minimal regression:** reduce the wrong round to one `LEFT` move.
+6. **Recovery boundary:** parse inside the protected region, then move outside
+   it.
+7. **Integration:** run the supplied tape and confirm final position, rejection
+   evidence, input ownership, and portal state.
+
+For one defect, use this investigation loop:
+
+```text
+Reproduce -> copy exact evidence -> state one cause -> change one line or boundary
+          -> rerun the focused check -> rerun all earlier checks
+```
+
+::: {.callout-warning title="Do not edit the expected values to create green output"}
+If an assertion surprises you, compare it with the written command or movement
+rule. Repair an incorrect oracle only when you can demonstrate that the written
+contract contradicts it.
+:::
 
 ## 5. Run progressive assertions
 
+Run each stage after the previous stage passes. The helper below captures the
+specific exception and fails clearly when no `ValueError` is raised:
+
 ```python
-assert parse_record({"name": " Ada ", "score": "9"}, 1) == {
-    "name": "Ada",
-    "score": 9,
-}
-
-for line_number, row in enumerate(rows, start=1):
+def captured_value_error(action):
+    """Run action and return its ValueError, or fail if none is raised."""
     try:
-        accepted.append(parse_record(row, line_number))
+        action()
     except ValueError as error:
-        rejected.append(str(error))
-
-assert accepted == [{"name": "Ada", "score": 9}]
-assert len(rejected) == 2
-assert all("line " in message for message in rejected)
+        return error
+    raise AssertionError("expected ValueError")
 ```
 
-::: {.callout-warning title="Do not edit expected values to create a pass"}
-If a check appears wrong, explain the contract conflict before changing either
-side. Otherwise, repair the implementation and preserve the check.
-:::
+### Stage A: normalize valid commands
+
+```python
+assert parse_command("UP 2", 1) == ("UP", 2)
+assert parse_command("left 3", 2) == ("LEFT", 3)
+assert parse_command("  Right   4  ", 3) == ("RIGHT", 4)
+assert parse_command("dOwN 1", 4) == ("DOWN", 1)
+```
+
+### Stage B: preserve a malformed-shape cause
+
+Unpacking one or three parts raises the lower-level `ValueError`. Add turn
+context without losing that cause:
+
+```python
+shape_error = captured_value_error(lambda: parse_command("UP", 5))
+assert "turn 5" in str(shape_error)
+assert "two" in str(shape_error) or "parts" in str(shape_error)
+assert isinstance(shape_error.__cause__, ValueError)
+
+extra_part_error = captured_value_error(lambda: parse_command("UP 2 NOW", 6))
+assert "turn 6" in str(extra_part_error)
+assert isinstance(extra_part_error.__cause__, ValueError)
+```
+
+### Stage C: preserve an integer-conversion cause
+
+```python
+conversion_error = captured_value_error(lambda: parse_command("LEFT many", 3))
+assert "turn 3" in str(conversion_error)
+assert "integer" in str(conversion_error)
+assert isinstance(conversion_error.__cause__, ValueError)
+assert "many" in str(conversion_error.__cause__)
+```
+
+### Stage D: reject unsupported and non-positive moves
+
+These are direct contract decisions, not translated lower-level failures:
+
+```python
+direction_error = captured_value_error(lambda: parse_command("JUMP 1", 4))
+assert "turn 4" in str(direction_error)
+assert "JUMP" in str(direction_error)
+assert direction_error.__cause__ is None
+
+zero_error = captured_value_error(lambda: parse_command("RIGHT 0", 7))
+assert "positive" in str(zero_error)
+assert zero_error.__cause__ is None
+
+negative_error = captured_value_error(lambda: parse_command("DOWN -2", 8))
+assert "turn 8" in str(negative_error)
+assert "positive" in str(negative_error)
+```
+
+### Stage E: move in all four directions
+
+```python
+origin = (3, 2)
+assert move_pixel(origin, ("UP", 2)) == (3, 4)
+assert move_pixel(origin, ("RIGHT", 2)) == (5, 2)
+assert move_pixel(origin, ("DOWN", 2)) == (3, 0)
+assert move_pixel(origin, ("LEFT", 2)) == (1, 2)
+assert origin == (3, 2)
+```
+
+Keep this smallest regression check even after the full round passes:
+
+```python
+assert move_pixel((3, 1), ("LEFT", 1)) == (2, 1)
+```
+
+### Stage F: reject bad commands and keep playing
+
+```python
+commands_before = commands.copy()
+position, rejected, opened = play_round(commands, portal)
+
+assert position == (2, 1)
+assert len(rejected) == 3
+assert "turn 3" in rejected[0]
+assert "turn 4" in rejected[1]
+assert "turn 7" in rejected[2]
+assert opened is True
+assert commands == commands_before
+assert portal == (2, 1)
+```
+
+Confirm the round boundary does not hide a movement defect. Temporarily replace
+`move_pixel` with a version that raises `RuntimeError`, call `play_round`, and
+observe that the failure propagates. Restore the real function before the full
+rerun. Do not add a `RuntimeError` handler merely to make this experiment quiet.
+
+Finally, create a short command list of your own. Predict every accepted move,
+every rejection, and the final position on paper, then add assertions for its
+result without changing any supplied expected values.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
 <summary>Hint 1</summary>
 
-Normalize the name, then reject it explicitly if it is empty.
+Let the failing assertion identify the subsystem. `__cause__` belongs to parser
+translation, a wrong coordinate belongs to movement, and a swallowed
+`RuntimeError` belongs to the round's `try` boundary. Do not repair all three at
+once.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Wrap the score lookup/conversion in a narrow `try` block.
+When Python itself raises during unpacking or `int`, retain that exception after
+adding turn context. “Positive” excludes zero. `LEFT` and `RIGHT` must use
+opposite x-coordinate operations. The round can catch parser `ValueError`
+without placing movement in the same protected block.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-Use `raise ValueError(f"line {line_number}: ...") from error` to preserve the original cause.
+Fill only the missing decisions in these focused shapes:
+
+```python
+try:
+    direction, raw_steps = text.split()
+except ValueError as error:
+    raise ValueError(...) from error
+
+if steps <= 0:  # Replace the comparison if your evidence supports another one.
+    raise ValueError(...)
+
+elif direction == "LEFT":
+    x = ...  # Replace the value with the intended coordinate update.
+
+try:
+    command = parse_command(text, turn)
+except ValueError as error:
+    rejected.append(...)
+else:
+    position = move_pixel(position, command)
+```
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing check. Record its inputs, actual result or exception,
-expected result, one hypothesis, one controlled change, and the verified rerun.
+Preserve one failure that changed your understanding. The one-move `LEFT` check
+is a good candidate because it removes parsing, the loop, and the portal while
+retaining the coordinate defect.
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
-|---|---|---|---|---|
-| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+| Reproduction | Actual evidence | Hypothesis | One change | Focused rerun | Full rerun | Regression check |
+|---|---|---|---|---|---|---|
+| exact call/check | value, message, or cause | one mechanism that could be false | one line or boundary | nearest check result | all earlier stages | smallest permanent check |
 
-## 8. Compare with a solution path
+Example evidence should be specific:
 
-<details>
-<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
-
-```python
-def parse_record(record, line_number):
-    """Return a normalized name/score record or raise contextual ValueError."""
-    name = record.get("name", "").strip()
-    if not name:
-        raise ValueError(f"line {line_number}: name is empty")
-    try:
-        score = int(record["score"])
-    except (KeyError, ValueError) as error:
-        raise ValueError(f"line {line_number}: invalid score") from error
-    return {"name": name, "score": score}
+```text
+Reproduction: move_pixel((3, 1), ("LEFT", 1))
+Expected: (2, 1)
+Actual: (4, 1)
+Hypothesis: LEFT uses addition, the same x update as RIGHT.
+Prediction: changing only LEFT to subtraction returns (2, 1); other directions stay unchanged.
 ```
 
-Compare contracts and decisions, not only line-for-line syntax. If your solution
-also satisfies the constraints and checks, explain one trade-off between the
-approaches.
+After every repair, restart the notebook runtime and run from the starter or
+your final definitions through all progressive assertions. A portal that opens
+only because an old function remains in memory is not reliable evidence.
+
+## 8. Compare with a complete solution
+
+<details class="solution">
+<summary>Show the complete arcade repair after attempting every stage</summary>
+
+```python
+VALID_DIRECTIONS = {"UP", "RIGHT", "DOWN", "LEFT"}
+
+
+def parse_command(text, turn):
+    """Return a normalized (direction, steps) tuple or raise contextual ValueError."""
+    try:
+        direction, raw_steps = text.split()
+    except ValueError as error:
+        raise ValueError(
+            f"turn {turn}: command needs exactly two parts"
+        ) from error
+
+    direction = direction.upper()
+    if direction not in VALID_DIRECTIONS:
+        raise ValueError(
+            f"turn {turn}: unsupported direction {direction!r}"
+        )
+
+    try:
+        steps = int(raw_steps)
+    except ValueError as error:
+        raise ValueError(
+            f"turn {turn}: steps must be an integer; got {raw_steps!r}"
+        ) from error
+
+    if steps <= 0:
+        raise ValueError(
+            f"turn {turn}: steps must be positive; got {steps}"
+        )
+    return direction, steps
+
+
+def move_pixel(position, command):
+    """Return Pixel's new position after one validated command."""
+    x, y = position
+    direction, steps = command
+
+    if direction == "UP":
+        y += steps
+    elif direction == "RIGHT":
+        x += steps
+    elif direction == "DOWN":
+        y -= steps
+    elif direction == "LEFT":
+        x -= steps
+    else:
+        raise ValueError(f"unvalidated direction reached movement: {direction!r}")
+    return x, y
+
+
+def play_round(commands, portal):
+    """Return final position, rejected messages, and whether the portal opened."""
+    position = (0, 0)
+    rejected = []
+
+    for turn, text in enumerate(commands, start=1):
+        try:
+            command = parse_command(text, turn)
+        except ValueError as error:
+            rejected.append(str(error))
+        else:
+            position = move_pixel(position, command)
+
+    return position, rejected, position == portal
+```
+
+Why the repaired boundaries matter:
+
+- unpacking and integer conversion can fail at a lower level, so chaining keeps
+  both Python's cause and the command's turn context;
+- unsupported direction and non-positive steps are direct parser rules, so no
+  unrelated cause is manufactured;
+- `LEFT` subtracts from x and the tuple returned is new;
+- only parsing sits inside the round's `try`, so an unexpected movement failure
+  still produces honest developer evidence; and
+- the portal result derives from the final position rather than being
+  hard-coded.
+
+Run every assertion from Section 5 unchanged after loading this solution.
 
 </details>
 
-## 9. Check your understanding
+## 9. Predict a changed arcade rule
+
+The cabinet designer proposes two changes:
+
+1. `STAY 1` becomes a supported command that leaves Pixel in place; and
+2. the portal opens if Pixel finishes at Manhattan distance at most one from its
+   center, not only on the exact coordinate.
+
+Before editing:
+
+- Which parser constant, movement branch, docstrings, and assertions change?
+- Should `STAY 0` become valid, or does the positive-step rule still reject it?
+- For portal `(2, 1)`, which neighboring coordinates now open it?
+- Which behavior belongs in a small helper instead of making `play_round` harder
+  to read?
+- Which old assertions should remain unchanged as regression evidence?
+
+Implement the changed rule only after writing examples for exact, adjacent, and
+two-steps-away positions. Do not weaken command validation accidentally while
+adding a new direction.
+
+## 10. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-errors-exceptions-debugging-challenge",
-  "title": "Run a Data Import Bug Clinic readiness check",
-  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "title": "Glitched arcade repair check",
+  "instructions": "Connect each answer to the supplied contract and progressive evidence.",
   "questions": [
     {
-      "id": "design-boundary",
-      "prompt": "What does exception chaining add to the new import error?",
+      "id": "conversion-chain",
+      "prompt": "Why should `LEFT many` use `raise ... from error` after `int` fails?",
       "options": [
-        "It converts every failure into a passing result.",
-        "It retries the row forever.",
-        "It preserves the original failure as the cause while adding record context.",
-        "It removes the traceback."
+        "It makes `many` a valid integer",
+        "It adds turn context while preserving the original conversion failure",
+        "It skips every later command",
+        "It hides the traceback"
       ],
-      "answer_index": 2,
-      "explanation": "It preserves the original failure as the cause while adding record context."
+      "answer_index": 1,
+      "explanation": "The contextual error tells where the command failed, while its cause retains why integer conversion failed."
     },
     {
-      "id": "clean-evidence",
-      "prompt": "What should happen before recording this challenge as complete?",
+      "id": "zero-steps",
+      "prompt": "Why must `RIGHT 0` be rejected?",
       "options": [
-        "The unchanged checks pass from a clean state and the important decisions can be explained.",
-        "The expected values are edited to match the current output.",
-        "Only the final successful line is kept.",
-        "Several unrelated features are added."
+        "Zero is text",
+        "RIGHT is unsupported",
+        "The contract requires a positive integer, and zero is not positive",
+        "Every even number is invalid"
+      ],
+      "answer_index": 2,
+      "explanation": "The correct boundary is `steps <= 0`; a negative-only check accidentally accepts zero."
+    },
+    {
+      "id": "left-reproducer",
+      "prompt": "What does `move_pixel((3, 1), (\"LEFT\", 1)) == (2, 1)` isolate?",
+      "options": [
+        "The LEFT coordinate rule without parsing or round recovery",
+        "Every possible arcade feature",
+        "Only integer conversion",
+        "The browser's progress storage"
       ],
       "answer_index": 0,
-      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+      "explanation": "The minimal call removes other subsystems and directly checks the sign of the x-coordinate update."
+    },
+    {
+      "id": "round-boundary",
+      "prompt": "Why does `play_round` catch parser `ValueError` but move outside the `try` block?",
+      "options": [
+        "Movement can never fail",
+        "A broader block runs faster",
+        "It converts every defect into a portal success",
+        "Expected command mistakes can be recorded, while unexpected movement defects remain visible"
+      ],
+      "answer_index": 3,
+      "explanation": "The handler is responsible for bad commands, not for hiding faults in movement code."
+    },
+    {
+      "id": "clean-portal",
+      "prompt": "Which evidence most strongly supports the final repair?",
+      "options": [
+        "The portal opened once before the last edit",
+        "From a clean run, all unchanged staged checks pass, three turns are rejected, and Pixel ends at `(2, 1)`",
+        "Expected values were changed to match output",
+        "Unexpected exceptions no longer appear because all are caught"
+      ],
+      "answer_index": 1,
+      "explanation": "A clean, complete rerun connects parser, movement, recovery, and final state to the written contract."
     }
   ]
 }
@@ -192,17 +581,18 @@ approaches.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 10. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | Acceptance examples and progressive checks pass unchanged. |
-| Scope | The artifact follows the constraints without unrelated features. |
-| Reasoning | Important values, boundaries, and design choices can be traced. |
-| Debugging | One record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+| Parser | Normalization, shape, conversion, direction, and positive-step checks pass unchanged. |
+| Movement | Four directions and the minimal `LEFT` regression behave as specified without input mutation. |
+| Boundary | Three anticipated command failures are recorded, play continues, and an unexpected movement defect would propagate. |
+| Payoff | Pixel finishes at `(2, 1)` and the computed portal flag is true. |
+| Reasoning | One debugging record connects exact evidence, one hypothesis, one controlled change, and focused/full reruns. |
+| Reproducibility | The definitions and all assertions pass after a clean restart and top-to-bottom run. |
 
 This button stores a self-reported marker only in this browser. It does not
 submit work, grade it, verify identity, or issue a certificate.
@@ -219,7 +609,12 @@ submit work, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows design choices without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- Progressive assertions turn a multi-defect program into parser, movement, and
+  boundary investigations.
+- Exception chaining preserves a lower-level cause while adding turn context.
+- Narrow handling continues after anticipated command mistakes without hiding
+  programmer defects.
+- A minimal logic reproduction exposes direction state without needing the
+  whole arcade round.
+- The strongest finish is a clean rerun you can explain, not merely a glowing
+  portal from stale notebook state.

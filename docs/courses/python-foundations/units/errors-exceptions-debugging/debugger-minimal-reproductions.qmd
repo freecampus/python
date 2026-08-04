@@ -1,13 +1,15 @@
 ---
-title: Debugger Tools and Minimal Reproducible Examples
+title: Pause, Inspect, and Shrink a Bug
 lesson_id: errors-exceptions-debugging.debugger-minimal-reproductions
 lesson_order: 40
-description: Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
+description: Choose a debugging tool, pause before a suspicious line, inspect frames and state, and reduce a failure to a safe complete reproduction.
 execute:
   echo: true
 categories:
 - python-foundations
 - errors-exceptions-debugging
+- debugger
+- minimal-reproduction
 order: 40
 colab_notebook: notebooks/courses/python-foundations/units/errors-exceptions-debugging/debugger-minimal-reproductions.ipynb
 course_id: python-foundations
@@ -16,106 +18,184 @@ unit_number: 8
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Shrink a bug into the smallest code that still shows the problem.
-- **Practice in:** Generated Colab notebook and a local project when appropriate
+- **Estimated time:** 4–5 hours
+- **You will learn:** Choose between prints, assertions, traces, and a debugger; pause before a suspicious operation; inspect frames and variables; and build a minimal, complete, safe reproduction.
+- **Practice in:** A generated notebook for analysis and a local `.py` file for interactive debugging
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A robot courier should deliver three parcels and finish with seven energy points.
+Instead, it finishes with four:
 
-A useful bug report must be small enough to understand and complete enough for another person to reproduce. Shrinking a failure separates its cause from unrelated application details.
+```python
+def delivery_cost(distance, fragile):
+    """Return energy spent for one delivery."""
+    cost = distance * 2
+    if fragile:
+        cost += 1
+    return cost
 
-::: {.callout-note title="Prediction"}
-Before running the example, write the output or failure you expect and identify the line that will produce it.
+
+def run_route(parcels, starting_energy):
+    """Return remaining energy after delivering every parcel."""
+    energy = starting_energy
+    for parcel in parcels:
+        cost = delivery_cost(parcel["distance"], parcel["fragile"])
+        energy -= cost
+        energy -= 1
+    return energy
+
+
+parcels = [
+    {"name": "map", "distance": 1, "fragile": False},
+    {"name": "lamp", "distance": 2, "fragile": True},
+    {"name": "key", "distance": 1, "fragile": False},
+]
+
+assert run_route(parcels, 16) == 7
+```
+
+You could add prints. You could pause execution. You could shrink the route to
+one parcel. Good debugging is not loyalty to one tool; it is choosing the least
+complicated tool that can answer the current question.
+
+## 1. Match the tool to the uncertainty
+
+| Tool | Best question | Strength | Risk |
+|---|---|---|---|
+| traceback | where did an exception stop, and through which calls? | already produced, structured | absent for silent wrong results |
+| focused `print`/`repr` | what value reaches this point? | fast and portable | noisy output or accidental state changes |
+| assertion | which rule first becomes false? | executable and reusable | needs a known expected condition |
+| state trace | how does selected state change across a loop? | exposes transitions | can collect too much data |
+| debugger | what are locals and call frames at this exact moment? | pause, inspect, step without adding many prints | stepping without a question becomes wandering |
+| minimal reproduction | what is essential to trigger the failure? | removes noise and aids sharing | removing too much can remove the cause |
+
+Start with the smallest question. If one assertion identifies the bad transition,
+a debugger is unnecessary. If values change across nested calls and a loop,
+pausing and stepping may be clearer than adding fifteen prints.
+
+::: {.callout-tip title="Write the debugger question first"}
+Examples: “What is `cost` immediately before energy changes?” or “Which call
+first turns energy below the expected value?” A breakpoint without a question is
+only a pause.
 :::
 
-## 2. Reduce an empty-input failure without removing the failure itself.
+## 2. A breakpoint pauses before the highlighted line executes
+
+Save the opening example as `courier.py`, including a final print:
 
 ```python
-def average(numbers: list[float]) -> float:
-    return sum(numbers) / len(numbers)
-
-print(average([]))
+print("remaining energy:", run_route(parcels, 16))
 ```
 
-### Step-by-step explanation
-
-1. `average([])` creates a call whose local `numbers` is an empty list.
-2. `sum(numbers)` produces `0`, while `len(numbers)` produces `0`.
-3. The division raises `ZeroDivisionError`; the exception type, line, and empty input are the reproduction evidence.
-
-Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
-
-## 3. Debug a contract violation
-
-This version is syntactically valid but communicates or implements the wrong contract:
+In VS Code, select the gutter beside this line inside `run_route`:
 
 ```python
-values = []
-# Hiding the call removes the symptom instead of explaining it.
-if values:
-    print(sum(values) / len(values))
+energy -= cost
 ```
 
-A focused repair is:
+Start a Python debugging session. When execution reaches the breakpoint, that
+line has **not run yet**. Inspect:
 
-```python
-def average(numbers: list[float]) -> float:
-    if not numbers:
-        raise ValueError("average needs at least one number")
-    return sum(numbers) / len(numbers)
+- `parcel`: the current mapping;
+- `cost`: the value returned by `delivery_cost`;
+- `energy`: the value before subtraction;
+- the call stack: module code called `run_route`, which is now paused.
 
-assert average([2.0, 4.0]) == 3.0
-```
+That before/after distinction prevents off-by-one confusion. Step over the line
+once, then compare energy again.
 
-Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
+### The four movements through paused code
 
-## 4. Practice from trace to transfer
+Debugger interfaces use similar actions:
 
-1. Start with a 15-line failing snippet and remove one line at a time while rerunning.
-2. Write an exact four-part report: input, expected result, actual result, traceback.
-3. Ask a partner to reproduce the failure from only your saved example.
+- **Continue** runs until another breakpoint, exception pause, or program end.
+- **Step over** executes the current line and pauses at the next line in the
+  current frame; called functions run without pausing inside them.
+- **Step into** enters a function called by the current line so you can inspect
+  its first executable step.
+- **Step out** finishes the current function and pauses back in its caller.
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the tasks</summary>
+For the courier:
 
-Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
+1. pause before the call to `delivery_cost`;
+2. step into it when you need to verify its formula;
+3. step out once the return value is understood;
+4. step over each energy subtraction;
+5. continue to the next parcel after recording the transition.
 
-</details>
+Stepping every library line is rarely useful. Move deliberately between
+application frames that can answer your hypothesis.
 
-## 5. Check your understanding
+## 3. Inspect locals and the call stack together
+
+A local variable makes sense in the context of its frame. If paused inside
+`delivery_cost`, locals include `distance`, `fragile`, and `cost`. The caller's
+frame contains `parcel` and `energy`.
+
+Use the call-stack panel to select each frame and compare the interface:
+
+| Frame | Inputs or locals to inspect | Contract question |
+|---|---|---|
+| `delivery_cost` | `distance`, `fragile`, `cost` | does one parcel cost match the formula? |
+| `run_route` | `parcel`, `cost`, `energy` | is the returned cost applied exactly once? |
+| module | `parcels`, starting value | did the scenario supply the intended data? |
+
+Expressions entered in a debug console can have side effects. Prefer simple
+observations such as `repr(parcel)`, `cost`, `energy`, or
+`type(parcel).__name__`. Avoid calling methods that mutate a list or mapping
+unless mutation is the planned experiment.
+
+::: {.callout-warning title="Inspect before you edit state"}
+Changing a variable in the debug console can make the current run pass without
+repairing the source. If you deliberately modify state, record it as an
+experiment and restart before verifying the actual fix.
+:::
+
+### Checkpoint: control the pause
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "errors-exceptions-debugging-minimal-reproducible-examples",
-  "title": "Minimal Reproducible Examples checkpoint",
-  "instructions": "Trace the code and contract before choosing.",
+  "id": "debugger-pauses",
+  "title": "Know what the debugger has and has not executed",
+  "instructions": "Choose the action that answers the stated question with the least wandering.",
   "questions": [
     {
-      "id": "complete",
-      "prompt": "Which item makes a small example reproducible rather than merely short?",
+      "id": "before-line",
+      "prompt": "Execution pauses on `energy -= cost`. What does `energy` normally show at that moment?",
       "options": [
-        "A screenshot without code",
-        "The exact input and steps that still trigger the failure",
-        "Removing the failing call",
-        "Renaming every variable"
+        "The value before that highlighted subtraction executes",
+        "Always zero",
+        "The final value after the entire loop",
+        "A syntax error"
       ],
-      "answer_index": 1,
-      "explanation": "A reproducer preserves the inputs and steps needed to observe the same failure."
+      "answer_index": 0,
+      "explanation": "A line breakpoint pauses before the highlighted operation, so stepping over reveals its after-state."
     },
     {
-      "id": "reduce",
-      "prompt": "When should you stop removing code?",
+      "id": "step-into",
+      "prompt": "You need to inspect how `delivery_cost(...)` calculates its return. Which action fits?",
       "options": [
-        "When the file is empty",
-        "As soon as line count is below ten",
-        "When the same focused failure still appears and the remaining setup is necessary",
-        "Before rerunning"
+        "Stop and delete the function",
+        "Continue to program end",
+        "Step into the function call",
+        "Change every local variable"
       ],
       "answer_index": 2,
-      "explanation": "Minimal means no irrelevant part remains, not that all context has disappeared."
+      "explanation": "Step into enters the called function so its parameters and internal transitions become visible."
+    },
+    {
+      "id": "frame-context",
+      "prompt": "Why select different call-stack frames while paused?",
+      "options": [
+        "To rewrite Python's library",
+        "To inspect locals in the function that owns them and compare caller/callee contracts",
+        "To make the traceback disappear",
+        "To skip all verification"
+      ],
+      "answer_index": 1,
+      "explanation": "Each frame has its own local state; moving between frames shows values passed across boundaries."
     }
   ]
 }
@@ -123,13 +203,443 @@ Write one ordinary acceptance example and one boundary before implementation. Ma
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 4. Stop only on the iteration that matters
 
-- State the behavior contract before selecting syntax or tools.
-- Trace the values and boundaries that provide observable evidence.
-- Preserve one useful failure and verify the repair from a clean state.
+The third parcel may be the only failing case in a hundred-item route. Clicking
+Continue ninety-nine times is not an investigation strategy. Use a **conditional
+breakpoint** when your editor supports it, for example:
 
-## References
+```text
+parcel["name"] == "key"
+```
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+The debugger evaluates that condition at the breakpoint and pauses only when it
+is true. Other useful conditions include:
+
+```text
+energy < 5
+cost != expected_cost
+turn == 7
+```
+
+Keep conditions free of side effects. A condition should observe the program,
+not modify it.
+
+You can also encode a temporary condition in source:
+
+```python
+for parcel in parcels:
+    cost = delivery_cost(parcel["distance"], parcel["fragile"])
+    if parcel["name"] == "key":
+        print("key parcel state:", repr(parcel), cost)
+```
+
+The source version is portable and easy to show in a notebook. An editor
+conditional breakpoint keeps production logic untouched. Choose based on the
+environment and whether the observation should remain in code.
+
+## 5. Use `breakpoint()` and `pdb` in a local script
+
+Python's built-in `breakpoint()` enters the configured debugger at that call
+site. Put it in a local script only while investigating:
+
+```python
+def run_route_with_pause(parcels, starting_energy):
+    energy = starting_energy
+    for parcel in parcels:
+        cost = delivery_cost(parcel["distance"], parcel["fragile"])
+        breakpoint()
+        energy -= cost
+        energy -= 1
+    return energy
+```
+
+Do **not** run that cell in hosted course notebooks unless you know how the
+environment handles interactive debugging. Save a complete script and run it
+locally instead.
+
+You can also start any saved script under Python's standard debugger without
+editing the file:
+
+```bash
+python -m pdb courier.py
+```
+
+At the `(Pdb)` prompt, these commands cover a focused first session:
+
+| Command | Meaning |
+|---|---|
+| `l` | list source around the current line |
+| `p expression` | print one expression |
+| `pp expression` | pretty-print one expression |
+| `n` | next line in the current frame (step over) |
+| `s` | step into a called function |
+| `r` | run until the current function returns (step out) |
+| `c` | continue until another stop |
+| `where` | show the current stack |
+| `up` / `down` | select an older/newer frame |
+| `q` | quit the debugging session |
+
+A short session might look like:
+
+```text
+(Pdb) p parcel
+{'name': 'map', 'distance': 1, 'fragile': False}
+(Pdb) p cost
+2
+(Pdb) p energy
+16
+(Pdb) n
+(Pdb) p energy
+14
+```
+
+The command letters are less important than the reasoning: pause before the
+transition, inspect inputs, execute one operation, inspect the after-state, and
+compare it with the expected transition.
+
+Remove stray `breakpoint()` calls after investigating. A forgotten breakpoint
+can halt another user's run unexpectedly.
+
+## 6. The courier's first divergence
+
+Trace the opening route without changing it:
+
+| Parcel | Cost returned | Energy before | Expected after | Actual after |
+|---|---:|---:|---:|---:|
+| map | 2 | 16 | 14 | 13 |
+| lamp | 5 | 13 | 8 | 7 |
+| key | 2 | 7 | 5 | 4 |
+
+For the code shown here, the first divergence occurs immediately after the
+correct delivery cost is applied: an extra `energy -= 1` charges an undocumented
+fee.
+
+Repair the earliest wrong transition:
+
+```python
+def run_route(parcels, starting_energy):
+    """Return remaining energy after delivering every parcel."""
+    energy = starting_energy
+    for parcel in parcels:
+        cost = delivery_cost(parcel["distance"], parcel["fragile"])
+        energy -= cost
+    return energy
+```
+
+Calculate the oracle independently: delivery costs are `2`, `5`, and `2`,
+totaling `9`, so starting at `16` leaves `7`. If an issue report had claimed the
+answer should be `6`, this calculation and the per-parcel trace would challenge
+the report itself. Debugging includes verifying the oracle.
+
+Use corrected evidence:
+
+```python
+assert delivery_cost(1, False) == 2
+assert delivery_cost(2, True) == 5
+assert run_route([], 16) == 16
+assert run_route([{"name": "map", "distance": 1, "fragile": False}], 16) == 14
+assert run_route(parcels, 16) == 7
+```
+
+This is a realistic lesson: user reports, comments, and assertions can be wrong.
+When actual transitions consistently contradict the stated expectation, return
+to the contract and recalculate it independently before forcing code to match.
+
+### Checkpoint: trust evidence, verify the oracle
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "debugger-tool-choice",
+  "title": "Choose evidence over the initial story",
+  "instructions": "Decide which tool or conclusion matches the uncertainty.",
+  "questions": [
+    {
+      "id": "wrong-oracle",
+      "prompt": "The debugger shows correct per-parcel costs totaling 9 from starting energy 16, but the report expects 6. What should happen next?",
+      "options": [
+        "Add an unexplained subtraction to force 6",
+        "Recalculate and verify the expected result against the contract",
+        "Ignore all observed values",
+        "Catch AssertionError and report success"
+      ],
+      "answer_index": 1,
+      "explanation": "An oracle is part of the investigation and must also withstand independent checking."
+    },
+    {
+      "id": "conditional-break",
+      "prompt": "A bug appears only for the parcel named `key`. What is a focused debugger stop condition?",
+      "options": [
+        "`parcel[\"name\"] == \"key\"`",
+        "`True` at every line in every library",
+        "Mutate the parcel inside the condition",
+        "Delete all other parcels before preserving the original case"
+      ],
+      "answer_index": 0,
+      "explanation": "A side-effect-free condition pauses only when the relevant iteration reaches the chosen line."
+    },
+    {
+      "id": "breakpoint-cleanup",
+      "prompt": "What should you do with temporary `breakpoint()` calls after the source repair is verified?",
+      "options": [
+        "Add one to every function",
+        "Commit them without explanation",
+        "Replace all assertions with them",
+        "Remove them so normal runs do not halt unexpectedly"
+      ],
+      "answer_index": 3,
+      "explanation": "Temporary interactive stops should not surprise later users or automated runs."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. A minimal reproduction is small **and complete**
+
+Imagine the real courier application has menus, colors, files, twenty parcel
+fields, and logging. The failure only depends on distance, fragility, starting
+energy, and the extra subtraction. A useful reproduction keeps those pieces:
+
+```python
+def delivery_cost(distance, fragile):
+    cost = distance * 2
+    if fragile:
+        cost += 1
+    return cost
+
+
+def buggy_remaining_energy(distance, fragile, starting_energy):
+    cost = delivery_cost(distance, fragile)
+    energy = starting_energy - cost
+    energy -= 1
+    return energy
+
+
+assert buggy_remaining_energy(1, False, 16) == 14
+```
+
+It is:
+
+- **minimal enough** to expose one parcel and one extra transition;
+- **complete** because every name, function, input, and expected value needed to
+  run is included;
+- **deterministic** because the same input produces the same failure;
+- **safe to share** because it contains no secret paths, customer addresses, or
+  access tokens.
+
+A fragment such as `energy -= 1` is small but not complete. A full production
+repository may be complete but not minimal. Aim for the smallest standalone
+program that preserves the same behavior.
+
+## 8. Reduce one dimension at a time
+
+Start from a copied reproduction, not the only production artifact. Confirm it
+still fails, then reduce deliberately:
+
+1. remove unrelated parcels;
+2. remove unused mapping fields;
+3. replace file or network input with a literal value of the same relevant
+   shape;
+4. inline a helper only if the failure remains;
+5. remove formatting, UI, or logging;
+6. rerun after **every** reduction;
+7. restore the last removed element if the failure disappears.
+
+Track results:
+
+| Reduction | Prediction | Still fails? | Conclusion |
+|---|---|---:|---|
+| keep one map parcel | extra charge should remain | yes | multiple parcels are unnecessary |
+| remove `name` | calculation should remain | yes | name is irrelevant to this failure |
+| replace `fragile` with `False` | extra charge should remain | yes | fragile branch is not required |
+| remove second subtraction | failure should disappear | no | subtraction is causally required |
+
+The last row is both a reduction and a controlled experiment. It connects one
+line to the observed mismatch.
+
+::: {.callout-warning title="Do not reduce away the environment too early"}
+If a bug depends on Python version, operating system, package version, working
+directory, locale, timing, or call order, that detail is part of the
+reproduction. Minimal means no irrelevant pieces, not no context.
+:::
+
+## 9. Write a bug report someone else can run
+
+A useful report includes:
+
+```text
+Title: Courier charges an extra energy point per parcel
+
+Environment:
+- Python version:
+- operating system/editor if relevant:
+- clean command used to run:
+
+Steps:
+1. Save the attached complete example as courier_minimal.py.
+2. Run `python courier_minimal.py`.
+
+Expected:
+One non-fragile distance-1 delivery costs 2; 16 energy should leave 14.
+
+Actual:
+The assertion fails because the function returns 13.
+
+First divergence:
+Cost is correctly 2. Energy becomes 14, then an additional subtraction makes 13.
+
+Attachment:
+Minimal complete example with synthetic, non-sensitive data.
+```
+
+Include the exact traceback for an exception or `repr` of surprising values. Do
+not paraphrase `TypeError` as “it crashed” or silently edit the message.
+
+Sanitize without changing shape. Replace a real path with
+`/example/project/data.txt`, a token with `<redacted-token>`, and personal data
+with synthetic records. Rerun the sanitized reproduction to prove it still
+fails.
+
+## 10. Run a debugger-to-reproduction lab
+
+The courier gets a new rule: fragile parcels cost one extra point only when
+distance is greater than one. The implementation applies the fee to every
+fragile parcel:
+
+```python
+def delivery_cost(distance, fragile):
+    cost = distance * 2
+    if fragile:
+        cost += 1
+    return cost
+
+
+route = [
+    {"name": "glass key", "distance": 1, "fragile": True, "color": "blue"},
+    {"name": "lamp", "distance": 3, "fragile": True, "color": "gold"},
+    {"name": "map", "distance": 4, "fragile": False, "color": "green"},
+]
+```
+
+Complete the lab:
+
+1. write expected costs for all three parcels;
+2. save a complete local script and reproduce the wrong first cost;
+3. pause before `cost += 1` and inspect `distance` and `fragile`;
+4. use a condition to pause only when `distance == 1`;
+5. step over the fee and record before/after state;
+6. reduce to one function call and one assertion;
+7. remove `name`, `color`, and the other parcels one at a time, rerunning each
+   time;
+8. state a falsifiable hypothesis;
+9. repair the condition and add checks for both sides of the boundary;
+10. remove temporary breakpoints and run the saved script normally.
+
+Target regression checks:
+
+```python
+assert delivery_cost(1, False) == 2
+assert delivery_cost(1, True) == 2
+assert delivery_cost(2, True) == 5
+assert delivery_cost(3, True) == 7
+```
+
+Do not copy those expected values blindly. Explain each from the updated rule.
+
+<details class="solution">
+<summary>Show the minimal repair after finishing the debugger trace</summary>
+
+The fee needs both conditions:
+
+```python
+def delivery_cost(distance, fragile):
+    """Return energy spent under the distance-sensitive fragile rule."""
+    cost = distance * 2
+    if fragile and distance > 1:
+        cost += 1
+    return cost
+```
+
+The one-parcel failure `delivery_cost(1, True) == 2` is the most focused
+regression. The distance-two and non-fragile checks protect the neighboring
+branches. Remove debugger stops, save the script, and run all four checks in a
+normal process before comparing your result.
+
+</details>
+
+### Checkpoint: shrink without losing the cause
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "debugger-minimal-reproduction",
+  "title": "Build a runnable bug report",
+  "instructions": "Choose what makes a reproduction useful to another investigator.",
+  "questions": [
+    {
+      "id": "minimal-complete",
+      "prompt": "Which description best fits a minimal complete reproduction?",
+      "options": [
+        "One suspicious line with all names undefined",
+        "The entire production system and private database",
+        "The smallest standalone code, input, and expected behavior that still trigger the same failure",
+        "A screenshot saying 'broken'"
+      ],
+      "answer_index": 2,
+      "explanation": "Useful minimal examples remove noise while retaining everything required to run and observe the same behavior."
+    },
+    {
+      "id": "reduce-rerun",
+      "prompt": "Why rerun after every removal while reducing a case?",
+      "options": [
+        "To detect the exact reduction that removed the failure",
+        "To guarantee the environment is irrelevant",
+        "To make the file longer",
+        "To avoid stating an expected result"
+      ],
+      "answer_index": 0,
+      "explanation": "One-at-a-time reductions reveal which details are causally required and which are noise."
+    },
+    {
+      "id": "safe-share",
+      "prompt": "What should happen after replacing sensitive values with synthetic ones?",
+      "options": [
+        "Assume the bug remains without running",
+        "Publish the original secrets too",
+        "Delete the expected result",
+        "Rerun the sanitized example to confirm it preserves the failure"
+      ],
+      "answer_index": 3,
+      "explanation": "Sanitization can alter behavior, so the safe version must be verified as a faithful reproduction."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Key points for the arcade challenge
+
+- Choose the simplest tool that can answer the current uncertainty.
+- A breakpoint normally pauses before its highlighted line; inspect, step once,
+  and compare the after-state with a predicted transition.
+- Use frames to understand caller and callee state, and conditional breakpoints
+  to reach the relevant iteration.
+- `breakpoint()` and `python -m pdb script.py` are useful local options; remove
+  temporary stops after the investigation.
+- Verify the oracle as carefully as the implementation.
+- A minimal reproduction must be small, complete, deterministic, safe, and
+  independently runnable.
+- Reduce one dimension at a time and rerun after every change.
+
+### References and next steps
+
+- [Python documentation: `pdb` — The Python Debugger](https://docs.python.org/3/library/pdb.html)
+- [Python documentation: built-in `breakpoint()`](https://docs.python.org/3/library/functions.html#breakpoint)
+- [VS Code documentation: Python debugging](https://code.visualstudio.com/docs/python/debugging)
+- [VS Code Python tutorial: run and debug](https://code.visualstudio.com/docs/python/python-tutorial#_run-hello-world)
+
+The unit challenge supplies a small arcade with several independent defects.
+Progressive assertions and a hint ladder will help you isolate parsing,
+movement, and exception-boundary behavior without hiding unexpected failures.

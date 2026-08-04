@@ -1,6 +1,6 @@
 ---
 title: Errors, Exceptions, and Debugging Overview
-description: Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
+description: Classify failures, read tracebacks, handle expected exceptions, and repair bugs through small evidence-backed experiments.
 course_id: python-foundations
 unit_id: errors-exceptions-debugging
 unit_number: 8
@@ -13,54 +13,170 @@ colab_notebook: notebooks/courses/python-foundations/units/errors-exceptions-deb
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 8
-- **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 18–23 hours including the challenge
+- **Unit outcome:** Classify syntax failures, runtime exceptions, and wrong results; read tracebacks across function calls; raise and handle only anticipated exceptions with useful context; and reproduce, inspect, isolate, repair, and verify a bug one evidence-backed hypothesis at a time.
+- **Practice in:** Generated Colab notebooks and a local Python file when using a debugger
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. Welcome to the arcade repair desk
 
-Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
+An arcade machine can fail in at least three noticeably different ways:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+- its game script may not start because Python cannot understand the code;
+- it may start and then stop when a player enters an unexpected command; or
+- it may finish without an error while moving the character in the wrong direction.
 
-## 2. Before you start
+Those are not variations of one problem. They leave different evidence and call
+for different first moves. This unit teaches you to treat a failure as an
+investigation rather than a guessing contest.
 
-**Prior knowledge:** Complete Unit 7 and bring its challenge notes and debugging record.
+By the end, red tracebacks should feel like structured reports. A silent wrong
+answer should prompt you to write down the expected result and find the first
+place where state diverges. An anticipated bad input should lead to one narrow,
+useful exception boundary—not a blanket `try` block that hides every defect.
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+## 2. Follow the evidence loop
 
-## 3. Lessons
+::: {.concept-diagram}
+The investigation repeats until the repaired behavior survives both the original
+case and nearby regression checks.
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Syntax Errors, Runtime Exceptions, and Logic Bugs](failure-categories-tracebacks.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Raising and Handling Exceptions](raising-handling-exceptions.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [A Repeatable Debugging Method](repeatable-debugging-method.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Debugger Tools and Minimal Reproducible Examples](debugger-minimal-reproductions.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  reproduce["Reproduce"] --> observe["Observe evidence"]
+  observe --> localize["Localize the failure"]
+  localize --> hypothesize["State one hypothesis"]
+  hypothesize --> change["Change one thing"]
+  change --> rerun["Rerun the same case"]
+  rerun --> regression["Run regression checks"]
+  regression -->|still wrong| observe
+  regression -->|stable| done["Record the repair"]
+```
 
-## 4. How to study this unit
-
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
-
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+This loop is intentionally slower than random editing for the first few
+minutes. It is usually much faster over the whole investigation.
 :::
 
-## 5. Unit evidence
+An evidence log makes the loop visible:
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+| Reproduction | Observed evidence | Hypothesis | One change | Verification |
+|---|---|---|---|---|
+| `move_pixel((0, 0), ("LEFT", 1))` | returns `(1, 0)` | the left branch adds instead of subtracts | change that branch only | original case and four direction checks pass |
+
+“The function is broken” is not a useful hypothesis. “The `LEFT` branch uses
+the same update as `RIGHT`” is specific, testable, and can be disproved.
+
+## 3. Your route through the unit
+
+| Step | Lesson | What you will be able to do |
+|---:|---|---|
+| 1 | [Understand Failures and Read Tracebacks](failure-categories-tracebacks.qmd) | Tell syntax failures, runtime exceptions, and wrong results apart; extract evidence from tracebacks and common exception types. |
+| 2 | [Raise Useful Errors and Handle Expected Failures](raising-handling-exceptions.qmd) | Design narrow exception boundaries, add context without erasing causes, and allow unexpected defects to remain visible. |
+| 3 | [Debug One Hypothesis at a Time](repeatable-debugging-method.qmd) | Reproduce a wrong result, localize its first divergence, run controlled experiments, and verify a root-cause repair. |
+| 4 | [Pause, Inspect, and Shrink a Bug](debugger-minimal-reproductions.qmd) | Choose between prints, assertions, a debugger, and a minimal reproduction; inspect program state without changing it accidentally. |
+| 5 | [Unit Challenge: Repair the Glitched Arcade](challenge.qmd) | Repair a command-driven game while preserving useful failures and proving the final behavior with assertions. |
+
+The first two lessons concentrate on failures Python reports. The next two
+concentrate on investigations you must lead. The challenge combines both.
+
+## 4. Bring forward the habits from Unit 7
+
+Unit 7 separated a problem statement from its examples, acceptance rules, and
+algorithm. Keep that separation here. A **logic bug** is visible only when you
+have an oracle: a rule, example, assertion, or independently calculated result
+that says what should have happened.
+
+Before editing code, write these four lines:
+
+```text
+Input:
+Expected behavior:
+Actual behavior:
+Smallest known reproduction:
+```
+
+If one line is unknown, investigate that missing evidence first. Changing code
+before you know the expected behavior can produce a different program without
+producing a correct one.
+
+Unit 9 will add files, paths, and external data. This unit deliberately uses
+small in-memory values so that an input format or operating-system path cannot
+distract from the failure itself.
+
+## 5. Set up two useful practice environments
+
+Use the generated notebook for quick experiments, traceback reading, and
+assertions. Run cells from top to bottom when confirming a repair; old notebook
+state can make deleted code or stale variables appear to work.
+
+For the debugger lesson, also save a complete example as a local `.py` file.
+You can run it normally before introducing the debugger:
+
+```bash
+python courier.py
+```
+
+Then run the same file under Python's debugger:
+
+```bash
+python -m pdb courier.py
+```
+
+The goal is not to memorize a particular editor. It is to understand pauses,
+frames, variables, stepping, and continuation well enough to recognize them in
+Python's `pdb`, VS Code, or another debugger.
+
+::: {.callout-warning title="Do not debug a secret in public evidence"}
+Tracebacks, debugger displays, screenshots, and minimal reproductions can expose
+passwords, tokens, personal records, and local paths. Replace sensitive values
+with harmless examples while preserving the data shape that triggers the bug.
+:::
+
+## 6. Budget time for investigation, not only reading
+
+A realistic pace is four to five hours per main lesson and one to two hours for
+the challenge. That includes typing examples, predicting results, deliberately
+triggering failures, completing labs, and recording one investigation.
+
+For every repair clinic:
+
+1. reproduce the exact failure without editing;
+2. name the category and copy the decisive evidence;
+3. shrink the input or inspect the suspicious state;
+4. state one hypothesis that could be false;
+5. make one controlled change;
+6. rerun the original reproduction;
+7. add a regression check that would fail if the bug returned.
+
+::: {.callout-tip title="Keep one useful failure"}
+Do not erase every failed attempt from your notes. Preserve one failure, the
+hypothesis it challenged, and the evidence that changed your mind. That record
+shows more debugging skill than a final green check by itself.
+:::
+
+## 7. The challenge ahead
+
+Pixel, an arcade character, must follow movement commands and reach a portal.
+The supplied program looks plausible but mishandles invalid commands, one
+direction, and an exception boundary. Progressive assertions will let you
+repair one subsystem at a time without needing a teacher to reveal the answer.
+
+Your final evidence will include:
+
+- a parser that rejects malformed commands with useful context;
+- movement rules that work in all four directions;
+- a game loop that continues after anticipated command mistakes without hiding
+  unexpected programming defects;
+- assertions run from a clean state; and
+- a short evidence log for one repaired defect.
+
+There is no final project or certificate in this release. Both are planned, and
+we will announce them when they are ready. For now, the strongest proof of
+progress is a program you can explain, break deliberately, repair, and rerun.
 
 <!-- fcpython-chapter-lab: end -->

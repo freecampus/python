@@ -1,13 +1,15 @@
 ---
-title: A Repeatable Debugging Method
+title: Debug One Hypothesis at a Time
 lesson_id: errors-exceptions-debugging.repeatable-debugging-method
 lesson_order: 30
-description: Distinguish failure categories, read tracebacks, handle only anticipated failures, and debug one evidence-backed hypothesis at a time.
+description: Reproduce wrong behavior, localize its first divergence, test one falsifiable hypothesis, repair the cause, and verify against regressions.
 execute:
   echo: true
 categories:
 - python-foundations
 - errors-exceptions-debugging
+- debugging-method
+- logic-bugs
 order: 30
 colab_notebook: notebooks/courses/python-foundations/units/errors-exceptions-debugging/repeatable-debugging-method.ipynb
 course_id: python-foundations
@@ -15,172 +17,186 @@ unit_id: errors-exceptions-debugging
 unit_number: 8
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Use print debugging, VS Code breakpoints, and pdb to inspect running programs.
-- **Practice in:** Colab, VS Code, and the terminal
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Turn a wrong result into a stable reproduction, localize its first divergence, test falsifiable hypotheses, and verify a root-cause repair with regression evidence.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
-
-Use print debugging, VS Code breakpoints, and pdb to inspect running programs. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
-
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Debugging Tools** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
-
-## 2. Print Debugging
-
-Inspect variable values and types with small temporary print statements.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-Print statements are sticky notes along a route: they show what happened at each checkpoint.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Print debugging adds temporary observations so you can see what the program knows at a point in time.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+A weekend tournament awards points for wins and a streak bonus for consecutive
+wins. The following function produces a plausible total, raises no exception,
+and is wrong:
 
 ```python
-price = "10"
-print("price:", price, type(price))
-total = int(price) * 2
-print(total)
+def tournament_score(results):
+    """Return 3 points per win plus 2 for each win after the first in a streak."""
+    total = 0
+    streak = 0
+
+    for result in results:
+        if result == "W":
+            streak += 1
+            total += 3 + (2 * streak)
+        else:
+            streak = 0
+
+    return total
+
+
+print(tournament_score(["W", "W", "L", "W"]))
 ```
 
-### Trace it line by line
+The correct total is `11`: three wins contribute nine points, and only the
+second consecutive win contributes a two-point streak bonus. The function
+returns `17`. This lesson is about the work between “wrong” and “fixed.”
 
-1. `price = "10"` — Python evaluates the right-hand expression and binds or updates `price` with the result.
-2. `print("price:", price, type(price))` — Python evaluates the arguments and writes their display form to standard output.
-3. `total = int(price) * 2` — Python evaluates the right-hand expression and binds or updates `total` with the result.
-4. `print(total)` — Python evaluates the arguments and writes their display form to standard output.
+Keep one rule throughout: **each experiment should distinguish between possible
+causes**. Editing several lines and seeing a pass tells you less than changing
+one cause and predicting exactly what new evidence should appear.
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+## 1. Freeze the failure before touching the code
 
-::: {.callout-warning title="Common mistake"}
-Too many print statements create noise. Print the smallest useful value, then remove or replace with logging later.
+A reproducible bug has a known starting state, action, expected result, and
+actual result. Turn the report into an assertion:
+
+```python
+failing_results = ["W", "W", "L", "W"]
+expected_score = 11
+actual_score = tournament_score(failing_results)
+
+print("input:", failing_results)
+print("expected:", expected_score)
+print("actual:", actual_score)
+assert actual_score == expected_score
+```
+
+Do not repair yet. Record:
+
+```text
+Reproduction: tournament_score(["W", "W", "L", "W"])
+Expected: 11, calculated from 3 + (3 + 2) + 0 + 3
+Actual: 17
+Environment: clean notebook run, current saved function
+Frequency: every clean run
+```
+
+If a report cannot be reproduced, that is evidence—not permission to guess.
+Check the exact input representation, random seed, call order, Python version,
+saved file, working directory, configuration, and notebook state. Change one
+environmental factor at a time.
+
+## 2. Establish a control case and nearby boundaries
+
+A **control** is a simple case expected to work. It shows which parts of the
+program are not yet implicated:
+
+```python
+assert tournament_score([]) == 0
+assert tournament_score(["L"]) == 0
+```
+
+Now try the smallest win case:
+
+```python
+print(tournament_score(["W"]))
+```
+
+The contract says one win earns `3`, but the function returns `5`. That smaller
+failure removes loss/reset behavior from suspicion. The defect is already
+present on the first win.
+
+Build a behavior table before editing:
+
+| Input | Expected | Actual before repair | Rule isolated |
+|---|---:|---:|---|
+| `[]` | 0 | 0 | empty tournament |
+| `['L']` | 0 | 0 | a loss scores nothing |
+| `['W']` | 3 | 5 | first win has no streak bonus |
+| `['W', 'W']` | 8 | 12 | second win adds one bonus |
+| `['W', 'L', 'W']` | 6 | 10 | loss resets the streak |
+
+The one-win case is a minimal reproduction: removing its only event makes the
+failure disappear. Smaller input reduces the number of states you must explain.
+
+::: {.callout-tip title="A smaller failure is a sharper question"}
+Minimization is not only for bug reports. It is an investigation tool. Remove
+one item, branch, function call, or configuration detail and ask whether the
+same rule still fails.
 :::
 
-### Practice print debugging
+## 3. Separate facts from hypotheses
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Print Debugging**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+Facts come directly from observations or the contract:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+- `tournament_score(["W"])` returns `5` on a clean run;
+- the rule awards `3` for a first win;
+- no loss branch runs for that input;
+- `streak` begins at zero.
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+Hypotheses are proposed explanations:
 
-</details>
+- **H1:** `streak` is not initialized to zero.
+- **H2:** the bonus formula applies to the first win instead of only later wins.
+- **H3:** the loss branch incorrectly adds points.
 
-### Check your understanding
+H1 and H3 conflict with visible evidence: the source initializes zero, and the
+minimal case never enters the loss branch. H2 predicts exactly the observed two
+extra points.
+
+A useful hypothesis names a mechanism and a predicted observation:
+
+> If the formula uses the new streak length directly, then the first win will
+> add `2 * 1`; printing the base and bonus separately will show base `3`, bonus
+> `2` before total becomes `5`.
+
+“The loop is weird” cannot be meaningfully disproved. “The first win receives a
+bonus because the calculation uses `streak` rather than `streak - 1`” can.
+
+### Checkpoint: make the failure testable
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "errors-exceptions-debugging-debugging-tools-print-debugging",
-  "title": "Print Debugging checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "debugging-reproduction",
+  "title": "Turn a report into stable evidence",
+  "instructions": "Choose the move that makes the investigation smaller and more repeatable.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Print Debugging?",
+      "id": "freeze-first",
+      "prompt": "What should happen before editing a reported wrong result?",
       "options": [
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
-        "pdb lets you pause and inspect Python programs without a graphical editor.",
-        "A script is a Python file designed to be executed from the terminal.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+        "Rewrite the whole function",
+        "Delete every assertion",
+        "Catch all exceptions",
+        "Capture exact input, expected result, actual result, and a repeatable run"
       ],
       "answer_index": 3,
-      "explanation": "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 3. Breakpoints in VS Code
-
-Pause code in VS Code and inspect values step by step.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A breakpoint is a pause button on a movie: stop at the interesting scene and look around before continuing.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-def total(prices):
-    result = 0
-    for price in prices:
-        result += price
-    return result
-
-print(total([2, 3, 4]))
-```
-
-### Trace it line by line
-
-1. `def total(prices):` — Python creates the function `total`; the indented body runs only when the function is called.
-2. `result = 0` — Python evaluates the right-hand expression and binds or updates `result` with the result.
-3. `for price in prices:` — Python takes the next item from the iterable, binds the loop name, and runs the indented body.
-4. `result += price` — Python evaluates the right-hand expression and binds or updates `result +` with the result.
-5. `return result` — Python evaluates the expression and sends that value back to the caller, ending this call.
-6. `print(total([2, 3, 4]))` — Python evaluates the arguments and writes their display form to standard output.
-
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Place the breakpoint before the suspicious line, not after all important values have already changed.
-:::
-
-### Practice breakpoints in vs code
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Breakpoints in VS Code**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "errors-exceptions-debugging-debugging-tools-breakpoints-in-vs-code",
-  "title": "Breakpoints in VS Code checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
+      "explanation": "A frozen reproduction lets you tell whether a later change affects the original failure."
+    },
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Breakpoints in VS Code?",
+      "id": "small-case",
+      "prompt": "Why is `['W']` more useful than a long tournament when both expose the same bonus defect?",
       "options": [
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "pdb lets you pause and inspect Python programs without a graphical editor.",
-        "A script is a Python file designed to be executed from the terminal."
+        "It guarantees no other bugs exist",
+        "It changes the contract",
+        "It removes unrelated state and branches while preserving the failing rule",
+        "It makes assertions unnecessary"
       ],
-      "answer_index": 0,
-      "explanation": "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+      "answer_index": 2,
+      "explanation": "A minimal case reduces competing explanations and makes the first wrong transition easier to see."
+    },
+    {
+      "id": "falsifiable",
+      "prompt": "Which statement is the strongest debugging hypothesis?",
+      "options": [
+        "The code is bad",
+        "Python is probably confused",
+        "Change things until it passes",
+        "The first win gets a bonus because the formula uses streak 1; separate base and bonus should reveal +2"
+      ],
+      "answer_index": 3,
+      "explanation": "It identifies a mechanism and predicts an observation that could prove it wrong."
     }
   ]
 }
@@ -188,67 +204,217 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. pdb Basics
+## 4. Localize the first wrong stage
 
-Use Python's built-in debugger from the terminal.
+For larger programs, identify the first stage where actual behavior differs from
+expected behavior. Model the scorer as a pipeline:
 
-::: {.callout-tip title="A useful analogy—and its limit"}
-pdb is a flashlight for terminal programs: small, built in, and useful when the room is dark.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** pdb lets you pause and inspect Python programs without a graphical editor.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-
+```text
+raw results -> iterate one result -> update streak -> calculate bonus -> update total
 ```
 
-### Trace it line by line
+The input is already a clean list, iteration sees the correct first item, and
+the streak becomes one as expected. The first divergence is bonus calculation.
+Do not edit parsing, iteration, or reset code when their observed states still
+match the contract.
 
+::: {.concept-diagram}
+Debugging moves from a broad failing outcome toward the first state transition
+that violates a known rule.
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  report["Wrong final total"] --> pipeline["Name program stages"]
+  pipeline --> boundary["Compare expected and actual after each stage"]
+  boundary --> first["Find first divergence"]
+  first --> hypothesis["Predict a local cause"]
+  hypothesis --> experiment["Observe or change one thing"]
+  experiment --> verify["Rerun original and nearby cases"]
+```
 
-::: {.callout-warning title="Common mistake"}
-pdb commands are typed at the debugger prompt, not inside your Python file unless you deliberately add a breakpoint().
+Later wrong values can be consequences. Repair the earliest supported cause, not
+every downstream symptom.
 :::
 
-### Practice pdb basics
+Function boundaries provide natural checkpoints. Suppose a leaderboard has
+three stages:
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **pdb Basics**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+```python
+def normalize_results(results):
+    return [result.strip().upper() for result in results]
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+def score_results(results):
+    return tournament_score(results)
 
-</details>
 
-### Check your understanding
+def build_summary(raw_results):
+    normalized = normalize_results(raw_results)
+    score = score_results(normalized)
+    return {"results": normalized, "score": score}
+```
+
+Check outputs at each boundary:
+
+```python
+raw = [" w ", "W", "l", "W"]
+normalized = normalize_results(raw)
+print("normalized:", normalized)
+assert normalized == ["W", "W", "L", "W"]
+
+score = score_results(normalized)
+print("score:", score)
+assert score == 11
+```
+
+If normalization passes and scoring fails, the first broken boundary lies after
+normalization. That does not prove every normalizer case is correct; it localizes
+this reproduction.
+
+## 5. Trace state when the problem lives inside a loop
+
+A state trace records selected values after each meaningful transition. Create
+an instrumented version without changing the scoring decisions:
+
+```python
+def trace_tournament_score(results):
+    total = 0
+    streak = 0
+    trace = []
+
+    for turn, result in enumerate(results, start=1):
+        before_total = total
+        if result == "W":
+            streak += 1
+            base = 3
+            bonus = 2 * streak
+            total += base + bonus
+        else:
+            streak = 0
+            base = 0
+            bonus = 0
+
+        trace.append(
+            {
+                "turn": turn,
+                "result": result,
+                "streak": streak,
+                "base": base,
+                "bonus": bonus,
+                "before": before_total,
+                "after": total,
+            }
+        )
+
+    return total, trace
+
+
+actual, trace = trace_tournament_score(["W"])
+print(actual)
+print(trace[0])
+```
+
+The trace should show `base: 3`, `bonus: 2`, `after: 5`. That observation
+supports H2. It also falsifies an alternative claim that addition happens twice
+in separate statements.
+
+Choose only variables needed for the hypothesis. Good instrumentation might
+show a loop index, current item, branch chosen, before value, delta, and after
+value. Printing entire nested objects on every iteration can bury the transition
+you need.
+
+Remove or convert temporary prints after the repair. Preserve the valuable rule
+as an assertion so future runs check it automatically.
+
+## 6. Change one cause and predict the result
+
+The contract says a streak bonus applies only to wins **after the first**. If
+`streak` is one, bonus count should be zero; if streak is two, bonus count should
+be one. Repair only that formula:
+
+```python
+def tournament_score(results):
+    """Return 3 points per win plus 2 for each win after the first in a streak."""
+    total = 0
+    streak = 0
+
+    for result in results:
+        if result == "W":
+            streak += 1
+            bonus_wins = streak - 1
+            total += 3 + (2 * bonus_wins)
+        else:
+            streak = 0
+
+    return total
+```
+
+Before running, predict:
+
+- `['W']` becomes `3`;
+- `['W', 'W']` becomes `8`;
+- the original case becomes `11`;
+- loss-only controls remain zero.
+
+Then execute the exact checks:
+
+```python
+assert tournament_score([]) == 0
+assert tournament_score(["L"]) == 0
+assert tournament_score(["W"]) == 3
+assert tournament_score(["W", "W"]) == 8
+assert tournament_score(["W", "L", "W"]) == 6
+assert tournament_score(["W", "W", "L", "W"]) == 11
+```
+
+A matching prediction is evidence that the causal model improved. If the
+original case passes but a control regresses, the change is not complete.
+
+### Checkpoint: locate before you repair
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "errors-exceptions-debugging-debugging-tools-pdb-basics",
-  "title": "pdb Basics checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "debugging-localization",
+  "title": "Find the first divergence",
+  "instructions": "Choose the experiment that best separates causes from consequences.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to pdb Basics?",
+      "id": "boundary-check",
+      "prompt": "Normalization output matches the expected list, but the score is wrong. What does that establish for this reproduction?",
       "options": [
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "pdb lets you pause and inspect Python programs without a graphical editor.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
-        "A script is a Python file designed to be executed from the terminal."
+        "Every possible normalizer input is correct",
+        "The first observed divergence occurs after the normalization boundary",
+        "The score must be changed manually",
+        "No further evidence is needed"
       ],
       "answer_index": 1,
-      "explanation": "pdb lets you pause and inspect Python programs without a graphical editor."
+      "explanation": "A passing intermediate boundary localizes this case without proving unrelated cases."
+    },
+    {
+      "id": "trace-fields",
+      "prompt": "Which trace is most focused for a suspected loop bonus formula?",
+      "options": [
+        "Current result, streak, base, bonus, total before, and total after",
+        "Every global and imported object",
+        "Only a message saying 'loop ran'",
+        "A different random input on every run"
+      ],
+      "answer_index": 0,
+      "explanation": "Those fields expose the relevant transition and allow expected-versus-actual comparison."
+    },
+    {
+      "id": "one-change",
+      "prompt": "Why predict the effect of one formula change before running?",
+      "options": [
+        "To guarantee syntax can never fail",
+        "To avoid keeping regression checks",
+        "To test whether the proposed cause explains the observed behavior",
+        "To make all alternate hypotheses true"
+      ],
+      "answer_index": 2,
+      "explanation": "A causal hypothesis should predict observable changes in the failure and nearby cases."
     }
   ]
 }
@@ -256,18 +422,273 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 5. Integrate the lesson
+## 7. Repair the cause, not the visible symptom
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+A symptom patch could subtract six from the original result:
 
-## 6. Key points
+```python
+def patch_one_example(results):
+    return tournament_score(results) - 6
+```
 
-- **Print Debugging:** Print debugging adds temporary observations so you can see what the program knows at a point in time.
-- **Breakpoints in VS Code:** A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.
-- **pdb Basics:** pdb lets you pause and inspect Python programs without a graphical editor.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+It might match one reported case while breaking an empty tournament and every
+other shape. Another weak patch might special-case the exact failing list. Both
+encode examples rather than the streak rule.
 
-## References
+A root-cause repair changes the earliest wrong decision supported by evidence.
+It should explain why all nearby cases now work:
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- first win: `streak - 1` is zero;
+- second consecutive win: it is one;
+- a loss resets streak to zero;
+- a later isolated win again receives no bonus.
+
+After repairing, ask what other behavior shares the changed line. Test long
+streaks, repeated losses, empty input, and alternating results. A fix can solve
+the report while exposing a neighboring boundary.
+
+## 8. Keep regression evidence and clean the investigation
+
+A regression check is a small executable example that would fail if the defect
+returned. The strongest one is often the minimal reproduction:
+
+```python
+def test_first_win_has_no_streak_bonus():
+    assert tournament_score(["W"]) == 3
+
+
+test_first_win_has_no_streak_bonus()
+```
+
+Unit 13 will organize these functions with pytest. Right now, naming the rule
+and running the assertion is enough to preserve learning.
+
+Complete the repair with a clean verification:
+
+1. remove unrelated experimental changes;
+2. keep a concise assertion for the original defect;
+3. run the minimal case, original case, controls, and nearby boundaries;
+4. restart the notebook runtime and run top to bottom, or rerun the saved script;
+5. record the cause and why the repair matches the contract.
+
+Do not describe a repair only as “changed line 8.” Line numbers move. Record the
+behavioral reason: “The formula treated the first win as an additional streak
+win; subtracting one from the streak count makes bonuses begin at win two.”
+
+## 9. Intermittent failures need controlled repetition
+
+Suppose a game selects a random prize and a test sometimes fails. Repeatedly
+clicking Run creates observations but not a stable experiment. Control the
+random input or inject it:
+
+```python
+def prize_message(prize):
+    if prize == "coin":
+        return "You found a coin"
+    if prize == "map":
+        return "You found a map"
+    return "Mystery prize"
+
+
+assert prize_message("coin") == "You found a coin"
+assert prize_message("map") == "You found a map"
+```
+
+For time-dependent, network, or environment-dependent behavior, record the
+varying dependency and substitute a controlled value when the design permits.
+Unit 13 covers test doubles and dependency injection more fully.
+
+## 10. Use AI suggestions as hypotheses, not evidence
+
+An assistant can propose suspicious lines, smaller examples, or possible
+assertions. It cannot observe your exact runtime unless you supply accurate,
+safe evidence, and a plausible explanation can still be wrong.
+
+Use this workflow:
+
+1. remove secrets and unrelated private data;
+2. provide the minimal complete reproduction, exact traceback or output,
+   expected behavior, environment, and attempts already made;
+3. ask for several falsifiable hypotheses and an experiment for each;
+4. inspect every suggested change before running it;
+5. run one controlled experiment locally;
+6. keep the repair only when original and regression cases support it.
+
+Never paste tokens, passwords, private student records, or proprietary data into
+an external tool. Replace values while preserving the shape that triggers the
+failure.
+
+## 11. Investigate a second scoreboard defect
+
+The tournament now supports a three-point comeback bonus after a loss followed
+by two wins. This implementation silently awards it too soon:
+
+```python
+def comeback_score(results):
+    total = 0
+    previous = None
+    wins_after_loss = 0
+
+    for result in results:
+        if result == "W":
+            total += 3
+            if previous == "L":
+                wins_after_loss += 1
+            if wins_after_loss == 1:
+                total += 3
+        else:
+            wins_after_loss = 0
+        previous = result
+
+    return total
+```
+
+The rule says `['L', 'W']` earns `3`, while `['L', 'W', 'W']` earns `9`. Conduct
+the investigation rather than jumping to a patch:
+
+1. freeze both assertions and record actual results;
+2. find a passing control;
+3. shrink any longer reported failure;
+4. list facts separately from at least three hypotheses;
+5. trace `result`, `previous`, `wins_after_loss`, and `total` per turn;
+6. mark the first divergence;
+7. run one experiment that falsifies a hypothesis;
+8. make one root-cause repair;
+9. verify empty, loss-only, isolated-win, qualifying-comeback, and repeated-win
+   cases from a clean state.
+
+Use this evidence table:
+
+| Stage | Expected | Actual | Evidence | Next hypothesis |
+|---|---|---|---|---|
+| reproduction | | | | |
+| smallest case | | | | |
+| first divergence | | | | |
+| controlled experiment | | | | |
+| clean verification | | | | |
+
+<details class="solution">
+<summary>Compare a root-cause repair after completing the investigation</summary>
+
+One clear model remembers whether a loss has armed a comeback and counts wins
+until the two-win requirement is satisfied:
+
+```python
+def comeback_score(results):
+    total = 0
+    comeback_armed = False
+    wins_after_loss = 0
+
+    for result in results:
+        if result == "L":
+            comeback_armed = True
+            wins_after_loss = 0
+            continue
+
+        total += 3
+        if comeback_armed:
+            wins_after_loss += 1
+            if wins_after_loss == 2:
+                total += 3
+                comeback_armed = False
+                wins_after_loss = 0
+
+    return total
+
+
+assert comeback_score([]) == 0
+assert comeback_score(["W"]) == 3
+assert comeback_score(["L", "W"]) == 3
+assert comeback_score(["L", "W", "W"]) == 9
+assert comeback_score(["L", "W", "W", "W"]) == 12
+```
+
+This is one contract-consistent design, not the only syntax that can work. Your
+record should still show which observation falsified a hypothesis and why the
+state stops awarding the comeback after it is earned.
+
+</details>
+
+### Checkpoint: close the investigation responsibly
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "debugging-verification",
+  "title": "Prove the repair survives",
+  "instructions": "Choose evidence that distinguishes a root-cause repair from a lucky pass.",
+  "questions": [
+    {
+      "id": "regression-case",
+      "prompt": "Which case is especially valuable as a regression check?",
+      "options": [
+        "A new random case with no expected value",
+        "The minimal input that exposed the original broken rule",
+        "Only the largest available input",
+        "A screenshot without code or output"
+      ],
+      "answer_index": 1,
+      "explanation": "The minimal reproduction directly guards the behavior that failed and is easy to understand."
+    },
+    {
+      "id": "root-cause",
+      "prompt": "What distinguishes a root-cause repair from subtracting a constant from one wrong total?",
+      "options": [
+        "It implements the underlying rule and explains nearby cases",
+        "It avoids every assertion",
+        "It changes more lines",
+        "It catches more exceptions"
+      ],
+      "answer_index": 0,
+      "explanation": "A root repair corrects the earliest wrong decision and remains consistent across related inputs."
+    },
+    {
+      "id": "ai-evidence",
+      "prompt": "How should an AI-generated debugging suggestion be treated?",
+      "options": [
+        "As proof that the bug is solved",
+        "As permission to share secrets",
+        "As a hypothesis to inspect and test with local evidence",
+        "As a replacement for expected behavior"
+      ],
+      "answer_index": 2,
+      "explanation": "Only controlled runs against the actual contract and environment can support or reject the suggestion."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 12. Key points and your reusable debugging record
+
+For future lessons and projects, keep this compact template:
+
+```text
+Failure statement:
+Environment and clean-run steps:
+Smallest reproduction:
+Expected result and oracle:
+Actual result or exception:
+Passing control:
+Facts:
+Candidate hypotheses:
+First divergence:
+Experiment and prediction:
+Observed result:
+Root-cause repair:
+Regression cases:
+Clean verification:
+```
+
+The record is not bureaucracy. It prevents repeated guesses, supports a teammate
+who joins later, and makes your own reasoning inspectable.
+
+### References and next steps
+
+- [Python tutorial: Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html)
+- [Python `repr` built-in](https://docs.python.org/3/library/functions.html#repr)
+- [Python `assert` statement](https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement)
+
+Next, you will pause a running program, inspect stack frames and local variables,
+step across function calls, and reduce a realistic report into a minimal
+reproduction someone else can run.
