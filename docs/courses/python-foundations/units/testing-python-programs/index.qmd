@@ -1,68 +1,252 @@
 ---
 title: Testing Python Programs Overview
-description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-course_id: python-foundations
-unit_id: testing-python-programs
-unit_number: 13
+description: Learn how Unit 13 turns behavioral contracts into focused pytest evidence through readable failures, parametrized boundaries, isolated fixtures, controlled dependencies, coverage questions, regressions, and generated examples.
+execute:
+  echo: true
 categories:
 - python-foundations
 - testing-python-programs
 - overview
 order: 0
 colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/index.ipynb
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
 ---
 ::: {.lesson-meta}
-- **Level:** Python Foundations · Unit 13
-- **Estimated time:** 6–12 hours including the challenge
-- **Unit outcome:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Level:** Python Foundations
+- **Estimated time:** 45–60 minutes
+- **You will learn:** Prepare a real pytest workspace, distinguish a passing check from proof, and plan the evidence produced by seven connected testing lessons.
+- **Practice in:** A local project and terminal for pytest commands, plus Google Colab or JupyterLab for direct function experiments
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
 
-Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+A weather station should classify a 70-kilometre-per-hour wind as a high-risk
+event. A test expected `"high"`, but the program returned `"medium"`:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+```text
+$ pytest -q tests/test_risk.py::test_seventy_is_high
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________________ test_seventy_is_high ____________________________
 
-## 2. Before you start
+    def test_seventy_is_high():
+>       assert risk_level(70) == "high"
+E       AssertionError: assert 'medium' == 'high'
+E
+E         - high
+E         + medium
 
-**Prior knowledge:** Complete Unit 12 and bring its challenge notes and debugging record.
+1 failed in 0.05s
+```
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+The red `F` is useful, but it does not decide who is wrong. The implementation
+may mishandle the boundary. The expected value may contradict the written rule.
+The test may be importing a different installation. Testing begins when you
+connect the report to a contract and ask which explanation fits the evidence.
 
-## 3. Lessons
+Suppose the requirement says:
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [What a Test Proves—and What It Does Not](what-tests-prove.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [pytest Discovery, Assertions, and Failure Reports](pytest-discovery-failures.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Fixtures, Parametrization, Temporary Paths, and Boundaries](fixtures-parametrization-boundaries.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Test Doubles, Mocking, Monkeypatching, and Dependency Injection](test-doubles-dependency-injection.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Unit, Integration, Smoke, and End-to-End Tests](test-levels.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [Properties, Regression Tests, and Test-Driven Development](properties-regressions-tdd.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 7 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+> Wind below 40 is low risk, wind from 40 through 69 is medium risk, and wind
+> of 70 or more is high risk.
 
-## 4. How to study this unit
+Now the failure identifies a violated boundary. A correction followed by a
+green rerun gives evidence that this case behaves as specified in that
+environment. It does **not** prove that every wind value, parser, file, clock,
+or command route is correct. A dependable suite is a collection of deliberately
+chosen claims, not a spell that removes all defects.
 
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
+## What you will be able to protect
 
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+Across this unit you will build tests around a small **Meteor Watch** package.
+It classifies weather observations, writes alert reports, reads configuration,
+uses a clock and notification sender, and exposes a thin command boundary. The
+domain remains simple so that the testing decision is always visible.
+
+By the end, you will be able to:
+
+- turn a written contract into ordinary, boundary, invalid, and regression
+  examples;
+- name tests so a failed node explains the scenario and expected result;
+- run all tests or one selected file, node, keyword, or previous failure;
+- distinguish collection, setup, call, and teardown evidence;
+- read pytest's assertion explanations, value diffs, captured output, and short
+  summary;
+- convert a case table into readable parametrized nodes;
+- use fixtures for fresh state, temporary paths, output capture, and reliable
+  teardown;
+- control time, randomness, environment settings, and collaborators without
+  making tests depend on real services;
+- choose the smallest test boundary capable of exposing a stated risk;
+- interpret statement and branch coverage as prompts for investigation;
+- preserve a discovered bug as a regression test;
+- complete a red–green–refactor cycle; and
+- use Hypothesis to search a general rule and shrink a failure to a small
+  counterexample.
+
+::: {.concept-diagram}
+Notice that a test is part of a feedback loop. A green result supports only the
+claims that the selected tests actually exercised.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Behavioral contract"] --> B["Focused test"]
+  B --> C["Run in a known environment"]
+  C --> D{"Observed result"}
+  D -->|"red"| E["Read the earliest useful failure"]
+  E --> F["Change one cause"]
+  F --> C
+  D -->|"green"| G["Retain limited evidence"]
+  G --> H["Ask which risk remains"]
+  H --> A
+```
 :::
 
-## 5. Unit evidence
+## The seven-stage Meteor Watch build
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+Every lesson adds a different kind of evidence. Each page includes a complete
+small snapshot, so a missed fragment does not leave the next lesson with an
+undefined function.
+
+| Step | Lesson | What you practise | Evidence you keep |
+|---:|---|---|---|
+| 1 | [Write Tests That Protect Behavior](what-tests-prove.qmd) | Translate a contract into independent public-behavior checks without copying implementation logic. | A behavior table, red/green pair, and explanation of what remains unproved. |
+| 2 | [Run Pytest and Read the Failure](pytest-discovery-failures.qmd) | Build a `src` project, collect tests, select nodes, and diagnose collection, setup, and assertion evidence. | An annotated report and one-failure-at-a-time repair record. |
+| 3 | [Turn Examples into Clear Parametrized Cases](parametrization-boundary-cases.qmd) | Partition inputs, test thresholds, and give every case a useful node ID. | A boundary table and a readable parametrized suite. |
+| 4 | [Build an Isolated Test World with Fixtures](fixtures-isolation-capture.qmd) | Supply fresh state, manage teardown, use temporary paths, and capture output or logs. | Setup/call/teardown evidence and a state-leak repair. |
+| 5 | [Control Dependencies Without Fragile Mocks](test-doubles-dependency-injection.qmd) | Inject a clock and sender, patch process state, and use a spec-constrained mock only where interaction is public behavior. | Deterministic results and proof that temporary changes are restored. |
+| 6 | [Test at the Smallest Boundary That Can Fail](test-levels.qmd) | Match risks to function, integration, and process checks; inspect line and branch coverage. | A risk portfolio, a subprocess result, and one justified coverage addition. |
+| 7 | [Preserve Bugs and Explore General Rules](properties-regressions-tdd.qmd) | Preserve a failure, work red–green–refactor, and let Hypothesis shrink a counterexample. | A named regression and minimal generated failure. |
+
+The [unit challenge](challenge.qmd) changes the story and the code. You will
+**Clear the Buggy Spaceport for Launch** by writing a focused suite against a
+published contract, exposing seeded defects, fixing them one at a time, and
+leaving a clean regression net.
+
+## Bring forward the boundaries you already built
+
+Testing combines earlier Foundations skills:
+
+- **Unit 7:** requirements, examples, decision tables, algorithm boundaries,
+  and explanations of practical cost;
+- **Unit 8:** traceback reading, small reproductions, one-hypothesis-at-a-time
+  debugging, and exception contracts;
+- **Unit 9:** `pathlib`, encodings, JSON, context managers, and external-data
+  validation;
+- **Unit 10:** `src` layouts, packages, editable installation, virtual
+  environments, and `pyproject.toml`;
+- **Unit 11:** explicit collaborators, object responsibilities, and replacing a
+  dependency through composition; and
+- **Unit 12:** thin `main()` adapters, streams, exit status, configuration,
+  logging, and one real subprocess check.
+
+You do not need to memorize those units before continuing. Revisit a linked
+lesson when a boundary feels unfamiliar. Unit 14 will later combine tests with
+typing, formatting, linting, pre-commit, and broader quality gates; this unit
+stays focused on evidence about runtime behavior.
+
+## Prepare a project where pytest can discover the truth
+
+The main workspace should be a local folder rather than only a notebook. Create
+this shape:
+
+```text
+meteor-watch-lab/
+├── pyproject.toml
+├── src/
+│   └── meteor_watch/
+│       ├── __init__.py
+│       └── risk.py
+└── tests/
+    └── test_risk.py
+```
+
+Use the environment workflow from Unit 10. In an existing checkout of this
+course, the development dependencies already provide pytest and pytest-cov.
+For an independent practice project, install the testing tools into that
+project's virtual environment:
+
+```bash
+python -m pip install -e .
+python -m pip install pytest pytest-cov hypothesis
+python -m pytest --version
+```
+
+`python -m pytest` makes the interpreter choice explicit. If `pytest` and
+`python -m pytest` report different installations, stop and inspect the active
+environment before interpreting any failure.
+
+Create a tiny first check in `tests/test_environment.py`:
+
+```python
+import meteor_watch
+
+
+def test_package_imports_from_the_practice_environment():
+    assert meteor_watch.__name__ == "meteor_watch"
+```
+
+Then run it from the directory containing `pyproject.toml`:
+
+```bash
+python -m pytest -q tests/test_environment.py
+```
+
+Expected evidence is one collected and passing test. A missing import is not a
+reason to edit the assertion; it is evidence about installation or layout.
+
+::: {.callout-note title="Use notebooks for direct experiments"}
+Colab and JupyterLab are still useful for calling pure functions, constructing
+case tables, and studying assertion behavior. Real discovery, command
+selection, installed imports, coverage, and child-process checks are clearest
+in a project terminal. The lessons label which boundary each exercise needs.
+:::
+
+## Keep a testing evidence log
+
+For each lab, record five short fields:
+
+| Field | Example |
+|---|---|
+| Contract | `70` belongs to the high-risk interval. |
+| Prediction | The focused test will fail with `medium` versus `high`. |
+| Observation | Call phase failed at `assert risk_level(70) == "high"`. |
+| One change | Change the second comparison from `<= 70` to `< 70`. |
+| Clean result | Focused node and complete suite both pass. |
+
+This log prevents a common testing mistake: changing several inputs,
+assertions, and production lines until green appears without knowing which
+cause mattered. A green run whose history you cannot explain is weaker evidence
+than a deliberate red/green pair.
+
+## Plan the active work
+
+Budget approximately **30–42 hours** for setup, typing, prediction, command
+runs, quizzes, repair clinics, final labs, and the challenge. A practical pace
+is:
+
+1. spend one session on behavior-focused assertions;
+2. give discovery and failure reading a full session in a clean local project;
+3. separate parametrization and fixtures across different days;
+4. practise dependency control after restarting the interpreter so old patches
+   or mock state cannot mislead you;
+5. reserve one session for test boundaries and coverage;
+6. install Hypothesis and complete generated-case work in a fresh environment;
+   and
+7. attempt the challenge later without copying Meteor Watch tests.
+
+Suggested stopping points appear at the final lab of each lesson. You are ready
+to continue when you can explain the evidence you kept, not merely when a green
+line appears.
+
+::: {.callout-tip title="Begin with the behavior worth preserving"}
+Continue to [Write Tests That Protect Behavior](what-tests-prove.qmd). Keep the
+wind-risk contract nearby and ask what each test can honestly claim.
+:::
 
 <!-- fcpython-chapter-lab: end -->

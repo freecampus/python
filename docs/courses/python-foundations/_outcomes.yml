@@ -1,5 +1,5 @@
 schema_version: 1
-curriculum_version: 17
+curriculum_version: 18
 course_id: python-foundations
 graduate_outcomes:
   learn-independently: Use prediction, clean execution, documentation, deliberate practice, and responsible AI assistance to learn from evidence.
@@ -194,14 +194,17 @@ units:
     challenge_id: command-line-applications.challenge
   - number: 13
     id: testing-python-programs
-    outcome: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+    outcome: Turn behavioral contracts into focused pytest suites, interpret failures, isolate state and dependencies, choose evidence-producing boundaries, preserve regressions, and use generated examples without confusing passing tests or coverage with proof.
     graduate_outcome_ids:
       - verify-quality
       - debug-from-evidence
+      - handle-boundaries
+      - build-projects
     lesson_ids:
       - testing-python-programs.what-tests-prove
       - testing-python-programs.pytest-discovery-failures
-      - testing-python-programs.fixtures-parametrization-boundaries
+      - testing-python-programs.parametrization-boundary-cases
+      - testing-python-programs.fixtures-isolation-capture
       - testing-python-programs.test-doubles-dependency-injection
       - testing-python-programs.test-levels
       - testing-python-programs.properties-regressions-tdd

@@ -1,130 +1,186 @@
 ---
-title: Properties, Regression Tests, and Test-Driven Development
+title: Preserve Bugs and Explore General Rules
 lesson_id: testing-python-programs.properties-regressions-tdd
-lesson_order: 60
-description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-course_id: python-foundations
-unit_id: testing-python-programs
-unit_number: 13
+lesson_order: 70
+description: Turn minimal failures into named regressions, complete an honest red-green-refactor cycle, and use Hypothesis strategies and shrinking to test invariants beyond a few remembered examples.
 execute:
   echo: true
 categories:
 - python-foundations
 - testing-python-programs
-order: 60
+- regression-testing
+- tdd
+- property-based-testing
+- hypothesis
+order: 70
 colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/properties-regressions-tdd.ipynb
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Preserve a discovered failure, work through red–green–refactor without changing the contract mid-cycle, and use generated examples and shrinking to investigate a general rule.
+- **Practice in:** A local pytest project with Hypothesis installed; notebook users can run direct examples after installing the same dependency
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+A hand-picked suite can be thoughtful and still miss a strange input. A user
+may type a tab where you expected a space, combine Unicode letters, repeat a
+separator, or provide a number near a boundary you did not remember. Once such
+a failure is found, a named regression prevents its quiet return. A property
+test can then explore the broader rule that the one example violated.
 
-A few hand-picked examples can miss entire classes of inputs. Properties express relationships that should hold across many generated cases, while regression tests preserve evidence from real failures.
+This lesson connects three practices:
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+- **regression testing:** keep evidence for a defect that once occurred;
+- **test-driven development (TDD):** add one promised behavior through red,
+  green, and refactor; and
+- **property-based testing:** generate many examples from a described input
+  space and check an invariant for all examples explored in the run.
 
-## 1. Read and predict a complete case
+They are complementary. TDD does not discover an unclear contract for you.
+Generated examples do not replace readable ordinary examples. A regression
+test does not prove all related inputs. Use each for the question it answers.
 
-```python
-def normalize_name(name):
-    return " ".join(name.split()).casefold()
+As you work, answer:
 
+- How can a large failure be reduced without removing the behavior that causes
+  it?
+- What evidence distinguishes a useful red test from a broken test setup?
+- Which invariants express more than a list of expected examples?
+- How do strategies define valid data and shrinking find a smaller failure?
+- When should a generated counterexample become a descriptive regression test?
 
-examples = [" Ada ", "ADA", "Ada"]
-for example in examples:
-    normalized = normalize_name(example)
-    assert normalize_name(normalized) == normalized
-```
+## 1. Reduce a failure before preserving it
 
-### Step-by-step explanation
-
-1. Normalization strips repeated whitespace and case differences.
-2. The assertion states idempotence: normalizing twice equals normalizing once.
-3. Each example exercises the same relationship rather than one exact hard-coded result.
-4. A property tool such as Hypothesis can generate far more strings for this contract.
-
-::: {.callout-note title="Make one controlled change"}
-Write a second property stating that normalized output has no leading/trailing whitespace, then try empty and whitespace-only text.
-:::
-
-## 2. Investigate the important boundary
-
-Properties do not replace concrete examples. Keep examples that explain the contract and regression cases that reproduce past bugs; add generated inputs where a broad invariant supplies extra evidence.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+Meteor Watch normalizes a station callsign for matching:
 
 ```python
-def test_regression_for_tabs():
-    # This case records a bug that once preserved a tab between names.
-    assert normalize_name("Ada	Lovelace") == "ada lovelace"
-
-
-test_regression_for_tabs()
+def normalize_callsign(text):
+    """Trim outside whitespace, collapse inside whitespace, and uppercase."""
+    return " ".join(text.strip().split(" ")).upper()
 ```
 
-Then complete the learning loop:
+It works for one ordinary string:
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+```python
+assert normalize_callsign(" ridge seven ") == "RIDGE SEVEN"
+```
 
-<details>
-<summary>Check your practice process</summary>
+But a user report contains a tab:
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+```python
+assert normalize_callsign("ridge\tseven") == "RIDGE SEVEN"
+```
 
-</details>
+The result is `"RIDGE\tSEVEN"` because `split(" ")` recognizes only the literal
+space separator. The original report may have contained several records and a
+large traceback. Reduce it while preserving the failure:
 
-## 4. Check your understanding
+1. remove unrelated records;
+2. remove unrelated fields;
+3. shorten the station text;
+4. replace multiple whitespace forms one at a time; and
+5. stop when removing the tab makes the failure disappear.
+
+`"a\tb"` is a smaller counterexample to the same rule:
+
+```python
+def test_tab_between_callsign_words_is_collapsed_regression():
+    assert normalize_callsign("a\tb") == "A B"
+```
+
+Run this test against the buggy implementation. It must fail because a tab
+remains, not because the package import or fixture setup is broken. Then repair
+the implementation with `text.split()`, whose no-argument form splits on runs
+of Unicode whitespace:
+
+```python
+def normalize_callsign(text):
+    """Trim outside whitespace, collapse inside whitespace, and uppercase."""
+    return " ".join(text.split()).upper()
+```
+
+Keep the regression after the repair. Its descriptive name records why a tab
+matters even if a future refactor changes the implementation again.
+
+### Record enough history, not an incident report in the test
+
+The name and a short comment may be enough:
+
+```python
+def test_tab_between_callsign_words_is_collapsed_regression():
+    # Tabs appeared in station exports from older field terminals.
+    assert normalize_callsign("a\tb") == "A B"
+```
+
+Issue links can live in a comment when the history is useful and stable. Do not
+paste a long ticket into the test. The executable input, expected result, and
+reason should remain understandable if the link disappears.
+
+## 2. Make red fail for the intended missing behavior
+
+TDD is often summarized as:
+
+1. **red:** write a small test for one missing or changed behavior;
+2. **green:** write the smallest clear production change that satisfies it; and
+3. **refactor:** improve structure while all tests remain green.
+
+The color is not enough. A test that is red because `meteor_watch` cannot import
+does not demonstrate missing behavior. Read the report and confirm the expected
+assertion or exception is responsible.
+
+Meteor Watch needs a new `"critical"` result when wind is at least 110 kph. The
+current contract has only green, amber, and red. Start with the changed
+requirement table:
+
+| Wind | Visibility | Expected |
+|---:|---:|---|
+| 109.9 | 10 | red |
+| 110 | 10 | critical |
+
+Write the boundary test first:
+
+```python
+def test_wind_one_hundred_ten_begins_critical_alert():
+    assert alert_level(110, 10) == "critical"
+```
+
+Run only that node. The useful red evidence is `assert 'red' == 'critical'`.
+If it passes before production changes, either behavior already exists or the
+test is not reaching the intended code.
+
+### Checkpoint: preserve a meaningful failure
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "testing-python-programs-properties-regressions-tdd",
-  "title": "Properties, Regression Tests, and Test-Driven Development checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit13-properties-regression-checkpoint",
+  "title": "Reduce failures and begin with useful red evidence",
+  "instructions": "Choose the regression or TDD step that preserves the actual behavior.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "What does idempotence mean for `normalize_name`?",
-      "options": [
-        "Every input becomes an empty string.",
-        "Normalization changes its result on every call.",
-        "Applying normalization again does not change an already normalized result.",
-        "The function must read random global state."
-      ],
+      "id": "unit13-properties-q55-minimal",
+      "prompt": "A long field report fails because a callsign contains one tab. Which regression input is most useful?",
+      "options": ["The entire production archive", "An empty string that passes", "A short string such as 'a\\tb' that still fails", "A random unrelated filename"],
       "answer_index": 2,
-      "explanation": "Idempotence is the property `f(f(x)) == f(x)` for inputs in the function's contract."
+      "explanation": "A small counterexample keeps the same cause while making the violated normalization rule obvious and fast to reproduce."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun."
-      ],
+      "id": "unit13-properties-q56-red",
+      "prompt": "The new critical-boundary test is red because meteor_watch cannot be imported. What should happen next?",
+      "options": ["Implement critical behavior immediately", "Change expected to red", "Mark the test xfail forever", "Repair the environment/import so red can expose the intended missing behavior"],
+      "answer_index": 3,
+      "explanation": "TDD red should fail for the promised behavior, not unrelated setup. Establish a valid test environment before changing the feature."
+    },
+    {
+      "id": "unit13-properties-q57-retain",
+      "prompt": "What should happen to the tab regression after normalize_callsign is fixed?",
+      "options": ["Keep it as lasting protection for the past failure", "Delete it because the defect is gone", "Replace it with assert True", "Move the tab into production code"],
       "answer_index": 0,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "The regression remains executable evidence that the discovered boundary must not return."
     }
   ]
 }
@@ -132,15 +188,540 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## Key points
+## 3. Write the smallest clear green change
 
-::: {.callout-tip title="Key points"}
-- Properties describe relationships across many valid inputs.
-- Regression tests preserve a minimal example of a past failure.
-- The TDD loop is failing evidence, the smallest behavior change, then safe refactoring.
+Add the critical branch before red:
+
+```python
+def alert_level(wind_kph, visibility_km):
+    if wind_kph < 0:
+        raise ValueError("wind must be non-negative")
+    if visibility_km < 0:
+        raise ValueError("visibility must be non-negative")
+    if wind_kph >= 110:
+        return "critical"
+    if wind_kph >= 70 or visibility_km < 1:
+        return "red"
+    if wind_kph >= 40 or visibility_km < 5:
+        return "amber"
+    return "green"
+```
+
+Run the new node, then the existing boundary table. The new test may be green
+while an old invariant test still allows only `{"green", "amber", "red"}`.
+That old failure is valuable: the public vocabulary changed and its test must
+be updated deliberately.
+
+Do not implement speculative categories, configuration, or notification rules
+that no current contract asks for. “Smallest” does not mean cryptic; it means no
+unrequested design expansion.
+
+## 4. Refactor only while the behavior stays green
+
+The branch ordering is readable, but duplicated validation can move into a
+helper if several functions use it:
+
+```python
+def validate_measurements(wind_kph, visibility_km):
+    if wind_kph < 0:
+        raise ValueError("wind must be non-negative")
+    if visibility_km < 0:
+        raise ValueError("visibility must be non-negative")
+
+
+def alert_level(wind_kph, visibility_km):
+    validate_measurements(wind_kph, visibility_km)
+    if wind_kph >= 110:
+        return "critical"
+    if wind_kph >= 70 or visibility_km < 1:
+        return "red"
+    if wind_kph >= 40 or visibility_km < 5:
+        return "amber"
+    return "green"
+```
+
+Run the complete suite after the extraction. Refactoring means changing
+structure without intentionally changing public behavior. If you add another
+category during this step, you have mixed a feature with the refactor and made
+failures harder to interpret.
+
+::: {.concept-diagram}
+Each TDD phase has different evidence. Refactor returns to green after a
+structural change; it does not quietly add a second requirement.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["One explicit requirement"] --> B["Red for the intended reason"]
+  B --> C["Small clear implementation"]
+  C --> D["Green focused and full suite"]
+  D --> E["Behavior-preserving refactor"]
+  E -->|"stay green"| D
+  D --> F["Choose next requirement"]
+```
 :::
 
-## References
+### When TDD helps—and when to explore first
 
-- https://hypothesis.readthedocs.io/en/latest/
-- https://docs.pytest.org/en/stable/getting-started.html
+TDD is useful when a small behavior can be stated before implementation:
+
+- a parser accepts a documented record;
+- a boundary changes at a known value;
+- a defect has a reproducible input;
+- a new function has a clear contract; or
+- an adapter must translate a known status.
+
+Exploration may come first when the problem, library, or user need is unclear.
+Use a notebook or disposable spike to learn. Then discard or clean the spike,
+write the contract learned from it, and add durable tests. Pretending an
+uncertain experiment was known in advance turns TDD into ceremony.
+
+## 5. State properties that cover more than remembered examples
+
+Examples say what should happen for specific inputs. A **property** says what
+relationship should hold across a range of inputs.
+
+Useful property shapes include:
+
+- **idempotence:** normalizing twice equals normalizing once;
+- **round trip:** encoding then decoding returns the original supported value;
+- **bounds:** a risk score always remains within its promised interval;
+- **monotonicity:** increasing wind while holding visibility fixed cannot reduce
+  severity;
+- **invariance:** adding outside whitespace does not change a normalized
+  callsign; and
+- **model agreement:** a production result equals a smaller independently
+  trusted model.
+
+For callsigns:
+
+```python
+def test_normalize_callsign_is_idempotent_for_one_example():
+    once = normalize_callsign("  Ridge\tSeven ")
+    twice = normalize_callsign(once)
+
+    assert twice == once
+```
+
+That is a property-shaped example. It communicates the invariant but explores
+only one string. Hypothesis can generate many strings from a strategy.
+
+## 6. Install Hypothesis and generate valid text
+
+Install Hypothesis in the practice environment:
+
+```bash
+python -m pip install hypothesis
+python -c "import hypothesis; print(hypothesis.__version__)"
+```
+
+The repository declares Hypothesis as a development dependency, so a Poetry
+development installation includes it.
+
+Import `given` and strategies, conventionally named `st`:
+
+```python
+from hypothesis import given
+from hypothesis import strategies as st
+
+
+@given(st.text())
+def test_normalize_callsign_is_idempotent(text):
+    once = normalize_callsign(text)
+    assert normalize_callsign(once) == once
+```
+
+For each generated `text`, Hypothesis calls the test and checks the assertion.
+The exact number of attempted examples is configurable and may include database
+replays or targeted cases; do not assert that a run always uses one fixed list.
+
+The empty string is valid under `st.text()`. Decide whether it belongs to the
+normalizer contract. If empty callsigns should be rejected, test a validator
+with a strategy that represents its accepted domain rather than hiding all empty
+failures.
+
+### Constrain the strategy to the contract
+
+If a station callsign accepts letters, digits, spaces, tabs, and hyphens with a
+maximum raw length of 40:
+
+```python
+from hypothesis import strategies as st
+
+
+callsign_text = st.text(
+    alphabet=st.characters(
+        categories=("L", "N"),
+        include_characters=" \t-",
+    ),
+    min_size=1,
+    max_size=40,
+)
+```
+
+Use it:
+
+```python
+from hypothesis import given
+
+
+@given(callsign_text)
+def test_normalization_is_idempotent_for_callsign_text(text):
+    normalized = normalize_callsign(text)
+    assert normalize_callsign(normalized) == normalized
+```
+
+Constraining generation directly is usually clearer and faster than generating
+arbitrary huge strings and rejecting most with `.filter(...)` or `assume(...)`.
+Use `assume` when a relationship between generated values is genuinely hard to
+encode, and watch for health-check evidence that too many examples are
+discarded.
+
+### Checkpoint: choose properties and strategies
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-properties-strategies-checkpoint",
+  "title": "Express general rules with generated inputs",
+  "instructions": "Choose the property or strategy that matches the supported input domain.",
+  "questions": [
+    {
+      "id": "unit13-properties-q58-idempotence",
+      "prompt": "Which assertion expresses idempotent callsign normalization?",
+      "options": ["normalize(text) != text", "normalize(normalize(text)) == normalize(text)", "len(normalize(text)) == len(text) for all text", "normalize(text) is text"],
+      "answer_index": 1,
+      "explanation": "Idempotence means applying the operation again does not change the already-normalized result."
+    },
+    {
+      "id": "unit13-properties-q59-domain",
+      "prompt": "The contract accepts at most 40 letters, digits, spaces, tabs, or hyphens. What is the clearest generation approach?",
+      "options": ["Generate arbitrary Python objects and ignore errors", "Generate million-character strings then filter them", "Build a text strategy with the accepted alphabet and size bounds", "Use one hand-picked string only"],
+      "answer_index": 2,
+      "explanation": "A strategy that directly describes valid inputs explores the contract efficiently and makes the domain reviewable."
+    },
+    {
+      "id": "unit13-properties-q60-examples",
+      "prompt": "What should happen to readable boundary and regression examples after adding a property test?",
+      "options": ["Delete every example", "Mark them all skipped", "Turn them into production comments", "Keep examples that communicate specific rules and history alongside the broader property"],
+      "answer_index": 3,
+      "explanation": "Examples and properties provide different evidence: examples explain named behavior while generated tests explore a wider input space."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Read the counterexample and the shrink
+
+Restore the buggy `split(" ")` normalizer and run the idempotence property.
+Idempotence may still pass because preserving a tab twice is stable. This is an
+important lesson: a true but weak property can miss the defect.
+
+Add an invariant from the contract: normalized output contains no whitespace
+other than single spaces between non-space tokens.
+
+```python
+from hypothesis import given
+
+
+@given(callsign_text)
+def test_normalized_callsign_has_only_single_spaces(text):
+    normalized = normalize_callsign(text)
+    assert "\t" not in normalized
+    assert "  " not in normalized
+    assert normalized == normalized.strip()
+```
+
+Hypothesis may report a falsifying example such as `text='0\t0'`. It tries to
+**shrink** a failure: find a simpler value that still makes the assertion false.
+A small counterexample helps reveal the rule and reduces debugging noise.
+
+Representative output:
+
+```text
+E   AssertionError: assert '\t' not in '0\t0'
+E     '\t' is contained here:
+E       0	0
+E   Falsifying example: test_normalized_callsign_has_only_single_spaces(
+E       text='0\t0',
+E   )
+```
+
+Do not assume the first shown value is the only possible failure. Read the
+assertion, strategy domain, and minimized example. Reproduce it as a direct
+call, confirm `split(" ")` is responsible, and repair with `split()`.
+
+::: {.concept-diagram}
+Generation searches the described domain. Shrinking keeps the failure while
+removing irrelevant complexity, producing a more useful debugging input.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Callsign strategy"] --> B["Generated examples"]
+  B --> C{"Property holds?"}
+  C -->|"yes"| B
+  C -->|"no"| D["Failing example"]
+  D --> E["Shrink while failure remains"]
+  E --> F["Minimal counterexample"]
+  F --> G["Diagnosis and regression"]
+```
+:::
+
+### Preserve important generated failures
+
+Hypothesis maintains an examples database that normally replays failures. Still
+add a named ordinary regression when the value represents a meaningful bug or
+communicates a boundary:
+
+```python
+def test_tab_between_callsign_words_is_collapsed_regression():
+    assert normalize_callsign("0\t0") == "0 0"
+```
+
+The property continues exploring variations. The named regression explains the
+specific obligation without depending on database state.
+
+## 8. Build numeric strategies around real boundaries
+
+Properties can complement exact alert examples. Define severity ordering:
+
+```python
+SEVERITY = {
+    "green": 0,
+    "amber": 1,
+    "red": 2,
+    "critical": 3,
+}
+```
+
+Increasing wind should not reduce severity while visibility is fixed:
+
+```python
+from hypothesis import given
+from hypothesis import strategies as st
+
+
+@given(
+    lower=st.floats(
+        min_value=0,
+        max_value=200,
+        allow_nan=False,
+        allow_infinity=False,
+    ),
+    increase=st.floats(
+        min_value=0,
+        max_value=200,
+        allow_nan=False,
+        allow_infinity=False,
+    ),
+    visibility=st.floats(
+        min_value=0,
+        max_value=20,
+        allow_nan=False,
+        allow_infinity=False,
+    ),
+)
+def test_more_wind_never_reduces_alert_severity(
+    lower,
+    increase,
+    visibility,
+):
+    higher = lower + increase
+    lower_severity = SEVERITY[alert_level(lower, visibility)]
+    higher_severity = SEVERITY[alert_level(higher, visibility)]
+
+    assert higher_severity >= lower_severity
+```
+
+The strategy excludes NaN and infinity because the current numeric contract
+accepts finite non-negative measurements. If production should reject
+non-finite floats, add explicit examples and a separate property for that
+validation contract.
+
+Properties can be wrong. If increasing wind legitimately changes another
+mode, the monotonic claim may overconstrain behavior. Review the property like
+any expected value.
+
+## 9. Reproduce generated failures without hard-coding a random seed
+
+Hypothesis reports a counterexample and saves it in its database. Rerun the
+focused node first. During investigation:
+
+1. copy the minimal value into a direct function call;
+2. confirm the property fails for the documented reason;
+3. simplify production or the property one change at a time;
+4. retain a named regression if the example communicates a real defect; and
+5. rerun the property and full suite.
+
+Hypothesis offers settings, seeds, and explicit `@example` values, but do not
+pin a seed merely to turn property-based exploration into one fixed random
+list. Use `@example(...)` when a known case should always accompany generated
+cases; use a normal regression test when a descriptive node is more helpful.
+
+### Checkpoint: interpret shrinking and combine evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-properties-shrinking-checkpoint",
+  "title": "Use a minimal counterexample without overclaiming",
+  "instructions": "Choose the next action supported by generated failure evidence.",
+  "questions": [
+    {
+      "id": "unit13-properties-q61-shrink",
+      "prompt": "What is Hypothesis shrinking trying to produce after a failure?",
+      "options": ["A simpler input that still causes the same property failure", "The largest possible benchmark", "A passing replacement expected value", "A coverage threshold"],
+      "answer_index": 0,
+      "explanation": "Shrinking removes irrelevant complexity while preserving the failure, making diagnosis and communication easier."
+    },
+    {
+      "id": "unit13-properties-q62-weak",
+      "prompt": "The buggy normalizer preserves tabs, yet the idempotence property passes. What does that show?",
+      "options": ["Hypothesis cannot generate tabs", "A property can be true but too weak to express the missing contract rule", "All generated tests are flaky", "The implementation is correct"],
+      "answer_index": 1,
+      "explanation": "Applying the same buggy normalization twice can be stable. Add an invariant about allowed whitespace to represent the real promise."
+    },
+    {
+      "id": "unit13-properties-q63-counterexample",
+      "prompt": "After a minimal tab counterexample exposes a real bug, what is the strongest lasting combination?",
+      "options": ["Delete the property after fixing it", "Retry with random seeds only", "Keep the property and add a descriptive tab regression", "Ignore the example because it is small"],
+      "answer_index": 2,
+      "explanation": "The property continues broad exploration while the named regression communicates the specific historical obligation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Shrink the strange callsign
+
+Build a final lab around `normalize_callsign` and `alert_level`:
+
+1. begin with the buggy `split(" ")` normalizer;
+2. keep ordinary examples for trimming, casing, repeated spaces, and hyphens;
+3. add an idempotence property and explain why it does not expose every
+   whitespace bug;
+4. define a bounded callsign strategy including letters, digits, spaces, tabs,
+   and hyphens;
+5. add a property that normalized output has no tabs, no doubled spaces, and no
+   outside whitespace;
+6. retain Hypothesis's minimal counterexample and reduce it as a direct call;
+7. add a named tab regression, verify it is red, and fix production with
+   `split()`;
+8. add the critical wind requirement through a separate red–green–refactor
+   cycle;
+9. add the monotonic-severity property for finite non-negative measurements;
+   and
+10. run ordinary examples, regressions, properties, and the complete project
+    from a clean process.
+
+Your evidence log should distinguish the regression failure, TDD boundary
+failure, and property counterexample. Do not describe one as proof of the
+others.
+
+<details>
+<summary>Hint 1: make the whitespace property stricter than idempotence</summary>
+
+Assert that `"\t"` and `"  "` are absent and that `normalized ==
+normalized.strip()`. The buggy result can be stable under a second call while
+still containing forbidden whitespace.
+</details>
+
+<details>
+<summary>Hint 2: constrain generation at the strategy</summary>
+
+Use `st.text` with an alphabet containing letters, digits, `" "`, `"\t"`, and
+`"-"`, plus `min_size=1` and `max_size=40`. Avoid generating arbitrary objects
+and discarding nearly all of them.
+</details>
+
+<details>
+<summary>Hint 3: keep the two red phases separate</summary>
+
+Finish and verify the normalization regression before starting the new
+critical-alert requirement. A refactor happens with the existing suite green;
+the next feature begins with a new intentional red node.
+</details>
+
+<details>
+<summary>Show a complete normalization property group</summary>
+
+```python
+from hypothesis import given
+from hypothesis import strategies as st
+
+from meteor_watch.callsigns import normalize_callsign
+
+
+callsign_text = st.text(
+    alphabet=st.characters(
+        categories=("L", "N"),
+        include_characters=" \t-",
+    ),
+    min_size=1,
+    max_size=40,
+)
+
+
+def test_callsign_trims_collapses_and_uppercases():
+    assert normalize_callsign("  ridge   seven ") == "RIDGE SEVEN"
+
+
+def test_tab_between_callsign_words_is_collapsed_regression():
+    assert normalize_callsign("0\t0") == "0 0"
+
+
+@given(callsign_text)
+def test_normalization_is_idempotent(text):
+    once = normalize_callsign(text)
+    assert normalize_callsign(once) == once
+
+
+@given(callsign_text)
+def test_normalized_callsign_uses_single_spaces(text):
+    normalized = normalize_callsign(text)
+    assert "\t" not in normalized
+    assert "  " not in normalized
+    assert normalized == normalized.strip()
+```
+
+The repaired implementation is intentionally small:
+
+```python
+def normalize_callsign(text):
+    """Trim, collapse whitespace, and uppercase a station callsign."""
+    return " ".join(text.split()).upper()
+```
+
+Add the separate critical threshold and monotonic-severity work from the lab
+contract before declaring the lesson complete.
+</details>
+
+## Key points
+
+- Reduce a real failure to the smallest input that preserves its cause.
+- Keep meaningful failures as descriptive regression tests after the repair.
+- TDD red must fail for the intended missing behavior, not a broken environment.
+- Green is the smallest clear implementation of the current requirement;
+  refactor changes structure while the complete suite remains green.
+- Explore first when the problem is unclear, then turn what you learned into a
+  contract and durable tests.
+- Properties express relationships such as idempotence, round trips, bounds,
+  and monotonicity across generated examples.
+- Strategies should describe the supported input domain directly.
+- Shrinking searches for a simpler value that still fails.
+- A passing weak property can miss a defect; review the property as carefully as
+  an expected example.
+- Keep communicative examples, named regressions, and broader properties
+  together when each supplies distinct evidence.
+
+## Continue learning
+
+- [Hypothesis documentation: quick start with pytest, strategies, and shrinking](https://hypothesis.readthedocs.io/en/latest/quickstart.html)
+- [Hypothesis documentation: details of generated examples and failures](https://hypothesis.readthedocs.io/en/latest/details.html)
+- [pytest documentation: parametrization and generated cases](https://docs.pytest.org/en/stable/how-to/parametrize.html)
+- Next: [Clear the Buggy Spaceport for Launch](challenge.qmd)

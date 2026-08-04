@@ -1,143 +1,165 @@
 ---
-title: Unit, Integration, Smoke, and End-to-End Tests
+title: Test at the Smallest Boundary That Can Fail
 lesson_id: testing-python-programs.test-levels
-lesson_order: 50
-description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-course_id: python-foundations
-unit_id: testing-python-programs
-unit_number: 13
+lesson_order: 60
+description: Match product risks to focused function, integration, process, and end-to-end boundaries; interpret statement and branch coverage; and remove flaky dependencies without chasing a universal test pyramid.
 execute:
   echo: true
 categories:
 - python-foundations
 - testing-python-programs
-order: 50
+- test-boundaries
+- integration-testing
+- subprocess
+- coverage
+- flaky-tests
+order: 60
 colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/test-levels.ipynb
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Select a test boundary from a concrete risk, combine fast diagnostic checks with a few broader proofs, and use coverage and flakiness evidence to improve—not grade—the suite.
+- **Practice in:** A local installed project and terminal for direct, filesystem, coverage, and child-process checks
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+A pure-function test can prove Meteor Watch classifies 70 kph as red. It cannot
+prove the installed command starts from another directory. A subprocess smoke
+test can prove the command starts, reads input, writes output, and returns the
+expected status. When that broad test fails, it may not immediately reveal
+whether parsing, configuration, rendering, packaging, or process wiring is at
+fault.
 
-One test level cannot provide every kind of confidence. Choose the smallest boundary that can reveal the failure you care about, then add a few broader checks for integration risk.
+No single level provides every kind of confidence. The useful question is not
+“How many unit tests should this pyramid contain?” It is “What risk could harm
+the user, and what is the smallest boundary that can actually expose it?”
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+Use these questions as you assemble a test portfolio:
 
-## 1. Read and predict a complete case
+- Which components must be real for the risk to exist?
+- What is the smallest boundary whose failure would reveal that risk?
+- Which faster check would make a broad failure easier to diagnose?
+- What does an uncovered line or branch invite you to investigate?
+- Which hidden dependency could make a result change without code changes?
 
-```python
-import json
+## 1. Name boundaries by what they cross
 
+Testing vocabulary varies between teams. Classify a test by its actual
+boundary rather than trusting a filename or label.
 
-def summarize(payload):
-    records = json.loads(payload)
-    return sum(record["minutes"] for record in records)
+| Boundary | Real parts | Replaced or controlled parts | Useful risk |
+|---|---|---|---|
+| focused function/component | one cohesive unit of behavior | external boundaries supplied as values or doubles | decision logic, validation, formatting |
+| integration | two or more real local parts | destructive/remote edges may remain controlled | parser-to-model, model-to-file, configuration-to-core |
+| process/smoke | installed entry point and operating-system process | remote service normally controlled | imports, entry point, argv, streams, exit status |
+| end-to-end/system | complete deployed user route | little or nothing inside the route | a critical journey across realistic infrastructure |
 
+“Unit” does not necessarily mean one Python function. A small class and its
+value object may form one cohesive component. “Integration” does not
+automatically mean a database or internet connection. Writing through a real
+`Path` into `tmp_path` integrates application code with the local filesystem.
 
-# Focused unit-style behavior check.
-assert summarize('[{"minutes": 20}, {"minutes": 15}]') == 35
+A **smoke test** asks whether a broad route basically works, not whether every
+branch is correct. An **end-to-end** test follows a realistic user journey
+through the whole system. This foundations project has no deployed web service,
+so a child-process CLI test is its broadest meaningful boundary. Do not invent a
+browser merely to fill a taxonomy box.
 
-# Boundary check for malformed serialized input.
-try:
-    summarize("not json")
-except json.JSONDecodeError:
-    malformed_is_rejected = True
+::: {.concept-diagram}
+Each wider boundary includes more real parts and can expose different risks,
+but failures generally cost more and have more possible causes.
 
-assert malformed_is_rejected
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Pure rule"] --> B["Modules together"] --> C["Installed CLI process"] --> D["Deployed user journey"]
+  E["Fast and precise"] --> A
+  D --> F["Broad and environment-sensitive"]
 ```
-
-### Step-by-step explanation
-
-1. The first assertion checks the composed parsing-and-summing behavior in memory.
-2. The second case crosses the JSON parser boundary.
-3. The anticipated decoder exception is part of the observed contract.
-4. Neither test needs a browser, subprocess, or network service.
-
-::: {.callout-note title="Make one controlled change"}
-Move the calculation into `total_minutes(records)` and decide which assertion is now a unit test and which remains an integration test.
 :::
 
-## 2. Investigate the important boundary
+## 2. Begin with a risk, not a target percentage
 
-A smoke test asks whether the main path starts and completes at all. End-to-end tests cross the full deployed interface and cost more to diagnose. Selenium is deferred because Foundations does not build a browser application.
+Create a small risk register:
 
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
+| Risk | Consequence | Smallest revealing boundary | Why narrower is insufficient |
+|---|---|---|---|
+| wind 70 classified amber | severe alert missed | pure `alert_level` call | function is the complete rule owner |
+| UTF-8 station damaged in report | user cannot identify station | report writer + real temporary file | returned in-memory text does not exercise encoding/write path |
+| configuration value never reaches classifier | wrong threshold used | config parser + application coordinator | parser alone and classifier alone do not prove wiring |
+| console entry point missing after installation | command cannot start | installed subprocess | direct `main()` bypasses package metadata and process lookup |
+| stderr mixed into JSON stdout | pipeline data corrupted | direct `main()` with separate streams, plus one process check | pure rendering does not prove adapter channel wiring |
 
-## 3. Practice from prediction to explanation
+The smallest boundary is not always the fewest lines. It includes exactly the
+parts necessary for the failure mode. If the risk is console-script metadata,
+no amount of direct function testing can expose it.
 
-Run this smaller case from a clean state:
+## 3. Build a focused function layer
+
+The pure rule remains fast and diagnostic:
 
 ```python
-def total_minutes(records):
-    return sum(record["minutes"] for record in records)
+import pytest
+
+from meteor_watch.alerts import alert_level
 
 
-assert total_minutes([]) == 0
-assert total_minutes([{"minutes": 5}]) == 5
-
-# The parser plus calculation can be checked separately as an integration boundary.
-assert total_minutes(json.loads('[{"minutes": 7}]')) == 7
+@pytest.mark.parametrize(
+    ("wind_kph", "visibility_km", "expected"),
+    [
+        pytest.param(39.9, 10, "green", id="below-amber"),
+        pytest.param(40, 10, "amber", id="wind-at-amber"),
+        pytest.param(69.9, 10, "amber", id="below-red"),
+        pytest.param(70, 10, "red", id="wind-at-red"),
+        pytest.param(45, 0.9, "red", id="red-outranks-amber"),
+    ],
+)
+def test_alert_level_rules(wind_kph, visibility_km, expected):
+    assert alert_level(wind_kph, visibility_km) == expected
 ```
 
-Then complete the learning loop:
+If `wind-at-red` fails, the node identifies one comparison. This layer can
+cover many rules cheaply and without filesystem or process noise.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+Focused does not mean isolated from every standard-library value. A pure
+function can accept a `datetime`, `Path`, dataclass, or dictionary. Replace a
+dependency only when crossing it would obscure or destabilize the behavior
+being investigated.
 
-<details>
-<summary>Check your practice process</summary>
-
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
-
-</details>
-
-## 4. Check your understanding
+### Checkpoint: place the test at a revealing boundary
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "testing-python-programs-test-levels",
-  "title": "Unit, Integration, Smoke, and End-to-End Tests checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit13-levels-boundary-checkpoint",
+  "title": "Match risks to the smallest revealing boundary",
+  "instructions": "Choose the test whose real parts can expose the named failure.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "When is an integration test preferable to a smaller unit test?",
-      "options": [
-        "Whenever a function has more than one line.",
-        "When the risk lies in whether multiple real components agree at their boundary.",
-        "Only when no assertions are available.",
-        "When the goal is to avoid reading failure output."
-      ],
+      "id": "unit13-levels-q46-entrypoint",
+      "prompt": "Which test can reveal that an installed console entry point is missing?",
+      "options": ["A direct alert_level call", "Launch the installed command as a child process", "A mocked Path.write_text", "A dictionary equality assertion"],
       "answer_index": 1,
-      "explanation": "Integration tests provide evidence about collaboration contracts that isolated tests cannot prove."
+      "explanation": "Entry-point metadata and process lookup exist only at the installed process boundary; direct calls bypass them."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun.",
-        "A written prediction, the observed result, and an explanation tied to the changed line."
-      ],
+      "id": "unit13-levels-q47-encoding",
+      "prompt": "Which boundary best checks that 'serra-ç' survives a UTF-8 report write?",
+      "options": ["A mock call-count assertion", "Only the risk classifier", "The real report writer with a tmp_path file", "A coverage percentage"],
+      "answer_index": 2,
+      "explanation": "A real isolated file exercises encoding and filesystem behavior without writing into the repository."
+    },
+    {
+      "id": "unit13-levels-q48-label",
+      "prompt": "What determines whether a test is an integration test?",
+      "options": ["Its function begins with test_integration", "It has at least ten assertions", "It always contacts the internet", "The real component boundaries it actually connects"],
       "answer_index": 3,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "Names are hints; the boundary comes from which real parts collaborate during the test."
     }
   ]
 }
@@ -145,14 +167,470 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## Key points
+## 4. Integrate real local collaborators where the risk crosses them
 
-::: {.callout-tip title="Key points"}
-- Unit tests isolate focused behavior; integration tests exercise real component boundaries.
-- Smoke tests provide shallow evidence that a main path operates.
-- Use a small number of costly end-to-end tests for risks only the full interface can expose.
+Suppose `load_thresholds` reads JSON and returns validated settings:
+
+```python
+import json
+
+
+def load_thresholds(path):
+    data = json.loads(path.read_text(encoding="utf-8"))
+    amber = float(data["amber_wind_kph"])
+    red = float(data["red_wind_kph"])
+    if not 0 <= amber < red:
+        raise ValueError("thresholds must satisfy 0 <= amber < red")
+    return {"amber": amber, "red": red}
+```
+
+An integration test uses a real temporary JSON file:
+
+```python
+def test_load_thresholds_reads_and_validates_json(tmp_path):
+    path = tmp_path / "meteor.json"
+    path.write_text(
+        '{"amber_wind_kph": 40, "red_wind_kph": 70}',
+        encoding="utf-8",
+    )
+
+    assert load_thresholds(path) == {"amber": 40.0, "red": 70.0}
+```
+
+This crosses `Path`, text decoding, JSON parsing, key lookup, numeric
+conversion, and validation. Separate focused tests can diagnose invalid ordering
+or missing keys. The integration test proves those pieces connect for one
+ordinary file.
+
+Do not replace every `Path` method with a mock simply to call the test a unit
+test. The real boundary is fast, deterministic, and central to the risk. Use a
+fake or patch when the collaborator is remote, destructive, unavailable, or
+otherwise unsuitable for a normal suite.
+
+### Integrate the coordinator without starting a process
+
+The Unit 12 pattern passes streams and arguments explicitly:
+
+```python
+from io import StringIO
+
+
+def main(argv, stdout, stderr):
+    if argv != ["classify"]:
+        stderr.write("usage: meteor-watch classify\n")
+        return 2
+    stdout.write("ridge-7|red\n")
+    return 0
+
+
+def test_main_keeps_data_and_diagnostics_separate():
+    stdout = StringIO()
+    stderr = StringIO()
+
+    status = main(["classify"], stdout, stderr)
+
+    assert status == 0
+    assert stdout.getvalue() == "ridge-7|red\n"
+    assert stderr.getvalue() == ""
+```
+
+This connects parser/coordinator/rendering responsibilities in one process but
+does not prove an installed command, `sys.argv`, or process status translation.
+It is faster and easier to diagnose than a child process, so keep it even when
+one smoke test is added.
+
+## 5. Cross the operating-system boundary once for the route that matters
+
+After installing the package, run the console command with `subprocess.run`:
+
+```python
+import os
+import subprocess
+
+
+def test_installed_command_classifies_from_another_directory(tmp_path):
+    environment = os.environ.copy()
+    result = subprocess.run(
+        ["meteor-watch", "classify"],
+        cwd=tmp_path,
+        env=environment,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert result.stdout == "ridge-7|red\n"
+    assert result.stderr == ""
+```
+
+This test proves:
+
+- the installed executable is discoverable in the test environment;
+- it does not depend on the repository as current directory;
+- process argument routing reaches the command;
+- stdout and stderr remain separate; and
+- `main()` becomes process status 0.
+
+It does not prove every option or validation branch. Keep one or a few process
+routes chosen by packaging and channel risk. Test detailed command grammar by
+calling parser or `main()` directly.
+
+If the project supports `python -m meteor_watch`, test that route separately
+only if it is promised to users. Do not duplicate every assertion across
+console-script and module entry routes without a reason.
+
+::: {.callout-note title="Make the environment explicit"}
+The subprocess inherits environment variables unless you pass a controlled
+mapping. Copy `os.environ`, remove or replace application-specific keys, and
+avoid logging secrets in a failure. Running from `tmp_path` exposes accidental
+current-directory imports and resource paths.
 :::
 
-## References
+## 6. Treat end-to-end checks as selected journeys
 
-- https://docs.pytest.org/en/stable/explanation/goodpractices.html
+If Meteor Watch later becomes a deployed service, an end-to-end test might
+submit an observation through its public interface and verify the alert seen by
+a user. That route is valuable for integration risk but may involve deployment,
+credentials, queues, networks, and slower diagnosis.
+
+Choose a few critical journeys:
+
+- the simplest successful user goal;
+- one high-consequence rejection;
+- one boundary whose deployment wiring has failed before; and
+- perhaps a health or smoke route after deployment.
+
+Do not move every rule assertion to the broadest layer. A hundred browser or
+remote tests for numeric thresholds would be slow, fragile, and difficult to
+diagnose compared with a parametrized pure-function table.
+
+### Checkpoint: assemble complementary evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-levels-portfolio-checkpoint",
+  "title": "Combine focused, integration, and process evidence",
+  "instructions": "Choose the boundary that adds a distinct kind of confidence.",
+  "questions": [
+    {
+      "id": "unit13-levels-q49-direct-main",
+      "prompt": "What does calling main(argv, StringIO(), StringIO()) check that a pure classifier test does not?",
+      "options": ["Coordinator routing, rendering, channels, and returned status in one process", "Installed console-script metadata", "The complete deployed environment", "Every possible argument"],
+      "answer_index": 0,
+      "explanation": "The direct adapter test connects more application parts and streams while remaining inside the current process."
+    },
+    {
+      "id": "unit13-levels-q50-subprocess-limit",
+      "prompt": "One subprocess smoke test passes. Which claim is too strong?",
+      "options": ["The selected command route started", "Every command option and data rule is correct", "The observed stdout and status matched this case", "The command worked from the selected temporary directory"],
+      "answer_index": 1,
+      "explanation": "A smoke route gives broad but shallow evidence for one journey; detailed cases still need focused tests."
+    },
+    {
+      "id": "unit13-levels-q51-broad",
+      "prompt": "Why keep fast focused tests when a broad process test already exists?",
+      "options": ["Pytest requires duplicate assertions", "Process tests cannot fail", "Focused failures locate rule defects more precisely and can cover many cases cheaply", "Focused tests prove installation"],
+      "answer_index": 2,
+      "explanation": "The layers answer different questions: focused tests give cheap, diagnostic depth while process tests cover selected wiring risks."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Use statement coverage to find unvisited code
+
+The repository already includes pytest-cov. Run:
+
+```bash
+python -m pytest --cov=meteor_watch --cov-report=term-missing
+```
+
+A report might show:
+
+```text
+Name                            Stmts   Miss  Cover   Missing
+-------------------------------------------------------------
+src/meteor_watch/alerts.py         12      2    83%   18-19
+src/meteor_watch/config.py         10      1    90%   14
+-------------------------------------------------------------
+TOTAL                              22      3    86%
+```
+
+Statement coverage answers: “Which executable lines did this run visit?” Open
+lines 18–19 and ask:
+
+- Is this behavior part of the supported contract?
+- Which risk would occur if it were wrong?
+- Is the line unreachable and removable?
+- Is the code defensive for an impossible state that should instead be
+  prevented by design?
+- What focused test boundary can execute it meaningfully?
+
+Do not write a content-free test merely to turn the line green. If the missing
+line logs an unsupported internal state, create the state only if the public
+contract permits it or redesign the state.
+
+## 8. Add branch evidence when one line has more than one destination
+
+Statement coverage can visit every line without taking every decision outcome:
+
+```python
+def report_label(risk, compact=False):
+    label = risk.upper() if compact else f"{risk.upper()} risk"
+    return label
+```
+
+One test with `compact=False` executes both source lines, producing 100%
+statement coverage. It does not check the true destination of the conditional
+expression.
+
+Run branch coverage:
+
+```bash
+python -m pytest \
+  --cov=meteor_watch \
+  --cov-branch \
+  --cov-report=term-missing
+```
+
+Then add a test because compact output is a promised route:
+
+```python
+def test_report_label_compact_omits_suffix():
+    assert report_label("red", compact=True) == "RED"
+```
+
+Branch coverage records possible transitions between lines and can identify a
+decision destination that did not occur. It still cannot tell whether the
+assertion is meaningful, whether boundaries are correct, or whether a missing
+requirement exists.
+
+::: {.concept-diagram}
+Executing the decision line is statement evidence. Taking both destinations is
+branch evidence. Neither decides whether the expected strings match the real
+contract.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A["report_label called"] --> B{"compact?"}
+  B -->|"true"| C["return RED"]
+  B -->|"false"| D["return RED risk"]
+  E["One false case"] --> A
+  E --> F["100% lines, partial branch evidence"]
+```
+:::
+
+## 9. Reject coverage theatre
+
+Coverage is not correctness. This test visits the line without checking it:
+
+```python
+def test_report_label_runs():
+    report_label("red", compact=True)
+```
+
+The percentage can increase while protection does not. Likewise, a test that
+asserts `result is not None` may visit every classifier branch without checking
+the right labels.
+
+Use coverage in review:
+
+1. run meaningful behavior tests;
+2. inspect missing statements and branches;
+3. connect each gap to a contract or risk;
+4. add a focused test, remove unreachable code, or record why the gap is
+   intentionally outside this suite; and
+5. review the new assertion by the failure it would catch.
+
+A project may use a minimum coverage threshold to prevent a large accidental
+drop. That threshold is a guardrail, not a grade and not a reason to demand
+100% from every module. Unit 14 will discuss automated quality gates; here the
+learning goal is interpretation.
+
+## 10. Remove hidden causes of flaky tests
+
+A **flaky test** sometimes passes and sometimes fails without an intentional
+code or contract change. Common causes include:
+
+- shared mutable state or order dependence;
+- current time and timing windows;
+- unseeded or globally seeded randomness;
+- real network or service availability;
+- sleeps used for coordination;
+- temporary ports, paths, or files assumed to have fixed names;
+- process-global environment or working-directory changes without restoration;
+- concurrency and event ordering; and
+- tests that depend on performance timing rather than functional results.
+
+Retries can collect evidence, but automatically rerunning until green can hide
+a defect. Reproduce the failure, record its seed/order/environment when
+available, and control the responsible dependency.
+
+This test is flaky around midnight:
+
+```python
+from datetime import datetime
+
+
+def test_alert_uses_today():
+    alert = build_live_alert("ridge-7")
+    assert alert["day"] == datetime.now().date().isoformat()
+```
+
+If the date changes between the production and test calls, it fails. Inject one
+clock value and derive both behavior and expected date from the contract:
+
+```python
+from datetime import datetime, timezone
+
+
+def test_alert_uses_injected_day():
+    moment = datetime(2035, 6, 1, 23, 59, tzinfo=timezone.utc)
+
+    alert = build_alert_for_moment("ridge-7", moment)
+
+    assert alert["day"] == "2035-06-01"
+```
+
+Do not add a one-second tolerance or repeat the assertion. Remove the race.
+
+### Checkpoint: interpret coverage and instability
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-levels-coverage-checkpoint",
+  "title": "Turn coverage and flaky failures into questions",
+  "instructions": "Choose the conclusion supported by the observed evidence.",
+  "questions": [
+    {
+      "id": "unit13-levels-q52-lines",
+      "prompt": "A module reports 100% statement coverage. Which conclusion is justified?",
+      "options": ["Every requirement is correct", "Every branch and input is proven", "The program has no defects", "Every counted executable statement ran at least once in that measured run"],
+      "answer_index": 3,
+      "explanation": "Statement coverage records execution, not assertion quality, missing requirements, boundary correctness, or all decision outcomes."
+    },
+    {
+      "id": "unit13-levels-q53-branch",
+      "prompt": "Why add --cov-branch to the report_label example?",
+      "options": ["To reveal whether both compact and non-compact decision destinations ran", "To make expected strings correct automatically", "To launch a subprocess", "To eliminate the need for assertions"],
+      "answer_index": 0,
+      "explanation": "Branch evidence distinguishes visiting a decision line from exercising each possible destination."
+    },
+    {
+      "id": "unit13-levels-q54-flaky",
+      "prompt": "A date test fails only around midnight because production and test read the clock separately. What is the strongest repair?",
+      "options": ["Retry until it passes", "Inject one controlled moment used by the behavior", "Increase coverage to 100%", "Skip the test at night"],
+      "answer_index": 1,
+      "explanation": "Controlling the time dependency removes the race and makes the expected date deterministic."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Design the smallest useful confidence portfolio
+
+Create a test portfolio for these Meteor Watch risks:
+
+1. wind and visibility boundaries may be classified incorrectly;
+2. non-ASCII station names may be damaged in a report file;
+3. invalid threshold ordering may reach the classifier;
+4. stderr diagnostics may contaminate stdout data;
+5. the installed command may depend on the project directory;
+6. compact formatting has an untested branch; and
+7. a date assertion sometimes fails around midnight.
+
+For each risk, record:
+
+| Risk | Smallest revealing boundary | Real parts | Controlled parts | Expected failure evidence |
+|---|---|---|---|---|
+
+Then implement:
+
+- focused parametrized classification cases;
+- one `tmp_path` UTF-8 integration;
+- one configuration validation integration;
+- one direct `main()` streams/status test;
+- one installed subprocess smoke test launched from `tmp_path`;
+- one compact branch assertion; and
+- one deterministic injected-time test.
+
+Run statement and branch coverage. Add a test only when an uncovered location
+maps to a supported behavior or recorded risk. Identify one redundant broad
+test that can be removed because a smaller test protects the same risk more
+precisely, but do not remove the only installation proof.
+
+<details>
+<summary>Hint 1: no boundary is universally best</summary>
+
+The classifier belongs at the function boundary. Encoding needs a real file.
+Entry-point installation needs a process. Match the real parts to the failure
+mode rather than forcing every risk into one level.
+</details>
+
+<details>
+<summary>Hint 2: use two checks around the command boundary</summary>
+
+Call `main(argv, stdout, stderr)` directly for several detailed cases. Keep one
+subprocess smoke check for installed entry point, separate channels, status, and
+working-directory independence.
+</details>
+
+<details>
+<summary>Hint 3: ask what an uncovered branch means</summary>
+
+Open the missing location. If compact formatting is public, add the exact
+compact assertion. If the branch is unreachable because validation prevents
+it, consider simplifying the code rather than manufacturing an impossible
+test.
+</details>
+
+<details>
+<summary>Show one justified portfolio</summary>
+
+One defensible mapping is:
+
+- boundary rules → parametrized direct `alert_level` tests;
+- UTF-8 persistence → real writer plus `tmp_path` readback;
+- threshold ordering → real JSON loader and validator with a temporary file;
+- stream separation → direct `main()` with two `StringIO` objects;
+- installation/current directory → one `subprocess.run` smoke test from
+  `tmp_path`;
+- compact route → one direct exact-result test prompted by branch evidence; and
+- midnight race → injected fixed datetime with no tolerance or retry.
+
+The final explanation should say why each broader boundary exists and which
+detailed cases stay at the faster layer.
+</details>
+
+## Key points
+
+- Classify a test by the real boundary it crosses, not by its filename.
+- Begin with product risk and choose the smallest boundary capable of exposing
+  it.
+- Focused tests provide cheap depth and precise diagnosis.
+- Real local integrations such as `tmp_path` can be simpler than mocks.
+- Direct `main()` tests cover detailed adapter behavior; a small number of
+  subprocess tests protect installation and process wiring.
+- End-to-end checks should represent selected critical journeys, not every
+  branch.
+- Statement coverage reveals visited lines; branch coverage reveals decision
+  destinations.
+- Coverage raises questions and can detect drops, but it does not prove
+  correctness or replace assertions.
+- Flaky tests reveal uncontrolled state, time, randomness, services, order, or
+  coordination; remove the cause instead of retrying until green.
+
+## Continue learning
+
+- [pytest documentation: good integration practices](https://docs.pytest.org/en/stable/explanation/goodpractices.html)
+- [pytest-cov documentation: reporting coverage from pytest](https://pytest-cov.readthedocs.io/en/latest/readme.html)
+- [Coverage.py documentation: branch coverage](https://coverage.readthedocs.io/en/latest/branch.html)
+- [pytest documentation: flaky tests](https://docs.pytest.org/en/stable/explanation/flaky.html)
+- Next: [Preserve Bugs and Explore General Rules](properties-regressions-tdd.qmd)

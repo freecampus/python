@@ -166,7 +166,8 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "testing-python-programs",
             "Testing Python Programs",
-            "choose test boundaries whose failures identify violated behavior",
+            "clear a buggy spaceport with isolated, boundary-focused, and "
+            "property-based tests",
         ),
         (
             "code-quality-maintainability",

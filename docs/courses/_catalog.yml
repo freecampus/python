@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 17
+curriculum_version: 18
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -8,14 +8,14 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 90
-    estimated_effort: 305–445 hours
+    lesson_count: 91
+    estimated_effort: 330–475 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 17
+      curriculum_version: 18
       rule_version: 9
       recognition: local-self-reported
       lesson_ids:
@@ -96,7 +96,8 @@ courses:
         - command-line-applications.cli-ecosystem-testable-architecture
         - testing-python-programs.what-tests-prove
         - testing-python-programs.pytest-discovery-failures
-        - testing-python-programs.fixtures-parametrization-boundaries
+        - testing-python-programs.parametrization-boundary-cases
+        - testing-python-programs.fixtures-isolation-capture
         - testing-python-programs.test-doubles-dependency-injection
         - testing-python-programs.test-levels
         - testing-python-programs.properties-regressions-tdd
@@ -163,7 +164,7 @@ courses:
           unit_id: command-line-applications
           path: courses/python-foundations/units/command-line-applications/challenge.qmd
         - id: testing-python-programs.challenge
-          title: Protect the Record Converter
+          title: Clear the Buggy Spaceport for Launch
           unit_id: testing-python-programs
           path: courses/python-foundations/units/testing-python-programs/challenge.qmd
         - id: code-quality-maintainability.challenge
@@ -257,7 +258,7 @@ courses:
         id: testing-python-programs
         title: Testing Python Programs
         directory: courses/python-foundations/units/testing-python-programs
-        lesson_count: 6
+        lesson_count: 7
         kind: instructional
       - number: 14
         id: code-quality-maintainability

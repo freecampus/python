@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Protect the Record Converter'
-description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+title: 'Unit Challenge: Clear the Buggy Spaceport for Launch'
+description: Build a layered pytest suite for a playful spaceport dispatcher, expose six contract-backed defects, repair them one at a time, and leave boundary, file, process, regression, and property evidence.
 challenge_id: testing-python-programs.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 2
+assessment_version: 3
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,169 +19,863 @@ unit_number: 13
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 13 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+- **Outcome assessed:** Turn a public contract into an isolated, readable pytest portfolio that exposes real defects at function, file, collaborator, and process boundaries.
+- **Evidence:** Approximately 30 collected cases, six red-to-green repairs, branch-coverage questions, one minimal generated counterexample, a clean process smoke test, and one debugging record
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
 
-The suite covers ordinary, boundary, invalid, parametrized, integration, regression, and property behavior with failures that identify the violated contract.
+## 1. Receive the launch inspector's warning
 
-**Scenario:** Protect the record converter from Unit 12 with a layered pytest suite. Preserve one past whitespace bug, exercise invalid records, isolate stream output, and add a property over normalized names.
+Tiny research ships are queuing at **Aurora Pocket Spaceport**. The dispatcher
+normalizes callsigns, calculates landing fees, stamps clearances, stores a JSON
+manifest, and exposes one small command. It looks ready—until the launch
+inspector reports six strange observations:
 
-::: {.callout-note title="Work independently, but not without support"}
-Use the starter contract, run one group of checks at a time, and open hints only
-after you can state the evidence blocking your next step.
+- tabs sometimes survive inside callsigns;
+- a cargo pod exactly on a fee boundary receives the lower price;
+- `True` can be accepted as a mass of one kilogram;
+- clearance timestamps ignore the spaceport's controlled clock;
+- a saved manifest can quietly lose all but its first clearance; and
+- an invalid command writes its diagnostic into the data channel.
+
+Your job is to build the protection system before opening the launch gates.
+Every defect is tied to the public contract below. There are no secret trivia
+rules. Write a red test for one observation, confirm its failure phase and
+values, repair one production cause, and rerun the focused node before moving
+on.
+
+::: {.callout-note title="Act as an inspector, not a guesser"}
+Do not rewrite the module from scratch or change expected results to match its
+current output. Let each public rule produce a focused failure. Keep the
+smallest useful report, one repair, and the clean rerun as evidence.
 :::
 
-## 2. Understand the acceptance example
+The finished result should feel satisfying: one compact suite stops six
+shape-shifting bugs from boarding the ships again.
 
-Before implementation, restate the normal input, expected result, important
-boundary, and one anticipated failure in your own words.
+## 2. Translate the spaceport rules into observable behavior
 
-### Constraints
+### Callsigns
 
-1. Test public behavior instead of private implementation lines.
-2. Use pytest parametrization for related examples.
-3. Use `StringIO` or pytest capture for streams.
-4. Keep Selenium and external services out of this project.
+`normalize_callsign(text)` must:
+
+1. accept a string;
+2. trim outside whitespace;
+3. collapse every inside run of Unicode whitespace—including spaces and tabs—to
+   one ordinary space;
+4. uppercase letters;
+5. preserve hyphens and digits; and
+6. raise `ValueError("callsign must not be empty")` when no non-whitespace text
+   remains.
+
+Examples:
+
+| Input | Result |
+|---|---|
+| `"  nova   7 "` | `"NOVA 7"` |
+| `"nova\t7"` | `"NOVA 7"` |
+| `"lx-42"` | `"LX-42"` |
+
+### Landing fees
+
+`landing_fee(mass_kg, hazardous=False)` must reject booleans, non-numeric
+values, and negative values. For accepted finite numeric values:
+
+| Mass | Base fee |
+|---:|---:|
+| `0 <= mass < 100` | 5 credits |
+| `100 <= mass < 500` | 12 credits |
+| `mass >= 500` | 25 credits |
+
+Hazardous cargo adds exactly 7 credits after the base tier is selected.
+
+### Clearances
+
+`build_clearance(record, clock)` receives a mapping with `callsign`, `mass_kg`,
+and optional `hazardous`. It must return a new dictionary containing:
+
+- normalized `callsign`;
+- original numeric `mass_kg`;
+- Boolean `hazardous`;
+- calculated `fee`; and
+- `created_at` from exactly one call to the supplied zero-argument `clock`,
+  formatted with `datetime.isoformat()`.
+
+It must not mutate `record`.
+
+### Manifests
+
+`save_clearances(path, records)` writes **every** record as one UTF-8 JSON array
+and returns the number written. `load_clearances(path)` returns the complete
+list. An empty list and non-ASCII callsign must round-trip. Invalid JSON is
+allowed to raise `json.JSONDecodeError` with its original context.
+
+### Command boundary
+
+The module supports:
+
+```text
+python -m spaceport_dispatch fee MASS [--hazardous]
+```
+
+On success it writes only the integer fee plus a newline to stdout, writes
+nothing to stderr, and returns status 0. Invalid mass writes
+`spaceport-dispatch: <message>` plus a newline to stderr, leaves stdout empty,
+and returns status 2.
 
 ## 3. Start from the contract
 
-```python
-import pytest
+Create a disposable project:
 
-from record_converter import convert_record
-
-
-@pytest.mark.parametrize(
-    ("record", "expected"),
-    [
-        ({"name": " Ada ", "score": "9"}, {"name": "Ada", "score": 9}),
-        ({"name": "Lin", "score": 0}, {"name": "Lin", "score": 0}),
-    ],
-)
-def test_convert_record_examples(record, expected):
-    """Protect ordinary and boundary conversion behavior."""
-    raise NotImplementedError
+```text
+spaceport-test-lab/
+├── spaceport_dispatch.py
+└── tests/
+    └── test_spaceport_dispatch.py
 ```
 
-## 4. Build in small stages
+Install the tools in an isolated environment if they are not already present:
 
-1. Make the smallest normal case observable.
-2. Run the nearest check and read its complete failure evidence.
-3. Add one boundary behavior without weakening earlier checks.
-4. Restart and run the complete artifact from top to bottom.
+```bash
+python -m pip install pytest pytest-cov hypothesis
+```
+
+Copy this **deliberately buggy but syntactically valid** module into
+`spaceport_dispatch.py`:
+
+```python
+import argparse
+import json
+import math
+import sys
+from datetime import datetime, timezone
+
+
+def normalize_callsign(text):
+    """Trim, collapse whitespace, and uppercase a non-empty callsign."""
+    if not isinstance(text, str):
+        raise TypeError("callsign must be text")
+    normalized = " ".join(text.strip().split(" ")).upper()
+    if not normalized:
+        raise ValueError("callsign must not be empty")
+    return normalized
+
+
+def landing_fee(mass_kg, hazardous=False):
+    """Return the landing fee for one finite non-negative cargo mass."""
+    if not isinstance(mass_kg, (int, float)):
+        raise TypeError("mass must be numeric")
+    if not math.isfinite(mass_kg) or mass_kg < 0:
+        raise ValueError("mass must be finite and non-negative")
+    if mass_kg <= 100:
+        fee = 5
+    elif mass_kg < 500:
+        fee = 12
+    else:
+        fee = 25
+    if hazardous:
+        fee += 7
+    return fee
+
+
+def build_clearance(record, clock):
+    """Build a new normalized clearance dictionary."""
+    hazardous = bool(record.get("hazardous", False))
+    return {
+        "callsign": normalize_callsign(record["callsign"]),
+        "mass_kg": record["mass_kg"],
+        "hazardous": hazardous,
+        "fee": landing_fee(record["mass_kg"], hazardous),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def save_clearances(path, records):
+    """Write every clearance as a UTF-8 JSON array and return its count."""
+    records = list(records)
+    path.write_text(
+        json.dumps(records[:1], ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return len(records)
+
+
+def load_clearances(path):
+    """Load and return a clearance list from UTF-8 JSON."""
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(prog="spaceport-dispatch")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    fee_parser = subparsers.add_parser("fee")
+    fee_parser.add_argument("mass")
+    fee_parser.add_argument("--hazardous", action="store_true")
+    return parser
+
+
+def main(argv=None, stdout=None, stderr=None):
+    """Run the fee command and return a process-style status."""
+    if stdout is None:
+        stdout = sys.stdout
+    if stderr is None:
+        stderr = sys.stderr
+    arguments = build_parser().parse_args(argv)
+    try:
+        mass = float(arguments.mass)
+        fee = landing_fee(mass, arguments.hazardous)
+    except (TypeError, ValueError) as error:
+        stdout.write(f"spaceport-dispatch: {error}\n")
+        return 2
+    stdout.write(f"{fee}\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+Do not fix a suspicious line before a test exposes its violated rule. Begin
+with this scaffold:
+
+```python
+from datetime import datetime, timezone
+from io import StringIO
+
+import pytest
+
+from spaceport_dispatch import (
+    build_clearance,
+    landing_fee,
+    load_clearances,
+    main,
+    normalize_callsign,
+    save_clearances,
+)
+
+
+@pytest.fixture
+def fixed_clock():
+    def clock():
+        return datetime(2042, 4, 5, 6, 7, tzinfo=timezone.utc)
+
+    return clock
+
+
+def test_ordinary_callsign_is_normalized():
+    assert normalize_callsign("  nova   7 ") == "NOVA 7"
+
+
+def test_light_non_hazardous_pod_costs_five():
+    assert landing_fee(25) == 5
+
+
+def test_main_prints_an_ordinary_fee():
+    stdout = StringIO()
+    stderr = StringIO()
+
+    status = main(["fee", "25"], stdout, stderr)
+
+    assert status == 0
+    assert stdout.getvalue() == "5\n"
+    assert stderr.getvalue() == ""
+```
+
+Run the baseline:
+
+```bash
+python -m pytest -q
+```
+
+These ordinary cases should pass. That does not clear the spaceport; it only
+confirms the project imports and three ordinary routes are ready for deeper
+inspection.
+
+## 4. Inspect one subsystem at a time
+
+Build the suite in this order:
+
+1. callsign examples and empty input;
+2. fee thresholds, hazardous addition, and invalid inputs;
+3. fixed-clock clearance construction and input immutability;
+4. manifest round trips with several records, Unicode, and an empty list;
+5. direct command stdout/stderr/status behavior;
+6. one child-process smoke test;
+7. branch coverage questions; and
+8. callsign properties and a named tab regression.
+
+This order keeps the earliest red report narrow. If you add every test at once,
+six failures compete for attention and encourage changing several causes
+together.
+
+### Required public test names
+
+Use these names where they apply so the progressive commands remain useful:
+
+- `test_tab_is_collapsed_in_callsign_regression`
+- `test_fee_boundaries`
+- `test_hazardous_fee_adds_seven`
+- `test_invalid_masses_are_rejected`
+- `test_clearance_uses_supplied_clock_without_mutating_record`
+- `test_manifest_round_trips_every_record`
+- `test_invalid_mass_uses_stderr_and_status_two`
+- `test_module_command_runs_as_a_process`
+- `test_normalization_is_idempotent`
+- `test_normalized_callsign_contains_only_single_spaces`
+
+You may add descriptive helpers, fixtures, and test names. Do not rename
+production functions or broaden their signatures to avoid testing the contract.
 
 ## 5. Run progressive assertions
 
-```python
-def test_convert_record_rejects_empty_name():
-    with pytest.raises(ValueError, match="name"):
-        convert_record({"name": "   ", "score": "8"})
+### Check 1 — collect the baseline
 
-
-def test_regression_repeated_whitespace():
-    converted = convert_record({"name": "Ada   Lovelace", "score": "9"})
-    assert converted["name"] == "Ada Lovelace"
-
-
-# Property to implement with Hypothesis:
-# normalized = convert_record({"name": generated_name, "score": "1"})["name"]
-# assert normalized == " ".join(normalized.split())
+```bash
+python -m pytest --collect-only -q
+python -m pytest -q -x
 ```
 
-::: {.callout-warning title="Do not edit expected values to create a pass"}
-If a check appears wrong, explain the contract conflict before changing either
-side. Otherwise, repair the implementation and preserve the check.
-:::
+Expected starting evidence: three collected tests pass.
+
+### Checks 2–6 — normalize callsigns
+
+Create a five-row parameter table for ordinary spaces, repeated spaces, a tab,
+hyphen/digits, and outside whitespace. Add a separate empty-input exception
+test. Run:
+
+```bash
+python -m pytest -q tests/test_spaceport_dispatch.py -k callsign -x
+```
+
+The tab or repeated-space node should fail against the starter. Preserve the
+smallest failing tab as the required regression before repairing the split.
+
+### Checks 7–20 — protect fees
+
+Create seven base-fee rows including values just below, at, and just above 100
+and 500. Add three hazardous rows and four invalid rows: `True`, `-0.1`,
+`float("inf")`, and `"heavy"`.
+
+```bash
+python -m pytest -q tests/test_spaceport_dispatch.py -k fee -x
+```
+
+The `100` and Boolean cases should become separate red nodes. Confirm the
+compared fee or missing exception before editing production.
+
+### Check 21 — control the clock and preserve the caller's record
+
+Use `fixed_clock`. Copy the input record before the call. Assert the complete
+clearance, unchanged input, and exact timestamp. The starter should fail because
+its timestamp comes from the real clock.
+
+```bash
+python -m pytest -q \
+  tests/test_spaceport_dispatch.py::test_clearance_uses_supplied_clock_without_mutating_record
+```
+
+### Checks 22–24 — round-trip manifests
+
+Use `tmp_path` to save and load two records including `"ÓRBITA-7"`; assert the
+returned count and complete list. Add an empty-list round trip and an invalid
+JSON exception test.
+
+```bash
+python -m pytest -q tests/test_spaceport_dispatch.py -k manifest -x
+```
+
+The two-record test should reveal that only one record was written.
+
+### Checks 25–27 — inspect the command boundary
+
+Retain the ordinary direct test. Add the named invalid-mass test and one
+subprocess smoke test using `sys.executable -m spaceport_dispatch fee 100`.
+
+```bash
+python -m pytest -q tests/test_spaceport_dispatch.py -k "main or process" -x
+```
+
+The invalid direct test should show a diagnostic in stdout instead of stderr.
+The process test should use a valid boundary and expect status 0, stdout
+`"12\n"`, and empty stderr.
+
+### Checks 28–29 — search normalization properties
+
+Define a bounded text strategy containing letters, digits, spaces, tabs, and
+hyphens. Add idempotence and allowed-whitespace properties. The no-single-space
+property may find the tab before your named regression does; retain both forms
+of evidence.
+
+```bash
+python -m pytest -q tests/test_spaceport_dispatch.py -k normalization
+```
+
+### Inspect coverage without manufacturing a grade
+
+```bash
+python -m pytest \
+  --cov=spaceport_dispatch \
+  --cov-branch \
+  --cov-report=term-missing
+```
+
+For every missing line or branch, write one of:
+
+- public risk → add a focused assertion;
+- already covered by a clearer boundary → explain why duplication adds little;
+- unreachable after validation → consider simplifying production; or
+- outside this challenge's public contract → record the limit.
+
+Do not change assertions merely to reach 100%.
+
+### Finish from a clean state
+
+```bash
+python -m pytest -q
+python -m spaceport_dispatch fee 100
+```
+
+The suite should collect approximately 30 cases and pass. The real process
+should print `12` and exit successfully.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
 <summary>Hint 1</summary>
 
-The parametrized test body needs one equality assertion.
-
+For callsigns, no-argument `split()` recognizes runs of whitespace; `split(" ")`
+recognizes only ordinary spaces and retains empty pieces between repeated
+spaces. For fees, remember that `bool` is a subclass of `int`, so reject
+booleans before the ordinary numeric type check. Write each failing test before
+making either repair.
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Use a regression name with multiple internal spaces so the old failure is reproducible.
-
+The fixed clock is a zero-argument callable. `build_clearance` should call it
+once and format that returned datetime. The manifest writer should serialize
+the complete `records` list, not a slice. Read the real temporary file back to
+prove what crossed the boundary.
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-For a CLI integration check, call `main` with injected `StringIO` streams before considering a subprocess smoke test.
-
+For the invalid command, inspect `stdout.getvalue()`, `stderr.getvalue()`, and
+status independently. For the property strategy, generate the accepted
+callsign alphabet directly and assert that output contains neither tabs nor
+double spaces and equals its stripped form. Preserve the minimal tab example as
+a named regression.
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing check. Record its inputs, actual result or exception,
-expected result, one hypothesis, one controlled change, and the verified rerun.
+Retain one record for a defect that was not the first one you noticed:
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
-|---|---|---|---|---|
-| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+| Field | Your evidence |
+|---|---|
+| Contract rule | What exact public promise applies? |
+| Focused node | Which node or parameter ID did you run? |
+| Red observation | Which phase, expression, and values appeared? |
+| Hypothesis | Which single production cause explains them? |
+| Controlled repair | Which one change tested the hypothesis? |
+| Focused rerun | What changed in the same node? |
+| Complete rerun | What did the approximately 30-case suite report? |
+| Remaining limit | Which risk is still outside this suite? |
 
-## 8. Compare with a solution path
+Avoid entries such as “tests failed, fixed code.” A useful record could say:
+
+> `test_fee_boundaries[one-hundred-starts-middle-tier]` failed in the call phase:
+> observed 5, expected 12. The contract makes 100 inclusive in the middle tier,
+> while production uses `<= 100` for the light tier. Changing only that
+> comparison to `< 100` made the node and complete fee table green.
+
+## 8. Compare a complete inspection suite
+
+Open this only after your own focused repairs. The solution is one design, not
+a reason to replace a working readable suite with identical formatting.
 
 <details>
-<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+<summary>Show the complete test suite</summary>
 
 ```python
-def test_convert_record_examples(record, expected):
-    assert convert_record(record) == expected
+import json
+import subprocess
+import sys
+from datetime import datetime, timezone
+from io import StringIO
+from pathlib import Path
+
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
+
+from spaceport_dispatch import (
+    build_clearance,
+    landing_fee,
+    load_clearances,
+    main,
+    normalize_callsign,
+    save_clearances,
+)
 
 
-# The complete solution adds the supplied invalid/regression cases, a bounded
-# Hypothesis property, and one `main` integration test with isolated streams.
+@pytest.fixture
+def fixed_clock():
+    def clock():
+        return datetime(2042, 4, 5, 6, 7, tzinfo=timezone.utc)
+
+    return clock
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        pytest.param("nova 7", "NOVA 7", id="ordinary-space"),
+        pytest.param("nova   7", "NOVA 7", id="repeated-spaces"),
+        pytest.param("nova\t7", "NOVA 7", id="tab"),
+        pytest.param("lx-42", "LX-42", id="hyphen-and-digits"),
+        pytest.param("  órbita 7 ", "ÓRBITA 7", id="outside-space"),
+    ],
+)
+def test_callsign_examples(raw, expected):
+    assert normalize_callsign(raw) == expected
+
+
+def test_tab_is_collapsed_in_callsign_regression():
+    assert normalize_callsign("0\t0") == "0 0"
+
+
+def test_empty_callsign_is_rejected():
+    with pytest.raises(ValueError, match="callsign must not be empty"):
+        normalize_callsign(" \t ")
+
+
+@pytest.mark.parametrize(
+    ("mass_kg", "expected"),
+    [
+        pytest.param(0, 5, id="zero"),
+        pytest.param(99.9, 5, id="below-one-hundred"),
+        pytest.param(100, 12, id="one-hundred-starts-middle-tier"),
+        pytest.param(100.1, 12, id="above-one-hundred"),
+        pytest.param(499.9, 12, id="below-five-hundred"),
+        pytest.param(500, 25, id="five-hundred-starts-heavy-tier"),
+        pytest.param(900, 25, id="ordinary-heavy"),
+    ],
+)
+def test_fee_boundaries(mass_kg, expected):
+    assert landing_fee(mass_kg) == expected
+
+
+@pytest.mark.parametrize(
+    ("mass_kg", "expected"),
+    [
+        pytest.param(25, 12, id="light-plus-seven"),
+        pytest.param(100, 19, id="middle-plus-seven"),
+        pytest.param(500, 32, id="heavy-plus-seven"),
+    ],
+)
+def test_hazardous_fee_adds_seven(mass_kg, expected):
+    assert landing_fee(mass_kg, hazardous=True) == expected
+
+
+@pytest.mark.parametrize(
+    ("mass_kg", "error_type"),
+    [
+        pytest.param(True, TypeError, id="boolean"),
+        pytest.param("heavy", TypeError, id="text"),
+        pytest.param(-0.1, ValueError, id="negative"),
+        pytest.param(float("inf"), ValueError, id="infinite"),
+    ],
+)
+def test_invalid_masses_are_rejected(mass_kg, error_type):
+    with pytest.raises(error_type):
+        landing_fee(mass_kg)
+
+
+def test_clearance_uses_supplied_clock_without_mutating_record(fixed_clock):
+    record = {"callsign": " nova 7 ", "mass_kg": 100, "hazardous": True}
+    original = record.copy()
+
+    observed = build_clearance(record, fixed_clock)
+
+    assert observed == {
+        "callsign": "NOVA 7",
+        "mass_kg": 100,
+        "hazardous": True,
+        "fee": 19,
+        "created_at": "2042-04-05T06:07:00+00:00",
+    }
+    assert record == original
+
+
+def test_manifest_round_trips_every_record(tmp_path):
+    path = tmp_path / "clearances.json"
+    records = [
+        {"callsign": "NOVA 7", "fee": 12},
+        {"callsign": "ÓRBITA-7", "fee": 25},
+    ]
+
+    count = save_clearances(path, records)
+
+    assert count == 2
+    assert load_clearances(path) == records
+    assert "ÓRBITA-7" in path.read_text(encoding="utf-8")
+
+
+def test_empty_manifest_round_trips(tmp_path):
+    path = tmp_path / "empty.json"
+
+    assert save_clearances(path, []) == 0
+    assert load_clearances(path) == []
+
+
+def test_invalid_manifest_preserves_json_error(tmp_path):
+    path = tmp_path / "broken.json"
+    path.write_text("{not-json", encoding="utf-8")
+
+    with pytest.raises(json.JSONDecodeError):
+        load_clearances(path)
+
+
+def test_main_prints_an_ordinary_fee():
+    stdout = StringIO()
+    stderr = StringIO()
+
+    status = main(["fee", "25"], stdout, stderr)
+
+    assert status == 0
+    assert stdout.getvalue() == "5\n"
+    assert stderr.getvalue() == ""
+
+
+def test_invalid_mass_uses_stderr_and_status_two():
+    stdout = StringIO()
+    stderr = StringIO()
+
+    status = main(["fee", "nan"], stdout, stderr)
+
+    assert status == 2
+    assert stdout.getvalue() == ""
+    assert stderr.getvalue() == (
+        "spaceport-dispatch: mass must be finite and non-negative\n"
+    )
+
+
+def test_module_command_runs_as_a_process():
+    project_root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [sys.executable, "-m", "spaceport_dispatch", "fee", "100"],
+        cwd=project_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert result.stdout == "12\n"
+    assert result.stderr == ""
+
+
+callsign_text = st.text(
+    alphabet=st.characters(
+        categories=("L", "N"),
+        include_characters=" \t-",
+    ),
+    min_size=1,
+    max_size=40,
+).filter(lambda text: bool(text.split()))
+
+
+@given(callsign_text)
+def test_normalization_is_idempotent(text):
+    once = normalize_callsign(text)
+    assert normalize_callsign(once) == once
+
+
+@given(callsign_text)
+def test_normalized_callsign_contains_only_single_spaces(text):
+    normalized = normalize_callsign(text)
+    assert "\t" not in normalized
+    assert "  " not in normalized
+    assert normalized == normalized.strip()
 ```
 
-Compare contracts and decisions, not only line-for-line syntax. If your solution
-also satisfies the constraints and checks, explain one trade-off between the
-approaches.
-
+The ordinary call example plus the listed parameter rows and property tests
+collects about 30 cases. If your process test runs from a different project
+shape, calculate its `cwd` deliberately; the goal is a fresh child process that
+can find the module without depending on state from a previous test.
 </details>
 
-## 9. Check your understanding
+<details>
+<summary>Show the repaired application module</summary>
+
+```python
+import argparse
+import json
+import math
+import sys
+
+
+def normalize_callsign(text):
+    """Trim, collapse whitespace, and uppercase a non-empty callsign."""
+    if not isinstance(text, str):
+        raise TypeError("callsign must be text")
+    normalized = " ".join(text.split()).upper()
+    if not normalized:
+        raise ValueError("callsign must not be empty")
+    return normalized
+
+
+def landing_fee(mass_kg, hazardous=False):
+    """Return the landing fee for one finite non-negative cargo mass."""
+    if isinstance(mass_kg, bool) or not isinstance(mass_kg, (int, float)):
+        raise TypeError("mass must be numeric")
+    if not math.isfinite(mass_kg) or mass_kg < 0:
+        raise ValueError("mass must be finite and non-negative")
+    if mass_kg < 100:
+        fee = 5
+    elif mass_kg < 500:
+        fee = 12
+    else:
+        fee = 25
+    if hazardous:
+        fee += 7
+    return fee
+
+
+def build_clearance(record, clock):
+    """Build a new normalized clearance dictionary."""
+    hazardous = bool(record.get("hazardous", False))
+    return {
+        "callsign": normalize_callsign(record["callsign"]),
+        "mass_kg": record["mass_kg"],
+        "hazardous": hazardous,
+        "fee": landing_fee(record["mass_kg"], hazardous),
+        "created_at": clock().isoformat(),
+    }
+
+
+def save_clearances(path, records):
+    """Write every clearance as a UTF-8 JSON array and return its count."""
+    records = list(records)
+    path.write_text(
+        json.dumps(records, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return len(records)
+
+
+def load_clearances(path):
+    """Load and return a clearance list from UTF-8 JSON."""
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(prog="spaceport-dispatch")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    fee_parser = subparsers.add_parser("fee")
+    fee_parser.add_argument("mass")
+    fee_parser.add_argument("--hazardous", action="store_true")
+    return parser
+
+
+def main(argv=None, stdout=None, stderr=None):
+    """Run the fee command and return a process-style status."""
+    if stdout is None:
+        stdout = sys.stdout
+    if stderr is None:
+        stderr = sys.stderr
+    arguments = build_parser().parse_args(argv)
+    try:
+        mass = float(arguments.mass)
+        fee = landing_fee(mass, arguments.hazardous)
+    except (TypeError, ValueError) as error:
+        stderr.write(f"spaceport-dispatch: {error}\n")
+        return 2
+    stdout.write(f"{fee}\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+</details>
+
+## 9. Verify the changed requirement and process boundary
+
+The launch inspector adds one rule after the first clean suite:
+
+> Cargo with mass exactly 1,000 kg receives a 4-credit heavy-lift surcharge,
+> applied after the hazardous surcharge. Values below 1,000 are unchanged.
+
+Use red–green–refactor:
+
+1. add rows for `999.9` and `1000`, with and without hazardous cargo;
+2. run the `1000` node against the current implementation and confirm the fee
+   differs by exactly 4;
+3. add the smallest clear production rule;
+4. run the fee group, complete suite, and process command; and
+5. inspect branch coverage for the new threshold.
+
+Do not change old expected fees below 1,000. Do not mix the feature with a
+refactor until the changed contract is green.
+
+Then launch from a fresh shell:
+
+```bash
+python -m spaceport_dispatch fee 1000 --hazardous
+```
+
+Expected result after the change is `36`: heavy base 25, hazardous 7, and
+heavy-lift surcharge 4.
+
+## 10. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-testing-python-programs-challenge",
-  "title": "Protect the Record Converter readiness check",
-  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "title": "Clear the Buggy Spaceport for Launch readiness check",
+  "instructions": "Choose the evidence that follows from the spaceport contract and suite.",
   "questions": [
     {
-      "id": "design-boundary",
-      "prompt": "Why retain the repeated-whitespace regression case?",
-      "options": [
-        "It replaces every other test level.",
-        "It proves all possible strings work.",
-        "It reproduces a real past failure and prevents a later refactor from restoring it.",
-        "It requires a browser automation framework."
-      ],
-      "answer_index": 2,
-      "explanation": "It reproduces a real past failure and prevents a later refactor from restoring it."
+      "id": "unit13-challenge-q64-bool",
+      "prompt": "Why must landing_fee reject True before the ordinary int/float type check?",
+      "options": ["True is infinite", "Pytest cannot parametrize booleans", "Hazardous cargo cannot be Boolean", "bool is a subclass of int and would otherwise be accepted as mass 1"],
+      "answer_index": 3,
+      "explanation": "Python treats booleans as integers for isinstance checks, so the public mass contract needs an explicit Boolean rejection."
     },
     {
-      "id": "clean-evidence",
-      "prompt": "What should happen before recording this challenge as complete?",
-      "options": [
-        "The unchanged checks pass from a clean state and the important decisions can be explained.",
-        "The expected values are edited to match the current output.",
-        "Only the final successful line is kept.",
-        "Several unrelated features are added."
-      ],
+      "id": "unit13-challenge-q65-clock",
+      "prompt": "Which evidence best proves build_clearance used the supplied clock?",
+      "options": ["The complete clearance contains the fixed clock's exact ISO timestamp", "The real system time is within one second", "The test sleeps before asserting", "The function imports datetime"],
       "answer_index": 0,
-      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+      "explanation": "A controlled clock produces one exact deterministic value; no timing tolerance or race is needed."
+    },
+    {
+      "id": "unit13-challenge-q66-manifest",
+      "prompt": "save_clearances returns 2 but writes only the first of two records. Which assertion exposes the defect most directly?",
+      "options": ["Assert only that the path exists", "Load the file and compare the complete two-record list", "Assert the returned count is an int", "Mock json.dumps without reading output"],
+      "answer_index": 1,
+      "explanation": "The public contract promises every record round-trips; reading the real temporary file exposes the slice that dropped one."
+    },
+    {
+      "id": "unit13-challenge-q67-channel",
+      "prompt": "An invalid mass returns status 2 but its message appears in stdout. Which contract is violated?",
+      "options": ["Fee threshold selection", "Callsign normalization", "Diagnostics must use stderr while stdout remains data-only", "Manifest encoding"],
+      "answer_index": 2,
+      "explanation": "The command's channel contract reserves stdout for successful fee data and stderr for invalid-input diagnostics."
+    },
+    {
+      "id": "unit13-challenge-q68-coverage",
+      "prompt": "The repaired module reaches 100% statement coverage. What should the inspector conclude?",
+      "options": ["All possible inputs are proven", "No property tests are needed", "Every future requirement is covered", "Every counted statement ran, but assertion quality, branches, and missing requirements still need review"],
+      "answer_index": 3,
+      "explanation": "Coverage is execution evidence and a prompt for questions; it is not a proof of correctness or completeness."
     }
   ]
 }
@@ -189,20 +883,23 @@ approaches.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 10. Decide whether the challenge is complete
+## 11. Record the challenge result
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | Acceptance examples and progressive checks pass unchanged. |
-| Scope | The artifact follows the constraints without unrelated features. |
-| Reasoning | Important values, boundaries, and design choices can be traced. |
-| Debugging | One record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+| Callsigns | Ordinary, repeated, tab, Unicode, hyphen, empty, regression, and property behavior pass. |
+| Fees | Both thresholds, hazardous addition, Boolean/text/negative/infinite rejection, and the changed 1,000-kg rule pass. |
+| Clearance | The exact injected time appears and the caller's record remains unchanged. |
+| Manifest | Several records, Unicode, empty data, and invalid JSON use a real isolated file boundary. |
+| Command | Direct and child-process evidence preserve stdout, stderr, and status. |
+| Coverage | Missing statements and branches are interpreted as risks or explicit limits, not chased as a grade. |
+| Reproducibility | The focused groups and complete suite pass in a clean process. |
+| Debugging | One record connects the contract, failed node, exact observation, one repair, and clean rerun. |
 
 This button stores a self-reported marker only in this browser. It does not
-submit work, grade it, verify identity, or issue a certificate.
+submit work, grade the suite, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -216,7 +913,28 @@ submit work, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows design choices without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- A testing challenge begins with a public contract and a reproducible red
+  observation, not a hunt for secret bugs.
+- Parametrized boundary IDs make fee failures precise without repetitive test
+  bodies.
+- `tmp_path`, explicit streams, a supplied clock, and one subprocess provide
+  real evidence at different boundaries.
+- Logic bugs remain valid Python; tests expose their observed behavior rather
+  than syntax markers.
+- A Hypothesis property explores a general whitespace rule while a named tab
+  regression preserves the discovered history.
+- Statement and branch coverage guide investigation but never replace
+  assertions or justify changing correct expected values.
+- Red–green–refactor adds the later 1,000-kg requirement without mixing it into
+  the original repairs.
+- A clean complete rerun and an evidence-rich debugging record make the suite
+  explainable to the next inspector.
+
+## Continue learning
+
+- [pytest documentation: getting started and reading failures](https://docs.pytest.org/en/stable/getting-started.html)
+- [pytest documentation: fixtures and temporary test worlds](https://docs.pytest.org/en/stable/how-to/fixtures.html)
+- [pytest documentation: parametrization](https://docs.pytest.org/en/stable/how-to/parametrize.html)
+- [Coverage.py documentation: branch coverage](https://coverage.readthedocs.io/en/latest/branch.html)
+- [Hypothesis documentation: generated examples and shrinking](https://hypothesis.readthedocs.io/en/latest/quickstart.html)
+- Next: [Code Quality and Maintainability Overview](../code-quality-maintainability/index.qmd)

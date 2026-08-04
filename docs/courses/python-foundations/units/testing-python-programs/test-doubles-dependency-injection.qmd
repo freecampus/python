@@ -1,137 +1,239 @@
 ---
-title: Test Doubles, Mocking, Monkeypatching, and Dependency Injection
+title: Control Dependencies Without Fragile Mocks
 lesson_id: testing-python-programs.test-doubles-dependency-injection
-lesson_order: 40
-description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-course_id: python-foundations
-unit_id: testing-python-programs
-unit_number: 13
+lesson_order: 50
+description: Make time, randomness, environment settings, and collaborators deterministic through explicit seams, small fakes, pytest monkeypatching, and narrowly specified mocks that protect public obligations.
 execute:
   echo: true
 categories:
 - python-foundations
 - testing-python-programs
-order: 40
+- dependency-injection
+- monkeypatch
+- mocks
+- determinism
+order: 50
 colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/test-doubles-dependency-injection.ipynb
+course_id: python-foundations
+unit_id: testing-python-programs
+unit_number: 13
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Identify uncontrollable dependencies, introduce the smallest useful seam, patch state where code looks it up, and avoid interaction assertions that reject safe implementation changes.
+- **Practice in:** A local pytest project using explicit collaborators, pytest's `monkeypatch`, and Python's standard-library `unittest.mock`
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+Meteor Watch should include a timestamp in each alert and send a notification
+for red risk. A direct implementation can reach the system clock, environment,
+random generator, and real notification service. The behavior may work in
+production while remaining slow, destructive, or impossible to reproduce in a
+test.
 
-Tests become slow or unreliable when code directly reaches clocks, networks, randomness, or user input. An explicit dependency lets a focused test supply controlled behavior.
+The answer is not “mock everything.” First make important dependencies visible.
+Then choose the simplest controlled replacement that provides the evidence you
+need. A returned result may need only a stub value. A stateful in-memory
+repository may deserve a fake. A public send-once obligation may justify a
+mock interaction assertion.
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+Use these questions throughout:
 
-## 1. Read and predict a complete case
+- Which hidden dependency makes the result nondeterministic or destructive?
+- Can an explicit parameter or small collaborator create a natural seam?
+- Is the contract about returned state, visible output, or an interaction?
+- Where does the system under test look up the name that must be patched?
+- Would this assertion still pass after a safe internal refactor?
 
-```python
-def welcome_message(name, clock):
-    hour = clock()
-    period = "morning" if hour < 12 else "afternoon"
-    return f"Good {period}, {name}!"
+## 1. Expose the clock instead of racing it
 
-
-def morning_clock():
-    return 9
-
-
-assert welcome_message("Ada", morning_clock) == "Good morning, Ada!"
-```
-
-### Step-by-step explanation
-
-1. The function receives a callable clock dependency.
-2. The fake clock returns a controlled hour without reading the real system clock.
-3. The function selects the morning branch deterministically.
-4. The assertion verifies visible behavior, not how many internal lines ran.
-
-::: {.callout-note title="Make one controlled change"}
-Supply an `afternoon_clock` returning 15 and add the matching behavior assertion.
-:::
-
-## 2. Investigate the important boundary
-
-Monkeypatch where the code under test looks up a dependency, not where that object was originally defined. Prefer an explicit parameter when it also makes the production design clearer.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+This function hides the current time:
 
 ```python
-class FakeReader:
-    def read_text(self):
-        return " Ada "
+from datetime import datetime, timezone
 
 
-def load_name(reader):
-    return reader.read_text().strip()
-
-
-assert load_name(FakeReader()) == "Ada"
+def build_alert(station, risk):
+    created_at = datetime.now(timezone.utc)
+    return {
+        "station": station,
+        "risk": risk,
+        "created_at": created_at.isoformat(),
+    }
 ```
 
-Then complete the learning loop:
+A test cannot know the exact microsecond in advance. Asserting “the timestamp is
+near now” adds timing tolerance and can still fail on a busy machine. Sleeping
+does not make the dependency deterministic.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+Inject a callable with the behavior the function needs:
 
-<details>
-<summary>Check your practice process</summary>
+```python
+from datetime import datetime, timezone
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
 
-</details>
+def utc_now():
+    return datetime.now(timezone.utc)
 
-## 4. Check your understanding
+
+def build_alert(station, risk, clock=utc_now):
+    created_at = clock()
+    return {
+        "station": station,
+        "risk": risk,
+        "created_at": created_at.isoformat(),
+    }
+```
+
+The ordinary caller uses the real default. The test supplies a deterministic
+clock:
+
+```python
+from datetime import datetime, timezone
+
+
+def fixed_clock():
+    return datetime(2035, 6, 1, 12, 30, tzinfo=timezone.utc)
+
+
+def test_build_alert_uses_supplied_clock():
+    observed = build_alert("ridge-7", "red", clock=fixed_clock)
+
+    assert observed == {
+        "station": "ridge-7",
+        "risk": "red",
+        "created_at": "2035-06-01T12:30:00+00:00",
+    }
+```
+
+The injected dependency is small: “a callable returning an aware datetime.” It
+does not expose an entire framework or require the test to alter process-global
+time.
+
+### Control randomness through the operation you need
+
+Suppose equal-risk alerts are assigned a rotating radio channel:
+
+```python
+import random
+
+
+def choose_channel(channels, chooser=random.choice):
+    if not channels:
+        raise ValueError("at least one channel is required")
+    return chooser(channels)
+```
+
+A deterministic chooser can return the last item:
+
+```python
+def choose_last(values):
+    return values[-1]
+
+
+def test_choose_channel_uses_supplied_chooser():
+    assert choose_channel(["alpha", "beta"], chooser=choose_last) == "beta"
+```
+
+This proves delegation and result behavior without globally seeding randomness.
+Use a seeded real generator only when the sequence produced by that generator
+is itself the subject. Tests should not depend on CPython's exact random
+sequence unless that is an intentional compatibility contract.
+
+::: {.concept-diagram}
+The seam lets production and test callers supply different collaborators while
+the core behavior remains the same.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Production caller"] --> B["Real clock or chooser"]
+  C["Test caller"] --> D["Fixed clock or chooser"]
+  B --> E["Explicit dependency seam"]
+  D --> E
+  E --> F["Alert behavior"]
+  F --> G["Observable result"]
+```
+:::
+
+## 2. Choose a double by the evidence it supplies
+
+Test-double vocabulary is useful when it communicates behavior:
+
+| Kind | Supplies | Meteor Watch use |
+|---|---|---|
+| dummy | required shape but no meaningful behavior | an unused context argument |
+| stub | a prepared answer | fixed clock returning one datetime |
+| fake | working lightweight implementation | in-memory notification outbox |
+| spy | records calls for later inspection | sender that retains delivered alerts |
+| mock | preconfigured interaction expectations | spec-constrained sender checked for one public call |
+
+Tools and teams use these words with small variations. The design question is
+more important: what controlled behavior and observation does the test need?
+
+An in-memory fake can be ordinary Python:
+
+```python
+class MemorySender:
+    def __init__(self):
+        self.sent = []
+
+    def send(self, alert):
+        self.sent.append(alert)
+
+
+def notify_if_red(alert, sender):
+    if alert["risk"] == "red":
+        sender.send(alert)
+        return True
+    return False
+
+
+def test_red_alert_is_delivered_to_memory_sender():
+    sender = MemorySender()
+    alert = {"station": "ridge-7", "risk": "red"}
+
+    delivered = notify_if_red(alert, sender)
+
+    assert delivered is True
+    assert sender.sent == [alert]
+```
+
+This asserts public result and final observable state. The fake has no network,
+sleep, credentials, or retry policy. It is easy to read and can support several
+tests without a mock API.
+
+### Checkpoint: choose the smallest controllable seam
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "testing-python-programs-test-doubles-dependency-injection",
-  "title": "Test Doubles, Mocking, Monkeypatching, and Dependency Injection checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit13-doubles-seams-checkpoint",
+  "title": "Control time, randomness, and sending",
+  "instructions": "Choose the dependency design that produces deterministic evidence.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "What makes `morning_clock` a useful test double?",
-      "options": [
-        "It provides controlled clock behavior through the same callable interface the function needs.",
-        "It disables every assertion.",
-        "It changes the production source file during the test.",
-        "It makes time globally constant for all programs."
-      ],
+      "id": "unit13-doubles-q37-clock",
+      "prompt": "What is the strongest reason to pass a clock callable to build_alert?",
+      "options": ["The test can supply one exact time without racing the real clock", "Datetime objects cannot be asserted", "Pytest refuses to import datetime", "Production code must never use the real clock"],
       "answer_index": 0,
-      "explanation": "The fake dependency is small, deterministic, and satisfies the required interface."
+      "explanation": "An explicit clock seam makes the result deterministic while ordinary callers can still use the real UTC clock."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "A copied solution whose behavior was not rerun."
-      ],
+      "id": "unit13-doubles-q38-fake",
+      "prompt": "A MemorySender implements send() and stores delivered alerts. Which description fits best?",
+      "options": ["A real remote service", "A lightweight fake or spy with observable state", "A pytest collection hook", "A coverage report"],
+      "answer_index": 1,
+      "explanation": "The in-memory collaborator performs useful sender behavior and records it without external effects."
+    },
+    {
+      "id": "unit13-doubles-q39-random",
+      "prompt": "Which test design makes choose_channel deterministic without changing global random state?",
+      "options": ["Sleep before calling it", "Assert any string", "Pass a chooser callable with a prepared result", "Retry until the expected channel appears"],
       "answer_index": 2,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "The explicit chooser seam controls exactly the operation the function needs and avoids order-dependent global random state."
     }
   ]
 }
@@ -139,15 +241,541 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## Key points
+## 3. Patch process state temporarily with `monkeypatch`
 
-::: {.callout-tip title="Key points"}
-- A test double replaces an external collaborator with controlled behavior.
-- Dependency injection can improve both testability and design clarity.
-- Patch the reference used by the code, and assert meaningful outcomes rather than incidental calls.
+Some application boundaries intentionally read environment variables or the
+current directory. Redesigning every read as a parameter can make a thin
+adapter awkward. Pytest's `monkeypatch` fixture changes state for one test and
+restores it afterward.
+
+Example production setting:
+
+```python
+import os
+
+
+def alert_region():
+    return os.environ.get("METEOR_REGION", "local").strip().casefold()
+```
+
+Test an explicit value:
+
+```python
+def test_alert_region_reads_environment(monkeypatch):
+    monkeypatch.setenv("METEOR_REGION", " NORTH ")
+
+    assert alert_region() == "north"
+```
+
+Test absence separately:
+
+```python
+def test_alert_region_defaults_when_variable_is_absent(monkeypatch):
+    monkeypatch.delenv("METEOR_REGION", raising=False)
+
+    assert alert_region() == "local"
+```
+
+After each test, pytest restores the previous environment. Do not manually put
+a guessed old value back; the variable may originally have been absent or held
+a user-specific value.
+
+`monkeypatch` can also:
+
+- `setitem` or `delitem` on mappings;
+- `setattr` or `delattr` on objects/modules;
+- prepend to `sys.path` for specific import tests;
+- `chdir` temporarily; and
+- create a limited `context()` for a smaller patch lifetime.
+
+Use these operations at the boundary that deliberately owns process state. A
+pure classifier should accept a value rather than read the environment in every
+call.
+
+### Change directories without leaking the process state
+
+```python
+from pathlib import Path
+
+
+def current_station_file():
+    return Path("stations.json")
+
+
+def test_station_file_is_relative_to_selected_workspace(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.chdir(tmp_path)
+
+    assert current_station_file().resolve() == tmp_path / "stations.json"
+```
+
+The test makes the current-directory dependency explicit and restored. An even
+more reusable design would accept a base path, but a CLI adapter whose contract
+uses the current directory may intentionally be tested this way.
+
+## 4. Patch the name the module actually looks up
+
+Patch failures often come from changing the name where a function was defined
+instead of where the system under test imported it.
+
+Suppose `meteor_watch/alerts.py` contains:
+
+```python
+from meteor_watch.delivery import send_alert
+
+
+def publish(alert):
+    send_alert(alert)
+```
+
+At import time, `alerts` binds its own name `send_alert`. Patching
+`meteor_watch.delivery.send_alert` later does not replace the already-bound
+name used by `publish`. Patch `meteor_watch.alerts.send_alert`:
+
+```python
+import meteor_watch.alerts
+
+
+def test_publish_uses_alert_module_sender(monkeypatch):
+    sent = []
+
+    def fake_send(alert):
+        sent.append(alert)
+
+    monkeypatch.setattr(meteor_watch.alerts, "send_alert", fake_send)
+    alert = {"station": "ridge-7", "risk": "red"}
+
+    meteor_watch.alerts.publish(alert)
+
+    assert sent == [alert]
+```
+
+If production instead used `import meteor_watch.delivery` and called
+`meteor_watch.delivery.send_alert(...)`, that is the name path it looks up and
+the patch location changes accordingly.
+
+::: {.concept-diagram}
+The caller follows its local binding. A patch must replace that lookup path, not
+merely another module's original definition.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["delivery.send_alert definition"] --> B["alerts.send_alert binding"]
+  B --> C["alerts.publish lookup"]
+  D["Patch delivery.send_alert only"] -. "does not replace bound name" .-> A
+  E["Patch alerts.send_alert"] --> B
+  C --> F["Controlled fake call"]
+```
 :::
 
-## References
+### Reproduce the wrong-namespace symptom
 
-- https://docs.pytest.org/en/stable/how-to/monkeypatch.html
-- https://docs.python.org/3/library/unittest.mock.html
+Patch the definition module on purpose and run the focused test. If the real
+sender raises `RuntimeError("network disabled")`, seeing that exception proves
+the fake was not used. Inspect the import statement in the system under test,
+patch its lookup name, and rerun. This is stronger than adding another patch at
+random.
+
+## 5. Use `Mock` when the interaction is the behavior
+
+Python's `unittest.mock` can configure return values, raise side effects, and
+record calls. Constrain the mock to a known collaborator shape:
+
+```python
+from unittest.mock import Mock
+
+
+class Sender:
+    def send(self, alert):
+        raise NotImplementedError
+
+
+def test_red_alert_is_sent_once():
+    sender = Mock(spec=Sender)
+    alert = {"station": "ridge-7", "risk": "red"}
+
+    delivered = notify_if_red(alert, sender)
+
+    assert delivered is True
+    sender.send.assert_called_once_with(alert)
+```
+
+`spec=Sender` prevents a test from configuring imaginary attributes that the
+real interface lacks. `create_autospec(Sender, instance=True)` can also enforce
+method signatures. A spec does not prove the real service works; it catches
+some test-double drift.
+
+Use `return_value` when production consumes a collaborator's result:
+
+```python
+from unittest.mock import Mock
+
+
+def next_sequence(counter):
+    return counter.next_value()
+
+
+def test_next_sequence_returns_counter_value():
+    counter = Mock()
+    counter.next_value.return_value = 17
+
+    assert next_sequence(counter) == 17
+```
+
+Use `side_effect` to model an anticipated collaborator failure:
+
+```python
+from unittest.mock import Mock
+
+
+def safe_send(alert, sender):
+    try:
+        sender.send(alert)
+    except ConnectionError:
+        return False
+    return True
+
+
+def test_safe_send_reports_connection_failure():
+    sender = Mock(spec=Sender)
+    sender.send.side_effect = ConnectionError("radio offline")
+
+    assert safe_send({"risk": "red"}, sender) is False
+```
+
+Do not use a broad side effect merely to make every failure path convenient.
+The production contract should name which collaborator failures it handles.
+
+### Checkpoint: patch and specify the real seam
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-doubles-patching-checkpoint",
+  "title": "Patch state and collaborator lookups safely",
+  "instructions": "Choose the patch or mock behavior that matches the code's lookup and contract.",
+  "questions": [
+    {
+      "id": "unit13-doubles-q40-restore",
+      "prompt": "Why use monkeypatch.setenv instead of manually assigning os.environ and guessing a cleanup value?",
+      "options": ["It makes environment variables immutable", "It permanently changes every process", "It disables pytest capture", "Pytest restores the actual prior state after the test"],
+      "answer_index": 3,
+      "explanation": "The fixture records whether the key was absent or had another value and restores that state automatically."
+    },
+    {
+      "id": "unit13-doubles-q41-where",
+      "prompt": "alerts.py uses 'from delivery import send_alert' and publish() calls its bound send_alert name. Where should the test patch?",
+      "options": ["The send_alert name in the alerts module", "Every send function in the interpreter", "The test function's local namespace", "Only the source text on disk"],
+      "answer_index": 0,
+      "explanation": "Patch where publish looks up the name: the binding inside the alerts module."
+    },
+    {
+      "id": "unit13-doubles-q42-spec",
+      "prompt": "What benefit does Mock(spec=Sender) provide?",
+      "options": ["It contacts the real sender", "It rejects access to attributes outside the known Sender interface", "It guarantees all call assertions are good design", "It makes network tests end-to-end"],
+      "answer_index": 1,
+      "explanation": "A spec catches some imaginary-method mistakes, though the test still must choose meaningful behavioral assertions."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Prefer observable state unless interaction is a public obligation
+
+This test is brittle:
+
+```python
+def test_report_builder_calls_three_helpers(mocker):
+    parse = mocker.patch("meteor_watch.reports.parse")
+    classify = mocker.patch("meteor_watch.reports.classify")
+    render = mocker.patch("meteor_watch.reports.render")
+
+    build_report("ridge-7|70")
+
+    parse.assert_called_once()
+    classify.assert_called_once()
+    render.assert_called_once()
+```
+
+It also requires the third-party `pytest-mock` plugin, which this course does
+not install. More importantly, the assertions freeze three private steps. A
+refactor that combines parsing and classification breaks the test even if the
+returned report is identical.
+
+Protect public output instead:
+
+```python
+def test_build_report_returns_classified_station():
+    assert build_report("ridge-7|70") == "ridge-7|red"
+```
+
+An interaction assertion is appropriate when interaction **is** the promise:
+
+- send a red alert exactly once;
+- do not send a green alert;
+- commit a transaction only after all records validate; or
+- release a resource acquired by the function.
+
+Even then, assert the narrow obligation, not every internal call:
+
+```python
+from unittest.mock import Mock
+
+
+def test_green_alert_is_not_sent():
+    sender = Mock(spec=Sender)
+    alert = {"station": "lake-2", "risk": "green"}
+
+    delivered = notify_if_red(alert, sender)
+
+    assert delivered is False
+    sender.send.assert_not_called()
+```
+
+## 7. Avoid mock chains and imaginary worlds
+
+This arrangement is hard to relate to a real interface:
+
+```python
+client.session.return_value.channel.return_value.send.return_value = {
+    "ok": True
+}
+```
+
+Deep chains reproduce implementation navigation and allow a test-only world
+that no real client supports. Hide a complex vendor client behind a small
+application-owned adapter such as `Sender.send(alert)`. Test core code against
+that small interface, and give the adapter a few integration tests at its real
+boundary when appropriate.
+
+Do not patch Python builtins such as `open` across the whole process when
+`tmp_path` can exercise a real file. Do not patch `time.sleep` as a substitute
+for a design with injectable retry policy. Do not send to a real production
+service from a normal unit test.
+
+## 8. Compare dependency injection with patching
+
+Both techniques can be valid:
+
+| Situation | Prefer |
+|---|---|
+| core behavior already accepts a collaborator | pass a stub, fake, or mock explicitly |
+| a new design naturally benefits from visible dependencies | dependency injection |
+| thin adapter intentionally reads environment/current directory | `monkeypatch` that state |
+| legacy module bound an imported function | patch the lookup namespace temporarily |
+| real local filesystem is fast and deterministic | `tmp_path`, not a fake file API |
+| interaction is not public behavior | assert returned state/output instead of calls |
+
+Injection improves design visibility. Patching changes an existing lookup for a
+limited test lifetime. Patching every dependency can conceal a tightly coupled
+design; forcing every process adapter to accept dozens of parameters can also
+reduce clarity. Choose the smallest seam at the layer that owns the boundary.
+
+### Checkpoint: reject fragile interaction tests
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-doubles-design-checkpoint",
+  "title": "Protect obligations without freezing internals",
+  "instructions": "Choose the assertion or seam that survives acceptable design changes.",
+  "questions": [
+    {
+      "id": "unit13-doubles-q43-output",
+      "prompt": "The contract promises build_report returns 'ridge-7|red' but says nothing about helpers. Which check is most stable?",
+      "options": ["Assert parse, classify, and render are each called once", "Patch every private function", "Assert the returned report equals 'ridge-7|red'", "Assert the implementation has three functions"],
+      "answer_index": 2,
+      "explanation": "The returned value is public behavior and remains valid if internal steps are safely reorganized."
+    },
+    {
+      "id": "unit13-doubles-q44-interaction",
+      "prompt": "When is assert_called_once_with(alert) most defensible?",
+      "options": ["Whenever any helper exists", "When it increases line coverage", "When no result can be observed", "When sending exactly one alert is part of the public obligation"],
+      "answer_index": 3,
+      "explanation": "An interaction assertion should represent a promised effect, not an incidental implementation sequence."
+    },
+    {
+      "id": "unit13-doubles-q45-file",
+      "prompt": "A report writer should create UTF-8 text in a local file. Which test boundary is the clearest default?",
+      "options": ["Use a real isolated path from tmp_path", "Patch every open and Path method", "Write into the repository", "Skip the file behavior"],
+      "answer_index": 0,
+      "explanation": "A temporary real filesystem boundary is fast, faithful, and simpler than reproducing Path behavior with mocks."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Make the meteor alert deterministic
+
+Build a small alert workflow with these public functions:
+
+```python
+def build_alert(station, risk, clock):
+    """Return an alert dictionary stamped with clock()."""
+    return {
+        "station": station,
+        "risk": risk,
+        "created_at": clock().isoformat(),
+    }
+
+
+def publish_if_enabled(alert, sender, enabled):
+    """Send red alerts when enabled and report whether delivery occurred."""
+    if not enabled or alert["risk"] != "red":
+        return False
+    sender.send(alert)
+    return True
+```
+
+Add a thin environment adapter:
+
+```python
+import os
+
+
+def notifications_enabled():
+    raw = os.environ.get("METEOR_NOTIFY", "0").strip().casefold()
+    return raw in {"1", "true", "yes"}
+```
+
+Your tests must:
+
+1. inject a fixed aware datetime and assert the complete alert;
+2. use a `MemorySender` to prove red delivery and green non-delivery through
+   final state;
+3. use `monkeypatch.setenv` and `delenv` for enabled, disabled, and absent
+   environment cases;
+4. use `Mock(spec=Sender)` for exactly one test where send-once is the public
+   obligation;
+5. configure `side_effect=ConnectionError(...)` for an explicitly handled
+   sender failure;
+6. reproduce one wrong-namespace patch and record the real evidence;
+7. replace one assertion on private helper calls with a returned-state or
+   output assertion; and
+8. run every test both alone and as part of the complete file.
+
+<details>
+<summary>Hint 1: make a clock no more complicated than necessary</summary>
+
+A zero-argument function returning one timezone-aware `datetime` is sufficient.
+The workflow needs `clock()`, not a fake calendar library.
+</details>
+
+<details>
+<summary>Hint 2: decide whether state or interaction is the evidence</summary>
+
+Use `MemorySender.sent` for most tests. Reserve `assert_called_once_with` for
+the explicit exactly-once delivery obligation.
+</details>
+
+<details>
+<summary>Hint 3: follow the import statement to the patch target</summary>
+
+If `workflow.py` imported `send_alert` directly, patch
+`meteor_watch.workflow.send_alert`. If it imported the module and accesses an
+attribute, patch that attribute on the module object it uses.
+</details>
+
+<details>
+<summary>Show a deterministic core suite</summary>
+
+```python
+from datetime import datetime, timezone
+from unittest.mock import Mock
+
+
+class Sender:
+    def send(self, alert):
+        raise NotImplementedError
+
+
+class MemorySender:
+    def __init__(self):
+        self.sent = []
+
+    def send(self, alert):
+        self.sent.append(alert)
+
+
+def fixed_clock():
+    return datetime(2035, 6, 1, 12, 30, tzinfo=timezone.utc)
+
+
+def test_build_alert_uses_injected_clock():
+    assert build_alert("ridge-7", "red", fixed_clock) == {
+        "station": "ridge-7",
+        "risk": "red",
+        "created_at": "2035-06-01T12:30:00+00:00",
+    }
+
+
+def test_red_alert_reaches_memory_sender():
+    sender = MemorySender()
+    alert = build_alert("ridge-7", "red", fixed_clock)
+
+    assert publish_if_enabled(alert, sender, enabled=True) is True
+    assert sender.sent == [alert]
+
+
+def test_green_alert_is_not_delivered():
+    sender = MemorySender()
+    alert = build_alert("lake-2", "green", fixed_clock)
+
+    assert publish_if_enabled(alert, sender, enabled=True) is False
+    assert sender.sent == []
+
+
+def test_red_alert_is_sent_exactly_once():
+    sender = Mock(spec=Sender)
+    alert = build_alert("ridge-7", "red", fixed_clock)
+
+    delivered = publish_if_enabled(alert, sender, enabled=True)
+
+    assert delivered is True
+    sender.send.assert_called_once_with(alert)
+
+
+def test_notification_setting_accepts_yes(monkeypatch):
+    monkeypatch.setenv("METEOR_NOTIFY", " yes ")
+    assert notifications_enabled() is True
+
+
+def test_notification_setting_defaults_to_disabled(monkeypatch):
+    monkeypatch.delenv("METEOR_NOTIFY", raising=False)
+    assert notifications_enabled() is False
+```
+
+Add the specified failure and patch-location tests around this core rather than
+turning every collaborator into a mock.
+</details>
+
+## Key points
+
+- Hidden clocks, randomness, environment state, and services make tests hard to
+  reproduce.
+- An explicit callable or small collaborator often creates the clearest seam.
+- Choose a stub, fake, spy, or mock by the evidence required, not by fashion.
+- `monkeypatch` changes process state temporarily and restores the real prior
+  value.
+- Patch the namespace where the system under test looks up the name.
+- `Mock(spec=...)` catches some imaginary attributes; it does not prove a good
+  test design.
+- Assert state or returned output unless an interaction is itself a public
+  obligation.
+- Avoid real services, sleeps, broad builtin patches, and deep mock chains in
+  focused tests.
+- Use real deterministic boundaries such as `tmp_path` when they are simpler
+  and more faithful than a double.
+
+## Continue learning
+
+- [pytest documentation: safely patch attributes, mappings, environment, and directories](https://docs.pytest.org/en/stable/how-to/monkeypatch.html)
+- [Python documentation: `unittest.mock`](https://docs.python.org/3/library/unittest.mock.html)
+- [Python documentation: where to patch](https://docs.python.org/3/library/unittest.mock.html#where-to-patch)
+- Next: [Test at the Smallest Boundary That Can Fail](test-levels.qmd)

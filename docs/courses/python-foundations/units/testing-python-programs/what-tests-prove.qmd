@@ -1,13 +1,16 @@
 ---
-title: What a Test Proves—and What It Does Not
+title: Write Tests That Protect Behavior
 lesson_id: testing-python-programs.what-tests-prove
 lesson_order: 10
-description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+description: Turn public behavior into independent pytest assertions, expose false confidence and brittle checks, and build a focused protection map for a weather-risk rule.
 execute:
   echo: true
 categories:
 - python-foundations
 - testing-python-programs
+- assertions
+- contracts
+- boundaries
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/what-tests-prove.ipynb
 course_id: python-foundations
@@ -15,242 +18,231 @@ unit_id: testing-python-programs
 unit_number: 13
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner to intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Use assertions, pytest, and edge cases to check behavior.
-- **Practice in:** VS Code, terminal, pytest, and ruff
+- **Level:** Python Foundations
+- **Estimated time:** 3–4 hours
+- **You will learn:** Translate a behavioral contract into independent assertions, recognize tests that pass without protecting the right behavior, and keep checks stable across safe refactoring.
+- **Practice in:** A local pytest project, with optional notebook experiments for direct function calls
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
-
-Use assertions, pytest, and edge cases to check behavior. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
-
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Testing with pytest** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
-
-## 2. Assertions
-
-Use assert statements to document and check assumptions while learning and testing.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-An assertion is a checkpoint gate: if the rule is false, the gate stops you immediately.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** An assertion says a condition should be true at this point in the program.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+Meteor Watch receives a wind speed and returns one of three labels. The first
+version appears reasonable:
 
 ```python
-total = 2 + 3
-assert total == 5
+def risk_level(wind_kph):
+    if wind_kph < 40:
+        return "low"
+    if wind_kph < 70:
+        return "medium"
+    return "high"
 ```
 
-### Trace it line by line
+Running the function with `25` displays `"low"`. That is an example, but it is
+not yet a useful protection net. Which threshold should be included in medium?
+What should happen for a negative speed? Would changing `70` to `71` be caught?
+A test becomes meaningful when its expected result comes from an explicit
+contract and the failure would identify a behavior worth preserving.
 
-1. `total = 2 + 3` — Python evaluates the right-hand expression and binds or updates `total` with the result.
-2. `assert total == 5` — Python checks the condition and raises `AssertionError` if the expected behavior is false.
+As you work, answer these questions with code and failure evidence:
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+- What exactly does one passing test support, and what remains unknown?
+- How can Arrange–Act–Assert make the behavior visible without adding ceremony?
+- Which assertions observe public results rather than implementation trivia?
+- How do false positives and false negatives create different kinds of risk?
+- Which ordinary, boundary, and invalid cases protect the wind rule?
 
-::: {.callout-warning title="Common mistake"}
-Do not use assert for user-facing validation in production programs; assertions can be disabled.
+## 1. Start with a contract, not the current implementation
+
+Use this contract throughout the lesson:
+
+| Input | Required behavior |
+|---|---|
+| a real number below `0` | raise `ValueError` with `wind must be non-negative` |
+| `0 <= wind < 40` | return `"low"` |
+| `40 <= wind < 70` | return `"medium"` |
+| `wind >= 70` | return `"high"` |
+
+The table supplies expected values independently of the function body. A test
+for `70` should expect `"high"` because the published interval begins at 70,
+not because the current code uses a particular comparison.
+
+A minimal pytest test is an ordinary function whose name begins with `test_`:
+
+```python
+from meteor_watch.risk import risk_level
+
+
+def test_seventy_kph_begins_high_risk():
+    observed = risk_level(70)
+    assert observed == "high"
+```
+
+The lines have three jobs:
+
+1. **Arrange:** choose `70` because the contract makes it a boundary.
+2. **Act:** call `risk_level(70)` and retain the observed result.
+3. **Assert:** compare the observation with the contract's `"high"`.
+
+The test name records the scenario and promised result. If it fails in a list
+of hundreds, `test_seventy_kph_begins_high_risk` is more useful than
+`test_risk_2`.
+
+Arrange–Act–Assert describes a reading pattern. It does not require three
+comments in every five-line test. Blank lines or well-chosen names can make the
+stages clear:
+
+```python
+def test_calm_wind_is_low_risk():
+    observed = risk_level(12)
+
+    assert observed == "low"
+```
+
+### Predict a deliberate boundary defect
+
+Change the production comparison to `if wind_kph <= 70:`. Predict the value for
+`70`, then run only the boundary test. It should fail with `"medium"` versus
+`"high"`. Restore `< 70` and run again. Keep both outputs: the red run shows
+that the test can notice the defect; the green run shows that this selected case
+now matches the contract.
+
+::: {.concept-diagram}
+The contract supplies the expected result. Copying a decision from the
+implementation back into the test would make both sides share the same mistake.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Published wind intervals"] --> B["Expected high at 70"]
+  C["risk_level implementation"] --> D["Observed result at 70"]
+  B --> E{"Compare"}
+  D --> E
+  E --> F["Pass or useful failure"]
+```
 :::
 
-### Practice assertions
+## 2. State one observable promise per test
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Assertions**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+A focused test may contain several assertions when they describe one result.
+For example, a parsed observation promises a station, wind value, and note as
+one returned record:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "testing-python-programs-testing-with-pytest-assertions",
-  "title": "Assertions checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to Assertions?",
-      "options": [
-        "pytest discovers test functions and reports which expectations pass or fail.",
-        "An edge case is an input near a boundary where assumptions often break.",
-        "An assertion says a condition should be true at this point in the program.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
-      "answer_index": 2,
-      "explanation": "An assertion says a condition should be true at this point in the program."
+```python
+def parse_observation(line):
+    station, wind_text, note = line.split("|", maxsplit=2)
+    return {
+        "station": station.strip(),
+        "wind_kph": float(wind_text),
+        "note": note.strip(),
     }
-  ]
-}
-</script>
 
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. pytest
+def test_parse_observation_returns_the_three_public_fields():
+    observed = parse_observation(" ridge-7 | 42.5 | crosswind ")
 
-Write and run automated tests with pytest.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-pytest is a tireless practice partner: it repeats your checks every time you change the code.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** pytest discovers test functions and reports which expectations pass or fail.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-def add(a, b):
-    return a + b
-
-def test_add():
-    assert add(2, 3) == 5
+    assert observed["station"] == "ridge-7"
+    assert observed["wind_kph"] == 42.5
+    assert observed["note"] == "crosswind"
 ```
 
-### Trace it line by line
+All three assertions explain one public record. By contrast, placing parsing,
+risk classification, file writing, and notification in one test gives a
+failure too many possible causes. Test names and boundaries should make the
+broken promise easy to locate.
 
-1. `def add(a, b):` — Python creates the function `add`; the indented body runs only when the function is called.
-2. `return a + b` — Python evaluates the expression and sends that value back to the caller, ending this call.
-3. `def test_add():` — Python creates the function `test_add`; the indented body runs only when the function is called.
-4. `assert add(2, 3) == 5` — Python checks the condition and raises `AssertionError` if the expected behavior is false.
+### Compare direct and vague assertions
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+This assertion technically passes for any valid risk label:
 
-::: {.callout-warning title="Common mistake"}
-A test file or test function with the wrong name may not be discovered. Use test_ prefixes.
-:::
+```python
+def test_risk_returns_text():
+    assert isinstance(risk_level(70), str)
+```
 
-### Practice pytest
+It does not protect the important result. An implementation that always
+returns `"low"` still passes. The direct equality assertion is stronger:
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **pytest**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+```python
+def test_seventy_kph_begins_high_risk():
+    assert risk_level(70) == "high"
+```
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+Prefer the clearest assertion that expresses the contract. Pytest can explain
+plain `assert` expressions, so a custom `if` followed by `raise AssertionError`
+usually hides useful details.
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+### Check exceptions as behavior
 
-</details>
+Invalid input is not protected by a test that merely calls the function and
+lets any exception end the test. State the promised type and stable part of the
+message:
 
-### Check your understanding
+```python
+import pytest
+
+
+def test_negative_wind_is_rejected():
+    with pytest.raises(ValueError, match="wind must be non-negative"):
+        risk_level(-0.1)
+```
+
+`pytest.raises` fails if no exception occurs or if the type differs. The
+`match` expression checks user-relevant context without coupling to an entire
+traceback. Do not catch `Exception` in the production function merely to make
+this test pass; the contract names `ValueError` because the value is outside
+the accepted domain.
+
+### Compare measurements approximately
+
+Binary floating-point operations can produce a nearby value instead of an
+exact decimal. If Meteor Watch converts 10 metres per second to 36 kilometres
+per hour, the contract is numeric closeness rather than a formatted string:
+
+```python
+import pytest
+
+
+def metres_per_second_to_kph(speed):
+    return speed * 3.6
+
+
+def test_speed_conversion_is_numerically_close():
+    assert metres_per_second_to_kph(10 / 3) == pytest.approx(12.0)
+```
+
+Use exact equality when exactness is the behavior: category labels, integer
+counts, dictionary keys, and normalized text should not be made fuzzy.
+
+### Checkpoint: assertions that describe behavior
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "testing-python-programs-testing-with-pytest-pytest",
-  "title": "pytest checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit13-behavior-contract-checkpoint",
+  "title": "Connect assertions to the wind contract",
+  "instructions": "Choose the assertion that gives the clearest evidence.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to pytest?",
-      "options": [
-        "An assertion says a condition should be true at this point in the program.",
-        "An edge case is an input near a boundary where assumptions often break.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "pytest discovers test functions and reports which expectations pass or fail."
-      ],
-      "answer_index": 3,
-      "explanation": "pytest discovers test functions and reports which expectations pass or fail."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 4. Edge Cases
-
-Choose tests for boundaries, empty inputs, and unusual but valid situations.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-Edge cases are the corners of a tablecloth: if the corners are secure, the middle is usually easier.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** An edge case is an input near a boundary where assumptions often break.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-def first(items):
-    if not items:
-        return None
-    return items[0]
-
-assert first([]) is None
-```
-
-### Trace it line by line
-
-1. `def first(items):` — Python creates the function `first`; the indented body runs only when the function is called.
-2. `if not items:` — Python evaluates this condition and enters the indented branch only when the result is true.
-3. `return None` — Python evaluates the expression and sends that value back to the caller, ending this call.
-4. `return items[0]` — Python evaluates the expression and sends that value back to the caller, ending this call.
-5. `assert first([]) is None` — Python checks the condition and raises `AssertionError` if the expected behavior is false.
-
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Only testing typical examples can leave boundary bugs hidden until users find them.
-:::
-
-### Practice edge cases
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Edge Cases**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "testing-python-programs-testing-with-pytest-edge-cases",
-  "title": "Edge Cases checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to Edge Cases?",
-      "options": [
-        "An edge case is an input near a boundary where assumptions often break.",
-        "An assertion says a condition should be true at this point in the program.",
-        "pytest discovers test functions and reports which expectations pass or fail.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
+      "id": "unit13-behavior-q01-seventy",
+      "prompt": "The contract says high risk begins at 70 kph. Which assertion protects that boundary most directly?",
+      "options": ["assert risk_level(70) == \"high\"", "assert isinstance(risk_level(70), str)", "assert risk_level(70)", "assert risk_level(70) in {\"low\", \"medium\", \"high\"}"],
       "answer_index": 0,
-      "explanation": "An edge case is an input near a boundary where assumptions often break."
+      "explanation": "Exact equality connects the boundary input to the one result promised by the contract. The other assertions also pass for an incorrect category."
+    },
+    {
+      "id": "unit13-behavior-q02-negative",
+      "prompt": "Which test checks both the promised exception type and its useful context for wind -1?",
+      "options": ["Call risk_level(-1) without an assertion", "Use pytest.raises(ValueError, match=\"non-negative\")", "Use pytest.raises(Exception) without a match", "Assert that risk_level(-1) is None"],
+      "answer_index": 1,
+      "explanation": "The contract names ValueError and a stable message fragment. A broad Exception check could accept an unrelated defect."
+    },
+    {
+      "id": "unit13-behavior-q03-approx",
+      "prompt": "Which result is the best fit for pytest.approx?",
+      "options": ["The exact label \"medium\"", "The integer station count 4", "A converted measurement expected to be near 12.0", "The dictionary key \"wind_kph\""],
+      "answer_index": 2,
+      "explanation": "Approximate comparison is useful for floating-point measurements with an accepted tolerance, not for exact labels, counts, or keys."
     }
   ]
 }
@@ -258,18 +250,471 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 5. Integrate the lesson
+## 3. Separate examples, checks, and test suites
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+An interactive example answers, “What happened in this run?”
 
-## 6. Key points
+```python
+print(risk_level(25))
+```
 
-- **Assertions:** An assertion says a condition should be true at this point in the program.
-- **pytest:** pytest discovers test functions and reports which expectations pass or fail.
-- **Edge Cases:** An edge case is an input near a boundary where assumptions often break.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+An assertion inside a notebook stops when a claim is false:
 
-## References
+```python
+assert risk_level(25) == "low"
+```
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+A pytest test adds discovery, a stable name, independent execution, rich
+failure reporting, selection, and inclusion in a repeatable suite:
+
+```python
+def test_twenty_five_kph_is_low_risk():
+    assert risk_level(25) == "low"
+```
+
+All three can help, but they provide different evidence. A copied screenshot of
+one green run does not guarantee that another machine can discover the same
+test. A suite becomes dependable when the project declares its dependencies,
+tests run from a clean state, and each test controls the resources it needs.
+
+## 4. Recognize false confidence
+
+A **false positive** in everyday testing language is a test that passes while
+the behavior you intended to protect is wrong. Consider four examples.
+
+### A test with no assertion
+
+```python
+def test_risk_example_runs():
+    risk_level(70)
+```
+
+This detects an unexpected exception for `70`, but it cannot distinguish
+`"high"` from `"medium"`. That may be a valid smoke check only if “does not
+raise” is the written promise. Its current name does not say so.
+
+### An assertion on the arranged value
+
+```python
+def test_high_wind():
+    wind = 70
+    observed = risk_level(wind)
+
+    assert wind == 70
+```
+
+The test never checks `observed`. It proves that the test assigned `70` to
+`wind`, not that the system classified it.
+
+### Expected logic copied from production
+
+```python
+def test_risk_matches_expected_formula():
+    wind = 70
+    if wind < 40:
+        expected = "low"
+    elif wind < 70:
+        expected = "medium"
+    else:
+        expected = "high"
+
+    assert risk_level(wind) == expected
+```
+
+This case currently works, but duplicating every branch makes the test capable
+of sharing the same typo as the implementation. Prefer expected values from a
+small contract table. A separate simpler model can be a valid oracle later,
+but it must actually be independent and easier to trust.
+
+### An assertion too broad to notice the defect
+
+```python
+def test_risk_is_a_known_label():
+    assert risk_level(70) in {"low", "medium", "high"}
+```
+
+This protects a useful invariant—no unknown label—but not the boundary. Keep it
+only if that invariant has value alongside exact examples, not instead of them.
+
+::: {.callout-warning title="Make the test red before trusting a new check"}
+Temporarily introduce the defect the test is meant to catch, or write the test
+before the missing behavior. If the test stays green, inspect whether it calls
+the right code and asserts the right observation. Restore production code and
+rerun the complete suite afterward.
+:::
+
+## 5. Avoid tests that reject safe refactoring
+
+A **false negative** is a test that fails even though the public behavior is
+still acceptable. These tests slow improvement because ordinary refactoring
+looks like a defect.
+
+Suppose the first implementation has a private helper:
+
+```python
+def _upper_boundary_for(label):
+    boundaries = {"low": 40, "medium": 70}
+    return boundaries[label]
+
+
+def risk_level(wind_kph):
+    if wind_kph < _upper_boundary_for("low"):
+        return "low"
+    if wind_kph < _upper_boundary_for("medium"):
+        return "medium"
+    return "high"
+```
+
+This test couples to that private shape:
+
+```python
+def test_medium_private_boundary():
+    assert _upper_boundary_for("medium") == 70
+```
+
+Refactoring to a tuple of ranges removes the helper and breaks the test even if
+every promised result remains correct. The public-boundary test survives:
+
+```python
+def test_seventy_kph_begins_high_risk():
+    assert risk_level(70) == "high"
+```
+
+Private helpers can be tested directly when they contain complicated,
+independently meaningful behavior. The warning is not “never test a helper.” It
+is “do not make incidental structure part of the contract by accident.”
+
+The same caution applies to call counts. If the contract says “send one public
+alert,” an exactly-once interaction may matter. If the function is free to
+cache, batch, or reorganize an internal helper, an exact call count is trivia.
+
+### Checkpoint: identify misleading green and red results
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-behavior-confidence-checkpoint",
+  "title": "Find false confidence and brittle checks",
+  "instructions": "Judge what each test actually observes.",
+  "questions": [
+    {
+      "id": "unit13-behavior-q04-wrong-value",
+      "prompt": "A test calls observed = risk_level(70) but asserts only wind == 70. What is the main defect in the test?",
+      "options": ["It uses too few local variables", "It should compare floating point approximately", "It must call a private helper", "It never asserts the system's observed result"],
+      "answer_index": 3,
+      "explanation": "The assertion checks the arranged input, so any returned category—including a wrong one—can pass."
+    },
+    {
+      "id": "unit13-behavior-q05-private-helper",
+      "prompt": "Why can a test of _upper_boundary_for become brittle?",
+      "options": ["A safe refactor may remove the private helper while preserving risk_level behavior", "Private functions can never return values", "Pytest refuses to import names beginning with an underscore", "Boundary values cannot be asserted"],
+      "answer_index": 0,
+      "explanation": "The helper's existence may be an implementation choice rather than a public promise. A public input/output test survives that refactor."
+    },
+    {
+      "id": "unit13-behavior-q06-membership",
+      "prompt": "What does assert risk_level(70) in {\"low\", \"medium\", \"high\"} establish?",
+      "options": ["That 70 is high risk", "Only that the result is one of the known labels", "That every numeric input is classified correctly", "That no exception can occur for any value"],
+      "answer_index": 1,
+      "explanation": "Membership protects the label vocabulary but is too broad to protect the 70-kph boundary."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Choose examples by input class and boundary
+
+You cannot test every real number. Instead, partition the contract into groups
+that should behave alike:
+
+| Class | Representative values | Why they matter |
+|---|---|---|
+| invalid negative | `-0.1` | closest invalid value below zero |
+| low | `0`, `12`, `39.9` | lower boundary, ordinary case, upper edge |
+| medium | `40`, `55`, `69.9` | lower boundary, ordinary case, upper edge |
+| high | `70`, `120` | lower boundary and ordinary high value |
+
+Start with one ordinary case in each valid class, then test both sides of every
+boundary. If input arrives as text, that parser adds separate empty, malformed,
+and non-finite cases. Do not silently mix those parser requirements into the
+numeric classifier's tests.
+
+A compact suite can still be explicit:
+
+```python
+import pytest
+
+from meteor_watch.risk import risk_level
+
+
+def test_zero_kph_is_low_risk():
+    assert risk_level(0) == "low"
+
+
+def test_just_below_forty_is_low_risk():
+    assert risk_level(39.9) == "low"
+
+
+def test_forty_begins_medium_risk():
+    assert risk_level(40) == "medium"
+
+
+def test_just_below_seventy_is_medium_risk():
+    assert risk_level(69.9) == "medium"
+
+
+def test_seventy_begins_high_risk():
+    assert risk_level(70) == "high"
+
+
+def test_negative_wind_is_rejected():
+    with pytest.raises(ValueError, match="wind must be non-negative"):
+        risk_level(-0.1)
+```
+
+Lesson 3 will turn related cases into a parametrized table. First learn to
+justify each row. Parametrization makes a design concise; it does not decide
+which cases belong in the design.
+
+## 7. Keep tests independent and deterministic
+
+Each test should be able to run alone and in any order. This pair is not
+independent:
+
+```python
+observed_labels = []
+
+
+def test_record_low_label():
+    observed_labels.append(risk_level(10))
+    assert observed_labels == ["low"]
+
+
+def test_record_high_label():
+    observed_labels.append(risk_level(90))
+    assert observed_labels == ["low", "high"]
+```
+
+The second test passes only if the first test has already changed global state.
+Run it alone and it fails. Reverse the order and both may fail. Use fresh local
+state when shared history is not the behavior:
+
+```python
+def test_records_low_label():
+    observed_labels = []
+    observed_labels.append(risk_level(10))
+    assert observed_labels == ["low"]
+
+
+def test_records_high_label():
+    observed_labels = []
+    observed_labels.append(risk_level(90))
+    assert observed_labels == ["high"]
+```
+
+Current time, unseeded randomness, current directory, environment variables,
+network services, and leftover files create similar hidden dependencies. Later
+lessons provide fixtures and seams for them. For now, ask of every test: “What
+must already be true outside this function?” If the answer is not visible in
+the arrangement, isolation is at risk.
+
+## 8. Explain the limit of every green result
+
+After the six wind tests pass, accurate statements include:
+
+- the selected boundary and ordinary values matched the stated intervals;
+- the selected negative value raised the stated exception in this environment;
+- the test suite did not observe shared state or real external services; and
+- the deliberate `<= 70` defect was noticed by the 70-kph test.
+
+Inaccurate statements include:
+
+- `risk_level` has no bugs;
+- every possible float behaves correctly;
+- parsing, report writing, the CLI, and installation work;
+- the suite will never be flaky; or
+- high coverage has proven the algorithm.
+
+Precise limits do not make tests weak. They make evidence honest and show what
+to investigate next.
+
+### Checkpoint: select a protection map
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-behavior-map-checkpoint",
+  "title": "Choose cases and state honest conclusions",
+  "instructions": "Use the wind intervals and test-isolation rules.",
+  "questions": [
+    {
+      "id": "unit13-behavior-q07-boundary-set",
+      "prompt": "Which three values best reveal both sides of the 40-kph boundary?",
+      "options": ["10, 20, 30", "40, 50, 60", "39.9, 40, 40.1", "70, 80, 90"],
+      "answer_index": 2,
+      "explanation": "The just-below, exact, and just-above values reveal how the implementation assigns the threshold and its neighbors."
+    },
+    {
+      "id": "unit13-behavior-q08-order",
+      "prompt": "A test passes only after another test appends to a module-level list. What is the best diagnosis?",
+      "options": ["The assertion needs pytest.approx", "The function name is too descriptive", "The list must be made private", "The tests share order-dependent mutable state"],
+      "answer_index": 3,
+      "explanation": "A focused test should construct the state it needs. Depending on a previous test makes isolated or reordered runs unreliable."
+    },
+    {
+      "id": "unit13-behavior-q09-green-limit",
+      "prompt": "Six selected wind examples pass. Which conclusion is justified?",
+      "options": ["Those selected inputs produced the contract's expected results in this run", "Every possible Python number is correct", "The CLI and package installation are proven", "No future refactor can introduce a defect"],
+      "answer_index": 0,
+      "explanation": "A passing suite supports its exercised claims in the observed environment; it does not prove untested inputs or boundaries."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Build a protection map for Meteor Watch
+
+Create `src/meteor_watch/risk.py` with this deliberately incomplete function:
+
+```python
+def risk_level(wind_kph):
+    """Return low, medium, or high for a non-negative wind speed."""
+    if wind_kph < 40:
+        return "low"
+    if wind_kph < 70:
+        return "medium"
+    return "high"
+```
+
+Create `tests/test_risk.py`. Your finished lab should:
+
+1. write one ordinary case for each valid interval;
+2. protect `0`, `40`, and `70` plus the values just below the latter two
+   boundaries;
+3. require `ValueError("wind must be non-negative")` for `-0.1`;
+4. temporarily introduce one comparison defect and capture the focused red
+   report;
+5. repair the implementation rather than changing a correct expected value;
+6. run the focused node and then the complete file from a clean process; and
+7. write two sentences: what the suite supports and one risk it does not cover.
+
+The negative rule requires this production guard:
+
+```python
+def risk_level(wind_kph):
+    """Return low, medium, or high for a non-negative wind speed."""
+    if wind_kph < 0:
+        raise ValueError("wind must be non-negative")
+    if wind_kph < 40:
+        return "low"
+    if wind_kph < 70:
+        return "medium"
+    return "high"
+```
+
+Run:
+
+```bash
+python -m pytest -q tests/test_risk.py
+```
+
+Your observable result should name every case and finish green. Do not add
+parser, file, or CLI checks; they are different contracts.
+
+<details>
+<summary>Hint 1: turn the interval table into names</summary>
+
+Start with `test_forty_begins_medium_risk` and
+`test_just_below_forty_is_low_risk`. Repeat the pattern around 70. The name
+should tell you which expected value belongs in the assertion.
+</details>
+
+<details>
+<summary>Hint 2: prove the negative path fails for the right reason</summary>
+
+Use `with pytest.raises(ValueError, match="non-negative"):` around one call.
+Run that node before adding the production guard; it should fail because no
+exception was raised.
+</details>
+
+<details>
+<summary>Hint 3: find accidental coupling</summary>
+
+Search the tests for globals, current time, random values, files, or one test
+calling another. This lab needs none of those dependencies; every case can call
+the public function with one explicit number.
+</details>
+
+<details>
+<summary>Show one complete protection map</summary>
+
+```python
+import pytest
+
+from meteor_watch.risk import risk_level
+
+
+def test_zero_kph_is_low_risk():
+    assert risk_level(0) == "low"
+
+
+def test_ordinary_low_wind_is_low_risk():
+    assert risk_level(18) == "low"
+
+
+def test_just_below_forty_is_low_risk():
+    assert risk_level(39.9) == "low"
+
+
+def test_forty_begins_medium_risk():
+    assert risk_level(40) == "medium"
+
+
+def test_ordinary_medium_wind_is_medium_risk():
+    assert risk_level(55) == "medium"
+
+
+def test_just_below_seventy_is_medium_risk():
+    assert risk_level(69.9) == "medium"
+
+
+def test_seventy_begins_high_risk():
+    assert risk_level(70) == "high"
+
+
+def test_ordinary_high_wind_is_high_risk():
+    assert risk_level(110) == "high"
+
+
+def test_negative_wind_is_rejected():
+    with pytest.raises(ValueError, match="wind must be non-negative"):
+        risk_level(-0.1)
+```
+
+One honest conclusion is: “These selected examples protect both sides of the
+documented numeric thresholds and one negative value. They do not test parsing,
+non-finite numbers, files, notifications, or the process boundary.”
+</details>
+
+## Key points
+
+- Derive expected values from a behavioral contract, not from the current
+  implementation.
+- A focused test arranges visible state, performs one meaningful action, and
+  asserts an observable promise.
+- A green test supports only the case and environment it actually exercised.
+- Broad, vacuous, wrong-value, and copied-logic assertions can pass without
+  protecting the intended behavior.
+- Tests of incidental helpers or call sequences can reject safe refactoring.
+- Choose ordinary, boundary, invalid, and regression examples deliberately.
+- Run a new test red for the expected reason before trusting its green result.
+- Keep tests independent, deterministic, and able to run alone.
+
+## Continue learning
+
+- [pytest documentation: get started with plain assertions](https://docs.pytest.org/en/stable/getting-started.html)
+- [pytest documentation: assertion introspection, exceptions, and approximate comparisons](https://docs.pytest.org/en/stable/how-to/assert.html)
+- [Python documentation: floating-point limitations](https://docs.python.org/3/tutorial/floatingpoint.html)
+- Next: [Run Pytest and Read the Failure](pytest-discovery-failures.qmd)

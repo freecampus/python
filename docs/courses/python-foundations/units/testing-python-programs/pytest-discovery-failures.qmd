@@ -1,13 +1,16 @@
 ---
-title: pytest Discovery, Assertions, and Failure Reports
+title: Run Pytest and Read the Failure
 lesson_id: testing-python-programs.pytest-discovery-failures
 lesson_order: 20
-description: Design fast, meaningful tests at appropriate boundaries and use failures to improve behavior without coupling tests to implementation trivia.
+description: Build a discoverable src-layout pytest project, select precise nodes, distinguish collection and execution phases, and turn assertion reports into one-cause-at-a-time repairs.
 execute:
   echo: true
 categories:
 - python-foundations
 - testing-python-programs
+- pytest
+- failure-reports
+- project-layout
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/testing-python-programs/pytest-discovery-failures.ipynb
 course_id: python-foundations
@@ -16,112 +19,263 @@ unit_number: 13
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Derive focused tests from contracts, boundaries, and past defects.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 4–5 hours
+- **You will learn:** Make pytest discover the intended project, select one test precisely, classify where a run failed, and use rich assertion evidence to repair the earliest useful cause.
+- **Practice in:** A local `src` project and terminal; a notebook can reproduce direct assertions but not the complete discovery and process workflow
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A good assertion is useful only if the test runner can find it, import the
+intended package, create its dependencies, and report the observation clearly.
+This lesson turns the small Meteor Watch checks into a real project and treats
+pytest output as structured debugging evidence.
 
-Strong tests fail for one understandable reason, choose meaningful input classes, and check public behavior. A passing suite is evidence only for the cases and properties it actually exercises.
+Keep these questions visible:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+- How does pytest turn directories, files, classes, functions, and parameter
+  cases into collected node IDs?
+- Which commands select exactly the evidence you need without hiding context?
+- Did the run fail during collection, setup, the test call, or teardown?
+- What do the traceback, assertion explanation, captured output, and summary
+  each contribute?
+- How can you repair one failure without allowing later noise to lead you away
+  from the earliest cause?
+
+## 1. Give production code and tests different homes
+
+Create this project:
+
+```text
+meteor-watch-lab/
+├── pyproject.toml
+├── src/
+│   └── meteor_watch/
+│       ├── __init__.py
+│       └── risk.py
+└── tests/
+    ├── test_import.py
+    └── test_risk.py
+```
+
+The `src` layout makes an important mistake visible: importing code merely
+because the current directory happens to contain a package. Install the project
+into its virtual environment and let tests import it by its public package
+name.
+
+Use a minimal `pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meteor-watch"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+```
+
+`testpaths` tells pytest where ordinary suite discovery begins. `-ra` adds a
+short summary for outcomes such as skips and expected failures. Configuration
+should make the ordinary command predictable; it should not hide warnings or
+force a maze of plugins.
+
+Place the public function in `src/meteor_watch/risk.py`:
+
+```python
+def risk_level(wind_kph):
+    """Return low, medium, or high for a non-negative wind speed."""
+    if wind_kph < 0:
+        raise ValueError("wind must be non-negative")
+    if wind_kph < 40:
+        return "low"
+    if wind_kph < 70:
+        return "medium"
+    return "high"
+```
+
+Re-export it in `src/meteor_watch/__init__.py`:
+
+```python
+from .risk import risk_level
+
+__all__ = ["risk_level"]
+```
+
+Add `tests/test_import.py`:
+
+```python
+import meteor_watch
+
+
+def test_installed_package_exposes_risk_level():
+    assert callable(meteor_watch.risk_level)
+```
+
+Create and activate an environment using the Unit 10 instructions for your
+platform, then run:
+
+```bash
+python -m pip install -e .
+python -m pytest -q
+```
+
+The editable install means changes under `src/` are visible without rebuilding
+a wheel. It does not mean “import any file near the terminal.” Confirm the
+interpreter and imported location when results are surprising:
+
+```bash
+python -c "import sys, meteor_watch; print(sys.executable); print(meteor_watch.__file__)"
+```
+
+::: {.callout-warning title="Do not repair an import error by editing a correct assertion"}
+If collection cannot import `meteor_watch`, pytest has not called the test.
+Check the active interpreter, editable installation, package directory, and
+module spelling before changing expected values.
 :::
 
-## 2. Read and trace a complete case
+## 2. Follow discovery from a path to a node ID
+
+With default conventions, pytest searches configured directories for files
+named `test_*.py` or `*_test.py`. It then collects test functions and methods
+whose names begin with `test`. A class can group tests when its name begins with
+`Test` and it does not define its own constructor.
+
+This file yields three function nodes:
 
 ```python
-def test_shipping_boundary():
-    assert shipping_cost(2) == 5
-    assert shipping_cost(2.01) == 8
+from meteor_watch import risk_level
+
+
+def test_calm_wind_is_low():
+    assert risk_level(12) == "low"
+
+
+def test_forty_begins_medium():
+    assert risk_level(40) == "medium"
+
+
+class TestHighRisk:
+    def test_seventy_begins_high(self):
+        assert risk_level(70) == "high"
 ```
 
-### What Python does
+Ask pytest to show the collection without running the bodies:
 
-1. The values sit on opposite sides of one threshold.
-2. The test checks behavior rather than branch layout.
-3. Pytest will display actual and expected values.
+```bash
+python -m pytest --collect-only -q
+```
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+Representative output:
 
-## 3. Debug the boundary
+```text
+tests/test_import.py::test_installed_package_exposes_risk_level
+tests/test_risk.py::test_calm_wind_is_low
+tests/test_risk.py::test_forty_begins_medium
+tests/test_risk.py::TestHighRisk::test_seventy_begins_high
 
-This version is valid Python but does not satisfy the lesson's intended contract:
+4 tests collected in 0.02s
+```
+
+Each `::` adds another collected level. The complete string is a **node ID**.
+It is both a location and a precise selector:
+
+```bash
+python -m pytest -q tests/test_risk.py::TestHighRisk::test_seventy_begins_high
+```
+
+::: {.concept-diagram}
+Pytest first discovers candidates and imports modules. Only successfully
+collected nodes can enter setup, call, and teardown.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Configured test path"] --> B["Matching test files"]
+  B --> C["Import each module"]
+  C -->|"import succeeds"| D["Collect classes and functions"]
+  C -->|"import fails"| E["Collection error"]
+  D --> F["Stable node IDs"]
+  F --> G["Run selected nodes"]
+```
+:::
+
+### Diagnose a test that never appears
+
+This function is valid Python but is not collected:
 
 ```python
-def test_total():
-    prices = [10, 20]
-    assert total(prices) == sum(prices)
+def checks_medium_boundary():
+    assert risk_level(40) == "medium"
 ```
 
-A focused repair is:
+Rename it `test_medium_boundary`. Do not add a manual call at the bottom of the
+file; that would run during import and blur collection with execution.
 
-```python
-def test_total_known_example():
-    assert total([10, 20]) == 30
-```
+Likewise, `risk_checks.py` is not a conventional test filename. Discovery
+conventions make a suite predictable for maintainers and tools. A custom
+pattern is possible, but changing configuration to accommodate one accidental
+name is usually less clear than naming the file `test_risk.py`.
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+## 3. Select enough evidence, not more noise
 
-## 4. Practice from trace to transfer
+Use the broadest command that still answers the current question:
 
-1. Create equivalence classes for age validation.
-2. Turn an off-by-one repair into regression test.
-3. Read a pytest failure and identify all evidence.
+| Command | Useful question |
+|---|---|
+| `python -m pytest` | Does the complete configured suite pass? |
+| `python -m pytest -q` | Can I see a compact complete result? |
+| `python -m pytest tests/test_risk.py` | What happens in this file? |
+| `python -m pytest tests/test_risk.py::test_forty_begins_medium` | What happens in this exact node? |
+| `python -m pytest -k boundary` | Which collected nodes with matching names pass? |
+| `python -m pytest -x` | What is the first failure in this run? |
+| `python -m pytest --maxfail=2` | What are the first two failures before stopping? |
+| `python -m pytest --lf` | Do nodes that failed in the previous run now pass? |
+| `python -m pytest -vv` | Which full node IDs and parameter IDs are running? |
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+`-k` matches collected names and parents; it is not a text search through
+source. Quote complex expressions in the shell, such as `-k "boundary and not
+negative"`.
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+`-x` reduces noise while debugging the earliest failure. It is not a final
+verification command. After the focused node turns green, run its file and then
+the complete suite. A local repair may expose a second failure or accidentally
+break another contract.
 
-</details>
-
-## 5. Check your understanding
+### Checkpoint: discover and select the intended node
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "testing-python-programs-test-design-and-failures",
-  "title": "Test Design and Failure Evidence checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit13-pytest-discovery-checkpoint",
+  "title": "Follow pytest discovery and selection",
+  "instructions": "Choose the command or diagnosis that matches the project evidence.",
   "questions": [
     {
-      "id": "behavior",
-      "prompt": "What should tests protect?",
-      "options": [
-        "Local names",
-        "Editor settings",
-        "Line count",
-        "Observable behavior"
-      ],
-      "answer_index": 3,
-      "explanation": "Behavior survives refactoring."
-    },
-    {
-      "id": "boundary",
-      "prompt": "What tests threshold 10?",
-      "options": [
-        "Values immediately around 10",
-        "1 and 2",
-        "10 twice",
-        "100 only"
-      ],
-      "answer_index": 0,
-      "explanation": "Adjacent cases expose inclusivity."
-    },
-    {
-      "id": "regression",
-      "prompt": "What is regression test?",
-      "options": [
-        "Removed after fix",
-        "Reproduces a past defect",
-        "A style rule",
-        "A random run"
-      ],
+      "id": "unit13-pytest-q10-node",
+      "prompt": "Which command runs only test_seventy_begins_high inside class TestHighRisk in tests/test_risk.py?",
+      "options": ["python -m pytest -k tests/test_risk.py", "python -m pytest tests/test_risk.py::TestHighRisk::test_seventy_begins_high", "python tests/test_risk.py::TestHighRisk", "python -m pytest --collect-only TestHighRisk"],
       "answer_index": 1,
-      "explanation": "It prevents the defect returning."
+      "explanation": "The full node ID uses :: between file, class, and test function and selects exactly that collected node."
+    },
+    {
+      "id": "unit13-pytest-q11-missing",
+      "prompt": "A valid function named checks_medium_boundary does not appear under --collect-only. What is the most direct repair?",
+      "options": ["Add assert True at module scope", "Call the function while the module imports", "Rename it so the function name begins with test_", "Change the production result"],
+      "answer_index": 2,
+      "explanation": "Default pytest function discovery looks for test-prefixed names. The function body has not run, so production behavior is not yet relevant."
+    },
+    {
+      "id": "unit13-pytest-q12-x",
+      "prompt": "What is the best use of pytest -x during a repair?",
+      "options": ["Prove that no later failures exist", "Skip every slow test permanently", "Rewrite all expected values automatically", "Stop after the first failure so its evidence can be investigated without later noise"],
+      "answer_index": 3,
+      "explanation": "-x supports a focused investigation. A complete suite run is still needed after the repair."
     }
   ]
 }
@@ -129,14 +283,438 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 4. Classify the phase before changing code
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+For a collected test, pytest can run three phases:
 
-## References
+1. **setup** obtains fixtures and prepares the test world;
+2. **call** executes the test function; and
+3. **teardown** releases fixture-managed resources.
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+An assertion mismatch during the call phase is reported as a **failure**. An
+unexpected exception during fixture setup or teardown is usually reported as
+an **error**. Collection errors happen earlier, before those phases exist.
+
+::: {.concept-diagram}
+The report phase narrows the search. Editing the classifier cannot repair a
+misspelled fixture or a module that never imported.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Collection"] --> B["Setup"] --> C["Call"] --> D["Teardown"]
+  A -->|"import or syntax problem"| E["Collection error"]
+  B -->|"fixture cannot prepare"| F["Setup error"]
+  C -->|"assertion is false"| G["Test failure"]
+  C -->|"unexpected exception"| H["Call error evidence"]
+  D -->|"cleanup fails"| I["Teardown error"]
+```
+:::
+
+Consider a misspelled fixture request:
+
+```python
+def test_report_uses_station(station_reccord):
+    assert station_reccord["station"] == "ridge-7"
+```
+
+Pytest can collect the function, but setup cannot find
+`station_reccord`. The report includes `fixture 'station_reccord' not found`
+and lists available fixtures. The production parser never ran. Rename the
+argument or define the intended fixture; do not change parsing code.
+
+By contrast, this test reaches the call and observes a wrong result:
+
+```python
+def test_forty_begins_medium():
+    observed = risk_level(40)
+    assert observed == "medium"
+```
+
+If `observed` is `"low"`, inspect the 40-kph comparison or the contract. The
+phase and compared values point to a much smaller investigation.
+
+## 5. Read every useful part of an assertion report
+
+Introduce this defect temporarily:
+
+```python
+def risk_level(wind_kph):
+    if wind_kph < 0:
+        raise ValueError("wind must be non-negative")
+    if wind_kph <= 40:
+        return "low"
+    if wind_kph < 70:
+        return "medium"
+    return "high"
+```
+
+Run the focused node without `-q`:
+
+```bash
+python -m pytest tests/test_risk.py::test_forty_begins_medium
+```
+
+A report resembles:
+
+```text
+============================= test session starts ==============================
+platform linux -- Python 3.12.4, pytest-9.1.1
+rootdir: /work/meteor-watch-lab
+configfile: pyproject.toml
+collected 1 item
+
+tests/test_risk.py F                                                     [100%]
+
+=================================== FAILURES ===================================
+________________________ test_forty_begins_medium _________________________
+
+    def test_forty_begins_medium():
+        observed = risk_level(40)
+>       assert observed == "medium"
+E       AssertionError: assert 'low' == 'medium'
+E
+E         - medium
+E         + low
+
+tests/test_risk.py:11: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_risk.py::test_forty_begins_medium - AssertionError: ...
+============================== 1 failed in 0.06s ===============================
+```
+
+Annotate it:
+
+- **session header:** interpreter, pytest version, root directory, and selected
+  configuration identify the environment;
+- **collection:** one item confirms the intended node existed;
+- **failure heading and node:** identify the scenario;
+- **source excerpt and `>`:** show the exact expression that was false;
+- **`E` lines:** show the compared values and pytest's explanation;
+- **location:** points to the test assertion, from which the call can be traced;
+- **short summary:** collects every non-passing node for navigation; and
+- **duration/result:** confirms the run ended with one failure rather than a
+  collection interruption.
+
+The report does not order you to change `low` to `medium` in production. It
+states the observation. The interval contract decides the correct repair:
+change `<= 40` to `< 40`.
+
+## 6. Let plain assertions produce useful diffs
+
+Pytest rewrites assertions as test modules are imported, retaining information
+about subexpressions. Use direct comparisons so that information stays visible.
+
+### Strings reveal the changed region
+
+```python
+def format_alert(station, level):
+    return f"{station}: {level.upper()} risk"
+
+
+def test_alert_format_names_station_and_level():
+    assert format_alert("ridge-7", "high") == "ridge-7: HIGH risk"
+```
+
+A misspelled suffix produces a character-level diff. Avoid replacing this with
+`assert "HIGH" in observed` unless the rest of the format truly does not
+matter.
+
+### Lists reveal order and missing elements
+
+```python
+def risky_stations(observations):
+    return [
+        item["station"]
+        for item in observations
+        if item["risk"] == "high"
+    ]
+
+
+def test_risky_stations_preserve_observation_order():
+    observations = [
+        {"station": "ridge-7", "risk": "high"},
+        {"station": "lake-2", "risk": "low"},
+        {"station": "tower-1", "risk": "high"},
+    ]
+
+    assert risky_stations(observations) == ["ridge-7", "tower-1"]
+```
+
+If order is not a promise, compare a set. If order is a promise, converting both
+sides to sets creates a false positive.
+
+### Dictionaries reveal differing fields
+
+```python
+def test_parsed_observation_has_expected_fields():
+    observed = parse_observation("ridge-7|42.5|crosswind")
+
+    assert observed == {
+        "station": "ridge-7",
+        "wind_kph": 42.5,
+        "note": "crosswind",
+    }
+```
+
+One dictionary equality gives pytest enough information to show missing, extra,
+or differing entries while preserving the whole record contract.
+
+### Checkpoint: classify and read reports
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-pytest-report-checkpoint",
+  "title": "Use the failure phase and assertion evidence",
+  "instructions": "Choose the diagnosis supported by the report.",
+  "questions": [
+    {
+      "id": "unit13-pytest-q13-import",
+      "prompt": "Pytest reports ModuleNotFoundError while importing tests/test_risk.py and collects zero items. What should be investigated first?",
+      "options": ["The active environment, editable install, and import spelling", "The expected label in the boundary assertion", "The fixture teardown order", "The branch coverage percentage"],
+      "answer_index": 0,
+      "explanation": "Collection never produced a runnable node. Package installation and import context come before behavior assertions."
+    },
+    {
+      "id": "unit13-pytest-q14-fixture",
+      "prompt": "The report says fixture 'station_reccord' not found during setup. Which change best follows the evidence?",
+      "options": ["Return a different risk label", "Correct the requested fixture name or define the fixture", "Use pytest.approx on the station name", "Ignore the error and run coverage"],
+      "answer_index": 1,
+      "explanation": "The test body has not run. Setup needs a fixture whose name matches the requested argument."
+    },
+    {
+      "id": "unit13-pytest-q15-dict",
+      "prompt": "Why is direct dictionary equality useful for a record contract?",
+      "options": ["It prevents pytest from showing values", "It ignores all extra keys", "Pytest can explain missing, extra, and differing fields", "It automatically changes production data"],
+      "answer_index": 2,
+      "explanation": "A direct comparison preserves the expected record shape and gives assertion rewriting useful subexpression evidence."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Assert anticipated exceptions precisely
+
+Use `pytest.raises` as a context around only the action expected to fail:
+
+```python
+import pytest
+
+
+def parse_wind(text):
+    try:
+        wind = float(text)
+    except ValueError as error:
+        raise ValueError(f"invalid wind: {text!r}") from error
+    if wind < 0:
+        raise ValueError("wind must be non-negative")
+    return wind
+
+
+def test_parse_wind_rejects_non_numeric_text():
+    with pytest.raises(ValueError, match="invalid wind") as error_info:
+        parse_wind("east")
+
+    assert "'east'" in str(error_info.value)
+```
+
+Code after the call belongs outside the `with` block. If you place another
+operation inside, an exception from that operation can satisfy a broad context
+and create false confidence.
+
+Use a narrow message regular expression. User-specific values can be checked
+through `error_info.value`. Do not assert the entire traceback or platform path.
+Those are report details rather than the exception contract.
+
+## 8. Compare numeric results with an explicit tolerance
+
+`pytest.approx` is asymmetric in how it treats expected and observed values, but
+ordinary use reads naturally:
+
+```python
+import pytest
+
+
+def average_wind(values):
+    return sum(values) / len(values)
+
+
+def test_average_wind_is_close_to_expected_measurement():
+    observed = average_wind([10.0, 10.1, 9.9])
+    assert observed == pytest.approx(10.0, abs=0.001)
+```
+
+Choose a tolerance from the domain or numeric operation, not merely a large
+number that makes red disappear. If the requirement is “display one decimal
+place,” test the formatted string separately from the numeric calculation.
+
+## 9. Use skip and expected failure deliberately
+
+Sometimes a test cannot run in a known environment, or a documented defect is
+temporarily accepted. Pytest can represent those states:
+
+```python
+import sys
+
+import pytest
+
+
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="requires tomllib")
+def test_toml_configuration_example():
+    import tomllib
+
+    assert tomllib.loads("limit = 70")["limit"] == 70
+```
+
+An expected failure can use `@pytest.mark.xfail(reason="issue 42")`. Add
+`strict=True` when an unexpected pass should force review rather than silently
+remaining XPASS. These marks communicate a specific condition; they are not a
+bin for inconvenient failures. A failing boundary test whose contract is
+current should remain red until repaired.
+
+## 10. Repair the earliest useful failure
+
+Use this repeatable sequence:
+
+1. run `--collect-only` if discovery or import is uncertain;
+2. run with `-x` to stop at the earliest selected failure;
+3. identify collection, setup, call, or teardown;
+4. state one hypothesis that explains the exact report;
+5. run the smallest node or collection command capable of testing it;
+6. change one cause;
+7. rerun the focused evidence;
+8. rerun the file; and
+9. rerun the complete suite from a clean process.
+
+Changing production and expected values together destroys the red/green
+evidence. Likewise, deleting a test because it fails is not a repair unless the
+contract has intentionally changed and that decision is recorded.
+
+### Checkpoint: choose the next command
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit13-pytest-repair-checkpoint",
+  "title": "Choose the smallest useful rerun",
+  "instructions": "Match the command to the uncertainty you need to resolve.",
+  "questions": [
+    {
+      "id": "unit13-pytest-q16-collect",
+      "prompt": "You renamed a test file and are unsure whether its functions are discovered. What should you run first?",
+      "options": ["pytest --cov", "pytest --lf", "pytest -x after changing production", "python -m pytest --collect-only -q"],
+      "answer_index": 3,
+      "explanation": "Collection-only output answers whether nodes exist without mixing that question with their behavior."
+    },
+    {
+      "id": "unit13-pytest-q17-focused",
+      "prompt": "A single boundary node failed and you changed one comparison. What is the best immediate rerun?",
+      "options": ["That exact node ID", "Only the package import command", "Delete pytest's cache", "An unrelated fixture test"],
+      "answer_index": 0,
+      "explanation": "The focused node directly tests the repair hypothesis. Follow it with the file and complete suite."
+    },
+    {
+      "id": "unit13-pytest-q18-clean",
+      "prompt": "Why run the complete suite after the focused node turns green?",
+      "options": ["To make pytest rewrite production code", "To detect interactions or regressions outside the repaired node", "To guarantee the program has no bugs", "To avoid installing the package"],
+      "answer_index": 1,
+      "explanation": "A local change can affect other contracts. The broader rerun checks those already-declared expectations."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 11. Run the mixed-failure weather clinic
+
+Create a disposable copy of the Meteor Watch project. Add four faults, one in
+each category:
+
+1. in `tests/test_import.py`, import `meteor_wotch` to create a collection
+   error;
+2. in one collected test, request a nonexistent `weather_record` fixture;
+3. change the 40-kph comparison in production from `< 40` to `<= 40`;
+4. write one expected dictionary with the wrong note.
+
+Your task is not to repair all four immediately. Produce an evidence record:
+
+| Run | Phase | Earliest useful line | Hypothesis | One change | Result |
+|---|---|---|---|---|---|
+| 1 | collection | ... | ... | ... | ... |
+| 2 | setup | ... | ... | ... | ... |
+| 3 | call | ... | ... | ... | ... |
+| 4 | call | ... | ... | ... | ... |
+
+Use `--collect-only`, `-x`, an exact node ID, and finally the complete suite.
+Annotate at least one report with the environment, node, source line, compared
+values, and summary.
+
+<details>
+<summary>Hint 1: zero collected items changes the first question</summary>
+
+If module import fails, no fixture or assertion in that file can run. Correct
+the import spelling and rerun collection before reasoning about wind values.
+</details>
+
+<details>
+<summary>Hint 2: distinguish fixture lookup from the test call</summary>
+
+A missing fixture is setup evidence. Pytest lists available fixtures. Make the
+argument name match an existing fixture or add the small fixture the test
+actually needs.
+</details>
+
+<details>
+<summary>Hint 3: do not change a contract-derived expected value</summary>
+
+For the 40-kph failure, compare the production condition with `0 <= wind < 40`.
+For the dictionary failure, compare the expected note with the supplied input.
+Only one side should contradict the contract in each case.
+</details>
+
+<details>
+<summary>Show a completed diagnosis sequence</summary>
+
+One valid order is:
+
+1. `--collect-only -q` exposes `ModuleNotFoundError: meteor_wotch`; correct the
+   import and confirm nodes collect.
+2. `-x` exposes `fixture 'weather_record' not found`; correct the requested
+   fixture and rerun that node.
+3. The next `-x` run reaches `test_forty_begins_medium` and reports `low` versus
+   `medium`; restore `< 40` and rerun the exact node.
+4. The dictionary test shows only the note differs; correct whichever side
+   contradicts its written input/contract.
+5. Run `python -m pytest` from a fresh process and retain the complete green
+   summary.
+
+The important artifact is the phase-based explanation, not merely four edited
+lines.
+</details>
+
+## Key points
+
+- A `src` layout plus editable installation makes import assumptions visible.
+- Discovery creates stable node IDs from matching files, classes, functions,
+  and later parameter cases.
+- Select a suite, file, node, keyword, or previous failure based on the question
+  you are answering.
+- Collection, setup, call, and teardown evidence point to different causes.
+- Plain assertions let pytest display useful scalar, text, sequence, and mapping
+  differences.
+- `pytest.raises` and `pytest.approx` express exception and numeric contracts
+  precisely.
+- Skip and xfail marks should state a real condition, never hide an unexplained
+  failure.
+- Repair one cause, rerun the focused evidence, then verify the complete suite.
+
+## Continue learning
+
+- [pytest documentation: discovery and the first test](https://docs.pytest.org/en/stable/getting-started.html)
+- [pytest documentation: test anatomy and execution phases](https://docs.pytest.org/en/stable/explanation/anatomy.html)
+- [pytest documentation: assertion explanations](https://docs.pytest.org/en/stable/how-to/assert.html)
+- [pytest documentation: good integration practices](https://docs.pytest.org/en/stable/explanation/goodpractices.html)
+- Next: [Turn Examples into Clear Parametrized Cases](parametrization-boundary-cases.qmd)
