@@ -1,6 +1,6 @@
 ---
 title: Files, Paths, and External Data Overview
-description: Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
+description: Locate files predictably, preserve text, translate external formats, validate records, and produce reproducible outputs with rejection evidence.
 course_id: python-foundations
 unit_id: files-paths-external-data
 unit_number: 9
@@ -13,55 +13,207 @@ colab_notebook: notebooks/courses/python-foundations/units/files-paths-external-
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 9
-- **Estimated time:** 5–10 hours including the challenge
-- **Unit outcome:** Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 22–28 hours including the challenge
+- **Unit outcome:** Locate and traverse files predictably; read and write text with explicit resource, encoding, newline, and replacement policies; translate CSV, JSON, YAML, and binary data into validated Python values; and build a reproducible import pipeline that preserves accepted data, rejected evidence, and original inputs.
+- **Practice in:** Generated Colab notebooks and temporary local workspaces created by Python
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. Welcome to the signal archive
 
-Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
+A program often begins with values already in memory: a list of names, a price,
+or a dictionary. Useful programs also need to cross boundaries. They load a
+configuration, discover yesterday's reports, accept a spreadsheet export, save
+a game, or inspect an image header. Beyond each boundary is data that your
+program did not create and cannot simply trust.
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+Imagine receiving a folder of starship signals. Before learning anything from
+it, your program must answer several practical questions:
 
-## 2. Before you start
+- Where is the folder relative to the process that is running?
+- Which entries are input files, and in what order should they be processed?
+- Are the bytes UTF-8 text, text in another encoding, or not text at all?
+- Does a valid CSV row also satisfy the archive's rules?
+- Where should rejected rows and their reasons be recorded?
+- Can a failed rerun leave the previous good archive untouched?
 
-**Prior knowledge:** Complete Unit 8 and bring its challenge notes and debugging record.
+This unit gives each question enough room to become a usable skill. You will not
+merely call `read_text()` once. You will build and inspect complete, repeatable
+pipelines.
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+## 2. See the complete journey before studying each stage
 
-## 3. Lessons
+::: {.concept-diagram}
+External data becomes trustworthy only after several different responsibilities
+have succeeded; saving results crosses the same boundaries in reverse.
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Paths, Text Files, and Managed Resources](paths-text-files-resources.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Unicode Encodings, Newlines, and Text Boundaries](unicode-encodings-newlines.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [CSV, JSON, and YAML Records](csv-json-yaml-records.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Text Patterns and Validation Pipelines](text-patterns-validation-pipelines.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Bytes, Binary Files, and In-Memory Streams](bytes-binary-memory-streams.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  locate["Locate paths"] --> read["Read bytes or text"]
+  read --> decode["Decode text"]
+  decode --> parse["Parse structure"]
+  parse --> validate["Validate rules"]
+  validate --> split["Accept or reject"]
+  split --> serialize["Serialize output"]
+  serialize --> verify["Verify and replace"]
+```
 
-## 4. How to study this unit
-
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
-
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+A parser can succeed while validation fails. A correct serializer can still
+write to the wrong path. Naming each stage helps you locate failures instead of
+blaming “the file” as one indivisible operation.
 :::
 
-## 5. Unit evidence
+The stages have different contracts:
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+| Stage | Question it answers | Typical evidence |
+|---|---|---|
+| Locate | Which filesystem object do we mean? | a `Path`, directory tree, sorted file list |
+| Read | How do values enter the process, and who closes the resource? | mode, open handle, bytes or text |
+| Decode | How do byte values map to characters? | encoding name, newline policy, decode error |
+| Parse | Does the text follow a format grammar? | CSV fields, JSON values, YAML values |
+| Validate | Do those values obey our application rules? | accepted record or a precise reason |
+| Serialize | How will Python values be represented outside Python? | deterministic text or bytes |
+| Replace | When is an output complete enough to become official? | verified temporary artifact and final path |
+
+When an error occurs, ask which contract was broken. A missing path is not a
+Unicode problem. Malformed JSON is not the same as a valid JSON object missing a
+required key. Keeping the stages separate makes both code and explanations more
+precise.
+
+## 3. Work in a disposable practice folder
+
+File exercises should be safe to rerun. Hard-coded paths such as
+`/Users/sam/Desktop` work for one person and fail everywhere else. Writing
+practice output into the repository also leaves clutter and can accidentally
+replace real files.
+
+Most lessons therefore use `TemporaryDirectory`:
+
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    workspace = Path(temporary_name)
+    inbox = workspace / "incoming"
+    inbox.mkdir()
+
+    note_path = inbox / "welcome.txt"
+    note_path.write_text("Olá, archive!\n", encoding="utf-8")
+
+    print(note_path.relative_to(workspace))
+    print(note_path.read_text(encoding="utf-8"))
+```
+
+Python creates a unique directory, the example writes only inside it, and the
+directory is removed after the `with` block. Every learner gets the same small
+world regardless of operating system. Each larger lab creates all of its own
+input files, so you can restart the kernel and rerun it from the top.
+
+::: {.callout-note title="Temporary means temporary"}
+Move evidence you want to keep—such as a debugging note or final function—out
+of the temporary directory before its `with` block ends. The directory is a
+safe laboratory, not permanent storage.
+:::
+
+A notebook and a local script may start with different **current working
+directories**. You will inspect that value rather than assume it, and you will
+build paths from a deliberate root. Later, when Unit 10 turns programs into
+projects, that root can come from configuration, a command-line argument, or a
+known package resource.
+
+## 4. Take this route through the unit
+
+| Step | Lesson | Capability you will practice |
+|---:|---|---|
+| 1 | [Find, Read, and Write Files Reliably](paths-text-files-resources.qmd) | Construct and inspect paths, traverse folders deterministically, manage file handles, stream lines, and choose writing modes without accidental truncation. |
+| 2 | [Keep Text Intact Across Encodings and Newlines](unicode-encodings-newlines.qmd) | Distinguish characters from bytes, diagnose decoding failures, normalize comparisons carefully, and preserve multilingual text across newline conventions. |
+| 3 | [Move Records Between CSV, JSON, YAML, and Python](csv-json-yaml-records.qmd) | Choose a format, use its reader and writer correctly, make type conversion explicit, and separate parsed structure from trusted records. |
+| 4 | [Turn Messy Text into Trustworthy Records](text-patterns-validation-pipelines.qmd) | Recognize and extract patterns, validate structural and domain rules, and preserve accepted values, rejected evidence, and source lineage. |
+| 5 | [Cross the Text–Binary Boundary Safely](bytes-binary-memory-streams.qmd) | Inspect bytes, use binary file modes and chunks, work with in-memory streams, and encode text only when a format defines the boundary. |
+| 6 | [Unit Challenge: Restore the Starship Signal Archive](challenge.qmd) | Repair a multilingual, multi-file import pipeline and prove its discovery, validation, error, and replacement policies with progressive assertions. |
+
+Each lesson contains three short quiz checkpoints and a larger integration lab.
+Do not rush past a surprising output. Record what you predicted, what actually
+happened, and which boundary explains the difference.
+
+## 5. Carry Unit 8's debugging method into external data
+
+Unit 8 taught you to reproduce a failure, gather evidence, state one hypothesis,
+and change one thing. External-data failures reward exactly that discipline.
+Preserve the smallest artifact that reproduces the problem:
+
+```text
+Path or source name:
+Expected contract:
+Observed value or exception:
+Smallest input that reproduces it:
+Stage where expectation first diverges:
+```
+
+For a decoding error, record the encoding you attempted and the offending byte
+position. For a rejected record, preserve the source file, logical record
+number, raw fields, and reason. For a wrong output, compare parsed Python values
+as well as serialized text. Evidence should explain *which* boundary failed.
+
+::: {.callout-warning title="Never experiment on the only copy"}
+Keep original external inputs unchanged. Write derived output elsewhere, and do
+not replace a known-good artifact until the complete new artifact has been
+written and checked. The lessons use disposable fixtures, but the habit applies
+to real research data, customer exports, save files, and configurations.
+:::
+
+## 6. Budget time for deliberate practice
+
+Plan roughly four to six hours for each lesson and one to two hours for the
+challenge. That time includes:
+
+1. predicting selected outputs before running them;
+2. typing and tracing complete examples;
+3. making the requested changes and observing the consequences;
+4. diagnosing at least one intentional failure;
+5. completing the lesson lab without relying on old notebook state; and
+6. answering the quizzes from your reasoning, not from trial-and-error clicks.
+
+Reading the page once is not completion. A more useful signal is whether you can
+create a fresh temporary workspace, explain every path and format decision, and
+rerun the pipeline with the same results.
+
+## 7. Prepare for the archive restoration
+
+At the end of the unit, you will inherit a plausible but defective signal
+archive program. It discovers CSV files, normalizes records, quarantines bad
+rows, and writes a JSON archive. Several choices are subtly unsafe: ordering is
+reversed, a pattern accepts extra characters, one priority slips through, an
+exception boundary is too broad, and the writer does not satisfy its output
+contract.
+
+The challenge gives you function names, docstrings, fixtures, progressive
+assertions, and three hints. Your job is to investigate and repair the program,
+not invent an application from a blank page. A successful clean rerun will
+reveal the restored multilingual beacon while preserving evidence for every
+rejected signal.
+
+Unit 10 will then use these boundary skills inside modules, environments, and
+projects. You will move from one reliable notebook pipeline to code that can be
+installed and reused. There is no final project or certificate in this release;
+both are planned, and we will announce them when they are ready.
+
+## Key points
+
+- External data crosses several contracts: location, resources, decoding,
+  parsing, validation, serialization, and replacement.
+- A temporary workspace makes file labs portable, self-contained, and safe to
+  rerun.
+- Original inputs, rejected evidence, and unexpected exceptions should remain
+  visible.
+- Deterministic discovery and output make a pipeline easier to reproduce and
+  debug.
+- Unit 8's evidence loop remains the right response when a file or record
+  behaves unexpectedly.
 
 <!-- fcpython-chapter-lab: end -->

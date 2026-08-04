@@ -1,15 +1,16 @@
 ---
-title: 'Unit Challenge: Convert a Multilingual Records Archive'
-description: Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
+title: 'Unit Challenge: Restore the Starship Signal Archive'
+description: Repair a multilingual multi-file import pipeline so it discovers signals predictably, rejects invalid records with evidence, and publishes verified JSON without hiding defects.
 challenge_id: files-paths-external-data.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 2
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
 - files-paths-external-data
 - unit-challenge
+- archive-puzzle
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/files-paths-external-data/challenge.ipynb
 course_id: python-foundations
@@ -19,190 +20,827 @@ unit_number: 9
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 9 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Read valid JSON data through explicit paths and write a reproducible text report.
-- **Evidence:** Complete the checks and explain the result in your own words.
+- **Outcome assessed:** Discover and decode multiple files predictably, parse and validate CSV records, preserve rejection lineage, allow unexpected failures to propagate, and verify deterministic UTF-8 JSON before replacement.
+- **Evidence:** Unchanged progressive assertions, four accepted multilingual signals, four detailed rejections, an unexpected-failure propagation check, a verified archive, a restored beacon phrase, and one debugging record
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
+## 1. Reconnect a starship whose archive went silent
 
-Convert line-oriented reading records into canonical JSON while preserving a
-specific rejection reason for each line that does not satisfy the format.
+The research ship **Asteria** has emerged from a communications storm. Two signal
+files survived, but the archive builder now reverses their order, accepts an ID
+hidden inside extra characters, allows priority zero, calls programming defects
+“bad records,” and publishes JSON that violates the ship's text contract.
 
-**Scenario:** A reading group exports records such as
-`BK-104|Python Steps|120`. Identifiers, titles, and page counts arrive in one
-text stream. Some lines contain an invalid identifier, missing title, or
-non-numeric page count.
+The implementation is not blank. It looks reasonable and runs far enough to
+produce an archive—which is exactly why the defects are dangerous. Repair it
+one contract at a time until the accepted message fragments reveal:
 
-::: {.callout-note title="Work independently, but not without support"}
-Plan for one or two focused hours. Start from the pattern and examples, run one
-check at a time, and open a hint only after naming the evidence blocking you.
+```text
+NOVA HELLO, LUNA SAFE HOME
+```
+
+You will work entirely inside a temporary starship workspace:
+
+```text
+starship-signals/
+├── incoming/
+│   ├── operator-notes.txt
+│   ├── signal-alpha.csv
+│   └── signal-beta.csv
+└── restored/
+    └── signal-archive.json   # created by your repaired pipeline
+```
+
+One CSV begins with a UTF-8 BOM. The records include accented and non-Latin
+names, a quoted multiline message, an invalid ID wrapper, an empty sender, a
+nonnumeric priority, and a priority outside the allowed range. The original
+inputs must remain unchanged.
+
+::: {.callout-note title="Repair the archive, not the evidence"}
+Keep the fixture and expected values unchanged. Run the nearest failing stage,
+write one hypothesis, make one focused change, and rerun all earlier stages.
+Hints are available, but first use the assertion message, exception type,
+serialized text, or path list already in front of you.
 :::
 
-## 2. Understand the acceptance example
+## 2. Read the restoration rules
 
-For the supplied five lines, predict which three records are accepted and the
-exact rejection reason for the other two. Keep input order in both outputs.
+### File discovery
 
-### Constraints
+- Search only `incoming/signal-*.csv` beneath the supplied workspace root.
+- Return `Path` objects in sorted, deterministic order.
+- Do not include `operator-notes.txt`, a previous JSON output, or unrelated CSV
+  files.
+- Do not mutate or delete any input.
 
-1. Compile one named regular expression with groups for ID, title, and pages.
-2. Keep parsing, conversion, and file writing in separate functions.
-3. Return rejected lines with a reason; do not silently discard them.
-4. Write canonical JSON as UTF-8 with stable indentation and a final newline.
+### CSV and text boundary
+
+- Open every signal file with `encoding="utf-8-sig"` and `newline=""`.
+- Require headers in this exact order:
+  `signal_id`, `sender`, `message`, `priority`.
+- Enumerate logical data records from 1. A quoted newline remains part of one
+  message and does not create an extra record.
+- A header mismatch is a file-level `ValueError`; do not call it one rejected
+  row.
+
+### Record validation
+
+- `signal_id` must **fully match** `SIG-` followed by four ASCII digits.
+- Strip surrounding whitespace from `signal_id`, `sender`, and `message`.
+- `sender` and `message` must remain non-empty after stripping.
+- Convert `priority` to an integer and require the inclusive range 1 through 5.
+- When `int` raises `ValueError`, add source and record context with
+  `raise ... from error`.
+- Return a new normalized dictionary; do not modify the raw row retained as
+  evidence.
+
+### Accepted and rejected records
+
+- `load_signal_files` returns `(accepted, rejected)`.
+- Catch only the contextual `ValueError` raised for an anticipated bad record.
+- Each rejection stores `source`, `record`, `raw`, and `reason`.
+- An unexpected `RuntimeError`, `TypeError`, or programming defect must stop the
+  pipeline with its traceback.
+
+### Archive output
+
+- Write one JSON document containing `accepted` and `rejected` lists.
+- Use `ensure_ascii=False`, `indent=2`, and `sort_keys=True`.
+- End the UTF-8 file with exactly one newline.
+- Write a sibling `.tmp` artifact, parse it back, compare the restored value,
+  and only then replace the destination.
+- Remove a leftover temporary artifact if creation or verification fails.
+- A second clean write with the same values must produce identical text.
 
 ## 3. Start from the contract
 
+Run the fixture cell first. It creates a fresh workspace and all inputs, so the
+challenge does not depend on repository files or old notebook state.
+
 ```python
+import csv
 import json
 import re
 from pathlib import Path
-
-BOOK_PATTERN = re.compile(
-    r"^(?P<book_id>BK-\d{3})\|(?P<title>[^|]+)\|(?P<pages>\d+)$"
-)
+from tempfile import TemporaryDirectory
 
 
-def parse_book(line: str) -> dict[str, object]:
-    """Return one normalized record or raise ValueError with a useful reason."""
-    raise NotImplementedError
+def create_starship_workspace(root):
+    """Create and return a self-contained signal archive fixture beneath root."""
+    root = Path(root) / "starship-signals"
+    incoming = root / "incoming"
+    restored = root / "restored"
+    incoming.mkdir(parents=True)
+    restored.mkdir()
+
+    alpha_text = (
+        "signal_id,sender,message,priority\n"
+        "SIG-1001,Ana,NOVA,3\n"
+        "xxSIG-1002yy,Luna,DRIFT,2\n"
+        "SIG-1003,,QUIET,1\n"
+        'SIG-1004,Renée,"HELLO,\nLUNA",5\n'
+    )
+    beta_text = (
+        "signal_id,sender,message,priority\n"
+        "SIG-2001,Noor,SAFE,2\n"
+        "SIG-2002,Íris,DELAY,urgent\n"
+        "SIG-2003,Kai,AGAIN,0\n"
+        "SIG-2004,Zoë,HOME,4\n"
+    )
+
+    (incoming / "signal-alpha.csv").write_text(
+        alpha_text,
+        encoding="utf-8-sig",
+        newline="",
+    )
+    (incoming / "signal-beta.csv").write_text(
+        beta_text,
+        encoding="utf-8",
+        newline="",
+    )
+    (incoming / "operator-notes.txt").write_text(
+        "Não arquivar automaticamente. 月 channel remains open.\n",
+        encoding="utf-8",
+    )
+    (incoming / "unrelated.csv").write_text(
+        "this,is,not,a,signal\n",
+        encoding="utf-8",
+    )
+    return root
 
 
-def convert_lines(
-    lines: list[str],
-) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
-    """Return accepted records and rejected line/reason records."""
-    raise NotImplementedError
-
-
-def write_catalog(path: Path, records: list[dict[str, object]]) -> Path:
-    """Write deterministic UTF-8 JSON and return path."""
-    raise NotImplementedError
+challenge_temporary_directory = TemporaryDirectory()
+challenge_root = create_starship_workspace(challenge_temporary_directory.name)
 ```
 
-## 4. Build in small stages
+Now run the starter unchanged. Preserve these five public names, signatures, and
+docstrings. It contains a small set of seeded defects; do not rewrite the whole
+pipeline before the assertions tell you where each promise breaks.
 
-1. Make `parse_book` pass one ordinary line and return typed `pages` data.
-2. Add empty-title and non-matching format failures with different messages.
-3. Implement the conversion loop without hiding unexpected exceptions.
-4. Write the accepted records, read them back, and rerun from a clean folder.
+```python
+EXPECTED_SIGNAL_HEADERS = ["signal_id", "sender", "message", "priority"]
+SIGNAL_ID_PATTERN = re.compile(r"SIG-[0-9]{4}")
+
+
+def discover_signal_files(root):
+    """Return intended signal CSV paths in deterministic order."""
+    paths = list((Path(root) / "incoming").glob("signal-*.csv"))
+    paths.reverse()
+    return paths
+
+
+def parse_signal(row, source, record_number):
+    """Return one normalized signal or raise contextual ValueError."""
+    signal_id = row["signal_id"].strip()
+    sender = row["sender"].strip()
+    message = row["message"].strip()
+
+    if SIGNAL_ID_PATTERN.search(signal_id) is None:
+        raise ValueError(
+            f"{source}: record {record_number}: invalid signal_id {signal_id!r}"
+        )
+    if not sender:
+        raise ValueError(f"{source}: record {record_number}: sender is empty")
+    if not message:
+        raise ValueError(f"{source}: record {record_number}: message is empty")
+
+    try:
+        priority = int(row["priority"])
+    except ValueError as error:
+        raise ValueError(
+            f"{source}: record {record_number}: invalid priority {row['priority']!r}"
+        ) from error
+
+    if priority < 0 or priority > 5:
+        raise ValueError(
+            f"{source}: record {record_number}: priority must be 1 through 5"
+        )
+
+    return {
+        "signal_id": signal_id,
+        "sender": sender,
+        "message": message,
+        "priority": priority,
+    }
+
+
+def load_signal_files(paths):
+    """Return accepted signals and detailed rejected-record evidence."""
+    accepted = []
+    rejected = []
+
+    for path in paths:
+        with Path(path).open(encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            if reader.fieldnames != EXPECTED_SIGNAL_HEADERS:
+                raise ValueError(
+                    f"{path.name}: expected headers {EXPECTED_SIGNAL_HEADERS!r}; "
+                    f"got {reader.fieldnames!r}"
+                )
+
+            for record_number, row in enumerate(reader, start=1):
+                try:
+                    signal = parse_signal(row, path.name, record_number)
+                except Exception as error:
+                    rejected.append(
+                        {
+                            "source": path.name,
+                            "record": record_number,
+                            "raw": dict(row),
+                            "reason": str(error),
+                        }
+                    )
+                else:
+                    accepted.append(signal)
+
+    return accepted, rejected
+
+
+def write_signal_archive(path, accepted, rejected):
+    """Safely write deterministic UTF-8 JSON and return destination path."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    archive = {"accepted": accepted, "rejected": rejected}
+    text = json.dumps(archive, indent=2, sort_keys=True)
+    path.write_text(text, encoding="utf-8")
+    return path
+```
+
+## 4. Repair one boundary at a time
+
+Treat the archive as four cooperating subsystems:
+
+| Subsystem | Input | Success | Anticipated failure | Evidence |
+|---|---|---|---|---|
+| discovery | workspace root | sorted intended paths | none in supplied fixture | relative path list |
+| record parser | raw row + lineage | normalized dictionary | contextual `ValueError` | value, message, `__cause__` |
+| batch loader | discovered paths | accepted and rejected lists | record `ValueError` only | counts, raw rows, reasons |
+| writer | lists + destination | verified deterministic JSON | serialization or filesystem failure | parsed output, exact text, final/tmp paths |
+
+Use this order:
+
+1. make discovery select and sort the intended paths;
+2. make identifier recognition consume the whole normalized field;
+3. repair the lower priority boundary while preserving conversion context;
+4. narrow the batch exception handler without losing rejections;
+5. serialize readable Unicode and a final newline;
+6. add temporary creation, parse-back verification, cleanup, and replacement;
+7. run the complete archive twice from a clean state.
+
+The same assertion may reveal a later defect after you fix an earlier one. That
+is progress, not regression.
+
+::: {.callout-warning title="Do not make the tests pass by weakening the mission"}
+Do not edit expected filenames, accepted IDs, rejection counts, or the beacon
+phrase. If a check seems wrong, compare it with the written rule and fixture,
+then record the contradiction before changing an oracle.
+:::
 
 ## 5. Run progressive assertions
 
+The helper below captures an anticipated validation failure and clearly fails
+if the action incorrectly succeeds:
+
 ```python
-lines = [
-    "BK-104|Python Steps|120",
-    "bad-id|Debug Calmly|180",
-    "BK-205|Unicode Notes|95",
-    "BK-301||50",
-    "BK-410|Testing Well|210",
-]
-
-accepted, rejected = convert_lines(lines)
-assert accepted == [
-    {"book_id": "BK-104", "title": "Python Steps", "pages": 120},
-    {"book_id": "BK-205", "title": "Unicode Notes", "pages": 95},
-    {"book_id": "BK-410", "title": "Testing Well", "pages": 210},
-]
-assert [item["line"] for item in rejected] == [lines[1], lines[3]]
-assert all(item["reason"] for item in rejected)
-
-output = write_catalog(Path("catalog.json"), accepted)
-assert json.loads(output.read_text(encoding="utf-8")) == accepted
-assert output.read_text(encoding="utf-8").endswith("\n")
+def captured_value_error(action):
+    """Run action and return its ValueError, or fail if none is raised."""
+    try:
+        action()
+    except ValueError as error:
+        return error
+    raise AssertionError("expected ValueError")
 ```
 
-::: {.callout-warning title="Do not weaken the contract"}
-A broad pattern that accepts malformed records is not a repair. Compare the
-captured groups and converted types with the expected record shape.
-:::
+### Stage A: discover only intended files in stable order
+
+```python
+paths = discover_signal_files(challenge_root)
+relative_paths = [path.relative_to(challenge_root).as_posix() for path in paths]
+
+assert relative_paths == [
+    "incoming/signal-alpha.csv",
+    "incoming/signal-beta.csv",
+]
+```
+
+Run discovery again after creating an old output. Its result must not change:
+
+```python
+old_output = challenge_root / "restored" / "signal-archive.json"
+old_output.write_text("previous good archive\n", encoding="utf-8")
+assert discover_signal_files(challenge_root) == paths
+```
+
+### Stage B: validate one record independently
+
+```python
+valid_row = {
+    "signal_id": "  SIG-4242  ",
+    "sender": "  航海士 月  ",
+    "message": "  HOME  ",
+    "priority": "5",
+}
+valid_snapshot = valid_row.copy()
+
+assert parse_signal(valid_row, "focus.csv", 1) == {
+    "signal_id": "SIG-4242",
+    "sender": "航海士 月",
+    "message": "HOME",
+    "priority": 5,
+}
+assert valid_row == valid_snapshot
+```
+
+The whole identifier field must match:
+
+```python
+identifier_error = captured_value_error(
+    lambda: parse_signal(
+        {
+            "signal_id": "xxSIG-4242yy",
+            "sender": "Luna",
+            "message": "DRIFT",
+            "priority": "2",
+        },
+        "focus.csv",
+        2,
+    )
+)
+assert all(
+    fragment in str(identifier_error)
+    for fragment in ["focus.csv", "record 2", "signal_id"]
+)
+```
+
+Check empty text and both priority failure families:
+
+```python
+empty_sender_error = captured_value_error(
+    lambda: parse_signal(
+        {
+            "signal_id": "SIG-4243",
+            "sender": "   ",
+            "message": "QUIET",
+            "priority": "1",
+        },
+        "focus.csv",
+        3,
+    )
+)
+assert "sender" in str(empty_sender_error)
+
+conversion_error = captured_value_error(
+    lambda: parse_signal(
+        {
+            "signal_id": "SIG-4244",
+            "sender": "Íris",
+            "message": "DELAY",
+            "priority": "urgent",
+        },
+        "focus.csv",
+        4,
+    )
+)
+assert "focus.csv" in str(conversion_error) and "record 4" in str(conversion_error)
+assert isinstance(conversion_error.__cause__, ValueError)
+
+zero_error = captured_value_error(
+    lambda: parse_signal(
+        {
+            "signal_id": "SIG-4245",
+            "sender": "Kai",
+            "message": "AGAIN",
+            "priority": "0",
+        },
+        "focus.csv",
+        5,
+    )
+)
+assert "1 through 5" in str(zero_error)
+assert zero_error.__cause__ is None
+```
+
+### Stage C: preserve CSV records and rejection lineage
+
+```python
+accepted, rejected = load_signal_files(paths)
+
+assert [signal["signal_id"] for signal in accepted] == [
+    "SIG-1001",
+    "SIG-1004",
+    "SIG-2001",
+    "SIG-2004",
+]
+assert [signal["sender"] for signal in accepted] == [
+    "Ana",
+    "Renée",
+    "Noor",
+    "Zoë",
+]
+assert accepted[1]["message"] == "HELLO,\nLUNA"
+assert [signal["priority"] for signal in accepted] == [3, 5, 2, 4]
+assert len(rejected) == 4
+assert [item["source"] for item in rejected] == [
+    "signal-alpha.csv",
+    "signal-alpha.csv",
+    "signal-beta.csv",
+    "signal-beta.csv",
+]
+assert [item["record"] for item in rejected] == [2, 3, 2, 3]
+assert all(
+    set(item) == {"source", "record", "raw", "reason"} and item["reason"]
+    for item in rejected
+)
+assert (
+    rejected[0]["raw"]["signal_id"],
+    rejected[2]["raw"]["priority"],
+) == ("xxSIG-1002yy", "urgent")
+```
+
+The multiline signal is one logical record. Its presence as accepted record 4
+of the alpha file proves physical line breaks were not treated as separate CSV
+records.
+
+### Stage D: let an unexpected parser defect propagate
+
+Temporarily replace the global parser, then restore it even if the experiment
+fails. The batch loader must not quarantine this `RuntimeError`.
+
+```python
+original_parse_signal = parse_signal
+
+
+def crashing_parse_signal(row, source, record_number):
+    raise RuntimeError("simulated navigation-computer defect")
+
+
+parse_signal = crashing_parse_signal
+try:
+    try:
+        load_signal_files(paths)
+    except RuntimeError as error:
+        assert "navigation-computer" in str(error)
+    else:
+        raise AssertionError("unexpected RuntimeError was hidden")
+finally:
+    parse_signal = original_parse_signal
+```
+
+Rerun Stage C after restoring the real parser.
+
+### Stage E: write, parse, and compare the archive
+
+```python
+archive_path = challenge_root / "restored" / "signal-archive.json"
+written_path = write_signal_archive(archive_path, accepted, rejected)
+archive_text = written_path.read_text(encoding="utf-8")
+restored_archive = json.loads(archive_text)
+
+assert written_path == archive_path
+assert restored_archive == {"accepted": accepted, "rejected": rejected}
+assert "Renée" in archive_text
+assert "Zoë" in archive_text
+assert "\\u00e9" not in archive_text.lower()
+assert archive_text.endswith("\n")
+assert not archive_text.endswith("\n\n")
+assert not (archive_path.parent / "signal-archive.json.tmp").exists()
+```
+
+Prove the text is deterministic and a serialization failure preserves the
+previous good artifact:
+
+```python
+first_archive_text = archive_text
+write_signal_archive(archive_path, accepted, rejected)
+assert archive_path.read_text(encoding="utf-8") == first_archive_text
+
+try:
+    write_signal_archive(
+        archive_path,
+        accepted,
+        [{"source": "broken", "raw": {"not-json-compatible"}}],
+    )
+except TypeError:
+    pass
+else:
+    raise AssertionError("expected JSON serialization failure")
+
+assert archive_path.read_text(encoding="utf-8") == first_archive_text
+assert not (archive_path.parent / "signal-archive.json.tmp").exists()
+```
+
+### Stage F: reveal the restored beacon
+
+```python
+beacon_phrase = " ".join(
+    signal["message"].replace("\n", " ") for signal in accepted
+)
+
+assert beacon_phrase == "NOVA HELLO, LUNA SAFE HOME"
+print(beacon_phrase)
+```
+
+Finally, restart the runtime, recreate the workspace, load your repaired five
+functions, and run every stage top to bottom. Confirm the fixture bytes and
+relative input names are unchanged.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
 <summary>Hint 1</summary>
 
-Use `BOOK_PATTERN.fullmatch(line.strip())`, then inspect `match.groupdict()`.
+Map the first failed assertion to one boundary. A reversed relative-path list is
+only discovery. An accepted wrapper ID is only recognition. Priority zero is a
+domain boundary. A swallowed simulated `RuntimeError` points to the loader's
+`except` clause. Escaped names or a missing final newline point to serialization.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Convert the `pages` group with `int`; reject an empty stripped title separately
-so its message identifies the field.
+The relevant operations already appeared in the lessons: `sorted`, regex
+`fullmatch`, an inclusive comparison, `except ValueError`,
+`json.dumps(..., ensure_ascii=False, indent=2, sort_keys=True) + "\n"`, and a
+sibling path whose name ends in `.tmp`. Apply one only where its contract
+belongs.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-In `convert_lines`, catch only the `ValueError` promised by `parse_book` and
-append `{"line": line, "reason": str(error)}`.
+The core repair shapes are:
+
+```python
+paths = sorted((Path(root) / "incoming").glob("signal-*.csv"))
+
+if SIGNAL_ID_PATTERN.fullmatch(signal_id) is None:
+    raise ValueError(...)
+
+if not 1 <= priority <= 5:
+    raise ValueError(...)
+
+try:
+    signal = parse_signal(...)
+except ValueError as error:
+    rejected.append(...)
+
+text = json.dumps(
+    archive,
+    ensure_ascii=False,
+    indent=2,
+    sort_keys=True,
+) + "\n"
+```
+
+Write `text` to the sibling temporary path, load it with `json.load`, compare it
+to `archive`, then call `temporary_path.replace(path)`. Cleanup belongs in an
+exception path that immediately re-raises.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one line that your first pattern classified incorrectly. Record the
-captured groups, expected shape, smallest pattern or validation change, and the
-full clean rerun.
+Preserve one failed stage that changed your understanding. The wrapper-ID check
+or simulated-runtime check makes a useful focused investigation.
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
-|---|---|---|---|---|
-| Which line was wrong? | Which groups or message appeared? | Which rule is too broad or narrow? | What one pattern or validation changed? | Which checks pass now? |
+| Reproduction | Actual evidence | Hypothesis | One change | Focused rerun | Earlier stages | Clean rerun |
+|---|---|---|---|---|---|---|
+| exact call or assertion | path list, value, exception, or text | one mechanism that could be false | one expression or boundary | nearest stage result | pass/fail record | top-to-bottom result |
 
-## 8. Check your understanding
+A strong record is specific:
 
-::: {.quiz-box}
-Answer these questions before recording the challenge. The quiz runs directly
-in your browser.
-:::
+```text
+Reproduction: parse_signal with signal_id "xxSIG-4242yy"
+Expected: contextual ValueError
+Actual: returned a normalized record
+Hypothesis: search accepts a valid substring without checking the complete field.
+Prediction: replacing search with fullmatch rejects the wrapper while SIG-4242 still passes.
+```
+
+Do not write “fixed regex.” Record the input, observed result, contract,
+hypothesis, and regression evidence. Preserve that record beside the final clean
+run.
+
+## 8. Compare with a complete solution
+
+<details class="solution">
+<summary>Show the restored archive implementation after attempting every stage</summary>
+
+```python
+EXPECTED_SIGNAL_HEADERS = ["signal_id", "sender", "message", "priority"]
+SIGNAL_ID_PATTERN = re.compile(r"SIG-[0-9]{4}")
+
+
+def discover_signal_files(root):
+    """Return intended signal CSV paths in deterministic order."""
+    return sorted((Path(root) / "incoming").glob("signal-*.csv"))
+
+
+def parse_signal(row, source, record_number):
+    """Return one normalized signal or raise contextual ValueError."""
+    signal_id = row["signal_id"].strip()
+    sender = row["sender"].strip()
+    message = row["message"].strip()
+
+    if SIGNAL_ID_PATTERN.fullmatch(signal_id) is None:
+        raise ValueError(
+            f"{source}: record {record_number}: invalid signal_id {signal_id!r}"
+        )
+    if not sender:
+        raise ValueError(f"{source}: record {record_number}: sender is empty")
+    if not message:
+        raise ValueError(f"{source}: record {record_number}: message is empty")
+
+    try:
+        priority = int(row["priority"])
+    except ValueError as error:
+        raise ValueError(
+            f"{source}: record {record_number}: invalid priority {row['priority']!r}"
+        ) from error
+
+    if not 1 <= priority <= 5:
+        raise ValueError(
+            f"{source}: record {record_number}: priority must be 1 through 5"
+        )
+
+    return {
+        "signal_id": signal_id,
+        "sender": sender,
+        "message": message,
+        "priority": priority,
+    }
+
+
+def load_signal_files(paths):
+    """Return accepted signals and detailed rejected-record evidence."""
+    accepted = []
+    rejected = []
+
+    for path in paths:
+        with Path(path).open(encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            if reader.fieldnames != EXPECTED_SIGNAL_HEADERS:
+                raise ValueError(
+                    f"{path.name}: expected headers {EXPECTED_SIGNAL_HEADERS!r}; "
+                    f"got {reader.fieldnames!r}"
+                )
+
+            for record_number, row in enumerate(reader, start=1):
+                try:
+                    signal = parse_signal(row, path.name, record_number)
+                except ValueError as error:
+                    rejected.append(
+                        {
+                            "source": path.name,
+                            "record": record_number,
+                            "raw": dict(row),
+                            "reason": str(error),
+                        }
+                    )
+                else:
+                    accepted.append(signal)
+
+    return accepted, rejected
+
+
+def write_signal_archive(path, accepted, rejected):
+    """Safely write deterministic UTF-8 JSON and return destination path."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = path.with_name(path.name + ".tmp")
+    archive = {"accepted": accepted, "rejected": rejected}
+    text = json.dumps(
+        archive,
+        ensure_ascii=False,
+        indent=2,
+        sort_keys=True,
+    ) + "\n"
+
+    try:
+        temporary_path.write_text(text, encoding="utf-8", newline="\n")
+        with temporary_path.open(encoding="utf-8") as handle:
+            restored = json.load(handle)
+        if restored != archive:
+            raise ValueError("temporary archive did not round-trip")
+        temporary_path.replace(path)
+    except Exception:
+        temporary_path.unlink(missing_ok=True)
+        raise
+
+    return path
+```
+
+Why these boundaries matter:
+
+- sorted discovery makes file encounter order reproducible;
+- `fullmatch` protects the complete identifier contract;
+- the inclusive range rejects zero while conversion chaining retains the
+  original `int` failure;
+- the loader continues for anticipated invalid records but cannot hide a
+  programming defect;
+- the writer keeps multilingual names readable, creates exactly one document,
+  verifies parsed values, and replaces only after success; and
+- cleanup catches broadly only to remove its own temporary resource, then
+  immediately re-raises the original failure.
+
+Run every assertion in Section 5 unchanged after loading the solution.
+
+</details>
+
+## 9. Predict a changed mission rule
+
+Asteria's engineers propose archive contract version 3:
+
+1. a third file, `signal-gamma.csv`, may arrive in UTF-8 **without** a BOM;
+2. priority 5 signals must include a non-empty `acknowledged_by` column; and
+3. the final archive must contain a `sources` list and a count by priority.
+
+Before editing code, answer:
+
+- Does `utf-8-sig` already handle a UTF-8 file without a BOM?
+- Which exact header rule changes, and how will older files be versioned?
+- Is `acknowledged_by` a field rule or a cross-field rule?
+- Should counts be derived from accepted records or trusted from input?
+- Which source order is deterministic?
+- Which current assertions remain valuable regression evidence?
+- What malformed gamma record would exercise the new rule without confusing it
+  with CSV syntax?
+
+Write new examples and expected values before implementing. Do not weaken the
+existing ID, sender, message, or priority contracts while adding a field.
+
+## 10. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-files-paths-external-data-challenge",
-  "title": "Messy Reading Log readiness check",
-  "instructions": "Trace the parsing pipeline before choosing.",
+  "title": "Starship archive restoration check",
+  "instructions": "Connect each answer to the fixture, contract, and progressive evidence.",
   "questions": [
     {
-      "id": "fullmatch",
-      "prompt": "Why use `fullmatch` for each record line?",
+      "id": "discovery-order",
+      "prompt": "Why must `discover_signal_files` sort the intended matches?",
       "options": [
-        "It accepts any matching substring.",
-        "It verifies that the entire line follows the record grammar.",
-        "It converts pages to integers.",
-        "It writes JSON automatically."
-      ],
-      "answer_index": 1,
-      "explanation": "A record is valid only when the complete stripped line matches the grammar."
-    },
-    {
-      "id": "stages",
-      "prompt": "Where should `int(pages_text)` happen?",
-      "options": [
-        "Inside the JSON writer",
-        "Before the regular expression",
-        "At the parse/validation boundary after a match",
-        "Only in the rejection report"
-      ],
-      "answer_index": 2,
-      "explanation": "The parser owns conversion from captured text to the canonical record type."
-    },
-    {
-      "id": "rejections",
-      "prompt": "Why preserve the rejected line and reason?",
-      "options": [
-        "To make every line valid",
-        "To avoid writing accepted data",
-        "To replace tests",
-        "To make data loss observable and repairable"
+        "Sorting converts CSV to JSON",
+        "The filesystem always returns reverse order",
+        "It removes the need for validation",
+        "Sorted paths make encounter order and derived output reproducible"
       ],
       "answer_index": 3,
-      "explanation": "A rejection report lets a learner or operator locate and repair source data."
+      "explanation": "A documented deterministic order stabilizes accepted records, rejections, output, and tests."
+    },
+    {
+      "id": "identifier-match",
+      "prompt": "Why does the identifier validator use `fullmatch` rather than `search`?",
+      "options": [
+        "The entire normalized field must satisfy the ID rule, not merely contain a matching substring",
+        "Search cannot find digits",
+        "Fullmatch decodes the CSV file",
+        "It automatically converts priority"
+      ],
+      "answer_index": 0,
+      "explanation": "A wrapper such as xxSIG-4242yy contains a valid-looking fragment but is not a valid complete ID."
+    },
+    {
+      "id": "loader-boundary",
+      "prompt": "What should happen when `parse_signal` unexpectedly raises `RuntimeError`?",
+      "options": [
+        "Store it as an ordinary rejected row",
+        "Delete the source file",
+        "The error should propagate with its traceback",
+        "Write an empty archive"
+      ],
+      "answer_index": 2,
+      "explanation": "The loader is responsible for anticipated validation ValueError instances, not programming defects."
+    },
+    {
+      "id": "archive-unicode",
+      "prompt": "Which combination keeps names such as Renée readable and the archive deterministic?",
+      "options": [
+        "ASCII ignore and random key order",
+        "`repr` followed by append mode",
+        "Manual string concatenation",
+        "`ensure_ascii=False`, deterministic formatting, UTF-8, and a final newline"
+      ],
+      "answer_index": 3,
+      "explanation": "Serialization options and file encoding are separate deliberate parts of the output contract."
+    },
+    {
+      "id": "replacement-order",
+      "prompt": "When should the temporary JSON artifact replace the current archive?",
+      "options": [
+        "Immediately after choosing its filename",
+        "After it has been fully written, parsed back, and compared to the intended value",
+        "Before JSON serialization",
+        "Only after deleting every input"
+      ],
+      "answer_index": 1,
+      "explanation": "Verification precedes replacement so incomplete or invalid output does not become official."
     }
   ]
 }
@@ -210,28 +848,23 @@ in your browser.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
-
-Record completion only when every statement is true:
-
-- [ ] All supplied assertions pass without editing their expected values.
-- [ ] The work runs from a clean notebook state or documented project root.
-- [ ] I can explain the important state changes and boundaries in my own words.
-- [ ] I kept one complete debugging record.
-- [ ] I predicted and verified one controlled modification.
+| Discovery | The unchanged path assertion returns only alpha then beta, even after output exists. |
+| Parsing | Whole-field ID, non-empty text, conversion cause, and priority range checks pass without mutating raw rows. |
+| CSV | The quoted multiline message remains one record and UTF-8/BOM inputs preserve names. |
+| Boundary | Four anticipated rows have source, logical record, raw fields, and reasons; simulated `RuntimeError` propagates. |
+| Output | Parsed JSON equals intended values, Unicode is readable, text is deterministic, exactly one final newline exists, and no `.tmp` remains. |
+| Payoff | Accepted fragments reveal `NOVA HELLO, LUNA SAFE HOME`. |
+| Reasoning | One debugging record connects exact evidence, one hypothesis, one controlled change, and focused/full reruns. |
+| Reproducibility | A clean temporary workspace passes all progressive stages top to bottom. |
 
 This button stores a self-reported marker only in this browser. It does not
-submit the artifact, grade it, verify identity, or issue a certificate.
+submit work, grade it, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -245,7 +878,13 @@ submit the artifact, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows the design without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- Stable discovery, explicit encoding/newline behavior, CSV parsing, and domain
+  validation are distinct contracts in one reproducible import pipeline.
+- Full-field recognition and inclusive range checks prevent plausible-looking
+  invalid values from entering accepted records.
+- Narrow record handling preserves bad-input evidence without hiding developer
+  failures.
+- Deterministic Unicode JSON becomes official only after a temporary artifact
+  parses back to the intended value.
+- The strongest restoration evidence is an unchanged top-to-bottom clean run,
+  the complete rejection trail, and a beacon phrase derived from accepted data.

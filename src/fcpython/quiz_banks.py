@@ -146,7 +146,7 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "files-paths-external-data",
             "Files, Paths, and External Data",
-            "cross file, text, binary, and structured-data boundaries explicitly",
+            "locate files predictably, preserve text, and validate external data",
         ),
         (
             "modules-environments-projects",

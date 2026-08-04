@@ -1,13 +1,16 @@
 ---
-title: CSV, JSON, and YAML Records
+title: Move Records Between CSV, JSON, YAML, and Python
 lesson_id: files-paths-external-data.csv-json-yaml-records
 lesson_order: 30
-description: Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
+description: Choose a structured-text format, use its reader and writer correctly, convert types explicitly, and validate parsed values before trusting them.
 execute:
   echo: true
 categories:
 - python-foundations
 - files-paths-external-data
+- csv
+- json
+- yaml
 order: 30
 colab_notebook: notebooks/courses/python-foundations/units/files-paths-external-data/csv-json-yaml-records.ipynb
 course_id: python-foundations
@@ -15,95 +18,284 @@ unit_id: files-paths-external-data
 unit_number: 9
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner to intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Read and write CSV and JSON data formats.
-- **Practice in:** VS Code, Jupyter, and local files
+- **Level:** Python Foundations
+- **Estimated time:** 5–6 hours
+- **You will learn:** Choose between CSV, JSON, and YAML; handle quoted CSV records and headers; distinguish stream and string APIs; serialize Unicode predictably; use safe YAML loading; and validate structure and types after parsing.
+- **Practice in:** Google Colab, JupyterLab, or a local editor with temporary festival data
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A neighborhood festival receives booth registrations from a spreadsheet, saves
+a processed snapshot for another program, and keeps a small human-edited
+configuration. Those three jobs look like “store some records,” yet they have
+different shapes and different readers:
 
-Read and write CSV and JSON data formats. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+- CSV is naturally tabular and exchanges well with spreadsheets;
+- JSON represents nested combinations of objects, arrays, strings, numbers,
+  booleans, and null; and
+- YAML is convenient for human-edited configuration but has a larger grammar
+  and requires a third-party Python library here.
 
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Structured Files** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
+The format parser answers “Is this valid CSV/JSON/YAML syntax?” Your application
+must still answer “Is this the kind of festival record we accept?” Keep those
+two questions separate.
+
+## 1. Choose a format from the data and its consumers
+
+| Need | CSV | JSON | YAML |
+|---|---|---|---|
+| rows with a shared set of columns | strong fit | possible, more punctuation | possible |
+| deeply nested data | awkward | strong fit | strong fit |
+| spreadsheet exchange | common | less convenient | uncommon |
+| human-edited comments | no standard comment facility | no comments | supported |
+| Python standard library | `csv` | `json` | no; this course uses PyYAML |
+| types after parsing | fields are strings (or `None` in special cases) | defined JSON-to-Python mapping | loader-dependent scalar typing |
+
+A filename suffix communicates a convention; it does not validate the contents.
+Use the format's parser, then validate the resulting Python values.
+
+::: {.callout-tip title="Write the interchange contract down"}
+Record the encoding, newline policy, fields/keys, permitted types, missing-value
+rules, and version expectations. “It's a CSV” is not enough: CSV has dialect,
+header, quoting, and application-schema choices.
 :::
 
-## 2. CSV Files
+## 2. CSV quoting defeats manual comma splitting
 
-Read and write tabular data in comma-separated value files.
+Consider this valid CSV text:
 
-::: {.callout-tip title="A useful analogy—and its limit"}
-A CSV file is a plain-text spreadsheet: each line is a row and commas separate cells.
+```python
+csv_text = '''booth_id,name,description,capacity
+B-101,Café Aurora,"Coffee, tea, and cakes",40
+B-102,月の屋台,"Games on two
+levels",25
+'''
 
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
+for physical_line in csv_text.splitlines():
+    print(physical_line.split(","))
+```
 
-**Contract:** CSV stores rows and columns as text, making it common for spreadsheets and simple datasets.
+The first description contains a quoted comma. The second contains a quoted
+newline, so one logical record spans two physical lines. Splitting strings on
+commas or newlines cannot implement the CSV grammar correctly.
 
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+Use `csv.reader` for positional rows or `csv.DictReader` when the first row names
+fields:
 
 ```python
 import csv
+from io import StringIO
 
-with open("scores.csv", newline="", encoding="utf-8") as file:
-    reader = csv.DictReader(file)
-    for row in reader:
-        print(row["name"], row["score"])
+with StringIO(csv_text, newline="") as handle:
+    reader = csv.DictReader(handle)
+    rows = list(reader)
+    last_line_number = reader.line_num
+
+print(rows[0])
+print(repr(rows[1]["description"]))
+print("last physical line consumed:", last_line_number)
 ```
 
-### Trace it line by line
+Every ordinary CSV field is text. `"40"` is not automatically the integer `40`.
+Convert under an application rule and add context to failure:
 
-1. `import csv` — Python loads the named module or object so later lines can use it.
-2. `with open("scores.csv", newline="", encoding="utf-8") as file:` — Python enters the context, binds its resource if requested, and guarantees the matching exit step.
-3. `reader = csv.DictReader(file)` — Python evaluates the right-hand expression and binds or updates `reader` with the result.
-4. `for row in reader:` — Python takes the next item from the iterable, binds the loop name, and runs the indented body.
-5. `print(row["name"], row["score"])` — Python evaluates the arguments and writes their display form to standard output.
+`csv.reader` is useful when position is the public contract or when a file has
+no header. Dialect options belong to the reader or writer rather than string
+replacement:
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+```python
+semicolon_text = 'B-201;"Tea; coffee";30\n'
 
-::: {.callout-warning title="Common mistake"}
-CSV values are text when read. Convert numeric columns before arithmetic.
-:::
+with StringIO(semicolon_text, newline="") as handle:
+    reader = csv.reader(
+        handle,
+        delimiter=";",
+        quotechar='"',
+        quoting=csv.QUOTE_MINIMAL,
+    )
+    positional_row = next(reader)
 
-### Practice csv files
+assert positional_row == ["B-201", "Tea; coffee", "30"]
+```
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **CSV Files**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+Only choose a non-default delimiter because the producer's dialect specifies
+it. Python cannot infer every CSV variation reliably from one short sample.
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```python
+def parse_capacity(raw_value, source, record_number):
+    """Return a positive integer capacity with source context."""
+    try:
+        capacity = int(raw_value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(
+            f"{source}: record {record_number}: invalid capacity {raw_value!r}"
+        ) from error
+    if capacity <= 0:
+        raise ValueError(
+            f"{source}: record {record_number}: capacity must be positive"
+        )
+    return capacity
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
 
-</details>
+print(parse_capacity(rows[0]["capacity"], "booths.csv", 1))
+```
 
-### Check your understanding
+`reader.line_num` counts physical lines read, which is not always the same as a
+logical record number when quoted fields contain newlines. Track a logical
+record number with `enumerate(reader, start=1)` and include both kinds of context
+when useful.
+
+## 3. Open CSV files with an empty newline setting
+
+The `csv` documentation requires files to be opened with `newline=""`. That
+lets the CSV module, rather than the text layer, own CSV newline handling.
+Continue to state the encoding.
+
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+format_temporary_directory = TemporaryDirectory()
+workspace = Path(format_temporary_directory.name)
+csv_path = workspace / "booths.csv"
+csv_path.write_text(csv_text, encoding="utf-8", newline="")
+
+with csv_path.open(encoding="utf-8", newline="") as handle:
+    reader = csv.DictReader(handle)
+    print("headers:", reader.fieldnames)
+    file_rows = list(reader)
+
+assert len(file_rows) == 2
+```
+
+Validate headers before trusting rows:
+
+```python
+EXPECTED_HEADERS = ["booth_id", "name", "description", "capacity"]
+
+
+def require_csv_headers(fieldnames, source):
+    """Raise when CSV headers do not exactly match the versioned contract."""
+    if fieldnames != EXPECTED_HEADERS:
+        raise ValueError(
+            f"{source}: expected headers {EXPECTED_HEADERS!r}; got {fieldnames!r}"
+        )
+```
+
+An exact-order policy is easy to explain but may be stricter than some systems
+need. Another application might allow any order while rejecting missing and
+extra names separately. Decide deliberately. `DictReader` uses `None` as a key
+for surplus fields and `restval` for missing ones; check rather than assuming a
+short or long row is harmless.
+
+Make those shapes visible with a controlled input:
+
+```python
+uneven_text = "id,name\n1,Ana,EXTRA\n2\n"
+with StringIO(uneven_text, newline="") as handle:
+    uneven_reader = csv.DictReader(handle, restkey="_extra", restval="<missing>")
+    uneven_rows = list(uneven_reader)
+
+assert uneven_rows[0]["_extra"] == ["EXTRA"]
+assert uneven_rows[1]["name"] == "<missing>"
+```
+
+These sentinels expose malformed row shape. They do not decide whether extra or
+missing fields are permitted; validation owns that decision.
+
+Write through `csv.writer` or `csv.DictWriter` so quoting is handled correctly:
+
+```python
+output_path = workspace / "accepted-booths.csv"
+output_rows = [
+    {
+        "booth_id": "B-101",
+        "name": "Café Aurora",
+        "description": "Coffee, tea, and cakes",
+        "capacity": 40,
+    },
+    {
+        "booth_id": "B-102",
+        "name": "月の屋台",
+        "description": "Games on two\nlevels",
+        "capacity": 25,
+    },
+]
+
+with output_path.open("w", encoding="utf-8", newline="") as handle:
+    writer = csv.DictWriter(handle, fieldnames=EXPECTED_HEADERS)
+    writer.writeheader()
+    writer.writerows(output_rows)
+
+with output_path.open(encoding="utf-8", newline="") as handle:
+    restored_rows = list(csv.DictReader(handle))
+
+assert restored_rows[0]["description"] == "Coffee, tea, and cakes"
+assert restored_rows[0]["capacity"] == "40"
+```
+
+The integer became CSV text and comes back as a string. That is expected format
+behavior, not a failed round trip. Define equality in terms of the interchange
+contract, not Python object identity.
+
+`csv.writer` writes sequences, while `DictWriter` selects named fields in its
+declared order. Values are converted to text; notably, the module writes `None`
+as an empty field, which cannot be reversed without a separate missing-value
+contract:
+
+```python
+none_stream = StringIO(newline="")
+csv.writer(none_stream).writerow(["B-999", None, ""])
+print(repr(none_stream.getvalue()))
+```
+
+If `None` and an intentionally empty string mean different things, choose an
+explicit sentinel or schema instead of assuming CSV preserves the distinction.
+
+### Checkpoint: read tables as CSV, not punctuation
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "files-paths-external-data-structured-files-csv-files",
-  "title": "CSV Files checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit9-formats-csv",
+  "title": "Preserve complete CSV records",
+  "instructions": "Choose the behavior required by a robust CSV boundary.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to CSV Files?",
+      "id": "split-failure",
+      "prompt": "Why does `line.split(\",\")` fail as a general CSV parser?",
       "options": [
-        "JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language- independent text format.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
-        "CSV stores rows and columns as text, making it common for spreadsheets and simple datasets."
+        "CSV never contains commas",
+        "Quoted fields can contain commas, quotes, and newlines that belong to one field",
+        "Python strings cannot be split",
+        "CSV is always binary"
+      ],
+      "answer_index": 1,
+      "explanation": "The CSV grammar distinguishes delimiters from quoted content; the module implements that distinction."
+    },
+    {
+      "id": "csv-newline",
+      "prompt": "How should a text file be opened for Python's CSV reader or writer?",
+      "options": [
+        "Without an encoding and with `errors=\"ignore\"`",
+        "In binary append mode",
+        "With `newline=\"\"` and an explicit encoding",
+        "By reading each physical line into `split`"
+      ],
+      "answer_index": 2,
+      "explanation": "The empty newline setting lets the CSV module manage record newlines while encoding remains explicit."
+    },
+    {
+      "id": "csv-types",
+      "prompt": "After `DictReader` reads a field containing `40`, what should application code normally expect?",
+      "options": [
+        "An automatically validated positive integer",
+        "A YAML value",
+        "A file handle",
+        "The string `\"40\"`, which must be converted under a validation rule"
       ],
       "answer_index": 3,
-      "explanation": "CSV stores rows and columns as text, making it common for spreadsheets and simple datasets."
+      "explanation": "CSV fields enter as text; application conversion and domain validation are separate stages."
     }
   ]
 }
@@ -111,75 +303,191 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. JSON Files
+## 4. JSON maps a defined set of values
 
-Use JSON for nested data that can be shared between programs.
+JSON supports objects, arrays, strings, numbers, booleans, and null. Python's
+`json` module maps them approximately as follows:
 
-::: {.callout-tip title="A useful analogy—and its limit"}
-JSON is like a labeled shipping box: programs in different places can read the labels and contents.
+| JSON | Python after loading |
+|---|---|
+| object | `dict` |
+| array | `list` |
+| string | `str` |
+| integer number | `int` |
+| non-integer number | `float` |
+| `true` / `false` | `True` / `False` |
+| `null` | `None` |
 
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language- independent text format.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+`loads` and `dumps` work with strings. `load` and `dump` work with open file-like
+objects:
 
 ```python
 import json
 
-text = '{"name": "Ada", "scores": [90, 95]}'
-data = json.loads(text)
-print(data["scores"][0])
+festival = {
+    "name": "Festival da Lua",
+    "open": True,
+    "visitor_limit": 500,
+    "booths": ["Café Aurora", "月の屋台"],
+    "closed_at": None,
+}
+
+json_text = json.dumps(
+    festival,
+    ensure_ascii=False,
+    indent=2,
+    sort_keys=True,
+)
+restored = json.loads(json_text)
+
+print(json_text)
+assert restored == festival
 ```
 
-### Trace it line by line
+`ensure_ascii=False` keeps non-ASCII characters readable in the Unicode output
+string. Encoding remains a separate file operation; write that string as UTF-8.
+`indent=2` makes a human-readable artifact, while `sort_keys=True` makes object
+key order deterministic for comparisons. Neither option validates the data.
 
-1. `import json` — Python loads the named module or object so later lines can use it.
-2. `text = '{"name": "Ada", "scores": [90, 95]}'` — Python evaluates the right-hand expression and binds or updates `text` with the result.
-3. `data = json.loads(text)` — Python evaluates the right-hand expression and binds or updates `data` with the result.
-4. `print(data["scores"][0])` — Python evaluates the arguments and writes their display form to standard output.
+Some Python values have no direct JSON representation:
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+```python
+from pathlib import Path
 
-::: {.callout-warning title="Common mistake"}
-JSON uses true/false/null, while Python uses True/False/None. Use json.loads instead of hand-parsing.
-:::
+unsupported = {"path": Path("booths.csv"), "tags": {"food", "games"}}
 
-### Practice json files
+try:
+    json.dumps(unsupported)
+except TypeError as error:
+    print(type(error).__name__, error)
+```
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **JSON Files**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+Convert intentionally at your application's boundary—for example, a path to a
+string and a set to a sorted list. Avoid a catch-all `default=str` when it would
+turn unsupported or accidental objects into ambiguous text.
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+Even supported-looking containers can change representation:
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+```python
+round_trip_cases = {
+    "tuple": ("north", "south"),
+    "integer_key": {7: "lucky"},
+    "nested": {"values": [True, None, 3.5]},
+}
 
-</details>
+for name, value in round_trip_cases.items():
+    restored_value = json.loads(json.dumps(value))
+    print(name, repr(value), "->", repr(restored_value))
+```
 
-### Check your understanding
+A tuple returns as a list, and an integer object key returns as the string
+`"7"`, because JSON arrays do not record Python tuple identity and JSON object
+names are strings. Dates and times also need an explicit representation such as
+an ISO 8601 string plus a documented timezone policy. Test semantic round trips
+for the data model your application actually promises.
+
+## 5. JSON parsing failures include location evidence
+
+Malformed JSON raises `JSONDecodeError`, a subclass of `ValueError`:
+
+```python
+broken_json = '{"name": "Aurora", "capacity": 40,}'
+
+try:
+    json.loads(broken_json)
+except json.JSONDecodeError as error:
+    print("message:", error.msg)
+    print("line:", error.lineno)
+    print("column:", error.colno)
+    print("character:", error.pos)
+```
+
+The parser error says where JSON grammar failed. If parsing succeeds but
+`capacity` is negative or `booths` is a string instead of a list, that is an
+application validation failure and should have a different message.
+
+Use one `dump` per complete JSON document. JSON is not a framed protocol, so
+calling `dump` repeatedly on one stream normally concatenates invalid documents:
+
+```python
+from io import StringIO
+
+stream = StringIO()
+json.dump({"id": 1}, stream)
+json.dump({"id": 2}, stream)
+print(stream.getvalue())
+```
+
+If you need a sequence, write one JSON array, adopt a specified format such as
+newline-delimited JSON, or use another framing protocol. State which contract
+readers expect.
+
+Untrusted JSON can consume substantial CPU and memory through huge inputs or
+deep structures. Limit input size at the surrounding system boundary when that
+risk matters; successful JSON grammar parsing is not a resource-safety proof.
+
+Write a complete deterministic document with a final newline, then parse it
+back before publishing:
+
+```python
+archive_path = workspace / "festival.json"
+archive_text = json.dumps(
+    festival,
+    ensure_ascii=False,
+    indent=2,
+    sort_keys=True,
+) + "\n"
+archive_path.write_text(archive_text, encoding="utf-8", newline="\n")
+
+with archive_path.open(encoding="utf-8") as handle:
+    restored_from_file = json.load(handle)
+
+assert restored_from_file == festival
+```
+
+### Checkpoint: make JSON output predictable
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "files-paths-external-data-structured-files-json-files",
-  "title": "JSON Files checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit9-formats-json",
+  "title": "Separate JSON syntax from application rules",
+  "instructions": "Choose the narrow claim supported by the JSON operation.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to JSON Files?",
+      "id": "load-loads",
+      "prompt": "Which statement correctly distinguishes `json.load` and `json.loads`?",
       "options": [
-        "JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language- independent text format.",
-        "CSV stores rows and columns as text, making it common for spreadsheets and simple datasets.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
+        "Both only read CSV",
+        "`load` validates business rules while `loads` does not",
+        "`loads` writes bytes to a path",
+        "`load` reads a file-like object; `loads` parses a string or compatible byte input"
+      ],
+      "answer_index": 3,
+      "explanation": "The names distinguish stream/file-like input from an in-memory serialized value, not different validation levels."
+    },
+    {
+      "id": "unicode-json",
+      "prompt": "What does `ensure_ascii=False` do when dumping JSON to a Python string?",
+      "options": [
+        "It preserves non-ASCII characters visibly instead of escaping every one",
+        "It chooses a filesystem path",
+        "It validates every key",
+        "It turns JSON into YAML"
       ],
       "answer_index": 0,
-      "explanation": "JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language- independent text format."
+      "explanation": "The result is still a Unicode string; choose UTF-8 explicitly when writing it to bytes or a file."
+    },
+    {
+      "id": "json-framing",
+      "prompt": "Why not call `json.dump` repeatedly to append independent objects to one ordinary JSON document?",
+      "options": [
+        "Objects cannot contain numbers",
+        "JSON is not framed, so adjacent dumped values do not form one normal document",
+        "`dump` only accepts CSV rows",
+        "Files can contain only one character"
+      ],
+      "answer_index": 1,
+      "explanation": "Use an array or a separately specified framed format rather than silently concatenating documents."
     }
   ]
 }
@@ -187,56 +495,378 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. YAML and trust boundaries
+## 6. YAML is a third-party, human-edited boundary
 
-YAML is useful for human-edited configuration, but it is not part of Python's
-standard library. Install and import a YAML implementation deliberately; this
-course uses PyYAML's safe interface:
+This course uses PyYAML 6 or newer as a direct project dependency. In a fresh
+standalone notebook, the following hidden setup cell installs it only when it is
+absent:
+
+```python
+#| echo: false
+import importlib.util
+import subprocess
+import sys
+
+if importlib.util.find_spec("yaml") is None:
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "PyYAML>=6"],
+        check=True,
+    )
+```
+
+Now load the public API:
 
 ```python
 import yaml
-
-settings_text = """
-course: Python Foundations
-units:
-    - syntax
-    - values
-published: false
-"""
-
-settings = yaml.safe_load(settings_text)
-assert settings["units"] == ["syntax", "values"]
-assert settings["published"] is False
 ```
 
-Line by line:
+For untrusted or ordinary configuration, use `safe_load`, not a loader capable
+of constructing arbitrary Python objects:
 
-1. `import yaml` loads the third-party PyYAML package; it is not the format
-   itself and not a built-in module.
-2. The triple-quoted string is external text, not yet trusted Python data.
-3. `safe_load` parses ordinary YAML values without enabling arbitrary Python
-   object construction.
-4. The assertions verify the expected shape and types. Parsing success still
-   does not prove that every required application field is present.
+```python
+yaml_text = (
+    "festival_name: Festival da Lua\n"
+    "open: true\n"
+    "visitor_limit: 500\n"
+    "theme:\n"
+    "  primary_color: indigo\n"
+    "  languages:\n"
+    "    - pt\n"
+    "    - ja\n"
+)
 
-::: {.callout-warning title="Never use an unsafe loader on untrusted YAML"}
-Treat YAML as an input boundary. Use a safe loader, validate the parsed shape,
-and reject unexpected tags, fields, and types with useful source context.
-:::
+configuration = yaml.safe_load(yaml_text)
+print(configuration)
+assert configuration["open"] is True
+```
 
-## 5. Integrate the lesson
+Safe loading restricts object construction. It does **not** prove that the
+result is a mapping, that required keys exist, or that values satisfy festival
+rules. Even an empty YAML document can parse to `None`.
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+```python
+def validate_configuration(value):
+    """Return a small validated festival configuration."""
+    if not isinstance(value, dict):
+        raise ValueError("configuration must be a mapping")
 
-## 6. Key points
+    required = {"festival_name", "open", "visitor_limit", "theme"}
+    missing = required - value.keys()
+    extra = value.keys() - required
+    if missing:
+        raise ValueError(f"missing configuration keys: {sorted(missing)!r}")
+    if extra:
+        raise ValueError(f"unexpected configuration keys: {sorted(extra)!r}")
+    if not isinstance(value["festival_name"], str) or not value["festival_name"].strip():
+        raise ValueError("festival_name must be non-empty text")
+    if type(value["open"]) is not bool:
+        raise ValueError("open must be a boolean")
+    if not isinstance(value["visitor_limit"], int) or isinstance(
+        value["visitor_limit"], bool
+    ):
+        raise ValueError("visitor_limit must be an integer")
+    if value["visitor_limit"] <= 0:
+        raise ValueError("visitor_limit must be positive")
+    if not isinstance(value["theme"], dict):
+        raise ValueError("theme must be a mapping")
 
-- **CSV Files:** CSV stores rows and columns as text, making it common for spreadsheets and simple datasets.
-- **JSON Files:** JSON stores dictionaries, lists, strings, numbers, booleans, and null in a language- independent text format.
-- **YAML records:** YAML needs a third-party parser, safe loading, and the same
-  explicit shape and domain validation as any external format.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+    return value
 
-## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+validated_configuration = validate_configuration(configuration)
+```
+
+The explicit `type(... ) is not bool` check matters because `bool` is a subclass
+of `int` in Python. Domain contracts sometimes need stricter distinctions than
+`isinstance(value, int)` alone.
+
+Write with `safe_dump`:
+
+```python
+yaml_output = yaml.safe_dump(
+    validated_configuration,
+    allow_unicode=True,
+    sort_keys=True,
+)
+print(yaml_output)
+assert validate_configuration(yaml.safe_load(yaml_output)) == configuration
+```
+
+`allow_unicode=True` keeps multilingual text readable. YAML formatting and
+scalar interpretation can vary by library and version, so compare validated
+values rather than requiring one hand-written spacing style unless textual form
+is itself the contract.
+
+Inspect scalar typing rather than assuming every unquoted value remains text:
+
+```python
+scalar_sample = yaml.safe_load(
+    "count: 7\nratio: 1.5\nactive: true\nmissing: null\nlabel: '007'\n"
+)
+
+assert scalar_sample == {
+    "count": 7,
+    "ratio": 1.5,
+    "active": True,
+    "missing": None,
+    "label": "007",
+}
+```
+
+Quoting `007` preserves it as a label instead of inviting numeric
+interpretation. PyYAML can also construct date-like scalars as date objects.
+Treat such behavior as part of the chosen loader/version contract, and validate
+types immediately after loading.
+
+## 7. Compare the same record across format boundaries
+
+Suppose one accepted booth is:
+
+```python
+comparison_record = {
+    "booth_id": "B-101",
+    "name": "Café Aurora",
+    "capacity": 40,
+    "features": ["tea", "games"],
+}
+```
+
+CSV needs a policy for turning `features` into one cell or a related table.
+JSON and YAML can represent the list directly. YAML can carry human comments,
+but those comments normally do not survive a `safe_load`/`safe_dump` value
+round trip. JSON is broadly interoperable but deliberately has no comment
+syntax. No format preserves Python classes, aliases, validators, or business
+meaning automatically.
+
+Use this decision record before implementation:
+
+| Question | Example answer for the festival |
+|---|---|
+| Who produces and consumes it? | spreadsheet staff produce booth rows; programs consume the archive |
+| What is the natural shape? | flat rows for intake, nested values for snapshot |
+| Must people edit it? | YAML configuration is reviewed by coordinators |
+| Which types must survive? | capacity is validated as integer; feature order is meaningful |
+| How is invalid data represented? | raw CSV row plus source, logical record, and reason |
+| What makes output reproducible? | stable source order, key order, field order, encoding, and newline policy |
+
+## 8. Build one festival conversion pipeline
+
+Create three files in a temporary workspace:
+
+- `incoming/booths.csv` with a quoted comma, a quoted multiline description,
+  one invalid capacity, and multilingual names;
+- `config/festival.yml` with a positive visitor limit and theme; and
+- `output/festival.json`, which does not exist yet.
+
+Build functions with these responsibilities:
+
+```python
+def load_booths(path):
+    """Return (accepted, rejected) booth records from a UTF-8 CSV file."""
+    # Validate headers, enumerate logical records, and convert capacity.
+    ...
+
+
+def load_festival_configuration(path):
+    """Return validated configuration loaded with yaml.safe_load."""
+    ...
+
+
+def build_festival_archive(configuration, booths):
+    """Return the JSON-compatible archive value."""
+    return {"configuration": configuration, "booths": booths}
+```
+
+Requirements:
+
+1. Open CSV with `encoding="utf-8"` and `newline=""`.
+2. Require the exact header contract.
+3. Preserve the raw CSV row and a useful reason for each rejected record.
+4. Do not catch unexpected exceptions from programming defects.
+5. Load YAML safely, then validate its Python structure.
+6. Dump one JSON document with visible Unicode, indentation, deterministic keys,
+   and one final newline.
+7. Parse the output back and compare it to the Python archive.
+8. Rerun the pipeline and prove the serialized text is identical.
+
+<details class="solution">
+<summary>Compare the boundary order after completing your version</summary>
+
+```python
+def load_booths(path):
+    accepted = []
+    rejected = []
+    path = Path(path)
+    with path.open(encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        require_csv_headers(reader.fieldnames, path.name)
+        for record_number, row in enumerate(reader, start=1):
+            try:
+                booth_id = row["booth_id"].strip()
+                name = row["name"].strip()
+                if not booth_id or not name:
+                    raise ValueError("booth_id and name must be non-empty")
+                capacity = parse_capacity(
+                    row["capacity"], path.name, record_number
+                )
+            except ValueError as error:
+                rejected.append(
+                    {
+                        "source": path.name,
+                        "record": record_number,
+                        "raw": dict(row),
+                        "reason": str(error),
+                    }
+                )
+            else:
+                accepted.append(
+                    {
+                        "booth_id": booth_id,
+                        "name": name,
+                        "description": row["description"],
+                        "capacity": capacity,
+                    }
+                )
+    return accepted, rejected
+
+
+def load_festival_configuration(path):
+    with Path(path).open(encoding="utf-8") as handle:
+        return validate_configuration(yaml.safe_load(handle))
+```
+
+Here is a complete caller using a fresh fixture and a parse-back check:
+
+```python
+integration_root = workspace / "integration"
+incoming = integration_root / "incoming"
+configuration_directory = integration_root / "config"
+output_directory = integration_root / "output"
+for directory in [incoming, configuration_directory, output_directory]:
+    directory.mkdir(parents=True, exist_ok=True)
+
+(incoming / "booths.csv").write_text(
+    (
+        "booth_id,name,description,capacity\n"
+        'B-101,Café Aurora,"Coffee, tea",40\n'
+        'B-102,月の屋台,"Games on two\nlevels",25\n'
+        "B-103,Broken Booth,Invalid capacity,many\n"
+    ),
+    encoding="utf-8",
+    newline="",
+)
+(configuration_directory / "festival.yml").write_text(
+    yaml_text,
+    encoding="utf-8",
+)
+
+accepted_booths, rejected_booths = load_booths(incoming / "booths.csv")
+festival_configuration = load_festival_configuration(
+    configuration_directory / "festival.yml"
+)
+complete_archive = {
+    **build_festival_archive(festival_configuration, accepted_booths),
+    "rejected": rejected_booths,
+}
+complete_text = json.dumps(
+    complete_archive,
+    ensure_ascii=False,
+    indent=2,
+    sort_keys=True,
+) + "\n"
+complete_path = output_directory / "festival.json"
+complete_path.write_text(complete_text, encoding="utf-8", newline="\n")
+
+with complete_path.open(encoding="utf-8") as handle:
+    parsed_archive = json.load(handle)
+
+assert parsed_archive == complete_archive
+assert len(parsed_archive["booths"]) == 2
+assert len(parsed_archive["rejected"]) == 1
+assert "Café Aurora" in complete_text
+assert complete_text.endswith("\n")
+```
+
+The caller keeps CSV parsing, YAML configuration validation, archive assembly,
+and JSON verification visibly separate. Lesson 2's temporary replacement helper
+can guard the local text write; the challenge combines JSON parse-back
+verification with replacement directly.
+
+</details>
+
+### Checkpoint: choose the complete format boundary
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit9-formats-integration",
+  "title": "Parse safely, then validate",
+  "instructions": "Choose what each layer can actually guarantee.",
+  "questions": [
+    {
+      "id": "safe-yaml",
+      "prompt": "Which operation should load an ordinary PyYAML configuration from an untrusted or external source?",
+      "options": [
+        "`yaml.load` with an arbitrary object loader",
+        "`eval` on the YAML text",
+        "`yaml.safe_load`, followed by application validation",
+        "Manual splitting on colons"
+      ],
+      "answer_index": 2,
+      "explanation": "Safe loading restricts construction; validation still must check the resulting value's structure and domain rules."
+    },
+    {
+      "id": "parser-success",
+      "prompt": "A JSON document parses successfully but contains `\"visitor_limit\": -5`. What has been proven?",
+      "options": [
+        "Only that the document follows JSON syntax; the domain rule can still reject it",
+        "That every festival accepts negative limits",
+        "That the file is CSV",
+        "That no further validation is needed"
+      ],
+      "answer_index": 0,
+      "explanation": "Grammar and application validity are separate contracts."
+    },
+    {
+      "id": "format-choice",
+      "prompt": "Which combination best fits spreadsheet booth rows, a nested program snapshot, and human-edited configuration?",
+      "options": [
+        "YAML, YAML, YAML only because one format is always best",
+        "Raw comma splitting, repr, and eval",
+        "JSON, CSV, then arbitrary Python code",
+        "CSV for rows, JSON for the snapshot, and safely loaded YAML for configuration"
+      ],
+      "answer_index": 3,
+      "explanation": "Choose from shape and consumers; each boundary still needs an explicit schema and validation policy."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Key points for structured records
+
+- CSV, JSON, and YAML solve overlapping but different interchange problems;
+  choose from data shape, producers, consumers, and trust boundary.
+- Use the CSV module for quoting and multiline records, open files with
+  `newline=""`, validate headers, and convert field types explicitly.
+- `json.loads`/`dumps` work with in-memory serialized values; `load`/`dump` work
+  with file-like objects. JSON parsing is not domain validation or framing.
+- Use `ensure_ascii=False` plus UTF-8 for readable multilingual JSON, and select
+  formatting or key order when deterministic output matters.
+- Use PyYAML's `safe_load` and `safe_dump`, but validate the resulting Python
+  value just as carefully as data from another parser.
+- Preserve source, logical record, raw values, and reason for anticipated
+  rejected data. Let unexpected programming defects remain visible.
+
+## 10. References and next step
+
+- [Python documentation: CSV file reading and writing](https://docs.python.org/3/library/csv.html)
+- [Python documentation: JSON encoding and decoding](https://docs.python.org/3/library/json.html)
+- [PyYAML documentation: safe loading and dumping](https://pyyaml.org/wiki/PyYAMLDocumentation)
+
+Next, strengthen the validation stage. You will turn messy text into accepted
+records or explainable rejections by separating normalization, recognition,
+extraction, conversion, structural rules, and domain rules.
+
+<!-- fcpython-chapter-lab: end -->

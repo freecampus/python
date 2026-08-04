@@ -1,13 +1,15 @@
 ---
-title: Text Patterns and Validation Pipelines
+title: Turn Messy Text into Trustworthy Records
 lesson_id: files-paths-external-data.text-patterns-validation-pipelines
 lesson_order: 40
-description: Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
+description: Recognize and extract text patterns, validate structure and domain rules, and preserve accepted records, rejected evidence, and source lineage.
 execute:
   echo: true
 categories:
 - python-foundations
 - files-paths-external-data
+- regular-expressions
+- validation
 order: 40
 colab_notebook: notebooks/courses/python-foundations/units/files-paths-external-data/text-patterns-validation-pipelines.ipynb
 course_id: python-foundations
@@ -16,157 +18,232 @@ unit_number: 9
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Separate parsing, structural validation, domain rules, and error reporting.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 4–5 hours
+- **You will learn:** Prefer simple string operations when they fit, read a practical regular-expression subset, distinguish recognition from extraction, validate records in stages, choose fail-fast or error accumulation, and keep input lineage through a complete pipeline.
+- **Practice in:** Google Colab, JupyterLab, or a local editor with messy beacon records
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A radio observatory receives beacon lines written by several generations of
+equipment. A clean line looks like this:
 
-Valid CSV or JSON syntax does not prove records contain required fields or valid values. A pipeline should reject problems at the earliest boundary that understands them and preserve enough context to repair source data.
-
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
-:::
-
-## 2. Read and trace a complete case
-
-```python
-def validate_record(record, row):
-    errors = []
-    if not record.get("name"):
-        errors.append(f"row {row}: missing name")
-    if not isinstance(record.get("minutes"), int):
-        errors.append(f"row {row}: minutes must be integer")
-    return errors
+```text
+BCN-2042 | Europa Relay | temperature=18.5; battery=87
 ```
 
-### What Python does
+Other lines have surrounding spaces, an identifier with extra characters, a
+missing station name, a nonnumeric temperature, or a battery outside 0–100. A
+single regular expression can recognize punctuation, but it should not be asked
+to make every domain decision. This lesson builds a sequence whose stages can be
+explained and tested independently.
 
-1. Parsing has already produced a record.
-2. Each rule adds a precise contextual message.
-3. The caller can fail fast or collect rejected rows deliberately.
+## 1. Start with the simplest string operations that fit
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
-
-```python
-try:
-    transformed = transfrom(record)
-except Exception:
-    rejected.append(record)
-```
-
-A focused repair is:
+For exact prefixes, suffixes, delimiters, or whitespace policy, ordinary string
+methods are usually clearer than a regular expression:
 
 ```python
-errors = validate_record(record, row)
-if errors:
-    rejected.append((record, errors))
-else:
-    transformed = transform(record)
+raw_line = "  BCN-2042 | Europa Relay | temperature=18.5; battery=87  "
+line = raw_line.strip()
+
+print(line.startswith("BCN-"))
+print(line.count("|"))
+print([part.strip() for part in line.split("|")])
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+This works if the contract is exactly three `|`-separated fields and the last
+field has a separately parsed structure. It becomes awkward if whitespace can
+vary within the punctuation or several identifier families are allowed.
 
-## 4. Practice from trace to transfer
+Use a regular expression when you need a compact **pattern language**, not
+because it looks more advanced.
 
-1. Design stages for a score import.
-2. Choose fail-fast or collect-errors for two scenarios.
-3. Partition valid records and detailed rejections.
+| Need | Clear first choice |
+|---|---|
+| exact prefix or suffix | `startswith`, `endswith` |
+| one literal delimiter | `split` or `partition` |
+| remove known surrounding whitespace | `strip` under a stated policy |
+| fixed character classes and repeated structure | regular expression |
+| a full structured interchange format | its parser, not a regex |
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+CSV quoting and JSON nesting are grammars with dedicated parsers. A regex should
+not replace them.
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+For a small, owned delimiter grammar, write the contract directly:
 
-</details>
+```python
+def split_beacon_fields(raw_line):
+    """Return three stripped beacon fields from an exact pipe-delimited line."""
+    parts = [part.strip() for part in raw_line.strip().split("|")]
+    if len(parts) != 3:
+        raise ValueError(f"expected three pipe-delimited fields; got {len(parts)}")
+    beacon_id, station, readings = parts
+    if not all([beacon_id, station, readings]):
+        raise ValueError("beacon fields must be non-empty")
+    return beacon_id, station, readings
 
-## 5. Use regular expressions inside a staged pipeline
 
-A regular expression can recognize a constrained text shape, but it should not
-also normalize records, choose business rules, and format output. Keep those
-stages visible:
+assert split_beacon_fields(
+    "BCN-2042 | Europa Relay | temperature=18.5; battery=87"
+) == ("BCN-2042", "Europa Relay", "temperature=18.5; battery=87")
+```
+
+This parser is easier to change if the only syntax is three pipe-separated
+fields. The later regular expression is justified by the more detailed numeric
+grammar. Comparing the two implementations is a design exercise, not a contest
+to use the most punctuation.
+
+## 2. Read a useful regular-expression subset
+
+Python's `re` module compiles a pattern and applies it to text. Raw string
+literals such as `r"\d"` keep backslashes from being interpreted first by the
+Python string-literal layer.
 
 ```python
 import re
 
-CODE_PATTERN = re.compile(r"^(?P<prefix>[A-Z]{2})-(?P<number>\d{4})$")
+identifier_pattern = re.compile(r"BCN-\d{4}")
 
-
-def parse_code(text):
-    """Return normalized code parts or one validation message."""
-    normalized = text.strip().upper()
-    match = CODE_PATTERN.fullmatch(normalized)
-    if match is None:
-        return None, f"invalid code: {text!r}"
-    return match.groupdict(), None
-
-
-parts, error = parse_code(" py-0042 ")
-assert parts == {"prefix": "PY", "number": "0042"}
-assert error is None
+for candidate in ["BCN-2042", "BCN-42", "xxBCN-2042yy"]:
+    print(candidate, bool(identifier_pattern.fullmatch(candidate)))
 ```
 
-The pipeline is normalize, recognize, extract, validate domain rules, and then
-transform. `fullmatch` is intentional: a valid substring inside unrelated text
-does not satisfy the whole-field contract. Named groups retain meaning better
-than unexplained numeric positions.
+Read `BCN-\d{4}` from left to right:
 
-::: {.callout-tip title="Prefer ordinary string operations when they are clear"}
-Use `split`, `startswith`, membership, or direct parsing for simple formats.
-Reach for a regular expression when one declarative pattern makes the accepted
-language easier—not harder—to explain and test.
+- `BCN-` matches those literal characters;
+- `\d` matches a Unicode decimal digit by default; and
+- `{4}` requires exactly four repetitions of the preceding token.
+
+If the external contract specifically means ASCII digits, express that as
+`[0-9]{4}` or use an ASCII flag. A pattern should encode the real contract, not
+a visually similar approximation.
+
+Useful pieces for this unit:
+
+| Pattern piece | Meaning | Example |
+|---|---|---|
+| `.` | almost any single character | `A.B` |
+| `[A-Z]` | one character in the range | uppercase ASCII letter |
+| `[^|]` | one character except `|` | field content |
+| `\s` | whitespace character | space, tab, or newline |
+| `?` | zero or one repetition | optional sign |
+| `*` | zero or more repetitions | possibly empty content |
+| `+` | one or more repetitions | non-empty content |
+| `{2,4}` | from two through four | bounded repetition |
+| `(one|two)` | alternatives | either literal choice |
+| `(...)` | capturing group | extract by position |
+| `(?P<name>...)` | named group | extract by meaning |
+| `^` and `$` | beginning and end anchors | whole-line intent |
+
+Raw strings do not make a pattern automatically correct. Compile small pieces,
+try accepted and rejected examples, and explain each token.
+
+## 3. Choose `fullmatch`, `search`, or extraction deliberately
+
+Three operations answer different questions:
+
+```python
+pattern = re.compile(r"BCN-[0-9]{4}")
+text = "alert BCN-2042 received"
+
+print("fullmatch:", pattern.fullmatch(text))
+print("search:", pattern.search(text).group())
+```
+
+- `fullmatch` asks whether the *entire* string satisfies the pattern;
+- `search` scans for a match anywhere; and
+- `match` starts at the beginning but can leave an unmatched suffix; and
+- `finditer` yields repeated matches with positions.
+
+For a record identifier field, use `fullmatch`; accepting
+`"xxBCN-2042yy"` because it contains a valid-looking fragment violates the field
+contract. For scanning a log message that may mention an identifier, `search`
+is appropriate.
+
+Named groups turn successful recognition into labeled extraction:
+
+```python
+BEACON_PATTERN = re.compile(
+    r"(?P<beacon_id>BCN-[0-9]{4})\s*\|\s*"
+    r"(?P<station>[^|]+)\s*\|\s*"
+    r"temperature=(?P<temperature>[+-]?[0-9]+(?:\.[0-9]+)?);\s*"
+    r"battery=(?P<battery>[0-9]+)"
+)
+
+candidate = "BCN-2042 | Europa Relay | temperature=18.5; battery=87"
+match = BEACON_PATTERN.fullmatch(candidate)
+assert match is not None
+print(match.groupdict())
+```
+
+The pattern recognizes syntax and extracts **strings**. It does not prove that
+battery 187 is reasonable, temperature is within sensor limits, or the station
+is registered.
+
+::: {.concept-diagram}
+A trustworthy pipeline keeps boundary responsibilities separate and records
+where a candidate leaves the accepted path.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  raw["Raw text + source"] --> normalize["Normalize permitted whitespace"]
+  normalize --> recognize["Recognize and extract"]
+  recognize --> convert["Convert field types"]
+  convert --> validate["Validate structure and domain"]
+  validate -->|valid| accepted["Accepted + lineage"]
+  validate -->|anticipated failure| rejected["Rejected + raw + reason"]
+```
+
+Unexpected programming exceptions leave the pipeline rather than being relabeled
+as bad input.
 :::
 
-## 6. Check your understanding
+### Checkpoint: use patterns for the right question
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "files-paths-external-data-validation-pipelines",
-  "title": "Validation Pipelines checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit9-validation-patterns",
+  "title": "Match the operation to the text question",
+  "instructions": "Choose the narrowest tool that expresses the stated contract.",
   "questions": [
     {
-      "id": "parse",
-      "prompt": "What does valid JSON prove?",
+      "id": "simple-delimiter",
+      "prompt": "A trusted line always contains exactly one literal `=` separating a key and value. What is a clear first tool?",
       "options": [
-        "All fields valid",
-        "Syntax is valid",
-        "All numbers positive",
-        "Schema complete"
+        "`partition(\"=\")` plus explicit checks",
+        "A CSV parser with an invented dialect",
+        "`eval`",
+        "A regex that accepts every character"
       ],
-      "answer_index": 1,
-      "explanation": "Parsing and domain validation differ."
+      "answer_index": 0,
+      "explanation": "A literal single delimiter is clearly expressed by `partition`; validate the missing or extra delimiter policy separately."
     },
     {
-      "id": "message",
-      "prompt": "What makes an error actionable?",
+      "id": "id-whole-field",
+      "prompt": "Which operation should validate that an entire identifier field is exactly `BCN-` plus four digits?",
       "options": [
-        "“bad data”",
-        "A broad catch",
-        "Row/field and violated rule",
-        "A screenshot"
+        "`search`, because extra prefixes should be ignored",
+        "`splitlines`",
+        "`fullmatch` with the identifier pattern",
+        "`json.loads`"
       ],
       "answer_index": 2,
-      "explanation": "Context identifies the repair."
+      "explanation": "The whole field is the contract; a substring match would accept invalid surrounding characters."
     },
     {
-      "id": "broad",
-      "prompt": "Why avoid broad catch around transforms?",
+      "id": "regex-limit",
+      "prompt": "What has a successful named-group regex extraction of `battery=187` proven?",
       "options": [
-        "It uses memory",
-        "It changes JSON",
-        "It is slow",
-        "It hides programming defects"
+        "That the battery is physically safe",
+        "That the text matches the represented syntax; range validation is still needed",
+        "That every required record field exists",
+        "That no conversion can fail"
       ],
-      "answer_index": 3,
-      "explanation": "Unexpected defects must remain visible."
+      "answer_index": 1,
+      "explanation": "Recognition and extraction precede type conversion and domain validation."
     }
   ]
 }
@@ -174,16 +251,446 @@ language easier—not harder—to explain and test.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 7. Key points
+## 4. Normalize only what the contract allows
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Keep regular-expression recognition as one explicit pipeline stage and test
-  its ordinary, boundary, and rejected inputs.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+Normalization makes equivalent permitted inputs share one representation. It
+should be **idempotent**: applying it twice yields the same result as once.
 
-## References
+```python
+def normalize_beacon_line(raw_line):
+    """Remove surrounding whitespace while preserving internal field text."""
+    return raw_line.strip()
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+
+sample = "  BCN-2042 | Europa Relay | temperature=18.5; battery=87  "
+once = normalize_beacon_line(sample)
+twice = normalize_beacon_line(once)
+assert twice == once
+```
+
+Do not automatically collapse all internal whitespace, lowercase display names,
+or delete punctuation. Those transformations may change meaning or destroy
+forensic evidence. Preserve the original alongside any comparison form.
+
+A record can carry lineage explicitly:
+
+```python
+candidate = {
+    "source": "receiver-europa.log",
+    "record_number": 17,
+    "raw": sample,
+    "normalized": normalize_beacon_line(sample),
+}
+```
+
+Once data has passed through several functions, the source and record number are
+still available for explanations.
+
+## 5. Convert values with chained context
+
+After a successful match, convert fields under narrow exception boundaries:
+
+```python
+def convert_beacon_groups(groups, source, record_number):
+    """Convert extracted beacon strings into typed values."""
+    try:
+        temperature = float(groups["temperature"])
+    except ValueError as error:
+        raise ValueError(
+            f"{source}: record {record_number}: invalid temperature "
+            f"{groups['temperature']!r}"
+        ) from error
+
+    try:
+        battery = int(groups["battery"])
+    except ValueError as error:
+        raise ValueError(
+            f"{source}: record {record_number}: invalid battery "
+            f"{groups['battery']!r}"
+        ) from error
+
+    return {
+        "beacon_id": groups["beacon_id"],
+        "station": groups["station"].strip(),
+        "temperature": temperature,
+        "battery": battery,
+    }
+```
+
+The regex already constrains these particular numeric strings, but keeping
+conversion checks close to the conversion makes the function robust if it is
+later reused with groups from another source. Exception chaining preserves the
+original failure.
+
+## 6. Structural, field, and cross-field rules are distinct
+
+A useful validator checks increasingly domain-specific claims:
+
+```python
+KNOWN_STATIONS = {"Europa Relay", "Luna South", "Mars Ridge"}
+
+
+def validate_beacon(record):
+    """Return record after checking field and cross-field rules."""
+    required = {"beacon_id", "station", "temperature", "battery"}
+    missing = required - record.keys()
+    extra = record.keys() - required
+    if missing:
+        raise ValueError(f"missing fields: {sorted(missing)!r}")
+    if extra:
+        raise ValueError(f"unexpected fields: {sorted(extra)!r}")
+
+    if not record["station"]:
+        raise ValueError("station must be non-empty")
+    if record["station"] not in KNOWN_STATIONS:
+        raise ValueError(f"unknown station: {record['station']!r}")
+    if not -120 <= record["temperature"] <= 80:
+        raise ValueError("temperature outside sensor range -120..80")
+    if not 0 <= record["battery"] <= 100:
+        raise ValueError("battery must be between 0 and 100")
+    if record["temperature"] < -80 and record["battery"] < 10:
+        raise ValueError("extreme cold reports require battery of at least 10")
+
+    return record
+```
+
+The sets of keys are structural rules. Station membership, ranges, and the
+relationship between cold temperature and battery are domain rules. A program
+can accumulate several messages for a form-like user experience, or fail at the
+first violation for a simple import API.
+
+Some rules apply across records rather than inside one record. Duplicate IDs
+need batch state:
+
+```python
+def require_unique_beacon_ids(records):
+    """Return records after rejecting the first duplicated beacon identifier."""
+    seen = set()
+    for record in records:
+        beacon_id = record["beacon_id"]
+        if beacon_id in seen:
+            raise ValueError(f"duplicate beacon_id: {beacon_id!r}")
+        seen.add(beacon_id)
+    return records
+
+
+unique_preview = [
+    {"beacon_id": "BCN-1001"},
+    {"beacon_id": "BCN-1002"},
+]
+assert require_unique_beacon_ids(unique_preview) is unique_preview
+```
+
+Choose whether a duplicate rejects only the later record, both records, or the
+whole batch. That decision requires source order and ownership policy; a
+single-record regex cannot make it.
+
+Choose and document one style:
+
+```python
+def collect_battery_errors(value):
+    """Return all independently checkable battery validation messages."""
+    errors = []
+    if not isinstance(value, int) or isinstance(value, bool):
+        errors.append("battery must be an integer")
+        return errors
+    if value < 0:
+        errors.append("battery cannot be negative")
+    if value > 100:
+        errors.append("battery cannot exceed 100")
+    return errors
+```
+
+The early return avoids meaningless numeric comparisons after a type failure.
+Do not continue merely to produce more messages when later rules require a
+valid earlier stage.
+
+Use a rule table before writing a large validator. It exposes dependencies and
+prevents an error message from claiming more than has been checked:
+
+| Order | Rule | Depends on | Failure category |
+|---:|---|---|---|
+| 1 | value is a mapping with exact keys | parsed value | structure |
+| 2 | identifier, station, and numeric fields have expected basic types | structure | field type |
+| 3 | identifier follows the complete pattern | text identifier | recognition |
+| 4 | station is known and ranges are satisfied | converted fields | domain |
+| 5 | extreme cold has sufficient battery | valid temperature and battery | cross-field |
+| 6 | identifier has not appeared earlier | accepted batch state | cross-record |
+
+Independent field rules can accumulate messages. Dependent rules should wait.
+For example, after `battery` fails the integer type check, “battery exceeds
+100” is not a second useful diagnosis; comparison is not yet meaningful. That
+is why `collect_battery_errors` returns immediately after the type failure.
+
+Error accumulation also changes the return contract. A function that raises one
+`ValueError` cannot simultaneously return a list of all field errors. Choose a
+consistent API such as `validate_or_raise(record)` for fail-fast code or
+`validation_messages(record)` returning a list for batch feedback, and name it
+so callers know which behavior to expect.
+
+### Checkpoint: keep validation stages explainable
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit9-validation-rules",
+  "title": "Place each rule in the right stage",
+  "instructions": "Choose the design that preserves meaning and evidence.",
+  "questions": [
+    {
+      "id": "lineage",
+      "prompt": "Why carry source and logical record number beside a candidate?",
+      "options": [
+        "To make strings encode themselves",
+        "To avoid all validation",
+        "To replace the raw input",
+        "To connect an accepted or rejected result back to where it came from"
+      ],
+      "answer_index": 3,
+      "explanation": "Lineage makes diagnostics and audits actionable even after several transformation stages."
+    },
+    {
+      "id": "idempotent-normalization",
+      "prompt": "What does idempotent normalization mean?",
+      "options": [
+        "Applying it twice produces the same result as applying it once",
+        "It deletes every unusual character",
+        "It catches every exception",
+        "It writes two output files"
+      ],
+      "answer_index": 0,
+      "explanation": "Idempotence makes reruns stable and prevents repeated normalization from drifting the value."
+    },
+    {
+      "id": "cross-field",
+      "prompt": "Which is a cross-field rule?",
+      "options": [
+        "The record must be a dictionary",
+        "Battery must parse as an integer",
+        "When temperature is below -80, battery must be at least 10",
+        "The input must have a source name"
+      ],
+      "answer_index": 2,
+      "explanation": "The rule depends on the relationship between two otherwise valid fields."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Compose the pipeline and quarantine expected rejections
+
+One function can connect the stages without blending their responsibilities:
+
+```python
+def parse_beacon_line(raw_line, source, record_number):
+    """Return one validated beacon record or raise contextual ValueError."""
+    normalized = normalize_beacon_line(raw_line)
+    match = BEACON_PATTERN.fullmatch(normalized)
+    if match is None:
+        raise ValueError(
+            f"{source}: record {record_number}: line does not match beacon syntax"
+        )
+
+    converted = convert_beacon_groups(match.groupdict(), source, record_number)
+    return validate_beacon(converted)
+```
+
+A batch loader can quarantine anticipated `ValueError` instances:
+
+```python
+def partition_beacon_lines(lines, source):
+    """Return accepted records and detailed anticipated rejections."""
+    accepted = []
+    rejected = []
+
+    for record_number, raw_line in enumerate(lines, start=1):
+        try:
+            record = parse_beacon_line(raw_line, source, record_number)
+        except ValueError as error:
+            rejected.append(
+                {
+                    "source": source,
+                    "record": record_number,
+                    "raw": raw_line,
+                    "reason": str(error),
+                }
+            )
+        else:
+            accepted.append(
+                {
+                    **record,
+                    "source": source,
+                    "record": record_number,
+                }
+            )
+
+    return accepted, rejected
+```
+
+Why not catch `Exception`? Examine a plausible defect:
+
+```python
+def transform_beacon(record):
+    """Return a display label for one parsed record."""
+    return f"{record['beacon_id']} from {record['station']}"
+
+
+try:
+    transform_beacon(None)
+except TypeError as error:
+    print("programming failure remains visible:", error)
+```
+
+If a batch loop catches `Exception` and labels this as “invalid source data,” it
+hides a programming defect. Catch the exception type your parser deliberately
+uses for anticipated record rejection. Let `TypeError`, `KeyError` from an
+internal typo, and other unexpected defects stop the run with their traceback.
+
+## 8. Decode the observatory beacon batch
+
+Use these inputs:
+
+```python
+beacon_lines = [
+    "BCN-2042 | Europa Relay | temperature=18.5; battery=87",
+    "xxBCN-2043yy | Luna South | temperature=20; battery=90",
+    "BCN-2044 | Unknown Port | temperature=12; battery=70",
+    "BCN-2045 | Mars Ridge | temperature=-95; battery=8",
+    "BCN-2046 | Luna South | temperature=21; battery=101",
+    "  BCN-2047 | Mars Ridge | temperature=-20; battery=65  ",
+]
+```
+
+Write this prediction table before calling the pipeline:
+
+| Record | Expected stage | Expected result |
+|---:|---|---|
+| 1 | all stages | accept `BCN-2042` |
+| 2 | full-line recognition | reject wrapper text around the identifier |
+| 3 | domain validation | reject the unknown station |
+| 4 | cross-field validation | reject extreme cold with battery below 10 |
+| 5 | field range | reject battery 101 |
+| 6 | normalization then all stages | accept `BCN-2047` |
+
+For one accepted line, also run `split_beacon_fields`. Compare its three broad
+fields with the regex named groups. The split version is easier to read for the
+outer pipes; the regex earns its complexity by recognizing and extracting the
+numeric readings. A production parser could combine both rather than force one
+tool to express every layer.
+
+Before running, predict which records are accepted and which stage rejects each
+other record. Then:
+
+1. call `partition_beacon_lines` with source `receiver-night.log`;
+2. assert accepted IDs are exactly `BCN-2042` and `BCN-2047`;
+3. assert every rejection retains source, record, raw line, and non-empty reason;
+4. assert `normalize_beacon_line` is idempotent for every input;
+5. temporarily change `validate_beacon` to call a misspelled helper and confirm
+   the resulting `NameError` is not quarantined as bad data;
+6. restore the function and rerun from a clean state.
+
+<details class="solution">
+<summary>Check the expected partition and evidence after your clean run</summary>
+
+```python
+accepted, rejected = partition_beacon_lines(
+    beacon_lines,
+    "receiver-night.log",
+)
+
+assert [record["beacon_id"] for record in accepted] == ["BCN-2042", "BCN-2047"]
+assert len(rejected) == 4
+assert all(item["source"] == "receiver-night.log" for item in rejected)
+assert all(isinstance(item["record"], int) for item in rejected)
+assert all(item["raw"] in beacon_lines for item in rejected)
+assert all(item["reason"] for item in rejected)
+assert all(
+    normalize_beacon_line(normalize_beacon_line(line))
+    == normalize_beacon_line(line)
+    for line in beacon_lines
+)
+```
+
+Inspect the reasons instead of only counting them. One should describe syntax,
+one an unknown station, one the cross-field extreme-cold rule, and one battery
+range. That diversity proves several stages were exercised.
+
+</details>
+
+### Checkpoint: preserve expected and unexpected failures
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit9-validation-pipeline",
+  "title": "Keep a pipeline observable",
+  "instructions": "Choose the exception and evidence policy that supports debugging.",
+  "questions": [
+    {
+      "id": "narrow-catch",
+      "prompt": "Why does the batch loader catch only the `ValueError` used for anticipated record rejection?",
+      "options": [
+        "So unexpected programming failures keep their tracebacks instead of being mislabeled as data errors",
+        "Because Python permits only one exception class",
+        "So no record can ever be rejected",
+        "Because `ValueError` closes every file"
+      ],
+      "answer_index": 0,
+      "explanation": "A narrow boundary continues for known bad-input cases while preserving visibility of defects."
+    },
+    {
+      "id": "rejection-evidence",
+      "prompt": "Which rejection record is most actionable?",
+      "options": [
+        "`{\"bad\": true}` only",
+        "A count with no source",
+        "Source, record number, raw value, and a specific reason",
+        "The normalized value after deleting the original"
+      ],
+      "answer_index": 2,
+      "explanation": "The evidence connects a reason to the exact input and preserves material for diagnosis or correction."
+    },
+    {
+      "id": "pipeline-order",
+      "prompt": "Which order avoids domain checks on unconverted syntax?",
+      "options": [
+        "Serialize, delete, then recognize",
+        "Validate every domain rule before parsing",
+        "Catch Exception, then guess",
+        "Normalize permitted differences, recognize/extract, convert, then validate"
+      ],
+      "answer_index": 3,
+      "explanation": "Each stage establishes assumptions needed by the next while retaining a clear failure category."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Key points for trustworthy validation
+
+- Prefer clear string methods for simple delimiters and exact prefixes; use a
+  regular expression when a pattern language genuinely clarifies the contract.
+- `fullmatch` validates a whole field, while `search` finds a substring. Choose
+  according to the question you are asking.
+- Recognition, extraction, conversion, structural validation, field rules, and
+  cross-field rules are separate responsibilities.
+- Preserve original values and lineage. Make permitted normalization
+  idempotent instead of gradually changing data on reruns.
+- Choose fail-fast or accumulated errors based on how later rules depend on
+  earlier success.
+- Quarantine anticipated invalid records with useful evidence; do not convert
+  unexpected programming failures into ordinary rejections.
+
+## 10. References and next step
+
+- [Python documentation: regular-expression operations](https://docs.python.org/3/library/re.html)
+- [Python HOWTO: regular expressions](https://docs.python.org/3/howto/regex.html)
+- [Python tutorial: exception chaining and handling](https://docs.python.org/3/tutorial/errors.html)
+
+Next, move below the text decoder. You will inspect raw byte values, file
+signatures, binary chunks, mutable byte buffers, and in-memory streams without
+pretending arbitrary binary data is encoded prose.
+
+<!-- fcpython-chapter-lab: end -->

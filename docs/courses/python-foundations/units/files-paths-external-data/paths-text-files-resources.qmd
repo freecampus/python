@@ -1,13 +1,15 @@
 ---
-title: Paths, Text Files, and Managed Resources
+title: Find, Read, and Write Files Reliably
 lesson_id: files-paths-external-data.paths-text-files-resources
 lesson_order: 10
-description: Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
+description: Build predictable paths, inspect and traverse directories, manage text-file resources, and write without surprising truncation.
 execute:
   echo: true
 categories:
 - python-foundations
 - files-paths-external-data
+- pathlib
+- text-files
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/files-paths-external-data/paths-text-files-resources.ipynb
 course_id: python-foundations
@@ -15,165 +17,229 @@ unit_id: files-paths-external-data
 unit_number: 9
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner to intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Find files reliably and read or write plain text safely.
-- **Practice in:** VS Code, Jupyter, and local files
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Build and inspect paths, distinguish files from directories, traverse a workspace in a stable order, manage file handles, choose between whole-file and streaming reads, and select a safe writing mode.
+- **Practice in:** Google Colab, JupyterLab, or a local editor using temporary workspaces
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A wildlife team returns from the field with notes from several observation
+stations. Your task is to find the notes, read them without leaking resources,
+and create a daily summary. That sounds simple, but the first version can fail
+by starting in a different folder, including yesterday's generated report as
+new input, reading a directory as though it were a file, or erasing an existing
+log with the wrong mode.
 
-Find files reliably and read or write plain text safely. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+Keep these questions beside your notebook:
 
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Paths and Text Files** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
+- What root directory is this path relative to?
+- Does the path exist, and is it the kind of object the operation needs?
+- Who closes the file if reading or processing fails?
+- Is the file small enough to read at once, or should records be streamed?
+- Does writing replace, append, or require a new destination?
+- Is traversal order part of the observable result?
 
-## 2. Paths and Working Directories
+## 1. Paths describe locations; files and directories occupy them
 
-Find files reliably using paths and the current working directory.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A path is an address, and the working directory is your current neighborhood.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A path describes where a file lives; the working directory is the folder Python starts searching from.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+A filesystem organizes named entries inside directories. A **path** is a route
+to an entry, not the file's contents. `pathlib.Path` represents that route with
+rules appropriate to the operating system.
 
 ```python
 from pathlib import Path
-print(Path.cwd())
-data_file = Path("data") / "scores.csv"
-print(data_file)
+
+report_path = Path("field-notes") / "north" / "sightings.txt"
+
+print(report_path)
+print(report_path.name)
+print(report_path.stem)
+print(report_path.suffix)
+print(report_path.parent)
+print(report_path.parts)
 ```
 
-### Trace it line by line
+The `/` operator here joins path components; it does not divide numbers. For the
+last component `sightings.txt`:
 
-1. `from pathlib import Path` — Python loads the named module or object so later lines can use it.
-2. `print(Path.cwd())` — Python evaluates the arguments and writes their display form to standard output.
-3. `data_file = Path("data") / "scores.csv"` — Python evaluates the right-hand expression and binds or updates `data_file` with the result.
-4. `print(data_file)` — Python evaluates the arguments and writes their display form to standard output.
+- `.name` is `"sightings.txt"`;
+- `.stem` is `"sightings"`;
+- `.suffix` is `".txt"`;
+- `.parent` is the path ending in `north`; and
+- `.parts` exposes every component as a tuple.
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+A suffix is only part of a name. Renaming a file from `.txt` to `.json` does not
+convert its contents to JSON. Formats require parsing and serialization, which
+you will practice in Lesson 3.
 
-::: {.callout-warning title="Common mistake"}
-A file can exist but still not be found if your program starts in a different working directory.
+Path construction does not create or open anything:
+
+```python
+imagined = Path("archive") / "2026" / "observations.tar.gz"
+print(bool(imagined))
+print(imagined.exists())
+print(imagined.name, imagined.stem, imagined.suffix, imagined.suffixes)
+```
+
+`bool(imagined)` is `True` even when the path is missing; a `Path` is an object,
+not a filesystem-state test. Notice also that `.stem` removes only the final
+suffix (`.gz`), while `.suffixes` reports `['.tar', '.gz']`. Names with several
+dots need a documented naming rule rather than repeated string slicing.
+
+Do not join components with `str(root) + "/north/sightings.txt"`. Separators,
+drives, and absolute components vary by platform. Let `Path` perform path
+composition, and convert to text only when an external API actually requires a
+string.
+
+::: {.concept-diagram}
+A relative path begins at the process's current working directory; an absolute
+path begins at a filesystem anchor such as a root or drive.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  cwd["Current working directory"] --> project["field-notes/"]
+  project --> north["north/"]
+  north --> note["sightings.txt"]
+  absolute["Filesystem root or drive"] --> cwd
+```
+
+If the current working directory changes, the same relative spelling can refer
+to a different location. The `Path` object does not search for the intended
+project automatically.
 :::
 
-### Practice paths and working directories
+Inspect rather than assume:
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Paths and Working Directories**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+```python
+from pathlib import Path
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+working_directory = Path.cwd()
+candidate = Path("field-notes") / "north" / "sightings.txt"
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+print("working directory:", working_directory)
+print("relative?:", not candidate.is_absolute())
+print("candidate from cwd:", working_directory / candidate)
+```
 
-</details>
+`Path.resolve()` can produce an absolute path and resolve symbolic components,
+but its exact filesystem behavior depends on the `strict` argument and the
+platform. It does not prove that you selected the correct project root. The
+best repair for an ambiguous relative path is usually to pass the intended root
+into the function.
 
-### Check your understanding
+```python
+def notes_path(workspace, station_name):
+    """Return the notes path for one station under an explicit workspace."""
+    return Path(workspace) / "field-notes" / station_name / "sightings.txt"
+```
+
+The function no longer depends silently on wherever the process happened to
+start.
+
+## 2. Create a safe field-notes workspace
+
+The next fixture creates every file it needs. Run the cell again whenever you
+want a clean starting point.
+
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+temporary_directory = TemporaryDirectory()
+workspace = Path(temporary_directory.name)
+notes_root = workspace / "field-notes"
+(notes_root / "north").mkdir(parents=True)
+(notes_root / "south").mkdir(parents=True)
+(notes_root / "empty-station").mkdir()
+
+(notes_root / "north" / "sightings.txt").write_text(
+    "otter,3\nheron,2\n",
+    encoding="utf-8",
+)
+(notes_root / "south" / "sightings.txt").write_text(
+    "fox,1\notter,2\n",
+    encoding="utf-8",
+)
+(notes_root / "README.md").write_text(
+    "Field notes are recorded once per station.\n",
+    encoding="utf-8",
+)
+
+print("workspace:", workspace)
+```
+
+`parents=True` permits Python to create missing parents. Without it, creating
+`field-notes/north` would fail if `field-notes` did not exist. By default,
+`mkdir()` also fails if the final directory already exists. `exist_ok=True` is
+appropriate only when an existing directory satisfies the contract; do not use
+it to silence a collision that ought to be investigated.
+
+Ask what each path currently represents:
+
+```python
+north_note = notes_root / "north" / "sightings.txt"
+missing_note = notes_root / "west" / "sightings.txt"
+
+for path in [notes_root, north_note, missing_note]:
+    print(
+        path.relative_to(workspace),
+        "exists=", path.exists(),
+        "file=", path.is_file(),
+        "directory=", path.is_dir(),
+    )
+```
+
+`exists()` alone is not enough. A directory exists, but `read_text()` requires a
+file. A path can also disappear between a check and the following operation, so
+handle the operation's exception at a boundary where absence is genuinely
+expected.
+
+### Checkpoint: make location explicit
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "files-paths-external-data-paths-and-text-files-paths-and-working-directories",
-  "title": "Paths and Working Directories checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit9-paths-location",
+  "title": "Reason about paths before opening them",
+  "instructions": "Choose the statement that follows from the path contract.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Paths and Working Directories?",
+      "id": "relative-root",
+      "prompt": "What determines the starting point of `Path(\"reports/today.txt\")`?",
       "options": [
-        "Reading a file copies text from storage into your program.",
-        "A path describes where a file lives; the working directory is the folder Python starts searching from.",
-        "Writing sends text from your program to storage.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+        "The location of the last file opened",
+        "The process's current working directory",
+        "The learner's Downloads directory",
+        "The file suffix"
       ],
       "answer_index": 1,
-      "explanation": "A path describes where a file lives; the working directory is the folder Python starts searching from."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 3. Reading Text Files
-
-Open a text file and read its contents safely.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-Reading a file is like opening a notebook and copying a paragraph onto your desk.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Reading a file copies text from storage into your program.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-from pathlib import Path
-text = Path("notes.txt").read_text(encoding="utf-8")
-print(text)
-```
-
-### Trace it line by line
-
-1. `from pathlib import Path` — Python loads the named module or object so later lines can use it.
-2. `text = Path("notes.txt").read_text(encoding="utf-8")` — Python evaluates the right-hand expression and binds or updates `text` with the result.
-3. `print(text)` — Python evaluates the arguments and writes their display form to standard output.
-
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Encoding problems are easier to debug when you specify encoding="utf-8" consistently.
-:::
-
-### Practice reading text files
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Reading Text Files**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "files-paths-external-data-paths-and-text-files-reading-text-files",
-  "title": "Reading Text Files checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
+      "explanation": "A relative path is resolved from the process's current working directory unless your code joins it to another explicit root."
+    },
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Reading Text Files?",
+      "id": "file-kind",
+      "prompt": "Why check `is_file()` rather than only `exists()` before a read that requires a regular file?",
       "options": [
-        "A path describes where a file lives; the working directory is the folder Python starts searching from.",
-        "Writing sends text from your program to storage.",
-        "Reading a file copies text from storage into your program.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
+        "Because files never exist",
+        "Because `exists()` changes the path",
+        "Because a directory or another filesystem entry can exist at that path",
+        "Because `is_file()` decodes UTF-8"
       ],
       "answer_index": 2,
-      "explanation": "Reading a file copies text from storage into your program."
+      "explanation": "Existence and entry kind answer different questions; a directory exists but is not a text file."
+    },
+    {
+      "id": "explicit-root",
+      "prompt": "Which design is least dependent on notebook launch location?",
+      "options": [
+        "Repeatedly call `Path.cwd()` inside every helper",
+        "Pass a workspace root into the function and join paths beneath it",
+        "Guess that the current directory is always the repository",
+        "Search the entire computer for a matching filename"
+      ],
+      "answer_index": 1,
+      "explanation": "An explicit root makes the dependency visible to callers and easy to control in tests and notebooks."
     }
   ]
 }
@@ -181,72 +247,203 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. Writing Text Files
+## 3. Discover inputs in a deterministic order
 
-Create or replace text files with clear output.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-Writing a file is like saving a note in a folder for future you.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Writing sends text from your program to storage.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+`iterdir()` yields a directory's immediate children. `glob()` selects paths that
+match a pattern. `rglob()` searches recursively.
 
 ```python
-from pathlib import Path
-report = "Result: success\n"
-Path("report.txt").write_text(report, encoding="utf-8")
+print("immediate entries:")
+for path in sorted(notes_root.iterdir(), key=lambda item: item.name):
+    print("-", path.name)
+
+print("station notes:")
+station_files = sorted(notes_root.glob("*/sightings.txt"))
+for path in station_files:
+    print("-", path.relative_to(notes_root))
 ```
 
-### Trace it line by line
+Do not rely on the order returned by the filesystem. Sort when order affects
+summaries, identifiers, tests, or reproducibility. Sorting `Path` objects is
+usually enough for paths with a shared root; an explicit key documents another
+policy such as case-insensitive names.
 
-1. `from pathlib import Path` — Python loads the named module or object so later lines can use it.
-2. `report = "Result: success\n"` — Python evaluates the right-hand expression and binds or updates `report` with the result.
-3. `Path("report.txt").write_text(report, encoding="utf-8")` — Python evaluates the right-hand expression and binds or updates `Path("report.txt").write_text(report, encoding` with the result.
+Pattern matching should describe intended inputs, not merely all text files.
+This broad search can accidentally include generated output on the next run:
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+```python
+output_path = notes_root / "daily-summary.txt"
+output_path.write_text("generated output\n", encoding="utf-8")
 
-::: {.callout-warning title="Common mistake"}
-write_text replaces existing content. If that is risky, write to a new file name first.
+broad_matches = sorted(notes_root.rglob("*.txt"))
+print([path.relative_to(notes_root) for path in broad_matches])
+```
+
+The pattern `*/sightings.txt` encodes two useful constraints: one station
+directory and the exact input filename. You can also filter explicitly:
+
+```python
+input_files = [
+    path
+    for path in sorted(notes_root.rglob("*.txt"))
+    if path.name == "sightings.txt" and path != output_path
+]
+```
+
+Choose a rule that remains correct after output exists. “Delete the output
+before discovery” is fragile because a crash can leave it behind.
+
+## 4. A file handle is a managed, stateful resource
+
+`Path.read_text()` is convenient for a small file. Underneath, Python opens a
+text stream, reads it, and closes it. When you need line-by-line processing or
+more control, open the file explicitly with a `with` statement:
+
+```python
+first_note = station_files[0]
+
+with first_note.open(mode="r", encoding="utf-8") as handle:
+    print("inside block, closed?:", handle.closed)
+    first_line = handle.readline()
+    remaining_text = handle.read()
+
+print("outside block, closed?:", handle.closed)
+print("first line:", repr(first_line))
+print("remaining:", repr(remaining_text))
+```
+
+A handle has a **cursor**. `readline()` advances past one line; the following
+`read()` begins from that position, not from the start. Opening the file again
+creates a new handle with a new cursor.
+
+Make cursor exhaustion observable:
+
+```python
+with first_note.open(encoding="utf-8") as handle:
+    first_pass = handle.read()
+    second_pass = handle.read()
+
+print("first pass:", repr(first_pass))
+print("second pass:", repr(second_pass))
+assert second_pass == ""
+```
+
+You could call `handle.seek(0)` before the second read, but reopening is often
+clearer when you truly need two independent passes. The built-in form
+`open(first_note, encoding="utf-8")` also accepts `Path` objects; `Path.open()`
+is used here because it keeps the location and operation visually together.
+
+The context manager closes the resource even when code inside the block raises
+an exception. It does not suppress that exception:
+
+```python
+try:
+    with first_note.open(encoding="utf-8") as handle:
+        raw_count = handle.readline().split(",")[1]
+        int("not-a-number")
+except ValueError as error:
+    print(type(error).__name__, error)
+
+print("closed after failure?:", handle.closed)
+```
+
+That separation is valuable: resource cleanup is guaranteed, while the
+unexpected or deliberately caught failure remains observable.
+
+::: {.callout-warning title="A closed handle cannot read more data"}
+Store the values you need inside the `with` block. Returning a handle from a
+helper whose context has already ended returns a closed resource, not deferred
+file contents.
 :::
 
-### Practice writing text files
+## 5. Read small files whole; stream large or record-oriented files
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Writing Text Files**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+For a small configuration or note, whole-file methods are clear:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```python
+text = first_note.read_text(encoding="utf-8")
+lines = text.splitlines()
+print(lines)
+```
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+`read_text()` returns one string. It is then possible to split, search, or parse
+that value. The complete contents must fit comfortably in memory.
 
-</details>
+For a large log or naturally line-oriented input, iterate over the handle:
 
-### Check your understanding
+```python
+def count_animals(path):
+    """Return total observed animals from a small comma-separated note."""
+    total = 0
+    with Path(path).open(encoding="utf-8") as handle:
+        for line_number, raw_line in enumerate(handle, start=1):
+            line = raw_line.rstrip("\n")
+            animal, raw_count = line.split(",")
+            try:
+                total += int(raw_count)
+            except ValueError as error:
+                raise ValueError(
+                    f"{path}:{line_number}: invalid count {raw_count!r}"
+                ) from error
+    return total
+
+
+for path in station_files:
+    print(path.parent.name, count_animals(path))
+```
+
+Only one line at a time needs to be held by the loop. `enumerate` preserves line
+context for diagnostics. The narrow `rstrip("\n")` removes the line terminator
+without deleting meaningful leading or trailing spaces. Lesson 2 develops
+newline policies further, and Lesson 3 replaces the deliberately simple
+comma split with the CSV parser needed for quoted fields.
+
+Choose from the data shape and size, not from a rule that one method is always
+superior.
+
+### Checkpoint: manage reads and discovery
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "files-paths-external-data-paths-and-text-files-writing-text-files",
-  "title": "Writing Text Files checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit9-paths-reading",
+  "title": "Choose a reliable reading boundary",
+  "instructions": "Reason about ordering, handles, and cursors.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Writing Text Files?",
+      "id": "deterministic-order",
+      "prompt": "A combined report must be identical across reruns. What should discovery do?",
       "options": [
-        "A path describes where a file lives; the working directory is the folder Python starts searching from.",
-        "Reading a file copies text from storage into your program.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "Writing sends text from your program to storage."
+        "Trust whatever order the filesystem returns",
+        "Open only the shortest filename",
+        "Shuffle paths before every run",
+        "Select intended inputs and sort them by a documented key"
       ],
       "answer_index": 3,
-      "explanation": "Writing sends text from your program to storage."
+      "explanation": "Selection prevents output or unrelated files from entering the batch; sorting makes the processing order reproducible."
+    },
+    {
+      "id": "cursor-after-readline",
+      "prompt": "After `readline()` consumes the first line, what does `read()` on the same handle return?",
+      "options": [
+        "The entire file from the beginning",
+        "The remaining text from the current cursor position",
+        "Only the filename",
+        "A new handle"
+      ],
+      "answer_index": 1,
+      "explanation": "Reads advance the stream cursor. Reopen or seek deliberately if the contract requires another pass."
+    },
+    {
+      "id": "with-failure",
+      "prompt": "What does a file `with` statement guarantee when processing raises an exception?",
+      "options": [
+        "The handle is closed while the exception remains available",
+        "Every exception is silently ignored",
+        "The file contents are automatically repaired",
+        "The cursor returns to zero"
+      ],
+      "answer_index": 0,
+      "explanation": "The context manager owns cleanup; exception policy remains a separate decision."
     }
   ]
 }
@@ -254,18 +451,280 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 5. Integrate the lesson
+## 6. Writing modes express different promises
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+The common text modes are:
 
-## 6. Key points
+| Mode | Promise | Important risk or behavior |
+|---|---|---|
+| `"r"` | read an existing file | missing path raises `FileNotFoundError` |
+| `"w"` | create or replace a file | an existing file is truncated when opened |
+| `"a"` | append at the end, creating if needed | reruns may duplicate content |
+| `"x"` | create a new file only | existing path raises `FileExistsError` |
 
-- **Paths and Working Directories:** A path describes where a file lives; the working directory is the folder Python starts searching from.
-- **Reading Text Files:** Reading a file copies text from storage into your program.
-- **Writing Text Files:** Writing sends text from your program to storage.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+`write()` does not add a newline:
 
-## References
+```python
+mode_demo = workspace / "mode-demo.txt"
+with mode_demo.open("w", encoding="utf-8") as handle:
+    handle.write("north")
+    handle.write("south")
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+print(repr(mode_demo.read_text(encoding="utf-8")))
+```
+
+`write()` returns the number of text characters accepted by the stream. The
+return value can support a focused check, although reopening and comparing the
+artifact is stronger evidence of the saved result:
+
+```python
+with mode_demo.open("a", encoding="utf-8") as handle:
+    character_count = handle.write("\nnight shift\n")
+
+assert character_count == len("\nnight shift\n")
+assert mode_demo.read_text(encoding="utf-8").endswith("night shift\n")
+```
+
+Run that cell twice and the line appears twice. Append mode preserves existing
+content, but it does not make retries idempotent.
+
+The result is `'northsouth'`. Include the separator required by the file
+contract:
+
+```python
+with mode_demo.open("w", encoding="utf-8", newline="\n") as handle:
+    handle.write("north\n")
+    handle.write("south\n")
+```
+
+Opening with `"w"` immediately truncates an existing file, even if a later
+calculation fails before the first `write`. Compute and validate the complete
+text before opening the destination when practical:
+
+```python
+summary_lines = []
+for path in station_files:
+    summary_lines.append(f"{path.parent.name}: {count_animals(path)}")
+
+summary_text = "\n".join(summary_lines) + "\n"
+assert summary_text.count("\n") == len(summary_lines)
+output_path.write_text(summary_text, encoding="utf-8", newline="\n")
+print(summary_text)
+```
+
+Appending is suitable for an event log only when duplicate appends on retry are
+acceptable or prevented by another rule. Exclusive creation is useful when
+replacing an existing destination would indicate a mistake:
+
+```python
+reservation = workspace / "reserved-name.txt"
+reservation.write_text("first owner\n", encoding="utf-8")
+
+try:
+    with reservation.open("x", encoding="utf-8") as handle:
+        handle.write("second owner\n")
+except FileExistsError:
+    print("destination already exists; original preserved")
+```
+
+Lesson 2 will build a temporary-write, verify, and replace sequence for outputs
+that should become official only when complete.
+
+## 7. Handle expected filesystem failures at the right boundary
+
+Common filesystem exceptions carry different evidence:
+
+- `FileNotFoundError`: a required path or parent is missing;
+- `FileExistsError`: exclusive creation or directory creation collided;
+- `IsADirectoryError`: an operation expected a file but received a directory;
+- `NotADirectoryError`: some path component expected as a directory is not one;
+- `PermissionError`: the operating system denied the operation;
+- broader `OSError`: other operating-system or filesystem conditions.
+
+Catch only a failure the caller can meaningfully handle:
+
+```python
+def read_optional_note(path):
+    """Return optional note text, or an empty string when it is absent."""
+    try:
+        return Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return ""
+
+
+print(repr(read_optional_note(workspace / "optional.txt")))
+```
+
+This policy is valid only because the docstring declares absence normal. A
+required configuration should instead let the failure propagate or add useful
+context. Do not catch `Exception` and report “file missing”; decoding failures,
+permissions, and programming bugs require different responses.
+
+## 8. Build the daily field-note summary
+
+Complete a clean, self-contained lab:
+
+1. Create a temporary workspace with `incoming/north`, `incoming/south`, and
+   `output` directories.
+2. Write at least two `sightings.txt` inputs and one unrelated `.txt` file.
+3. Implement `discover_notes(root)` to return only station notes in sorted
+   order.
+4. Implement `summarize_note(path)` to stream records and return one station
+   total with source-and-line context for invalid counts.
+5. Build the complete report in memory, end it with one newline, then write it
+   to `output/daily-summary.txt`.
+6. Run the pipeline twice and assert that discovery never includes the output
+   and that the report text is identical.
+7. Change one count to `"many"`. Confirm the exception identifies its file and
+   line while the previous report remains available because calculation occurs
+   before writing.
+
+Start from these contracts:
+
+```python
+from pathlib import Path
+
+
+def discover_notes(root):
+    """Return station sightings files beneath root in deterministic order."""
+    root = Path(root)
+    return sorted(root.glob("*/sightings.txt"))
+
+
+def summarize_note(path):
+    """Return (station_name, total_count) for one sightings file."""
+    path = Path(path)
+    total = 0
+    with path.open(encoding="utf-8") as handle:
+        for line_number, raw_line in enumerate(handle, start=1):
+            animal, raw_count = raw_line.rstrip("\n").split(",")
+            if not animal:
+                raise ValueError(f"{path}:{line_number}: empty animal name")
+            try:
+                total += int(raw_count)
+            except ValueError as error:
+                raise ValueError(
+                    f"{path}:{line_number}: invalid count {raw_count!r}"
+                ) from error
+    return path.parent.name, total
+```
+
+<details class="solution">
+<summary>Compare one complete integration after finishing your own</summary>
+
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    root = Path(temporary_name)
+    incoming = root / "incoming"
+    output = root / "output"
+    (incoming / "north").mkdir(parents=True)
+    (incoming / "south").mkdir()
+    output.mkdir()
+
+    (incoming / "north" / "sightings.txt").write_text(
+        "otter,3\nheron,2\n", encoding="utf-8"
+    )
+    (incoming / "south" / "sightings.txt").write_text(
+        "fox,1\notter,2\n", encoding="utf-8"
+    )
+    (incoming / "ignore.txt").write_text("not an input\n", encoding="utf-8")
+
+    paths = discover_notes(incoming)
+    rows = [summarize_note(path) for path in paths]
+    report = "\n".join(f"{station}: {total}" for station, total in rows) + "\n"
+    report_path = output / "daily-summary.txt"
+    report_path.write_text(report, encoding="utf-8", newline="\n")
+
+    assert [path.parent.name for path in paths] == ["north", "south"]
+    assert report == "north: 5\nsouth: 3\n"
+    assert report_path.read_text(encoding="utf-8") == report
+    assert discover_notes(incoming) == paths
+```
+
+The narrow discovery rule makes generated output irrelevant. The report is
+fully constructed before `write_text` opens the destination. The next lessons
+will replace the simple record grammar with robust external formats and add a
+verified replacement step.
+
+</details>
+
+### Checkpoint: choose the writing contract
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit9-paths-writing",
+  "title": "Prevent surprising writes",
+  "instructions": "Match each requirement to a deliberate writing policy.",
+  "questions": [
+    {
+      "id": "truncation-time",
+      "prompt": "When can opening an existing text file with mode `w` erase its previous contents?",
+      "options": [
+        "Only after the handle closes",
+        "Only after `read()`",
+        "As the file is opened, before later processing necessarily succeeds",
+        "Never; `w` always appends"
+      ],
+      "answer_index": 2,
+      "explanation": "Write mode truncates an existing destination on open, so compute and validate output first when possible."
+    },
+    {
+      "id": "exclusive-mode",
+      "prompt": "Which mode expresses “create this destination, but fail if it already exists”?",
+      "options": [
+        "`x`",
+        "`a`",
+        "`r`",
+        "`w`"
+      ],
+      "answer_index": 0,
+      "explanation": "Exclusive creation protects an existing path by raising `FileExistsError`."
+    },
+    {
+      "id": "catch-files",
+      "prompt": "Why is `except Exception: return \"\"` a poor implementation for an optional file?",
+      "options": [
+        "Because optional files must be binary",
+        "Because empty strings are invalid Python",
+        "Because `Path` cannot raise errors",
+        "Because it also hides permissions, decoding failures, and programming defects"
+      ],
+      "answer_index": 3,
+      "explanation": "Catch the anticipated absence specifically; unrelated failures should remain visible."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Key points for reliable file work
+
+- A `Path` describes a location. Resolve relative paths from a deliberate root,
+  not an unspoken assumption about the working directory.
+- Check whether a path is a file or directory when the distinction matters, but
+  still handle operation-time failures appropriately.
+- Select intended inputs and sort them when processing order affects output.
+- A `with` statement closes a file handle on normal and exceptional paths; it
+  does not hide the exception.
+- Read small files whole for clarity and stream large or record-oriented files
+  when memory and context matter.
+- Modes `r`, `w`, `a`, and `x` express different contracts. In particular, `w`
+  truncates and `write()` adds no newline automatically.
+- Compute and validate complete output before opening a destination for
+  replacement whenever practical.
+
+## 10. References and next step
+
+- [Python documentation: `pathlib` — object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
+- [Python documentation: `io` — streams and text I/O](https://docs.python.org/3/library/io.html)
+- [Python tutorial: reading and writing files](https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files)
+
+Next, keep the same path and resource discipline while investigating what turns
+stored bytes into characters—and why the wrong encoding or newline assumption
+can damage otherwise correct text.
+
+<!-- fcpython-chapter-lab: end -->

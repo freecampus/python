@@ -1,13 +1,15 @@
 ---
-title: Unicode Encodings, Newlines, and Text Boundaries
+title: Keep Text Intact Across Encodings and Newlines
 lesson_id: files-paths-external-data.unicode-encodings-newlines
 lesson_order: 20
-description: Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
+description: Distinguish characters from bytes, diagnose decoding failures, normalize comparisons carefully, and preserve multilingual text and line boundaries.
 execute:
   echo: true
 categories:
 - python-foundations
 - files-paths-external-data
+- unicode
+- encodings
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/files-paths-external-data/unicode-encodings-newlines.ipynb
 course_id: python-foundations
@@ -16,115 +18,250 @@ unit_number: 9
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Read, stream, and replace text files with explicit encoding and failure behavior.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 4–5 hours
+- **You will learn:** Explain the character–encoding–byte boundary, encode and decode explicitly, diagnose failures without hiding damage, compare normalized Unicode safely, control newline behavior, and replace a text artifact only after verification.
+- **Practice in:** Google Colab, JupyterLab, or a local editor using temporary multilingual fixtures
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A subtitle team exchanges lines such as `"Café déjà vu"`, `"Olá, Lua"`, and
+`"東京へようこそ"`. One machine displays them correctly. Another shows replacement
+symbols. A third reads every line but produces extra blank lines after export.
+The words did not change; assumptions at the text boundary did.
 
-Text files contain encoded bytes. A file contract should state encoding, newline behavior, size assumptions, and whether replacement may expose partial output. Build and validate content before replacing a good destination.
+Use these questions throughout the lesson:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+- Do I currently have Python characters (`str`) or encoded byte values (`bytes`)?
+- Which encoding contract produced or should interpret those bytes?
+- Does an error policy stop, preserve evidence, or silently discard information?
+- Are two visually identical strings represented by the same code points?
+- Which newline sequence is stored, and which line endings should Python expose?
+- Can the previous good output survive a failed replacement attempt?
+
+## 1. Text and bytes are different kinds of value
+
+Python's `str` stores Unicode text. It is a sequence of characters as Python
+represents them, not a sequence of UTF-8 bytes. `bytes` stores integers from 0
+to 255. An **encoding** defines how text maps to bytes; decoding applies that
+contract in reverse.
+
+```python
+message = "Café ☕"
+encoded = message.encode("utf-8")
+decoded = encoded.decode("utf-8")
+
+print(message)
+print(encoded)
+print("characters:", len(message))
+print("bytes:", len(encoded))
+print("round trip:", decoded == message)
+```
+
+The accented letter and coffee symbol need more than one UTF-8 byte, so byte
+length can exceed character length. The byte representation may display
+printable ASCII directly and other values as hexadecimal escapes. That display
+is evidence about bytes, not corrupted text.
+
+::: {.concept-diagram}
+Encoding and decoding cross an explicit boundary. The same codec must be part of
+both sides' contract for a reliable round trip.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  text["Python str: characters"] -->|"encode with UTF-8"| data["bytes: integer values"]
+  data --> storage["file or network"]
+  storage --> incoming["bytes"]
+  incoming -->|"decode with UTF-8"| restored["Python str"]
+```
+
+A file does not carry a universal promise that it is UTF-8. The producer,
+protocol, format, or explicit metadata must establish the encoding.
 :::
 
-## 2. Read and trace a complete case
+Python prevents accidental mixing:
+
+```python
+text = "Lua"
+data = b"Lua"
+
+try:
+    print(text + data)
+except TypeError as error:
+    print(type(error).__name__, error)
+```
+
+Decide whether the operation is a text operation or a byte operation, then
+convert exactly at the documented boundary.
+
+A **code point** is the numbered entry assigned to a Unicode character. `ord`
+shows the number and `unicodedata.name` supplies a descriptive name when one is
+defined:
+
+```python
+import unicodedata
+
+for character in ["A", "é", "月", "🚀"]:
+    print(
+        repr(character),
+        f"U+{ord(character):04X}",
+        unicodedata.name(character),
+        character.encode("utf-8").hex(" "),
+    )
+```
+
+This comparison makes three measurements distinct: one displayed character,
+one numbered code point, and one or more UTF-8 bytes. Human-perceived symbols
+can be more complicated still: a flag, family emoji, or accented grapheme may
+contain several code points. Do not promise that `len(text)` counts what a user
+would call visible characters.
+
+## 2. An explicit encoding makes the file contract portable
+
+The default text encoding can vary across platforms, locales, and Python
+configuration. State the encoding when reading or writing durable data:
 
 ```python
 from pathlib import Path
-path = Path("greeting.txt")
-path.write_text("Olá, Python!\n", encoding="utf-8")
-message = path.read_text(encoding="utf-8")
-print(repr(message))
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    workspace = Path(temporary_name)
+    subtitle_path = workspace / "opening.txt"
+    subtitle_path.write_text("Olá, Lua!\n東京へようこそ\n", encoding="utf-8")
+
+    restored = subtitle_path.read_text(encoding="utf-8")
+    print(restored)
+    assert restored == "Olá, Lua!\n東京へようこそ\n"
 ```
 
-### What Python does
+Here, both operations promise UTF-8. Writing first makes the notebook example
+self-contained; reading proves the round trip rather than depending on an
+unknown file.
 
-1. UTF-8 converts between text and bytes.
-2. `repr` makes the final newline visible.
-3. A `Path` avoids manual separator construction.
-
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
+What happens if the declared decoding contract is wrong?
 
 ```python
-with open("report.txt", "w", encoding="utf-8") as out:
-    for record in parse_records():
-        out.write(format_record(record))
+text = "Café"
+utf8_data = text.encode("utf-8")
+
+try:
+    utf8_data.decode("ascii")
+except UnicodeDecodeError as error:
+    print("codec:", error.encoding)
+    print("start:", error.start)
+    print("end:", error.end)
+    print("reason:", error.reason)
+    print("offending bytes:", error.object[error.start:error.end])
 ```
 
-A focused repair is:
+`UnicodeDecodeError` identifies the attempted codec and byte position. Preserve
+that evidence. Repeatedly trying random encodings until one produces characters
+can yield plausible-looking but false text.
+
+The absence of an exception does not prove the encoding guess was correct.
+These Latin-1 bytes decode under a different single-byte codec into the wrong
+characters, then round-trip perfectly under that wrong assumption:
 
 ```python
-temporary = Path("report.txt.tmp")
-temporary.write_text(complete_report, encoding="utf-8")
-temporary.replace("report.txt")
+utf8_data = "Café".encode("utf-8")
+wrong_text = utf8_data.decode("latin-1")
+wrong_round_trip = wrong_text.encode("latin-1")
+
+print(wrong_text)
+assert wrong_round_trip == utf8_data
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+The display becomes the familiar mojibake `CafÃ©`, yet the bytes round-trip. A
+round-trip verifies internal consistency with a chosen codec; it cannot
+discover the producer's contract. Use metadata, a protocol, or knowledge of the
+source. Re-encoding mojibake repeatedly can make recovery harder, so retain the
+original bytes while investigating.
 
-## 4. Practice from trace to transfer
+Encoding can fail too:
 
-1. Stream non-empty lines from a large file.
-2. Use a temporary directory to test transformation.
-3. Preserve or remove a final newline deliberately.
+```python
+try:
+    "東京".encode("ascii")
+except UnicodeEncodeError as error:
+    print(type(error).__name__, error)
+```
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+ASCII has no representation for those characters. The solution is normally to
+choose the correct output encoding—often UTF-8—not delete the characters.
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+## 3. Error policies trade fidelity for continuation
 
-</details>
+The default `errors="strict"` raises when conversion cannot satisfy the codec.
+That is the safest default because it stops at the boundary instead of hiding
+loss.
 
-## 5. Check your understanding
+```python
+invalid_utf8 = b"signal:\xff:end"
+
+for policy in ["replace", "backslashreplace", "ignore"]:
+    result = invalid_utf8.decode("utf-8", errors=policy)
+    print(policy, repr(result))
+```
+
+Typical results illustrate three policies:
+
+- `replace` inserts `�`, visibly marking damage;
+- `backslashreplace` exposes the offending byte as text such as `\\xff`;
+- `ignore` drops information and can join text that was never adjacent.
+
+::: {.callout-warning title="Continuation is not correctness"}
+Use a non-strict policy only when the application contract says how data loss is
+recorded and reviewed. `errors="ignore"` should not be a reflexive “fix” for an
+unknown input. Keep the original bytes so another tool or corrected contract can
+recover them later.
+:::
+
+### Checkpoint: protect the character–byte contract
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "files-paths-external-data-text-files-and-encodings",
-  "title": "Text Files and Encodings checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit9-unicode-boundary",
+  "title": "Know which side of the boundary you hold",
+  "instructions": "Choose the statement that preserves the encoding contract.",
   "questions": [
     {
-      "id": "encoding",
-      "prompt": "What translates bytes to text?",
+      "id": "length-difference",
+      "prompt": "Why can `len(text.encode(\"utf-8\"))` exceed `len(text)`?",
       "options": [
-        "An encoding",
-        "A list index",
-        "A branch",
-        "A comment"
+        "Some characters require multiple UTF-8 bytes",
+        "Encoding adds a Python list around every character",
+        "All files duplicate each character",
+        "`len` counts words for strings"
       ],
       "answer_index": 0,
-      "explanation": "Encoding maps bytes and characters."
+      "explanation": "String length counts Python's text elements, while byte length counts the encoded integer values needed by the codec."
     },
     {
-      "id": "repr",
-      "prompt": "Why inspect `repr(text)`?",
+      "id": "decode-evidence",
+      "prompt": "What is the best first response to a `UnicodeDecodeError`?",
       "options": [
-        "It deletes spaces",
-        "It exposes escapes such as newline",
-        "It changes encoding",
-        "It closes files"
-      ],
-      "answer_index": 1,
-      "explanation": "Invisible characters become visible."
-    },
-    {
-      "id": "replace",
-      "prompt": "When replace the destination?",
-      "options": [
-        "Before parsing",
-        "After one row",
-        "After complete validation",
-        "On any error"
+        "Delete the file",
+        "Decode with `errors=\"ignore\"` and forget the loss",
+        "Record the attempted codec and failing byte position, then verify the source contract",
+        "Rename the suffix to `.utf8`"
       ],
       "answer_index": 2,
-      "explanation": "Avoid partial ordinary output."
+      "explanation": "The exception provides evidence. Confirm the producer's encoding rather than guessing or discarding bytes."
+    },
+    {
+      "id": "explicit-encoding",
+      "prompt": "Why specify `encoding=\"utf-8\"` for a durable text file?",
+      "options": [
+        "It makes every file smaller",
+        "It avoids relying on a platform-dependent default",
+        "It converts CSV into JSON",
+        "It closes the file twice"
+      ],
+      "answer_index": 1,
+      "explanation": "An explicit encoding makes the producer and consumer contract visible and portable."
     }
   ]
 }
@@ -132,14 +269,420 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 4. Byte-order marks require a deliberate policy
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+Some UTF-8 text begins with the byte sequence `EF BB BF`, commonly called a
+UTF-8 byte-order mark (BOM). It is unnecessary for UTF-8 byte order, but tools
+sometimes emit it as a signature. Decoding with plain `utf-8` exposes a leading
+Unicode character `\ufeff`; `utf-8-sig` consumes it when present.
 
-## References
+```python
+with_bom = b"\xef\xbb\xbfheadline\n"
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+print(repr(with_bom.decode("utf-8")))
+print(repr(with_bom.decode("utf-8-sig")))
+```
+
+This matters when the first CSV header unexpectedly becomes `"\ufeffname"`
+instead of `"name"`. If your input contract permits a UTF-8 BOM, opening with
+`encoding="utf-8-sig"` handles files with or without it. Do not strip `\ufeff`
+from arbitrary positions; the policy belongs at the start of a documented text
+stream.
+
+## 5. Visually identical text can use different code points
+
+Unicode sometimes represents the same visible text in more than one way. `é`
+can be one precomposed code point or an `e` followed by a combining accent.
+
+```python
+import unicodedata
+
+composed = "Café"
+decomposed = "Cafe\u0301"
+
+print(composed == decomposed)
+print([f"U+{ord(character):04X}" for character in composed])
+print([f"U+{ord(character):04X}" for character in decomposed])
+
+normalized_left = unicodedata.normalize("NFC", composed)
+normalized_right = unicodedata.normalize("NFC", decomposed)
+print(normalized_left == normalized_right)
+```
+
+Normalization form NFC is useful when an application wants canonically
+equivalent text to compare equal. NFD decomposes compatible sequences instead.
+Other forms, NFKC and NFKD, perform compatibility transformations that can
+change distinctions; do not choose them without a domain reason.
+
+Preserve original display text when evidence matters:
+
+```python
+record = {
+    "display_name": decomposed,
+    "comparison_name": unicodedata.normalize("NFC", decomposed),
+}
+
+assert record["display_name"] == decomposed
+assert record["comparison_name"] == unicodedata.normalize("NFC", composed)
+```
+
+Normalization is not case folding, translation, spell checking, or security
+validation. It answers one narrower representation question.
+
+## 6. Newlines have stored and in-memory forms
+
+Common line terminators include:
+
+- line feed: `\n`, conventional on Unix-like systems;
+- carriage return plus line feed: `\r\n`, conventional on Windows;
+- carriage return: `\r`, present in some older data.
+
+`repr` makes invisible separators visible:
+
+```python
+mixed = "north\r\nsouth\nwest\r"
+print(repr(mixed))
+print(mixed.splitlines())
+```
+
+`splitlines()` understands several line boundaries and removes them by default.
+Use `split("\n")` only when the contract specifically requires a line-feed
+separator and you want its exact empty-field behavior.
+
+When a text file is opened with `newline=None` (the default), Python applies
+universal newline translation on reading: `\r`, `\r\n`, and `\n` become `\n` in
+the returned text. The handle's `.newlines` attribute reports terminators it has
+observed:
+
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    path = Path(temporary_name) / "mixed-lines.txt"
+    path.write_bytes(b"alpha\r\nbeta\ngamma\r")
+
+    with path.open(encoding="utf-8", newline=None) as handle:
+        translated = handle.read()
+        observed = handle.newlines
+
+    with path.open(encoding="utf-8", newline="") as handle:
+        preserved = handle.read()
+
+    print("translated:", repr(translated))
+    print("observed:", observed)
+    print("preserved:", repr(preserved))
+```
+
+With `newline=""`, line endings are returned without translation. This is the
+setting required by Python's CSV module because the CSV parser owns record
+newline handling. For ordinary application text, translation is often useful.
+
+Be precise when removing terminators. `line.rstrip()` removes *all* trailing
+whitespace, including spaces and tabs that may be meaningful. `rstrip("\r\n")`
+removes any run of those characters, while `splitlines()` expresses the intent
+to divide lines. Choose according to the data contract.
+
+Compare a subtitle whose indentation belongs to its display:
+
+```python
+indented_subtitle = "    whisper from the left    \r\n"
+
+print("strip:", repr(indented_subtitle.strip()))
+print("newline only:", repr(indented_subtitle.rstrip("\r\n")))
+```
+
+The unqualified `strip()` removes both leading and trailing spaces as well as
+the terminator. That may be correct for an identifier field and destructive for
+preformatted text. The operation name alone does not define the policy; the
+field contract does.
+
+A short matrix makes newline choices easier to review:
+
+| Operation | Preserves terminator? | Preserves surrounding spaces? | Typical use |
+|---|---|---|---|
+| `splitlines()` | no | yes | divide ordinary text into logical lines |
+| `splitlines(keepends=True)` | yes | yes | inspect or reproduce exact boundaries |
+| `rstrip("\r\n")` | no trailing CR/LF run | yes | remove a known record terminator |
+| `strip()` | no | no | normalize a field only when all edge whitespace is insignificant |
+
+A final newline is also a policy. Many line-oriented tools expect one. Build it
+deliberately:
+
+```python
+subtitle_lines = ["Olá, Lua!", "東京へようこそ"]
+subtitle_text = "\n".join(subtitle_lines) + "\n"
+assert subtitle_text.endswith("\n")
+```
+
+### Checkpoint: compare and split text deliberately
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit9-unicode-normalization-newlines",
+  "title": "Preserve meaning across representations",
+  "instructions": "Choose the narrow policy that matches the stated need.",
+  "questions": [
+    {
+      "id": "bom-reader",
+      "prompt": "A CSV producer may include a UTF-8 BOM. Which decoding contract handles it at the start of the stream?",
+      "options": [
+        "ASCII with ignore",
+        "UTF-16 for every file",
+        "Strip every unusual character after parsing",
+        "`encoding=\"utf-8-sig\"`"
+      ],
+      "answer_index": 3,
+      "explanation": "The utf-8-sig codec consumes a leading UTF-8 BOM while decoding ordinary UTF-8 as well."
+    },
+    {
+      "id": "normalization-purpose",
+      "prompt": "What does NFC normalization help an application compare?",
+      "options": [
+        "Files with different permissions",
+        "Canonically equivalent Unicode sequences such as composed and decomposed accents",
+        "All misspelled words",
+        "Binary images and text"
+      ],
+      "answer_index": 1,
+      "explanation": "Normalization aligns canonical Unicode representations; it is not translation, case folding, or general validation."
+    },
+    {
+      "id": "csv-newline-preview",
+      "prompt": "Which open setting lets a format parser such as `csv` receive newline characters without text translation?",
+      "options": [
+        "`newline=\"\"`",
+        "`errors=\"ignore\"`",
+        "`mode=\"x\"`",
+        "Omit both encoding and newline forever"
+      ],
+      "answer_index": 0,
+      "explanation": "An empty newline setting preserves line endings for the CSV module's own record handling."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Replace an output only after creating and checking it
+
+Writing directly to a known-good destination can leave it empty or partial if
+generation fails. A safer local workflow writes a sibling temporary artifact,
+reads it back under the promised contract, and only then replaces the final
+path.
+
+```python
+from pathlib import Path
+
+
+def replace_verified_text(path, text):
+    """Write verified UTF-8 text beside path, then replace path."""
+    path = Path(path)
+    temporary_path = path.with_name(path.name + ".tmp")
+
+    try:
+        temporary_path.write_text(text, encoding="utf-8", newline="\n")
+        restored = temporary_path.read_text(encoding="utf-8")
+        if restored != text:
+            raise OSError("temporary text did not round-trip")
+        temporary_path.replace(path)
+    except Exception:
+        temporary_path.unlink(missing_ok=True)
+        raise
+
+    return path
+```
+
+`Path.replace()` requests a filesystem replacement. Keeping the temporary file
+in the same directory avoids an unnecessary cross-filesystem move. This pattern
+reduces the window in which the destination is incomplete, but it is **not a
+universal durability or transaction guarantee**. Filesystem, operating-system,
+power-loss, permissions, locking, and directory-sync behavior matter in
+high-stakes systems. State the scope of the promise you have actually tested.
+
+Exercise both paths:
+
+```python
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    output_path = Path(temporary_name) / "subtitles.txt"
+    output_path.write_text("previous good version\n", encoding="utf-8")
+
+    new_text = "Olá, Lua!\n東京へようこそ\n"
+    replace_verified_text(output_path, new_text)
+
+    assert output_path.read_text(encoding="utf-8") == new_text
+    assert not (output_path.parent / "subtitles.txt.tmp").exists()
+```
+
+For JSON, Lesson 3 will verify that the temporary text parses back to the
+expected Python structure, a stronger check than text equality alone.
+
+## 8. Restore the multilingual subtitle reel
+
+Build a lab with four supplied byte payloads:
+
+```python
+subtitle_payloads = {
+    "opening-utf8.txt": "Olá, Lua!\n".encode("utf-8"),
+    "tokyo-bom.txt": b"\xef\xbb\xbf" + "東京へようこそ\r\n".encode("utf-8"),
+    "cafe-decomposed.txt": "Cafe\u0301\n".encode("utf-8"),
+    "damaged.txt": b"signal:\xff:end\n",
+}
+```
+
+Your tasks:
+
+1. Write the payloads as bytes in a temporary `incoming` directory.
+2. Decode the first three with a documented UTF-8/BOM policy and preserve their
+   original display strings.
+3. Store NFC comparison forms separately and prove the decomposed café matches
+   `"Café"` after normalization.
+4. Use `repr` to record the translated and preserved line endings of the BOM
+   file.
+5. Attempt strict decoding of `damaged.txt`; capture codec, position, and
+   offending bytes in a rejection record without deleting the original.
+6. Join accepted display lines with `\n`, add one final newline, and call
+   `replace_verified_text`.
+7. Rerun from a clean workspace and compare exact output text.
+
+<details class="solution">
+<summary>Inspect one recovery loop after completing your investigation</summary>
+
+```python
+import unicodedata
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    root = Path(temporary_name)
+    incoming = root / "incoming"
+    incoming.mkdir()
+    for name, payload in subtitle_payloads.items():
+        (incoming / name).write_bytes(payload)
+
+    accepted = []
+    rejected = []
+    for path in sorted(incoming.glob("*.txt")):
+        try:
+            display_text = path.read_text(encoding="utf-8-sig")
+        except UnicodeDecodeError as error:
+            rejected.append(
+                {
+                    "source": path.name,
+                    "encoding": error.encoding,
+                    "position": error.start,
+                    "bytes": error.object[error.start:error.end].hex(),
+                }
+            )
+            continue
+
+        accepted.append(
+            {
+                "source": path.name,
+                "display": display_text,
+                "comparison": unicodedata.normalize("NFC", display_text),
+            }
+        )
+
+    cafe = next(item for item in accepted if item["source"] == "cafe-decomposed.txt")
+    assert cafe["comparison"].strip() == "Café"
+    assert rejected[0]["source"] == "damaged.txt"
+
+    output_text = "".join(item["display"].replace("\r\n", "\n") for item in accepted)
+    if output_text and not output_text.endswith("\n"):
+        output_text += "\n"
+    output_path = replace_verified_text(root / "restored.txt", output_text)
+    assert output_path.read_text(encoding="utf-8") == output_text
+    saved_bytes = output_path.read_bytes()
+    assert saved_bytes.decode("utf-8") == output_text
+    assert saved_bytes.endswith(b"\n")
+```
+
+The original bytes remain available. Accepted records preserve display text and
+store a separate normalized comparison value. The rejection explains why one
+payload could not cross the declared boundary. Inspecting the saved bytes closes
+the whole contract: Python text was encoded as UTF-8, the result decodes back to
+the intended text, and the byte artifact retains the chosen final newline.
+
+</details>
+
+### Checkpoint: publish text without hiding damage
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit9-unicode-output",
+  "title": "Choose evidence-preserving output behavior",
+  "instructions": "Select the policy that matches a trustworthy text pipeline.",
+  "questions": [
+    {
+      "id": "strict-default",
+      "prompt": "Why is strict decoding the safest default for an archive import?",
+      "options": [
+        "It silently repairs every codec",
+        "It converts bytes into CSV rows",
+        "It removes all Unicode characters",
+        "It stops at undecodable data instead of concealing information loss"
+      ],
+      "answer_index": 3,
+      "explanation": "A visible failure preserves evidence; any lossy continuation should be an explicit, recorded domain policy."
+    },
+    {
+      "id": "temporary-check",
+      "prompt": "What should happen before a temporary artifact replaces the known-good text output?",
+      "options": [
+        "Read it back under the promised contract and verify the result",
+        "Delete both the old and temporary files",
+        "Change the source encoding randomly",
+        "Ignore every write exception"
+      ],
+      "answer_index": 0,
+      "explanation": "Creation and verification must succeed before the new artifact becomes official."
+    },
+    {
+      "id": "replacement-scope",
+      "prompt": "Why should the lesson avoid calling `Path.replace()` a universal transaction guarantee?",
+      "options": [
+        "Because paths cannot be replaced",
+        "Because only JSON can be durable",
+        "Because temporary files are always remote",
+        "Because filesystem, OS, power-loss, and durability semantics still affect the promise"
+      ],
+      "answer_index": 3,
+      "explanation": "The pattern is safer than direct overwrite, but high-stakes durability needs platform-specific guarantees and testing."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Key points for text integrity
+
+- `str` contains Unicode text; `bytes` contains integer byte values. Encoding
+  and decoding cross between them under an explicit codec contract.
+- A decoding exception provides useful byte-position evidence. Do not replace it
+  with silent loss unless the application explicitly records that trade-off.
+- `utf-8-sig` is useful when a producer may place a UTF-8 BOM at the beginning
+  of a text stream.
+- Unicode normalization can align canonically equivalent comparison forms while
+  original display text remains preserved.
+- Newline translation, splitting, stripping, and final-newline choices express
+  different policies; choose them deliberately.
+- Create and verify a sibling temporary artifact before replacement when a
+  previous good local output should survive generation failures.
+
+## 10. References and next step
+
+- [Python Unicode HOWTO](https://docs.python.org/3/howto/unicode.html)
+- [Python documentation: codecs and encoding error handlers](https://docs.python.org/3/library/codecs.html)
+- [Python documentation: text I/O and newline behavior](https://docs.python.org/3/library/io.html#text-i-o)
+- [Python documentation: Unicode normalization](https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize)
+
+Next, apply these encoding and newline contracts to structured records. CSV,
+JSON, and YAML each preserve a different set of information and require their
+own parser and writer rather than ad hoc string operations.
+
+<!-- fcpython-chapter-lab: end -->

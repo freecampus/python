@@ -1,13 +1,15 @@
 ---
-title: Bytes, Binary Files, and In-Memory Streams
+title: Cross the Text–Binary Boundary Safely
 lesson_id: files-paths-external-data.bytes-binary-memory-streams
 lesson_order: 50
-description: Cross text, binary, file, and structured-data boundaries explicitly, using paths, encodings, validation, and managed resources safely.
+description: Inspect byte sequences, use binary files and chunks, work with mutable buffers and in-memory streams, and decode only documented text payloads.
 execute:
   echo: true
 categories:
 - python-foundations
 - files-paths-external-data
+- bytes
+- streams
 order: 50
 colab_notebook: notebooks/courses/python-foundations/units/files-paths-external-data/bytes-binary-memory-streams.ipynb
 course_id: python-foundations
@@ -16,143 +18,157 @@ unit_number: 9
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Preserve human text when converting between strings, bytes, and files.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 4–5 hours
+- **You will learn:** Read byte literals and hexadecimal evidence, distinguish byte indexing from slicing, use binary modes and signatures, process chunks correctly, mutate `bytearray`, control stream position, and decide when `memoryview` is worth using.
+- **Practice in:** Google Colab, JupyterLab, or a local editor with synthetic telemetry packets
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A probe sends a telemetry file containing a short ASCII signature, a version
+byte, a payload length, UTF-8 label bytes, and measurements. Only one portion is
+text. Opening the whole artifact as UTF-8 would confuse a binary container with
+a text document. This lesson keeps those roles visible.
 
-Python `str` values hold Unicode text; files and messages store bytes. An encoding translates between them. The character count and byte count can differ, and decoding with the wrong encoding can fail or corrupt data.
+Ask these questions whenever raw data appears:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+- Does the format define this region as text, integers, compressed data, or
+  opaque bytes?
+- Which byte offsets and byte order does the specification promise?
+- Is this operation using a text stream or a binary stream?
+- Does a loop stop on `b""`, the binary end-of-stream marker?
+- Do I need mutable bytes, an in-memory stream, or merely the original immutable
+  value?
+- Will avoiding one copy make a measurable difference here?
+
+## 1. A `bytes` value is a sequence of small integers
+
+Byte literals use a `b` prefix. ASCII-range printable values often appear as
+characters in their representation, while other values appear as hexadecimal
+escapes:
+
+```python
+packet = b"FC\x01\x00\xff"
+
+print(packet)
+print("length:", len(packet))
+print("first item:", packet[0])
+print("first slice:", packet[:1])
+print("hex:", packet.hex(" "))
+```
+
+`packet[0]` is the integer `70`, the byte value for ASCII `F`. `packet[:1]` is
+the one-byte value `b"F"`. Indexing and slicing intentionally return different
+types.
+
+```python
+assert packet[0] == 0x46
+assert packet[:2] == b"FC"
+assert bytes.fromhex("46 43 01 00 ff") == packet
+```
+
+Hexadecimal is a compact notation for byte values: `0xff` is decimal 255. It is
+not text that needs decoding.
+
+::: {.concept-diagram}
+Text and binary streams enforce different value types; encoding or decoding is
+allowed only where the format defines a text boundary.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  text["Text stream: str"] -->|"encode with declared codec"| binary["Binary stream: bytes"]
+  binary --> file["Binary file or packet"]
+  file --> bytes["bytes"]
+  bytes -->|"decode only documented text region"| restored["str"]
+```
+
+Arbitrary image, compressed, encrypted, or numeric bytes do not become
+meaningful by trying UTF-8.
 :::
 
-## 2. Read and trace a complete case
+A byte literal can directly contain only ASCII source characters. Encode
+Unicode text explicitly:
 
 ```python
-message = "café ☕"
-raw = message.encode("utf-8")
-restored = raw.decode("utf-8")
-print(len(message), len(raw))
-print(restored == message)
+label_text = "café-月"
+label_bytes = label_text.encode("utf-8")
+assert label_bytes.decode("utf-8") == label_text
+print(label_bytes.hex(" "))
 ```
 
-### What Python does
+## 2. Text and binary streams reject the wrong value type
 
-1. Encoding creates bytes for storage or transfer.
-2. UTF-8 may use several bytes for one character.
-3. Decoding with the same documented encoding restores the text.
-
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
-
-```python
-raw = "São Paulo".encode("utf-8")
-print(raw.decode("ascii"))
-```
-
-A focused repair is:
-
-```python
-print(raw.decode("utf-8"))
-```
-
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
-
-## 4. Practice from trace to transfer
-
-1. Compare the character and byte lengths of three scripts.
-2. Normalize two visually identical accented strings with `unicodedata.normalize`.
-3. Keep a raw display name and a normalized comparison key.
-
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
-
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
-
-</details>
-
-## 5. Binary containers and file-like buffers
-
-`bytes` is immutable, `bytearray` is mutable, and both hold integer byte values
-from 0 through 255. File-like memory streams let code use the same read/write
-interface without creating a disk file:
+An in-memory demonstration makes stream type strictness easy to see:
 
 ```python
 from io import BytesIO, StringIO
 
 text_stream = StringIO()
-text_stream.write("café")
-assert text_stream.getvalue() == "café"
-
 binary_stream = BytesIO()
-binary_stream.write("café".encode("utf-8"))
-payload = binary_stream.getvalue()
-assert payload.decode("utf-8") == "café"
 
-mutable_payload = bytearray(payload)
-mutable_payload[0] = ord("C")
-assert bytes(mutable_payload).decode("utf-8") == "Café"
+text_stream.write("signal")
+binary_stream.write(b"signal")
+
+try:
+    text_stream.write(b"wrong type")
+except TypeError as error:
+    print("text stream:", error)
+
+try:
+    binary_stream.write("wrong type")
+except TypeError as error:
+    print("binary stream:", error)
 ```
 
-The two streams deliberately reject the wrong side of the text/binary
-boundary. `StringIO.write` expects `str`; `BytesIO.write` expects bytes-like
-data. This makes them useful in tests that should not depend on a real file.
+Text streams accept and return `str`; binary streams accept and return
+bytes-like values. This early failure is useful because it forces the codec
+boundary to be explicit.
 
-`memoryview(payload)` can expose a zero-copy view over bytes-like data. Learn to
-recognize that interface here, but measure a real binary-processing bottleneck
-before adopting it for performance.
-
-## 6. Check your understanding
+### Checkpoint: identify byte values accurately
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "files-paths-external-data-unicode-and-text-boundaries",
-  "title": "Unicode and Text Boundaries checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit9-binary-values",
+  "title": "Know what a byte operation returns",
+  "instructions": "Choose the exact type and boundary behavior.",
   "questions": [
     {
-      "id": "str",
-      "prompt": "What does `str` represent?",
+      "id": "byte-index",
+      "prompt": "What does `b\"FC\"[0]` return?",
       "options": [
-        "Bytes",
-        "Only ASCII",
-        "Integers",
-        "Unicode text"
-      ],
-      "answer_index": 3,
-      "explanation": "Strings are Unicode text."
-    },
-    {
-      "id": "encode",
-      "prompt": "What type does `encode` return?",
-      "options": [
-        "bytes",
-        "str",
-        "list",
-        "dict"
-      ],
-      "answer_index": 0,
-      "explanation": "Encoding creates bytes."
-    },
-    {
-      "id": "source",
-      "prompt": "What should determine a decoding encoding?",
-      "options": [
-        "The font",
-        "The documented data source",
-        "The filename length",
-        "A random guess"
+        "The string `\"F\"`",
+        "The integer byte value 70",
+        "The one-byte value `b\"F\"`",
+        "A file handle"
       ],
       "answer_index": 1,
-      "explanation": "The producer or format defines it."
+      "explanation": "Indexing bytes returns an integer; slicing returns another bytes value."
+    },
+    {
+      "id": "decode-region",
+      "prompt": "When should part of a binary packet be decoded as UTF-8?",
+      "options": [
+        "Whenever any byte is above 127",
+        "Only when the format contract defines that region as UTF-8 text",
+        "After deleting every zero byte",
+        "For every image and compressed file"
+      ],
+      "answer_index": 1,
+      "explanation": "A codec has meaning only at a documented text boundary; arbitrary bytes are not failed text."
+    },
+    {
+      "id": "stream-type",
+      "prompt": "What happens when code writes a `str` directly to `BytesIO`?",
+      "options": [
+        "It guesses an encoding",
+        "It writes JSON",
+        "It raises `TypeError`; the caller must encode deliberately",
+        "It switches to text mode"
+      ],
+      "answer_index": 2,
+      "explanation": "Binary streams enforce bytes-like input so encoding decisions remain visible."
     }
   ]
 }
@@ -160,17 +176,514 @@ before adopting it for performance.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 7. Key points
+## 3. Binary file modes preserve byte values
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Use `StringIO` for text and `BytesIO` for binary file-like tests.
-- Use `bytearray` only when byte-level mutation is part of the contract;
-  recognize `memoryview` as an advanced view over binary storage.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+Use `rb`, `wb`, `ab`, or `xb` for binary files. `Path.read_bytes()` and
+`write_bytes()` are convenient whole-file operations:
 
-## References
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+binary_temporary_directory = TemporaryDirectory()
+workspace = Path(binary_temporary_directory.name)
+packet_path = workspace / "probe.fct"
+original = b"FCTM" + bytes([1, 3]) + "月".encode("utf-8") + b"\x00\xff"
+
+written = packet_path.write_bytes(original)
+restored = packet_path.read_bytes()
+
+print("bytes written:", written)
+print("signature:", restored[:4])
+print("all bytes:", restored.hex(" "))
+assert restored == original
+```
+
+No encoding or newline argument belongs to `read_bytes`; the operation does not
+interpret text.
+
+Many binary formats begin with a **signature** or magic byte sequence. It is a
+useful early check, not complete validation:
+
+```python
+EXPECTED_SIGNATURE = b"FCTM"
+
+
+def require_telemetry_signature(data, source="<memory>"):
+    """Raise when data does not start with the telemetry signature."""
+    if not data.startswith(EXPECTED_SIGNATURE):
+        found = data[:4].hex(" ")
+        raise ValueError(
+            f"{source}: expected signature {EXPECTED_SIGNATURE!r}; found {found}"
+        )
+
+
+require_telemetry_signature(restored, packet_path.name)
+```
+
+Two different formats can share a suffix, and a malicious or corrupted file can
+copy a signature. Continue validating version, lengths, checksums, and fields
+specified by the format.
+
+## 4. Parse a small, documented packet layout
+
+Use a deliberately simple teaching format:
+
+| Offset | Size | Meaning |
+|---:|---:|---|
+| 0 | 4 bytes | signature `FCTM` |
+| 4 | 1 byte | format version |
+| 5 | 1 byte | UTF-8 label byte length |
+| 6 | variable | label bytes |
+| after label | remaining | opaque payload bytes |
+
+```python
+def parse_packet(data, source="<memory>"):
+    """Return version, UTF-8 label, and opaque payload from an FCTM packet."""
+    require_telemetry_signature(data, source)
+    if len(data) < 6:
+        raise ValueError(f"{source}: header is truncated")
+
+    version = data[4]
+    label_length = data[5]
+    label_end = 6 + label_length
+    if len(data) < label_end:
+        raise ValueError(f"{source}: label is truncated")
+
+    label_bytes = data[6:label_end]
+    try:
+        label = label_bytes.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise ValueError(f"{source}: label is not valid UTF-8") from error
+
+    return {
+        "version": version,
+        "label": label,
+        "payload": data[label_end:],
+    }
+
+
+parsed = parse_packet(restored, packet_path.name)
+print(parsed)
+assert parsed["version"] == 1
+assert parsed["label"] == "月"
+assert parsed["payload"] == b"\x00\xff"
+```
+
+Only the label slice is decoded. Version and length are already integers after
+indexing, while the payload remains opaque bytes.
+
+## 5. Stream chunks until the binary end marker
+
+Whole-file reads require memory proportional to file size. A chunk loop uses a
+bounded buffer:
+
+```python
+def count_binary_bytes(path, chunk_size=4):
+    """Return total byte count by reading positive-sized chunks."""
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be positive")
+
+    total = 0
+    with Path(path).open("rb") as handle:
+        while True:
+            chunk = handle.read(chunk_size)
+            if chunk == b"":
+                break
+            total += len(chunk)
+            print("chunk:", chunk.hex(" "))
+    return total
+
+
+assert count_binary_bytes(packet_path, chunk_size=3) == len(original)
+```
+
+At end of a binary stream, `read()` returns `b""`. Do not write `if chunk is
+None`; ordinary file reads do not use `None` for end-of-stream. Validate a
+positive chunk size so the loop cannot repeatedly request zero bytes and
+mistake that result for natural progress.
+
+A chunk boundary is arbitrary. A multibyte UTF-8 character, numeric field, or
+compressed block can span chunks. Do not decode each arbitrary chunk
+independently. Use an incremental decoder or buffer complete format records
+when a streaming text protocol requires it.
+
+Sometimes only a bounded header is needed. Read that contract instead of the
+entire attachment:
+
+```python
+def read_packet_header(path):
+    """Return signature, version, and label length from a six-byte header."""
+    with Path(path).open("rb") as handle:
+        header = handle.read(6)
+    if len(header) != 6:
+        raise ValueError(f"{path}: expected a six-byte header; got {len(header)}")
+    return header[:4], header[4], header[5]
+
+
+signature, version, label_length = read_packet_header(packet_path)
+assert signature == b"FCTM"
+assert version == 1
+assert label_length == 3
+```
+
+The label `月` is one character but three UTF-8 bytes, so the length field is 3.
+Header inspection can reject an unsupported version before allocating or
+reading a large body. If the format later uses multibyte integers, apply its
+documented byte order with tools such as `int.from_bytes` or `struct`, not
+decimal parsing.
+
+### Checkpoint: inspect and stream binary files
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit9-binary-files",
+  "title": "Respect binary layout and end-of-stream",
+  "instructions": "Choose the behavior supported by the file-format contract.",
+  "questions": [
+    {
+      "id": "signature-scope",
+      "prompt": "What does a matching four-byte file signature prove?",
+      "options": [
+        "The entire file is valid and safe",
+        "The suffix was renamed",
+        "The initial bytes match one expected marker; remaining structure still needs validation",
+        "The file is UTF-8 prose"
+      ],
+      "answer_index": 2,
+      "explanation": "A signature is one early structural check, not complete validation or a security guarantee."
+    },
+    {
+      "id": "binary-eof",
+      "prompt": "What value marks end-of-stream for `handle.read(size)` on a normal binary file?",
+      "options": [
+        "`b\"\"`",
+        "`None`",
+        "`-1`",
+        "A newline string"
+      ],
+      "answer_index": 0,
+      "explanation": "An empty bytes value means no more bytes were read."
+    },
+    {
+      "id": "chunk-decode",
+      "prompt": "Why can decoding every arbitrary byte chunk independently fail for valid UTF-8 text?",
+      "options": [
+        "UTF-8 has no bytes",
+        "A multibyte character can be split across chunk boundaries",
+        "Binary reads always add spaces",
+        "Chunks automatically become JSON"
+      ],
+      "answer_index": 1,
+      "explanation": "Use an incremental decoder or preserve complete text boundaries rather than assuming chunks align with characters."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Use `bytearray` when bytes must change in place
+
+`bytes` is immutable. A `bytearray` is a mutable sequence of byte integers:
+
+```python
+corrupted = bytearray(b"XCTM\x01\x00")
+print(corrupted)
+
+corrupted[0] = ord("F")
+corrupted.extend(b"OK")
+repaired = bytes(corrupted)
+
+print(repaired)
+assert repaired == b"FCTM\x01\x00OK"
+```
+
+Mutation is useful for constructing packets, updating a known header field, or
+receiving data into a reusable buffer. It also creates aliasing concerns: two
+names can refer to the same mutable `bytearray`. Convert to `bytes` when you need
+an immutable snapshot.
+
+```python
+shared_buffer = bytearray(b"ABC")
+alias = shared_buffer
+snapshot = bytes(shared_buffer)
+
+alias[0] = ord("Z")
+assert shared_buffer == bytearray(b"ZBC")
+assert snapshot == b"ABC"
+```
+
+The alias observes mutation because both names refer to one object. The bytes
+snapshot preserves the earlier state, reconnecting this binary example to Unit
+6's reference and copying rules.
+
+Slice assignment can change length:
+
+```python
+buffer = bytearray(b"ABxxxxEF")
+buffer[2:6] = b"CD"
+assert buffer == bytearray(b"ABCDEF")
+```
+
+Validate offsets before mutation. One incorrect index can produce a syntactically
+valid but semantically corrupted artifact.
+
+Every assigned integer must remain in the byte range:
+
+```python
+try:
+    buffer[0] = 256
+except ValueError as error:
+    print(type(error).__name__, error)
+```
+
+Negative values and values above 255 are not byte values. Converting arbitrary
+integers with modulo arithmetic would hide an upstream range defect unless the
+binary format explicitly defines wrapping.
+
+## 7. In-memory streams behave like files without filesystem I/O
+
+`StringIO` holds text and `BytesIO` holds bytes. They are useful when an API
+expects a file-like object, when tests should not touch disk, or when a small
+artifact is assembled in memory.
+
+```python
+from io import BytesIO, StringIO
+
+text_handle = StringIO()
+text_handle.write("north\n")
+text_handle.write("south\n")
+print("cursor after writes:", text_handle.tell())
+
+text_handle.seek(0)
+print("first line:", repr(text_handle.readline()))
+print("cursor after readline:", text_handle.tell())
+print("complete value:", repr(text_handle.getvalue()))
+text_handle.close()
+print("closed?:", text_handle.closed)
+```
+
+`tell()` reports the current stream position. `seek(0)` moves back to the
+beginning. `getvalue()` returns the complete in-memory value regardless of the
+current cursor while the stream is open.
+
+A closed stream enforces its resource boundary:
+
+```python
+closed_stream = BytesIO(b"evidence")
+closed_stream.close()
+
+try:
+    closed_stream.read()
+except ValueError as error:
+    print(type(error).__name__, error)
+```
+
+Retrieve needed values before closing, or use a `with BytesIO(...) as handle`
+block just as you would for a disk-backed handle.
+
+Use `BytesIO` with APIs such as `json.dump` only after considering stream type:
+`json.dump` writes text and expects a text stream. To put JSON into a binary
+container, first create JSON text with `dumps`, then encode it under the
+container's documented codec.
+
+The telemetry layout can also be assembled through a binary file-like API:
+
+```python
+packet_stream = BytesIO()
+packet_stream.write(b"FCTM")
+packet_stream.write(bytes([1]))
+stream_label = "Luna".encode("utf-8")
+packet_stream.write(bytes([len(stream_label)]))
+packet_stream.write(stream_label)
+packet_stream.write(bytes.fromhex("00 ff"))
+
+packet_from_stream = packet_stream.getvalue()
+packet_stream.seek(0)
+assert packet_stream.read(4) == b"FCTM"
+assert parse_packet(packet_from_stream)["label"] == "Luna"
+```
+
+Each write advances the cursor, while `getvalue()` exposes the complete buffer.
+This is useful when a library accepts a binary handle even though the lesson or
+test should not create a real file.
+
+## 8. `memoryview` can expose a buffer without copying its bytes
+
+Slicing a `bytes` value creates another bytes object. `memoryview` provides a
+view over an object supporting the buffer protocol:
+
+```python
+large_packet = b"HEAD" + bytes(range(64))
+view = memoryview(large_packet)
+payload_view = view[4:]
+
+print(type(payload_view).__name__)
+print(payload_view[:8].hex(" "))
+print(payload_view.obj is large_packet)
+```
+
+The view refers to the original buffer. Convert with `bytes(payload_view)` only
+when an API needs an independent immutable bytes object.
+
+Do not use `memoryview` merely because it sounds efficient. For small records,
+ordinary slicing is clearer and copying is negligible. Measure the actual
+workload before adding buffer-lifetime and mutability complexity. A view over a
+mutable buffer can observe later mutations, while some exporters prevent
+resizing until views are released.
+
+## 9. Assemble and inspect a telemetry packet
+
+Build a small packet without reading any external fixture:
+
+```python
+def build_packet(label, payload, version=1):
+    """Return an FCTM packet with one UTF-8 label and opaque payload."""
+    if not 0 <= version <= 255:
+        raise ValueError("version must fit in one byte")
+    label_bytes = label.encode("utf-8")
+    if len(label_bytes) > 255:
+        raise ValueError("encoded label is too long")
+    return b"FCTM" + bytes([version, len(label_bytes)]) + label_bytes + bytes(payload)
+```
+
+Then:
+
+1. build a packet for label `"estação-月"` and payload
+   `bytes.fromhex("00 10 ff 7f")`;
+2. save it with `write_bytes` and verify the first four bytes in hexadecimal;
+3. count it in chunks of 5 bytes;
+4. parse it and compare the label, version, and exact opaque payload;
+5. corrupt the signature and prove a contextual `ValueError` appears;
+6. truncate the label and prove the length check detects it;
+7. load the bytes into `BytesIO`, inspect `tell`, `seek`, and two reads;
+8. create a `memoryview` of only the payload and explain whether avoiding a copy
+   matters for this small packet.
+
+<details class="solution">
+<summary>Compare one complete packet round trip after your own clean run</summary>
+
+```python
+from io import BytesIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+payload = bytes.fromhex("00 10 ff 7f")
+packet = build_packet("estação-月", payload)
+
+with TemporaryDirectory() as temporary_name:
+    path = Path(temporary_name) / "telemetry.fct"
+    path.write_bytes(packet)
+
+    assert path.read_bytes()[:4].hex(" ") == "46 43 54 4d"
+    assert count_binary_bytes(path, chunk_size=5) == len(packet)
+
+    restored = parse_packet(path.read_bytes(), path.name)
+    assert restored == {"version": 1, "label": "estação-月", "payload": payload}
+
+    try:
+        parse_packet(b"FAIL" + packet[4:], "bad-signature.fct")
+    except ValueError as error:
+        assert "signature" in str(error)
+
+    encoded_label_length = packet[5]
+    truncated = packet[: 6 + encoded_label_length - 1]
+    try:
+        parse_packet(truncated, "truncated.fct")
+    except ValueError as error:
+        assert "truncated" in str(error)
+
+    stream = BytesIO(packet)
+    assert stream.tell() == 0
+    assert stream.read(4) == b"FCTM"
+    assert stream.tell() == 4
+    stream.seek(0)
+    assert stream.read() == packet
+
+payload_view = memoryview(packet)[-len(payload):]
+assert payload_view.tobytes() == payload
+```
+
+For four payload bytes, a normal slice is simpler. The view is an educational
+preview of an optimization to consider only after measurement.
+
+</details>
+
+### Checkpoint: choose the appropriate buffer
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit9-binary-buffers",
+  "title": "Select a bytes tool for the job",
+  "instructions": "Choose based on mutability, cursor behavior, and measured need.",
+  "questions": [
+    {
+      "id": "bytearray-use",
+      "prompt": "When is `bytearray` more suitable than `bytes`?",
+      "options": [
+        "When a buffer must be changed in place under validated offsets",
+        "When a string needs `.upper()`",
+        "When JSON keys need sorting",
+        "When every value must be hashable"
+      ],
+      "answer_index": 0,
+      "explanation": "Bytearray is mutable; convert to bytes when an immutable snapshot is needed."
+    },
+    {
+      "id": "seek-purpose",
+      "prompt": "What does `stream.seek(0)` normally do for a seekable `BytesIO` or `StringIO`?",
+      "options": [
+        "Closes the stream",
+        "Moves its cursor to the beginning",
+        "Changes bytes into text",
+        "Deletes the buffer"
+      ],
+      "answer_index": 1,
+      "explanation": "Subsequent reads begin at the new cursor position."
+    },
+    {
+      "id": "memoryview-choice",
+      "prompt": "When should a foundation-level program introduce `memoryview` into production code?",
+      "options": [
+        "For every two-byte value",
+        "Whenever a variable needs a friendly name",
+        "When measurement shows copying is meaningful and the buffer-lifetime complexity is understood",
+        "To decode arbitrary images as UTF-8"
+      ],
+      "answer_index": 2,
+      "explanation": "Use the simpler slice by default; optimize a demonstrated bottleneck rather than adding complexity speculatively."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Key points for binary boundaries
+
+- `bytes` is an immutable sequence of integers from 0 through 255. Indexing
+  returns an integer; slicing returns bytes.
+- Text and binary streams enforce different value types. Encode and decode only
+  where a format declares a text region and codec.
+- Binary modes and `read_bytes`/`write_bytes` preserve exact byte values without
+  encoding or newline translation.
+- A signature, version, declared length, and payload each need their own checks;
+  one matching marker is not complete validation.
+- Chunk loops stop on `b""`, and arbitrary chunks do not necessarily align with
+  text characters or format records.
+- Use `bytearray` for deliberate in-place changes, `StringIO`/`BytesIO` for
+  file-like in-memory APIs, and `memoryview` only for a measured copy cost.
+
+## 11. References and next step
+
+- [Python documentation: binary sequence types](https://docs.python.org/3/library/stdtypes.html#binary-sequence-types-bytes-bytearray-memoryview)
+- [Python documentation: `io` and in-memory streams](https://docs.python.org/3/library/io.html)
+- [Python documentation: `struct` for later binary layouts](https://docs.python.org/3/library/struct.html)
+
+You now have every boundary needed by the unit challenge: predictable discovery,
+UTF-8/BOM handling, CSV records, staged validation, narrow rejection handling,
+deterministic JSON, and verified replacement. Next, repair a starship archive
+whose code looks plausible but violates several of those contracts.
+
+<!-- fcpython-chapter-lab: end -->
