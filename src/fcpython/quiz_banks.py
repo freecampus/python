@@ -151,7 +151,7 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "modules-environments-projects",
             "Modules, Environments, and Python Projects",
-            "organize and clean-install a versioned multi-file project",
+            "release and clean-install a moonlit cipher package",
         ),
         (
             "object-oriented-python",

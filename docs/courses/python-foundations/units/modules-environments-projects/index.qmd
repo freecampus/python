@@ -1,6 +1,6 @@
 ---
 title: Modules, Environments, and Python Projects Overview
-description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+description: Move from isolated scripts to a versioned, installable Python project that works from a clean environment outside its repository.
 course_id: python-foundations
 unit_id: modules-environments-projects
 unit_number: 10
@@ -13,56 +13,189 @@ colab_notebook: notebooks/courses/python-foundations/units/modules-environments-
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 10
-- **Estimated time:** 6–12 hours including the challenge
-- **Unit outcome:** Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 28–36 hours including the challenge
+- **Unit outcome:** Find and evaluate reusable Python tools; split behavior across modules and packages with intentional imports and entry points; arrange and version a `src`-layout project; create and diagnose isolated environments; declare metadata and dependencies in `pyproject.toml`; and build, inspect, and clean-install a wheel whose public API works outside the repository.
+- **Practice in:** Generated Colab notebooks for exploration and a local terminal project for multi-file and packaging work
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
 
-Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+## 1. Grow a script into something another person can run
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+Until now, a notebook cell or one `.py` file has been enough for most tasks. A
+real project quickly develops more parts: reusable functions, a command that
+runs them, checks, documentation, configuration, dependencies, and version
+history. Merely putting those parts in folders does not make the result
+reliable. Python must be able to find the intended code, imports must avoid
+surprising work, collaborators need the same dependencies, and a built artifact
+must work away from the convenient repository directory.
 
-## 2. Before you start
+Throughout this unit you will grow a small **constellation report** tool. It
+begins as a search for an existing standard-library function. It becomes a
+module, then a package with a deliberate public interface, then a versioned
+`src`-layout project. Finally, you will build a wheel and prove that a new
+environment can install and run it from another directory.
 
-**Prior knowledge:** Complete Unit 9 and bring its challenge notes and debugging record.
+That last proof matters. “It worked in my project folder” may only mean that the
+current directory accidentally made source code importable. A clean
+installation asks a stronger question: **did the project declare, build, and
+ship everything its user actually needs?**
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+::: {.concept-diagram}
+The unit follows one path from discovering a tool to verifying the artifact a
+different environment receives.
 
-## 3. Lessons
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  discover["Discover a tool"] --> module["Create a module"]
+  module --> package["Design a package API"]
+  package --> repository["Arrange and version the project"]
+  repository --> environment["Create an isolated environment"]
+  environment --> metadata["Declare project metadata"]
+  metadata --> wheel["Build and inspect a wheel"]
+  wheel --> verify["Install and run elsewhere"]
+```
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Built-ins, the Standard Library, Third-Party Packages, and Help](builtins-standard-library-help.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Modules, Imports, and Program Entry Points](modules-imports-entry-points.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Packages and Public Interfaces](packages-public-interfaces.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Project Layout and Git Essentials](project-layout-git-essentials.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Virtual Environments and Dependencies](virtual-environments-dependencies.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [pyproject.toml, Builds, and the Packaging Tool Landscape](pyproject-builds-tools.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 7 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
-
-## 4. How to study this unit
-
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
-
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+Each arrow adds a contract. A later step does not repair an unclear earlier
+one automatically.
 :::
 
-## 5. Unit evidence
+## 2. Questions you will answer with evidence
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+Keep these questions nearby as you work:
+
+- Is a capability built in, in the standard library, installed from a
+  third-party distribution, or owned by this project?
+- How can `help()`, signatures, examples, and primary documentation reveal a
+  callable's contract?
+- When does Python execute a module, where does it search, and why can an import
+  succeed from one directory but fail from another?
+- Which names should callers import, and which files are implementation details?
+- What should run on import, with `python -m package`, or through an installed
+  command?
+- Which files belong in source, checks, documentation, configuration, generated
+  output, and version history?
+- Which exact interpreter will run a command, and which environment will receive
+  an installation?
+- Which dependencies are directly needed at runtime, needed only during
+  development, or merely pulled in by another dependency?
+- What do `[build-system]`, `[project]`, and `[project.scripts]` communicate?
+- Can the built wheel import and run from a fresh environment outside the source
+  tree?
+
+## 3. Prepare the two practice spaces
+
+Exploration that uses the standard library works in the generated Colab
+notebooks. Modules, Git, environments, and builds are clearer in a local folder
+and terminal because their behavior depends on real files and processes.
+
+Before Lesson 2, confirm that these commands work locally:
+
+```bash
+python --version
+python -m pip --version
+git --version
+```
+
+On systems where the launcher is named `py`, use `py -m ...` consistently. On
+systems where Python 3 is named `python3`, use `python3 -m ...`. The important
+rule is not the spelling: use the **same intended interpreter** to create an
+environment and invoke its tools.
+
+Create a disposable practice parent rather than experimenting inside an
+important repository:
+
+```bash
+mkdir unit10-practice
+cd unit10-practice
+```
+
+Every lesson shows the expected working directory before shell commands. When a
+command changes files or installs software, read it before running and use the
+disposable workspace.
+
+::: {.callout-warning title="Colab is useful, but it is not the whole project lab"}
+A hosted notebook can demonstrate imports and temporary files, but its runtime
+is replaced and its environment is managed for you. Complete the local project,
+Git, virtual-environment, build, and clean-install steps to observe the contracts
+this unit teaches.
+:::
+
+## 4. Follow one connected sequence
+
+| Step | Lesson | What you will produce |
+|---:|---|---|
+| 1 | [Find the Right Tool Without Memorizing Everything](builtins-standard-library-help.qmd) | A repeatable discovery record that compares built-ins, standard-library tools, installed distributions, and project code. |
+| 2 | [Turn One Script into Reusable Modules](modules-imports-entry-points.qmd) | A multi-file constellation report with imports that behave differently from program entry points. |
+| 3 | [Design a Package People Can Rely On](packages-public-interfaces.qmd) | A package facade whose public imports survive an internal file move. |
+| 4 | [Build a Project You Can Navigate and Share](project-layout-git-essentials.qmd) | A clear `src` project recorded in a small, inspectable Git history. |
+| 5 | [Give Each Project a Clean Python Environment](virtual-environments-dependencies.qmd) | An isolated environment whose interpreter and installed distributions you can identify and recreate. |
+| 6 | [Build and Verify an Installable Python Project](pyproject-builds-tools.qmd) | Metadata, an editable installation, an sdist, a wheel, and a clean-install report. |
+| 7 | [Unit Challenge: Release the Moonlight Cipher Kit](challenge.qmd) | A repaired puzzle package that reveals its phrase through both its public API and installed command. |
+
+The sequence is deliberate. Do not begin by copying a large `pyproject.toml`
+from an unfamiliar repository. First make module and package behavior explicit;
+then metadata can describe a project you understand.
+
+## 5. Use four checkpoints instead of trusting the prompt
+
+At each stage, record four kinds of evidence:
+
+1. **Source evidence:** Which file owns the behavior, and which names form its
+   public contract?
+2. **Process evidence:** Which interpreter ran, from which working directory,
+   with which arguments?
+3. **Environment evidence:** Which environment and installed distribution
+   versions were actually visible?
+4. **Artifact evidence:** Which files entered the sdist or wheel, and did the
+   installed artifact work away from the repository?
+
+Prompt text such as `(.venv)` is a convenience for humans, not proof. An import
+that succeeds beside `src/` is not proof of installation. A successful build is
+not proof that the wheel contains the right files. Prefer commands that expose
+identity and behavior.
+
+## 6. Suggested stopping points
+
+This unit contains roughly 28–36 hours of active work. A useful pace is:
+
+- **Session 1:** tool discovery and documentation experiments;
+- **Sessions 2–3:** modules, import behavior, and execution boundaries;
+- **Session 4:** package interfaces and import debugging;
+- **Session 5:** project layout and a disposable Git history;
+- **Session 6:** environment identity and dependency practice;
+- **Sessions 7–8:** metadata, editable installation, building, inspection, and
+  clean installation;
+- **Session 9:** the Moonlight Cipher Kit challenge.
+
+Stop after a lab passes from a fresh start, not merely when prose ends. Reopen a
+terminal in the project directory and repeat the proof command before moving on.
+
+## 7. What success looks like
+
+By the end, you should be able to receive a small script and turn it into a
+project without guessing:
+
+- discover and justify reused functionality;
+- split code without creating import-time surprises or cycles;
+- state which package names callers may rely on;
+- explain the repository tree to a collaborator;
+- inspect what Git will record before committing;
+- create a disposable environment and identify its interpreter;
+- declare metadata and direct dependencies in one standards-based file;
+- distinguish editable source from a built distribution;
+- inspect wheel contents; and
+- install the exact wheel into a new environment and run it outside the source
+  checkout.
+
+The later units will deepen classes, command-line interfaces, automated testing,
+quality tools, and documentation. Unit 10 supplies the project structure those
+tools will inhabit without trying to teach all of them early.
+
+Continue to [Find the Right Tool Without Memorizing Everything](builtins-standard-library-help.qmd).
 
 <!-- fcpython-chapter-lab: end -->

@@ -42,6 +42,7 @@ Documentation = "https://freecampus.github.io/python/"
 
 [project.optional-dependencies]
 dev = [
+  "build>=1",
   "pytest>=8",
   "pytest-cov>=5",
   "ruff>=0.6",
@@ -52,6 +53,7 @@ dev = [
 docs = []
 
 [tool.poetry.group.dev.dependencies]
+build = ">=1"
 quarto-cli = ">=1.9.0"
 pytest = ">=8"
 pytest-cov = ">=5"

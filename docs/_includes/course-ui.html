@@ -137,7 +137,7 @@
       }
       if (!progress.courses[id] && create) {
         progress.courses[id] = {
-          curriculum_version: 14,
+          curriculum_version: 15,
           completion_rule_version: 9,
           completed_lessons: {},
           completed_challenges: {},
@@ -149,7 +149,7 @@
       }
       const state = progress.courses[id] || null;
       if (state) {
-        state.curriculum_version = 14;
+        state.curriculum_version = 15;
         state.completion_rule_version = 9;
         state.completed_lessons = state.completed_lessons || {};
         state.completed_challenges = state.completed_challenges || {};

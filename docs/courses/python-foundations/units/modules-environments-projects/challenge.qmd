@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Package a Reproducible Text Utility'
-description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+title: 'Unit Challenge: Release the Moonlight Cipher Kit'
+description: Repair, package, build, inspect, and clean-install a moonlit cipher puzzle whose public API and installed command reveal the same hidden phrase.
 challenge_id: modules-environments-projects.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 2
+assessment_version: 3
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,164 +19,758 @@ unit_number: 10
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 10 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
-- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+- **Outcome assessed:** Organize a quiet public package, repair module and console entry points, declare build metadata, isolate its environment, inspect its wheel, and prove the exact artifact works outside the repository.
+- **Evidence:** Thirty progressive checks, one debugging record, artifact inspection, and a clean outside-repository run
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
+
 ## 1. Challenge outcome
 
-The package exposes one public function, declares metadata and a build backend, passes its test, builds a wheel, and imports from a clean environment.
+The Moonlight Museum has recovered four fragments from a lunar vault. The
+decoder works, but an overexcited apprentice scattered it across a broken Python
+package. Importing the package leaks the secret, the advertised command points
+to a missing callable, module mode produces no useful output, the Python version
+claim excludes every real visitor, and Git is preparing to preserve generated
+debris.
 
-**Scenario:** Turn a small text-normalization function into a versioned `src`-layout package that another learner can build, install into a clean environment, and run without relying on the repository working directory.
+Repair and release **Moonlight Cipher Kit 0.1.0**. Both:
 
-::: {.callout-note title="Work independently, but not without support"}
-Use the starter contract, run one group of checks at a time, and open hints only
-after you can state the evidence blocking your next step.
+```bash
+python -m mooncipher
+mooncipher
+```
+
+must reveal exactly:
+
+```text
+OPEN THE LUNAR VAULT
+```
+
+An ordinary `import mooncipher` must print nothing. The phrase must come from
+the package's public decoding behavior—not from a second hard-coded print added
+to each launcher. Finally, build a wheel, inspect it, install that exact file in
+a fresh environment, and repeat the proof from outside the source repository.
+
+::: {.callout-note title="Use evidence, not repeated installation guesses"}
+Run one stage at a time. Repair the earliest failed contract, rerun that stage,
+then continue. Open a hint only after recording the command, observed output,
+and one hypothesis.
 :::
 
 ## 2. Understand the acceptance example
 
-Before implementation, restate the normal input, expected result, important
-boundary, and one anticipated failure in your own words.
+The museum's fragments are:
 
-### Constraints
+```python
+fragments = [" open-", "_the_", " lunar ", "-vault "]
+```
 
-1. Use the package name `studytext` and the supplied public function.
-2. Keep implementation in `src/studytext/normalize.py`.
-3. Re-export `normalize_name` from `studytext`.
-4. Do not commit the virtual environment, build output, or credentials.
+`normalize_fragment(value)` must:
+
+1. treat hyphens and underscores as word separators;
+2. remove surrounding and repeated whitespace;
+3. return uppercase words separated by one ordinary space; and
+4. return `""` when no word remains.
+
+`decode_fragments(values)` normalizes every fragment, discards empty results,
+and joins the remaining text with one space.
+
+```python
+assert normalize_fragment("_open--gate_") == "OPEN GATE"
+assert normalize_fragment("__-") == ""
+assert decode_fragments(fragments) == "OPEN THE LUNAR VAULT"
+assert decode_fragments(["_open_", "", "---", "vault"]) == "OPEN VAULT"
+```
+
+The package root must publicly expose both functions:
+
+```python
+from mooncipher import decode_fragments, normalize_fragment
+```
+
+The callable `main(argv=None)` belongs in `mooncipher.cli`. With no supplied
+fragments it decodes the museum fixture. With a sequence supplied explicitly,
+it decodes that sequence. It prints one result and returns `None`; full CLI
+parsing belongs to Unit 12.
+
+The release metadata contract is:
+
+| Field | Required value |
+|---|---|
+| distribution name | `moonlight-cipher-kit` |
+| version | `0.1.0` |
+| Python | `>=3.10` |
+| build backend | `hatchling.build` |
+| runtime dependencies | none |
+| console command | `mooncipher` |
+| command target | `mooncipher.cli:main` |
 
 ## 3. Start from the contract
 
-```python
-# Create this project tree locally:
-# studytext/
-# ├── pyproject.toml
-# ├── .gitignore
-# ├── src/studytext/__init__.py
-# ├── src/studytext/normalize.py
-# └── tests/test_normalize.py
+Run this bootstrap in a disposable directory. It creates every starter file,
+including deliberate defects. Do not run it inside another project because it
+creates a new `moonlight-cipher-kit` folder.
 
-def normalize_name(value):
-    """Return whitespace-normalized title-case text."""
-    raise NotImplementedError
+```python
+from pathlib import Path
+from textwrap import dedent
+
+root = Path("moonlight-cipher-kit")
+files = {
+    ".gitignore": "*.pyc\n",
+    "README.md": dedent(
+        """\
+        # Moonlight Cipher Kit
+
+        Decode word fragments recovered from the Moonlight Museum's lunar vault.
+        """
+    ),
+    "pyproject.toml": dedent(
+        """\
+        [build-system]
+        requires = ["hatchling>=1.26"]
+        build-backend = "hatchling.build"
+
+        [project]
+        name = "moonlight-cipher-kit"
+        version = "0.1.0"
+        description = "Decode fragments from a moonlit puzzle vault."
+        readme = "README.md"
+        requires-python = ">=99"
+        dependencies = []
+
+        [project.scripts]
+        mooncipher = "mooncipher.cli:launch"
+
+        [tool.hatch.build.targets.wheel]
+        packages = ["src/mooncipher"]
+        """
+    ),
+    "src/mooncipher/decoder.py": dedent(
+        """\
+        def normalize_fragment(value):
+            \"\"\"Return uppercase words separated by one space.\"\"\"
+            separated = value.replace("-", " ").replace("_", " ")
+            return " ".join(separated.split()).upper()
+
+
+        def decode_fragments(values):
+            \"\"\"Normalize fragments and join the non-empty results.\"\"\"
+            cleaned = [normalize_fragment(value) for value in values]
+            return " ".join(value for value in cleaned if value)
+
+
+        print(decode_fragments([" open-", "_the_", " lunar ", "-vault "]))
+        """
+    ),
+    "src/mooncipher/__init__.py": dedent(
+        """\
+        \"\"\"Tools for decoding the Moonlight Museum's fragments.\"\"\"
+        """
+    ),
+    "src/mooncipher/cli.py": dedent(
+        """\
+        import sys
+
+        from .decoder import decode_fragments
+
+        DEFAULT_FRAGMENTS = [" open-", "_the_", " lunar ", "-vault "]
+
+
+        def main(argv=None):
+            \"\"\"Decode supplied fragments, or the museum fixture, and print it.\"\"\"
+            fragments = list(sys.argv[1:] if argv is None else argv)
+            print(decode_fragments(fragments or DEFAULT_FRAGMENTS))
+
+
+        main()
+        """
+    ),
+    "src/mooncipher/__main__.py": dedent(
+        """\
+        from .cli import main
+
+        main
+        """
+    ),
+    "checks/check_release.py": dedent(
+        """\
+        import contextlib
+        import importlib.util
+        import io
+        import os
+        import subprocess
+        import sys
+        import tomllib
+        from email.parser import BytesParser
+        from email.policy import default
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from zipfile import ZipFile
+
+        ROOT = Path(__file__).resolve().parents[1]
+        SOURCE = ROOT / "src" / "mooncipher"
+        EXPECTED = "OPEN THE LUNAR VAULT"
+        checks_run = 0
+
+
+        def check(condition, message):
+            global checks_run
+            assert condition, message
+            checks_run += 1
+
+
+        def environment_python(environment):
+            relative = Path("Scripts/python.exe") if os.name == "nt" else Path("bin/python")
+            return environment / relative
+
+
+        def command_path(environment, name):
+            if os.name == "nt":
+                return environment / "Scripts" / f"{name}.exe"
+            return environment / "bin" / name
+
+
+        def run(command, cwd):
+            return subprocess.run(
+                [str(part) for part in command],
+                cwd=cwd,
+                text=True,
+                capture_output=True,
+            )
+
+
+        def source_checks():
+            required = ["__init__.py", "__main__.py", "cli.py", "decoder.py"]
+            check(all((SOURCE / name).is_file() for name in required), "source files are missing")
+
+            spec = importlib.util.spec_from_file_location("moon_decoder_check", SOURCE / "decoder.py")
+            check(spec is not None and spec.loader is not None, "decoder cannot be loaded")
+            module = importlib.util.module_from_spec(spec)
+            captured = io.StringIO()
+            with contextlib.redirect_stdout(captured):
+                spec.loader.exec_module(module)
+            check(captured.getvalue() == "", "decoder printed during import")
+            check(callable(module.normalize_fragment), "normalize_fragment is missing")
+            check(callable(module.decode_fragments), "decode_fragments is missing")
+            check(module.normalize_fragment("_open--gate_") == "OPEN GATE", "normalization failed")
+            check(module.normalize_fragment("__-") == "", "empty boundary failed")
+            check(
+                module.decode_fragments([" open-", "_the_", " lunar ", "-vault "]) == EXPECTED,
+                "museum phrase failed",
+            )
+            check(module.decode_fragments(["_open_", "", "---", "vault"]) == "OPEN VAULT", "empty fragment filtering failed")
+
+
+        def metadata_checks():
+            data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+            project = data["project"]
+            check(project["name"] == "moonlight-cipher-kit", "distribution name is wrong")
+            check(project["version"] == "0.1.0", "version is wrong")
+            check(project["requires-python"] == ">=3.10", "Python range is wrong")
+            check(project["dependencies"] == [], "runtime dependencies must be empty")
+            check(data["build-system"]["build-backend"] == "hatchling.build", "backend is wrong")
+            check(project["scripts"]["mooncipher"] == "mooncipher.cli:main", "script target is wrong")
+
+
+        def installed_checks():
+            with TemporaryDirectory() as name:
+                outside = Path(name)
+                api = run(
+                    [sys.executable, "-c", "from mooncipher import decode_fragments, normalize_fragment; print(decode_fragments(['open', 'the', 'lunar', 'vault'])); print(normalize_fragment('_moon-gate_'))"],
+                    outside,
+                )
+                check(api.returncode == 0, api.stderr)
+                check(api.stdout.splitlines() == [EXPECTED, "MOON GATE"], "public API or quiet import failed")
+
+                module = run([sys.executable, "-m", "mooncipher"], outside)
+                check(module.returncode == 0, module.stderr)
+                check(module.stdout.strip() == EXPECTED, "module entry point failed")
+
+                command = run([command_path(Path(sys.prefix), "mooncipher")], outside)
+                check(command.returncode == 0, command.stderr)
+                check(command.stdout.strip() == EXPECTED, "console command failed")
+
+
+        def artifact_checks():
+            wheels = sorted((ROOT / "dist").glob("*.whl"))
+            check(len(wheels) == 1, f"expected one wheel, found {len(wheels)}")
+            wheel = wheels[0].resolve()
+            with ZipFile(wheel) as archive:
+                names = archive.namelist()
+                check("mooncipher/decoder.py" in names, "decoder is absent from wheel")
+                check("mooncipher/cli.py" in names, "CLI is absent from wheel")
+                check(not any("__pycache__" in name or name.startswith("checks/") for name in names), "development artifacts entered wheel")
+                metadata_name = next(name for name in names if name.endswith(".dist-info/METADATA"))
+                metadata = BytesParser(policy=default).parsebytes(archive.read(metadata_name))
+                check(metadata["Name"] == "moonlight-cipher-kit" and metadata["Version"] == "0.1.0", "wheel metadata is wrong")
+
+            with TemporaryDirectory() as name:
+                root = Path(name)
+                environment = root / "clean-env"
+                outside = root / "outside"
+                outside.mkdir()
+                subprocess.run([sys.executable, "-m", "venv", str(environment)], check=True)
+                python = environment_python(environment)
+                install = run([python, "-m", "pip", "install", wheel], outside)
+                check(install.returncode == 0, install.stderr)
+                proof = run([python, "-m", "mooncipher"], outside)
+                check(proof.returncode == 0 and proof.stdout.strip() == EXPECTED, proof.stderr or proof.stdout)
+                console = run([command_path(environment, "mooncipher")], outside)
+                check(console.returncode == 0 and console.stdout.strip() == EXPECTED, console.stderr or console.stdout)
+
+
+        STAGES = {
+            "source": source_checks,
+            "metadata": metadata_checks,
+            "installed": installed_checks,
+            "artifact": artifact_checks,
+        }
+
+        if __name__ == "__main__":
+            stage = sys.argv[1] if len(sys.argv) == 2 else ""
+            if stage not in STAGES:
+                raise SystemExit("usage: python checks/check_release.py source|metadata|installed|artifact")
+            STAGES[stage]()
+            print(f"{stage}: {checks_run} checks passed")
+        """
+    ),
+}
+
+for relative_path, content in files.items():
+    destination = root / relative_path
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(content, encoding="utf-8")
+
+print(f"Created {len(files)} files under {root.resolve()}")
 ```
+
+The starter has seven seeded defects:
+
+1. `decoder.py` prints the secret while being imported;
+2. `__init__.py` does not expose the two public functions;
+3. `cli.py` launches `main()` during import;
+4. `__main__.py` refers to `main` but never calls it behind an execution guard;
+5. `requires-python` excludes the course interpreter;
+6. the installed script points to nonexistent `launch`; and
+7. `.gitignore` omits environments, build output, and caches.
+
+Do not add an eighth workaround such as `sys.path.insert`. Repair the owning
+contract.
 
 ## 4. Build in small stages
 
-1. Make the smallest normal case observable.
-2. Run the nearest check and read its complete failure evidence.
-3. Add one boundary behavior without weakening earlier checks.
-4. Restart and run the complete artifact from top to bottom.
+Work from the new `moonlight-cipher-kit` directory.
+
+### Stage A: make source imports quiet
+
+Remove import-time action from `decoder.py`. Keep the two function definitions
+there. The source stage loads that file directly, so it can run before package
+installation:
+
+```bash
+python checks/check_release.py source
+```
+
+Expected final result for this stage:
+
+```text
+source: 9 checks passed
+```
+
+### Stage B: repair metadata before creating the project environment
+
+Correct `requires-python` and the script target, then run:
+
+```bash
+python checks/check_release.py metadata
+```
+
+Expected:
+
+```text
+metadata: 6 checks passed
+```
+
+### Stage C: create one development environment and install editable source
+
+```bash
+python -m venv .venv
+.venv/bin/python -m pip install --editable .
+```
+
+On Windows, use `.venv\Scripts\python.exe`. Prove identity before continuing:
+
+```bash
+.venv/bin/python -c "import sys; print(sys.executable); print(sys.prefix != sys.base_prefix)"
+.venv/bin/python -m pip --version
+```
+
+Repair the package facade, remove the unguarded call from `cli.py`, and make
+`__main__.py` call `main()` only when executed as the top-level module. Then run
+the installed stage through the environment interpreter:
+
+```bash
+.venv/bin/python checks/check_release.py installed
+```
+
+Expected:
+
+```text
+installed: 6 checks passed
+```
+
+### Stage D: protect the repository boundary
+
+Expand `.gitignore`, initialize the disposable repository, and inspect before
+committing:
+
+```bash
+git init
+git status --short --ignored
+git add .gitignore README.md pyproject.toml src checks
+git diff --staged
+git commit -m "Repair moonlight cipher package"
+```
+
+Configure a local course identity first if Git requests one. The staged diff
+must exclude `.venv/`, `dist/`, `build/`, caches, and installed metadata.
+
+### Stage E: build one clean artifact set
+
+Install the build frontend as development tooling, remove stale output, and
+build:
+
+```bash
+.venv/bin/python -m pip install "build>=1"
+rm -rf dist build
+.venv/bin/python -m build
+```
+
+The final artifact stage creates its own second environment and installs the
+exact wheel. It may take longer than the earlier stages:
+
+```bash
+.venv/bin/python checks/check_release.py artifact
+```
+
+Expected:
+
+```text
+artifact: 8 checks passed
+```
+
+Windows learners can remove `dist` and `build` with PowerShell before running
+the same Python check command.
 
 ## 5. Run progressive assertions
 
-```python
-assert normalize_name("  ada   lovelace ") == "Ada Lovelace"
-assert normalize_name("lin") == "Lin"
-assert normalize_name("") == ""
+The harness groups **29 automated checks**. Add this final Git inspection as
+check 30:
 
-# Evidence targets for the local project:
-# python -m venv .venv
-# python -m pip install --editable .
-# pytest -q
-# python -m build
-# python -c "from studytext import normalize_name; print(normalize_name(' ada '))"
-# git status --short
+```bash
+git status --short --ignored
+git log --oneline --decorate -n 2
 ```
 
-::: {.callout-warning title="Do not edit expected values to create a pass"}
-If a check appears wrong, explain the contract conflict before changing either
-side. Otherwise, repair the implementation and preserve the check.
-:::
+Use the list to see progress even before a whole group passes.
+
+### Source contract — checks 1–9
+
+- [ ] all four package source files exist;
+- [ ] the decoder can be loaded from its file;
+- [ ] decoder import prints nothing;
+- [ ] `normalize_fragment` is callable;
+- [ ] `decode_fragments` is callable;
+- [ ] separators and repeated whitespace normalize to `OPEN GATE`;
+- [ ] a separator-only fragment becomes empty text;
+- [ ] museum fragments decode to `OPEN THE LUNAR VAULT`; and
+- [ ] empty normalized fragments do not add extra spaces.
+
+### Metadata contract — checks 10–15
+
+- [ ] distribution name is `moonlight-cipher-kit`;
+- [ ] version is `0.1.0`;
+- [ ] Python requirement is `>=3.10`;
+- [ ] runtime dependency list is empty;
+- [ ] backend is `hatchling.build`; and
+- [ ] script target is `mooncipher.cli:main`.
+
+### Development installation — checks 16–21
+
+- [ ] public API imports in a child process outside the repository;
+- [ ] public import adds no extra output and both API results are correct;
+- [ ] `python -m mooncipher` exits successfully;
+- [ ] module mode prints exactly the phrase;
+- [ ] installed console launcher exits successfully; and
+- [ ] console launcher prints exactly the phrase.
+
+### Wheel and clean installation — checks 22–29
+
+- [ ] exactly one wheel is present;
+- [ ] wheel contains `mooncipher/decoder.py`;
+- [ ] wheel contains `mooncipher/cli.py`;
+- [ ] wheel excludes checks and Python caches;
+- [ ] wheel metadata contains the expected name and version;
+- [ ] exact wheel installs into the fresh environment;
+- [ ] clean module mode prints the phrase outside the repository; and
+- [ ] clean console command prints the phrase outside the repository.
+
+### Repository boundary — check 30
+
+- [ ] Git records only intentional project source; generated/local artifacts
+  are ignored and absent from the commit.
+
+If a group stops on the first assertion, repair it and rerun. The displayed
+count will advance as earlier checks pass.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
 <summary>Hint 1</summary>
 
-`value.split()` removes repeated whitespace; join the pieces before title-casing.
+There should be exactly one owner for decoding and one owner for command action.
+`decoder.py` should contain definitions only. The package root imports the two
+supported functions. Both launch mechanisms should eventually call
+`mooncipher.cli.main`.
+
+Draw these arrows before editing:
+
+```text
+__init__.py  -> decoder.py
+cli.py       -> decoder.py
+__main__.py  -> cli.py
+```
+
+No arrow needs to point back upward.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-`src/studytext/__init__.py` can re-export with `from .normalize import normalize_name`.
+An imported module should not call its own demo. In `cli.py`, retain the
+`main(argv=None)` definition but remove the unguarded final call. In
+`__main__.py`, import `main` and put the call under the same `__name__` guard
+used in the modules lesson. In `pyproject.toml`, the script target uses
+`module:attribute` without parentheses.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-Use a standards-compliant `[build-system]` and `[project]` in `pyproject.toml`; verify the resulting wheel in `dist/`.
+The package initializer needs explicit relative re-exports and `__all__`. The
+Python requirement is the course minimum, not a fictional future version. A
+useful ignore file covers `.venv/`, `__pycache__/`, `*.py[cod]`, `*.egg-info/`,
+`build/`, `dist/`, and common tool caches. After every metadata or source
+repair, rerun editable installation before judging its installed entry points.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing check. Record its inputs, actual result or exception,
-expected result, one hypothesis, one controlled change, and the verified rerun.
+Preserve one failure that changed your understanding. A useful record has this
+shape:
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
-|---|---|---|---|---|
-| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+| Field | Your evidence |
+|---|---|
+| Stage and command | for example, `.venv/bin/python checks/check_release.py installed` |
+| Interpreter | output of `sys.executable` |
+| Working directory | absolute project path or temporary outside path |
+| Observed result | return code plus exact stdout/stderr |
+| Contract | what should have been quiet or printed exactly once |
+| Hypothesis | one ownership, metadata, environment, or artifact explanation |
+| Controlled repair | one changed file and why it owns the contract |
+| Regression proof | rerun stage plus one later stage |
 
-## 8. Compare with a solution path
+For example, two copies of the secret phrase suggest two execution paths, not a
+string-normalization bug. A traceback naming `launch` suggests entry-point
+metadata, not a missing wheel. A `Requires-Python` refusal points at compatibility
+metadata before source execution begins.
 
-<details>
-<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+Do not erase the failed output after repairing it. The contrast between failure
+and proof is part of the challenge result.
 
-```python
-def normalize_name(value):
-    """Return whitespace-normalized title-case text."""
-    return " ".join(value.split()).title()
+## 8. Compare with a complete solution
 
+<details class="solution">
+<summary>Show every final project file after attempting all stages</summary>
 
-# A complete solution also includes project metadata, the public re-export,
-# tests, ignore rules, a clean build, and a focused Git history.
+`.gitignore`:
+
+```gitignore
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 ```
 
-Compare contracts and decisions, not only line-for-line syntax. If your solution
-also satisfies the constraints and checks, explain one trade-off between the
-approaches.
+`README.md`:
+
+```markdown
+# Moonlight Cipher Kit
+
+Decode word fragments recovered from the Moonlight Museum's lunar vault.
+
+Run `python -m mooncipher` or the installed `mooncipher` command to reveal the
+museum fixture.
+```
+
+`pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "moonlight-cipher-kit"
+version = "0.1.0"
+description = "Decode fragments from a moonlit puzzle vault."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+mooncipher = "mooncipher.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mooncipher"]
+```
+
+`src/mooncipher/decoder.py`:
+
+```python
+def normalize_fragment(value):
+    """Return uppercase words separated by one space."""
+    separated = value.replace("-", " ").replace("_", " ")
+    return " ".join(separated.split()).upper()
+
+
+def decode_fragments(values):
+    """Normalize fragments and join the non-empty results."""
+    cleaned = [normalize_fragment(value) for value in values]
+    return " ".join(value for value in cleaned if value)
+```
+
+`src/mooncipher/__init__.py`:
+
+```python
+"""Tools for decoding the Moonlight Museum's fragments."""
+
+from .decoder import decode_fragments, normalize_fragment
+
+__all__ = ["decode_fragments", "normalize_fragment"]
+```
+
+`src/mooncipher/cli.py`:
+
+```python
+import sys
+
+from .decoder import decode_fragments
+
+DEFAULT_FRAGMENTS = [" open-", "_the_", " lunar ", "-vault "]
+
+
+def main(argv=None):
+    """Decode supplied fragments, or the museum fixture, and print it."""
+    fragments = list(sys.argv[1:] if argv is None else argv)
+    print(decode_fragments(fragments or DEFAULT_FRAGMENTS))
+```
+
+`src/mooncipher/__main__.py`:
+
+```python
+from .cli import main
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Keep the starter `checks/check_release.py` unchanged. It is development support,
+not part of the import package. Run all four stages again from clean source and
+verify the staged Git diff excludes generated paths.
 
 </details>
 
-## 9. Check your understanding
+## 9. Adapt to a changed museum rule
+
+The museum finds a fifth fragment, `_TONIGHT_`. Prepare release `0.2.0` so the
+default phrase becomes:
+
+```text
+OPEN THE LUNAR VAULT TONIGHT
+```
+
+Requirements:
+
+1. change the version in project metadata;
+2. extend `DEFAULT_FRAGMENTS` rather than hard-coding a new final phrase;
+3. keep `decode_fragments` and its original assertions compatible;
+4. update the expected fixture in the check harness;
+5. remove old `dist/` artifacts before rebuilding;
+6. inspect wheel metadata for `0.2.0`; and
+7. clean-install the new exact wheel and prove both entry routes outside the
+   repository.
+
+Explain why changing only `EXPECTED` in the harness would manufacture a failure
+rather than implement the new product rule. Then create one focused Git commit
+whose staged diff contains the version, fixture, and expectation changes but no
+wheel or environment.
+
+## 10. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-modules-environments-projects-challenge",
-  "title": "Package a Reproducible Text Utility readiness check",
-  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "title": "Moonlight Cipher release check",
+  "instructions": "Connect each answer to the package, environment, and artifact evidence.",
   "questions": [
     {
-      "id": "design-boundary",
-      "prompt": "What proves that the package does not depend on the repository working directory?",
-      "options": [
-        "Running the source file only from its own directory.",
-        "Keeping the virtual environment in Git.",
-        "Renaming the wheel after it builds.",
-        "Installing the built artifact in a clean environment and importing its public API."
-      ],
-      "answer_index": 3,
-      "explanation": "Installing the built artifact in a clean environment and importing its public API."
+      "id": "quiet-decoder-import",
+      "prompt": "Where should the unconditional demo print be removed first?",
+      "options": ["Only from the README", "Only from the check harness", "From `decoder.py`, because importing reusable definitions must be quiet", "From the wheel filename"],
+      "answer_index": 2,
+      "explanation": "The decoder owns reusable behavior. Entry modules decide when the program action runs."
     },
     {
-      "id": "clean-evidence",
-      "prompt": "What should happen before recording this challenge as complete?",
-      "options": [
-        "The unchanged checks pass from a clean state and the important decisions can be explained.",
-        "The expected values are edited to match the current output.",
-        "Only the final successful line is kept.",
-        "Several unrelated features are added."
-      ],
+      "id": "console-target-contract",
+      "prompt": "Which script target matches the repaired callable?",
+      "options": ["`src/mooncipher/cli.py()`", "`moonlight-cipher-kit:main`", "`mooncipher.cli.launch`", "`mooncipher.cli:main`"],
+      "answer_index": 3,
+      "explanation": "Entry-point metadata uses an importable module, a colon, and the callable attribute without parentheses."
+    },
+    {
+      "id": "outside-wheel-proof",
+      "prompt": "What is the strongest evidence that the wheel—not repository source—reveals the phrase?",
+      "options": ["Install the exact wheel in a fresh environment and run from an unrelated directory.", "Run the editable package from the repository root.", "Read only the source TOML.", "Keep several old wheels and choose one arbitrarily."],
       "answer_index": 0,
-      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+      "explanation": "The fresh interpreter, exact artifact, and outside working directory remove source-tree shortcuts."
+    },
+    {
+      "id": "git-artifact-boundary",
+      "prompt": "Which path belongs in the commit for this challenge?",
+      "options": ["`.venv/`", "`src/mooncipher/decoder.py`", "`dist/*.whl`", "`__pycache__/`"],
+      "answer_index": 1,
+      "explanation": "The decoder is deliberate project source; environments, caches, and locally reproducible build output remain ignored."
+    },
+    {
+      "id": "changed-rule-implementation",
+      "prompt": "How should release 0.2.0 add `TONIGHT` while preserving the decoder contract?",
+      "options": ["Replace `decode_fragments` with one hard-coded phrase.", "Edit only the expected assertion.", "Extend the default fragment fixture, bump metadata, rebuild, and repeat clean verification.", "Commit the old virtual environment."],
+      "answer_index": 2,
+      "explanation": "The changed input rule belongs in the default fixture, while versioned metadata and artifact evidence must follow the changed product."
     }
   ]
 }
@@ -184,20 +778,20 @@ approaches.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 10. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
-### Evidence rubric
+Record completion only after:
 
-| Evidence | Ready to record when |
-|---|---|
-| Behavior | Acceptance examples and progressive checks pass unchanged. |
-| Scope | The artifact follows the constraints without unrelated features. |
-| Reasoning | Important values, boundaries, and design choices can be traced. |
-| Debugging | One record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+- source, metadata, installed, and artifact stages all pass;
+- check 30 confirms generated paths stayed out of Git;
+- imports are quiet and both entry routes print exactly one phrase;
+- the wheel's package files and metadata were inspected;
+- the clean installation ran outside the repository;
+- one debugging record contains before-and-after evidence; and
+- the `0.2.0` changed rule also passes from a rebuilt, clean-installed wheel.
 
-This button stores a self-reported marker only in this browser. It does not
-submit work, grade it, verify identity, or issue a certificate.
+This button records progress only in this browser. It does not submit work,
+grade it, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -211,7 +805,14 @@ submit work, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows design choices without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- Reusable modules define behavior without launching demonstrations at import.
+- Package facades and both entry routes should point toward one-directional
+  ownership, not duplicate the secret phrase.
+- Metadata errors can prevent installation before product source runs; diagnose
+  the layer named by the evidence.
+- Environment Python, module origin, wheel contents, and installed metadata are
+  stronger proof than a prompt or successful build message.
+- A fresh environment outside the repository tests the artifact a user actually
+  receives.
+- Git should preserve deliberate source and configuration, not disposable
+  environments, caches, or local build output.

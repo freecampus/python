@@ -1,13 +1,15 @@
 ---
-title: Virtual Environments and Dependencies
+title: Give Each Project a Clean Python Environment
 lesson_id: modules-environments-projects.virtual-environments-dependencies
 lesson_order: 50
-description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+description: Create, identify, use, inspect, and recreate isolated Python environments while distinguishing direct, transitive, runtime, and development dependencies.
 execute:
   echo: true
 categories:
 - python-foundations
 - modules-environments-projects
+- virtual-environments
+- dependencies
 order: 50
 colab_notebook: notebooks/courses/python-foundations/units/modules-environments-projects/virtual-environments-dependencies.ipynb
 course_id: python-foundations
@@ -15,236 +17,214 @@ unit_id: modules-environments-projects
 unit_number: 10
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner to intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Use virtual environments, install packages, and understand pyproject.toml.
-- **Practice in:** VS Code and the terminal
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Create a project environment, prove interpreter and installer identity, install through that interpreter, classify dependency relationships, compare declarations with environment snapshots, and recreate rather than move an environment.
+- **Practice in:** A local terminal and disposable project; selected identity checks also run in notebooks
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+Project A needs one set of installed distributions; Project B needs another.
+Installing everything into one shared Python makes both projects depend on
+invisible machine history. A virtual environment gives one project an isolated
+Python installation area. It does not replace project metadata, prove that the
+right interpreter ran, or make an environment portable by magic.
 
-Use virtual environments, install packages, and understand pyproject.toml. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+You will create two disposable environments for the constellation project and
+answer:
 
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Environments and Dependencies** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
+- Which interpreter created and runs the environment?
+- What changes when an environment is activated?
+- Why is `environment_python -m pip` stronger than trusting a prompt label?
+- Which dependencies should the project declare directly?
+- How do declarations, constraints, environment snapshots, and lock files differ?
+- Why should a broken or moved environment normally be recreated?
+
+## 1. An environment connects one project to one interpreter context
+
+A virtual environment contains or references a Python executable and has its
+own installation directories. Packages installed there do not enter another
+ordinary virtual environment.
 
 ::: {.concept-diagram}
-An isolated environment connects one project to an explicit interpreter and dependency set.
+Two projects can begin from the same base Python while receiving separate
+interpreters, installers, and installed distributions.
 
 ```{mermaid}
 %%| echo: false
 %%| eval: true
-flowchart LR
-  project["Project configuration"] --> environment["Virtual environment"]
-  environment --> python["Python interpreter"]
-  environment --> dependencies["Declared dependencies"]
-  python --> checks["Repeatable project checks"]
-  dependencies --> checks
+flowchart TD
+  base["Base Python installation"] --> envA["Project A .venv"]
+  base --> envB["Project B .venv"]
+  envA --> pythonA["Environment Python"]
+  envA --> packagesA["Project A distributions"]
+  envB --> pythonB["Environment Python"]
+  envB --> packagesB["Project B distributions"]
+  configA["Project A declarations"] -.-> packagesA
+  configB["Project B declarations"] -.-> packagesB
 ```
+
+Isolation prevents ordinary cross-environment package visibility. It does not
+isolate files, network access, operating-system libraries, or every environment
+variable.
 :::
 
-## 2. Virtual Environments
-
-Create isolated Python environments for project dependencies.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A virtual environment is a separate lunchbox: one project's ingredients do not spill into another's.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A virtual environment gives one project its own installed packages.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+Before creating anything, identify the current interpreter:
 
 ```python
+import sys
 
+print("executable:", sys.executable)
+print("version:", sys.version.split()[0])
+print("prefix:", sys.prefix)
+print("base prefix:", sys.base_prefix)
 ```
 
-### Trace it line by line
+Outside a typical virtual environment, `sys.prefix` and `sys.base_prefix` are
+usually equal. Inside one, `sys.prefix` points at the environment while
+`sys.base_prefix` points at the base installation used to create it.
+
+This check is more dependable than reading the terminal prompt:
+
+```python
+import sys
+
+inside_virtual_environment = sys.prefix != sys.base_prefix
+print("inside virtual environment:", inside_virtual_environment)
+```
+
+Some environment tools use different mechanisms, so this exact comparison is a
+`venv`-focused diagnostic rather than a universal environment detector.
+
+## 2. Create `.venv` with the intended Python
+
+From the `constellation-report` project root, run:
+
+```bash
+python -m venv .venv
+```
+
+This says: ask the `python` resolved by the shell to run the standard-library
+`venv` module and create an environment at `.venv`. Check `python --version`
+first if the project requires a particular Python line.
+
+`.venv` is a common local name because editors recognize it and one ignore rule
+is simple. The name is convention, not Python syntax. Keep it in `.gitignore`:
+
+```gitignore
+.venv/
+```
+
+Virtual environments contain machine-specific paths and installed artifacts.
+Do not commit them. Commit the project declarations used to create them.
+
+### Locate the environment interpreter portably
+
+The executable path differs by platform:
+
+```python
+from pathlib import Path
+import os
 
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+def environment_python(environment_directory):
+    """Return the conventional Python executable inside a venv directory."""
+    root = Path(environment_directory)
+    if os.name == "nt":
+        return root / "Scripts" / "python.exe"
+    return root / "bin" / "python"
 
-::: {.callout-warning title="Common mistake"}
-Installing packages before activating the environment often installs them in the wrong place. Check which python.
-:::
 
-### Practice virtual environments
+print(environment_python(".venv"))
+```
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Virtual Environments**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+On POSIX systems the result is `.venv/bin/python`; on Windows it is
+`.venv\Scripts\python.exe`. Use the path shown for your platform in later
+commands.
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+Verify that executable directly:
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+```bash
+.venv/bin/python -c "import sys; print(sys.executable); print(sys.prefix); print(sys.base_prefix)"
+```
 
-</details>
+Windows PowerShell equivalent:
 
-### Check your understanding
+```powershell
+.venv\Scripts\python.exe -c "import sys; print(sys.executable); print(sys.prefix); print(sys.base_prefix)"
+```
+
+The output path should resolve inside `.venv`, and prefix should differ from
+base prefix.
+
+### Create and inspect an environment from Python
+
+This complete example uses a temporary workspace and never depends on shell
+activation:
+
+```python
+import os
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+
+def environment_python(environment_directory):
+    root = Path(environment_directory)
+    relative = Path("Scripts/python.exe") if os.name == "nt" else Path("bin/python")
+    return root / relative
+
+
+with TemporaryDirectory() as temporary_name:
+    environment = Path(temporary_name) / "practice-env"
+    subprocess.run([sys.executable, "-m", "venv", str(environment)], check=True)
+    python = environment_python(environment)
+    result = subprocess.run(
+        [
+            str(python),
+            "-c",
+            "import sys; print(sys.executable); "
+            "print(sys.prefix != sys.base_prefix)",
+        ],
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    print(result.stdout)
+```
+
+The child process identifies itself. No prompt decoration is involved.
+
+### Checkpoint: prove environment identity
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "modules-environments-projects-environments-and-dependencies-virtual-environments",
-  "title": "Virtual Environments checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit10-environments-identity",
+  "title": "Identify the Python that will actually run",
+  "instructions": "Choose the observation that proves interpreter identity.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Virtual Environments?",
-      "options": [
-        "Packages extend Python with code written by other people.",
-        "pyproject.toml records project metadata, dependencies, and tool configuration.",
-        "A virtual environment gives one project its own installed packages.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
-      "answer_index": 2,
-      "explanation": "A virtual environment gives one project its own installed packages."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 3. Installing Packages
-
-Install third-party libraries and record what your project needs.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-Installing a package is borrowing a specialized tool from a community workshop.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Packages extend Python with code written by other people.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-
-```
-
-### Trace it line by line
-
-
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Use python -m pip so pip belongs to the Python interpreter you are using.
-:::
-
-### Practice installing packages
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Installing Packages**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "modules-environments-projects-environments-and-dependencies-installing-packages",
-  "title": "Installing Packages checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to Installing Packages?",
-      "options": [
-        "A virtual environment gives one project its own installed packages.",
-        "pyproject.toml records project metadata, dependencies, and tool configuration.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "Packages extend Python with code written by other people."
-      ],
-      "answer_index": 3,
-      "explanation": "Packages extend Python with code written by other people."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 4. pyproject.toml
-
-Understand the configuration file used by modern Python projects.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-pyproject.toml is a project recipe card: name, ingredients, tools, and rules in one place.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** pyproject.toml records project metadata, dependencies, and tool configuration.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-
-```
-
-### Trace it line by line
-
-
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Configuration files are read by tools. A typo may not fail until that tool runs.
-:::
-
-### Practice pyproject.toml
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **pyproject.toml**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "modules-environments-projects-environments-and-dependencies-pyproject-toml",
-  "title": "pyproject.toml checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to pyproject.toml?",
-      "options": [
-        "pyproject.toml records project metadata, dependencies, and tool configuration.",
-        "A virtual environment gives one project its own installed packages.",
-        "Packages extend Python with code written by other people.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
+      "id": "strong-interpreter-proof",
+      "prompt": "Which check most directly proves that a command used `.venv`?",
+      "options": ["Run `.venv`'s Python and print `sys.executable` and prefixes.", "Look only for `(.venv)` in the prompt.", "Check that a `.venv` directory name exists.", "Run an unrelated system command."],
       "answer_index": 0,
-      "explanation": "pyproject.toml records project metadata, dependencies, and tool configuration."
+      "explanation": "The interpreter reports its own executable and installation prefixes; prompt text is only shell convenience."
+    },
+    {
+      "id": "venv-isolation-scope",
+      "prompt": "What does an ordinary virtual environment primarily isolate?",
+      "options": ["All files and network access", "Python interpreter context and installed distributions", "Git history", "Operating-system accounts"],
+      "answer_index": 1,
+      "explanation": "A venv separates Python installation locations; it is not a container or general security boundary."
+    },
+    {
+      "id": "venv-source-control",
+      "prompt": "What should normally be committed instead of the `.venv` directory?",
+      "options": ["The interpreter binary", "Every cache file", "Project metadata and dependency declarations", "The terminal prompt"],
+      "answer_index": 2,
+      "explanation": "Declarations are portable project source; the machine-specific environment can be recreated from them."
     }
   ]
 }
@@ -252,18 +232,529 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 5. Integrate the lesson
+## 3. Activation changes command lookup; it does not create the environment
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+Activation prepends the environment's executable directory to the current
+shell's command search path and usually changes the prompt. Common commands are:
 
-## 6. Key points
+```bash
+# macOS, Linux, and many POSIX shells
+source .venv/bin/activate
+```
 
-- **Virtual Environments:** A virtual environment gives one project its own installed packages.
-- **Installing Packages:** Packages extend Python with code written by other people.
-- **pyproject.toml:** pyproject.toml records project metadata, dependencies, and tool configuration.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+```powershell
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
+
+After activation, `python` should resolve to the environment executable:
+
+```bash
+python -c "import sys; print(sys.executable)"
+python -m pip --version
+```
+
+Activation is convenient for repeated interactive commands. It is not required.
+Scripts, editors, CI jobs, and careful diagnostics can invoke the environment's
+Python by full path.
+
+The prompt can mislead when:
+
+- a shell startup script customizes it;
+- an editor launches a different interpreter;
+- another activation changes lookup order;
+- a copied prompt is shown in instructions; or
+- a command is run in a different terminal.
+
+Trust `sys.executable` and `python -m pip --version`, which reports both pip's
+version and installation location.
+
+Deactivate only changes the current shell's lookup configuration:
+
+```bash
+deactivate
+```
+
+It does not delete the environment or uninstall its packages.
+
+## 4. Install through the interpreter that should receive the package
+
+Prefer this shape:
+
+```bash
+python -m pip install SOME_DISTRIBUTION
+```
+
+When activated, first verify `python`. Without activation, use the explicit
+environment path:
+
+```bash
+.venv/bin/python -m pip install SOME_DISTRIBUTION
+```
+
+The selected interpreter loads its `pip` module. A bare `pip` executable can be
+associated with another Python on the shell path.
+
+Before adding anything, inspect the environment without network access:
+
+```bash
+.venv/bin/python -m pip --version
+.venv/bin/python -m pip list
+.venv/bin/python -m pip check
+```
+
+- `pip --version` exposes pip's path and Python association.
+- `pip list` reports installed distributions.
+- `pip check` reports incompatible or missing requirements among installed
+  distributions; silence means it found no such inconsistency, not that the
+  whole application works.
+
+### Observe isolation with metadata
+
+```python
+from importlib.metadata import distributions
+
+installed = sorted(
+    distribution.metadata["Name"]
+    for distribution in distributions()
+    if distribution.metadata["Name"]
+)
+print(installed[:10])
+```
+
+Run it with base Python and environment Python. The lists may differ. A newly
+created `venv` normally includes pip unless created with `--without-pip`, but
+the exact bootstrap versions depend on the Python installation.
+
+Do not teach environment isolation by installing random packages globally.
+Use disposable environments and delete them when finished.
+
+### Run an interpreter mismatch clinic
+
+When installation succeeds but import fails, compare the installer report and
+runtime in the same terminal:
+
+```bash
+python -c "import sys; print(sys.executable)"
+python -m pip --version
+python -m pip show pip
+```
+
+All reported locations should belong to the intended context. Classify the
+evidence before repairing:
+
+| Evidence | Likely explanation | Next controlled check |
+|---|---|---|
+| `sys.executable` is outside `.venv` | shell/editor selected another Python | invoke `.venv` Python by full path |
+| pip path is outside the printed Python's environment | command spelling mixed launchers | use that Python with `-m pip` |
+| distribution appears in `pip show`, but import name fails | distribution/import names may differ | read primary package usage docs and installed metadata |
+| module origin is a project file with the same name | local shadowing | print `module.__file__` from a fresh process |
+| package imports in one kernel after uninstall | cached module remains in memory | restart and rerun the exact import |
+
+Do not respond to all five cases with another `pip install`. Repeated
+installation into the wrong interpreter can report success forever while the
+runtime remains unchanged.
+
+Capture both standard channels when a child interpreter fails:
+
+```python
+import subprocess
+import sys
+
+result = subprocess.run(
+    [sys.executable, "-m", "pip", "show", "definitely-not-installed"],
+    text=True,
+    capture_output=True,
+)
+print("return code:", result.returncode)
+print("stdout:", result.stdout)
+print("stderr:", result.stderr)
+```
+
+The exact wording can vary across pip releases, so build the diagnosis around
+the return code, selected interpreter, and distribution identity rather than a
+fragile substring alone.
+
+### Checkpoint: route installations deliberately
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit10-environments-install",
+  "title": "Send commands to the intended environment",
+  "instructions": "Choose the command or interpretation with the strongest identity link.",
+  "questions": [
+    {
+      "id": "module-pip-reason",
+      "prompt": "Why prefer `.venv/bin/python -m pip ...` during diagnosis?",
+      "options": ["It installs without an environment.", "It guarantees every release is compatible.", "It skips distribution metadata.", "It explicitly connects pip to the environment interpreter being invoked."],
+      "answer_index": 3,
+      "explanation": "The interpreter selects and runs its pip module, avoiding ambiguity from a separate bare `pip` launcher."
+    },
+    {
+      "id": "activation-role",
+      "prompt": "What is activation mainly doing for the current shell?",
+      "options": ["Changing command lookup so the environment executables are found first", "Building a wheel", "Committing installed packages", "Moving the environment to another computer"],
+      "answer_index": 0,
+      "explanation": "Activation is shell convenience; the environment already exists and can be addressed directly."
+    },
+    {
+      "id": "pip-check-limit",
+      "prompt": "`python -m pip check` reports no problems. What has been established?",
+      "options": ["Every application behavior is correct.", "Installed requirements have no inconsistency that pip detected.", "The wheel contains all project files.", "The environment is portable."],
+      "answer_index": 1,
+      "explanation": "Dependency consistency is one check; imports, project behavior, and built artifacts need separate verification."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Declare direct needs, not the entire environment accident
+
+Dependency words describe different relationships:
+
+| Kind | Meaning | Constellation example |
+|---|---|---|
+| Direct | The project intentionally imports or invokes it | a future astronomy library imported by project source |
+| Transitive | A direct dependency needs it | a parsing library needed internally by that astronomy distribution |
+| Runtime | Users need it to run product behavior | the astronomy library if report calculation imports it |
+| Development | Maintainers need it to build, check, or document | `build`, pytest, Ruff, or a documentation generator |
+| Optional | Needed only for a named extra feature | plotting support not used by the base report |
+
+Declare direct project requirements. Do not copy every transitive package from
+`pip freeze` into runtime dependencies. The direct distribution owns its own
+requirements, and duplicating the entire graph hides which relationships your
+project actually chose.
+
+For the current constellation package, all runtime behavior uses Python's
+standard library. The runtime dependency list can be empty. The repository will
+use `build` during development in Lesson 6, so `build` is a development tool—not
+runtime baggage for users of `constellation`.
+
+### Derive direct dependencies from source responsibilities
+
+Start with project-owned import statements and external processes. Classify
+each top-level name:
+
+```python
+# Standard-library imports: no distribution declaration is added for these.
+from collections import Counter
+from pathlib import Path
+
+# Project-package import: delivered by this distribution itself.
+# from constellation import observation_line
+
+# Hypothetical third-party import: map it to its providing distribution.
+# import astronomy_catalog
+```
+
+Do not turn the text after every `import` into a pip name mechanically. A name
+may be standard library, project source, or supplied by a differently named
+distribution. Confirm the third-party mapping in that project's primary
+installation documentation and installed metadata.
+
+Then ask where the import occurs. If product source imports
+`astronomy_catalog`, users need its distribution at runtime. If only a local
+build script imports `build`, it is development tooling. If a tutorial notebook
+uses plotting but the package does not, decide whether that notebook is a
+supported development environment, an optional extra, or merely an external
+example. Location alone is a clue; the documented product workflow supplies the
+final classification.
+
+Transitive packages can appear in `pip list` even though no project source names
+them. Removing one manually may break the direct dependency that selected it.
+Let the installer resolve declared relationships, and use `python -m pip check`
+after controlled changes.
+
+### Read a dependency specification
+
+Examples of distribution requirement strings are:
+
+```text
+example-reader>=2
+example-reader>=2,<3
+example-reader~=2.4
+example-reader; python_version < "3.12"
+```
+
+These are demonstrations of syntax, not recommendations for a real distribution
+named `example-reader`.
+
+- `>=2` sets a lower bound but allows future major releases.
+- `>=2,<3` sets an inclusive lower and exclusive upper range.
+- `~=2.4` expresses compatible release behavior as defined by the packaging
+  specification.
+- the marker applies the requirement only when its condition is true.
+
+Choose bounds from tested compatibility and project policy, not habit. `==` can
+be useful in a controlled application lock but is often too restrictive for a
+reusable library dependency declaration. Leaving every dependency unbounded is
+also a policy choice with risks.
+
+## 6. Declarations, constraints, snapshots, and locks answer different questions
+
+These artifacts are related but not interchangeable:
+
+### Project declaration
+
+`pyproject.toml` says what direct distributions and Python versions the project
+requires. It is maintained as part of source and used when building/installing.
+
+### Environment snapshot
+
+```bash
+python -m pip freeze
+```
+
+This reports installed distribution versions in the current environment. It is
+useful diagnostic evidence, but it may include unrelated, transitive, editable,
+or manually installed content. It does not explain why each item belongs.
+
+### Constraints file
+
+A pip constraints file limits versions considered during an installation but
+does not itself request installation of every listed project. It is an
+environment-control input, not a package's runtime metadata.
+
+### Tool-specific lock file
+
+Some project managers resolve dependencies and record a repeatable set in a lock
+format. Lock semantics, supported targets, and installation commands belong to
+that tool. Python packaging does not currently make every lock file universal
+across every workflow.
+
+Use precise statements: “this is the project's declared range,” “this is what
+was installed here,” or “this tool resolved this lock.” Avoid saying any one of
+them is simply “the dependencies” without context.
+
+### Compare declarations with observations
+
+`importlib.metadata.requires` reads an installed distribution's recorded
+requirements:
+
+```python
+from importlib.metadata import PackageNotFoundError, requires
+
+try:
+    requirements = requires("pip") or []
+    print(requirements[:5])
+except PackageNotFoundError:
+    print("pip distribution metadata was not found")
+```
+
+This reports metadata from this installed environment. It does not edit
+`pyproject.toml` and does not decide what your project should declare.
+
+## 7. Recreate environments instead of moving or repairing them forever
+
+Virtual environments embed absolute paths in scripts and are generally not
+portable. If the project directory moves, Python is upgraded, or the environment
+becomes mysterious, recreation is usually safer:
+
+```bash
+# Run only after leaving/deactivating the environment.
+rm -rf .venv
+python -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+```
+
+On Windows, remove `.venv` through PowerShell or the file explorer, then use the
+Windows interpreter path. In an offline or tightly controlled environment, do
+not upgrade from the network casually; use the organization's approved package
+source and versions.
+
+After Lesson 6 supplies project metadata, the recreation flow continues:
+
+```bash
+.venv/bin/python -m pip install --editable .
+.venv/bin/python -m pip check
+.venv/bin/python -c "import constellation; print(constellation.__file__)"
+```
+
+The declarations and source are durable. `.venv` is disposable.
+
+### Run a two-environment identity lab
+
+The following creates two environments without third-party downloads:
+
+```python
+import os
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+
+def environment_python(environment_directory):
+    root = Path(environment_directory)
+    relative = Path("Scripts/python.exe") if os.name == "nt" else Path("bin/python")
+    return root / relative
+
+
+with TemporaryDirectory() as temporary_name:
+    root = Path(temporary_name)
+    environments = [root / "alpha", root / "beta"]
+
+    for environment in environments:
+        subprocess.run([sys.executable, "-m", "venv", str(environment)], check=True)
+
+    identities = []
+    for environment in environments:
+        python = environment_python(environment)
+        result = subprocess.run(
+            [str(python), "-c", "import sys; print(sys.executable)"],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        identities.append(Path(result.stdout.strip()).resolve())
+
+    assert identities[0] != identities[1]
+    assert all(identity.exists() for identity in identities)
+    print(*identities, sep="\n")
+```
+
+Extend the lab:
+
+1. run `-m pip --version` through each interpreter;
+2. print `sys.prefix` and `sys.base_prefix` in each;
+3. record the output in a table;
+4. delete `alpha` after its process exits;
+5. recreate `alpha`; and
+6. explain why its path can match the old spelling even though it is a new
+   environment.
+
+<details class="solution">
+<summary>Compare a compact environment evidence helper</summary>
+
+```python
+import json
+import subprocess
+
+
+def environment_evidence(python_executable):
+    """Return identity evidence reported by one Python interpreter."""
+    program = (
+        "import json, sys; "
+        "print(json.dumps({"
+        "'executable': sys.executable, "
+        "'prefix': sys.prefix, "
+        "'base_prefix': sys.base_prefix, "
+        "'version': sys.version.split()[0]}))"
+    )
+    result = subprocess.run(
+        [str(python_executable), "-c", program],
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return json.loads(result.stdout)
+```
+
+The function trusts the child interpreter's report, not the parent process's
+assumption. A recreated directory can reuse a path, but its installed state is
+new and must be restored from declarations.
+
+</details>
+
+### Checkpoint: explain and recreate the dependency context
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit10-environments-dependencies",
+  "title": "Keep declarations and observations distinct",
+  "instructions": "Choose the artifact or dependency relationship described.",
+  "questions": [
+    {
+      "id": "direct-runtime-dependency",
+      "prompt": "Project source imports a third-party astronomy package, which itself installs a parser. What should the project normally declare directly?",
+      "options": ["Every distribution ever installed", "Only the parser", "The astronomy distribution it intentionally uses", "The `.venv` directory"],
+      "answer_index": 2,
+      "explanation": "Declare the chosen direct relationship; the astronomy distribution records its own transitive parser requirement."
+    },
+    {
+      "id": "freeze-meaning",
+      "prompt": "What does `python -m pip freeze` primarily report?",
+      "options": ["Why every dependency was chosen", "The only valid project metadata", "A universal cross-tool lock", "Installed distribution versions observed in the current environment"],
+      "answer_index": 3,
+      "explanation": "A freeze is an environment observation and may contain transitive or unrelated state; it is not a rationale."
+    },
+    {
+      "id": "move-venv-repair",
+      "prompt": "A project and its `.venv` were moved, and launchers contain old paths. What is the normal repair?",
+      "options": ["Recreate the environment from the intended Python and project declarations.", "Commit and share the broken environment.", "Edit every generated script manually.", "Add random directories to `sys.path`."],
+      "answer_index": 0,
+      "explanation": "Virtual environments are disposable and generally non-portable; declarations make reliable recreation possible."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+### Write a recreation note another learner can follow
+
+Finish with a short environment handoff that contains commands and expected
+identity evidence, not a copy of your prompt:
+
+```text
+Supported Python: 3.10 or newer for this exercise
+Environment path: .venv (ignored and disposable)
+Create:           python -m venv .venv
+Install project:  .venv/bin/python -m pip install --editable .
+Verify identity:  .venv/bin/python -c "import sys; print(sys.executable)"
+Check metadata:   .venv/bin/python -m pip check
+Run:              .venv/bin/python -m constellation
+```
+
+Provide the Windows executable spelling beside this POSIX version when the
+audience uses both platforms. Do not paste `pip freeze` as though it explains
+the project. If a tool-specific lock is part of the chosen workflow, name the
+tool and the exact lock-based install command.
+
+Test the note yourself from an empty environment directory. A useful handoff
+lets a learner answer:
+
+- which base Python should create the environment;
+- which path is safe to delete and recreate;
+- which command installs declared project needs;
+- which command proves the runtime interpreter;
+- which command checks installed requirement consistency; and
+- which behavior proves the project is ready for the next packaging step.
+
+Record any package-index or offline-cache assumption. An environment that
+recreates only while connected to your private machine is not yet a complete
+handoff. Do not include secrets, local access tokens, or environment binaries in
+the note or repository.
+
+Delete the practice environment, follow only the note, and compare the new
+interpreter and distribution list with the old evidence. Paths and bootstrap
+tool versions may differ while the declared project behavior remains the same.
+That is the intended distinction between reproducible behavior and identical
+machine state.
+
+## 8. Key points for clean environments
+
+- A virtual environment isolates a Python interpreter context and installation
+  directories; it is not a container or a complete security boundary.
+- The creating Python matters. Verify the environment through its own
+  `sys.executable`, `sys.prefix`, and `sys.base_prefix`.
+- Activation changes shell command lookup for convenience. It is not required
+  and its prompt is not proof.
+- Invoke pip through the interpreter that should receive the installation.
+- Classify direct, transitive, runtime, development, and optional relationships;
+  do not declare an accidental snapshot as runtime requirements.
+- Project declarations, constraints, environment snapshots, and tool-specific
+  locks answer different questions.
+- Do not commit or move `.venv`. Recreate it from the intended Python and
+  deliberate project inputs.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python `venv` documentation](https://docs.python.org/3/library/venv.html)
+- [PyPA tutorial: installing packages in a virtual environment](https://packaging.python.org/en/latest/tutorials/installing-packages/)
+- [pip user guide: running pip](https://pip.pypa.io/en/stable/user_guide/#running-pip)
+- [PyPA dependency-specifier specification](https://packaging.python.org/en/latest/specifications/dependency-specifiers/)
+- [pip requirements and constraints files](https://pip.pypa.io/en/stable/user_guide/#constraints-files)
+- [`importlib.metadata` distribution metadata](https://docs.python.org/3/library/importlib.metadata.html)

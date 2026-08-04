@@ -1,13 +1,15 @@
 ---
-title: Built-ins, the Standard Library, Third-Party Packages, and Help
+title: Find the Right Tool Without Memorizing Everything
 lesson_id: modules-environments-projects.builtins-standard-library-help
 lesson_order: 10
-description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+description: Discover, inspect, compare, and verify built-in, standard-library, installed, and project-owned Python tools without relying on memory or guesswork.
 execute:
   echo: true
 categories:
 - python-foundations
 - modules-environments-projects
+- standard-library
+- documentation
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/modules-environments-projects/builtins-standard-library-help.ipynb
 course_id: python-foundations
@@ -16,114 +18,184 @@ unit_number: 10
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Find, evaluate, and apply documented standard-library tools.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 3–4 hours
+- **You will learn:** Search from the smallest dependency outward, inspect callable contracts, distinguish import packages from distributions, diagnose name shadowing, and justify whether to reuse or write a tool.
+- **Practice in:** Google Colab, JupyterLab, or a local Python interpreter
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A constellation report contains labels such as `"  Vega-North  "`. You need to
+remove surrounding spaces, normalize the case, count repeated labels, and find
+the most common one. You could write every operation yourself, but Python
+already supplies most of them. The professional skill is not memorizing a giant
+catalog. It is finding a plausible tool, reading its contract, and checking that
+the contract matches your data.
 
-Fluency means discovering tools, reading their contracts, trying a small example, and recording important assumptions—not memorizing every module. Standard modules still need application-level tests.
+Answer these questions as you work:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
-:::
+- Where should a search begin before adding a dependency?
+- What do a signature, docstring, example, and exception each reveal?
+- How is `import yaml` related to a distribution named `PyYAML`?
+- How can a local file silently replace the standard module you intended?
+- When is a small project function a better choice than another dependency?
 
-## 2. Read and trace a complete case
+## 1. Search from the nearest tool outward
+
+Use a **reuse ladder**. Stop at the first level that solves the complete problem
+clearly enough:
+
+1. operations already available on the value, such as string methods;
+2. built-in functions such as `len`, `sum`, `sorted`, and `enumerate`;
+3. modules in Python's standard library;
+4. an already-declared project dependency;
+5. a carefully evaluated new distribution; or
+6. a small function owned and tested by the project.
+
+The order reduces unnecessary code and dependencies, but it is not a command to
+force an awkward built-in solution. Readability and the full contract still
+matter.
+
+```python
+raw_labels = ["  Vega-North  ", "lyra-east", "VEGA-NORTH"]
+
+normalized = [label.strip().casefold() for label in raw_labels]
+print(normalized)
+```
+
+`strip` and `casefold` are methods already carried by each string. The list
+comprehension calls them in order for every label. `strip()` removes surrounding
+whitespace; `casefold()` performs an aggressive, Unicode-aware normalization
+for caseless matching. If the requirement were only display capitalization,
+`casefold()` would be the wrong contract even though the code runs.
+
+Now count without writing a loop that manages a dictionary manually:
 
 ```python
 from collections import Counter
-from statistics import mean
-counts = Counter("red blue red green red".split())
-print(counts.most_common(2))
-print(mean(counts.values()))
+
+counts = Counter(normalized)
+print(counts)
+print(counts.most_common(1))
 ```
 
-### What Python does
+`collections` belongs to the standard library, and `Counter` is a dictionary
+subclass designed for counting hashable values. `most_common(1)` returns a list
+of up to one `(value, count)` pair—not the value by itself. That return shape is
+part of the contract.
 
-1. Counter models frequencies.
-2. `most_common` returns item/count pairs.
-3. `mean` communicates statistical intent.
+::: {.concept-diagram}
+Start close to the value and move outward only when the earlier level does not
+meet the requirement.
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  method["Value method"] --> builtin["Built-in function"]
+  builtin --> stdlib["Standard library"]
+  stdlib --> declared["Declared dependency"]
+  declared --> evaluate["Evaluate new distribution"]
+  evaluate --> project["Project-owned code"]
+```
 
-## 3. Debug the boundary
+The final choice still needs a small verification example.
+:::
 
-This version is valid Python but does not satisfy the lesson's intended contract:
+## 2. Inspect a callable before trusting its name
+
+A useful name suggests intent, but it cannot state every accepted argument,
+return shape, or failure. Investigate in layers:
 
 ```python
-from statistics import mean  # local statistics.py shadows stdlib
-print(mean([1, 2, 3]))
+import inspect
+
+print(callable(str.removeprefix))
+print(inspect.signature(str.removeprefix))
+print(str.removeprefix.__doc__)
 ```
 
-A focused repair is:
+`callable(...)` answers whether Python can call the object. The signature shows
+that a string instance and a prefix are involved. The docstring gives a compact
+behavior description. In a notebook, `help(str.removeprefix)` presents related
+information in a pager or output cell:
 
 ```python
-import statistics
-print(statistics.__file__)
-print(statistics.mean([1, 2, 3]))
+help(str.removeprefix)
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+Read parameter markers rather than skipping them. For example:
 
-## 4. Practice from trace to transfer
+```python
+import inspect
 
-1. Use `help(Counter.most_common)` and summarize its result.
-2. Replace a manual frequency loop with Counter.
-3. Use datetime across a month boundary.
+print(inspect.signature(sorted))
+```
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+The signature is `sorted(iterable, /, *, key=None, reverse=False)`. The slash
+means arguments before it are positional-only. The star means `key` and
+`reverse` must be named. These calls therefore communicate different things:
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+```python
+stars = ["Sirius", "sun", "Betelgeuse"]
 
-</details>
+print(sorted(stars))
+print(sorted(stars, key=str.casefold))
+print(sorted(stars, key=len, reverse=True))
+```
 
-## 5. Check your understanding
+The first uses default text ordering. The second compares caseless keys without
+changing the original strings. The third orders by length from greatest to
+least. `sorted` returns a new list; it does not rearrange `stars`.
+
+### Ask the tool one narrow question
+
+Documentation reading becomes reliable when paired with a miniature experiment:
+
+```python
+samples = [
+    ("north-star", "north-"),
+    ("star-north", "north-"),
+    ("north-north", "north-"),
+]
+
+for value, prefix in samples:
+    print(value, "->", value.removeprefix(prefix))
+```
+
+This reveals three boundaries: only the beginning is considered, a missing
+prefix leaves the value unchanged, and exactly one matching prefix is removed.
+The experiment is not a substitute for documentation; it checks your reading
+against representative values.
+
+### Checkpoint: read a callable contract
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "modules-environments-projects-standard-library-fluency",
-  "title": "Standard-Library Fluency checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit10-discovery-contract",
+  "title": "Read signatures and return shapes",
+  "instructions": "Choose the answer supported by the examples and contract.",
   "questions": [
     {
-      "id": "fluency",
-      "prompt": "What is library fluency?",
-      "options": [
-        "Find and check documented tools",
-        "Memorize all names",
-        "Use star imports",
-        "Avoid tests"
-      ],
+      "id": "sorted-new-value",
+      "prompt": "What does `sorted(stars, key=len)` do to `stars`?",
+      "options": ["It returns a new list and leaves `stars` unchanged.", "It permanently sorts `stars` in place.", "It converts every star to its length.", "It returns one longest string."],
       "answer_index": 0,
-      "explanation": "Discovery and contract reading matter."
+      "explanation": "`sorted` consumes an iterable and returns a new list; the key supplies comparison values without replacing the original items."
     },
     {
-      "id": "counter",
-      "prompt": "Which models frequencies?",
-      "options": [
-        "Path",
-        "Counter",
-        "Decimal",
-        "date"
-      ],
+      "id": "keyword-only-marker",
+      "prompt": "What does `*` before `key` in the signature of `sorted` tell you?",
+      "options": ["The key is repeated many times.", "`key` must be supplied by name.", "The key must be a string.", "Everything after the star is optional positional input."],
       "answer_index": 1,
-      "explanation": "Counter is designed for counts."
+      "explanation": "Parameters after the star are keyword-only, so `key=str.casefold` makes the call valid and explicit."
     },
     {
-      "id": "location",
-      "prompt": "What reveals many module locations?",
-      "options": [
-        "__count__",
-        "__path_name__",
-        "__file__",
-        "__test__"
-      ],
+      "id": "removeprefix-boundary",
+      "prompt": "What is `\"north-north\".removeprefix(\"north-\")`?",
+      "options": ["`\"\"`", "`\"north-north\"`", "`\"north\"`", "An exception"],
       "answer_index": 2,
-      "explanation": "Inspecting location exposes shadowing."
+      "explanation": "`removeprefix` removes one matching prefix and returns the remaining `north`."
     }
   ]
 }
@@ -131,14 +203,442 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 3. Follow documentation from overview to proof
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+Good documentation has layers. A module index helps you discover a candidate;
+an API reference defines parameters and return values; a tutorial or example
+shows composition; and a small local check confirms the part your project
+depends on.
+
+Suppose the constellation report needs an average observation count:
+
+```python
+from statistics import mean
+
+observations = [3, 4, 8, 5]
+average = mean(observations)
+
+print(average)
+print(type(average).__name__)
+```
+
+Do not stop at “`mean` averages numbers.” Ask about empty data and accepted
+numeric types. A controlled failure makes one boundary visible:
+
+```python
+from statistics import StatisticsError, mean
+
+try:
+    mean([])
+except StatisticsError as error:
+    print(type(error).__name__, error)
+```
+
+The caller must now decide whether an empty collection is invalid, means “no
+result,” or should be handled earlier. The standard library cannot choose the
+application rule.
+
+::: {.callout-tip title="Record a dependency-sized note"}
+Do not copy an entire reference page into project notes. Record the qualified
+name, the contract detail your code relies on, one representative example, one
+important boundary, and a link to the primary documentation.
+:::
+
+### Read exceptions as part of the API
+
+Different parsing tools make different promises:
+
+```python
+from pathlib import Path
+
+candidate = Path("reports") / "night.txt"
+print(candidate.suffix)
+print(candidate.with_suffix(".json"))
+```
+
+Try an invalid suffix separately:
+
+```python
+from pathlib import Path
+
+try:
+    Path("night.txt").with_suffix("json")
+except ValueError as error:
+    print(type(error).__name__, error)
+```
+
+Knowing that the suffix must begin with a dot helps you validate or construct
+the value at the right boundary. Exceptions are not footnotes; they describe
+which inputs are outside the callable's promise.
+
+### Compare neighboring tools with one discriminating example
+
+Search results often offer several plausible names. Do not choose the shortest
+name or the first result. Find an input on which the contracts differ. For
+caseless matching, `lower()` and `casefold()` often agree on ASCII text:
+
+```python
+for value in ["VEGA", "Lyra"]:
+    print(value.lower(), value.casefold())
+```
+
+That example cannot distinguish them. A better probe contains text for which
+Unicode caseless matching matters:
+
+```python
+value = "STRAẞE"
+print("lower:   ", value.lower())
+print("casefold:", value.casefold())
+```
+
+The results are not interchangeable for every language. The documentation says
+`casefold` is intended to remove case distinctions and can be more aggressive
+than `lower`. That makes it a candidate for comparison keys, while `lower` may
+better preserve a display-oriented transformation. The project must still
+decide whether Unicode caseless matching is its real requirement.
+
+Also compare mutation and return contracts, not only names:
+
+```python
+labels = ["vega", "Orion", "lyra"]
+new_order = sorted(labels, key=str.casefold)
+returned = labels.sort(key=str.casefold)
+
+print("new:", new_order)
+print("original after sort:", labels)
+print("sort returned:", returned)
+```
+
+`sorted` accepts any iterable and returns a new list. `list.sort` mutates one
+list and returns `None`. Both order these labels, but only one matches a
+contract that must preserve the caller's original list. A discriminating
+example turns “these tools sound similar” into an observable design decision.
+
+## 4. Separate import names from distribution names
+
+Three categories are often confused:
+
+- A **module** is one importable unit, often one `.py` file.
+- An **import package** is an importable namespace that can contain modules and
+  subpackages.
+- A **distribution package** is a versioned artifact installed by a package
+  installer. It can provide one or several import packages.
+
+The spelling need not match. The distribution `PyYAML`, for example, commonly
+provides the import package `yaml`. Installation commands name distributions;
+`import` statements name modules or import packages.
+
+Use `find_spec` to ask whether the import system can locate a name without
+executing that module:
+
+```python
+from importlib.util import find_spec
+
+for import_name in ["json", "statistics", "not_a_real_star_module"]:
+    specification = find_spec(import_name)
+    print(import_name, "found" if specification else "missing")
+```
+
+A found specification says the import system found a candidate. It does not
+prove that the module is trustworthy, compatible with your use, or safe to
+import. To inspect installed distribution metadata, use `importlib.metadata`:
+
+```python
+from importlib.metadata import PackageNotFoundError, version
+
+for distribution_name in ["pip", "definitely-not-a-distribution"]:
+    try:
+        print(distribution_name, version(distribution_name))
+    except PackageNotFoundError:
+        print(distribution_name, "not installed")
+```
+
+`version()` expects a **distribution** name. It does not accept every import
+name. When tooling has recorded the mapping, `packages_distributions()` can help
+connect the two:
+
+```python
+from importlib.metadata import packages_distributions
+
+providers = packages_distributions()
+print("pip is provided by:", providers.get("pip", []))
+```
+
+Some imports have no distribution mapping, especially project source that has
+not been installed. Treat an empty result as evidence to investigate, not as
+proof that the import is from the standard library.
+
+### Checkpoint: distinguish what Python imports from what pip installs
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit10-discovery-names",
+  "title": "Keep module and distribution identities separate",
+  "instructions": "Choose the most precise interpretation.",
+  "questions": [
+    {
+      "id": "distribution-versus-import",
+      "prompt": "A project installs `PyYAML` and later runs `import yaml`. Which statement is correct?",
+      "options": ["Both names must always match exactly.", "`yaml` is the version number.", "`PyYAML` is a built-in function.", "The distribution name and import-package name are different kinds of identity."],
+      "answer_index": 3,
+      "explanation": "Installers select distributions, while Python imports modules and import packages; one distribution can expose differently named imports."
+    },
+    {
+      "id": "find-spec-meaning",
+      "prompt": "What does a non-`None` result from `find_spec(\"orbits\")` establish?",
+      "options": ["The import system found a candidate for that import name.", "The distribution is current and secure.", "The module has already executed successfully.", "The module belongs to the standard library."],
+      "answer_index": 0,
+      "explanation": "`find_spec` performs discovery without establishing origin category, quality, compatibility, or successful execution."
+    },
+    {
+      "id": "metadata-version-input",
+      "prompt": "Which identity does `importlib.metadata.version(...)` look up?",
+      "options": ["A function parameter", "An installed distribution name", "A filename suffix", "A Git branch"],
+      "answer_index": 1,
+      "explanation": "`importlib.metadata` reads installed distribution metadata, so its version lookup uses the distribution identity."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Prove which file an import selected
+
+Imagine a project file named `statistics.py` beside your program. `import
+statistics` may now load the project file instead of the standard-library
+module. This is **shadowing**: an earlier matching name hides the intended one.
+
+The safest first question is “which file did Python load?”
+
+```python
+import statistics
+
+print(statistics.__name__)
+print(statistics.__file__)
+```
+
+Most source modules expose `__file__`. Some built-in or unusual module loaders
+do not, so diagnostic code can use `getattr(statistics, "__file__", None)`.
+
+Create a disposable reproduction rather than adding a conflicting file beside
+your notebook:
+
+```python
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    workspace = Path(temporary_name)
+    (workspace / "statistics.py").write_text(
+        "origin = 'local shadow'\n",
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import statistics; print(statistics.__file__); "
+            "print(hasattr(statistics, 'mean'))",
+        ],
+        cwd=workspace,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    print(result.stdout)
+```
+
+The child process starts in the temporary workspace. Its first search location
+finds `statistics.py`; that file has no `mean`, so `hasattr` prints `False`.
+Renaming the local file to something project-specific, deleting its generated
+`__pycache__`, and restarting the process removes the ambiguity. Do not repair
+ordinary project imports by inserting guessed paths into `sys.path`; correct the
+name or installation contract.
+
+Other useful origin checks are:
+
+```python
+from importlib.util import find_spec
+
+specification = find_spec("statistics")
+print(specification.origin if specification else "not found")
+```
+
+If an import behaves differently in two terminals, record the current working
+directory, `sys.executable`, `sys.path`, the module's origin, and the exact
+command. “Python cannot find it” is a symptom; those values are evidence.
+
+## 6. Evaluate a new dependency before adding it
+
+A third-party distribution can save months of work, but every dependency adds
+an installation, compatibility, maintenance, and trust decision. Evaluate the
+specific project need:
+
+| Question | Evidence to collect |
+|---|---|
+| Does it solve the complete requirement? | API reference and a small representative experiment |
+| Is its Python/platform support compatible? | Project metadata and supported-version policy |
+| Is it maintained for the intended use? | Release history, issue activity, and maintainer guidance |
+| Is the license acceptable for the project? | Declared license information and organizational policy |
+| Is the dependency proportionate? | Compare its delivered capability with a clear project-owned function |
+| Can the team replace or contain it? | Place it behind a small project interface when appropriate |
+
+Popularity alone is not a contract. Neither is the first search result. Prefer
+the project's primary documentation and package-index metadata, then verify the
+small slice of behavior your code needs.
+
+For this unit's label normalization, string methods and `Counter` are enough.
+Adding a new distribution would increase setup work without improving the
+contract. A specialized astronomy coordinate conversion, however, may justify
+a mature domain library rather than a handwritten scientific implementation.
+
+## 7. Build a tool-discovery dossier
+
+Create a short record for this requirement:
+
+> Given labels containing surrounding spaces and mixed case, return each
+> normalized label and the two most frequent labels. Equal counts should retain
+> first-seen order.
+
+Use these required names:
+
+```python
+from collections import Counter
+
+
+def normalize_label(value):
+    """Return a stripped, caseless label suitable for matching."""
+    return value.strip().casefold()
+
+
+def summarize_labels(values, limit=2):
+    """Return normalized labels and their most common `(label, count)` pairs."""
+    normalized = [normalize_label(value) for value in values]
+    return normalized, Counter(normalized).most_common(limit)
+```
+
+Run ordinary and boundary checks:
+
+```python
+labels, leaders = summarize_labels(
+    [" Vega ", "LYRA", "vega", "Orion", "lyra", "vega"]
+)
+
+assert labels == ["vega", "lyra", "vega", "orion", "lyra", "vega"]
+assert leaders == [("vega", 3), ("lyra", 2)]
+assert summarize_labels([], limit=2) == ([], [])
+assert summarize_labels([" A ", "b"], limit=0) == (["a", "b"], [])
+print(leaders)
+```
+
+Your dossier should contain:
+
+1. the reuse-ladder level for `strip`, `casefold`, and `Counter`;
+2. the signature or documented contract detail each use depends on;
+3. one boundary learned from an experiment;
+4. why no new distribution is justified; and
+5. a primary-documentation link.
+
+::: {.callout-important title="Changed requirement"}
+Suppose display spelling must be preserved while matching remains caseless.
+Do not overwrite every label with its casefolded form. Change the representation
+so comparison keys and first-seen display labels remain available. Explain why
+the original return contract can no longer satisfy both needs.
+:::
+
+<details class="solution">
+<summary>Compare one possible display-preserving extension</summary>
+
+```python
+from collections import Counter
+
+
+def most_common_display_labels(values, limit=2):
+    """Return first-seen display labels paired with caseless counts."""
+    display_by_key = {}
+    keys = []
+    for value in values:
+        display = value.strip()
+        key = display.casefold()
+        keys.append(key)
+        display_by_key.setdefault(key, display)
+
+    counts = Counter(keys)
+    return [
+        (display_by_key[key], count)
+        for key, count in counts.most_common(limit)
+    ]
+
+
+assert most_common_display_labels([" Vega ", "VEGA", "Lyra"]) == [
+    ("Vega", 2),
+    ("Lyra", 1),
+]
+```
+
+The normalized key supports matching; `display_by_key` retains the first
+trimmed spelling. One value no longer has to serve two incompatible purposes.
+
+</details>
+
+### Checkpoint: choose and verify a tool
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit10-discovery-choice",
+  "title": "Make a proportionate reuse decision",
+  "instructions": "Choose the decision supported by the stated contract.",
+  "questions": [
+    {
+      "id": "shadowing-first-check",
+      "prompt": "`statistics.mean` is unexpectedly missing. What is the most useful first diagnostic?",
+      "options": ["Install several statistics distributions.", "Add the repository root to `sys.path`.", "Print `statistics.__file__` to identify what was imported.", "Rename every Python file."],
+      "answer_index": 2,
+      "explanation": "The module origin tests the shadowing hypothesis directly before any broad repair changes the environment."
+    },
+    {
+      "id": "new-dependency-choice",
+      "prompt": "String methods and `Counter` completely satisfy a small label-counting contract. What is the best default?",
+      "options": ["Add the most popular text framework anyway.", "Rewrite `Counter` from scratch.", "Avoid standard-library imports.", "Use the existing tools and record the contract details relied on."],
+      "answer_index": 3,
+      "explanation": "The nearby tools solve the requirement clearly without adding installation and maintenance decisions."
+    },
+    {
+      "id": "experiment-and-docs",
+      "prompt": "Why pair primary documentation with a miniature experiment?",
+      "options": ["The documentation defines the contract, while the experiment checks your reading on relevant values.", "Experiments prove every possible behavior.", "Documentation is never current.", "The pair prevents all future dependency changes."],
+      "answer_index": 0,
+      "explanation": "Neither random experimentation nor untested reading is enough; together they support a narrow, evidence-based use."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Key points for finding reusable tools
+
+- Search value methods, built-ins, and the standard library before adding a new
+  dependency, while still choosing for the complete requirement.
+- Read signatures, parameter markers, docstrings, return shapes, and documented
+  exceptions; verify the relevant behavior with a small example.
+- A module or import package is what Python imports. A distribution is what an
+  installer installs and versions; their names need not match.
+- Use `find_spec`, `importlib.metadata`, `sys.executable`, and module origin as
+  diagnostic evidence rather than guessing.
+- A local file can shadow the intended module. Identify its origin before
+  changing paths or installing packages.
+- New dependencies deserve a proportional compatibility, maintenance, license,
+  trust, and replacement decision.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python built-in functions and `help`](https://docs.python.org/3/library/functions.html#help)
+- [Python standard library overview](https://docs.python.org/3/library/index.html)
+- [`inspect.signature` and callable introspection](https://docs.python.org/3/library/inspect.html#inspect.signature)
+- [`importlib.util.find_spec`](https://docs.python.org/3/library/importlib.html#importlib.util.find_spec)
+- [Accessing installed distribution metadata](https://docs.python.org/3/library/importlib.metadata.html)
+- [PyPA explanation of distribution packages and import packages](https://packaging.python.org/en/latest/discussions/distribution-package-vs-import-package/)

@@ -1,13 +1,15 @@
 ---
-title: Modules, Imports, and Program Entry Points
+title: Turn One Script into Reusable Modules
 lesson_id: modules-environments-projects.modules-imports-entry-points
 lesson_order: 20
-description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+description: Split a working script into modules, trace import search and caching, diagnose import failures, and keep reusable behavior separate from program entry points.
 execute:
   echo: true
 categories:
 - python-foundations
 - modules-environments-projects
+- modules
+- imports
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/modules-environments-projects/modules-imports-entry-points.ipynb
 course_id: python-foundations
@@ -15,88 +17,143 @@ unit_id: modules-environments-projects
 unit_number: 10
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner to intermediate
-- **Estimated time:** 25–40 minutes
-- **You will learn:** Organize reusable code into Python files and package folders.
-- **Practice in:** VS Code and the terminal
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Create and import real modules, trace namespaces and the import cache, inspect search locations and failures, and design a `main` boundary that supports both reuse and execution.
+- **Practice in:** A local editor and terminal; temporary workspaces also run in Colab or JupyterLab
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+Your constellation report has grown into one long script. Coordinate conversion,
+label formatting, report assembly, demo data, and printing are mixed together.
+Changing one part means scrolling through all the others, and importing one
+useful function would run the whole report. This lesson separates those
+responsibilities without turning every function into its own microscopic file.
 
-Organize reusable code into Python files and package folders. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+Keep five questions visible:
 
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Modules and Packages** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
+- What namespace does each import form create in the caller?
+- Which statements run the first time a module is imported?
+- Why does editing a module not automatically change an already imported object?
+- Which search location supplied the module?
+- How can one file offer reusable functions and still run as a program?
 
-## 2. Modules
+## 1. A module is an executed file with its own namespace
 
-Put reusable Python code in .py files and import it elsewhere.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A module is like a toolbox drawer: open it when you need a tool stored there.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A module is a Python file that can define functions, classes, and constants for reuse.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+Create a folder named `constellation-report` containing this file:
 
 ```python
-import math
-print(math.sqrt(16))
+# orbit_math.py
+DEGREES_IN_CIRCLE = 360
+
+
+def normalize_degrees(value):
+    """Return an angle in the half-open range 0 <= result < 360."""
+    return value % DEGREES_IN_CIRCLE
 ```
 
-### Trace it line by line
+A `.py` file is a **module source file**. When Python imports it, Python creates
+a module object, gives that object a namespace, executes the file's top-level
+statements in that namespace, and caches the module object.
 
-1. `import math` — Python loads the named module or object so later lines can use it.
-2. `print(math.sqrt(16))` — Python evaluates the arguments and writes their display form to standard output.
+Add a second file beside it:
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+```python
+# report.py
+import orbit_math
 
-::: {.callout-warning title="Common mistake"}
-Naming your file the same as a standard library module, such as math.py, can shadow the real module.
+angles = [-15, 20, 390]
+normalized = [orbit_math.normalize_degrees(angle) for angle in angles]
+print(normalized)
+```
+
+From inside `constellation-report`, run:
+
+```bash
+python report.py
+```
+
+The expected output is:
+
+```text
+[345, 20, 30]
+```
+
+Trace the important names:
+
+| Namespace | Name | Value or role |
+|---|---|---|
+| `orbit_math` module | `DEGREES_IN_CIRCLE` | `360` |
+| `orbit_math` module | `normalize_degrees` | function object |
+| `report` module | `orbit_math` | module object |
+| `report` module | `angles` | input list |
+| `report` module | `normalized` | output list |
+
+`import orbit_math` does not copy every module name into `report`. It binds one
+name, `orbit_math`, and attribute access crosses the visible module boundary.
+That explicit qualifier helps a reader locate ownership.
+
+::: {.concept-diagram}
+An import binds a module object in the caller while the imported definitions
+remain in the module's own namespace.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  caller["report namespace"] -->|"orbit_math"| module["orbit_math module object"]
+  module --> constant["DEGREES_IN_CIRCLE"]
+  module --> function["normalize_degrees()"]
+```
 :::
 
-### Practice modules
+### Top-level statements run during import
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Modules**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+This version has an unwanted surprise:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```python
+# noisy_orbits.py
+print("Loading demo observations...")
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
 
-</details>
+def normalize_degrees(value):
+    return value % 360
+```
 
-### Check your understanding
+Any importer displays the message even if it only wants the function. Imports
+must execute definitions, assignments, and import statements needed to create
+the module. Avoid unrelated printing, input prompts, file writes, network calls,
+and expensive demo work at import time.
+
+### Checkpoint: trace module namespaces
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "modules-environments-projects-modules-and-packages-modules",
-  "title": "Modules checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit10-modules-namespace",
+  "title": "Follow names across a module boundary",
+  "instructions": "Choose what Python creates or executes.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Modules?",
-      "options": [
-        "A package is a folder of modules that belong together.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A module is a Python file that can define functions, classes, and constants for reuse.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
-      ],
+      "id": "qualified-import-binding",
+      "prompt": "After `import orbit_math`, which name is bound directly in the caller?",
+      "options": ["`normalize_degrees`", "`orbit_math`", "`DEGREES_IN_CIRCLE`", "Every public name in the file"],
+      "answer_index": 1,
+      "explanation": "The import binds the module object as `orbit_math`; its functions and constants remain attributes of that object."
+    },
+    {
+      "id": "module-first-import",
+      "prompt": "What happens to the top-level `print` in `noisy_orbits.py` on its first ordinary import?",
+      "options": ["Python ignores every statement except `def`.", "It runs only when the function is called.", "It executes while Python initializes the module.", "It becomes the module docstring."],
       "answer_index": 2,
-      "explanation": "A module is a Python file that can define functions, classes, and constants for reuse."
+      "explanation": "Python executes the module body to populate its namespace, so unrelated top-level effects surprise importers."
+    },
+    {
+      "id": "module-namespace-purpose",
+      "prompt": "Why can `report.py` and `orbit_math.py` both use a name such as `value` safely?",
+      "options": ["Names are always global across every file.", "Python renames every variable.", "Only uppercase names belong to modules.", "Each module has its own global namespace."],
+      "answer_index": 3,
+      "explanation": "Module namespaces separate their global bindings; callers cross the boundary through imported module objects or selected names."
     }
   ]
 }
@@ -104,70 +161,144 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. Packages
+## 2. Choose an import form that keeps ownership clear
 
-Group related modules into folders with importable names.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A package is a labeled binder with several sections, not a pile of loose papers.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A package is a folder of modules that belong together.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+Python offers several import forms. They bind different names:
 
 ```python
+import statistics
 from pathlib import Path
-print(Path("src") / "my_project")
+from collections import Counter as Tally
+
+print(statistics.mean([2, 4, 6]))
+print(Path("reports") / "night.txt")
+print(Tally("vega lyra vega".split()))
 ```
 
-### Trace it line by line
+- `import statistics` binds the module name and keeps calls qualified.
+- `from pathlib import Path` binds one selected attribute directly.
+- `as Tally` binds an alias. Use aliases for established conventions or a real
+  collision, not merely to invent shorter spellings.
 
-1. `from pathlib import Path` — Python loads the named module or object so later lines can use it.
-2. `print(Path("src") / "my_project")` — Python evaluates the arguments and writes their display form to standard output.
+Avoid star imports in application code:
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+```python
+# Avoid: the reader cannot see which names this statement introduces.
+# from orbit_math import *
+```
 
-::: {.callout-warning title="Common mistake"}
-Imports depend on project layout. Run code from the project root while learning to reduce path surprises.
-:::
+They obscure ownership, make collisions easy, and turn a dependency's added
+public name into a possible local behavior change.
 
-### Practice packages
+### Imports bind objects at a moment in time
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Packages**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+Compare module-qualified access with a directly imported name:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```python
+import types
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+tools = types.SimpleNamespace(scale=2)
+scale_copy = tools.scale
+tools.scale = 3
 
-</details>
+print(tools.scale)
+print(scale_copy)
+```
 
-### Check your understanding
+The direct binding `scale_copy` still refers to the earlier integer. A `from
+module import name` statement similarly binds the object available at import
+time; it is not a permanently live link to later rebinding in the module.
+
+For ordinary constants and functions this is usually fine. During debugging,
+however, it explains why changing or rebinding a module attribute does not
+update every name copied elsewhere.
+
+## 3. The import cache prevents repeated initialization
+
+Python records initialized modules in `sys.modules`. A later import of the same
+name normally returns that cached object rather than executing the source file
+again.
+
+Use a child process and temporary file so the demonstration starts clean:
+
+```python
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    workspace = Path(temporary_name)
+    (workspace / "beacon.py").write_text(
+        "print('initializing beacon')\nstatus = 'ready'\n",
+        encoding="utf-8",
+    )
+    program = "import beacon; import beacon; print(beacon.status)"
+    result = subprocess.run(
+        [sys.executable, "-c", program],
+        cwd=workspace,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    print(result.stdout)
+```
+
+Expected output:
+
+```text
+initializing beacon
+ready
+```
+
+The statement appears once, not twice. The cache supports shared module state
+and avoids repeated setup. It also creates a notebook trap: after editing a
+source file, running `import beacon` again in the same kernel may reuse the old
+module. Restarting the kernel or process gives the cleanest beginner proof.
+`importlib.reload` exists, but existing `from ... import ...` bindings and
+created objects make reload behavior more subtle than “restart the file.”
+
+Inspect the cache without mutating it:
+
+```python
+import json
+import sys
+
+print("json" in sys.modules)
+print(sys.modules["json"] is json)
+```
+
+Deleting arbitrary cache entries is not a normal repair strategy. Find the
+source of stale state and reproduce in a fresh process.
+
+### Checkpoint: reason about forms and caching
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "modules-environments-projects-modules-and-packages-packages",
-  "title": "Packages checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit10-modules-cache",
+  "title": "Choose imports and explain repeated behavior",
+  "instructions": "Use namespace and cache behavior, not guesswork.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Packages?",
-      "options": [
-        "A module is a Python file that can define functions, classes, and constants for reuse.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
-        "A package is a folder of modules that belong together."
-      ],
-      "answer_index": 3,
-      "explanation": "A package is a folder of modules that belong together."
+      "id": "clear-module-ownership",
+      "prompt": "Which form most clearly shows that `mean` belongs to `statistics` at each call site?",
+      "options": ["`import statistics` followed by `statistics.mean(...)`", "`from statistics import *`", "Copy the function into the caller", "Rename it to `m`"],
+      "answer_index": 0,
+      "explanation": "The qualified call keeps ownership visible and avoids introducing several unannounced names."
+    },
+    {
+      "id": "cache-output-once",
+      "prompt": "Why does a top-level message usually appear once after two imports of the same module in one process?",
+      "options": ["`print` detects duplicates.", "The second import normally reuses the module in `sys.modules`.", "Python deletes the second import statement.", "Only constants can execute twice."],
+      "answer_index": 1,
+      "explanation": "After successful initialization, the module object is cached by import name and ordinarily reused."
+    },
+    {
+      "id": "notebook-stale-import",
+      "prompt": "You edit an imported file, but the notebook still shows old behavior. What is the clearest beginner verification?",
+      "options": ["Add several entries to `sys.path`.", "Use a star import.", "Restart the kernel and run from the top.", "Rename the function on every run."],
+      "answer_index": 2,
+      "explanation": "A fresh process removes cached module state and hidden notebook execution order from the experiment."
     }
   ]
 }
@@ -175,17 +306,467 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. Integrate the lesson
+## 4. Python searches specific locations in order
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+An import name is not a filesystem path. Python asks configured import finders
+to locate it. For ordinary source imports, `sys.path` displays the search path:
 
-## 5. Key points
+```python
+import sys
 
-- **Modules:** A module is a Python file that can define functions, classes, and constants for reuse.
-- **Packages:** A package is a folder of modules that belong together.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+print("interpreter:", sys.executable)
+for position, location in enumerate(sys.path[:5]):
+    print(position, repr(location))
+```
+
+The exact entries depend on how Python started, the environment, the platform,
+and configuration. The script directory or current working directory commonly
+appears near the beginning, followed by standard-library and environment
+locations. This is why project files can shadow installed or standard modules.
+
+Use the import system to report a candidate origin:
+
+```python
+from importlib.util import find_spec
+
+for name in ["pathlib", "orbit_math"]:
+    specification = find_spec(name)
+    print(name, specification.origin if specification else "not found")
+```
+
+In a notebook without `orbit_math.py` on its search path, the second result is
+`not found`. That is expected—not evidence that Python itself is broken.
+
+### Classify common import failures
+
+These failures point to different places:
+
+| Symptom | Likely question |
+|---|---|
+| `ModuleNotFoundError: No module named 'orbits'` | Is the top-level name installed or on the search path for this interpreter? |
+| `ImportError: cannot import name 'scale' from 'orbits'` | Was the module found but the selected attribute absent or not yet initialized? |
+| Attribute missing from an unexpected local path | Is a file or package shadowing the intended module? |
+| Import works only from the repository root | Is the code relying on the working directory instead of installation? |
+| Import behaves differently after edits | Is an old module cached in this process? |
+
+Do not automatically append parent directories to `sys.path` inside project
+source. That hides a broken project or command contract and makes behavior
+depend on a guessed folder depth. Later in this unit, a `src` layout plus an
+editable installation will make the package available intentionally.
+
+### Separate discovery failure from module-execution failure
+
+`ModuleNotFoundError` does not always mean the first import name was absent.
+Read the traceback and the exception's `name`:
+
+```python
+try:
+    import definitely_missing_constellation
+except ModuleNotFoundError as error:
+    print("missing name:", error.name)
+```
+
+Now imagine `constellation` was found but its source contains `import
+missing_catalog`. The traceback begins while executing `constellation`, but the
+missing name is `missing_catalog`. Installing another copy of `constellation`
+does not address that dependency.
+
+An import can also find a file and then fail during its top-level execution:
+
+```python
+# broken_catalog.py
+DEFAULT_SCALE = 0
+
+
+def adjusted(value):
+    return value / DEFAULT_SCALE
+
+
+# Avoid top-level demonstration work like this:
+# preview = adjusted(10)
+```
+
+If the commented preview ran, discovery would have succeeded and initialization
+would have raised `ZeroDivisionError`. Preserve the full traceback: the
+exception category and failing source line distinguish “not found” from “found
+but broken while importing.”
+
+### Bytecode caches are outputs, not source ownership
+
+Python may create `__pycache__/` and `.pyc` files after imports. They store
+bytecode tagged for an interpreter implementation/version so later starts can
+avoid recompiling unchanged source. They do not replace the `.py` source as the
+project's maintained contract.
+
+```python
+import importlib.util
+
+print(importlib.util.cache_from_source("orbit_math.py"))
+```
+
+The exact tag varies, which is one reason caches do not belong in Git. Python
+normally checks cache validity against source metadata. When a rename or unusual
+tool leaves the diagnosis confusing, remove generated caches and reproduce in a
+fresh process—but do not treat routine cache deletion as the repair for an
+incorrect import graph.
+
+### Reproduce two search locations without changing the parent notebook
+
+This lab proves that the same import spelling can select different files:
+
+```python
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as temporary_name:
+    root = Path(temporary_name)
+    first = root / "first"
+    second = root / "second"
+    first.mkdir()
+    second.mkdir()
+    (first / "catalog.py").write_text("station = 'north'\n", encoding="utf-8")
+    (second / "catalog.py").write_text("station = 'south'\n", encoding="utf-8")
+
+    for working_directory in [first, second]:
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import catalog; print(catalog.station); print(catalog.__file__)",
+            ],
+            cwd=working_directory,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        print(result.stdout)
+```
+
+Each child begins with a clean cache and a different starting location. Record
+both origins. In a real project, installation and distinctive package names
+remove this ambiguity; adding another guessed search directory would increase
+it.
+
+### Capture a useful import report
+
+```python
+import importlib.util
+import sys
+from pathlib import Path
+
+
+def import_report(name):
+    """Return interpreter, working directory, and discovered origin for a name."""
+    specification = importlib.util.find_spec(name)
+    return {
+        "name": name,
+        "interpreter": sys.executable,
+        "working_directory": str(Path.cwd()),
+        "origin": specification.origin if specification else None,
+    }
+
+
+print(import_report("json"))
+```
+
+This diagnostic observes configuration without changing it. Preserve the exact
+command alongside the report because script mode and `-m` mode establish
+different entry context.
+
+## 5. `__name__` separates import from direct execution
+
+Every module receives a `__name__`. When imported normally, it is the import
+name. When Python executes a source file as the top-level program, it is
+`"__main__"`.
+
+```python
+# constellation_report.py
+def build_report(labels):
+    """Return one display line for constellation labels."""
+    cleaned = [label.strip().title() for label in labels]
+    return "Constellations: " + ", ".join(cleaned)
+
+
+def main():
+    """Run the small demonstration program."""
+    print(build_report([" lyra", "orion "]))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+The `if` line does not make `main` special. It simply compares a module-provided
+name with a string. During import, Python defines the functions but skips the
+call. During direct execution, the condition is true and the call runs.
+
+Run both modes from the file's directory:
+
+```bash
+python constellation_report.py
+python -c "import constellation_report; print(constellation_report.build_report(['vega']))"
+```
+
+The first prints the demo once. The second prints only the expression explicitly
+requested by the importer.
+
+Keep the guarded block tiny. Put behavior in a callable so other Python code can
+reuse it and later tests can call it without launching a process. Unit 12 will
+develop full argument parsing, streams, and exit status; here, `main` only marks
+the execution boundary.
+
+## 6. `python -m` executes a discovered module
+
+The command:
+
+```bash
+python -m constellation_report
+```
+
+asks the selected interpreter to find `constellation_report` through the import
+system and execute it as `__main__`. This differs from passing a filesystem path
+such as `python tools/constellation_report.py`. Module mode works with the
+importable project structure and later supports packages through a
+`package/__main__.py` file.
+
+Use `python -m pip` for the same identity reason: it asks the displayed Python
+interpreter to run its importable `pip` module. A bare `pip` command may be a
+launcher associated with another installation.
+
+### Compare the two launch contracts explicitly
+
+From a directory containing `constellation_report.py`, run these diagnostics:
+
+```python
+# Add temporarily inside constellation_report.py while investigating.
+import sys
+from pathlib import Path
+
+print("name:", __name__)
+print("working directory:", Path.cwd())
+print("first search entry:", sys.path[0])
+```
+
+Then compare:
+
+```bash
+python constellation_report.py
+python -m constellation_report
+```
+
+Both execute the module as `__main__`, but the first names a source path and the
+second asks the import system to locate a module name. Depending on the command
+and platform, the first search entry can reflect the script directory or the
+current directory. Do not build application behavior around the incidental
+text of that entry. Use the commands to understand why one undocumented launch
+location can mask an import problem.
+
+Write a launch contract in the README when a project gains a supported command:
+
+```text
+Working directory: project root
+Interpreter:       project environment Python
+Command:           python -m constellation_report
+Input:             built-in demonstration observations
+Output:            report text on standard output
+```
+
+This record makes reruns comparable. “I clicked Run in my editor” omits the
+interpreter, working directory, and launch mode, all of which can affect module
+discovery.
+
+After the comparison, remove diagnostic prints from reusable source. Keep a
+small `main` and use an external command or logging/debugging tool when future
+investigation needs the same evidence. Importers should not inherit permanent
+diagnostic noise.
+
+Editor Run buttons encode these same choices through settings: selected
+interpreter, launch file or module, working directory, arguments, and
+environment variables. When terminal and editor behavior differ, display that
+configuration rather than claiming editors use a different kind of Python.
+Reproduce the editor command in a terminal with the same interpreter and
+working directory. If it then matches, the source is probably not the differing
+variable. If it does not, compare the exact environment and arguments next.
+
+Keep the launch record beside the project while diagnosing, then turn the
+supported route into concise README instructions. Debug-only variations such as
+running an internal module path should not become accidental public commands.
+One documented route, one fresh-process verification, and one callable action
+owner give future learners a stable place to begin.
+
+::: {.callout-warning title="Do not combine `-m` with a `.py` path"}
+`python -m constellation_report` takes a dotted import name without `.py` or
+path separators. `python constellation_report.py` takes a filesystem path. They
+are two different command forms.
+:::
+
+## 7. Build the multi-file constellation report
+
+Create this structure in a disposable local folder:
+
+```text
+constellation-report/
+├── orbit_math.py
+├── report_text.py
+└── run_report.py
+```
+
+Use these contracts:
+
+```python
+# orbit_math.py
+def normalize_degrees(value):
+    """Return an angle in the range 0 <= result < 360."""
+    return value % 360
+```
+
+```python
+# report_text.py
+def observation_line(label, angle):
+    """Return one normalized constellation observation line."""
+    return f"{label.strip().title()}: {angle}°"
+```
+
+Complete the program entry module:
+
+```python
+# run_report.py
+import orbit_math
+import report_text
+
+
+def build_report(observations):
+    """Return newline-separated lines for `(label, angle)` observations."""
+    lines = []
+    for label, raw_angle in observations:
+        angle = orbit_math.normalize_degrees(raw_angle)
+        lines.append(report_text.observation_line(label, angle))
+    return "\n".join(lines)
+
+
+def main():
+    observations = [(" lyra ", -15), ("orion", 390)]
+    print(build_report(observations))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+From the project folder, verify both use cases:
+
+```bash
+python run_report.py
+python -c "import run_report; print(run_report.build_report([('vega', 720)]))"
+```
+
+Expected direct output:
+
+```text
+Lyra: 345°
+Orion: 30°
+```
+
+The import command should print only `Vega: 0°`, with no demo report before it.
+
+Make these controlled changes:
+
+1. add a suffix parameter to `observation_line` without moving angle arithmetic
+   into the text module;
+2. temporarily add a top-level print to `orbit_math`, predict both commands'
+   output, then remove it;
+3. run from the parent directory and record the failure before returning to the
+   documented working directory; and
+4. print `orbit_math.__file__` to prove which source was loaded.
+
+<details class="solution">
+<summary>Compare a version with an explicit display suffix</summary>
+
+```python
+# report_text.py
+def observation_line(label, angle, suffix="°"):
+    """Return one normalized constellation observation line."""
+    return f"{label.strip().title()}: {angle}{suffix}"
+```
+
+```python
+# run_report.py
+import orbit_math
+import report_text
+
+
+def build_report(observations, suffix="°"):
+    """Return newline-separated lines for `(label, angle)` observations."""
+    lines = []
+    for label, raw_angle in observations:
+        angle = orbit_math.normalize_degrees(raw_angle)
+        lines.append(report_text.observation_line(label, angle, suffix))
+    return "\n".join(lines)
+```
+
+Angle normalization remains in `orbit_math`; display policy remains in
+`report_text`; orchestration remains in `run_report`. The files are separated by
+responsibility rather than by arbitrary line count.
+
+</details>
+
+### Checkpoint: choose a dependable execution boundary
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit10-modules-entry",
+  "title": "Diagnose search and entry-point behavior",
+  "instructions": "Choose the repair or explanation that matches the evidence.",
+  "questions": [
+    {
+      "id": "module-not-found-evidence",
+      "prompt": "An import works in one terminal but not another. Which evidence set is most useful first?",
+      "options": ["Only the source file's line count", "Only the computer model", "A list of random packages to install", "Exact command, working directory, `sys.executable`, search path, and discovered origin"],
+      "answer_index": 3,
+      "explanation": "Those observations distinguish interpreter, location, search, shadowing, and command-mode hypotheses."
+    },
+    {
+      "id": "main-guard-purpose",
+      "prompt": "Why place `main()` under `if __name__ == \"__main__\"`?",
+      "options": ["Importers receive definitions without automatically running the program action.", "It makes all functions private.", "It installs the module.", "It forces every import to reload."],
+      "answer_index": 0,
+      "explanation": "The guarded call runs for top-level execution while ordinary import can reuse the module without launching its demo or command."
+    },
+    {
+      "id": "dash-m-input",
+      "prompt": "Which command correctly asks Python to execute an importable module named `run_report`?",
+      "options": ["`python -m run_report.py`", "`python -m run_report`", "`python import run_report`", "`python --module ./run_report.py`"],
+      "answer_index": 1,
+      "explanation": "`-m` takes a dotted module name, not a filename. The selected interpreter discovers it through the import system."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Key points for modules and execution
+
+- A module is initialized by executing its top-level code in its own namespace.
+- `import module` keeps ownership visible; selected imports bind individual
+  objects, and star imports obscure what entered the caller.
+- Successfully initialized modules are cached in `sys.modules`. Use a fresh
+  process when stale notebook state makes an experiment ambiguous.
+- Import names are discovered through configured finders and search locations;
+  they are not arbitrary relative filesystem paths.
+- Diagnose failures with the exact command, working directory, interpreter,
+  search path, and module origin before changing anything.
+- Keep import-time work limited to establishing the module. Put program action
+  in a callable and guard the call with `if __name__ == "__main__"`.
+- `python file.py` executes a path; `python -m dotted.name` discovers and
+  executes a module with the chosen interpreter.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: modules](https://docs.python.org/3/tutorial/modules.html)
+- [Python language reference: the import system](https://docs.python.org/3/reference/import.html)
+- [`sys.path`, `sys.modules`, and `sys.executable`](https://docs.python.org/3/library/sys.html)
+- [`importlib` implementation and inspection utilities](https://docs.python.org/3/library/importlib.html)
+- [`__main__` and top-level code environments](https://docs.python.org/3/library/__main__.html)

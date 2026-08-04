@@ -1,13 +1,15 @@
 ---
-title: pyproject.toml, Builds, and the Packaging Tool Landscape
+title: Build and Verify an Installable Python Project
 lesson_id: modules-environments-projects.pyproject-builds-tools
 lesson_order: 60
-description: Find reusable functionality, split code across modules, organize a versioned project, isolate dependencies, and explain how source becomes an installable distribution.
+description: Declare standards-based project metadata, install editable source, create and inspect an sdist and wheel, and prove the wheel works in a clean environment outside the repository.
 execute:
   echo: true
 categories:
 - python-foundations
 - modules-environments-projects
+- pyproject
+- packaging
 order: 60
 colab_notebook: notebooks/courses/python-foundations/units/modules-environments-projects/pyproject-builds-tools.ipynb
 course_id: python-foundations
@@ -16,146 +18,151 @@ unit_number: 10
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Connect source layout, distribution metadata, editable installation, and entry points.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 5–6 hours
+- **You will learn:** Read the main `pyproject.toml` tables, connect source and distribution identities, install editable source, expose module and console entry points, build and inspect artifacts, and verify the exact wheel in a fresh environment.
+- **Practice in:** A local editor and terminal with two disposable virtual environments
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+The constellation source works in its project environment. That is not yet a
+release proof. Another person receives an installable **distribution**, not your
+working tree, editor settings, or accidental current-directory imports. This
+lesson writes one complete project description, builds the two common artifacts,
+and tests the wheel from somewhere that cannot see `src/`.
 
-An import package is code Python imports; a distribution is the installable artifact described by `pyproject.toml`. A source layout makes installation part of development instead of accidentally importing the working directory.
+Keep these questions beside the terminal:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
-:::
+- Which metadata is standardized, and which table belongs to a particular tool?
+- Which name is used by installers, imports, and console commands?
+- What changes between editable and regular installation?
+- What does a build frontend ask a build backend to do?
+- Which files actually entered the wheel?
+- Can the exact wheel run in a new environment outside the repository?
 
-## 2. Read and trace a complete case
+## 1. One `pyproject.toml` describes the installable project
 
-```python
-from pathlib import Path
-
-for path in [
-    Path("pyproject.toml"),
-    Path("src/study_tools/__init__.py"),
-    Path("tests/test_report.py"),
-]:
-    print(path)
-```
-
-### What Python does
-
-1. Metadata describes the distribution.
-2. The `src` directory contains import packages.
-3. Tests should import the installed project.
-
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This command is valid shell syntax but bypasses the installed-package contract:
-
-```bash
-python src/study_tools/cli.py
-```
-
-A focused repair is:
-
-```bash
-python -m study_tools.cli
-```
-
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
-
-## 4. Practice from trace to transfer
-
-1. Distinguish repository, distribution, package, and module names.
-2. Write minimal project metadata.
-3. Verify an editable install in a fresh environment.
-
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
-
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
-
-</details>
-
-## 5. Separate standards from tool roles
-
-A modern `pyproject.toml` can declare project metadata and the build backend:
+At the root of `constellation-report`, replace the placeholder with:
 
 ```toml
-[project]
-name = "study-tools"
-version = "0.1.0"
-requires-python = ">=3.10"
-
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.26"]
 build-backend = "hatchling.build"
+
+[project]
+name = "constellation-report"
+version = "0.1.0"
+description = "Build small constellation observation reports."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "Course Learner" }
+]
+dependencies = []
+
+[project.scripts]
+constellation-report = "constellation.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/constellation"]
 ```
 
-The `[project]` table describes the distribution. `[build-system]` tells a build
-frontend which backend creates a wheel or source distribution. These are roles,
-not interchangeable brand names.
+TOML uses tables, keys, strings, arrays, and inline tables. The spelling and
+value type matter. This file has four responsibilities:
 
-| Tool | Main role in this course comparison |
-|---|---|
-| Setuptools | Established general-purpose build backend and packaging tools |
-| Hatchling | Focused standards-based build backend |
-| Poetry | Integrated dependency, environment, build, and project workflow |
-| PDM | Standards-oriented project and dependency workflow |
-| Pixi | Cross-language environment and task workflow, including Conda packages |
+| Table | Who defines it? | What it says here |
+|---|---|---|
+| `[build-system]` | Python packaging standard | backend interface and requirements needed to build |
+| `[project]` | Python packaging standard | distribution identity, version, compatibility, description, and dependencies |
+| `[project.scripts]` | Python packaging standard | installed command name mapped to an importable callable |
+| `[tool.hatch.build.targets.wheel]` | Hatchling | which src-layout package the chosen backend should put in the wheel |
 
-Complete one path—create a clean environment, install the project, run tests,
-build artifacts, inspect them, and install the wheel into another clean
-environment. The comparison table helps you read other projects; it is not five
-parallel setup tutorials.
+The last table is tool-specific. Replacing Hatchling with another backend would
+require reading that backend's configuration; do not assume all `[tool.*]`
+tables are portable standards.
 
-## 6. Check your understanding
+### Read each identity precisely
+
+```text
+Repository directory: constellation-report/
+Distribution name:    constellation-report
+Import package:       constellation
+Module:               constellation.reports
+Console command:      constellation-report
+```
+
+The repository directory can be renamed without changing installed metadata.
+The distribution name is used by installers and `importlib.metadata`. The
+import-package name is used by Python. The console command is a generated
+launcher whose name happens to match the distribution here, but it need not.
+
+### State Python compatibility honestly
+
+`requires-python = ">=3.10"` tells installers which Python versions the release
+claims to support. It does not install Python and does not test those versions.
+Choose the range from syntax used, dependencies, and actual verification. A
+mistyped range can make an otherwise correct wheel impossible to install.
+
+### Runtime dependencies stay empty when runtime uses only Python
+
+The constellation package imports only standard-library modules, so:
+
+```toml
+dependencies = []
+```
+
+is accurate. Hatchling and `build` are development/build tools. Users do not
+need to import them when running the installed report, so they do not belong in
+`[project].dependencies`.
+
+::: {.concept-diagram}
+Standard metadata connects the source tree to build tooling and the artifact a
+user installs.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  source["src/constellation"] --> backend["Hatchling build backend"]
+  pyproject["pyproject.toml"] --> frontend["Build frontend"]
+  pyproject --> backend
+  frontend -->|"standard build request"| backend
+  backend --> sdist["Source distribution"]
+  backend --> wheel["Wheel"]
+  wheel --> installer["Installer in clean environment"]
+  installer --> package["import constellation"]
+  installer --> command["constellation-report command"]
+```
+:::
+
+### Checkpoint: read the project tables
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "modules-environments-projects-packaging-with-pyproject",
-  "title": "Packaging with pyproject.toml checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit10-builds-metadata",
+  "title": "Connect metadata to its packaging role",
+  "instructions": "Choose the table or identity described.",
   "questions": [
     {
-      "id": "meta",
-      "prompt": "What does pyproject metadata describe?",
-      "options": [
-        "One local variable",
-        "Git history",
-        "Notebook state",
-        "Installable distribution"
-      ],
-      "answer_index": 3,
-      "explanation": "It describes project distribution and tools."
-    },
-    {
-      "id": "src",
-      "prompt": "What can src layout prevent?",
-      "options": [
-        "Accidental uninstalled imports",
-        "All import errors",
-        "Tests running",
-        "Virtual environments"
-      ],
-      "answer_index": 0,
-      "explanation": "It exposes packaging mistakes."
-    },
-    {
-      "id": "entry",
-      "prompt": "What does a console entry point target?",
-      "options": [
-        "A Git commit",
-        "A callable such as package.cli:main",
-        "A file extension",
-        "A fixture"
-      ],
+      "id": "build-system-role",
+      "prompt": "What does `[build-system]` primarily declare?",
+      "options": ["The report's runtime observations", "The backend interface and requirements needed to build", "Every package installed on the machine", "Git author identity"],
       "answer_index": 1,
-      "explanation": "Installers map commands to callables."
+      "explanation": "A build frontend uses this standardized table to prepare and call the selected backend."
+    },
+    {
+      "id": "runtime-dependency-empty",
+      "prompt": "The installed package uses only the standard library at runtime. Where should `build` be listed?",
+      "options": ["As an import package alias", "In every wheel filename", "As development tooling, not `[project].dependencies`", "As the project's console command"],
+      "answer_index": 2,
+      "explanation": "The build frontend supports maintainers producing artifacts; users do not need it to run this package."
+    },
+    {
+      "id": "distribution-import-identity",
+      "prompt": "Which statement correctly distinguishes `constellation-report` and `constellation`?",
+      "options": ["They must be the same valid Python identifier.", "The first is a Git branch and the second is a filename.", "The first is a Python version specifier.", "The first is the distribution/command spelling here; the second is the import package."],
+      "answer_index": 3,
+      "explanation": "Distribution and import identities serve different systems and may use different spellings."
     }
   ]
 }
@@ -163,20 +170,679 @@ parallel setup tutorials.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 7. Key points
+## 2. Give every execution route one callable
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
-- Distinguish project metadata, installer/environment behavior, build frontend,
-  and build backend.
-- Verify a distribution by building and installing its artifact in a clean
-  environment.
+Add a small command boundary. Unit 12 will teach full argument parsing, streams,
+and exit codes; this lesson only connects packaging entry points safely.
+
+```python
+# src/constellation/cli.py
+from .reports import observation_line
+
+
+def main():
+    """Display one example observation report."""
+    print(observation_line("moon gate", -15))
+```
+
+Make package-module execution delegate to the same callable:
+
+```python
+# src/constellation/__main__.py
+from .cli import main
+
+
+if __name__ == "__main__":
+    main()
+```
+
+There are now three intended entry routes:
+
+```text
+Python API:       from constellation import observation_line
+Module command:   python -m constellation
+Installed command: constellation-report
+```
+
+The first calls functions explicitly. The second executes `__main__.py`. The
+third is generated from this metadata:
+
+```toml
+[project.scripts]
+constellation-report = "constellation.cli:main"
+```
+
+The right side means: import the module `constellation.cli`, retrieve its
+`main` attribute, and call it. Do not add parentheses. This is metadata, not a
+Python call expression.
+
+### Keep `cli.py` import-safe
+
+Do not call `main()` unconditionally in `cli.py`:
+
+```python
+# Wrong design: importing constellation.cli would run the command.
+def main():
+    print("Moon Gate: 345°")
+
+
+# main()  # Do not place this unguarded call in the real file.
+```
+
+The generated launcher calls `main`. `__main__.py` calls `main` only when module
+mode executes it. An ordinary import merely defines it.
+
+## 3. Install editable source for development
+
+Activate `.venv` and verify its identity, or use its Python explicitly. From the
+project root:
+
+```bash
+.venv/bin/python -m pip install --editable .
+```
+
+PowerShell uses `.venv\Scripts\python.exe`. The dot means “install the project
+described by `pyproject.toml` in the current directory.”
+
+An **editable installation** records a development link so imports use the
+working source. Editing `src/constellation/reports.py` can affect the next fresh
+Python process without rebuilding and reinstalling a wheel. Backend details
+vary, so treat editable installation as a development mode—not as the release
+artifact users receive.
+
+Prove origin, metadata, API, and both entry routes:
+
+```bash
+.venv/bin/python -c "import constellation; print(constellation.__file__)"
+.venv/bin/python -c "from importlib.metadata import version; print(version('constellation-report'))"
+.venv/bin/python -c "from constellation import normalize_degrees; print(normalize_degrees(-1))"
+.venv/bin/python -m constellation
+.venv/bin/constellation-report
+```
+
+On Windows, the generated console launcher is normally
+`.venv\Scripts\constellation-report.exe`.
+
+Expected important values are:
+
+```text
+.../src/constellation/__init__.py
+0.1.0
+359
+Moon Gate: 345°
+Moon Gate: 345°
+```
+
+The editable origin points into `src`. This proves the development installation
+is connected, not that a wheel contains the package.
+
+### Diagnose an editable install failure in order
+
+1. Confirm the command ran from the directory containing `pyproject.toml`.
+2. Confirm `sys.executable` belongs to `.venv`.
+3. Read the first build/installation error, not only the final summary.
+4. Validate table spelling and value types in `pyproject.toml`.
+5. Confirm `src/constellation/__init__.py` and the backend package path agree.
+6. After success, start a fresh Python process and print module origin.
+
+Do not “repair” a metadata error with `sys.path.insert`. That bypasses the
+contract under investigation.
+
+### Checkpoint: connect editable source and entry points
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit10-builds-editable",
+  "title": "Verify development installation without confusing it with release",
+  "instructions": "Choose what each command or metadata entry proves.",
+  "questions": [
+    {
+      "id": "editable-origin",
+      "prompt": "After an editable installation, `constellation.__file__` points into the repository's `src` directory. What does this show?",
+      "options": ["The development installation resolves imports to working source.", "The wheel was clean-installed elsewhere.", "Git committed the package.", "Every dependency is locked."],
+      "answer_index": 0,
+      "explanation": "Editable mode connects imports to source for development; artifact verification remains a separate step."
+    },
+    {
+      "id": "script-target-shape",
+      "prompt": "What does `constellation.cli:main` in `[project.scripts]` identify?",
+      "options": ["A filesystem path to execute directly", "An importable module and callable attribute", "A distribution version range", "A Git remote"],
+      "answer_index": 1,
+      "explanation": "The installer generates a launcher that imports `constellation.cli` and invokes its `main` attribute."
+    },
+    {
+      "id": "module-and-console-shared",
+      "prompt": "Why should `__main__.py` and the console script delegate to the same `main` callable?",
+      "options": ["Python permits only one source file.", "It disables package imports.", "It avoids duplicated command behavior drifting between entry routes.", "It turns the wheel into a source distribution."],
+      "answer_index": 2,
+      "explanation": "Multiple launch mechanisms can share one behavior owner and remain consistent."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Build frontends and backends have different jobs
+
+Python packaging tools cooperate through standardized interfaces:
+
+- An **installer** such as pip installs distributions and resolves requirements.
+- An **environment creator/manager** creates or selects interpreter contexts.
+- A **build frontend** such as `build` asks for artifacts through standard hooks.
+- A **build backend** such as Hatchling implements those hooks for a project.
+
+One tool can cover several roles, but the roles remain useful for reasoning. In
+this workflow:
+
+```text
+python -m venv .venv          environment creation
+python -m pip install ...     installation
+python -m build               build frontend
+hatchling.build               configured backend
+```
+
+Install the frontend as development tooling in the project environment:
+
+```bash
+.venv/bin/python -m pip install "build>=1"
+```
+
+Then remove old artifacts and build from the repository root:
+
+```bash
+rm -rf dist build
+.venv/bin/python -m build
+```
+
+By default, `build` creates an isolated build environment, installs the
+`[build-system].requires` there, asks the backend for a source distribution, and
+builds a wheel (normally from that source distribution). This can require access
+to a configured package index unless requirements are already available.
+
+Do not put `build` into runtime dependencies merely because maintainers use it.
+The finished wheel records only `[project].dependencies` as runtime
+requirements.
+
+## 5. An sdist and a wheel serve different installation paths
+
+After a successful build, `dist/` should contain files resembling:
+
+```text
+constellation_report-0.1.0-py3-none-any.whl
+constellation_report-0.1.0.tar.gz
+```
+
+Filename normalization can change hyphens to underscores. Read metadata rather
+than inferring every identity rule from the filename.
+
+A **source distribution** (`.tar.gz`) contains source material and metadata from
+which a backend can build. A **wheel** (`.whl`) is a built distribution with a
+standard archive layout that installers can place without rebuilding project
+source in the usual pure-Python case.
+
+Neither artifact is “the Git repository zipped up.” Backend selection rules
+decide included files. Inspect them.
+
+### Inspect the source distribution without extracting it
+
+Use `tarfile` to list the `.tar.gz` safely. Listing avoids overwriting files in
+the current directory:
+
+```python
+from pathlib import Path
+from tarfile import open as open_tar
+
+source_archives = sorted(Path("dist").glob("*.tar.gz"))
+if len(source_archives) != 1:
+    raise RuntimeError(
+        f"expected one source distribution, found {len(source_archives)}"
+    )
+
+source_archive = source_archives[0]
+with open_tar(source_archive, mode="r:gz") as archive:
+    source_names = sorted(member.name for member in archive.getmembers())
+
+for name in source_names:
+    print(name)
+```
+
+The archive should contain project metadata, README material, and package
+source needed for another build. It need not include `.git`, `.venv`, caches,
+or a previously generated `dist/` directory. Treat any archive from an
+untrusted source as external input; listing is safer than extracting, and safe
+extraction still requires attention to member paths and links.
+
+Why inspect both artifacts? The default frontend workflow can build the wheel
+from the sdist. A source file present in the repository but absent from the
+sdist may therefore disappear from the wheel even if a direct local wheel build
+would have found it. Checking both makes the handoff chain visible.
+
+### Inspect wheel contents with the standard library
+
+```python
+from pathlib import Path
+from zipfile import ZipFile
+
+wheels = sorted(Path("dist").glob("*.whl"))
+if len(wheels) != 1:
+    raise RuntimeError(f"expected one wheel, found {len(wheels)}")
+
+wheel = wheels[0]
+with ZipFile(wheel) as archive:
+    names = sorted(archive.namelist())
+
+for name in names:
+    print(name)
+```
+
+Look for:
+
+```text
+constellation/__init__.py
+constellation/__main__.py
+constellation/angles.py
+constellation/cli.py
+constellation/reports.py
+...dist-info/METADATA
+...dist-info/WHEEL
+...dist-info/entry_points.txt
+```
+
+Do not expect `.venv/`, `.git/`, `checks/`, caches, or `dist/` inside the product
+wheel. The README may be represented in distribution metadata rather than as a
+top-level package file.
+
+### Read metadata from inside the wheel
+
+```python
+from email.parser import BytesParser
+from email.policy import default
+from pathlib import Path
+from zipfile import ZipFile
+
+wheel = next(Path("dist").glob("*.whl"))
+with ZipFile(wheel) as archive:
+    metadata_name = next(
+        name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
+    )
+    metadata = BytesParser(policy=default).parsebytes(archive.read(metadata_name))
+
+print(metadata["Name"])
+print(metadata["Version"])
+print(metadata["Requires-Python"])
+print(metadata.get_all("Requires-Dist", []))
+```
+
+Expected values are `constellation-report`, `0.1.0`, `>=3.10`, and an empty
+runtime requirement list. This is artifact evidence, not merely the source
+TOML you hoped the backend would use.
+
+### Reject ambiguous artifact selection
+
+Avoid this shortcut:
+
+```python
+from pathlib import Path
+
+# Avoid: `next` silently chooses whichever matching artifact appears first.
+possibly_stale_wheel = next(Path("dist").glob("*.whl"))
+```
+
+If `0.1.0` and `0.2.0` wheels both remain, a successful install may verify the
+wrong release. Clean the output directory before building and assert the exact
+number of artifacts afterward:
+
+```python
+from pathlib import Path
+
+wheels = sorted(Path("dist").glob("*.whl"))
+sdists = sorted(Path("dist").glob("*.tar.gz"))
+
+assert len(wheels) == 1, wheels
+assert len(sdists) == 1, sdists
+print(wheels[0].name)
+print(sdists[0].name)
+```
+
+For automation beyond this lesson, pass the exact expected artifact path from
+the build step rather than rediscovering it through a broad glob.
+
+## 6. A clean installation must not see the repository source
+
+Create a second environment in a temporary directory, install the **exact wheel
+file**, and run from another directory. This helper works on POSIX and Windows:
+
+```python
+import os
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+
+def environment_python(environment_directory):
+    root = Path(environment_directory)
+    relative = Path("Scripts/python.exe") if os.name == "nt" else Path("bin/python")
+    return root / relative
+
+
+project_root = Path.cwd()
+wheels = sorted((project_root / "dist").glob("*.whl"))
+if len(wheels) != 1:
+    raise RuntimeError(f"expected one wheel, found {len(wheels)}")
+wheel = wheels[0].resolve()
+
+with TemporaryDirectory() as temporary_name:
+    root = Path(temporary_name)
+    clean_environment = root / "clean-env"
+    outside_repository = root / "run-here"
+    outside_repository.mkdir()
+
+    subprocess.run(
+        [sys.executable, "-m", "venv", str(clean_environment)],
+        check=True,
+    )
+    clean_python = environment_python(clean_environment)
+    subprocess.run(
+        [str(clean_python), "-m", "pip", "install", str(wheel)],
+        check=True,
+    )
+
+    proof = subprocess.run(
+        [
+            str(clean_python),
+            "-c",
+            "from importlib.metadata import version; "
+            "import constellation; "
+            "print(version('constellation-report')); "
+            "print(constellation.__file__); "
+            "print(constellation.normalize_degrees(-1))",
+        ],
+        cwd=outside_repository,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    print(proof.stdout)
+
+    module_run = subprocess.run(
+        [str(clean_python), "-m", "constellation"],
+        cwd=outside_repository,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    print(module_run.stdout)
+```
+
+The installed origin should point inside the temporary clean environment, not
+the repository's `src`. The version should be `0.1.0`, normalization should
+print `359`, and module execution should print `Moon Gate: 345°`.
+
+To test the generated console launcher portably, locate its scripts directory:
+
+```python
+from pathlib import Path
+import os
+
+
+def environment_command(environment_directory, command_name):
+    root = Path(environment_directory)
+    if os.name == "nt":
+        return root / "Scripts" / f"{command_name}.exe"
+    return root / "bin" / command_name
+```
+
+Then run `environment_command(clean_environment, "constellation-report")`
+through `subprocess.run`. The launcher should produce the same output as module
+mode.
+
+### Compare installed metadata with source and wheel metadata
+
+Ask the clean environment—not the development process—to report what it
+received:
+
+```python
+import subprocess
+
+metadata_program = (
+    "from importlib.metadata import distribution; "
+    "d = distribution('constellation-report'); "
+    "print(d.metadata['Name']); "
+    "print(d.version); "
+    "print(d.metadata['Requires-Python']); "
+    "print(d.requires or [])"
+)
+
+result = subprocess.run(
+    [str(clean_python), "-c", metadata_program],
+    cwd=outside_repository,
+    text=True,
+    capture_output=True,
+    check=True,
+)
+print(result.stdout)
+```
+
+The values should agree with the wheel inspection. This three-way comparison
+catches different mistakes:
+
+- source TOML wrong: repair project metadata before rebuilding;
+- source correct but wheel metadata stale: clean artifacts and rebuild;
+- wheel correct but clean environment reports another version: verify the exact
+  installed path and environment interpreter;
+- metadata correct but import origin points to the repository: remove the
+  source-tree shortcut and rerun outside it.
+
+Do not import a `__version__` constant and assume it matches distribution
+metadata unless the project deliberately has one version source and tests the
+relationship. This lesson uses installed distribution metadata as the release
+version record.
+
+### Preserve subprocess failures as release evidence
+
+During a clean run, do not use `check=True` until you know which output you need
+to inspect. Capture the first failing attempt:
+
+```python
+import subprocess
+
+attempt = subprocess.run(
+    [str(clean_python), "-m", "constellation"],
+    cwd=outside_repository,
+    text=True,
+    capture_output=True,
+)
+print("return code:", attempt.returncode)
+print("stdout:", attempt.stdout)
+print("stderr:", attempt.stderr)
+```
+
+A missing module, missing callable, wrong output, or duplicated output identifies
+a different contract. After recording it, repair source/metadata, rebuild from a
+clean `dist/`, recreate or reinstall into the clean environment, and rerun. An
+old installed wheel cannot observe a source edit by itself.
+
+::: {.callout-important title="Why the outside directory matters"}
+If the proof runs from the repository root, an accidental flat-layout package,
+path modification, or current-directory file might mask a broken wheel. A fresh
+environment plus unrelated working directory isolates the artifact contract.
+:::
+
+### Checkpoint: distinguish building from release proof
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit10-builds-artifacts",
+  "title": "Inspect and verify what a user receives",
+  "instructions": "Choose the strongest evidence for each artifact claim.",
+  "questions": [
+    {
+      "id": "successful-build-limit",
+      "prompt": "`python -m build` succeeded. What still needs separate verification?",
+      "options": ["Whether Python has strings", "Whether Git exists anywhere", "Whether TOML supports tables", "Artifact contents and behavior after installing the exact wheel elsewhere"],
+      "answer_index": 3,
+      "explanation": "A backend can produce an archive that omits code or has broken entry metadata; inspection and clean installation test the deliverable."
+    },
+    {
+      "id": "wheel-origin-proof",
+      "prompt": "Which origin best supports a successful clean-wheel proof?",
+      "options": ["`constellation.__file__` points inside the new environment, while running outside the repository.", "It points into the repository `src` directory.", "The current directory is the repository root.", "The module was already loaded in the development notebook."],
+      "answer_index": 0,
+      "explanation": "That combination removes working-source visibility and shows the clean interpreter imported its installed copy."
+    },
+    {
+      "id": "build-tool-roles",
+      "prompt": "In this workflow, how do `build` and Hatchling relate?",
+      "options": ["Both are runtime report functions.", "`build` is the frontend requesting artifacts; Hatchling is the configured backend producing them.", "Hatchling creates Git commits for `build`.", "They are two import names for the constellation package."],
+      "answer_index": 1,
+      "explanation": "The standard frontend/backend interface lets the command request builds without embedding one backend's implementation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Run the complete release rehearsal
+
+Starting from a clean project checkout, produce this evidence in order:
+
+1. **Tree:** `src/constellation`, checks, README, `.gitignore`, and
+   `pyproject.toml` are present; generated folders are absent.
+2. **Environment:** `.venv`'s Python reports its executable and differing
+   `prefix`/`base_prefix`.
+3. **Editable install:** package origin points into `src`, public assertions
+   pass, and module/console routes agree.
+4. **Build:** one sdist and one wheel exist after cleaning `dist/`.
+5. **Inspection:** the wheel contains every package module and entry-point
+   metadata but no local environment or caches.
+6. **Clean install:** a second environment installs the exact wheel path without
+   seeing repository source.
+7. **Outside run:** public API, version metadata, module command, and generated
+   console launcher all produce expected results from another directory.
+8. **Git:** `git status --short` contains only deliberate source changes; build
+   artifacts remain ignored.
+
+Add one changed requirement: update the version to `0.2.0` and change the demo
+label from `moon gate` to `lunar archive`. Clean `dist/`, rebuild, and verify the
+new wheel. Do not leave both versions in `dist/`, because a glob that silently
+chooses one would make the proof ambiguous.
+
+<details class="solution">
+<summary>Compare a compact release evidence checklist</summary>
+
+```text
+[ ] Environment executable is inside .venv
+[ ] Editable origin is inside repository/src
+[ ] Distribution metadata version is 0.2.0
+[ ] Exactly one sdist and one wheel were built
+[ ] Wheel contains constellation package and entry_points.txt
+[ ] Wheel contains no .venv, .git, __pycache__, checks, or dist directory
+[ ] Clean origin is inside the second environment, not repository/src
+[ ] API returns 359 for -1 degrees
+[ ] python -m constellation prints Lunar Archive: 345°
+[ ] installed constellation-report prints the same line
+[ ] proof command ran outside the repository
+[ ] repository status contains no generated artifacts
+```
+
+If a check fails, retain the command, return code, standard output, standard
+error, interpreter, working directory, and relevant origin. Repair the earliest
+failed contract, rebuild from clean `dist/`, and repeat the clean install.
+
+</details>
+
+### Diagnose the release layer before editing code
+
+Use the first failed observation to choose the next inspection:
+
+| Failure | Inspect next | Avoid |
+|---|---|---|
+| TOML parse or validation error | named table, key, line, and value type | changing package functions |
+| backend cannot load in isolated build | `[build-system].requires`, configured index, and connectivity | adding backend to runtime dependencies |
+| editable import missing | environment Python, install result, package path, and origin | permanent `sys.path` mutation |
+| wheel lacks one module | backend inclusion configuration and sdist contents | copying source into the clean environment |
+| console launcher names a missing callable | `[project.scripts]` target and import-safe module | duplicating command logic in metadata |
+| clean install refuses Python version | `Requires-Python` in source and wheel metadata | forcing installation without understanding compatibility |
+| outside run imports repository source | working directory, environment, editable state, and module origin | treating passing output as release proof |
+
+One repair can require rebuilding and reinstalling. Source edits do not alter an
+already built wheel. Wheel edits do not alter an already installed copy. Keep a
+simple chain in the evidence log:
+
+```text
+source commit -> pyproject metadata -> sdist -> wheel -> clean installation
+```
+
+Write the filename and SHA-256 digest beside the installed wheel when several
+processes could handle artifacts:
+
+```python
+from hashlib import sha256
+from pathlib import Path
+
+wheels = sorted(Path("dist").glob("*.whl"))
+if len(wheels) != 1:
+    raise RuntimeError(f"expected one wheel, found {len(wheels)}")
+wheel = wheels[0]
+digest = sha256(wheel.read_bytes()).hexdigest()
+print(wheel.name)
+print(digest)
+```
+
+The digest identifies exact bytes; it does not prove those bytes are safe or
+correct. Pair identity with metadata, content inspection, and behavior. Signing
+and full supply-chain policy belong beyond this Foundations unit.
+
+### Hand the project to a clean-room learner
+
+Ask another learner—or simulate one with a new directory—to use only:
+
+- the source repository at one named commit;
+- a supported Python interpreter;
+- documented access to build requirements;
+- the release rehearsal commands; and
+- expected API, module, and console outputs.
+
+They should not receive your `.venv`, editable-install metadata, caches, or
+`dist/`. If they build the same version, artifact bytes are not guaranteed to be
+identical across every backend, timestamp, or platform. The foundation claim is
+narrower: the declared workflow produces an artifact with the expected metadata
+and behavior. Fully reproducible builds require additional controls.
+
+Have the learner report the base/environment Python versions, wheel filename,
+wheel digest, installed origin, and all three behavior results. Differences in
+absolute paths are expected. Differences in distribution version, public
+result, entry-point output, or artifact contents require investigation before a
+release is trusted.
+
+## 8. Key points for installable projects
+
+- `[build-system]`, `[project]`, and `[project.scripts]` are standardized
+  packaging tables; `[tool.hatch...]` is backend-specific configuration.
+- Repository, distribution, import-package, module, and console-command names
+  are distinct identities even when some spellings match.
+- Runtime dependencies describe what installed product code needs. Build and
+  verification tools belong in development configuration.
+- Editable installation supports source development. It is not proof of the
+  wheel another environment receives.
+- Module mode and a generated console launcher should delegate to one import-safe
+  callable.
+- A build frontend requests artifacts; a backend implements the build hooks.
+- Inspect both metadata and file contents. A successful build command alone does
+  not establish artifact completeness.
+- The strongest release rehearsal installs the exact wheel into a fresh
+  environment and runs it outside the repository.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
-- [Python Packaging User Guide: Writing pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)
-- [Python Packaging User Guide: Packaging Python Projects](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
+- [PyPA guide: writing `pyproject.toml`](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)
+- [PyPA tutorial: packaging Python projects](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
+- [PyPA build-system interface specification](https://packaging.python.org/en/latest/specifications/pyproject-toml/)
+- [PyPA entry-points specification](https://packaging.python.org/en/latest/specifications/entry-points/)
+- [PyPA discussion of src and flat layouts](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/)
+- [Python wheel archive format specification](https://packaging.python.org/en/latest/specifications/binary-distribution-format/)
+- [Python `zipfile` documentation](https://docs.python.org/3/library/zipfile.html)
+- [Python installed-distribution metadata](https://docs.python.org/3/library/importlib.metadata.html)
