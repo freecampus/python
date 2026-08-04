@@ -571,6 +571,12 @@ def test_selected_lessons_include_mermaid_diagrams() -> None:
         / "units/functions-call-behavior/iterators-generators-lazy-values.qmd",
         FOUNDATIONS_ROOT
         / "units/functions-call-behavior/decorators-function-contracts.qmd",
+        FOUNDATIONS_ROOT
+        / "units/mutability-identity-copying/equality-identity-references.qmd",
+        FOUNDATIONS_ROOT
+        / "units/mutability-identity-copying/aliasing-shallow-deep-copies.qmd",
+        FOUNDATIONS_ROOT
+        / "units/mutability-identity-copying/mutation-function-boundaries.qmd",
         FOUNDATIONS_ROOT / "units/collections-iteration/lists.qmd",
         FOUNDATIONS_ROOT / "units/collections-iteration/dictionaries.qmd",
         FOUNDATIONS_ROOT

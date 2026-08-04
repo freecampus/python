@@ -1,6 +1,6 @@
 ---
-title: Mutability, Identity, and Copying Overview
-description: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+title: Sharing, Changing, and Copying Objects Overview
+description: Learn to see which names and containers reach the same objects, then choose intentional sharing, mutation, or copying from a clear ownership contract.
 course_id: python-foundations
 unit_id: mutability-identity-copying
 unit_number: 6
@@ -13,54 +13,246 @@ colab_notebook: notebooks/courses/python-foundations/units/mutability-identity-c
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 6
-- **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 45–75 minutes for orientation and readiness work
+- **You will learn:** Trace shared objects, ask who owns future changes, and follow the four-lesson path from identity to copy depth and mutation-aware function design.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. One update appears in two places
 
-Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+Two explorers appear to have separate inventory names:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+```python
+nova_inventory = ["lantern", "rope"]
+sol_inventory = nova_inventory
 
-## 2. Before you start
+sol_inventory.append("moon key")
 
-**Prior knowledge:** Complete Unit 5 and bring its challenge notes and debugging record.
+assert nova_inventory == ["lantern", "rope", "moon key"]
+assert sol_inventory == ["lantern", "rope", "moon key"]
+```
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+There is only one list. Assignment did not repeat the list construction; it
+bound `sol_inventory` to the object already reached through `nova_inventory`.
+Appending through either name changes that shared list.
 
-## 3. Lessons
+Now compare equal independent values:
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Equality, Identity, and Object References](equality-identity-references.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Mutable, Immutable, and Hashable Objects](mutable-immutable-hashable.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Aliasing, Shallow Copies, and Deep Copies](aliasing-shallow-deep-copies.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Mutation Across Function Boundaries](mutation-function-boundaries.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+```python
+nova_inventory = ["lantern", "rope"]
+sol_inventory = ["lantern", "rope"]
 
-## 4. How to study this unit
+assert nova_inventory == sol_inventory
+assert nova_inventory is not sol_inventory
+```
 
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
+The lists contain equal values, but they are different objects. A mutation of
+one does not change the other. Unit 6 gives you the language and evidence to tell
+these situations apart before a surprising edit reaches the wrong data.
 
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+## 2. Names point; objects carry identity and state
+
+Use a small diagram instead of imagining variables as sealed boxes. Names are
+ways to reach objects. Containers also hold references to other objects.
+
+::: {.concept-diagram}
+Both inventory names point to one mutable list. The list contains references to
+two string objects.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["name: nova_inventory"] --> C["one list object"]
+  B["name: sol_inventory"] --> C
+  C --> D["string: lantern"]
+  C --> E["string: rope"]
+```
+
 :::
 
-## 5. Unit evidence
+Every object has a type, a value or observable state, and an identity. The
+identity answers “is this the very same object?” It is distinct from asking
+whether two objects currently compare equal.
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+When code runs, watch two kinds of change:
+
+- **rebinding** changes which object a name reaches;
+- **mutation** changes the state of an existing object.
+
+Those events can produce similar printed output while giving later code very
+different behavior.
+
+## 3. Ask four questions before editing data
+
+Before modifying a collection or passing it to a helper, ask:
+
+1. **Are the values equal?** Use `==` for ordinary value comparison.
+2. **Are they the same object?** Use `is` only when identity is the question.
+3. **Can this object change in place?** Lists, dictionaries, and sets commonly
+   can; strings, numbers, and tuples cannot change their own stored contents.
+4. **Who should observe future changes?** This ownership decision determines
+   whether sharing, mutation, or copying is appropriate.
+
+The last question prevents automatic rules such as “never mutate” or “always
+deep copy.” Shared state can be intentional. A scoreboard may need one list that
+several views observe. A new player's inventory may need independent nested
+state. Correctness depends on the contract.
+
+## 4. Choose a sharing policy, not a reflex
+
+Four broad choices will recur:
+
+| Choice | What stays shared? | Suitable when |
+|---|---|---|
+| Keep the reference | the complete object graph | every user should observe the same updates |
+| Shallow copy | nested objects, but not the outer container | only outer membership or fields will change |
+| Selective copy | only fields named by the ownership design | known mutable descendants need independence |
+| Deep copy | a recursively copied supported graph | the complete mutable graph must be independently editable |
+
+The most expensive or deepest choice is not automatically the safest design.
+Copying can hide intended communication, duplicate large structures, and obscure
+who owns the authoritative state. First draw which objects may change; then
+separate only the boundaries that require independent ownership.
+
+## 5. Your path through this unit
+
+| Lesson | Capability you will build | Main lab artifact |
+|---:|---|---|
+| 1 | [When Names Share the Same Object](equality-identity-references.qmd) — follow bindings and container references, distinguish equality from identity, and use the `None` sentinel correctly. | Party-roster object graph |
+| 2 | [Changing Objects and Choosing Safe Keys](mutable-immutable-hashable.qmd) — distinguish mutation from rebinding, read method return contracts, and choose hashable dictionary/set keys. | Expedition-state tracker |
+| 3 | [Copying Nested Data Without Surprises](aliasing-shallow-deep-copies.qmd) — diagnose repeated references and select shallow, selective, or deep copying from ownership needs. | Independent mission boards |
+| 4 | [Designing Functions That Control Mutation](mutation-function-boundaries.qmd) — make caller-visible effects, returned copies, defaults, snapshots, and retained state explicit. | Quest-state API |
+
+The [Unit Challenge](challenge.qmd) asks you to break a Mirror Vault whose
+doppelgängers accidentally share inventories, journals, and visited-room state.
+
+## 6. Unit 5 supplied the call boundaries
+
+You already know how to design parameters, returned results, side effects,
+defaults, closures, and decorated calls. Unit 6 explains which objects cross
+those boundaries.
+
+```python
+def add_badge_in_place(badges, badge):
+    """Append badge to caller-owned badges; return None."""
+    badges.append(badge)
+
+
+earned = ["starter"]
+result = add_badge_in_place(earned, "pathfinder")
+
+assert earned == ["starter", "pathfinder"]
+assert result is None
+```
+
+The parameter `badges` is a local name, but it reaches the list supplied by the
+caller. Mutating that object is visible outside the function. Rebinding the
+local parameter would be different. Lesson 4 develops both traces and turns them
+into clear API choices.
+
+## 7. Unit 7 will turn requirements into algorithms
+
+This unit begins with an already-understood task and object graph. It asks how
+state is shared and who should control changes. [Unit 7](../problem-solving-algorithms/index.qmd)
+adds ambiguous requirements, decomposition, algorithm selection, correctness
+arguments, and practical efficiency.
+
+You will discuss the cost of copying qualitatively here, because it affects the
+ownership decision. Formal complexity and evidence-driven algorithm comparison
+remain in the next unit.
+
+## 8. Set up an object laboratory
+
+Separate fixture construction, relationships, mutations, and evidence:
+
+```python
+# 1. Construct source objects.
+source = {"name": "Nova", "badges": ["starter"]}
+
+# 2. Establish a relationship deliberately.
+alias = source
+
+# 3. Record the expected relationship before mutation.
+assert alias is source
+assert alias["badges"] is source["badges"]
+
+# 4. Perform one mutation.
+alias["badges"].append("pathfinder")
+
+# 5. Check values and relationships.
+assert source["badges"] == ["starter", "pathfinder"]
+```
+
+Keep value assertions and identity assertions separate. `==` can show that data
+matches while missing whether a later edit will leak. `is` can show shared
+identity while saying nothing about whether the current values are correct.
+
+Restart the notebook before interpreting identity-sensitive examples. Old
+mutations and reused names can make a correct diagram appear wrong.
+
+## 9. Choose a realistic pace
+
+Unit 6 is planned for approximately **15–23 hours**, including orientation,
+examples, diagrams, modifications, checkpoints, four final labs, and the
+challenge. The range is guidance rather than a deadline.
+
+A useful rhythm is:
+
+1. draw names and container paths before running;
+2. predict both value equality and object identity;
+3. perform one rebind, mutation, or copy;
+4. update the graph rather than drawing a disconnected new picture;
+5. answer a checkpoint from the graph;
+6. finish the lab before opening its hint or solution; and
+7. restart before checking repeated calls or old shared state.
+
+## 10. Check your readiness
+
+Predict every assertion before running:
+
+```python
+first = ["map"]
+alias = first
+equal_copy = ["map"]
+
+assert first == alias
+assert first is alias
+assert first == equal_copy
+assert first is not equal_copy
+
+alias.append("key")
+assert first == ["map", "key"]
+assert equal_copy == ["map"]
+
+alias = ["compass"]
+assert first == ["map", "key"]
+assert alias == ["compass"]
+```
+
+Explain two moments separately. `append` changed the list reached through both
+aliased names. The later assignment changed only the `alias` binding; it did not
+undo or replace the object still reached through `first`.
+
+You are ready for Lesson 1 when you can draw those relationships and explain why
+equal lists need not be identical.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Names and container entries provide paths to objects; assignment can create
+  another path without copying the object.
+- Equality asks whether values compare equal; identity asks whether two
+  expressions reach the same object.
+- Rebinding changes a name-to-object relationship; mutation changes an existing
+  object's state.
+- Copy depth should follow an ownership contract, not an automatic preference
+  for the deepest copy.
+- Unit 5 supplied function boundaries; this unit explains what can remain shared
+  across them.
+:::
 
 <!-- fcpython-chapter-lab: end -->

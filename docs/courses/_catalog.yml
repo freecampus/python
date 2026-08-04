@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 10
+curriculum_version: 11
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -9,13 +9,13 @@ courses:
     status: available
     pathway: both
     lesson_count: 89
-    estimated_effort: 200–305 hours
+    estimated_effort: 210–320 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 10
+      curriculum_version: 11
       rule_version: 9
       recognition: local-self-reported
       lesson_ids:
@@ -134,7 +134,7 @@ courses:
           unit_id: functions-call-behavior
           path: courses/python-foundations/units/functions-call-behavior/challenge.qmd
         - id: mutability-identity-copying.challenge
-          title: Repair a Shared Study Planner
+          title: Break the Mirror Vault
           unit_id: mutability-identity-copying
           path: courses/python-foundations/units/mutability-identity-copying/challenge.qmd
         - id: problem-solving-algorithms.challenge
@@ -212,7 +212,7 @@ courses:
         kind: instructional
       - number: 6
         id: mutability-identity-copying
-        title: Mutability, Identity, and Copying
+        title: Sharing, Changing, and Copying Objects
         directory: courses/python-foundations/units/mutability-identity-copying
         lesson_count: 4
         kind: instructional

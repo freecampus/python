@@ -1,8 +1,8 @@
 ---
-title: Mutable, Immutable, and Hashable Objects
+title: Changing Objects and Choosing Safe Keys
 lesson_id: mutability-identity-copying.mutable-immutable-hashable
 lesson_order: 20
-description: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+description: Predict which built-in operations mutate existing objects or return new values, then choose dictionary keys and set members from stable hash behavior.
 course_id: python-foundations
 unit_id: mutability-identity-copying
 unit_number: 6
@@ -11,121 +11,188 @@ execute:
 categories:
 - python-foundations
 - mutability-identity-copying
+- mutability
+- hashability
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/mutability-identity-copying/mutable-immutable-hashable.ipynb
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+- **Level:** Python Foundations · Unit 6
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Distinguish mutation from rebinding, predict common method and `+=` behavior, explain nested mutability, and choose hashable values for dictionary and set lookup.
 - **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
-
-Container operations behave differently depending on whether an object can change and whether its hash can remain stable. Those properties determine safe dictionary keys and set members.
-
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
-
-## 1. Read and predict a complete case
+## 1. One operation changes an object; another returns a replacement
 
 ```python
-topics = ["loops", "files"]
-label = "Python"
+supplies = ["water", "map"]
+alias = supplies
+mission_name = "moon trail"
 
-topics.append("testing")
-upper_label = label.upper()
+append_result = supplies.append("rope")
+upper_name = mission_name.upper()
 
-print(topics)
-print(label, upper_label)
-print({("unit", 1): "syntax"})
+assert append_result is None
+assert supplies == ["water", "map", "rope"]
+assert alias == ["water", "map", "rope"]
+assert mission_name == "moon trail"
+assert upper_name == "MOON TRAIL"
 ```
 
-### Step-by-step explanation
+`list.append` mutates the existing list. Its alias observes the change. Strings
+are immutable: `str.upper` cannot change the string object, so it returns another
+string value. The original name still reaches the original lowercase value.
 
-1. `list.append` mutates the existing list.
-2. `str.upper` cannot mutate the string, so it returns a new string.
-3. The original `label` remains `Python`.
-4. A tuple containing hashable values can be a dictionary key.
+This lesson answers:
 
-::: {.callout-note title="Make one controlled change"}
-Try to use `topics` as a dictionary key, capture the `TypeError`, and explain why a changeable list cannot provide a stable hash.
-:::
+- Which common objects can change in place?
+- Why do many mutating methods return `None`?
+- Why can `+=` mutate one type and rebind another?
+- What makes a value suitable for dictionary or set lookup?
 
-## 2. Investigate the important boundary
-
-A tuple is immutable, but a tuple that contains a list is not hashable. Hashability depends on the complete value graph used to calculate equality and a stable hash.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+## 2. Mutation preserves identity while changing state
 
 ```python
-coordinates = (10, 20)
-visited = {coordinates}
+route = ["gate", "bridge"]
+before_id = id(route)
 
-candidate = (10, 20)
-print(candidate in visited)
-print(hash(candidate) == hash(coordinates))
+route.append("tower")
+
+assert id(route) == before_id
+assert route == ["gate", "bridge", "tower"]
 ```
 
-Then complete the learning loop:
+The list's observable contents changed while its identity remained the same.
+Every reference to that list can observe the updated state.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+Rebinding produces a different event:
 
-<details>
-<summary>Check your practice process</summary>
+```python
+route = ["gate", "bridge"]
+before = route
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+route = route + ["tower"]
 
-</details>
+assert route == ["gate", "bridge", "tower"]
+assert before == ["gate", "bridge"]
+assert route is not before
+```
 
-## 4. Check your understanding
+List concatenation built a new list, then assignment rebound `route`. The name
+`before` still reaches the original object.
+
+## 3. Common built-in types have different mutation contracts
+
+Use this table as a guide, then read the documentation for the exact operation:
+
+| Common type | Can that object change in place? | Typical transformation |
+|---|---:|---|
+| `list` | yes | `append`, item assignment, `sort` |
+| `dict` | yes | item assignment, `update`, `pop` |
+| `set` | yes | `add`, `discard`, `update` |
+| `bytearray` | yes | item assignment, `extend` |
+| `int`, `float`, `complex`, `bool` | no | arithmetic returns a value |
+| `str`, `bytes` | no | methods return a value |
+| `tuple`, `frozenset` | no | operations return a value |
+| `None` | no | used as a singleton sentinel |
+
+User-defined instances are generally mutable unless their design prevents
+updates. Unit 11 develops classes and custom equality/hash behavior. For now,
+make decisions with built-in values whose contracts are documented.
+
+“Immutable” does not mean a name can never change. A name may be rebound to a
+new immutable object:
+
+```python
+attempts = 2
+old_attempts = attempts
+attempts = attempts + 1
+
+assert attempts == 3
+assert old_attempts == 2
+```
+
+The integer `2` did not become `3`; the expression produced another integer and
+assignment changed the `attempts` binding.
+
+## 4. Mutating methods usually return `None`
+
+Several standard methods emphasize their effect by returning `None`:
+
+```python
+items = ["map", "rope"]
+mapping = {"north": "open"}
+visited = {(0, 0)}
+
+assert items.sort() is None
+assert mapping.update({"east": "closed"}) is None
+assert visited.add((1, 0)) is None
+
+assert items == ["map", "rope"]
+assert mapping == {"north": "open", "east": "closed"}
+assert visited == {(0, 0), (1, 0)}
+```
+
+The returned `None` prevents an easy confusion between the action and a new
+collection result. This mistake loses the useful binding:
+
+```python
+items = ["map"]
+items = items.append("rope")
+
+assert items is None
+```
+
+Repair it by keeping the command separate:
+
+```python
+items = ["map"]
+items.append("rope")
+
+assert items == ["map", "rope"]
+```
+
+Not every mutating method returns `None`; always check its contract. The pattern
+is common enough to predict cautiously, not to invent a universal rule.
+
+### Checkpoint: mutation and returned values
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "mutability-identity-copying-mutable-immutable-hashable",
-  "title": "Mutable, Immutable, and Hashable Objects checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit6-mutability-operations",
+  "title": "Mutation and rebinding checkpoint",
+  "instructions": "Track both object identity and the operation's returned value.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "Why can a tuple of integers be a set member while a list of integers cannot?",
-      "options": [
-        "Sets accept only values written with parentheses.",
-        "The tuple is hashable and cannot change in a way that invalidates set lookup.",
-        "Lists contain too many values.",
-        "Integers become strings inside tuples."
-      ],
-      "answer_index": 1,
-      "explanation": "Set and dictionary lookup require a stable hash and equality behavior."
+      "id": "append-identity",
+      "prompt": "What happens to a list's identity when `append` mutates it?",
+      "options": ["It remains the same while the list state changes", "It becomes the appended item's identity", "It changes to None", "It matches every equal list"],
+      "answer_index": 0,
+      "explanation": "In-place mutation changes the existing object's contents without replacing that object."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun.",
-        "A written prediction, the observed result, and an explanation tied to the changed line."
-      ],
+      "id": "string-upper",
+      "prompt": "Why must code keep the result of `mission_name.upper()` to use the uppercase value?",
+      "options": ["Upper deletes the original name", "Strings are immutable, so the method returns a new value", "Upper mutates every alias", "Only lists can be assigned"],
+      "answer_index": 1,
+      "explanation": "A string object cannot change its contents; its transformation produces another string."
+    },
+    {
+      "id": "lost-list",
+      "prompt": "Why does `items = items.append('rope')` make items become None?",
+      "options": ["The list was empty", "Assignment freezes the list", "Append mutates the list but its returned value is None", "Rope is not hashable"],
+      "answer_index": 2,
+      "explanation": "The assignment stores the method's result, not the list that the method changed."
+    },
+    {
+      "id": "concat-event",
+      "prompt": "What does `route = route + ['tower']` do?",
+      "options": ["Mutates every nested object", "Deletes the old list", "Makes all aliases identical", "Creates a new list and rebinds route"],
       "answer_index": 3,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "List addition returns a new list; assignment then changes one binding."
     }
   ]
 }
@@ -133,15 +200,417 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 5. Returning alternatives preserve the source
+
+Compare methods and expressions that return new values:
+
+```python
+numbers = [3, 1, 2]
+original_numbers = numbers
+
+ordered = sorted(numbers)
+assert ordered == [1, 2, 3]
+assert numbers == [3, 1, 2]
+assert ordered is not numbers
+assert original_numbers is numbers
+
+regions = {"north"}
+expanded = regions | {"east"}
+assert regions == {"north"}
+assert expanded == {"north", "east"}
+```
+
+`sorted` accepts an iterable and returns a list. Set union with `|` returns a set.
+Their in-place counterparts have different ownership effects:
+
+```python
+numbers.sort()
+regions.update({"east"})
+
+assert numbers == [1, 2, 3]
+assert regions == {"north", "east"}
+```
+
+Neither style is always preferable. Choose from whether the caller owns the
+source, whether aliases should observe the update, and whether preserving the
+old value is useful.
+
+## 6. `+=` follows the left operand's type
+
+With a list, augmented assignment normally performs in-place addition:
+
+```python
+items = ["map"]
+alias = items
+
+items += ["rope"]
+
+assert items is alias
+assert alias == ["map", "rope"]
+```
+
+With a tuple, there is no in-place tuple mutation. A new tuple is returned and
+the target name is rebound:
+
+```python
+steps = ("gate",)
+old_steps = steps
+
+steps += ("bridge",)
+
+assert steps == ("gate", "bridge")
+assert old_steps == ("gate",)
+assert steps is not old_steps
+```
+
+Strings and numbers similarly produce new values. Do not classify syntax alone
+as mutating. Ask what the left operand's type promises for that operation.
+
+## 7. An immutable tuple can point to a mutable list
+
+```python
+record = ("Nova", ["map"])
+gear = record[1]
+
+gear.append("rope")
+
+assert record == ("Nova", ["map", "rope"])
+```
+
+The tuple still contains the same two references in the same positions. Its
+second reference reaches a list whose state changed. Tuple immutability prevents
+replacing a tuple slot; it does not freeze every object reachable from the tuple.
+
+This distinction matters for copying and hashability. A nested mutable object
+can leak state and can make the containing tuple unhashable.
+
+### Checkpoint: `+=` and nested mutability
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit6-mutability-nested",
+  "title": "Type-dependent change checkpoint",
+  "instructions": "Use the left operand's type and the complete nested graph.",
+  "questions": [
+    {
+      "id": "list-plus-equals",
+      "prompt": "What will an alias observe after `items += ['rope']` when items is a list?",
+      "options": ["Only the old list", "The list mutated to include rope", "A tuple replacement", "An unhashable error"],
+      "answer_index": 1,
+      "explanation": "List in-place addition changes the existing list, so its aliases observe the new element."
+    },
+    {
+      "id": "tuple-plus-equals",
+      "prompt": "Why does an old tuple alias retain the earlier tuple after `steps += ('bridge',)`?",
+      "options": ["Tuples reject all addition", "The alias is automatically copied", "Tuple addition creates a value and the target name is rebound", "Bridge is mutable"],
+      "answer_index": 2,
+      "explanation": "The immutable tuple does not change; augmented assignment binds the target to the returned tuple."
+    },
+    {
+      "id": "tuple-list",
+      "prompt": "What can change in `('Nova', ['map'])`?",
+      "options": ["The tuple can replace its first slot", "The tuple becomes a dictionary", "Its identity changes on append", "The nested list can mutate while the tuple retains the same reference"],
+      "answer_index": 3,
+      "explanation": "Container immutability does not recursively freeze mutable descendants."
+    },
+    {
+      "id": "operation-question",
+      "prompt": "What should you inspect before deciding whether `+=` mutates?",
+      "options": ["The left operand's type and operation contract", "The variable name length", "Whether the line prints", "The current hash number"],
+      "answer_index": 0,
+      "explanation": "The same syntax can use different behaviors supplied by different types."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Hashability supports reliable lookup
+
+Dictionaries and sets use a hash to locate candidates efficiently, then equality
+to confirm a matching key. A hashable object promises hash/equality behavior
+stable enough for its lifetime in the collection.
+
+```python
+room_names = {
+    (0, 0): "entrance",
+    (1, 0): "mirror hall",
+}
+visited = {(0, 0), (1, 0)}
+
+candidate = tuple([1, 0])
+assert candidate in visited
+assert room_names[candidate] == "mirror hall"
+```
+
+`candidate` is a distinct tuple constructed through a different path. It
+compares equal to `(1, 0)` and has compatible hash behavior, so it finds the same
+set member and dictionary entry.
+
+The core invariant is: objects that compare equal must produce the same hash
+while used as keys. Unequal objects may still have equal hashes; the collection
+checks equality to resolve such collisions.
+
+## 9. Common key choices depend on the complete value
+
+| Value | Usually hashable? | Key/set-member result |
+|---|---:|---|
+| string, integer, bytes | yes | commonly suitable |
+| tuple of hashable elements | yes | commonly suitable |
+| frozenset of hashable elements | yes | suitable when unordered grouping matters |
+| list | no | mutable and rejected |
+| dictionary | no | mutable and rejected |
+| set | no | mutable and rejected |
+| tuple containing a list | no | nested list makes the complete tuple unhashable |
+
+Observe supported values:
+
+```python
+markers = {
+    "entrance",
+    7,
+    (1, 2),
+    frozenset({"north", "east"}),
+}
+
+assert (1, 2) in markers
+assert frozenset({"east", "north"}) in markers
+```
+
+These calls reveal unsupported boundaries when run separately:
+
+```python
+list_key = [1, 2]
+tuple_with_list = ("route", [1, 2])
+
+# hash(list_key)
+# hash(tuple_with_list)
+```
+
+Each uncommented call raises `TypeError` because the complete value is not
+hashable. Unit 8 develops systematic exception handling; here the error directly
+answers the key-suitability question.
+
+## 10. Hashes are not secure or persistent IDs
+
+`hash(value)` returns an integer used by hash-based collections. Do not treat it
+as:
+
+- encryption;
+- a password hash;
+- a collision-free fingerprint;
+- an object's identity;
+- a database identifier; or
+- a value guaranteed to remain the same across Python runs.
+
+For example, Python commonly randomizes string hashes between processes. The
+program-level contract is that a live hashable key remains findable in its
+collection, not that its printed hash belongs in permanent data.
+
+## 11. Choose a key from the meaning of the data
+
+A room coordinate fits a tuple because its two positions form one fixed value:
+
+```python
+coordinate = (3, 5)
+visited = {coordinate}
+```
+
+A collection of permissions might fit a frozenset when order does not matter:
+
+```python
+permissions = frozenset({"read", "map"})
+access_levels = {permissions: "scout"}
+
+assert access_levels[frozenset({"map", "read"})] == "scout"
+```
+
+Do not convert a list to a tuple only to silence an error if its meaning is
+supposed to change while stored. Redesign the key as a stable identifier, or
+keep mutable state in the dictionary value instead.
+
+## 12. Lab: track an expedition state
+
+Implement four focused operations:
+
+```python
+def add_supply_in_place(state, supply):
+    """Append supply to state and return None."""
+    raise NotImplementedError
+
+
+def with_status(state, status):
+    """Return a new outer state with status and shared untouched values."""
+    raise NotImplementedError
+
+
+def visit_room_in_place(state, coordinate):
+    """Add one hashable coordinate to visited and return None."""
+    raise NotImplementedError
+
+
+def observation_counts(observations):
+    """Return counts keyed by hashable observation labels."""
+    raise NotImplementedError
+```
+
+Use this fixture and evidence:
+
+```python
+state = {
+    "name": "Nova",
+    "status": "searching",
+    "supplies": ["water"],
+    "visited": {(0, 0)},
+}
+alias = state
+
+assert add_supply_in_place(state, "rope") is None
+assert alias["supplies"] == ["water", "rope"]
+
+updated = with_status(state, "ready")
+assert updated == {
+    "name": "Nova",
+    "status": "ready",
+    "supplies": ["water", "rope"],
+    "visited": {(0, 0)},
+}
+assert updated is not state
+assert state["status"] == "searching"
+
+assert visit_room_in_place(state, (1, 0)) is None
+assert state["visited"] == {(0, 0), (1, 0)}
+assert observation_counts(["rune", "key", "rune"]) == {
+    "rune": 2,
+    "key": 1,
+}
+assert observation_counts([]) == {}
+```
+
+`with_status` changes only an outer immutable field, so a shallow outer copy is
+enough for this contract. Do not mutate `supplies` through `updated`; Lesson 3
+will show why that different requirement needs a deeper ownership decision.
+
+<details>
+<summary>Hint: separate in-place commands from returned transformations</summary>
+
+The two `_in_place` functions call mutating collection methods and rely on their
+implicit `None` result. `with_status` can use `state.copy()` then replace only the
+status slot. Count observations with a local dictionary whose string keys are
+hashable.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def add_supply_in_place(state, supply):
+    """Append supply to state and return None."""
+    state["supplies"].append(supply)
+
+
+def with_status(state, status):
+    """Return a new outer state with status and shared untouched values."""
+    updated = state.copy()
+    updated["status"] = status
+    return updated
+
+
+def visit_room_in_place(state, coordinate):
+    """Add one hashable coordinate to visited and return None."""
+    state["visited"].add(coordinate)
+
+
+def observation_counts(observations):
+    """Return counts keyed by hashable observation labels."""
+    counts = {}
+    for observation in observations:
+        counts[observation] = counts.get(observation, 0) + 1
+    return counts
+```
+
+</details>
+
+### Checkpoint: hashable expedition state
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit6-mutability-lab",
+  "title": "Expedition state checkpoint",
+  "instructions": "Match each operation to its mutation and lookup contract.",
+  "questions": [
+    {
+      "id": "tuple-room",
+      "prompt": "Why can `(1, 0)` be stored in the visited set?",
+      "options": ["It is a tuple containing only hashable integers", "Every coordinate is global", "Sets accept all lists and tuples", "Its printed hash is permanent"],
+      "answer_index": 0,
+      "explanation": "The complete coordinate value is hashable and stable for set membership."
+    },
+    {
+      "id": "alias-supply",
+      "prompt": "Why does alias observe the added rope?",
+      "options": ["with_status copied it", "alias and state reach the same outer dictionary and nested list", "String keys synchronize objects", "Sets force list mutation"],
+      "answer_index": 1,
+      "explanation": "The in-place command changes state reached through both aliases."
+    },
+    {
+      "id": "status-copy-depth",
+      "prompt": "Why is a shallow copy sufficient for with_status's stated contract?",
+      "options": ["It freezes every nested object", "Status is a list", "Only the outer status slot is replaced; nested state is not edited", "Deepcopy cannot copy strings"],
+      "answer_index": 2,
+      "explanation": "Copy depth follows the fields the function promises to change independently."
+    },
+    {
+      "id": "unhashable-list",
+      "prompt": "Why would `[1, 0]` fail as a set member?",
+      "options": ["It has two elements", "Coordinates must be strings", "Lists compare by identity only", "A mutable list is unhashable"],
+      "answer_index": 3,
+      "explanation": "Set members require hashable values whose lookup behavior remains stable."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Explain each update and lookup
+
+Use your lab to answer:
+
+1. Which functions mutate an object and which return a new outer object?
+2. Why does a returned `None` not mean the in-place commands failed?
+3. Which nested values remain shared by `with_status`, and why is that acceptable
+   only under its narrow contract?
+4. Why do equal tuple coordinates find one set entry?
+5. Why would converting a changing route list into a key be a design problem even
+   if a tuple conversion silenced `TypeError`?
+
+Then change `with_status` so it also appends a supply. Predict the leak through
+the shallow copy before running. Revert the change; Lesson 3 will implement the
+appropriate deeper strategy.
+
 ## Key points
 
 ::: {.callout-tip title="Key points"}
-- Mutation changes an existing object's observable state; rebinding changes a name.
-- Common immutable types return new values from transformations.
-- Dictionary keys and set members must be hashable.
+- Mutation changes an existing object's state; rebinding makes a name reach a
+  different object.
+- Common mutating collection methods return `None`; keep the command separate
+  from the useful collection binding.
+- Returning alternatives such as `sorted` preserve their source, while in-place
+  counterparts make aliases observe a change.
+- `+=` follows the left operand's type: lists commonly mutate, while tuples,
+  strings, and numbers produce values and rebind the target.
+- An immutable container can still refer to mutable descendants.
+- Hashability supports stable dictionary/set lookup and depends on the complete
+  value, not merely tuple punctuation.
+- A hash is not encryption, object identity, or a persistent record identifier.
 :::
 
 ## References
 
-- https://docs.python.org/3/glossary.html#term-hashable
-- https://docs.python.org/3/library/stdtypes.html
+- [Python data model: object mutability and identity](https://docs.python.org/3/reference/datamodel.html#objects-values-and-types)
+- [Python library reference: mutable and immutable sequence operations](https://docs.python.org/3/library/stdtypes.html#sequence-types-list-tuple-range)
+- [Python glossary: hashable](https://docs.python.org/3/glossary.html#term-hashable)
+- [Python built-in function: `hash`](https://docs.python.org/3/library/functions.html#hash)

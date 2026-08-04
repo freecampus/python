@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Repair a Shared Study Planner'
-description: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+title: 'Unit Challenge: Break the Mirror Vault'
+description: Repair a magical cloning spell with independent nested state, hashable room markers, deliberate in-place and returned-copy APIs, and safe snapshots.
 challenge_id: mutability-identity-copying.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 2
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,135 +19,475 @@ unit_number: 6
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 6 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Diagnose aliasing, choose shallow or deep copying, and stop edits from leaking between plans.
-- **Evidence:** Passing checks, a clean rerun, and a short debugging record
+- **Outcome assessed:** Trace and repair nested aliases, choose stable room keys, and compose explicit mutation, copy, default, and snapshot contracts.
+- **Evidence:** Pass 24 progressive assertions, preserve one debugging record, and explain the derived escape artifact.
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
+## 1. Break a cloning spell without hard-coding the escape
 
-Two learners start from the same weekly plan. Editing one learner’s nested task list must not change the template or the other learner’s plan.
+The Mirror Vault creates adventurer doppelgängers from one blueprint. Its broken
+spell copies only names: explorers share inventories, journals, routes, and
+visited-room state. When Nova collects a rune, Sol's journal changes too.
 
-::: {.callout-note title="Work independently, but not without support"}
-Plan for one or two focused hours. Start with the contract, run the smallest
-relevant check after each change, and open a hint only after naming the evidence
-that has blocked you.
+Build a small ownership-aware state API that produces independently editable
+explorers while safely sharing immutable vault rules. Nova must collect three
+runes and derive this final artifact:
+
+```text
+NOVA BREAKS THE MIRROR VAULT WITH 3 RUNES
+```
+
+Your implementation must make these behaviors visible:
+
+1. spawning creates new outer and nested mutable owners;
+2. tuple room coordinates work as stable set members;
+3. one command mutates a named explorer intentionally;
+4. one transformer returns independent state and preserves its source;
+5. a snapshot does not expose internal lists;
+6. omitted history gets fresh per-call storage; and
+7. a shallow-copy variation reproduces the curse and is then repaired.
+
+::: {.callout-note title="Keep the complete solution closed on your first attempt"}
+Work for one or two focused hours. Run one assertion group at a time. Before
+opening a hint, identify the exact access path whose identity or value differs
+from the contract.
 :::
 
-## 2. Understand the acceptance examples
+## 2. Read the blueprint and ownership rules
 
-Before writing implementation code, write one ordinary example, one boundary,
-and one invalid or empty case. Predict the result for each. These examples are
-the specification you will compare against while working.
+The blueprint contains:
+
+- immutable role and difficulty strings;
+- an immutable tuple of vault rules that may be shared safely;
+- a mutable inventory list;
+- a mutable journal dictionary containing rune and route lists; and
+- a mutable set of visited tuple coordinates.
 
 ### Constraints
 
-1. Demonstrate the aliasing failure before repairing it.
-2. Preserve the original nested template.
-3. Choose the minimum copy depth that actually isolates nested tasks.
-4. Record one identity comparison that explains the result.
+1. Preserve all supplied public names, signatures, and docstrings.
+2. Do not mutate `blueprint` while spawning or operating on an explorer.
+3. Give each spawned explorer independent ownership of every mutable descendant.
+4. Preserve the identity of the immutable `rules` tuple deliberately.
+5. Use tuple coordinates such as `(1, 0)` as room markers; do not convert printed
+   hashes into stored identifiers.
+6. `record_rune_in_place` must mutate its supplied explorer and return `None`.
+7. `with_supply` must return independently editable state and preserve its source.
+8. `journal_snapshot` must not return either internal list directly.
+9. `remember_attempt` must not share an omitted mutable default between calls.
+10. Derive the final message from explorer state; do not assign the solved
+    sentence directly in `vault_message`.
+11. Keep calculation functions free of printing.
+12. Use only the standard library. Classes, files, serialization, and exception
+    handlers are outside this challenge.
 
 ## 3. Start from the contract
 
-Preserve the supplied public names and comments so that each assertion gives a
-useful location signal.
+Run the blueprint unchanged:
+
+```python
+blueprint = {
+    "name": None,
+    "role": "vault scout",
+    "difficulty": "foundation",
+    "rules": (
+        "record evidence",
+        "preserve the source",
+        "trust tuple coordinates",
+    ),
+    "inventory": ["lantern", "rope"],
+    "journal": {
+        "runes": [],
+        "route": [],
+    },
+    "visited": {(0, 0)},
+}
+```
+
+Then copy this scaffold. Implement functions in the order shown:
+
+```python
+def spawn_explorer(blueprint, *, name):
+    """Return an explorer with independent mutable state and shared rules."""
+    raise NotImplementedError
+
+
+def identity_report(left, right):
+    """Return labeled identity evidence for important explorer paths."""
+    raise NotImplementedError
+
+
+def record_rune_in_place(explorer, room, rune):
+    """Record room and rune in caller-owned explorer; return None."""
+    raise NotImplementedError
+
+
+def with_supply(explorer, supply):
+    """Return independent explorer state containing one additional supply."""
+    raise NotImplementedError
+
+
+def journal_snapshot(explorer):
+    """Return an immutable snapshot of rune and route sequences."""
+    raise NotImplementedError
+
+
+def remember_attempt(attempt, history=None):
+    """Append attempt to supplied history or a fresh per-call list; return it."""
+    raise NotImplementedError
+
+
+def vault_message(explorer):
+    """Return the explorer's derived Mirror Vault escape message."""
+    raise NotImplementedError
+```
+
+`identity_report(left, right)` returns exactly these keys:
+
+```python
+{
+    "same_outer": False,
+    "same_inventory": False,
+    "same_journal": False,
+    "same_runes": False,
+    "same_route": False,
+    "same_visited": False,
+    "same_rules": True,
+}
+```
+
+The values above describe two correctly spawned explorers from the same
+blueprint.
+
+## 4. Build the vault state in observable stages
+
+1. Write an ownership table for every blueprint field. Mark immutable values as
+   safe to share and mutable descendants as independently owned.
+2. Implement `spawn_explorer` with selective copying. Check the outer dictionary,
+   then every nested mutable path before performing a mutation.
+3. Implement `identity_report` with `is` comparisons only. It reports
+   relationships; it does not decide whether current values are correct.
+4. Implement the in-place rune command. Add the tuple room to `visited`, append
+   it to the journal route, append the rune, and rely on the implicit `None`
+   result.
+5. Implement `with_supply` by creating independent state first and then changing
+   only the new inventory.
+6. Convert journal lists to tuples for the returned snapshot.
+7. Use `None` to create fresh history on omitted-argument calls while documenting
+   that an explicitly supplied history is updated.
+8. Count the explorer's runes inside `vault_message`; do not store the final
+   count or sentence separately.
+9. Run the shallow-copy variation last so its deliberate leak cannot contaminate
+   the main blueprint.
+
+Draw the path `nova -> journal -> runes` and the matching Sol and blueprint paths.
+The three final list objects must be distinct even when their initial contents
+are equal.
+
+## 5. Run progressive assertions
+
+Run these 24 numbered assertions unchanged. A failed identity assertion points
+to an ownership boundary; a failed value assertion points to an operation or
+result contract.
+
+### Spawn and identity evidence
 
 ```python
 from copy import deepcopy
 
-template = {"Monday": ["read", "quiz"], "Tuesday": ["practice"]}
-ana_plan = template  # Repair this alias.
-bo_plan = template  # Repair this alias.
+before = deepcopy(blueprint)
+nova = spawn_explorer(blueprint, name="Nova")
+sol = spawn_explorer(blueprint, name="Sol")
 
-ana_plan["Monday"].append("review")
+assert nova["name"] == "Nova"                                        # 1
+assert sol["name"] == "Sol"                                          # 2
+assert blueprint == before                                            # 3
+assert identity_report(nova, sol) == {                                # 4
+    "same_outer": False,
+    "same_inventory": False,
+    "same_journal": False,
+    "same_runes": False,
+    "same_route": False,
+    "same_visited": False,
+    "same_rules": True,
+}
+assert nova["rules"] is blueprint["rules"]                            # 5
 ```
 
-## 4. Build in small stages
-
-1. Make the ordinary example pass without adding behavior for every case.
-2. Trace the important state after each step and compare it with your prediction.
-3. Add the boundary case, then the empty or invalid case.
-4. Restart the notebook or process and run the complete solution from the top.
-
-## 5. Run progressive assertions
-
-Do not weaken an expected value to make a check pass. If a check appears wrong,
-write down the contract conflict before changing either side.
+### Deliberate mutation and hashable room evidence
 
 ```python
-assert template["Monday"] == ["read", "quiz"]
-assert ana_plan["Monday"] == ["read", "quiz", "review"]
-assert bo_plan["Monday"] == ["read", "quiz"]
-assert ana_plan is not template
-assert ana_plan["Monday"] is not template["Monday"]
+result = record_rune_in_place(nova, (1, 0), "SUN")
+
+assert result is None                                                  # 6
+assert nova["journal"]["runes"] == ["SUN"]                           # 7
+assert nova["journal"]["route"] == [(1, 0)]                           # 8
+assert (1, 0) in nova["visited"]                                      # 9
+assert sol["journal"]["runes"] == []                                 # 10
+assert blueprint["journal"]["runes"] == []                           # 11
 ```
+
+A list coordinate such as `[1, 0]` is unhashable and cannot be a set member. Keep
+this direct failure commented during the normal run:
+
+```python
+# [1, 0] in nova["visited"]
+```
+
+### Returned-copy and snapshot evidence
+
+```python
+powered = with_supply(nova, "mirror lens")
+
+assert powered["inventory"] == ["lantern", "rope", "mirror lens"]     # 12
+assert powered is not nova                                             # 13
+assert powered["inventory"] is not nova["inventory"]                   # 14
+assert powered["journal"] is not nova["journal"]                       # 15
+assert nova["inventory"] == ["lantern", "rope"]                       # 16
+
+snapshot = journal_snapshot(nova)
+assert snapshot == {"runes": ("SUN",), "route": ((1, 0),)}           # 17
+assert isinstance(snapshot["runes"], tuple) and isinstance(             # 18
+    snapshot["route"], tuple
+)
+```
+
+### Fresh default and final artifact evidence
+
+```python
+first_attempt = remember_attempt("left mirror")
+second_attempt = remember_attempt("right mirror")
+
+assert first_attempt == ["left mirror"]                                # 19
+assert second_attempt == ["right mirror"]                              # 20
+assert first_attempt is not second_attempt                              # 21
+
+record_rune_in_place(nova, (1, 1), "MOON")
+record_rune_in_place(nova, (2, 1), "STAR")
+
+artifact = vault_message(nova)
+assert (                                                               # 22
+    artifact == "NOVA BREAKS THE MIRROR VAULT WITH 3 RUNES"
+    and blueprint == before
+    and sol["journal"]["runes"] == []
+)
+```
+
+### Reproduce and repair the shallow-copy curse
+
+Use a separate fixture so deliberate failure evidence does not damage the main
+blueprint:
+
+```python
+leaky_source = deepcopy(blueprint)
+leaky_clone = leaky_source.copy()
+leaky_clone["journal"]["runes"].append("SHADOW")
+
+assert leaky_source["journal"]["runes"] == ["SHADOW"]                  # 23
+
+repaired = spawn_explorer(leaky_source, name="Echo")
+record_rune_in_place(repaired, (9, 9), "LIGHT")
+assert (                                                               # 24
+    leaky_source["journal"]["runes"] == ["SHADOW"]
+    and repaired["journal"]["runes"] == ["SHADOW", "LIGHT"]
+    and repaired["journal"]["runes"] is not leaky_source["journal"]["runes"]
+)
+```
+
+::: {.callout-warning title="Do not repair a leak by weakening identity evidence"}
+Two lists can contain equal values and still need independent future ownership.
+Keep both value and identity assertions when the contract promises isolated
+mutation.
+:::
 
 ## 6. Use the hint ladder only when needed
 
 <details>
-<summary>Hint 1</summary>
+<summary>Hint 1: mark the intended object graph</summary>
 
-Assignment copies a reference, not the nested structure.
-
-</details>
-
-<details>
-<summary>Hint 2</summary>
-
-A shallow dictionary copy still shares the lists stored as values.
+The new outer dictionary, inventory list, journal dictionary, rune list, route
+list, and visited set need new identities for every explorer. Immutable strings
+may be reused, and the supplied rules tuple should remain the exact shared
+object. Check one access path at a time.
 
 </details>
 
 <details>
-<summary>Hint 3</summary>
+<summary>Hint 2: match each function to one ownership boundary</summary>
 
-`deepcopy(template)` recursively creates separate nested containers.
+`record_rune_in_place` follows the supplied explorer and mutates its three
+relevant descendants. `with_supply` first calls the same safe spawning/copying
+logic with the explorer's existing name, then appends only to the new inventory.
+The snapshot converts internal lists to tuples. The history helper constructs a
+list only when its parameter is `None`.
+
+</details>
+
+<details>
+<summary>Hint 3: assemble the selective copy and artifact</summary>
+
+Pseudocode:
+
+```text
+new explorer = shallow outer copy
+replace name
+copy inventory
+create journal dictionary with copied runes and route
+copy visited set
+reuse rules tuple deliberately
+
+message = uppercase name + vault phrase + length of runes + plural noun
+```
+
+The shallow variation leaks because its new outer dictionary still holds the
+source journal reference. `spawn_explorer` repairs every mutable path.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Keep one failure that helped you understand the program. Record the actual
-value or message, your single-cause hypothesis, the controlled change, and the
-clean rerun that confirmed or rejected it.
+Preserve one failed assertion from before your repair. Connect it to one exact
+path rather than writing only “the copy was wrong.”
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+| Failure | Value and identity evidence | Ownership hypothesis | Controlled change | Verified rerun |
 |---|---|---|---|---|
-| What did not work? | What did you observe? | Which cause fits? | What one thing changed? | Which check now passes? |
+| Which numbered assertion failed? | What were `==`, `is`, and relevant contents? | Which outer or nested object is shared incorrectly? | Which one construction/copy/mutation changed? | Which earlier and new assertions now pass? |
 
-## 8. Check your understanding
+Useful failures include a shared journal dictionary, independently copied journal
+with a still-shared rune list, a returned internal list, a reused default
+history, or a list room marker rejected as unhashable.
+
+## 8. Compare with a complete solution
+
+Open this only after attempting each assertion group and using hints in order.
+
+<details class="solution">
+<summary>Show one complete Mirror Vault solution</summary>
+
+```python
+def spawn_explorer(blueprint, *, name):
+    """Return an explorer with independent mutable state and shared rules."""
+    explorer = blueprint.copy()
+    explorer["name"] = name
+    explorer["inventory"] = blueprint["inventory"].copy()
+    explorer["journal"] = {
+        "runes": blueprint["journal"]["runes"].copy(),
+        "route": blueprint["journal"]["route"].copy(),
+    }
+    explorer["visited"] = blueprint["visited"].copy()
+    explorer["rules"] = blueprint["rules"]
+    return explorer
+
+
+def identity_report(left, right):
+    """Return labeled identity evidence for important explorer paths."""
+    return {
+        "same_outer": left is right,
+        "same_inventory": left["inventory"] is right["inventory"],
+        "same_journal": left["journal"] is right["journal"],
+        "same_runes": left["journal"]["runes"] is right["journal"]["runes"],
+        "same_route": left["journal"]["route"] is right["journal"]["route"],
+        "same_visited": left["visited"] is right["visited"],
+        "same_rules": left["rules"] is right["rules"],
+    }
+
+
+def record_rune_in_place(explorer, room, rune):
+    """Record room and rune in caller-owned explorer; return None."""
+    explorer["visited"].add(room)
+    explorer["journal"]["route"].append(room)
+    explorer["journal"]["runes"].append(rune)
+
+
+def with_supply(explorer, supply):
+    """Return independent explorer state containing one additional supply."""
+    updated = spawn_explorer(explorer, name=explorer["name"])
+    updated["inventory"].append(supply)
+    return updated
+
+
+def journal_snapshot(explorer):
+    """Return an immutable snapshot of rune and route sequences."""
+    return {
+        "runes": tuple(explorer["journal"]["runes"]),
+        "route": tuple(explorer["journal"]["route"]),
+    }
+
+
+def remember_attempt(attempt, history=None):
+    """Append attempt to supplied history or a fresh per-call list; return it."""
+    if history is None:
+        history = []
+    history.append(attempt)
+    return history
+
+
+def vault_message(explorer):
+    """Return the explorer's derived Mirror Vault escape message."""
+    name = explorer["name"].upper()
+    rune_count = len(explorer["journal"]["runes"])
+    return f"{name} BREAKS THE MIRROR VAULT WITH {rune_count} RUNES"
+```
+
+</details>
+
+## 9. Predict another ownership change
+
+Suppose the vault adds mutable `settings = {"sound": True}` to the blueprint.
+Before editing code, predict:
+
+- whether the current `spawn_explorer` shares that dictionary;
+- which identity-report field you would add;
+- whether settings should be shared or independently editable;
+- the minimum copy change for that ownership decision; and
+- which source-preservation assertion should fail before the repair.
+
+This variation checks whether you can extend the object graph rather than merely
+remember the existing field names.
+
+## 10. Check your understanding
+
+::: {.quiz-box}
+Answer from the completed object graph and assertions rather than the story
+alone.
+:::
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-mutability-identity-copying-challenge",
-  "title": "Repair a Shared Study Planner readiness check",
-  "instructions": "Trace the situation before choosing an answer.",
+  "title": "Mirror Vault evidence check",
+  "instructions": "Trace ownership, mutation, stable keys, and returned state.",
   "questions": [
     {
-      "id": "alias",
-      "prompt": "What does `ana_plan = template` create?",
-      "options": [
-        "A deep copy",
-        "An immutable dictionary",
-        "A serialized plan",
-        "A second name for the same dictionary"
-      ],
+      "id": "shallow-curse",
+      "prompt": "Why does leaky_clone change leaky_source's rune list?",
+      "options": ["Equal strings synchronize", "Sets mutate dictionaries", "The outer copy deep-copied the journal", "Both outer dictionaries still reach the same journal and rune list"],
       "answer_index": 3,
-      "explanation": "Assignment binds another name to the same object."
+      "explanation": "A shallow outer copy reuses the nested journal reference."
     },
     {
-      "id": "depth",
-      "prompt": "Why is a shallow dictionary copy insufficient here?",
-      "options": [
-        "Its nested lists remain shared.",
-        "It removes the keys.",
-        "It converts lists to strings.",
-        "It cannot be compared."
-      ],
+      "id": "tuple-marker",
+      "prompt": "Why is `(1, 0)` suitable for the visited set?",
+      "options": ["The tuple contains hashable integers and has stable lookup behavior", "Its printed hash is permanent", "All coordinates are immutable globals", "Set membership uses identity only"],
       "answer_index": 0,
-      "explanation": "Shallow copying duplicates the outer dictionary, not nested lists."
+      "explanation": "The complete tuple is hashable and equal tuple values can find the same set member."
+    },
+    {
+      "id": "copy-transformer",
+      "prompt": "What makes with_supply source-preserving?",
+      "options": ["It removes the source name", "It creates independent mutable explorer state before appending", "Append returns a deep copy", "The rules tuple copies the inventory"],
+      "answer_index": 1,
+      "explanation": "Mutation targets the newly owned inventory rather than the supplied explorer graph."
+    },
+    {
+      "id": "snapshot-safety",
+      "prompt": "Why return tuples from journal_snapshot?",
+      "options": ["Tuples turn rooms into hashes automatically", "Dictionaries cannot return lists", "Callers cannot append through them into the explorer's internal lists", "Tuple values rebind the explorer"],
+      "answer_index": 2,
+      "explanation": "The immutable sequences prevent the result from being a mutable alias to journal internals."
     }
   ]
 }
@@ -155,25 +495,33 @@ clean rerun that confirmed or rejected it.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+| Object graph | You can identify every intentionally shared and independently owned path. |
+| Behavior | All 24 assertions pass unchanged from a clean state. |
+| Mutation API | The in-place command changes only its supplied explorer and returns `None`. |
+| Copy API | The transformer returns independently editable state and preserves its source. |
+| Boundaries | Tuple markers, safe snapshots, and fresh default history behave as documented. |
+| Debugging | One failed assertion is connected to a precise shared path and verified repair. |
+| Artifact | The final sentence is derived from Nova's name and collected rune count. |
 
-- [ ] The acceptance examples and supplied checks pass.
-- [ ] The work runs from a clean state.
-- [ ] I can explain the important state changes and boundaries.
-- [ ] I kept one debugging record and verified a controlled modification.
+Record completion only when every statement is true:
+
+- [ ] All 24 supplied assertions pass without editing expected values.
+- [ ] I can draw the blueprint, Nova, and Sol mutable descendants separately.
+- [ ] The immutable rules relationship is intentionally shared.
+- [ ] The final artifact is derived rather than assigned directly.
+- [ ] I reproduced and repaired the shallow-copy curse.
+- [ ] I predicted one schema/ownership variation before implementing it.
+- [ ] I kept one complete debugging record.
+- [ ] The artifact works after restarting and running every cell in order.
 
 This button stores a self-reported marker only in this browser. It does not
-submit or grade the artifact.
+submit the artifact, grade it, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -187,6 +535,13 @@ submit or grade the artifact.
 
 ## Key points
 
-- The contract narrows the design without supplying the implementation.
-- Progressive checks turn the task into observable behavior.
-- A clean rerun and explanation are part of the evidence.
+- Object graphs make accidental sharing observable before a mutation spreads.
+- Selective copying can isolate every mutable descendant while safely reusing an
+  immutable value whose sharing is intentional.
+- Hashable tuple coordinates make visited-room membership stable and meaningful.
+- In-place commands, returned-copy transformers, snapshots, and optional defaults
+  each need explicit ownership contracts.
+- A shallow-copy failure is useful evidence when it identifies the exact nested
+  reference that remained shared.
+- The successful escape sentence is derived from independently owned state, not
+  hidden directly in the implementation.

@@ -1,13 +1,15 @@
 ---
-title: Equality, Identity, and Object References
+title: When Names Share the Same Object
 lesson_id: mutability-identity-copying.equality-identity-references
 lesson_order: 10
-description: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+description: Follow names and container entries to objects, distinguish equality from identity, and use identity evidence without relying on implementation-specific object reuse.
 execute:
   echo: true
 categories:
 - python-foundations
 - mutability-identity-copying
+- references
+- identity
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/mutability-identity-copying/equality-identity-references.ipynb
 course_id: python-foundations
@@ -15,114 +17,167 @@ unit_id: mutability-identity-copying
 unit_number: 6
 ---
 ::: {.lesson-meta}
-- **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Choose assignment, shallow copy, or deep copy after tracing object references.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Level:** Python Foundations · Unit 6
+- **Estimated time:** 3–4.5 hours
+- **You will learn:** Trace bindings and references, distinguish rebinding from mutation and equality from identity, use `is None`, and repair accidental sharing in a small object graph.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. Two inventory names can lead to one list
 
-Assignment does not copy a mutable object. A shallow copy creates a new outer container but can share nested objects. Equality compares values; identity asks whether references point to one object.
+```python
+nova_gear = ["lamp", "rope"]
+sol_gear = nova_gear
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+sol_gear.append("key")
+
+assert nova_gear == ["lamp", "rope", "key"]
+assert sol_gear == ["lamp", "rope", "key"]
+```
+
+There are two names but one list. The assignment `sol_gear = nova_gear` evaluates
+the expression on the right and binds another name to that same object. It does
+not run the list literal again or copy its contents.
+
+This lesson answers four questions that printed values alone cannot settle:
+
+- Which object does each name or container position reach?
+- Did an operation rebind a name or mutate an existing object?
+- Do two values compare equal, or are they the same object?
+- When is identity the correct test rather than value equality?
+
+## 2. A binding connects a name to an object
+
+Use these terms consistently:
+
+| Term | Meaning in this lesson |
+|---|---|
+| object | a Python value with a type, state/value, and identity |
+| name | an identifier such as `nova_gear` in a namespace |
+| binding | the relationship from a name to an object |
+| reference | a way for a name or container entry to reach an object |
+| alias | another reference to an object that is already reachable |
+
+The list literal creates a list object. The first assignment binds
+`nova_gear`. The second assignment adds the alias `sol_gear`.
+
+::: {.concept-diagram}
+Both names reach one list. Rebinding `sol_gear` later changes its arrow, not the
+old list or `nova_gear`.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["nova_gear"] --> C["list: lamp, rope"]
+  B["sol_gear before rebind"] --> C
+  D["sol_gear after rebind"] --> E["new list: compass"]
+```
+
 :::
 
-## 2. Read and trace a complete case
+The arrows are a learning representation, not syntax Python stores in your
+source file. They help predict which path will observe a later mutation.
+
+## 3. Assignment can rebind one name
+
+Continue from one shared list, then rebind only `sol_gear`:
 
 ```python
-original = [["Ada"], ["Grace"]]
-shallow = original.copy()
-shallow[0].append("Lin")
-print(original)
-print(original is shallow)
-print(original[0] is shallow[0])
+nova_gear = ["lamp", "rope"]
+sol_gear = nova_gear
+
+sol_gear = ["compass"]
+
+assert nova_gear == ["lamp", "rope"]
+assert sol_gear == ["compass"]
+assert nova_gear is not sol_gear
 ```
 
-### What Python does
+The new list literal creates a second list. Assignment changes the binding for
+`sol_gear`. It does not reach backward through the old binding and replace what
+`nova_gear` means.
 
-1. Outer lists are distinct.
-2. The first nested list is shared.
-3. Mutating the nested list appears through both outer lists.
+Compare the two events:
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+| Event | Binding changes? | Existing list state changes? |
+|---|---:|---:|
+| `sol_gear.append("key")` | no | yes |
+| `sol_gear = ["compass"]` | yes | no |
 
-## 3. Debug the boundary
+This distinction remains important inside functions, loops, and object
+attributes. Lesson 4 applies it to parameter names.
 
-This version is valid Python but does not satisfy the lesson's intended contract:
+## 4. Equality asks about values; identity asks about the object
+
+Create one alias and one equal independent list:
 
 ```python
-template = []
-records = [{"tags": template}, {"tags": template}]
+first = ["map", "key"]
+alias = first
+independent = ["map", "key"]
+
+assert first == alias
+assert first is alias
+
+assert first == independent
+assert first is not independent
 ```
 
-A focused repair is:
+`==` delegates to the values' equality behavior. For lists, corresponding
+elements are compared. `is` does not compare contents; it asks whether both
+expressions produce the same object.
 
-```python
-records = [{"tags": []}, {"tags": []}]
-```
+Four combinations are useful to reason about:
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+| Relationship | `==` | `is` | Example |
+|---|---:|---:|---|
+| same object, equal to itself | `True` | `True` | `first` and `alias` |
+| distinct objects, equal contents | `True` | `False` | `first` and `independent` |
+| distinct objects, unequal contents | `False` | `False` | `[1]` and `[2]` |
+| same object but unequal to itself | unusual | `True` | specialized values such as NaN require separate care |
 
-## 4. Practice from trace to transfer
+The final row is a reminder that equality is behavior defined by a type; it is
+not the definition of identity. Ordinary beginner data will mostly use the first
+three rows.
 
-1. Draw references for two names assigned to one dictionary.
-2. Compare assignment, shallow copy, and `deepcopy`.
-3. Test that records have independent tag lists.
-
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
-
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
-
-</details>
-
-## 5. Check your understanding
+### Checkpoint: binding, rebinding, and mutation
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "mutability-identity-copying-identity-aliasing-copying",
-  "title": "Identity, Aliasing, and Copying checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit6-references-bindings",
+  "title": "Bindings and shared objects checkpoint",
+  "instructions": "Follow each name to an object before predicting the update.",
   "questions": [
     {
-      "id": "assign",
-      "prompt": "What does `alias = items` do?",
-      "options": [
-        "Deep copies items",
-        "Creates another reference",
-        "Freezes items",
-        "Creates a tuple"
-      ],
+      "id": "assignment-alias",
+      "prompt": "What does `sol_gear = nova_gear` do when nova_gear refers to a list?",
+      "options": ["Binds sol_gear to the same list object", "Recursively copies the list", "Converts the list to a tuple", "Removes the nova_gear binding"],
+      "answer_index": 0,
+      "explanation": "Ordinary assignment adds or changes a binding; it does not clone the object on the right."
+    },
+    {
+      "id": "append-event",
+      "prompt": "Why does appending through one alias appear through the other?",
+      "options": ["Every list is global", "Both names reach the one list whose state changed", "Append creates matching copies", "Equality forces synchronization"],
       "answer_index": 1,
-      "explanation": "Assignment binds a second name."
+      "explanation": "Mutation changes the shared object, so every remaining reference observes its new state."
     },
     {
-      "id": "equal",
-      "prompt": "What does `==` ask?",
-      "options": [
-        "Whether identities match",
-        "Whether names match",
-        "Whether values compare equal",
-        "Whether values are global"
-      ],
+      "id": "rebind-event",
+      "prompt": "What changes in `sol_gear = ['compass']`?",
+      "options": ["The old list becomes a string", "Every alias is rebound", "The sol_gear binding now reaches a new list", "The nova_gear name is deleted"],
       "answer_index": 2,
-      "explanation": "Equality normally compares values."
+      "explanation": "The assignment redirects one name and leaves the object reached by other names unchanged."
     },
     {
-      "id": "nested",
-      "prompt": "What can remain shared after shallow copy?",
-      "options": [
-        "Only the outer identity",
-        "All integers globally",
-        "The filename",
-        "Nested mutable objects"
-      ],
+      "id": "equal-distinct",
+      "prompt": "Which evidence describes two independently constructed lists with the same contents?",
+      "options": ["They must be unequal and identical", "They must be unequal aliases", "They must share every nested object", "They can satisfy `left == right` and `left is not right`"],
       "answer_index": 3,
-      "explanation": "Only the outer container is copied."
+      "explanation": "Value equality does not require object identity."
     }
   ]
 }
@@ -130,14 +185,356 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 5. Use `id` as temporary diagnostic evidence
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+`id(object)` returns an integer identifying that object during its lifetime:
+
+```python
+items = ["map"]
+alias = items
+independent = ["map"]
+
+assert id(items) == id(alias)
+assert id(items) != id(independent)
+```
+
+The exact integers do not matter. Do not treat them as memory addresses promised
+by the Python language, sort them for meaning, save them as permanent record IDs,
+or compare them across program runs. After an object no longer exists, an
+implementation may reuse its old ID for a later object.
+
+For ordinary code, `left is right` communicates an identity question more
+directly. `id` is helpful in an evidence table or diagram when several paths must
+be compared at once.
+
+## 6. `None` is a singleton sentinel
+
+Python has one `None` object. It represents the intentional absence of a value in
+many APIs:
+
+```python
+leader = None
+
+if leader is None:
+    message = "Choose a party leader"
+else:
+    message = f"Leader: {leader}"
+
+assert message == "Choose a party leader"
+```
+
+Use `is None` or `is not None`. This is an identity question about a documented
+singleton, not ordinary content equality.
+
+Do not generalize that style to strings or numbers:
+
+```python
+answer = "moon"
+assert answer == "moon"
+
+attempts = 3
+assert attempts == 3
+```
+
+Those are value questions, so `==` is the meaningful operator.
+
+## 7. Do not learn equality from string or integer reuse
+
+Python implementations may reuse some immutable objects. A literal experiment
+can therefore make `is` appear to compare values:
+
+```python
+left = "".join(["moon", "light"])
+right = "moonlight"
+
+assert left == right
+```
+
+Do not add an assertion about `left is right`. Its result is not the value
+contract and can vary with implementation, optimization, or construction path.
+The same warning applies to small integers and some tuples or constants.
+
+The robust rule is simple:
+
+- use `==` when the program cares whether ordinary values are equal;
+- use `is` when the program explicitly cares about the same object, especially
+  `None` or a private sentinel created for that purpose.
+
+### Checkpoint: equality, identity, and sentinels
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit6-references-equality",
+  "title": "Equality and identity checkpoint",
+  "instructions": "Choose the operator that asks the program's real question.",
+  "questions": [
+    {
+      "id": "list-equality",
+      "prompt": "Which expression asks whether two route lists contain equal values?",
+      "options": ["`left is right`", "`left == right`", "`id(left) > id(right)`", "`left = right`"],
+      "answer_index": 1,
+      "explanation": "Equality compares list contents; identity asks whether there is one list object."
+    },
+    {
+      "id": "none-check",
+      "prompt": "Which check follows Python convention for an absent leader?",
+      "options": ["`leader == 'None'`", "`id(leader) == 0`", "`leader is None`", "`leader = None`"],
+      "answer_index": 2,
+      "explanation": "None is a singleton sentinel and is checked by identity."
+    },
+    {
+      "id": "id-boundary",
+      "prompt": "Which use of `id()` is reliable for this lesson?",
+      "options": ["Persist it as a database key", "Interpret it as a portable memory address", "Compare it across separate runs", "Compare two live references during one trace"],
+      "answer_index": 3,
+      "explanation": "An ID is useful as temporary same-object evidence, not as a persistent public identifier."
+    },
+    {
+      "id": "interning-rule",
+      "prompt": "Why should code not use `is` to compare ordinary strings?",
+      "options": ["Object reuse is an implementation detail, while the program needs value equality", "Strings never have identities", "`is` converts strings to lists", "Only empty strings support equality"],
+      "answer_index": 0,
+      "explanation": "Interning can make identity experiments misleading; `==` expresses the value contract."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Containers hold references to their elements
+
+Sharing can happen without two top-level names:
+
+```python
+shared_badges = ["starter"]
+party = [
+    {"name": "Nova", "badges": shared_badges},
+    {"name": "Sol", "badges": shared_badges},
+]
+
+assert party[0] is not party[1]
+assert party[0]["badges"] is party[1]["badges"]
+
+party[0]["badges"].append("vault scout")
+assert party[1]["badges"] == ["starter", "vault scout"]
+```
+
+The two dictionaries are distinct, but their `"badges"` entries reach one list.
+An outer identity check cannot answer every nested-sharing question. Follow the
+complete access path to the object that will mutate.
+
+This explains why nested diagrams matter. A program can have independent outer
+records and still leak edits through a shared descendant.
+
+## 9. Rebinding one reference does not remove the others
+
+```python
+inventory = ["lamp"]
+backup_name = inventory
+
+del inventory
+
+assert backup_name == ["lamp"]
+```
+
+`del inventory` removes that name from the current namespace. It does not destroy
+the list while `backup_name` still reaches it. Similarly, replacing one
+dictionary entry leaves an old object available through any other references.
+
+Python automatically manages object lifetime. The language does not require you
+to count references manually, and this unit does not depend on CPython's
+reference-counting details. The useful program-level question is whether any
+reachable path still leads to the object.
+
+## 10. Repair sharing only when it is accidental
+
+This construction gives every record the same badges list:
+
+```python
+template_badges = ["starter"]
+players = []
+
+for name in ["Nova", "Sol"]:
+    players.append({"name": name, "badges": template_badges})
+
+assert players[0]["badges"] is players[1]["badges"]
+```
+
+If badges belong to each player, construct a list for each iteration:
+
+```python
+players = []
+
+for name in ["Nova", "Sol"]:
+    players.append({"name": name, "badges": ["starter"]})
+
+assert players[0]["badges"] == players[1]["badges"]
+assert players[0]["badges"] is not players[1]["badges"]
+```
+
+If the shared list represents one team scoreboard that everyone should observe,
+the first graph may be correct. Identity is not itself a bug. A mismatch between
+actual sharing and intended ownership is the bug.
+
+## 11. Lab: map a party roster
+
+Implement helpers that report relationships and build independent player
+records:
+
+```python
+def relationship(left, right):
+    """Return equal and identical evidence for two values."""
+    raise NotImplementedError
+
+
+def build_player(name, starting_badges, *, leader=None):
+    """Return a player with an independent badges list and optional leader."""
+    raise NotImplementedError
+
+
+def add_badge(player, badge):
+    """Append one badge to player and return None."""
+    raise NotImplementedError
+```
+
+Use these acceptance checks:
+
+```python
+starting_badges = ["starter"]
+nova = build_player("Nova", starting_badges)
+sol = build_player("Sol", starting_badges, leader="Nova")
+
+assert relationship(nova["badges"], sol["badges"]) == {
+    "equal": True,
+    "identical": False,
+}
+assert relationship(nova, nova) == {"equal": True, "identical": True}
+assert nova["leader"] is None
+assert sol["leader"] == "Nova"
+
+result = add_badge(nova, "vault scout")
+assert result is None
+assert nova["badges"] == ["starter", "vault scout"]
+assert sol["badges"] == ["starter"]
+assert starting_badges == ["starter"]
+assert nova is not sol
+```
+
+Before implementing, draw three list objects: the source badges, Nova's badges,
+and Sol's badges. Equal initial contents do not require shared identity.
+
+<details>
+<summary>Hint: construct the owned list at the player boundary</summary>
+
+`relationship` returns the results of `==` and `is`. In `build_player`, create a
+new outer dictionary and use `list(starting_badges)` for the list that the new
+player owns. `add_badge` intentionally mutates that one nested list.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def relationship(left, right):
+    """Return equal and identical evidence for two values."""
+    return {"equal": left == right, "identical": left is right}
+
+
+def build_player(name, starting_badges, *, leader=None):
+    """Return a player with an independent badges list and optional leader."""
+    return {
+        "name": name,
+        "badges": list(starting_badges),
+        "leader": leader,
+    }
+
+
+def add_badge(player, badge):
+    """Append one badge to player and return None."""
+    player["badges"].append(badge)
+```
+
+</details>
+
+### Checkpoint: nested reference repair
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit6-references-lab",
+  "title": "Party roster checkpoint",
+  "instructions": "Use the lab's value and identity assertions together.",
+  "questions": [
+    {
+      "id": "nested-path",
+      "prompt": "What must be compared to learn whether Nova and Sol share their badge list?",
+      "options": ["`nova is sol` only", "Their name strings", "`nova['badges'] is sol['badges']`", "The number of dictionary keys"],
+      "answer_index": 2,
+      "explanation": "Outer records can be independent while a particular nested path remains shared."
+    },
+    {
+      "id": "source-preserved",
+      "prompt": "Why does `starting_badges` remain unchanged after adding Nova's badge?",
+      "options": ["Strings protect every list", "Append creates a tuple", "Leaders prevent mutation", "build_player constructed a separate list owned by Nova"],
+      "answer_index": 3,
+      "explanation": "The function copied the starting values into a new player-owned list."
+    },
+    {
+      "id": "leader-none",
+      "prompt": "Which assertion checks the intentional absence of Nova's leader?",
+      "options": ["`nova['leader'] is None`", "`nova['leader'] == 'None'`", "`id(nova) == 0`", "`nova is sol`"],
+      "answer_index": 0,
+      "explanation": "The field uses the None singleton as its absence sentinel."
+    },
+    {
+      "id": "mutation-result",
+      "prompt": "What does `add_badge` promise in addition to its `None` result?",
+      "options": ["It rebinds every player name", "It mutates the supplied player's badge list", "It deep-copies the party", "It changes the starting list"],
+      "answer_index": 1,
+      "explanation": "The command's documented effect is the useful behavior; its result is deliberately None."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 12. Explain the graph after every event
+
+Use your completed lab to answer:
+
+1. Which object does each outer player name reach?
+2. Why do the two badges lists compare equal before mutation?
+3. Which assertion proves they are independently owned?
+4. What changes when `add_badge` runs: a name, an outer dictionary, or a nested
+   list's state?
+5. Why is `leader is None` a different kind of question from
+   `leader == "Nova"`?
+
+Then deliberately make both players share one badges list, predict the leak,
+observe it once, and restore the independent construction. The failure is useful
+evidence only when you can point to the exact shared path.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Assignment binds a name to an evaluated object; it does not copy that object.
+- Rebinding redirects a name. Mutation changes an object seen through every
+  reference that still reaches it.
+- `==` asks about value equality; `is` asks about object identity.
+- Use `is None` for the singleton sentinel and `==` for ordinary string, number,
+  and collection values.
+- Treat `id()` as opaque temporary diagnostic evidence and never rely on literal
+  interning for program correctness.
+- Containers hold references, so independent outer objects may still share a
+  nested mutable object.
+- Sharing is correct when it matches ownership; repair only accidental sharing.
+:::
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python language reference: objects, values, and types](https://docs.python.org/3/reference/datamodel.html#objects-values-and-types)
+- [Python language reference: identity comparisons](https://docs.python.org/3/reference/expressions.html#is-not)
+- [Python built-in function: `id`](https://docs.python.org/3/library/functions.html#id)
+- [PEP 8: comparisons to singletons such as `None`](https://peps.python.org/pep-0008/#programming-recommendations)

@@ -128,8 +128,9 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         ),
         (
             "mutability-identity-copying",
-            "Mutability, Identity, and Copying",
-            "explain and repair accidental shared-state mutation",
+            "Sharing, Changing, and Copying Objects",
+            "trace shared objects and choose mutation, ownership, or copying "
+            "deliberately",
         ),
         (
             "problem-solving-algorithms",

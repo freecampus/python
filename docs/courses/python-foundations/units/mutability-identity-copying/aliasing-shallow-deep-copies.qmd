@@ -1,8 +1,8 @@
 ---
-title: Aliasing, Shallow Copies, and Deep Copies
+title: Copying Nested Data Without Surprises
 lesson_id: mutability-identity-copying.aliasing-shallow-deep-copies
 lesson_order: 30
-description: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+description: Diagnose repeated references at every depth and choose reconstruction, shallow copying, selective copying, or deep copying from explicit ownership needs.
 course_id: python-foundations
 unit_id: mutability-identity-copying
 unit_number: 6
@@ -11,123 +11,186 @@ execute:
 categories:
 - python-foundations
 - mutability-identity-copying
+- aliasing
+- copying
 order: 30
 colab_notebook: notebooks/courses/python-foundations/units/mutability-identity-copying/aliasing-shallow-deep-copies.ipynb
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+- **Level:** Python Foundations · Unit 6
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Trace nested aliases, recognize one-level copy operations, preserve intentional sharing, and choose selective or deep independence only where ownership requires it.
 - **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+## 1. Repeating one row repeats its reference
 
-Copying an outer container may still leave nested objects shared. The needed copy depth depends on which later mutations must remain independent.
-
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
-
-## 1. Read and predict a complete case
+This looks like a three-row grid:
 
 ```python
-from copy import deepcopy
+row = [0, 0, 0]
+grid = [row] * 3
 
-original = {"student": "Ada", "topics": ["loops"]}
-shallow = original.copy()
-independent = deepcopy(original)
+grid[0][1] = 7
 
-shallow["topics"].append("files")
-independent["topics"].append("testing")
-
-print(original["topics"])
-print(independent["topics"])
+assert grid == [
+    [0, 7, 0],
+    [0, 7, 0],
+    [0, 7, 0],
+]
+assert grid[0] is grid[1] is grid[2]
 ```
 
-### Step-by-step explanation
+List repetition copied the reference to `row` three times. It did not evaluate a
+new row construction for every position. The cell assignment followed
+`grid[0]` to the one row object and mutated it. Every apparent row displays the
+same changed object.
 
-1. `dict.copy` creates a new outer dictionary but reuses the nested list reference.
-2. Appending through `shallow` therefore changes the list visible through `original`.
-3. `deepcopy` recursively creates an independent nested list.
-4. Its later append does not change the original's topics.
+This lesson answers:
 
-::: {.callout-note title="Make one controlled change"}
-Add an immutable integer field and modify it in each copy. Explain why rebinding that field does not require a deep copy.
-:::
+- At which depth do two structures still share mutable state?
+- What exactly does a shallow copy separate?
+- When is copying selected nested fields clearer than `deepcopy`?
+- Why can a deep-copied graph still contain intentional internal sharing?
 
-## 2. Investigate the important boundary
+## 2. Construct a fresh row for every position
 
-Deep copying everything can be expensive and can duplicate objects that represent shared resources. Draw the references and copy only the ownership boundary the contract requires.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+A comprehension executes its expression once per iteration:
 
 ```python
-template = {"tags": [], "published": False}
-record = {**template, "tags": template["tags"].copy()}
+grid = [[0, 0, 0] for _ in range(3)]
 
-record["tags"].append("python")
-print(template)
-print(record)
+grid[0][1] = 7
+
+assert grid == [
+    [0, 7, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+]
+assert grid[0] is not grid[1]
+assert grid[1] is not grid[2]
 ```
 
-Then complete the learning loop:
+The outer list now holds references to three independently constructed rows.
+This is reconstruction, not a later copy operation. When you control creation,
+constructing the intended graph directly is often clearer than creating aliases
+and repairing them afterward.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+## 3. Assignment, construction, and copying answer different questions
 
-<details>
-<summary>Check your practice process</summary>
+```python
+source = {"name": "Nova", "tasks": ["map"]}
+alias = source
+constructed = {"name": source["name"], "tasks": ["map"]}
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+assert alias is source
+assert constructed is not source
+assert constructed["tasks"] is not source["tasks"]
+```
 
-</details>
+- Assignment adds a path to an existing object.
+- The explicit dictionary/list literals construct the objects written in the
+  expression.
+- A copy operation follows a defined copy depth and may retain inner references.
 
-## 4. Check your understanding
+Do not infer nested independence merely because the outer object is new. Follow
+every path that later code will mutate.
+
+## 4. A shallow copy separates the outside and shares the inside
+
+```python
+template = {
+    "name": "scout",
+    "tasks": ["map gate"],
+    "notes": {"entries": ["start"]},
+}
+shallow = template.copy()
+
+assert shallow is not template
+assert shallow["tasks"] is template["tasks"]
+assert shallow["notes"] is template["notes"]
+assert shallow["notes"]["entries"] is template["notes"]["entries"]
+```
+
+The new dictionary has its own set of key/value slots, but each value slot is
+initialized with a reference from the original. Replacing an outer slot remains
+local to one dictionary:
+
+```python
+shallow["name"] = "navigator"
+
+assert template["name"] == "scout"
+assert shallow["name"] == "navigator"
+```
+
+Mutating a shared descendant leaks:
+
+```python
+shallow["tasks"].append("open bridge")
+
+assert template["tasks"] == ["map gate", "open bridge"]
+```
+
+The copy is neither “broken” nor “half complete.” It correctly implements a
+one-level copy. The problem is choosing that depth for a contract that required
+nested independence.
+
+::: {.concept-diagram}
+Assignment shares the outer dictionary. A shallow copy creates another outer
+dictionary, but its task slot still points to the original nested list.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["name: template"] --> B["original dictionary"]
+  C["name: alias"] --> B
+  D["name: shallow"] --> E["new dictionary"]
+  B --> F["shared tasks list"]
+  E --> F
+  G["name: independent"] --> H["new dictionary"]
+  H --> I["new tasks list"]
+```
+
+:::
+
+### Checkpoint: repeated and shallow references
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "mutability-identity-copying-aliasing-shallow-deep-copies",
-  "title": "Aliasing, Shallow Copies, and Deep Copies checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit6-copying-shallow",
+  "title": "Shallow object graph checkpoint",
+  "instructions": "Follow the exact path to the object that changes.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "What does a shallow dictionary copy do with a nested list value?",
-      "options": [
-        "It recursively copies every nested object.",
-        "It converts the list to a tuple.",
-        "It copies the outer dictionary but keeps a reference to the same nested list.",
-        "It deletes the nested value."
-      ],
-      "answer_index": 2,
-      "explanation": "Shallow copies duplicate one container level; contained references are reused."
+      "id": "repeated-row",
+      "prompt": "Why does changing `grid[0][1]` affect every row in `[row] * 3`?",
+      "options": ["Every outer position stores a reference to the same row", "Integers synchronize lists", "Item assignment deep-copies rows", "Range forces equality"],
+      "answer_index": 0,
+      "explanation": "List repetition repeated the row reference rather than constructing three row objects."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun."
-      ],
-      "answer_index": 0,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "id": "comprehension-row",
+      "prompt": "Why does `[[0, 0] for _ in range(3)]` create independent rows?",
+      "options": ["Underscore copies values", "The inner list expression runs once per iteration", "All comprehensions deep-copy", "Zero is mutable"],
+      "answer_index": 1,
+      "explanation": "Each evaluation of the list literal creates a distinct row object."
+    },
+    {
+      "id": "shallow-outer",
+      "prompt": "What does `template.copy()` guarantee for a dictionary?",
+      "options": ["Every nested value is independent", "All values become immutable", "A distinct outer dictionary is created", "The source is deleted"],
+      "answer_index": 2,
+      "explanation": "A shallow copy duplicates the outer container and reuses contained references."
+    },
+    {
+      "id": "nested-leak",
+      "prompt": "Why does appending through `shallow['tasks']` affect template?",
+      "options": ["Names with matching keys are linked", "Dictionary equality mutates", "Strings propagate changes", "Both task slots reach the same nested list"],
+      "answer_index": 3,
+      "explanation": "Outer independence does not separate a reused inner reference."
     }
   ]
 }
@@ -135,14 +198,415 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 5. Several familiar operations make shallow copies
+
+For lists, these create distinct outer lists and reuse element references:
+
+```python
+nested = [["map"], ["key"]]
+
+by_method = nested.copy()
+by_slice = nested[:]
+by_constructor = list(nested)
+
+assert by_method is not nested
+assert by_slice is not nested
+assert by_constructor is not nested
+assert by_method[0] is nested[0]
+assert by_slice[0] is nested[0]
+assert by_constructor[0] is nested[0]
+```
+
+For dictionaries, `.copy()`, `dict(existing)`, unpacking, merge, and
+`copy.copy()` are one-level operations:
+
+```python
+from copy import copy
+
+source = {"tasks": ["map"]}
+copies = [
+    source.copy(),
+    dict(source),
+    {**source},
+    source | {},
+    copy(source),
+]
+
+assert all(candidate is not source for candidate in copies)
+assert all(candidate["tasks"] is source["tasks"] for candidate in copies)
+```
+
+These spellings have different uses and type constraints, but none recursively
+copies nested objects. Do not choose among them expecting a deeper ownership
+boundary.
+
+## 6. Immutable nested values can remain shared safely
+
+```python
+template = {
+    "rules": ("keep the map", "share clues"),
+    "difficulty": "foundation",
+    "tasks": ["find gate"],
+}
+shallow = template.copy()
+
+assert shallow["rules"] is template["rules"]
+assert shallow["difficulty"] is template["difficulty"]
+```
+
+The identity of immutable literals may be reused, but the design does not depend
+on it. More importantly, neither tuple's slots nor string contents can be
+mutated. Sharing those particular values cannot leak an in-place content change.
+
+The mutable `tasks` list is different. If each board may add tasks, that field
+must become independently owned. Copy decisions can therefore vary by field.
+
+## 7. Selective copying follows an ownership table
+
+Write the contract before code:
+
+| Field | May new owner mutate it? | Required relationship |
+|---|---:|---|
+| `rules` tuple | no | sharing is safe |
+| `difficulty` string | replaced only | sharing current value is safe |
+| `tasks` list | yes | independent list |
+| `notes` dictionary | yes | independent dictionary |
+| `notes["entries"]` list | yes | independent list |
+
+Implement exactly that boundary:
+
+```python
+def copy_board(template):
+    board = template.copy()
+    board["tasks"] = template["tasks"].copy()
+    board["notes"] = template["notes"].copy()
+    board["notes"]["entries"] = template["notes"]["entries"].copy()
+    return board
+```
+
+Selective copying makes the intended ownership visible. It requires maintenance
+when the data shape changes, which can be an advantage: adding a mutable field
+forces the designer to decide its ownership instead of silently copying
+everything.
+
+### Checkpoint: ownership and selective copying
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit6-copying-selective",
+  "title": "Selective ownership checkpoint",
+  "instructions": "Copy the paths that future code may mutate independently.",
+  "questions": [
+    {
+      "id": "safe-shared-rule",
+      "prompt": "Why may two boards share the immutable rules tuple under this contract?",
+      "options": ["Tuples deep-copy every child", "Neither board can mutate the tuple's fixed immutable rule values", "Identity makes rules equal", "Dictionaries reject tuples"],
+      "answer_index": 1,
+      "explanation": "Sharing is safe when no allowed operation can change the shared value in place."
+    },
+    {
+      "id": "copy-notes",
+      "prompt": "Why copy both the notes dictionary and its entries list?",
+      "options": ["Dictionary copies remove strings", "Lists require global state", "Both levels may be mutated independently by the new owner", "Deepcopy cannot handle dictionaries"],
+      "answer_index": 2,
+      "explanation": "A distinct notes dictionary would still leak appends if its nested entries list remained shared."
+    },
+    {
+      "id": "minimum-depth",
+      "prompt": "What determines the minimum necessary copy depth?",
+      "options": ["The number of printed lines", "Whether keys are alphabetic", "The largest available library function", "Which mutable descendants must have independent future changes"],
+      "answer_index": 3,
+      "explanation": "Ownership and allowed mutation, not visual nesting alone, determine independence."
+    },
+    {
+      "id": "shape-change",
+      "prompt": "What should happen when a new mutable field is added to a selectively copied record?",
+      "options": ["Its ownership should be decided and the copy function updated if needed", "It automatically becomes immutable", "It must always remain shared", "The whole program must use JSON"],
+      "answer_index": 0,
+      "explanation": "Selective copying makes ownership decisions explicit as the schema evolves."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. `deepcopy` creates an independent supported graph
+
+```python
+from copy import deepcopy
+
+template = {
+    "name": "scout",
+    "tasks": ["map gate"],
+    "notes": {"entries": ["start"]},
+}
+independent = deepcopy(template)
+
+assert independent is not template
+assert independent["tasks"] is not template["tasks"]
+assert independent["notes"] is not template["notes"]
+assert independent["notes"]["entries"] is not template["notes"]["entries"]
+
+independent["notes"]["entries"].append("bridge found")
+assert template["notes"]["entries"] == ["start"]
+```
+
+`deepcopy` recursively copies supported mutable descendants and reuses immutable
+values when appropriate. It is concise when the complete mutable graph truly
+needs independent edits.
+
+## 9. Deep copy preserves internal sharing in the new graph
+
+Suppose two source paths intentionally refer to one list:
+
+```python
+from copy import deepcopy
+
+shared_clues = ["moon"]
+source = {
+    "visible_clues": shared_clues,
+    "all_clues": shared_clues,
+}
+
+clone = deepcopy(source)
+
+assert clone is not source
+assert clone["visible_clues"] is not source["visible_clues"]
+assert clone["visible_clues"] is clone["all_clues"]
+```
+
+The copied graph has a new clues list separated from the source, but both clone
+paths still share that one new list. `deepcopy` remembers objects it has already
+copied so it can preserve relationships and handle recursive container graphs.
+It does not blindly duplicate one object every time another path encounters it.
+
+That behavior is usually desirable: graph structure is part of the data. If the
+two clone fields must become independent despite being shared in the source,
+that is a transformation requiring explicit reconstruction, not ordinary deep
+copying.
+
+## 10. Deep copy is not a universal safety button
+
+Deep copying can:
+
+- consume significant time and memory for large graphs;
+- duplicate mutable objects that should remain intentionally shared;
+- preserve internal aliases that the new contract wanted to split;
+- interact with custom class copy hooks introduced later; and
+- be unsuitable or return unchanged references for resource-like or executable
+  objects such as modules, functions, open files, sockets, and external sessions.
+
+Do not use JSON encode/decode as a generic substitute. Serialization accepts a
+limited data model and can change tuples, sets, keys, bytes, custom objects, and
+other semantics. Unit 9 teaches external formats for their actual purpose.
+
+## 11. Choose the strategy from the required future edits
+
+| Strategy | Choose it when | Evidence to record |
+|---|---|---|
+| intentional sharing | all owners should observe updates | relevant paths are identical |
+| reconstruct | source data can clearly build the intended graph | each constructed mutable owner is distinct |
+| shallow copy | only outer membership/fields change | outer identity differs; nested identities may match |
+| selective copy | known descendants need separate ownership | specified mutable paths differ |
+| deep copy | a supported complete graph needs independence | source and copied mutable descendants differ |
+
+Avoid “copy just in case.” State the future mutation and source-preservation
+promise first. The assertions then describe the minimum graph relationship that
+can satisfy it.
+
+## 12. Lab: create independent mission boards
+
+Implement a shallow comparison and a selectively owned board:
+
+```python
+def shallow_board(template):
+    """Return a new outer dictionary that shares nested values."""
+    raise NotImplementedError
+
+
+def mission_board(template, *, owner):
+    """Return a board whose mutable task and note state belongs to owner."""
+    raise NotImplementedError
+
+
+def board_relationship(left, right):
+    """Return identity evidence for important board paths."""
+    raise NotImplementedError
+```
+
+Use this template:
+
+```python
+template = {
+    "owner": None,
+    "difficulty": "foundation",
+    "rules": ("record evidence", "preserve source"),
+    "tasks": {
+        "north": ["map gate"],
+        "south": [],
+    },
+    "notes": {"entries": ["start"]},
+}
+
+shallow = shallow_board(template)
+assert shallow is not template
+assert shallow["tasks"] is template["tasks"]
+
+nova = mission_board(template, owner="Nova")
+sol = mission_board(template, owner="Sol")
+
+assert nova["owner"] == "Nova"
+assert sol["owner"] == "Sol"
+assert nova["rules"] == template["rules"]
+assert nova["tasks"] is not template["tasks"]
+assert nova["tasks"]["north"] is not template["tasks"]["north"]
+assert nova["notes"] is not template["notes"]
+assert nova["notes"]["entries"] is not template["notes"]["entries"]
+
+nova["tasks"]["north"].append("open bridge")
+nova["notes"]["entries"].append("rune found")
+
+assert template["tasks"]["north"] == ["map gate"]
+assert template["notes"]["entries"] == ["start"]
+assert sol["tasks"]["north"] == ["map gate"]
+assert sol["notes"]["entries"] == ["start"]
+assert board_relationship(nova, sol) == {
+    "same_outer": False,
+    "same_tasks": False,
+    "same_north_tasks": False,
+    "same_notes": False,
+    "same_note_entries": False,
+}
+```
+
+Keep the immutable `rules` tuple available for safe sharing. The lab does not
+require that its identity be shared because equivalent construction or
+implementation choices can differ; its value and immutability satisfy the
+contract.
+
+<details>
+<summary>Hint: rebuild every mutable level named in the ownership table</summary>
+
+Begin with a shallow outer copy. Replace `tasks` with a new dictionary whose
+values are new lists. Replace `notes` with a new dictionary and replace its
+`entries` with a new list. Rebind `owner`. The relationship helper uses `is` at
+each listed path.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def shallow_board(template):
+    """Return a new outer dictionary that shares nested values."""
+    return template.copy()
+
+
+def mission_board(template, *, owner):
+    """Return a board whose mutable task and note state belongs to owner."""
+    board = template.copy()
+    board["owner"] = owner
+    board["tasks"] = {}
+    for direction, tasks in template["tasks"].items():
+        board["tasks"][direction] = tasks.copy()
+    board["notes"] = template["notes"].copy()
+    board["notes"]["entries"] = template["notes"]["entries"].copy()
+    return board
+
+
+def board_relationship(left, right):
+    """Return identity evidence for important board paths."""
+    return {
+        "same_outer": left is right,
+        "same_tasks": left["tasks"] is right["tasks"],
+        "same_north_tasks": left["tasks"]["north"] is right["tasks"]["north"],
+        "same_notes": left["notes"] is right["notes"],
+        "same_note_entries": (
+            left["notes"]["entries"] is right["notes"]["entries"]
+        ),
+    }
+```
+
+</details>
+
+### Checkpoint: mission-board independence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit6-copying-lab",
+  "title": "Mission board checkpoint",
+  "instructions": "Check the identity of each mutable ownership boundary.",
+  "questions": [
+    {
+      "id": "tasks-dictionary",
+      "prompt": "Why must mission_board create both a new tasks dictionary and new task lists?",
+      "options": ["Only strings may be shared", "The owner may add directions and edit each direction's tasks independently", "Dictionaries automatically deep-copy lists", "Tuple rules require it"],
+      "answer_index": 1,
+      "explanation": "Both mutable levels are inside the new board's ownership contract."
+    },
+    {
+      "id": "sol-preserved",
+      "prompt": "What proves Nova's new task did not leak into Sol's board?",
+      "options": ["Their owner strings differ", "Their rules compare equal", "Sol's north tasks retain only `map gate`", "Nova's outer dictionary is truthy"],
+      "answer_index": 2,
+      "explanation": "The observable nested source remains unchanged because its list is independently owned."
+    },
+    {
+      "id": "shallow-evidence",
+      "prompt": "Which evidence identifies the shallow board relationship?",
+      "options": ["The outer dictionaries are identical", "Every nested value is copied", "The source is empty", "The outer dictionaries differ while their tasks dictionaries are identical"],
+      "answer_index": 3,
+      "explanation": "A shallow copy separates the outside and reuses the nested task reference."
+    },
+    {
+      "id": "deepcopy-choice",
+      "prompt": "When would deepcopy be reasonable instead of the selective lab implementation?",
+      "options": ["When the supported complete mutable graph needs independent ownership", "Whenever a string field changes", "To make hashes secure", "To rebind one local name"],
+      "answer_index": 0,
+      "explanation": "Deep copying is justified by whole-graph independence, not by a preference for maximum depth."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Defend the selected copy depth
+
+Use your lab to explain:
+
+1. Which outer and nested objects are new for Nova?
+2. Which values may remain shared safely, and why?
+3. Why would copying only the tasks dictionary still leak list edits?
+4. What schema change would require updating `mission_board`?
+5. What would `deepcopy(template)` make easier, and what ownership decisions
+   would it make less visible?
+
+Add an `evidence` list inside `notes`. Predict the leak before updating the copy
+function, observe it once, then give the new field independent ownership and
+rerun every source-preservation assertion.
+
 ## Key points
 
 ::: {.callout-tip title="Key points"}
-- Assignment creates another reference, not a copy.
-- A shallow copy duplicates one container level.
-- Choose deep copying only when the ownership contract requires independent nested objects.
+- Repetition can duplicate references rather than nested objects; construct a
+  fresh mutable value for each intended owner.
+- A shallow copy creates a new outer container and reuses its contained
+  references.
+- Immutable nested values can often remain shared safely.
+- Selective copying makes field-level ownership decisions explicit.
+- `deepcopy` separates a supported object graph from its source while preserving
+  intentional sharing relationships inside the cloned graph.
+- Deep copy has time, memory, resource, and semantic tradeoffs; it is not a
+  universal safety button.
+- Choose copy depth from the exact future mutations that must remain independent.
 :::
 
 ## References
 
-- https://docs.python.org/3/library/copy.html
+- [Python standard library: shallow and deep copy operations](https://docs.python.org/3/library/copy.html)
+- [Python FAQ: multidimensional list construction](https://docs.python.org/3/faq/programming.html#how-do-i-create-a-multidimensional-list)
+- [Python tutorial: copying lists](https://docs.python.org/3/tutorial/introduction.html#lists)
+- [Python language reference: display expressions and container construction](https://docs.python.org/3/reference/expressions.html#displays-for-lists-sets-and-dictionaries)

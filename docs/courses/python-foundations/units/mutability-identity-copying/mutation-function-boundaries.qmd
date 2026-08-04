@@ -1,13 +1,15 @@
 ---
-title: Mutation Across Function Boundaries
+title: Designing Functions That Control Mutation
 lesson_id: mutability-identity-copying.mutation-function-boundaries
 lesson_order: 40
-description: Predict shared state and choose mutation or copying deliberately, including when objects cross a function boundary.
+description: Trace object sharing across calls and design explicit contracts for in-place effects, returned copies, mutable defaults, retained inputs, and safe snapshots.
 execute:
   echo: true
 categories:
 - python-foundations
 - mutability-identity-copying
+- function-boundaries
+- ownership
 order: 40
 colab_notebook: notebooks/courses/python-foundations/units/mutability-identity-copying/mutation-function-boundaries.ipynb
 course_id: python-foundations
@@ -15,120 +17,182 @@ unit_id: mutability-identity-copying
 unit_number: 6
 ---
 ::: {.lesson-meta}
-- **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Make function side effects explicit and avoid shared mutable defaults.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Level:** Python Foundations · Unit 6
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Distinguish local parameter rebinding from caller-visible mutation, design in-place and copying APIs, prevent shared defaults, and protect retained or returned mutable state.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. A helper can change caller-owned state
 
-Parameters receive references to objects. A function may intentionally mutate caller-owned state or return a transformed copy. The name, docstring, and tests should make that choice visible.
+```python
+def record_badge(player, badge):
+    player["badges"].append(badge)
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+
+nova = {"name": "Nova", "badges": ["starter"]}
+result = record_badge(nova, "vault scout")
+
+assert result is None
+assert nova["badges"] == ["starter", "vault scout"]
+```
+
+The parameter name `player` is local to the call, but it reaches the dictionary
+supplied by the caller. The nested append mutates caller-owned state. If the
+caller expected a separate returned record, the function's ownership contract
+is wrong even though the Python is valid.
+
+This lesson answers:
+
+- Why can mutation cross a call boundary while parameter rebinding does not?
+- How should an API distinguish an in-place command from a transformer?
+- When should a function copy an input or returned result defensively?
+- How do mutable defaults and returned aliases leak state between calls?
+
+## 2. Argument evaluation creates a local binding to the object
+
+When Python evaluates `record_badge(nova, "vault scout")`:
+
+1. the caller evaluates `nova` and obtains its dictionary object;
+2. the function call binds local parameter `player` to that object;
+3. the caller name and local parameter temporarily reach the same dictionary;
+4. mutation through either path changes that one object; and
+5. the local parameter binding disappears when the call returns, but the changed
+   dictionary remains reachable through `nova`.
+
+This is sometimes called “call by sharing” or “pass by object reference.” Avoid
+saying only “pass by reference,” which can wrongly suggest that assigning the
+parameter will assign the caller's variable.
+
+::: {.concept-diagram}
+The caller and parameter reach one object during an in-place call. A copying
+transformer instead creates a new object and returns its reference.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["caller name: nova"] --> B["caller-owned dictionary"]
+  C["local parameter: player"] --> B
+  B --> D["shared badges list"]
+  C -->|"copying transformer creates"| E["new dictionary"]
+  E --> F["new badges list"]
+  E -->|"return reference"| G["caller name: updated"]
+```
+
 :::
 
-## 2. Read and trace a complete case
+## 3. Rebinding a parameter cannot rebind the caller's name
 
 ```python
-def add_tag_in_place(tags, tag):
-    """Append tag to tags and return None."""
-    tags.append(tag)
+def replace_route(route):
+    route = ["new gate"]
+    return route
 
-labels = ["python"]
-print(add_tag_in_place(labels, "course"))
-print(labels)
+
+original = ["old gate"]
+replacement = replace_route(original)
+
+assert original == ["old gate"]
+assert replacement == ["new gate"]
+assert replacement is not original
 ```
 
-### What Python does
+Assignment changes the local `route` binding. The caller name `original` is in a
+different namespace and still reaches its old list. Returning the new object
+lets the caller decide whether to bind another name to it.
 
-1. The caller and parameter refer to one list.
-2. Append changes the shared list.
-3. Returning `None` reinforces the side-effect contract.
-
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
+Compare mutation:
 
 ```python
-def remember(value, history=[]):
-    history.append(value)
-    return history
+def replace_first_in_place(route):
+    route[0] = "new gate"
+
+
+original = ["old gate"]
+replace_first_in_place(original)
+
+assert original == ["new gate"]
 ```
 
-A focused repair is:
+Item assignment follows the parameter reference and changes the shared list
+object; it does not rebind the parameter.
+
+## 4. Put the ownership choice in the public contract
+
+Use two functions when callers need two different policies:
 
 ```python
-def remember(value, history=None):
-    if history is None:
-        history = []
-    history.append(value)
-    return history
+def add_badge_in_place(player, badge):
+    """Append badge to caller-owned player; return None."""
+    player["badges"].append(badge)
+
+
+def with_badge(player, badge):
+    """Return an independent player containing badge; preserve player."""
+    from copy import deepcopy
+
+    updated = deepcopy(player)
+    updated["badges"].append(badge)
+    return updated
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+Evidence distinguishes them:
 
-## 4. Practice from trace to transfer
+```python
+source = {"name": "Nova", "badges": ["starter"]}
 
-1. Test an in-place sorter and a non-mutating sorter.
-2. Repair a mutable default dictionary.
-3. Rename a function so mutation is obvious.
+updated = with_badge(source, "vault scout")
+assert source["badges"] == ["starter"]
+assert updated["badges"] == ["starter", "vault scout"]
+assert updated["badges"] is not source["badges"]
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+result = add_badge_in_place(source, "pathfinder")
+assert result is None
+assert source["badges"] == ["starter", "pathfinder"]
+```
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+The suffix `_in_place` is not required Python syntax, but it communicates an
+effect. Names such as `update`, `record`, or `append` can also signal mutation
+when the surrounding API and docstring make ownership clear.
 
-</details>
-
-## 5. Check your understanding
+### Checkpoint: rebinding and caller-visible effects
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "mutability-identity-copying-mutation-across-boundaries",
-  "title": "Mutation Across Function Boundaries checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit6-boundaries-calls",
+  "title": "Call boundary checkpoint",
+  "instructions": "Follow the caller name, local parameter, and object separately.",
   "questions": [
     {
-      "id": "effect",
-      "prompt": "What is a side effect?",
-      "options": [
-        "A returned integer",
-        "A type hint",
-        "An externally observable change",
-        "A local expression"
-      ],
-      "answer_index": 2,
-      "explanation": "Mutation and I/O are effects."
-    },
-    {
-      "id": "append",
-      "prompt": "What does list.append return?",
-      "options": [
-        "The list",
-        "The item",
-        "The length",
-        "None"
-      ],
-      "answer_index": 3,
-      "explanation": "It mutates and returns None."
-    },
-    {
-      "id": "default",
-      "prompt": "Why is `items=[]` risky as a default?",
-      "options": [
-        "The same list is reused across calls",
-        "Lists cannot be parameters",
-        "It makes tuples",
-        "It catches errors"
-      ],
+      "id": "parameter-binding",
+      "prompt": "What does the parameter `player` initially refer to in `record_badge(nova, badge)`?",
+      "options": ["The same dictionary object produced by evaluating nova", "An automatic deep copy", "The caller's name object", "A tuple containing every argument"],
       "answer_index": 0,
-      "explanation": "Defaults are evaluated at definition time."
+      "explanation": "The local parameter binding receives a reference to the evaluated argument object."
+    },
+    {
+      "id": "local-rebind",
+      "prompt": "Why does `route = ['new gate']` inside a function not rebind the caller's original name?",
+      "options": ["Lists cannot be returned", "It changes only the function's local parameter binding", "Assignment always mutates", "The caller's list is immutable"],
+      "answer_index": 1,
+      "explanation": "Caller and callee names occupy different namespaces even when they initially reach one object."
+    },
+    {
+      "id": "item-mutation",
+      "prompt": "Why is `route[0] = 'new gate'` visible to the caller?",
+      "options": ["The parameter becomes global", "Return copies the change", "Item assignment mutates the shared list object", "Strings rebind the caller"],
+      "answer_index": 2,
+      "explanation": "Both caller and parameter references reach the list whose state was changed."
+    },
+    {
+      "id": "api-signal",
+      "prompt": "Which contract most clearly announces a caller-visible effect?",
+      "options": ["A helper with no name", "A function that silently changes nested state", "A transformer documented as source-preserving but mutating", "`add_badge_in_place` documented to append and return None"],
+      "answer_index": 3,
+      "explanation": "The public name, docstring, effect, and result all agree."
     }
   ]
 }
@@ -136,14 +200,470 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 5. Standard APIs offer both effect and result styles
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+Python already uses these contrasting contracts:
+
+```python
+numbers = [3, 1, 2]
+alias = numbers
+
+ordered = sorted(numbers)
+assert ordered == [1, 2, 3]
+assert numbers == [3, 1, 2]
+
+result = numbers.sort()
+assert result is None
+assert alias == [1, 2, 3]
+```
+
+Other pairs include:
+
+| In-place effect | Returned alternative |
+|---|---|
+| `set.update(other)` | `left | right` |
+| `dict.update(other)` | `left | right` on supported Python versions |
+| `list.reverse()` | `list(reversed(values))` |
+| item assignment | a reconstruction or explicit copy-and-edit helper |
+
+The returned alternative is not necessarily a deep independent result. A new
+outer list can still contain the same nested objects. Copy depth remains part of
+the contract.
+
+## 6. Mutating and returning the same object can hide aliases
+
+```python
+def add_and_return(items, item):
+    items.append(item)
+    return items
+
+
+source = ["map"]
+result = add_and_return(source, "rope")
+
+assert result is source
+```
+
+This API permits chaining but may look like a transformer that produced a new
+list. It is valid if documented, yet callers must understand that `result` is a
+new alias. Many built-in in-place methods return `None` precisely to make the
+effect style harder to mistake for independent output.
+
+Choose one clear primary story. If a function mutates and returns the same object,
+state both facts and test identity explicitly.
+
+## 7. A mutable default belongs to the definition, not each call
+
+```python
+def remember_badge(badge, history=[]):
+    history.append(badge)
+    return history
+
+
+first = remember_badge("starter")
+second = remember_badge("vault scout")
+
+assert first is second
+assert second == ["starter", "vault scout"]
+```
+
+The list expression runs once when Python executes the `def` statement. Every
+call that omits `history` binds its local parameter to that same default list.
+This is a definition-time ownership decision, not random memory.
+
+Create per-call state explicitly:
+
+```python
+def remember_badge(badge, history=None):
+    if history is None:
+        history = []
+    history.append(badge)
+    return history
+
+
+first = remember_badge("starter")
+second = remember_badge("vault scout")
+
+assert first == ["starter"]
+assert second == ["vault scout"]
+assert first is not second
+```
+
+When a caller supplies a list, this version intentionally mutates it:
+
+```python
+shared_history = []
+result = remember_badge("starter", shared_history)
+
+assert result is shared_history
+assert shared_history == ["starter"]
+```
+
+The default case and explicit-input case can have different ownership, so the
+docstring should state that supplied history is updated.
+
+### Checkpoint: effect style and defaults
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit6-boundaries-contracts",
+  "title": "Mutation contract checkpoint",
+  "instructions": "Identify who owns the changed object before and after each call.",
+  "questions": [
+    {
+      "id": "sort-pair",
+      "prompt": "Which call returns an ordered list while preserving the source outer list?",
+      "options": ["`items.sort()`", "`sorted(items)`", "`items.append(1)`", "`items.reverse()`"],
+      "answer_index": 1,
+      "explanation": "sorted returns a list; list.sort changes the list and returns None."
+    },
+    {
+      "id": "return-alias",
+      "prompt": "What does `result is source` prove after add_and_return?",
+      "options": ["The values are merely equal", "The source was deep-copied", "The result is another reference to the mutated source object", "The function had no side effect"],
+      "answer_index": 2,
+      "explanation": "Returning the input after mutation exposes the same object under another name."
+    },
+    {
+      "id": "default-timing",
+      "prompt": "When is the list in `history=[]` created?",
+      "options": ["After every append", "Whenever the result is printed", "Only after a failure", "Once when Python executes the function definition"],
+      "answer_index": 3,
+      "explanation": "The one default list can therefore be reused by multiple omitted-argument calls."
+    },
+    {
+      "id": "none-repair",
+      "prompt": "How does the None-sentinel repair create independent omitted histories?",
+      "options": ["The body constructs a new list during each call that receives None", "None freezes the original list", "The caller's name is deleted", "Every list becomes a tuple"],
+      "answer_index": 0,
+      "explanation": "Construction moves from definition time to the relevant call time."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Copying on input protects retained state
+
+A function or closure may retain an input after the call. Storing the caller's
+list directly shares future changes:
+
+```python
+def make_route_reader(route):
+    def read_route():
+        return route
+
+    return read_route
+
+
+source = ["gate"]
+read_route = make_route_reader(source)
+source.append("bridge")
+
+assert read_route() == ["gate", "bridge"]
+```
+
+If the contract says the reader captures a snapshot at creation, copy on input:
+
+```python
+def make_route_reader(route):
+    saved_route = list(route)
+
+    def read_route():
+        return saved_route
+
+    return read_route
+
+
+source = ["gate"]
+read_route = make_route_reader(source)
+source.append("bridge")
+
+assert read_route() == ["gate"]
+```
+
+This shallow copy is enough only because the route contains immutable strings.
+A nested mutable route would require a deeper ownership decision.
+
+## 9. Returning internal mutable state creates another leak
+
+The copied-input version still returns its internal list directly:
+
+```python
+source = ["gate"]
+read_route = make_route_reader(source)
+leaked = read_route()
+leaked.append("secret door")
+
+assert read_route() == ["gate", "secret door"]
+```
+
+The caller received an alias to retained state. Return an immutable snapshot or
+a suitable copy:
+
+```python
+def make_safe_route_reader(route):
+    saved_route = list(route)
+
+    def read_route():
+        return tuple(saved_route)
+
+    return read_route
+
+
+source = ["gate"]
+read_route = make_safe_route_reader(source)
+snapshot = read_route()
+
+assert snapshot == ("gate",)
+assert source == ["gate"]
+```
+
+The tuple works because its elements are immutable strings and the caller needs
+a read-only sequence. A dictionary or nested mutable snapshot may need explicit
+copying instead.
+
+## 10. Defensive copying has a cost
+
+Copying at every boundary can consume time and memory, hide useful intentional
+sharing, and create stale snapshots. Not copying can expose state to changes from
+places that did not appear in the public call.
+
+For every retained input or returned collection, state:
+
+1. Who created this object?
+2. Who is allowed to mutate it?
+3. Will the function retain it after returning?
+4. Does the result share mutable descendants with the input or internal state?
+5. Which source objects must remain unchanged?
+
+Then choose no copy, a shallow/selective copy, a deep copy, or an immutable
+representation. This is an API decision, not a style requirement.
+
+## 11. Value checks and identity checks prove different promises
+
+```python
+source = {"badges": ["starter"]}
+updated = with_badge(source, "vault scout")
+
+assert source == {"badges": ["starter"]}
+assert updated == {"badges": ["starter", "vault scout"]}
+assert updated is not source
+assert updated["badges"] is not source["badges"]
+```
+
+The first two assertions establish values. The final two establish ownership
+relationships required for safe later edits. Do not add identity assertions for
+immutable fields unless identity itself belongs to the contract.
+
+## 12. Lab: publish a mutation-aware quest API
+
+Implement four ownership contracts:
+
+```python
+def record_clue_in_place(state, room, clue):
+    """Record room and clue in caller-owned state; return None."""
+    raise NotImplementedError
+
+
+def with_clue(state, room, clue):
+    """Return independent state containing room and clue; preserve state."""
+    raise NotImplementedError
+
+
+def remember_event(event, history=None):
+    """Append event to supplied history or a fresh per-call list; return it."""
+    raise NotImplementedError
+
+
+def journal_snapshot(state):
+    """Return an immutable snapshot of rooms and clues."""
+    raise NotImplementedError
+```
+
+Use this state and evidence:
+
+```python
+source = {
+    "name": "Nova",
+    "journal": {
+        "rooms": [(0, 0)],
+        "clues": ["entrance"],
+    },
+}
+
+assert record_clue_in_place(source, (1, 0), "mirror") is None
+assert source["journal"] == {
+    "rooms": [(0, 0), (1, 0)],
+    "clues": ["entrance", "mirror"],
+}
+
+before = {
+    "name": "Nova",
+    "journal": {
+        "rooms": [(0, 0), (1, 0)],
+        "clues": ["entrance", "mirror"],
+    },
+}
+updated = with_clue(source, (2, 0), "moon")
+
+assert source == before
+assert updated["journal"]["rooms"] == [(0, 0), (1, 0), (2, 0)]
+assert updated["journal"]["clues"] == ["entrance", "mirror", "moon"]
+assert updated is not source
+assert updated["journal"] is not source["journal"]
+assert updated["journal"]["rooms"] is not source["journal"]["rooms"]
+assert updated["journal"]["clues"] is not source["journal"]["clues"]
+
+first_history = remember_event("gate")
+second_history = remember_event("bridge")
+assert first_history == ["gate"]
+assert second_history == ["bridge"]
+assert first_history is not second_history
+
+supplied_history = []
+assert remember_event("tower", supplied_history) is supplied_history
+assert supplied_history == ["tower"]
+
+snapshot = journal_snapshot(updated)
+assert snapshot == {
+    "rooms": ((0, 0), (1, 0), (2, 0)),
+    "clues": ("entrance", "mirror", "moon"),
+}
+assert isinstance(snapshot["rooms"], tuple)
+assert isinstance(snapshot["clues"], tuple)
+```
+
+`with_clue` may use `deepcopy` for this small supported graph or explicit
+selective copying. Be prepared to explain the choice. `journal_snapshot` returns
+a new dictionary whose sequence values are immutable tuples.
+
+<details>
+<summary>Hint: make ownership visible in each function body</summary>
+
+The in-place function appends directly. The transformer copies before reusing
+the in-place operation. The default helper constructs a list only when history
+is `None`. The snapshot converts each internal list to a tuple rather than
+returning the internal lists.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+from copy import deepcopy
+
+
+def record_clue_in_place(state, room, clue):
+    """Record room and clue in caller-owned state; return None."""
+    state["journal"]["rooms"].append(room)
+    state["journal"]["clues"].append(clue)
+
+
+def with_clue(state, room, clue):
+    """Return independent state containing room and clue; preserve state."""
+    updated = deepcopy(state)
+    record_clue_in_place(updated, room, clue)
+    return updated
+
+
+def remember_event(event, history=None):
+    """Append event to supplied history or a fresh per-call list; return it."""
+    if history is None:
+        history = []
+    history.append(event)
+    return history
+
+
+def journal_snapshot(state):
+    """Return an immutable snapshot of rooms and clues."""
+    return {
+        "rooms": tuple(state["journal"]["rooms"]),
+        "clues": tuple(state["journal"]["clues"]),
+    }
+```
+
+</details>
+
+### Checkpoint: safe API boundaries
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit6-boundaries-lab",
+  "title": "Quest API checkpoint",
+  "instructions": "Identify the ownership promise proved by each assertion group.",
+  "questions": [
+    {
+      "id": "deep-transform",
+      "prompt": "Why can with_clue safely call the in-place helper on its copied state?",
+      "options": ["The copy owns independent mutable descendants", "In-place calls never mutate", "Return automatically restores source", "Tuple rooms deep-copy dictionaries"],
+      "answer_index": 0,
+      "explanation": "The mutation targets function-created state rather than the caller's source graph."
+    },
+    {
+      "id": "history-calls",
+      "prompt": "What proves omitted-history calls do not share a default list?",
+      "options": ["Both contain strings", "Their result lists are distinct and contain only their own event", "The function has a docstring", "Supplied history is empty"],
+      "answer_index": 1,
+      "explanation": "Value and identity evidence together show per-call ownership."
+    },
+    {
+      "id": "snapshot-tuples",
+      "prompt": "Why does the snapshot return tuples for rooms and clues?",
+      "options": ["Tuples are always faster", "Lists cannot contain strings", "Callers cannot append through the snapshot into the retained lists", "Dictionary results require tuples"],
+      "answer_index": 2,
+      "explanation": "The immutable sequence representation prevents an output alias to internal mutable lists."
+    },
+    {
+      "id": "supplied-history",
+      "prompt": "What happens when a caller explicitly supplies history to remember_event?",
+      "options": ["A deep copy is always returned", "The argument is ignored", "The list becomes immutable", "The supplied list is intentionally updated and returned"],
+      "answer_index": 3,
+      "explanation": "The docstring makes explicit-input ownership different from fresh omitted-input state."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Explain the ownership contract aloud
+
+For each lab function, state:
+
+1. who owns each mutable input before the call;
+2. whether the function mutates, retains, or copies it;
+3. which result is returned and whether it aliases anything;
+4. which future caller mutation can cross the boundary; and
+5. which assertions provide value and identity evidence.
+
+Then deliberately return `state["journal"]["clues"]` from the snapshot, append
+through the result, and observe the leak. Restore the tuple snapshot and rerun
+from a clean state.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Function arguments bind local parameter names to evaluated objects; Python
+  does not automatically copy them.
+- Rebinding a parameter stays local, while mutating an object through it is
+  visible through caller references.
+- In-place commands and source-preserving transformers should advertise distinct
+  ownership contracts.
+- Returning a mutated input creates another alias unless the API says otherwise.
+- Mutable defaults are definition-owned objects reused across omitted-argument
+  calls; construct per-call state with a sentinel.
+- Copying retained input protects against later caller edits; copying or freezing
+  output protects internal state from callers.
+- Defensive copying costs time and memory, so apply it where ownership requires
+  isolation rather than at every boundary.
+:::
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: default argument evaluation](https://docs.python.org/3/tutorial/controlflow.html#default-argument-values)
+- [Python FAQ: changing a list inside a function](https://docs.python.org/3/faq/programming.html#how-do-i-write-a-function-with-output-parameters-call-by-reference)
+- [Python standard library: shallow and deep copy operations](https://docs.python.org/3/library/copy.html)
+- [Python tutorial: list methods and mutating return conventions](https://docs.python.org/3/tutorial/datastructures.html#more-on-lists)
