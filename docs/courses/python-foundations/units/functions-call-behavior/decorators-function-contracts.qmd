@@ -1,40 +1,286 @@
 ---
-title: Decorators That Preserve a Function's Contract
+title: Adding Behavior with Decorators
 lesson_id: functions-call-behavior.decorators-function-contracts
 lesson_order: 80
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+description: Build decorators from ordinary function reassignment, then preserve arguments, returned results, metadata, state, configuration, and stacked call order.
+course_id: python-foundations
+unit_id: functions-call-behavior
+unit_number: 5
 execute:
   echo: true
 categories:
 - python-foundations
 - functions-call-behavior
+- decorators
+- wrappers
 order: 80
 colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/decorators-function-contracts.ipynb
-course_id: python-foundations
-unit_id: functions-call-behavior
-unit_number: 5
 ---
 ::: {.lesson-meta}
-- **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Wrap a function to add behavior without changing its body.
-- **Practice in:** Generated Colab notebook and a local project when appropriate
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Explain decorator syntax as function transformation and write wrappers that forward calls, preserve results and metadata, retain state, accept configuration, and stack predictably.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. Repeated behavior can wrap several functions
 
-Several functions may need the same behavior around a call, such as timing or authorization. A decorator transforms a callable while preserving a reusable core function.
+Suppose several game actions need a small audit message:
 
-::: {.callout-note title="Prediction"}
-Before running the example, write the output or failure you expect and identify the line that will produce it.
+```python
+def open_gate(code):
+    print("calling open_gate")
+    result = f"gate {code} opened"
+    print("finished open_gate")
+    return result
+
+
+def reveal_map(region):
+    print("calling reveal_map")
+    result = f"map of {region} revealed"
+    print("finished reveal_map")
+    return result
+```
+
+The useful bodies differ, but the before/after behavior repeats. A decorator is
+a function transformation: it receives one function and returns replacement
+behavior, usually a wrapper that calls the original.
+
+This lesson will answer:
+
+- When does the decorator run, and when does the wrapper run?
+- How does a wrapper preserve arbitrary call shapes and returned values?
+- Why does `functools.wraps` matter?
+- In what order do configured or stacked decorators operate?
+
+## 2. Build a wrapper manually before using `@`
+
+Start with a zero-argument function so the transformation is visible:
+
+```python
+def add_log(function):
+    def wrapper():
+        print(f"calling {function.__name__}")
+        result = function()
+        print(f"finished {function.__name__}")
+        return result
+
+    return wrapper
+
+
+def find_key():
+    return "silver key"
+
+
+find_key = add_log(find_key)
+assert find_key() == "silver key"
+```
+
+Read the reassignment in three stages:
+
+1. The original `find_key` function becomes the argument to `add_log`.
+2. `add_log` creates and returns `wrapper`, whose closure remembers the original.
+3. The name `find_key` is rebound to that wrapper.
+
+Later, calling `find_key()` actually calls `wrapper()`, which calls the original
+function from its enclosing scope.
+
+## 3. `@decorator` is transformation syntax
+
+The decorator form expresses the same rebinding:
+
+```python
+@add_log
+def read_compass():
+    return "north"
+
+
+assert read_compass() == "north"
+```
+
+Conceptually, Python performs:
+
+```text
+define the original read_compass function
+read_compass = add_log(read_compass)
+```
+
+The decorator expression runs when Python executes the `def` statement, often
+while a module is imported or a notebook definition cell runs. The wrapper body
+runs only when the decorated function is called later.
+
+::: {.concept-diagram}
+Definition time installs replacement behavior; call time travels through the
+wrapper to the original and back.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["define original function"] --> B["decorator returns wrapper"]
+  B --> C["public name refers to wrapper"]
+  C -->|"later call"| D["wrapper before behavior"]
+  D --> E["original function"]
+  E --> F["wrapper after behavior and return"]
+```
+
 :::
 
-## 2. Count calls without changing the domain calculation.
+## 4. A wrapper must return the original result
+
+This broken wrapper calls correctly but discards the result:
+
+```python
+def broken_log(function):
+    def wrapper():
+        function()
+
+    return wrapper
+
+
+@broken_log
+def secret_number():
+    return 42
+
+
+assert secret_number() is None
+```
+
+The wrapper reaches its end without `return`, so callers see `None` even though
+the original returned `42`. A transparent decorator must capture and return the
+original result unless changing that result is its documented purpose.
+
+The required data flow is:
+
+```python
+result = function()
+return result
+```
+
+### Checkpoint: transformation and timing
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-decorators-transform",
+  "title": "Decorator transformation checkpoint",
+  "instructions": "Separate definition-time replacement from later call-time behavior.",
+  "questions": [
+    {
+      "id": "manual-equivalent",
+      "prompt": "What ordinary assignment matches `@add_log` above `def read_compass`?",
+      "options": ["`read_compass = add_log(read_compass)`", "`add_log = read_compass()`", "`read_compass = None`", "`wrapper = print`"],
+      "answer_index": 0,
+      "explanation": "Decorator syntax passes the newly defined function to the decorator and rebinds its name to the result."
+    },
+    {
+      "id": "application-time",
+      "prompt": "When does `add_log(read_compass)` run?",
+      "options": ["After every return", "When Python executes the decorated definition", "Only when the program exits", "After the wrapper has been exhausted"],
+      "answer_index": 1,
+      "explanation": "The decorator installs the replacement at definition time."
+    },
+    {
+      "id": "wrapper-time",
+      "prompt": "When does the body of the returned `wrapper` run?",
+      "options": ["Before the original is defined", "During every annotation", "When callers later call the decorated public name", "Only when the decorator returns it"],
+      "answer_index": 2,
+      "explanation": "Returning the wrapper and executing the wrapper are separate events."
+    },
+    {
+      "id": "lost-result",
+      "prompt": "Why does `secret_number()` return `None` after `broken_log` decorates it?",
+      "options": ["Integers cannot cross wrappers", "Decorators erase every result", "The original no longer runs", "The wrapper calls the original but never returns its result"],
+      "answer_index": 3,
+      "explanation": "The public call returns what the wrapper returns, so an omitted return loses the original value."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Forward every supported argument
+
+The first `add_log` wrapper accepts no arguments. It cannot decorate
+`open_gate(code)`. Use variadic forwarding:
+
+```python
+def add_log(function):
+    def wrapper(*args, **kwargs):
+        print(f"calling {function.__name__}")
+        result = function(*args, **kwargs)
+        print(f"finished {function.__name__}")
+        return result
+
+    return wrapper
+
+
+@add_log
+def open_gate(code, *, quiet=False):
+    suffix = " quietly" if quiet else ""
+    return f"gate {code} opened{suffix}"
+
+
+assert open_gate("A7") == "gate A7 opened"
+assert open_gate("B2", quiet=True) == "gate B2 opened quietly"
+```
+
+`*args` collects positional arguments passed to the wrapper. `**kwargs` collects
+keyword arguments. The original call `function(*args, **kwargs)` expands both
+collections, preserving the caller's call shape.
+
+A wrapper that forwards only positional arguments would lose `quiet=True`. A
+wrapper that forwards arguments but not the result still breaks the return
+contract. Both directions matter: arguments flow inward; results flow outward.
+
+## 6. Preserve useful metadata with `functools.wraps`
+
+Without help, the public function reports the wrapper's name and docstring:
+
+```python
+assert open_gate.__name__ == "wrapper"
+```
+
+Tools, help systems, and readers need the original public identity. Apply
+`functools.wraps` to the wrapper:
 
 ```python
 from functools import wraps
+
+
+def add_log(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        print(f"calling {function.__name__}")
+        result = function(*args, **kwargs)
+        print(f"finished {function.__name__}")
+        return result
+
+    return wrapper
+
+
+@add_log
+def reveal_map(region):
+    """Return a message revealing one region."""
+    return f"map of {region} revealed"
+
+
+assert reveal_map("Crater") == "map of Crater revealed"
+assert reveal_map.__name__ == "reveal_map"
+assert reveal_map.__doc__ == "Return a message revealing one region."
+```
+
+`wraps(function)` is itself a decorator applied to `wrapper`. It copies key
+metadata and exposes a `__wrapped__` link used by introspection tools. It does not
+fix lost arguments or results; your wrapper still owns those responsibilities.
+
+## 7. A decorator closure can keep focused state
+
+```python
+from functools import wraps
+
 
 def count_calls(function):
     count = 0
@@ -43,97 +289,62 @@ def count_calls(function):
     def wrapper(*args, **kwargs):
         nonlocal count
         count += 1
-        print(f"call {count}")
-        return function(*args, **kwargs)
+        result = function(*args, **kwargs)
+        return count, result
 
     return wrapper
+
 
 @count_calls
-def square(number):
-    return number * number
+def collect_star(color):
+    return f"{color} star"
 
-print(square(4))
+
+assert collect_star("blue") == (1, "blue star")
+assert collect_star("gold") == (2, "gold star")
 ```
 
-### Step-by-step explanation
+The `count` binding belongs to this decorated function's closure. A separately
+decorated function receives separate state. This decorator intentionally changes
+the result contract to `(call_number, original_result)`, so its name and
+documentation should make that choice clear. A transparent audit decorator
+would instead log elsewhere and return only the original result.
 
-1. `count_calls` receives a function and creates persistent closure state for its call count.
-2. The wrapper accepts and forwards positional and keyword arguments, then returns the original result.
-3. `@count_calls` rebinds `square` to the wrapper at definition time; each call now passes through it.
-
-Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
-
-## 3. Debug a contract violation
-
-This version is syntactically valid but communicates or implements the wrong contract:
-
-```python
-def announce(function):
-    def wrapper():
-        print("starting")
-        function()
-    return wrapper
-```
-
-A focused repair is:
-
-```python
-from functools import wraps
-
-def announce(function):
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        print("starting")
-        return function(*args, **kwargs)
-    return wrapper
-```
-
-Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
-
-## 4. Practice from trace to transfer
-
-1. Decorate a function that accepts one positional and one keyword argument.
-2. Stack two simple decorators and predict their call order.
-3. Inspect `square.__name__` with and without `@wraps`.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the tasks</summary>
-
-Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
-
-</details>
-
-## 5. Check your understanding
+### Checkpoint: transparent wrappers
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-decorators",
-  "title": "Decorators checkpoint",
-  "instructions": "Trace the code and contract before choosing.",
+  "id": "unit5-decorators-transparent",
+  "title": "Wrapper contract checkpoint",
+  "instructions": "Follow arguments inward, results outward, and metadata at the public name.",
   "questions": [
     {
-      "id": "time",
-      "prompt": "When does `@count_calls` execute the decorator itself?",
-      "options": [
-        "Only after the tenth call",
-        "When the module is deleted",
-        "Before parsing the file",
-        "When Python defines the decorated function"
-      ],
-      "answer_index": 3,
-      "explanation": "Decorator application happens as the function definition executes."
+      "id": "forward-keyword",
+      "prompt": "Which wrapper call preserves `quiet=True` for the original function?",
+      "options": ["`function()`", "`function(*args, **kwargs)`", "`function(args)`", "`kwargs(function)`"],
+      "answer_index": 1,
+      "explanation": "Expansion forwards both collected positional and keyword arguments."
     },
     {
-      "id": "return",
-      "prompt": "Why must the wrapper return the original result?",
-      "options": [
-        "To preserve the callable’s result contract",
-        "To make the decorator run twice",
-        "To convert every result to text",
-        "To create a global variable"
-      ],
+      "id": "wraps-name",
+      "prompt": "What public metadata does `@wraps(function)` help preserve?",
+      "options": ["Every global variable", "The wrapper's call count", "The original function's name and docstring", "All printed output"],
+      "answer_index": 2,
+      "explanation": "`wraps` updates the wrapper with key metadata from the original callable."
+    },
+    {
+      "id": "two-directions",
+      "prompt": "What must a transparent wrapper preserve across the call boundary?",
+      "options": ["Only the original name", "Only positional arguments", "Only print order", "Arguments going in and the original result coming out"],
+      "answer_index": 3,
+      "explanation": "Forwarding and returning protect both sides of the original call contract."
+    },
+    {
+      "id": "closure-count",
+      "prompt": "Where does `count_calls` keep its call count?",
+      "options": ["In an enclosing closure binding updated with `nonlocal`", "In every caller's global scope", "Inside the returned string", "In `functools.wraps`"],
       "answer_index": 0,
-      "explanation": "Dropping the return value silently changes how callers can use the function."
+      "explanation": "The wrapper retains access to state created when the decorator received the function."
     }
   ]
 }
@@ -141,13 +352,288 @@ Write one ordinary acceptance example and one boundary before implementation. Ma
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 8. A configurable decorator adds one more function layer
 
-- State the behavior contract before selecting syntax or tools.
-- Trace the values and boundaries that provide observable evidence.
-- Preserve one useful failure and verify the repair from a clean state.
+Suppose logging should include a chosen label. The outer function receives
+configuration and returns the actual decorator:
+
+```python
+from functools import wraps
+
+
+def tagged(label):
+    def decorate(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            result = function(*args, **kwargs)
+            return "[" + label + "] " + result
+
+        return wrapper
+
+    return decorate
+
+
+@tagged("TREASURE")
+def describe_treasure(name):
+    return f"found {name}"
+
+
+assert describe_treasure("moonstone") == "[TREASURE] found moonstone"
+```
+
+Trace the three layers:
+
+| Function layer | Receives | Returns |
+|---|---|---|
+| `tagged` | label configuration | `decorate` |
+| `decorate` | original function | `wrapper` |
+| `wrapper` | later call arguments | decorated call result |
+
+At definition time, `tagged("TREASURE")` runs first and returns `decorate`.
+Python then applies that decorator to `describe_treasure`. The wrapper waits for
+later calls.
+
+## 9. Stacked decorators apply inside out
+
+```python
+from functools import wraps
+
+
+def surround(left, right):
+    def decorate(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            return left + function(*args, **kwargs) + right
+
+        return wrapper
+
+    return decorate
+
+
+@surround("<", ">")
+@surround("[", "]")
+def rune():
+    return "moon"
+
+
+assert rune() == "<[moon]>"
+```
+
+Application follows ordinary nested calls:
+
+```text
+rune = surround("<", ">")(
+    surround("[", "]")(original_rune)
+)
+```
+
+The decorator closest to `def` wraps the original first. At call time, the outer
+`< >` wrapper starts first, calls the inner `[ ]` wrapper, which calls the
+original. Results then return outward. Swapping the decorator lines changes the
+result to `[<moon>]`.
+
+## 10. Decorators should make the public contract clearer, not mysterious
+
+Good foundational uses are narrow and visible: logging, counting, timing at a
+later stage, access checks in frameworks, caching, or registering functions.
+Every decorator changes the effective public callable, even when it tries to be
+transparent.
+
+Avoid a decorator when:
+
+- a direct helper call would be clearer;
+- the wrapper silently changes the result type;
+- decoration depends on surprising changing global state;
+- several layers make call order difficult to explain; or
+- different functions require incompatible call contracts.
+
+Decorator syntax hides a transformation behind one line. Use it only when that
+shared transformation is easier to understand than explicit repetition.
+
+## 11. Lab: track game achievements
+
+Create a configurable audit decorator that records one event per successful
+call while preserving the decorated function's behavior and metadata:
+
+```python
+from functools import wraps
+
+
+def track_achievement(log, *, badge):
+    """Return a decorator that appends successful call records to log."""
+    raise NotImplementedError
+```
+
+The event must be a dictionary with `badge`, `function`, `args`, `kwargs`, and
+`result`. Append it after the original returns.
+
+```python
+events = []
+
+
+@track_achievement(events, badge="gatekeeper")
+def open_gate(code, *, quiet=False):
+    """Return an opened-gate message."""
+    suffix = " quietly" if quiet else ""
+    return f"gate {code} opened{suffix}"
+
+
+@track_achievement(events, badge="cartographer")
+def reveal_map(region):
+    """Return a revealed-map message."""
+    return f"map of {region} revealed"
+
+
+assert open_gate("A7") == "gate A7 opened"
+assert open_gate("B2", quiet=True) == "gate B2 opened quietly"
+assert reveal_map("Crater") == "map of Crater revealed"
+assert open_gate.__name__ == "open_gate"
+assert open_gate.__doc__ == "Return an opened-gate message."
+assert events == [
+    {
+        "badge": "gatekeeper",
+        "function": "open_gate",
+        "args": ("A7",),
+        "kwargs": {},
+        "result": "gate A7 opened",
+    },
+    {
+        "badge": "gatekeeper",
+        "function": "open_gate",
+        "args": ("B2",),
+        "kwargs": {"quiet": True},
+        "result": "gate B2 opened quietly",
+    },
+    {
+        "badge": "cartographer",
+        "function": "reveal_map",
+        "args": ("Crater",),
+        "kwargs": {},
+        "result": "map of Crater revealed",
+    },
+]
+```
+
+The decorator intentionally mutates the supplied `log`; that effect is explicit
+in its contract. The wrapped game functions still return their original strings.
+
+<details>
+<summary>Hint: write and test one layer at a time</summary>
+
+The outer call remembers `log` and `badge`, then returns `decorate`. `decorate`
+receives `function` and returns a `@wraps(function)` wrapper. The wrapper forwards
+arguments, keeps the result, appends one dictionary, and returns the result.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+from functools import wraps
+
+
+def track_achievement(log, *, badge):
+    """Return a decorator that appends successful call records to log."""
+    def decorate(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            result = function(*args, **kwargs)
+            event = {
+                "badge": badge,
+                "function": function.__name__,
+                "args": args,
+                "kwargs": kwargs.copy(),
+                "result": result,
+            }
+            log.append(event)
+            return result
+
+        return wrapper
+
+    return decorate
+```
+
+</details>
+
+### Checkpoint: configuration and stacking
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-decorators-configured",
+  "title": "Configured decorator checkpoint",
+  "instructions": "Count the function layers and trace nested order.",
+  "questions": [
+    {
+      "id": "three-layers",
+      "prompt": "What does `track_achievement(events, badge='gatekeeper')` return?",
+      "options": ["The final gate message", "The actual decorator that will receive a function", "An already completed event", "The original `events` list"],
+      "answer_index": 1,
+      "explanation": "The configuration layer returns the function-transforming decorator layer."
+    },
+    {
+      "id": "audit-order",
+      "prompt": "Why does the solution append an event after calling the original?",
+      "options": ["Arguments exist only after return", "`wraps` requires a list", "The event can include the actual successful returned result", "The wrapper cannot run before the original"],
+      "answer_index": 2,
+      "explanation": "Recording afterward provides the real result and avoids recording completion before it occurs."
+    },
+    {
+      "id": "stack-application",
+      "prompt": "Which decorator wraps the original `rune` first?",
+      "options": ["Both simultaneously", "The top `< >` decorator", "Whichever wrapper prints first", "The `[ ]` decorator closest to `def`"],
+      "answer_index": 3,
+      "explanation": "Stacked decorators apply from the bottom upward, like nested function calls."
+    },
+    {
+      "id": "stack-result",
+      "prompt": "Why is the final rune text `<[moon]>`?",
+      "options": ["The outer `< >` wrapper receives and surrounds the inner `[moon]` result", "Python sorts punctuation", "The original function returns brackets", "Both decorators mutate one global string"],
+      "answer_index": 0,
+      "explanation": "Call results return outward through the nested wrappers."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 12. Explain definition time and call time separately
+
+Using `track_achievement`, state:
+
+1. when configuration arguments are evaluated;
+2. when the original function is passed to `decorate`;
+3. what public name refers to after definition;
+4. what the wrapper receives on each later call;
+5. where the result travels; and
+6. which state changes deliberately.
+
+Then apply `@surround` above a tracked function and predict both the returned text
+and recorded result. The outer wrapper sees the result of the complete inner
+decorated call; reversing the stack changes which result the audit records.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Decorator syntax passes a newly defined function to another function and
+  rebinds the public name to the returned callable.
+- Decorator application occurs at definition time; wrapper bodies run at later
+  call time.
+- Transparent wrappers forward `*args` and `**kwargs` and return the original
+  result.
+- `functools.wraps` preserves useful public metadata but does not repair broken
+  forwarding or missing returns.
+- Closures can retain small per-decorated-function state; `nonlocal` updates it
+  deliberately.
+- A configurable decorator has three layers: configuration, decoration, and
+  later wrapped calls.
+- Stacked decorators apply inside out and execute as nested wrappers, with
+  results returning outward.
+:::
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python glossary: decorator](https://docs.python.org/3/glossary.html#term-decorator)
+- [Python language reference: function definitions and decorators](https://docs.python.org/3/reference/compound_stmts.html#function-definitions)
+- [Python standard library: `functools.wraps`](https://docs.python.org/3/library/functools.html#functools.wraps)

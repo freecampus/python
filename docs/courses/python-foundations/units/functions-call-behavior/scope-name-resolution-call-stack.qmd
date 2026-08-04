@@ -1,133 +1,210 @@
 ---
-title: Scope, Name Resolution, and the Call Stack
+title: Following Names Through Function Calls
 lesson_id: functions-call-behavior.scope-name-resolution-call-stack
 lesson_order: 40
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+description: Trace separate call frames and return points, follow Python's name lookup rules, repair shadowing and assignment mistakes, and build small closures with independent state.
+course_id: python-foundations
+unit_id: functions-call-behavior
+unit_number: 5
 execute:
   echo: true
 categories:
 - python-foundations
 - functions-call-behavior
+- scope
+- closures
 order: 40
 colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/scope-name-resolution-call-stack.ipynb
-course_id: python-foundations
-unit_id: functions-call-behavior
-unit_number: 5
 ---
 ::: {.lesson-meta}
-- **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Trace name lookup and calls without relying on hidden global mutation.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Follow local frames and return points, apply LEGB lookup, diagnose shadowing and `UnboundLocalError`, and use `nonlocal` state deliberately.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. The same name can be safe in separate calls
 
-Each function call has a frame containing arguments and local names. A call-stack trace records active functions and return points. Python searches local, enclosing, global, then built-in scopes for an unqualified name.
+This dispatch program uses `message` in more than one function:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+```python
+def add_priority(message):
+    message = f"PRIORITY: {message}"
+    return message
+
+
+def build_dispatch(destination, message):
+    prepared = add_priority(message)
+    return f"{destination} <- {prepared}"
+
+
+report = build_dispatch("North Gate", "bridge closed")
+assert report == "North Gate <- PRIORITY: bridge closed"
+```
+
+Changing `message` inside `add_priority` does not overwrite the caller's local
+`message`. Each active call has its own frame: a workspace holding that call's
+parameters and local names.
+
+This lesson will help you answer:
+
+- Which frame owns a name at a particular moment?
+- Where does Python look when a name is not local?
+- Why can an assignment cause `UnboundLocalError`?
+- How can a returned function remember state from an enclosing call?
+
+## 2. A call frame remembers where execution must return
+
+When `build_dispatch` calls `add_priority`, the caller pauses. Python retains the
+caller frame and the location that should receive the returned value.
+
+::: {.concept-diagram}
+The active call is on top. Its return moves control and a value back to the
+suspended caller below it.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart BT
+  A["add_priority frame<br/>message: bridge closed"] -->|"returns prepared text"| B["build_dispatch frame<br/>destination: North Gate<br/>waiting at prepared assignment"]
+  B -->|"returns report"| C["top-level caller<br/>waiting at report assignment"]
+```
+
 :::
 
-## 2. Read and trace a complete case
+Trace the active frames:
+
+| Moment | Active frame | Important local state | Waiting return point |
+|---:|---|---|---|
+| 1 | `build_dispatch` | `destination`, `message` | top-level `report = ...` |
+| 2 | `add_priority` | its own `message` | caller's `prepared = ...` |
+| 3 | `build_dispatch` | new `prepared` value | top-level assignment |
+| 4 | top level | new `report` value | none |
+
+After a function returns, its ordinary local frame is removed. A later call gets
+a fresh frame.
+
+## 3. Repeated calls receive independent local state
 
 ```python
-tax_rate = 0.2
-def total_with_tax(subtotal):
-    tax = subtotal * tax_rate
-    return subtotal + tax
-def invoice_total(prices):
-    subtotal = sum(prices)
-    return total_with_tax(subtotal)
-print(invoice_total([10, 5]))
-```
-
-### What Python does
-
-1. The two functions have separate local `subtotal` names.
-2. `tax_rate` is read from module scope.
-3. Return values move back through the call stack.
-
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
-
-```python
-count = 0
-def increment():
-    count = count + 1
+def count_words(text):
+    count = len(text.split())
     return count
+
+
+first = count_words("red moon")
+second = count_words("quiet silver river")
+
+assert first == 2
+assert second == 3
 ```
 
-A focused repair is:
+The first call's local `text` and `count` do not become inputs to the second.
+Identical parameter names describe roles within a call, not one shared storage
+box across all calls.
+
+Recursion creates several frames for the same function at once. Lesson 6 will
+trace that special case. The rule remains the same: each active call owns its
+own parameters and locals.
+
+## 4. Python looks for names through LEGB
+
+When Python evaluates a name, it searches outward:
+
+1. **Local** — the current function call;
+2. **Enclosing** — any active enclosing function scope captured by a nested
+   function;
+3. **Global** — the module or notebook cell namespace;
+4. **Built-in** — names such as `len`, `sum`, and `print`.
 
 ```python
-def increment(count):
-    return count + 1
+THEME = "moon"  # global
+
+
+def make_label(prefix):  # prefix belongs to an enclosing function scope
+    separator = ": "
+
+    def label(name):  # name is local to this call
+        return prefix + separator + name + " / " + THEME.upper()
+
+    return label
+
+
+warning_label = make_label("Warning")
+assert warning_label("North Gate") == "Warning: North Gate / MOON"
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+Inside `label`, Python finds `name` locally, `prefix` and `separator` in the
+enclosing scope, `THEME` globally, and `str.upper` through the value's type. A
+separate built-in example is `len(name)`; `len` is found in built-ins when no
+closer scope defines it.
 
-## 4. Practice from trace to transfer
+“Search outward” applies to reading a name. Assignment has an additional rule
+that we will make visible shortly.
 
-1. Trace frames for a function calling two helpers.
-2. Create a closure that remembers a label.
-3. Refactor a global counter into parameter and return value.
+## 5. Constants can be global; changing dependencies are clearer as inputs
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+A stable configuration constant is readable in uppercase:
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+```python
+MAX_LABEL_LENGTH = 20
 
-</details>
 
-## 5. Check your understanding
+def label_fits(text):
+    return len(text) <= MAX_LABEL_LENGTH
+```
+
+A threshold that changes per dispatch is better passed explicitly:
+
+```python
+def label_fits(text, max_length=20):
+    return len(text) <= max_length
+
+
+assert label_fits("North Gate") is True
+assert label_fits("North Gate", max_length=5) is False
+```
+
+The second signature exposes the dependency and lets two callers use different
+rules without changing shared global state.
+
+### Checkpoint: call frames and lookup
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-scope-and-call-stacks",
-  "title": "Scope and Call Stacks checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit5-scope-frames",
+  "title": "Call frame checkpoint",
+  "instructions": "Locate each name and return point before choosing.",
   "questions": [
     {
-      "id": "frame",
-      "prompt": "When is a local frame created?",
-      "options": [
-        "At installation",
-        "Only recursively",
-        "At program exit",
-        "Per function call"
-      ],
-      "answer_index": 3,
-      "explanation": "Every call has its own frame."
-    },
-    {
-      "id": "lookup",
-      "prompt": "Where is an unqualified name sought first?",
-      "options": [
-        "Local",
-        "Built-ins",
-        "Global",
-        "Filesystem"
-      ],
+      "id": "separate-message",
+      "prompt": "Why does assigning `message` inside `add_priority` not replace `build_dispatch`'s parameter?",
+      "options": ["Each active call has its own local frame", "Strings cannot be assigned", "All parameters are global", "Return blocks every assignment"],
       "answer_index": 0,
-      "explanation": "Local is first in LEGB."
+      "explanation": "The same spelling can refer to separate local names owned by separate call frames."
     },
     {
-      "id": "explicit",
-      "prompt": "Why pass changing state?",
-      "options": [
-        "To hide it",
-        "To expose dependencies and results",
-        "To make it global",
-        "To disable scope"
-      ],
+      "id": "caller-waits",
+      "prompt": "What happens to `build_dispatch` while `add_priority` runs?",
+      "options": ["Its frame is deleted", "Its frame waits at the call until a value returns", "It restarts from its first line", "Its locals move into built-ins"],
       "answer_index": 1,
-      "explanation": "Explicit data flow is testable."
+      "explanation": "The suspended caller retains its frame and return point."
+    },
+    {
+      "id": "legb-prefix",
+      "prompt": "Where does nested `label` find `prefix`?",
+      "options": ["Built-ins", "The module global namespace", "The enclosing `make_label` scope", "A previous unrelated call"],
+      "answer_index": 2,
+      "explanation": "The returned nested function closes over `prefix` from its enclosing function scope."
+    },
+    {
+      "id": "changing-limit",
+      "prompt": "How should a per-call maximum label length usually reach `label_fits`?",
+      "options": ["By overwriting `len`", "Through an unrelated closure", "By editing the function body", "Through an explicit parameter"],
+      "answer_index": 3,
+      "explanation": "A parameter makes a changing dependency visible and independently configurable."
     }
   ]
 }
@@ -135,14 +212,417 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 6. Shadowing hides an outer name
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+A local name can temporarily hide a global name:
+
+```python
+signal = "global signal"
+
+
+def inspect_signal():
+    signal = "local signal"
+    return signal
+
+
+assert inspect_signal() == "local signal"
+assert signal == "global signal"
+```
+
+This is legal. It becomes confusing when the hidden name is needed. Shadowing a
+built-in is especially inconvenient:
+
+```python
+numbers = [2, 3, 5]
+sum = 10
+
+# total = sum(numbers)
+```
+
+If the commented line runs, Python tries to call integer `10`, not built-in
+`sum`. Rename the local value and remove the shadowing binding:
+
+```python
+del sum
+recorded_total = 10
+calculated_total = sum(numbers)
+
+assert recorded_total == calculated_total
+```
+
+Other common names to protect include `list`, `str`, `min`, `max`, and `input`.
+The problem is not a special prohibition; it is ordinary nearest-scope lookup
+finding the wrong object first.
+
+## 7. Assignment normally makes a name local to the whole function
+
+This code looks as though it reads a global counter and then updates it:
+
+```python
+attempts = 3
+
+
+def add_attempt():
+    # attempts = attempts + 1
+    return "uncomment the assignment to observe UnboundLocalError"
+```
+
+If `attempts = attempts + 1` is uncommented and the function is called, Python
+raises `UnboundLocalError`. Because the body assigns to `attempts`, Python treats
+that name as local throughout the function. The right side then tries to read
+the local value before that local value has been assigned.
+
+The order of the lines does not turn the earlier read into a global read. Local
+scope is determined when the function is compiled.
+
+Prefer explicit data flow:
+
+```python
+def increment_attempts(attempts):
+    return attempts + 1
+
+
+attempts = increment_attempts(attempts)
+assert attempts == 4
+```
+
+The function can now be understood from its input and result.
+
+## 8. `global` is real syntax, but it creates shared changing state
+
+Python can explicitly rebind a global:
+
+```python
+signal_count = 0
+
+
+def record_signal():
+    global signal_count
+    signal_count += 1
+
+
+record_signal()
+assert signal_count == 1
+```
+
+This works. It also means any call may change state used elsewhere, so the
+function's behavior depends on call history. A parameter and return value are
+usually easier for ordinary calculations. `global` is not forbidden; it is a
+strong coupling choice that should be visible in the contract.
+
+## 9. A closure remembers an enclosing value
+
+A nested function may survive after its enclosing call has returned:
+
+```python
+def make_channel_label(channel):
+    prefix = f"Channel {channel}"
+
+    def label(message):
+        return f"{prefix}: {message}"
+
+    return label
+
+
+north_label = make_channel_label("North")
+south_label = make_channel_label("South")
+
+assert north_label("ready") == "Channel North: ready"
+assert south_label("ready") == "Channel South: ready"
+```
+
+`label` is returned as a function object. Each returned function retains access
+to the enclosing `prefix` created by its own `make_channel_label` call. That
+retained relationship is a **closure**.
+
+Definition and call times matter:
+
+1. Calling `make_channel_label("North")` creates `prefix` and defines `label`.
+2. Returning `label` does not call it.
+3. Calling `north_label("ready")` later creates a new local frame for `message`.
+4. Name lookup finds remembered `prefix` in the enclosing scope.
+
+### Checkpoint: shadowing and assignment
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-scope-assignment",
+  "title": "Name assignment checkpoint",
+  "instructions": "Use scope rules rather than the intended English meaning of a name.",
+  "questions": [
+    {
+      "id": "shadow-sum",
+      "prompt": "Why does `sum = 10` make a later `sum(numbers)` fail in that scope?",
+      "options": ["Lists cannot be summed", "The nearest name `sum` now refers to an integer", "Built-ins work only once", "Numbers are enclosing functions"],
+      "answer_index": 1,
+      "explanation": "Nearest-scope lookup finds the integer binding before the built-in function."
+    },
+    {
+      "id": "unbound-local",
+      "prompt": "Why can `attempts = attempts + 1` raise `UnboundLocalError` inside a function?",
+      "options": ["Addition is not allowed in functions", "Global integers cannot be read", "The assignment makes `attempts` local, so the right side reads it before local assignment", "Return must appear first"],
+      "answer_index": 2,
+      "explanation": "An ordinary assignment classifies that name as local throughout the function body."
+    },
+    {
+      "id": "global-cost",
+      "prompt": "What important cost comes with rebinding a global counter?",
+      "options": ["The function cannot have a name", "The counter becomes immutable", "The function automatically becomes recursive", "Behavior depends on shared state and call history"],
+      "answer_index": 3,
+      "explanation": "Shared changing state creates coupling between calls and other code."
+    },
+    {
+      "id": "closure-label",
+      "prompt": "What does `north_label` remember after `make_channel_label` returns?",
+      "options": ["The enclosing prefix created for North", "Every future global variable", "The result of calling `label`", "The caller's complete notebook"],
+      "answer_index": 0,
+      "explanation": "The closure keeps access to the specific enclosing binding used by that factory call."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. `nonlocal` updates remembered enclosing state
+
+Without `nonlocal`, assigning to `count` would create a new local name in
+`record`. Declare that the assignment targets the enclosing binding:
+
+```python
+def make_counter(label):
+    count = 0
+
+    def record():
+        nonlocal count
+        count += 1
+        return f"{label}: {count}"
+
+    return record
+
+
+north_count = make_counter("North")
+south_count = make_counter("South")
+
+assert north_count() == "North: 1"
+assert north_count() == "North: 2"
+assert south_count() == "South: 1"
+assert north_count() == "North: 3"
+```
+
+The two closures have independent state because two calls to `make_counter`
+created two enclosing `count` bindings. State persists between calls to one
+returned closure, but it is not one global counter shared by every instance.
+
+Use closure state when it makes a small behavior cohesive. If callers need to
+inspect and coordinate many pieces of state, Unit 11's objects may offer a more
+explicit design.
+
+## 11. Closures created in a loop can share the final loop value
+
+Names in closures are looked up when the returned function runs, not copied
+automatically on every loop iteration:
+
+```python
+def make_bad_labels():
+    labels = []
+    for channel in ["North", "South"]:
+        labels.append(lambda: channel)
+    return labels
+
+
+bad_labels = make_bad_labels()
+assert [label() for label in bad_labels] == ["South", "South"]
+```
+
+Both functions close over the same `channel` binding. After the loop, its value
+is `"South"`. A beginner-readable repair creates a new enclosing binding through
+a factory call:
+
+```python
+def make_fixed_label(channel):
+    def label():
+        return channel
+
+    return label
+
+
+labels = []
+for channel in ["North", "South"]:
+    labels.append(make_fixed_label(channel))
+
+assert [label() for label in labels] == ["North", "South"]
+```
+
+You may also encounter a default-argument capture, but the named factory makes
+the new binding and its timing easier to explain.
+
+## 12. Lab: trace a dispatch center
+
+Complete the pipeline and counter factory:
+
+```python
+def normalize_message(message):
+    """Return message stripped and converted to sentence case."""
+    raise NotImplementedError
+
+
+def route_message(channel, message, *, prefix="Dispatch"):
+    """Return one routed message using explicit configuration."""
+    raise NotImplementedError
+
+
+def build_dispatch(channel, message, *, prefix="Dispatch"):
+    """Normalize and route one message."""
+    raise NotImplementedError
+
+
+def make_dispatch_counter(channel):
+    """Return a function that records and reports this channel's call count."""
+    raise NotImplementedError
+```
+
+Use the assertions as call-frame evidence:
+
+```python
+assert normalize_message("  BRIDGE CLOSED  ") == "Bridge closed"
+assert route_message("North", "Bridge closed") == (
+    "Dispatch North: Bridge closed"
+)
+assert build_dispatch("North", "  BRIDGE CLOSED  ") == (
+    "Dispatch North: Bridge closed"
+)
+assert build_dispatch("South", "clear", prefix="Moon Base") == (
+    "Moon Base South: Clear"
+)
+
+north = make_dispatch_counter("North")
+south = make_dispatch_counter("South")
+assert north() == "North dispatch 1"
+assert north() == "North dispatch 2"
+assert south() == "South dispatch 1"
+assert north() == "North dispatch 3"
+```
+
+Before implementing, draw the stack while `build_dispatch` waits for
+`normalize_message`. After it returns, mark which frame owns `clean_message`.
+
+<details>
+<summary>Hint: distinguish the pipeline's locals from remembered counter state</summary>
+
+`build_dispatch` keeps `clean_message` only for that call and passes it to
+`route_message`. The factory creates `count` once; its nested function declares
+`nonlocal count` before incrementing it.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def normalize_message(message):
+    """Return message stripped and converted to sentence case."""
+    return message.strip().capitalize()
+
+
+def route_message(channel, message, *, prefix="Dispatch"):
+    """Return one routed message using explicit configuration."""
+    return f"{prefix} {channel}: {message}"
+
+
+def build_dispatch(channel, message, *, prefix="Dispatch"):
+    """Normalize and route one message."""
+    clean_message = normalize_message(message)
+    return route_message(channel, clean_message, prefix=prefix)
+
+
+def make_dispatch_counter(channel):
+    """Return a function that records and reports this channel's call count."""
+    count = 0
+
+    def record():
+        nonlocal count
+        count += 1
+        return f"{channel} dispatch {count}"
+
+    return record
+```
+
+</details>
+
+### Checkpoint: closures and independent state
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-scope-closures",
+  "title": "Closure state checkpoint",
+  "instructions": "Trace factory creation separately from calls to returned functions.",
+  "questions": [
+    {
+      "id": "nonlocal-target",
+      "prompt": "Which binding does `nonlocal count` update?",
+      "options": ["A built-in count function", "The enclosing `make_dispatch_counter` call's `count`", "A new local created on each line", "Every global integer"],
+      "answer_index": 1,
+      "explanation": "`nonlocal` targets the nearest enclosing function binding with that name."
+    },
+    {
+      "id": "independent-counters",
+      "prompt": "Why does the first `south()` call report 1 after two `north()` calls?",
+      "options": ["South calls ignore addition", "The label resets every integer", "Each factory call created its own enclosing `count`", "Both functions read a global zero"],
+      "answer_index": 2,
+      "explanation": "Separate factory calls create separate captured state."
+    },
+    {
+      "id": "late-binding",
+      "prompt": "Why do both functions from `make_bad_labels` return `South`?",
+      "options": ["Lambda sorts the strings", "North is not a valid value", "Returned functions always share all locals", "Both close over one loop binding whose final value is `South`"],
+      "answer_index": 3,
+      "explanation": "The shared name is resolved later when each closure is called."
+    },
+    {
+      "id": "pipeline-frame",
+      "prompt": "Where does `clean_message` live while `build_dispatch` calls `route_message`?",
+      "options": ["In the suspended `build_dispatch` frame", "Inside built-ins", "In the earlier factory call", "In every frame at once"],
+      "answer_index": 0,
+      "explanation": "The caller frame and its locals remain while the callee runs."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Explain the frames before moving on
+
+Use your lab to answer:
+
+1. At what line does `build_dispatch` pause during its helper call?
+2. Which names are local to `route_message`?
+3. Why is `prefix` explicit instead of read from changing global state?
+4. When is each counter's enclosing `count` created?
+5. What observable evidence proves the counters are independent?
+
+Restart the notebook and call `north()` once. A clean restart creates the
+factory and its state again; it should report `1`, not remember an earlier run.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Each active function call has a separate frame containing parameters, local
+  names, and a return point.
+- Python reads names through local, enclosing, global, and built-in scopes.
+- Shadowing makes the nearest binding win, even when it hides a needed built-in.
+- Assignment normally makes a name local throughout a function; reading it first
+  can raise `UnboundLocalError`.
+- `global` rebinds module state; explicit parameters and returns usually reveal
+  changing dependencies more clearly.
+- A closure retains access to enclosing bindings, and `nonlocal` can update one
+  deliberately.
+- Each factory call can create independent closure state.
+:::
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: scopes and namespaces](https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces)
+- [Python language reference: naming and binding](https://docs.python.org/3/reference/executionmodel.html#naming-and-binding)
+- [Python language reference: `global` and `nonlocal`](https://docs.python.org/3/reference/simple_stmts.html#the-global-statement)

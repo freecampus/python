@@ -1,367 +1,207 @@
 ---
-title: Defining, Calling, and Returning from Functions
+title: Defining Functions and Returning Useful Results
 lesson_id: functions-call-behavior.defining-calling-returning
 lesson_order: 10
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+description: Define and call functions, trace when bodies execute, return reusable values on every intended path, and distinguish returned data from printed output and implicit None.
+course_id: python-foundations
+unit_id: functions-call-behavior
+unit_number: 5
 execute:
   echo: true
 categories:
 - python-foundations
 - functions-call-behavior
+- functions
+- return-values
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/defining-calling-returning.ipynb
-course_id: python-foundations
-unit_id: functions-call-behavior
-unit_number: 5
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 25–40 minutes
-- **You will learn:** Define functions, pass arguments, return results, and understand scope.
-- **Practice in:** Google Colab, Jupyter, or VS Code
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Define reusable behavior, trace definition and call time, and return useful results consistently without confusing display with data flow.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+## 1. Give a repeated calculation one reliable home
 
-As programs grow, repeated code becomes hard to read and easy to break. A
-**function** gives a name to a reusable block of code. Instead of copying the
-same steps in many places, you define the steps once and call the function when
-you need them.
+An expedition notebook calculates route totals in two places:
 
-Functions also help you think clearly: each function should answer a small
-question or perform a small task.
+```python
+day_one = [4, 7, 3]
+day_one_total = 0
+for distance in day_one:
+    day_one_total += distance
 
-## How a function call works
+day_two = [2, 5]
+day_two_total = 0
+for distance in day_two:
+    day_two_total += distance
+```
+
+The two copies currently agree, but a future repair could reach only one. Put the
+algorithm behind one function boundary:
+
+```python
+def total_distance(distances):
+    """Return the sum of the supplied distances."""
+    total = 0
+    for distance in distances:
+        total += distance
+    return total
+
+
+day_one_total = total_distance([4, 7, 3])
+day_two_total = total_distance([2, 5])
+
+assert day_one_total == 14
+assert day_two_total == 7
+```
+
+The function has one job. Its parameter gives each call an input, its local
+accumulator holds working state, and `return` sends the result back.
+
+### Questions this lesson will answer
+
+- What happens when Python reads a function definition?
+- When does the indented body actually run?
+- How is returning a value different from printing it?
+- What returns when execution reaches the end without `return`?
+- How can every supported branch provide a consistent result?
 
 ::: {.concept-diagram}
-A function call moves information into a named block of code and may send one
-result back to the caller.
+A call evaluates its argument, creates local parameter state, runs the body, and
+returns one result to the suspended caller.
 
 ```{mermaid}
 %%| echo: false
 %%| eval: true
 flowchart LR
-  caller["caller code"] -- arguments --> params["parameters<br/>inside function"]
-  params --> body["function body"]
-  body -- return value --> caller
-  body -. local names stay inside .-> scope["local scope"]
+  A[Caller evaluates argument] --> B[Bind local parameter]
+  B --> C[Run function body]
+  C --> D{Return reached?}
+  D -- Yes --> E[Send value to caller]
+  D -- No, body ends --> F[Send None to caller]
+  E --> G[Caller continues]
+  F --> G
 ```
-
-Read every function by asking: what arguments go in, what local names are used,
-and what value comes back?
 :::
 
-## 1. Defining and calling functions
-
-A function definition starts with `def`:
+## 2. Defining a function does not run its body
 
 ```python
-def greet():
-    print("Hello!")
+def announce_launch():
+    print("Launch sequence started")
+
+
+print("Definition complete")
 ```
 
-This teaches Python a new action named `greet`. It does not run the action yet.
-To run it, call the function with parentheses:
+Only `Definition complete` appears. When Python executes the `def` statement, it
+creates a function object and binds it to `announce_launch`. The indented body is
+stored as the behavior to run later.
+
+Parentheses request a call:
 
 ```python
-greet()
+print("Before call")
+announce_launch()
+print("After call")
 ```
 
-### Example 1
-Predict when `Hello!` will print.
+The order is:
+
+1. display `Before call`;
+2. enter `announce_launch` and display its message;
+3. finish the body and return to the caller; and
+4. display `After call`.
+
+A blank line between the definition and the call is style, not control flow.
+Indentation determines the body; alignment returns to top-level code.
+
+## 3. Parameters receive a fresh call's inputs
 
 ```python
-def greet():
-    print("Hello!")
+def route_label(name):
+    return f"Route: {name}"
 
-print("Before")
-greet()
-print("After")
+
+north_label = route_label("Northern Ridge")
+south_label = route_label("Southern Caves")
 ```
 
-### Step-by-step explanation
+`name` is a **parameter** in the definition. `"Northern Ridge"` and
+`"Southern Caves"` are **arguments** supplied by separate calls. During the
+first call, local `name` refers to the first string. That frame finishes before a
+new frame binds `name` to the second string.
 
-1. `def greet():`
-   - Python records the function definition.
-   - The indented body belongs to the function.
-   - The body does not run yet.
-2. `print("Before")`
-   - Python prints `Before`.
-3. `greet()`
-   - Parentheses mean "call this function now".
-   - Python jumps into the function body and runs `print("Hello!")`.
-4. `print("After")`
-   - After the function call finishes, Python continues with the next line.
-
-### Common mistakes
-
-::: {.callout-warning title="Common mistake"}
-**Mistake: defining a function but never calling it.**
+The parameter name need not match the caller's name:
 
 ```python
-def greet():
-    print("Hello!")
+selected_route = "Moon Pass"
+label = route_label(selected_route)
+assert label == "Route: Moon Pass"
 ```
 
-Nothing prints because the function is only defined. Add `greet()` to call it.
-:::
+Python passes the value produced by evaluating `selected_route`; it does not
+connect the two names permanently. Lesson 2 develops complete binding rules.
 
-::: {.callout-warning title="Common mistake"}
-**Mistake: forgetting parentheses.**
+## 4. Calling and referring to a function are different
 
 ```python
-print(greet)
+def route_count(stops):
+    return len(stops)
+
+
+function_value = route_count
+result_value = route_count(["dock", "ridge"])
+
+assert callable(function_value)
+assert result_value == 2
 ```
 
-This displays information about the function object. Use `greet()` to run the
-function.
-:::
+Without parentheses, `route_count` refers to the function object. With
+parentheses, Python calls it and the expression becomes its returned result.
+Lesson 5 uses function objects as configurable behavior. For now, check whether
+you intend to name the tool or use it.
 
-### Check your understanding
+### Checkpoint: definitions and calls
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "function-def-call-checkpoint",
-  "title": "Defining and calling functions checkpoint",
-  "instructions": "Choose an answer, then check your work.",
+  "id": "unit5-functions-definition-call",
+  "title": "Definition and call checkpoint",
+  "instructions": "Trace when Python creates behavior and when it executes it.",
   "questions": [
     {
-      "id": "definition-runs",
-      "prompt": "What happens when Python reads def greet():?",
-      "options": [
-        "It immediately prints everything inside the function.",
-        "It records the function definition but does not run the body yet.",
-        "It deletes the name greet.",
-        "It converts greet to a string."
-      ],
-      "answer_index": 1,
-      "explanation": "A function body runs when the function is called, not when it is defined."
-    },
-    {
-      "id": "call-syntax",
-      "prompt": "Which code calls the function greet?",
-      "options": [
-        "greet",
-        "def greet():",
-        "greet()",
-        "print(def greet)"
-      ],
-      "answer_index": 2,
-      "explanation": "Parentheses after the function name call the function."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 2. Parameters and arguments
-
-A **parameter** is a name in the function definition. An **argument** is the
-actual value supplied when the function is called.
-
-Think of a function as a form:
-
-- the parameter is the blank line on the form;
-- the argument is what you write in the blank.
-
-### Example 2
-```python
-def greet(name):
-    print(f"Hello, {name}!")
-
-greet("Ada")
-greet("Grace")
-```
-
-### Step-by-step explanation
-
-1. `def greet(name):`
-   - The function needs one piece of information.
-   - Inside the function, that information will be called `name`.
-2. `greet("Ada")`
-   - The argument is `"Ada"`.
-   - During this call, `name` refers to `"Ada"`.
-   - The function prints `Hello, Ada!`.
-3. `greet("Grace")`
-   - This is a separate call.
-   - During this call, `name` refers to `"Grace"`.
-
-### Multiple parameters
-
-```python
-def describe_pet(name, animal):
-    print(f"{name} is a {animal}.")
-
-describe_pet("Milo", "cat")
-```
-
-Arguments are matched to parameters by position unless you use keyword
-arguments:
-
-```python
-describe_pet(animal="dog", name="Rex")
-```
-
-Keyword arguments can make calls easier to read.
-
-### Common mistakes
-
-::: {.callout-warning title="Common mistake"}
-**Mistake: passing the wrong number of arguments.**
-
-```python
-def greet(name):
-    print(f"Hello, {name}!")
-
-greet()
-```
-
-Python raises `TypeError` because `greet` expected one argument and received
-zero.
-:::
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "function-parameters-checkpoint",
-  "title": "Parameters and arguments checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
-    {
-      "id": "parameter-meaning",
-      "prompt": "In def greet(name):, what is name?",
-      "options": [
-        "An argument already fixed to Ada.",
-        "The function's return value.",
-        "A Python keyword.",
-        "A parameter: a local name for an input value."
-      ],
-      "answer_index": 3,
-      "explanation": "Parameters are names listed in the function definition."
-    },
-    {
-      "id": "argument-meaning",
-      "prompt": "In greet(\"Ada\"), what is \"Ada\"?",
-      "options": [
-        "An argument",
-        "A parameter",
-        "A return statement",
-        "A scope error"
-      ],
+      "id": "def-execution",
+      "prompt": "What happens when Python executes a `def` statement?",
+      "options": ["It creates a function object and binds its name without running the body", "It runs the body once and discards it", "It asks the user for arguments", "It converts the body to printed text"],
       "answer_index": 0,
-      "explanation": "Arguments are actual values supplied during a call."
+      "explanation": "The body is recorded as behavior and runs only when a call later requests it."
     },
     {
-      "id": "wrong-number",
-      "prompt": "What error type often appears when a function gets the wrong number of arguments?",
-      "options": [
-        "KeyError",
-        "TypeError",
-        "IndexError",
-        "IndentationError"
-      ],
+      "id": "call-parentheses",
+      "prompt": "Which expression calls `route_count` with one list argument?",
+      "options": ["`route_count`", "`route_count(['dock'])`", "`def route_count`", "`['dock'].route_count`"],
       "answer_index": 1,
-      "explanation": "Python raises TypeError for many function-call shape problems."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 3. Return values
-
-`print()` displays a value for a human. `return` sends a value back to the code
-that called the function.
-
-This difference is one of the most important function ideas.
-
-### Example 3
-```python
-def add(a, b):
-    total = a + b
-    return total
-
-result = add(2, 3)
-print(result)
-```
-
-### Step-by-step explanation
-
-1. `def add(a, b):` defines a function with two parameters.
-2. `result = add(2, 3)` calls the function.
-3. Inside the function, `a` is `2` and `b` is `3`.
-4. `total = a + b` creates `5`.
-5. `return total` sends `5` back to the caller.
-6. `result = ...` stores that returned value in `result`.
-7. `print(result)` displays `5`.
-
-### `return` stops the function
-
-```python
-def sign(number):
-    if number > 0:
-        return "positive"
-    if number < 0:
-        return "negative"
-    return "zero"
-```
-
-Once Python reaches a `return`, the function ends. Later lines in the function
-body do not run for that call.
-
-### Common mistakes
-
-::: {.callout-warning title="Common mistake"}
-**Mistake: printing instead of returning.**
-
-```python
-def add(a, b):
-    print(a + b)
-
-result = add(2, 3)
-print(result)
-```
-
-The first print displays `5`, but `result` is `None` because the function did
-not return a value. Use `return a + b` when the caller needs the result.
-:::
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "function-returns-checkpoint",
-  "title": "Return values checkpoint",
-  "instructions": "Choose an answer, then check your work.",
-  "questions": [
+      "explanation": "Parentheses after the function value perform a call with the enclosed argument."
+    },
     {
-      "id": "return-job",
-      "prompt": "What is the job of return inside a function?",
-      "options": [
-        "Display text on the screen only.",
-        "Create a global variable automatically.",
-        "Send a value back to the caller and end the function call.",
-        "Start a loop."
-      ],
+      "id": "parameter-argument",
+      "prompt": "In `def label(name):` followed by `label('Ada')`, which statement is correct?",
+      "options": ["Both are parameters", "Both are arguments", "`name` is the parameter and `'Ada'` is the argument", "`'Ada'` is the return statement"],
       "answer_index": 2,
-      "explanation": "return provides the function's result to the calling code."
+      "explanation": "Definitions name parameters; calls supply argument values for those parameters."
     },
     {
-      "id": "print-vs-return",
-      "prompt": "If a function only prints a value and has no return, what does it return by default?",
-      "options": [
-        "The printed text",
-        "0",
-        "True",
-        "None"
-      ],
+      "id": "function-reference",
+      "prompt": "What does `tool = route_count` store?",
+      "options": ["The count from an empty route", "The source list", "None", "The function object without calling it"],
       "answer_index": 3,
-      "explanation": "A function with no explicit return value returns None."
+      "explanation": "No parentheses appear, so assignment stores a reference to the callable itself."
     }
   ]
 }
@@ -369,110 +209,405 @@ not return a value. Use `return a + b` when the caller needs the result.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. Scope
-
-**Scope** describes where a variable name can be used. Names created inside a
-function are usually **local** to that function.
-
-### Example 4
-```python
-def calculate_total(price, quantity):
-    total = price * quantity
-    return total
-
-print(calculate_total(4, 3))
-```
-
-Inside the function, `price`, `quantity`, and `total` are local names. They exist
-for the function call. Code outside the function should use the returned value,
-not reach inside for `total`.
-
-### Common mistake
+## 5. A return value remains useful to the caller
 
 ```python
-def calculate_total(price, quantity):
-    total = price * quantity
-    return total
+def distance_status(total):
+    if total >= 20:
+        return "long route"
+    return "short route"
 
-calculate_total(4, 3)
-print(total)
+
+status = distance_status(14)
+assert status == "short route"
 ```
 
-This raises `NameError` because `total` was created inside the function. Fix it
-by storing the returned value:
+`return` performs two actions:
+
+1. it ends the current call; and
+2. it makes the return expression’s value become the value of the call expression.
+
+That value can participate in later work:
 
 ```python
-final_total = calculate_total(4, 3)
-print(final_total)
+assert distance_status(25) == "long route"
+
+statuses = [distance_status(14), distance_status(25)]
+message = f"First expedition: {distance_status(14)}"
+
+assert statuses == ["short route", "long route"]
+assert message == "First expedition: short route"
 ```
 
-### Practice
+A function’s result is more reusable than one hard-coded display.
 
-In Colab, write and test a small function:
+## 6. Printing is an effect; returning is data flow
+
+This function displays a calculation but does not return it:
 
 ```python
-def dollars_to_cents(dollars):
-    return dollars * 100
+def show_total(distances):
+    print(sum(distances))
 
-print(dollars_to_cents(5))
+
+received = show_total([4, 7, 3])
+print("Caller received:", received)
 ```
 
-Then modify one thing at a time:
+The function prints `14`, then the caller displays `Caller received: None`.
+`print()` sends a display representation to a human. Its own return value is
+`None`, and reaching the end of `show_total` also returns `None` implicitly.
 
-1. Change the argument from `5` to `12`.
-2. Store the result in a variable before printing.
-3. Add a second parameter for extra cents.
+A calculation function should normally return the number:
 
-### Check your understanding
+```python
+def calculate_total(distances):
+    return sum(distances)
+
+
+received = calculate_total([4, 7, 3])
+assert received == 14
+```
+
+The caller chooses whether to display, compare, store, or format it:
+
+```python
+print(f"Total: {received} km")
+```
+
+Command-style functions can intentionally return `None` when their contract is an
+effect. The problem is not `None`; the problem is promising useful data and then
+only printing it.
+
+## 7. Falling off the end returns `None`
+
+```python
+def find_first_long_route(routes):
+    for route in routes:
+        if route["distance"] >= 20:
+            return route
+
+
+routes = [{"name": "ridge", "distance": 14}]
+result = find_first_long_route(routes)
+assert result is None
+```
+
+No route matches. The loop finishes and the body ends without an explicit
+`return`, so the call produces `None`.
+
+Make the boundary visible:
+
+```python
+def find_first_long_route(routes):
+    for route in routes:
+        if route["distance"] >= 20:
+            return route
+    return None
+```
+
+The behavior is the same, but the explicit line communicates that no match is an
+expected result rather than an accidental omission.
+
+### Checkpoint: return values and `None`
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "function-scope-checkpoint",
-  "title": "Scope checkpoint",
-  "instructions": "Choose an answer, then check your work.",
+  "id": "unit5-functions-return-none",
+  "title": "Return value checkpoint",
+  "instructions": "Distinguish displayed output from the value received by the caller.",
   "questions": [
     {
-      "id": "local-name",
-      "prompt": "Where can you normally use a variable created inside a function?",
-      "options": [
-        "Inside that function call.",
-        "Anywhere in any future program automatically.",
-        "Only inside comments.",
-        "Only in dictionary keys."
-      ],
+      "id": "return-actions",
+      "prompt": "What does `return value` do?",
+      "options": ["Ends the current call and sends the value to its caller", "Only displays the value", "Restarts the function", "Makes every local name global"],
       "answer_index": 0,
-      "explanation": "Names created inside a function are local unless explicitly returned or otherwise shared."
+      "explanation": "Return completes that frame and makes the call expression evaluate to the returned value."
     },
     {
-      "id": "store-return",
-      "prompt": "How should outside code use a value calculated inside a function?",
-      "options": [
-        "Print a local variable name directly outside the function.",
-        "Return it and store the returned value.",
-        "Depend on Python guessing the name.",
-        "Use indentation only."
-      ],
+      "id": "print-assignment",
+      "prompt": "A function only calls `print(14)` and reaches its end. What does `result = that_function()` bind to?",
+      "options": ["The string `'14'`", "None", "The print function", "A list containing 14"],
       "answer_index": 1,
-      "explanation": "The clean pattern is to return the value, then assign it outside."
+      "explanation": "Displayed output is not returned data; reaching the end returns None."
+    },
+    {
+      "id": "explicit-no-match",
+      "prompt": "Why might a search function end with explicit `return None`?",
+      "options": ["To call the function again", "To convert all records", "To communicate that no match is an expected result", "To print a blank line"],
+      "answer_index": 2,
+      "explanation": "The explicit sentinel makes the no-match contract visible even though falling off the end would also return None."
+    },
+    {
+      "id": "caller-choice",
+      "prompt": "Which design lets the caller store, compare, and later format a total?",
+      "options": ["Print it and return nothing", "Use only a comment", "Bind it to a local name but end without return", "Return the numeric total"],
+      "answer_index": 3,
+      "explanation": "A return value crosses the call boundary and remains available to caller code."
     }
   ]
 }
 </script>
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. `return` stops the current call immediately
+
+```python
+def boarding_message(has_ticket, gate_open):
+    if not has_ticket:
+        return "ticket required"
+    if not gate_open:
+        return "gate closed"
+    return "welcome aboard"
+
+
+assert boarding_message(False, True) == "ticket required"
+assert boarding_message(True, False) == "gate closed"
+assert boarding_message(True, True) == "welcome aboard"
+```
+
+The first satisfied guard returns immediately. Later conditions are not evaluated
+in that call. This flat structure can be clearer than nesting every successful
+step.
+
+Statements after an unconditional return in the same path are unreachable:
+
+```python
+def doubled(number):
+    return number * 2
+    print("This line cannot run")
+```
+
+Python accepts the syntax, but execution leaves before the `print()`. Remove
+unreachable code rather than trusting indentation to make it run.
+
+## 9. Every supported path should honor one result contract
+
+This function mixes a string with an accidental `None`:
+
+```python
+def temperature_label(value):
+    if value < 0:
+        return "freezing"
+    if value > 30:
+        return "hot"
+
+
+assert temperature_label(10) is None
+```
+
+If the contract promises a label for every numeric temperature, add the missing
+middle result:
+
+```python
+def temperature_label(value):
+    if value < 0:
+        return "freezing"
+    if value > 30:
+        return "hot"
+    return "mild"
+
+
+assert temperature_label(-1) == "freezing"
+assert temperature_label(10) == "mild"
+assert temperature_label(31) == "hot"
+```
+
+A deliberate sentinel may still be correct when the domain defines “no result.”
+Consistency means every path matches the stated contract, not that every function
+must return a string.
+
+## 10. Return related values together
+
+A function can return a tuple:
+
+```python
+def route_summary(distances):
+    total = sum(distances)
+    count = len(distances)
+    return total, count
+
+
+total, count = route_summary([4, 7, 3])
+assert (total, count) == (14, 3)
+```
+
+The comma constructs one tuple result, and the caller unpacks its two positions.
+Use this for a small, obvious fixed group. A dictionary with named fields may be
+clearer when there are many results or their roles are easy to confuse.
+
+## 11. Call expressions evaluate from the inside out
+
+```python
+def add_tax(price):
+    return price * 1.08
+
+
+def format_price(price):
+    return f"${price:.2f}"
+
+
+label = format_price(add_tax(10))
+assert label == "$10.80"
+```
+
+Python must know the argument for `format_price`, so it first calls `add_tax(10)`.
+That returns `10.8`; then `format_price(10.8)` runs. Expanded names expose the
+same order:
+
+```python
+taxed_price = add_tax(10)
+label = format_price(taxed_price)
+```
+
+Prefer intermediate names when the values matter during explanation or debugging.
+
+### Checkpoint: paths and call order
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-functions-paths-order",
+  "title": "Return paths and call order checkpoint",
+  "instructions": "Trace which statements execute and what one call ultimately produces.",
+  "questions": [
+    {
+      "id": "early-return",
+      "prompt": "After a return statement executes, what happens to later statements in that call path?",
+      "options": ["They are skipped because the call has ended", "They run before the return value leaves", "They become global", "They run on the next call automatically"],
+      "answer_index": 0,
+      "explanation": "Return immediately completes the current call."
+    },
+    {
+      "id": "missing-middle-path",
+      "prompt": "A label function returns for values below 0 and above 30 but has no final return. What does a value of 10 produce?",
+      "options": ["`'mild'` automatically", "None", "Zero", "The original argument"],
+      "answer_index": 1,
+      "explanation": "The middle path reaches the end and therefore returns None."
+    },
+    {
+      "id": "tuple-return",
+      "prompt": "What does `return total, count` return?",
+      "options": ["Two independent calls", "Only total", "One tuple containing the two values", "A printed sentence"],
+      "answer_index": 2,
+      "explanation": "The comma constructs a tuple that the caller may unpack."
+    },
+    {
+      "id": "nested-call-order",
+      "prompt": "In `format_price(add_tax(10))`, which function body runs first?",
+      "options": ["format_price", "Both simultaneously", "Neither until print", "add_tax"],
+      "answer_index": 3,
+      "explanation": "Python must evaluate the inner call to obtain the outer call's argument."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 12. Build an expedition summary
+
+Complete the contract before opening support:
+
+```python
+def summarize_route(distances):
+    """Return total distance, stop count, and route status."""
+    pass
+
+
+source_route = [4, 7, 3]
+summary = summarize_route(source_route)
+```
+
+The function must:
+
+1. accept one collection of non-negative numeric distances;
+2. return a three-item tuple `(total, count, status)`;
+3. return status `"no route"` for empty input;
+4. otherwise return `"short route"` below 20 total and `"long route"` at least 20;
+5. use early return for the empty case;
+6. not print or mutate the source; and
+7. leave no supported path with an implicit result.
+
+Run:
+
+```python
+assert summary == (14, 3, "short route")
+assert summarize_route([]) == (0, 0, "no route")
+assert summarize_route([20]) == (20, 1, "long route")
+assert summarize_route([0]) == (0, 1, "short route")
+assert source_route == [4, 7, 3]
+```
+
+Then use the returned tuple to build this display **outside** the function:
+
+```text
+3 stops | 14 km | short route
+```
+
+<details>
+<summary>Hint: decide the complete result at each return point</summary>
+
+Handle empty input first with one explicit tuple. For non-empty input, calculate
+total and count, choose status, and return all three values together. Printing
+belongs to the caller.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def summarize_route(distances):
+    """Return total distance, stop count, and route status."""
+    if not distances:
+        return 0, 0, "no route"
+
+    total = sum(distances)
+    count = len(distances)
+    if total >= 20:
+        status = "long route"
+    else:
+        status = "short route"
+    return total, count, status
+
+
+source_route = [4, 7, 3]
+summary = summarize_route(source_route)
+total, count, status = summary
+display = f"{count} stops | {total} km | {status}"
+```
+
+The caller owns presentation, so the returned numbers remain useful for later
+comparisons or calculations.
+
+</details>
+
+## 13. Explain the call boundary
+
+1. What does Python do at the definition, and what waits until a call?
+2. Why is printed output not the return value received by the caller?
+3. When is implicit `None` deliberate, and when does it reveal a missing path?
+4. Why can no statement after an executed `return` affect that call?
+5. In a nested call, why must the inner result exist before the outer body begins?
 
 ## Key points
 
 ::: {.callout-tip title="Key points"}
-- `def` defines a function; parentheses call it.
-- Defining a function does not run its body.
-- Parameters are names in the definition; arguments are values in the call.
-- `return` sends a result back to the caller.
-- `print()` displays; it does not return a useful value by itself.
-- Local variables created inside a function are not automatically available outside.
+- Executing `def` creates and binds a function; calling the function runs its body.
+- Parameters are local input names, while arguments are values evaluated by the
+  caller.
+- `return` ends one call and supplies the call expression’s value.
+- Printing is an observable effect, not a substitute for returning reusable data.
+- Reaching the end returns `None`; make expected no-result behavior explicit.
+- Every supported path should honor one stated result contract.
+- Small tuples can return several closely related results; caller code can unpack
+  and present them.
 :::
 
 ## References
 
-- Python Tutorial: defining functions: https://docs.python.org/3/tutorial/controlflow.html#defining-functions
-- Python Tutorial: more on functions: https://docs.python.org/3/tutorial/controlflow.html#more-on-defining-functions
+- [Python tutorial: defining functions](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+- [Python language reference: function definitions](https://docs.python.org/3/reference/compound_stmts.html#function-definitions)
+- [Python language reference: the `return` statement](https://docs.python.org/3/reference/simple_stmts.html#the-return-statement)
+- [Python built-in function: `callable`](https://docs.python.org/3/library/functions.html#callable)

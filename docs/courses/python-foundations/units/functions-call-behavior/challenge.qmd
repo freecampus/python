@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Build a Reusable Study-Session Analyzer'
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+title: 'Unit Challenge: Unlock the Moonlit Library'
+description: Traverse a nested magical archive with focused functions, a recursive generator, callback-selected clues, and an audited public unlock operation.
 challenge_id: functions-call-behavior.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 2
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,173 +19,548 @@ unit_number: 5
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 5 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Turn a structured-data calculation into focused functions with explicit contracts.
-- **Evidence:** Complete the checks and explain the result in your own words.
+- **Outcome assessed:** Compose clear interfaces, recursive lazy traversal, callback policy, and a metadata-preserving decorator into one reusable archive operation.
+- **Evidence:** Pass 24 progressive assertions, preserve a debugging record, and explain the derived library message.
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
+## 1. Open the archive without hard-coding its answer
 
-Create three reusable functions that summarize valid study-session records and handle empty input deliberately.
+At moonrise, the Moonlit Library rearranges its shelves. Nine readable scrolls
+contain numbered letters. Sealed scrolls are decoys, decorative scrolls have no
+clue, and shelves may contain smaller shelves. Your archive engine must discover
+the message from the data and return the final artifact:
 
-**Scenario:** A study log contains topic and minute records. Other code needs the total time, totals by topic, and the most-studied topic without depending on printed output.
+```text
+MOONLIGHT OPENS THE ARCHIVE
+```
 
-::: {.callout-note title="Work independently, but not without support"}
-This challenge should take about one or two focused hours. Use the starter
-contract, run one group of assertions at a time, and open hints only after you
-can state what evidence is blocking you.
+You will build a small set of cohesive functions rather than one long solution:
+
+1. normalize scroll titles through a keyword-only option;
+2. traverse shelves with a recursive generator;
+3. select scrolls through a predicate callback;
+4. decode ordered clues into one returned word;
+5. compose those steps in one public unlock operation; and
+6. audit that public call with a decorator that preserves its contract.
+
+::: {.callout-note title="Keep the solution closed for the first attempt"}
+Plan for one or two focused hours. Run one assertion group at a time. Open a hint
+only after recording the exact function, input, actual result, and expected
+result that currently disagree.
 :::
 
-## 2. Understand the acceptance example
+## 2. Read the archive shape and constraints
 
-Before writing code, predict the important values and the exact final result.
-For the supplied input, the expected evidence is:
+A node has one of two forms:
 
-`total_minutes` returns `60`, topic totals return `{"loops": 40, "lists": 20}`, and the most-studied topic is `"loops"`.
+- a **shelf** has `kind`, `name`, and `entries`, where every entry is another
+  shelf or scroll;
+- a **scroll** has `kind`, `title`, `sealed`, and `clue`, where a clue is either
+  `(position, letter)` or `None`.
 
-Write your prediction in a notebook text cell or project note. Do not change
-the sample input until the matching assertions pass.
+The traversal order is depth first and left to right. When the current node is a
+scroll, yield it. When it is a shelf, recurse into each entry in order.
 
 ### Constraints
 
-1. Keep each supplied signature and docstring.
-2. Return values rather than printing inside the calculation functions.
-3. Do not mutate `sessions`.
-4. Return `None` from `most_studied_topic` when no sessions exist.
+1. Preserve every supplied public name, signature, and docstring.
+2. Derive the artifact from the archive; do not assign `"MOONLIGHT"` or the
+   solved sentence directly in a function.
+3. Do not mutate the archive or its scroll records.
+4. Keep traversal lazy: `iter_scrolls` and `select_scrolls` must yield values,
+   not build hidden result lists.
+5. Pass a predicate function into `select_scrolls`; do not hard-code the
+   readable-scroll policy inside traversal.
+6. Keep calculation functions free of printing.
+7. The decorator must forward arguments, return the original result, preserve
+   metadata with `wraps`, and append one audit event after a successful call.
+8. Use only the Python standard library; classes, files, and exception handlers
+   are outside this challenge.
 
 ## 3. Start from the contract
 
-Copy this scaffold into the generated notebook or the indicated local project
-files. Preserve the supplied public names and docstrings so the checks can guide
-you.
+Run the data cell unchanged:
 
 ```python
-def total_minutes(sessions):
-    """Return the sum of the minutes in all session records."""
-    raise NotImplementedError
-
-
-def minutes_by_topic(sessions):
-    """Return a dictionary mapping each topic to its total minutes."""
-    raise NotImplementedError
-
-
-def most_studied_topic(sessions):
-    """Return the topic with the largest total, or None for no sessions."""
-    raise NotImplementedError
-
-
-sessions = [
-    {"topic": "loops", "minutes": 25},
-    {"topic": "lists", "minutes": 20},
-    {"topic": "loops", "minutes": 15},
-]
+archive = {
+    "kind": "shelf",
+    "name": "Atrium",
+    "entries": [
+        {
+            "kind": "scroll",
+            "title": " moon map ",
+            "sealed": False,
+            "clue": (0, "M"),
+        },
+        {
+            "kind": "shelf",
+            "name": "East Gallery",
+            "entries": [
+                {
+                    "kind": "scroll",
+                    "title": "Owl Song",
+                    "sealed": False,
+                    "clue": (1, "O"),
+                },
+                {
+                    "kind": "shelf",
+                    "name": "Upper Nook",
+                    "entries": [
+                        {
+                            "kind": "scroll",
+                            "title": "Oracle Note",
+                            "sealed": False,
+                            "clue": (2, "O"),
+                        },
+                        {
+                            "kind": "scroll",
+                            "title": "Counterfeit Omen",
+                            "sealed": True,
+                            "clue": (2, "X"),
+                        },
+                        {
+                            "kind": "scroll",
+                            "title": "North Bell",
+                            "sealed": False,
+                            "clue": (3, "N"),
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            "kind": "shelf",
+            "name": "Lantern Garden",
+            "entries": [
+                {
+                    "kind": "scroll",
+                    "title": "Lantern Leaf",
+                    "sealed": False,
+                    "clue": (4, "L"),
+                },
+                {
+                    "kind": "scroll",
+                    "title": "Idle Decoration",
+                    "sealed": False,
+                    "clue": None,
+                },
+                {
+                    "kind": "shelf",
+                    "name": "Glass Cabinet",
+                    "entries": [
+                        {
+                            "kind": "scroll",
+                            "title": "Ink Index",
+                            "sealed": False,
+                            "clue": (5, "I"),
+                        },
+                        {
+                            "kind": "scroll",
+                            "title": "Glass Glyph",
+                            "sealed": False,
+                            "clue": (6, "G"),
+                        },
+                        {
+                            "kind": "scroll",
+                            "title": "Horizon Hymn",
+                            "sealed": False,
+                            "clue": (7, "H"),
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            "kind": "scroll",
+            "title": "Twilight Key",
+            "sealed": False,
+            "clue": (8, "T"),
+        },
+        {
+            "kind": "scroll",
+            "title": "Sealed Mirror",
+            "sealed": True,
+            "clue": None,
+        },
+    ],
+}
 ```
 
-## 4. Build in small stages
+Then copy the scaffold. Implement the functions in this order; do not change the
+public call shapes.
 
-1. Implement and check `total_minutes` before working on grouped totals.
-2. Build `minutes_by_topic` using a local result dictionary.
-3. Use the grouped totals inside `most_studied_topic` rather than repeating the grouping logic.
-4. Run every function with an empty list and explain each chosen result.
+```python
+from functools import wraps
 
-After each stage, rerun only the smallest relevant check. When it passes, run
-all earlier checks before moving forward.
+
+def normalize_title(title, *, separator="-"):
+    """Return a case-folded title with words joined by separator."""
+    raise NotImplementedError
+
+
+def iter_scrolls(node):
+    """Yield scroll nodes depth first and left to right."""
+    raise NotImplementedError
+
+
+def is_readable(scroll):
+    """Return whether a scroll is unsealed and contains a clue."""
+    raise NotImplementedError
+
+
+def select_scrolls(scrolls, predicate):
+    """Yield scrolls for which predicate(scroll) is true."""
+    raise NotImplementedError
+
+
+def decode_clues(scrolls):
+    """Return clue letters ordered by numeric clue position."""
+    raise NotImplementedError
+
+
+def audit_calls(log):
+    """Return a decorator that appends one event after each successful call."""
+    raise NotImplementedError
+
+
+audit_log = []
+
+
+@audit_calls(audit_log)
+def unlock_archive(archive, *, predicate=is_readable):
+    """Return the decoded word followed by the archive-opening phrase."""
+    raise NotImplementedError
+```
+
+An audit event has exactly these fields:
+
+```python
+{
+    "function": "unlock_archive",
+    "args_count": 1,
+    "keyword_names": [],
+    "result": "MOONLIGHT OPENS THE ARCHIVE",
+}
+```
+
+`keyword_names` is the sorted list of keyword names received by the wrapper.
+
+## 4. Build the engine in observable stages
+
+Use this order so one missing contract does not hide another:
+
+1. Normalize ordinary, irregular-space, and empty titles. An empty title becomes
+   `"untitled"`; do not use the separator as a default title.
+2. Implement the generator's scroll base case. Then delegate shelf entries with
+   a recursive call.
+3. Create a fresh generator and prove partial consumption before converting any
+   complete traversal to a list.
+4. Implement the readable predicate and selector. Keep `predicate(scroll)` in
+   the selector, not inside the traversal function.
+5. Extract clue tuples, sort them by numeric position, and join uppercase letters.
+   An empty input returns the empty string.
+6. Compose a **fresh** traversal and selection in `unlock_archive`. Reusing the
+   exhausted probe will lose scrolls.
+7. Implement the three decorator layers: `audit_calls(log)`,
+   `decorate(function)`, and `wrapper(*args, **kwargs)`.
+8. Call the decorated public operation only after all smaller assertions pass.
+
+Write a short trace for the recursive route from `Atrium` to `Oracle Note`. Mark
+the shelf frame that waits, the smaller entry passed onward, and the scroll that
+is yielded.
 
 ## 5. Run progressive assertions
 
-These checks describe observable behavior. A failed assertion is a
-location signal: read its message, inspect the actual value, and change one
-cause rather than weakening the assertion.
+The 24 numbered assertions are the acceptance contract. Run each group after
+implementing its named behavior; do not weaken an expected value.
+
+### Title and interface evidence
 
 ```python
-assert total_minutes(sessions) == 60
-assert total_minutes([]) == 0
-assert minutes_by_topic(sessions) == {"loops": 40, "lists": 20}
-assert minutes_by_topic([]) == {}
-assert most_studied_topic(sessions) == "loops"
-assert most_studied_topic([]) is None
-assert sessions[0] == {"topic": "loops", "minutes": 25}
+assert callable(normalize_title)                                      # 1
+assert normalize_title.__doc__.startswith("Return a case-folded")     # 2
+assert normalize_title("  Moon   Map  ") == "moon-map"                # 3
+assert normalize_title("Moon Map", separator="_") == "moon_map"      # 4
+assert normalize_title("   ") == "untitled"                          # 5
 ```
 
-::: {.callout-warning title="Do not edit the expected values to create a pass"}
-Change the implementation until the stated behavior is true. If you believe an
-assertion is wrong, explain the contract conflict in writing before changing
-either side.
+### Recursive traversal and source evidence
+
+```python
+import copy
+
+before = copy.deepcopy(archive)
+all_scrolls = list(iter_scrolls(archive))
+
+assert len(all_scrolls) == 12                                         # 6
+assert all_scrolls[0]["title"] == " moon map "                        # 7
+assert all_scrolls[-1]["title"] == "Sealed Mirror"                   # 8
+assert archive == before                                              # 9
+```
+
+### Partial consumption and clean exhaustion
+
+```python
+probe = iter_scrolls(archive)
+assert next(probe)["title"] == " moon map "                           # 10
+assert next(probe)["title"] == "Owl Song"                            # 11
+assert len(list(probe)) == 10                                         # 12
+assert next(probe, "exhausted") == "exhausted"                       # 13
+```
+
+### Callback and decoding evidence
+
+```python
+readable = list(select_scrolls(iter_scrolls(archive), is_readable))
+
+assert len(readable) == 9                                             # 14
+assert all(not scroll["sealed"] and scroll["clue"] for scroll in readable)  # 15
+assert decode_clues(readable) == "MOONLIGHT"                          # 16
+assert decode_clues([]) == ""                                        # 17
+```
+
+### Decorated composition evidence
+
+```python
+assert unlock_archive.__name__ == "unlock_archive"                    # 18
+assert unlock_archive.__doc__.startswith("Return the decoded word")   # 19
+
+artifact = unlock_archive(archive)
+assert artifact == "MOONLIGHT OPENS THE ARCHIVE"                      # 20
+assert len(audit_log) == 1                                            # 21
+assert audit_log[0] == {                                              # 22
+    "function": "unlock_archive",
+    "args_count": 1,
+    "keyword_names": [],
+    "result": "MOONLIGHT OPENS THE ARCHIVE",
+}
+```
+
+### Controlled variation evidence
+
+Seal the first real clue and add an empty shelf. The decoder now returns the
+remaining ordered letters, and the recursive generator must cross the empty
+shelf without yielding a value.
+
+```python
+changed_archive = copy.deepcopy(archive)
+changed_archive["entries"][0]["sealed"] = True
+changed_archive["entries"].append(
+    {"kind": "shelf", "name": "Silent Annex", "entries": []}
+)
+
+changed_artifact = unlock_archive(changed_archive)
+assert changed_artifact == "OONLIGHT OPENS THE ARCHIVE"               # 23
+assert len(audit_log) == 2 and audit_log[-1]["result"] == changed_artifact  # 24
+```
+
+::: {.callout-warning title="Do not turn an exhausted generator into a decoding bug"}
+If a complete result is missing its first letters, check whether exploratory
+`next(...)` calls consumed the same generator. Create a fresh generator for each
+independent complete traversal.
 :::
 
 ## 6. Use the hint ladder only when needed
 
 <details>
-<summary>Hint 1</summary>
+<summary>Hint 1: locate the contract that currently disagrees</summary>
 
-Solve one contract at a time and keep the accumulating result in a local name.
-
-</details>
-
-<details>
-<summary>Hint 2</summary>
-
-Grouped totals use the topic as a dictionary key and add the record minutes to its previous total.
+Write down the function name, input shape, expected returned value, and intended
+side effect. A scroll is the generator's base case. A shelf owns recursive
+progress through its smaller `entries`. Title normalization can split on
+whitespace and join the words without changing the source string.
 
 </details>
 
 <details>
-<summary>Hint 3</summary>
+<summary>Hint 2: follow the boundary between behaviors</summary>
 
-For a non-empty totals dictionary, `max(totals, key=totals.get)` selects the key with the greatest associated value.
+`iter_scrolls` knows nothing about sealed clues. `select_scrolls` calls the
+supplied predicate for every yielded scroll. `decode_clues` receives only the
+selected scrolls, extracts their clue tuples, sorts by position, and joins the
+letters. Use a fresh traversal when composing those stages.
+
+</details>
+
+<details>
+<summary>Hint 3: assemble the decorator and public pipeline</summary>
+
+Pseudocode for the public operation:
+
+```text
+scroll stream = recursively traverse archive
+readable stream = select from scroll stream with predicate
+word = decode readable stream
+return word + opening phrase
+```
+
+The decorator factory returns `decorate`; `decorate` returns a
+`@wraps(function)` wrapper; the wrapper calls with `*args, **kwargs`, stores the
+result, appends the specified event, and returns the unchanged result.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing function assertion. Write the arguments, returned value, expected value, and the single contract statement your change repaired.
+Preserve one failed assertion from before your repair. Do not record only “it did
+not work.” Connect the evidence to one call boundary or state transition.
 
-Use this short record:
-
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+| Failure | Arguments and actual result | Expected contract | Single hypothesis | Controlled change and rerun |
 |---|---|---|---|---|
-| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+| Which numbered assertion failed? | What exact values or error appeared? | What should this function yield, return, preserve, or append? | Which base case, callback, generator state, or wrapper step could explain it? | What one edit did you make, and which earlier checks still pass? |
 
-## 8. Check your understanding
+A useful record might reveal that a probe had already consumed two scrolls, that
+the predicate was called too early, or that the wrapper forgot to return the
+original result. Keep the record even after the complete suite passes.
+
+## 8. Compare with a complete solution
+
+Open this only after making a serious attempt and using the hints in order.
+
+<details class="solution">
+<summary>Show one complete Moonlit Library solution</summary>
+
+```python
+from functools import wraps
+
+
+def normalize_title(title, *, separator="-"):
+    """Return a case-folded title with words joined by separator."""
+    words = title.casefold().split()
+    if not words:
+        return "untitled"
+    return separator.join(words)
+
+
+def iter_scrolls(node):
+    """Yield scroll nodes depth first and left to right."""
+    if node["kind"] == "scroll":
+        yield node
+        return
+
+    for entry in node["entries"]:
+        yield from iter_scrolls(entry)
+
+
+def is_readable(scroll):
+    """Return whether a scroll is unsealed and contains a clue."""
+    return not scroll["sealed"] and scroll["clue"] is not None
+
+
+def select_scrolls(scrolls, predicate):
+    """Yield scrolls for which predicate(scroll) is true."""
+    for scroll in scrolls:
+        if predicate(scroll):
+            yield scroll
+
+
+def decode_clues(scrolls):
+    """Return clue letters ordered by numeric clue position."""
+    clues = []
+    for scroll in scrolls:
+        clues.append(scroll["clue"])
+    clues.sort(key=lambda clue: clue[0])
+    return "".join(letter.upper() for _, letter in clues)
+
+
+def audit_calls(log):
+    """Return a decorator that appends one event after each successful call."""
+    def decorate(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            result = function(*args, **kwargs)
+            event = {
+                "function": function.__name__,
+                "args_count": len(args),
+                "keyword_names": sorted(kwargs),
+                "result": result,
+            }
+            log.append(event)
+            return result
+
+        return wrapper
+
+    return decorate
+
+
+audit_log = []
+
+
+@audit_calls(audit_log)
+def unlock_archive(archive, *, predicate=is_readable):
+    """Return the decoded word followed by the archive-opening phrase."""
+    scrolls = iter_scrolls(archive)
+    selected = select_scrolls(scrolls, predicate)
+    word = decode_clues(selected)
+    return f"{word} OPENS THE ARCHIVE"
+```
+
+</details>
+
+## 9. Predict an alternate library policy
+
+The supplied `is_readable` rejects sealed clues. Try an alternate predicate that
+accepts every scroll containing a clue:
+
+```python
+def has_clue(scroll):
+    return scroll["clue"] is not None
+```
+
+Before calling `unlock_archive(archive, predicate=has_clue)`, predict:
+
+- whether the sealed `Counterfeit Omen` enters the selected stream;
+- where its `(2, "X")` clue appears after stable sorting;
+- the exact decoded word;
+- the new `keyword_names` audit value; and
+- whether the original archive changes.
+
+The extra clue should make the danger of changing policy visible, not merely
+rename the same result. Explain why traversal required no edits.
+
+## 10. Check your understanding
 
 ::: {.quiz-box}
-Answer these questions before recording the challenge. The quiz runs directly
-in your browser.
+Answer from the completed artifact and its traces rather than from the story
+alone.
 :::
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-functions-call-behavior-challenge",
-  "title": "Study-Session Report readiness check",
-  "instructions": "Choose an answer, then check your work.",
+  "title": "Moonlit Library evidence check",
+  "instructions": "Follow the recursive stream, callback policy, and decorated result.",
   "questions": [
     {
-      "id": "return-boundary",
-      "prompt": "Why should total_minutes return a number instead of only printing it?",
-      "options": [
-        "So the function has no inputs.",
-        "So Python skips the calculation.",
-        "So local variables become global.",
-        "So callers can store, compare, test, or format the result."
-      ],
+      "id": "fresh-traversal",
+      "prompt": "Why must `unlock_archive` create a fresh `iter_scrolls(archive)` stream?",
+      "options": ["Fresh generators sort dictionaries", "A generator can contain only one scroll", "Decorators require new global data", "An earlier partially or fully consumed generator would resume late or be exhausted"],
       "answer_index": 3,
-      "explanation": "A return value crosses the function boundary and remains useful to other code."
+      "explanation": "Generator objects own one-pass state; a new call creates a complete traversal from the root."
     },
     {
-      "id": "focused-contract",
-      "prompt": "What makes a function contract focused?",
-      "options": [
-        "It promises one clear behavior for stated inputs and results.",
-        "It performs every program task at once.",
-        "It depends on hidden global state.",
-        "It changes whenever it is called."
-      ],
+      "id": "recursive-base",
+      "prompt": "What is the base case of `iter_scrolls`?",
+      "options": ["A scroll node is yielded without descending into entries", "A shelf sorts all clues", "The audit log has one event", "The title contains a space"],
       "answer_index": 0,
-      "explanation": "A focused contract makes the behavior explainable and independently checkable."
+      "explanation": "A scroll is a leaf in this archive shape and needs no recursive child call."
+    },
+    {
+      "id": "policy-owner",
+      "prompt": "Which component decides whether a sealed clue is accepted?",
+      "options": ["Title normalization", "The predicate passed through `select_scrolls`", "The recursive shelf traversal", "`functools.wraps`"],
+      "answer_index": 1,
+      "explanation": "Traversal yields every scroll; the supplied predicate owns eligibility policy."
+    },
+    {
+      "id": "decorator-result",
+      "prompt": "What must the audit wrapper do after appending its event?",
+      "options": ["Return the audit list instead", "Call the original a second time", "Return the original artifact unchanged", "Exhaust every earlier generator again"],
+      "answer_index": 2,
+      "explanation": "The decorator adds an effect while preserving the public function's returned result."
     }
   ]
 }
@@ -193,25 +568,28 @@ in your browser.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+| Function contracts | Every supplied name, signature, docstring, result, and deliberate side effect matches its promise. |
+| Recursive and lazy behavior | You can trace a nested shelf, partial consumption, resume, and exhaustion. |
+| Callback policy | You can explain why changing the predicate changes selection without changing traversal. |
+| Decorated behavior | Arguments, result, metadata, and one audit event survive the wrapper. |
+| Debugging | One record connects a failed assertion to a specific state or boundary and verified rerun. |
+| Reproducibility | All 24 assertions pass from a clean notebook state with the solution section closed. |
 
 Record completion only when every statement is true:
 
-- [ ] All supplied assertions pass without editing their expected values.
-- [ ] The work runs from a clean notebook state or documented project root.
-- [ ] I can explain the important state changes and boundaries in my own words.
+- [ ] All 24 supplied assertions pass without editing expected values.
+- [ ] The final artifact is derived from archive data rather than assigned directly.
+- [ ] The original archive remains unchanged.
+- [ ] I can explain downward recursive calls and upward yielded/returned values.
+- [ ] I tested one alternate predicate and predicted its effect before running it.
 - [ ] I kept one complete debugging record.
-- [ ] I predicted and verified one controlled modification.
+- [ ] The entire artifact works after restarting and running all cells in order.
 
 This button stores a self-reported marker only in this browser. It does not
 submit the artifact, grade it, verify identity, or issue a certificate.
@@ -228,7 +606,15 @@ submit the artifact, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows the design without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- Focused contracts make a large challenge solvable one returned or yielded value
+  at a time.
+- Recursive traversal follows nested data; generators expose that traversal
+  incrementally.
+- Callback policy belongs outside the traversal, so the same mechanism supports
+  controlled selection changes.
+- Fresh generator objects prevent exploratory consumption from contaminating a
+  complete result.
+- A transparent audit decorator forwards arguments, preserves metadata, records
+  one event, and returns the original artifact.
+- The successful sentence is evidence produced by composition, not a value hidden
+  directly in the implementation.

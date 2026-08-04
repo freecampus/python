@@ -1,6 +1,6 @@
 ---
-title: Functions and Call Behavior Overview
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+title: Building Reusable Functions Overview
+description: Turn working control-flow scripts into named, reusable tools with clear inputs, returned results, controlled effects, and call behavior you can trace.
 course_id: python-foundations
 unit_id: functions-call-behavior
 unit_number: 5
@@ -13,58 +13,281 @@ colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavi
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 5
-- **Estimated time:** 8–16 hours including the challenge
-- **Unit outcome:** Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 45–75 minutes for orientation and readiness work
+- **You will learn:** Read a function as a contract, trace values through calls, and follow the eight-lesson path from ordinary return values to recursive, lazy, and decorated behavior.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. A long script becomes a set of named tools
 
-Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+Unit 4 gave you the control flow to summarize expedition distances:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+```python
+distances = [4, 7, 3]
+total = 0
 
-## 2. Before you start
+for distance in distances:
+    total += distance
 
-**Prior knowledge:** Complete Unit 4 and bring its challenge notes and debugging record.
+message = f"Route total: {total} km"
+print(message)
+```
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+That script works once. A function turns the calculation into a tool that other
+code can call with different routes:
 
-## 3. Lessons
+```python
+def total_distance(distances):
+    """Return the sum of an expedition's distances."""
+    total = 0
+    for distance in distances:
+        total += distance
+    return total
 
-| Step | Lesson | Purpose |
+
+day_one = total_distance([4, 7, 3])
+day_two = total_distance([2, 5])
+
+assert day_one == 14
+assert day_two == 7
+```
+
+The loop still performs the calculation. The new function boundary answers
+additional design questions:
+
+- What input must the caller provide?
+- What result returns to the caller?
+- Which names exist only during one call?
+- Does the function change anything outside itself?
+- Can another function receive, return, pause, or wrap this behavior?
+
+Those questions—not the number of lines—make functions a design tool.
+
+## 2. Read every function as a contract
+
+Use this compact contract before examining the body:
+
+| Contract part | Question | `total_distance` answer |
+|---|---|---|
+| Purpose | What job has this name? | total route distances |
+| Parameters | What must the caller supply? | an iterable of numeric distances |
+| Returned result | What crosses back to the caller? | one numeric total |
+| Side effects | What observable state changes? | none intended |
+| Boundary | What happens for empty input? | returns `0` |
+
+A docstring and annotations may communicate parts of a contract, but the body
+must actually honor it. Assertions provide executable examples:
+
+```python
+assert total_distance([]) == 0
+assert total_distance([5]) == 5
+```
+
+A contract is not a promise that every possible value is valid. It identifies
+the supported inputs and behavior clearly enough that callers can use the
+function and check important boundaries.
+
+## 3. Trace the call, not only the final output
+
+When Python evaluates this line:
+
+```python
+label = f"Distance: {total_distance([4, 7])} km"
+```
+
+several moments occur:
+
+| Moment | Active code | Important state |
 |---:|---|---|
-| 1 | [Defining, Calling, and Returning from Functions](defining-calling-returning.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Parameters and Stable Function Interfaces](parameters-stable-interfaces.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Contracts, Decomposition, and Side Effects](contracts-decomposition-side-effects.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Scope, Name Resolution, and the Call Stack](scope-name-resolution-call-stack.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Recursion and Recursive Tracing](recursion-recursive-tracing.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [Functions as Values and Callbacks](functions-values-callbacks.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 7 | [Iterators, Generators, and Lazy Values](iterators-generators-lazy-values.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 8 | [Decorators That Preserve a Function's Contract](decorators-function-contracts.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 9 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+| 1 | caller | builds argument list `[4, 7]` |
+| 2 | function call | binds that list to local parameter `distances` |
+| 3 | function body | creates and updates local `total` |
+| 4 | `return` | sends `11` to the suspended caller |
+| 5 | caller resumes | formats `"Distance: 11 km"` and binds `label` |
 
-## 4. How to study this unit
+Every call receives its own local frame. Later lessons add enclosing scopes,
+recursive stacks, suspended generator frames, and wrapper calls, but the same
+questions remain useful: what entered, what executed, what changed, and what
+returned where?
 
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
+## 4. Put behavior in a function for a reason
 
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+A function is usually helpful when it provides at least one of these benefits:
+
+- several callers need the same behavior;
+- a meaningful name makes the program easier to read;
+- one responsibility can be checked independently;
+- a changing policy can be supplied as a parameter or callback;
+- a complex script becomes a small composition of explicit steps; or
+- local state should belong to one call rather than the entire program.
+
+Do not create a function only to make every block shorter. This adds a name
+without adding meaning:
+
+```python
+def add_one(number):
+    return number + 1
+```
+
+It may be useful if “advance one game level” is a real reusable rule. It is noise
+if it merely hides an obvious operator used once. Design from responsibility and
+contract, not an arbitrary line limit.
+
+## 5. Your path through this unit
+
+| Lesson | Capability you will build | Main lab artifact |
+|---:|---|---|
+| 1 | [Defining Functions and Returning Useful Results](defining-calling-returning.qmd) — separate definition from execution, return reusable values, and handle every intended path. | Expedition summary |
+| 2 | [Designing Clear Parameters and Calls](parameters-stable-interfaces.qmd) — predict argument binding and design safe positional, keyword, default, and variadic interfaces. | Mission-message builder |
+| 3 | [Breaking a Program into Small Functions](contracts-decomposition-side-effects.qmd) — compose cohesive calculations while keeping printing, mutation, and dependencies explicit. | Expedition report pipeline |
+| 4 | [Following Names Through Function Calls](scope-name-resolution-call-stack.qmd) — trace frames, LEGB lookup, return points, closures, and `nonlocal` state. | Dispatch-center trace |
+| 5 | [Passing Functions as Values](functions-values-callbacks.qmd) — configure reusable processing with callbacks, key functions, factories, and small lambdas. | Tournament leaderboard |
+| 6 | [Solving Smaller Problems with Recursion](recursion-recursive-tracing.qmd) — define base/progress cases and trace results through a nested data shape. | Nested quest archive |
+| 7 | [Producing Values One at a Time](iterators-generators-lazy-values.qmd) — explain one-pass consumption and build finite lazy pipelines with `yield`. | Sensor stream |
+| 8 | [Adding Behavior with Decorators](decorators-function-contracts.qmd) — wrap functions while preserving calls, results, metadata, and stacking order. | Achievement tracker |
+
+The [Unit Challenge](challenge.qmd) asks you to unlock a nested Moonlit Library
+with cohesive functions, a recursive generator, callback selection, and an
+audited unlock operation.
+
+## 6. Unit 4 supplied the bodies
+
+You already know how to:
+
+- choose complete branches;
+- transform, filter, total, count, group, and search in loops;
+- explain `while` progress and stopping;
+- traverse nested data; and
+- build readable comprehensions.
+
+Unit 5 places those algorithms behind explicit call boundaries. The function
+body is not a new universe: parameters become its starting values, local names
+hold its working state, and `return` makes its product available to the caller.
+
+```python
+def accepted_readings(readings):
+    accepted = []
+    for reading in readings:
+        if reading >= 0:
+            accepted.append(reading)
+    return accepted
+
+
+source = [8, -2, 0, 5]
+assert accepted_readings(source) == [8, 0, 5]
+assert source == [8, -2, 0, 5]
+```
+
+## 7. Unit 6 will deepen object sharing
+
+This unit identifies whether a function mutates an input and generally builds
+separate result collections when that keeps the contract simple. [Unit
+6](../mutability-identity-copying/index.qmd) develops the full model of identity,
+aliases, shallow and deep copies, hashability, and mutation across function
+boundaries.
+
+For now, state the effect plainly:
+
+```python
+def add_stamp(stamps):
+    stamps.append("approved")  # Mutates the supplied list.
+
+
+def with_stamp(stamps):
+    return stamps + ["approved"]  # Returns a new outer list.
+```
+
+Neither shape is automatically wrong. The caller must be able to tell which
+contract applies.
+
+## 8. Set up a call laboratory
+
+Use separate cells or sections for definitions, source inputs, calls, and checks:
+
+```python
+# 1. Definitions
+def route_status(stops):
+    if not stops:
+        return "no route"
+    return f"{len(stops)} stops"
+
+
+# 2. Source inputs
+route = ["dock", "ridge", "clinic"]
+
+# 3. Calls and observable results
+status = route_status(route)
+
+# 4. Checks
+assert status == "3 stops"
+assert route == ["dock", "ridge", "clinic"]
+```
+
+Restart and run all before trusting stateful examples. A closure can remember old
+calls, and an iterator can remain partly consumed even when the source code looks
+unchanged. Clean initialization separates a real rule from leftover notebook
+state.
+
+## 9. Choose a realistic pace
+
+Unit 5 is planned for approximately **29–43 hours**, including orientation,
+examples, modifications, checkpoints, eight final labs, and the challenge. The
+range is guidance, not a deadline.
+
+A sustainable rhythm is:
+
+1. state the contract before reading the implementation;
+2. trace one call through binding, body, and return;
+3. change one argument or boundary and update the prediction;
+4. answer a checkpoint without copying its nearby sentence;
+5. build the final lab before opening support; and
+6. rerun stateful closure, recursion, iterator, generator, and decorator examples
+   from clean definitions.
+
+## 10. Check your readiness
+
+Wrap this Unit 4 calculation in a function named `usable_total`:
+
+```python
+readings = [8, -2, 0, 5]
+total = 0
+
+for reading in readings:
+    if reading >= 0:
+        total += reading
+```
+
+Your function must accept a readings collection, return the total of values at
+least zero, return `0` for empty input, and leave its argument unchanged.
+
+```python
+source = [8, -2, 0, 5]
+
+assert usable_total(source) == 13
+assert usable_total([]) == 0
+assert source == [8, -2, 0, 5]
+```
+
+You are ready for Lesson 1 when you can identify the definition, call, argument,
+parameter, local accumulator, and returned result—and explain why no calculation
+runs merely because Python reads `def`.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A function gives behavior a name and a call boundary; it is useful when that
+  boundary communicates a real responsibility.
+- Read purpose, parameters, returned result, side effects, and boundaries as one
+  contract.
+- Trace argument evaluation, binding, local execution, return, and caller
+  resumption separately.
+- Unit 4 control flow becomes function-body behavior; Unit 6 will deepen shared
+  object and mutation mechanics.
+- Restart stateful examples so old calls or partial consumption cannot imitate
+  correct behavior.
 :::
-
-## 5. Unit evidence
-
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
 
 <!-- fcpython-chapter-lab: end -->

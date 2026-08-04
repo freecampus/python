@@ -1,8 +1,8 @@
 ---
-title: Functions as Values and Callbacks
+title: Passing Functions as Values
 lesson_id: functions-call-behavior.functions-values-callbacks
-lesson_order: 60
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+lesson_order: 50
+description: Store, pass, and return functions deliberately; define callback contracts; and configure selection, transformation, and ranking behavior without duplicating traversal.
 course_id: python-foundations
 unit_id: functions-call-behavior
 unit_number: 5
@@ -11,128 +11,174 @@ execute:
 categories:
 - python-foundations
 - functions-call-behavior
-order: 60
+- callbacks
+- higher-order-functions
+order: 50
 colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/functions-values-callbacks.ipynb
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Distinguish a function object from a call result, pass behavior through callback contracts, return configured functions, and choose named functions or lambdas for readability.
 - **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+## 1. Keep one traversal and swap the policy
 
-A traversal algorithm should not need rewriting whenever the caller changes how values are selected, sorted, or transformed. Passing behavior as a value separates mechanism from policy.
-
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
-
-## 1. Read and predict a complete case
+A tournament organizer wants several leaderboards from the same records:
 
 ```python
-def by_minutes(session):
-    return session["minutes"]
-
-
-sessions = [
-    {"topic": "loops", "minutes": 25},
-    {"topic": "lists", "minutes": 40},
+players = [
+    {"name": "Ari", "score": 90, "solved": 5, "active": True},
+    {"name": "Bo", "score": 75, "solved": 7, "active": False},
+    {"name": "Cy", "score": 90, "solved": 6, "active": True},
 ]
-
-selector = by_minutes
-longest = max(sessions, key=selector)
-print(longest["topic"])
 ```
 
-### Step-by-step explanation
+Copying a loop for “active players,” “high scorers,” and “rank by solved
+puzzles” duplicates traversal. Instead, keep the loop stable and supply the part
+that varies as another function.
 
-1. The function definition creates a callable object named `by_minutes`.
-2. Assignment stores that same function object in `selector`; no call happens yet.
-3. `max` calls the selector once for each record.
-4. The record whose key result is `40` wins, so `lists` is displayed.
+This requires precise answers to four questions:
 
-::: {.callout-note title="Make one controlled change"}
-Write `by_topic` returning the topic text and pass it to `sorted`. Predict the alphabetical order.
-:::
+- Is an expression referring to a function or calling it now?
+- What value will the reusable code pass to a callback?
+- What must the callback return?
+- When is a named function clearer than a short `lambda`?
 
-## 2. Investigate the important boundary
-
-`key=by_minutes` passes the function. `key=by_minutes(session)` calls it immediately and passes its result, which is not the callable interface `max` expects.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+## 2. A function definition creates a value
 
 ```python
-def apply_twice(operation, value):
-    """Return the result of applying operation two times."""
-    return operation(operation(value))
+def by_score(player):
+    return player["score"]
 
 
-def add_one(number):
-    return number + 1
+ranking_rule = by_score
 
-
-print(apply_twice(add_one, 3))
+assert callable(by_score) is True
+assert callable(ranking_rule) is True
+assert ranking_rule.__name__ == "by_score"
+assert ranking_rule(players[0]) == 90
 ```
 
-Then complete the learning loop:
+`by_score` without parentheses refers to the function object. Assignment binds
+the same object to another name; it does not run the body. Parentheses in
+`ranking_rule(players[0])` create a call and produce the integer `90`.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+Keep the distinction visible:
 
-<details>
-<summary>Check your practice process</summary>
+| Expression | Meaning | Value produced immediately |
+|---|---|---|
+| `by_score` | refer to behavior | function object |
+| `by_score(players[0])` | run behavior now | `90` |
+| `callable(by_score)` | ask whether object can be called | `True` |
+| `by_score.__name__` | inspect a useful metadata attribute | `"by_score"` |
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+## 3. Pass the function, not its early result
 
-</details>
+`sorted` accepts a `key` callback:
 
-## 4. Check your understanding
+```python
+ranked = sorted(players, key=by_score, reverse=True)
+assert [player["name"] for player in ranked] == ["Ari", "Cy", "Bo"]
+```
+
+Python does not call `by_score` while evaluating `key=by_score`. `sorted` later
+calls it once for each player and uses each returned score as the comparison
+key.
+
+This is a different expression:
+
+```python
+early_result = by_score(players[0])
+assert early_result == 90
+
+# sorted(players, key=early_result)
+```
+
+If the commented call runs, `sorted` eventually tries to call integer `90` and
+raises `TypeError`. The early call replaced behavior with one result.
+
+::: {.concept-diagram}
+The sorting mechanism owns repetition; the callback owns the policy for one
+record.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["sorted receives players"] --> B["calls by_score for each player"]
+  B --> C["callback returns comparison keys"]
+  C --> D["sorted returns reordered records"]
+```
+
+:::
+
+## 4. A callback contract connects two functions
+
+For `sorted(players, key=by_score)`, the contract has two sides:
+
+| Participant | Promise |
+|---|---|
+| `sorted` | Call `key` with one list item; use the returned key for ordering. |
+| `by_score` | Accept one player record; return a comparable score. |
+
+The callback should not expect the complete list because `sorted` supplies one
+item. It should not return a dictionary if those dictionaries have no supported
+ordering. Read callback documentation as an interface between the mechanism and
+the supplied behavior.
+
+Named key functions work with several built-ins:
+
+```python
+best = max(players, key=by_score)
+lowest = min(players, key=by_score)
+
+assert best["name"] == "Ari"
+assert lowest["name"] == "Bo"
+```
+
+Ties retain stable input order in `sorted`. `max` returns the first maximum it
+encounters. Unit 3 introduced sorting behavior; here the new idea is how a
+callable supplies the key.
+
+### Checkpoint: function object or call result
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-functions-values-callbacks",
-  "title": "Functions as Values and Callbacks checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit5-callbacks-values",
+  "title": "Function value checkpoint",
+  "instructions": "Decide whether each expression passes behavior or runs it immediately.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "Why is there no pair of parentheses after `by_minutes` in `key=by_minutes`?",
-      "options": [
-        "`max` needs the function object so it can call it for each candidate.",
-        "Functions can never be called with parentheses.",
-        "The dictionary calls the function automatically.",
-        "Parentheses would convert the function into text."
-      ],
+      "id": "alias-object",
+      "prompt": "What does `ranking_rule = by_score` assign?",
+      "options": ["The function object itself", "The score of every player", "A sorted list", "The text of the function body"],
       "answer_index": 0,
-      "explanation": "Functions are values; passing the function and calling the function are distinct operations."
+      "explanation": "Without call parentheses, the expression refers to the callable object."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "A copied solution whose behavior was not rerun."
-      ],
+      "id": "key-timing",
+      "prompt": "Who calls `by_score` in `sorted(players, key=by_score)`?",
+      "options": ["The assignment statement", "`sorted`, once for each item whose key it needs", "The dictionary constructor", "Nobody; functions cannot be arguments"],
+      "answer_index": 1,
+      "explanation": "The sorting mechanism invokes the supplied key callback with individual records."
+    },
+    {
+      "id": "premature-call",
+      "prompt": "Why is `key=by_score(players[0])` the wrong callback?",
+      "options": ["The first player cannot be ranked", "Key functions must print", "It passes integer 90 rather than callable behavior", "Parentheses are forbidden in arguments"],
       "answer_index": 2,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "The expression calls immediately and supplies its result where `sorted` expects a callable."
+    },
+    {
+      "id": "callback-input",
+      "prompt": "What argument should `by_score` expect when used as this key callback?",
+      "options": ["No arguments", "The final ranked list", "Only a score integer", "One player record"],
+      "answer_index": 3,
+      "explanation": "The mechanism calls the key function with each list item."
     }
   ]
 }
@@ -140,15 +186,418 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 5. Store actions behind stable command names
+
+Functions can be values in collections:
+
+```python
+def cheer(name):
+    return f"Go, {name}!"
+
+
+def welcome(name):
+    return f"Welcome, {name}."
+
+
+commands = {
+    "cheer": cheer,
+    "welcome": welcome,
+}
+
+chosen = commands["cheer"]
+assert chosen("Ari") == "Go, Ari!"
+```
+
+The dictionary stores a small, fixed set of known actions. The string chooses a
+function; a separate call supplies the function argument. Do not turn arbitrary
+user text into executable code. This pattern is useful because the allowed
+commands and their contracts remain explicit.
+
+Every stored function here accepts one name and returns one string. A consistent
+contract lets the caller use the chosen function without a separate call shape
+for every key.
+
+## 6. Write a reusable selector with a predicate callback
+
+A **predicate** returns `True` or `False` for one item:
+
+```python
+def is_active(player):
+    return player["active"]
+
+
+def has_high_score(player):
+    return player["score"] >= 80
+```
+
+One explicit traversal can accept either policy:
+
+```python
+def select_players(players, predicate):
+    """Return players for which predicate(player) is true."""
+    selected = []
+    for player in players:
+        if predicate(player):
+            selected.append(player)
+    return selected
+
+
+active = select_players(players, is_active)
+high_scores = select_players(players, has_high_score)
+
+assert [player["name"] for player in active] == ["Ari", "Cy"]
+assert [player["name"] for player in high_scores] == ["Ari", "Cy"]
+```
+
+`select_players` owns traversal. Each predicate owns one eligibility rule. The
+selector's docstring states exactly how it calls the callback and interprets the
+result.
+
+For a one-off simple condition, a comprehension is direct:
+
+```python
+active_names = [player["name"] for player in players if player["active"]]
+assert active_names == ["Ari", "Cy"]
+```
+
+Callbacks become valuable when callers genuinely need to swap, reuse, or inject
+behavior—not as a requirement to replace every readable loop.
+
+## 7. A transform callback returns a new representation
+
+```python
+def player_label(player):
+    return f'{player["name"]} ({player["score"]})'
+
+
+def transform_players(players, transform):
+    transformed = []
+    for player in players:
+        transformed.append(transform(player))
+    return transformed
+
+
+assert transform_players(players, player_label) == [
+    "Ari (90)",
+    "Bo (75)",
+    "Cy (90)",
+]
+```
+
+The callback contract differs from the predicate contract. A predicate's result
+decides keep/skip. A transform's result becomes one output value. Generic names
+such as `callback` are not enough by themselves; document what its result means.
+
+### Checkpoint: callback contracts
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-callbacks-contracts",
+  "title": "Callback contract checkpoint",
+  "instructions": "Match the supplied behavior to what the reusable mechanism expects.",
+  "questions": [
+    {
+      "id": "predicate-result",
+      "prompt": "What should a predicate passed to `select_players` return for one player?",
+      "options": ["A complete sorted list", "A truth value deciding whether to keep that player", "A function definition string", "A changed global list"],
+      "answer_index": 1,
+      "explanation": "The selector uses each predicate result as its keep-or-skip decision."
+    },
+    {
+      "id": "transform-result",
+      "prompt": "How does `transform_players` use `transform(player)`?",
+      "options": ["As a loop condition only", "As a new callback", "As the next value appended to its result", "As the player's source index"],
+      "answer_index": 2,
+      "explanation": "A transform callback produces the output representation for each input item."
+    },
+    {
+      "id": "command-table",
+      "prompt": "What makes the `commands` dictionary easy for one caller to use?",
+      "options": ["Every function changes global state", "Dictionary keys are Python code", "The actions are called at definition time", "All stored actions share a compatible input/result contract"],
+      "answer_index": 3,
+      "explanation": "A stable shared contract means selection can vary while the call shape remains the same."
+    },
+    {
+      "id": "direct-comprehension",
+      "prompt": "When is a direct comprehension often clearer than introducing a callback processor?",
+      "options": ["When the condition is short, local, and not meant to be swapped", "Whenever data has more than one item", "Only when functions are unavailable", "When arbitrary code must be executed"],
+      "answer_index": 0,
+      "explanation": "Behavior-as-data should solve a real configuration or reuse need rather than add ceremony."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Return a configured function from a factory
+
+Lesson 4 introduced closures. A factory can return a ranking policy that
+remembers configuration:
+
+```python
+def score_with_bonus(bonus_for_solved):
+    def ranking_key(player):
+        return player["score"] + player["solved"] * bonus_for_solved
+
+    return ranking_key
+
+
+plain_score = score_with_bonus(0)
+puzzle_weighted = score_with_bonus(5)
+
+assert plain_score(players[1]) == 75
+assert puzzle_weighted(players[1]) == 110
+```
+
+The outer call chooses a policy setting once. The returned function applies that
+setting to many records:
+
+```python
+ranked = sorted(players, key=puzzle_weighted, reverse=True)
+assert [player["name"] for player in ranked] == ["Cy", "Bo", "Ari"]
+```
+
+This is useful when several functions need separate configurations. A normal
+parameter is simpler when only one direct call needs the setting.
+
+## 9. Use `lambda` for one short readable expression
+
+A lambda expression creates an anonymous function:
+
+```python
+by_name = lambda player: player["name"]
+assert by_name(players[0]) == "Ari"
+
+alphabetical = sorted(players, key=lambda player: player["name"])
+assert [player["name"] for player in alphabetical] == ["Ari", "Bo", "Cy"]
+```
+
+The expression after the colon is returned automatically. A lambda cannot
+contain statements such as an ordinary `for`, `if` statement, assignment, or
+`return` statement. Conditional expressions are possible, but a complicated
+lambda is harder to explain than a named function.
+
+Prefer `def` when behavior:
+
+- needs a descriptive reusable name;
+- takes several steps;
+- benefits from a docstring or annotations;
+- needs separate assertions; or
+- is subtle enough to deserve explanation.
+
+## 10. Read `map` and `filter` without treating them as mandatory
+
+You may encounter callback-oriented built-ins:
+
+```python
+names_from_map = list(map(lambda player: player["name"], players))
+active_from_filter = list(filter(is_active, players))
+
+assert names_from_map == ["Ari", "Bo", "Cy"]
+assert [player["name"] for player in active_from_filter] == ["Ari", "Cy"]
+```
+
+In Python 3, `map` and `filter` return lazy iterators. Lesson 7 explains their
+consumption model. Comprehensions often state simple transformations and
+conditions more directly:
+
+```python
+names = [player["name"] for player in players]
+active = [player for player in players if is_active(player)]
+```
+
+Choose the form that communicates the operation to your readers. Function
+values are a tool for configurable behavior, not a style contest.
+
+## 11. Callback failures reveal a mismatched contract
+
+Three mistakes deserve separate diagnoses:
+
+1. `predicate(player)` was called before it was passed, so the selector receives
+   one Boolean instead of a callable.
+2. A ranking callback returns values that cannot be compared consistently.
+3. A callback expects two parameters, but the mechanism supplies one item.
+
+Do not hide these failures inside a broad `try`/`except`. Read which operation
+tried to call or compare which value. Unit 8 develops systematic error handling;
+here repair the mismatch between the two sides of the callback contract.
+
+## 12. Lab: build a configurable leaderboard
+
+Keep the source records unchanged while swapping eligibility and ranking:
+
+```python
+def active_player(player):
+    """Return whether player is active."""
+    raise NotImplementedError
+
+
+def solved_at_least(minimum):
+    """Return a predicate requiring at least minimum solved puzzles."""
+    raise NotImplementedError
+
+
+def leaderboard(players, eligible, rank_key):
+    """Return eligible player names ordered by descending rank key."""
+    raise NotImplementedError
+```
+
+Use these checks:
+
+```python
+players = [
+    {"name": "Ari", "score": 90, "solved": 5, "active": True},
+    {"name": "Bo", "score": 75, "solved": 7, "active": False},
+    {"name": "Cy", "score": 90, "solved": 6, "active": True},
+    {"name": "Di", "score": 80, "solved": 8, "active": True},
+]
+snapshot = [record.copy() for record in players]
+
+def by_score(player):
+    return player["score"]
+
+
+def by_solved_then_score(player):
+    return player["solved"], player["score"]
+
+
+assert leaderboard(players, active_player, by_score) == ["Ari", "Cy", "Di"]
+at_least_six = solved_at_least(6)
+assert leaderboard(players, at_least_six, by_solved_then_score) == [
+    "Di",
+    "Bo",
+    "Cy",
+]
+assert leaderboard(players, lambda player: True, by_score) == [
+    "Ari",
+    "Cy",
+    "Di",
+    "Bo",
+]
+assert players == snapshot
+assert callable(at_least_six)
+```
+
+The `eligible` callback must accept one record and return a truth value. The
+`rank_key` callback must accept one record and return a comparable key. Stable
+sorting keeps Ari before Cy when their scores tie.
+
+<details>
+<summary>Hint: pass the callbacks onward without calling them too early</summary>
+
+Create a list containing records for which `eligible(player)` is true. Then call
+`sorted(..., key=rank_key, reverse=True)` and extract names from that returned
+list. The predicate factory's nested function compares `player["solved"]` with
+the remembered minimum.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def active_player(player):
+    """Return whether player is active."""
+    return player["active"]
+
+
+def solved_at_least(minimum):
+    """Return a predicate requiring at least minimum solved puzzles."""
+    def eligible(player):
+        return player["solved"] >= minimum
+
+    return eligible
+
+
+def leaderboard(players, eligible, rank_key):
+    """Return eligible player names ordered by descending rank key."""
+    selected = []
+    for player in players:
+        if eligible(player):
+            selected.append(player)
+    ranked = sorted(selected, key=rank_key, reverse=True)
+    return [player["name"] for player in ranked]
+```
+
+</details>
+
+### Checkpoint: factories and readable policies
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-callbacks-policies",
+  "title": "Configurable behavior checkpoint",
+  "instructions": "Choose the design that preserves a clear callback contract.",
+  "questions": [
+    {
+      "id": "factory-timing",
+      "prompt": "What does `solved_at_least(6)` return?",
+      "options": ["A function that remembers minimum 6", "Every matching player immediately", "The integer 6", "A sorted list of names"],
+      "answer_index": 0,
+      "explanation": "The factory call creates and returns configured predicate behavior."
+    },
+    {
+      "id": "lambda-fit",
+      "prompt": "Which use is a good fit for a lambda?",
+      "options": ["A five-step validation algorithm", "A one-off key expression such as `lambda player: player['name']`", "A public function needing documentation", "Behavior with several statements"],
+      "answer_index": 1,
+      "explanation": "A short local expression can remain readable as a lambda."
+    },
+    {
+      "id": "tuple-key",
+      "prompt": "What does `by_solved_then_score` return for ranking?",
+      "options": ["A changed source record", "A callback factory", "A comparable tuple containing solved count then score", "A printed leaderboard"],
+      "answer_index": 2,
+      "explanation": "The tuple gives the sorting mechanism a primary and secondary key."
+    },
+    {
+      "id": "stable-tie",
+      "prompt": "Why does Ari remain before Cy when both have score 90 in the score-only leaderboard?",
+      "options": ["Ari's name is always forced first", "Callbacks reorder ties randomly", "Dictionaries compare their insertion order", "Python sorting is stable and preserves their source order for equal keys"],
+      "answer_index": 3,
+      "explanation": "Equal key values retain the original relative order."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Explain who owns each decision
+
+Using the lab, identify:
+
+1. which function owns traversal;
+2. which callback owns eligibility;
+3. which callback owns ranking;
+4. when the factory runs and when its returned predicate runs; and
+5. why source order still matters for ties.
+
+Then add `by_name_length` as a named key. Do not change `leaderboard`. If the
+new policy works by passing a different function, the mechanism and callback
+contracts are properly separated.
+
 ## Key points
 
 ::: {.callout-tip title="Key points"}
-- A function object can be assigned, stored, passed, and returned.
-- Callbacks let callers supply policy to reusable mechanics.
-- Use a small lambda only when it remains clearer than a named function.
+- A function is a value; parentheses distinguish referring to it from calling it.
+- A callback contract states what the mechanism supplies and what the callback
+  must return.
+- Functions can be assigned, stored in collections, passed to other functions,
+  and returned from factories.
+- Predicates decide keep/skip; transforms produce output values; key functions
+  produce comparison values.
+- Closures can remember callback configuration chosen by a factory call.
+- Use a lambda for one short, local expression and a named function when behavior
+  needs explanation, reuse, or several steps.
+- Prefer a direct loop or comprehension when configurable behavior would only
+  add ceremony.
 :::
 
 ## References
 
-- https://docs.python.org/3/tutorial/controlflow.html#lambda-expressions
-- https://docs.python.org/3/library/functions.html#max
+- [Python data model: callable objects](https://docs.python.org/3/reference/datamodel.html#emulating-callable-objects)
+- [Python built-in function: `sorted`](https://docs.python.org/3/library/functions.html#sorted)
+- [Python built-in functions: `map` and `filter`](https://docs.python.org/3/library/functions.html#map)
+- [Python tutorial: lambda expressions](https://docs.python.org/3/tutorial/controlflow.html#lambda-expressions)

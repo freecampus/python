@@ -561,6 +561,16 @@ def test_selected_lessons_include_mermaid_diagrams() -> None:
         FOUNDATIONS_ROOT / "units/decisions-repetition/for-loop-patterns.qmd",
         FOUNDATIONS_ROOT
         / "units/functions-call-behavior/defining-calling-returning.qmd",
+        FOUNDATIONS_ROOT
+        / "units/functions-call-behavior/scope-name-resolution-call-stack.qmd",
+        FOUNDATIONS_ROOT
+        / "units/functions-call-behavior/functions-values-callbacks.qmd",
+        FOUNDATIONS_ROOT
+        / "units/functions-call-behavior/recursion-recursive-tracing.qmd",
+        FOUNDATIONS_ROOT
+        / "units/functions-call-behavior/iterators-generators-lazy-values.qmd",
+        FOUNDATIONS_ROOT
+        / "units/functions-call-behavior/decorators-function-contracts.qmd",
         FOUNDATIONS_ROOT / "units/collections-iteration/lists.qmd",
         FOUNDATIONS_ROOT / "units/collections-iteration/dictionaries.qmd",
         FOUNDATIONS_ROOT

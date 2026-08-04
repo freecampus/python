@@ -1,104 +1,201 @@
 ---
-title: Parameters and Stable Function Interfaces
+title: Designing Clear Parameters and Calls
 lesson_id: functions-call-behavior.parameters-stable-interfaces
 lesson_order: 20
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+description: Predict how Python binds positional, keyword, default, keyword-only, variadic, and unpacked arguments while designing interfaces that remain readable across repeated calls.
+course_id: python-foundations
+unit_id: functions-call-behavior
+unit_number: 5
 execute:
   echo: true
 categories:
 - python-foundations
 - functions-call-behavior
+- parameters
+- interfaces
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/parameters-stable-interfaces.ipynb
-course_id: python-foundations
-unit_id: functions-call-behavior
-unit_number: 5
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Use docstrings and type hints to communicate how functions should be used.
-- **Practice in:** Google Colab, Jupyter, or VS Code
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 4–5.5 hours
+- **You will learn:** Read function signatures, predict argument binding and call errors, use safe defaults and keyword-only configuration, and unpack or forward arguments deliberately.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. Make configurable calls readable
 
-Use docstrings and type hints to communicate how functions should be used. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
-
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Function Contracts** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
-
-## 2. Docstrings
-
-Document what functions are for, what inputs they expect, and what they return.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A docstring is a label on a tool drawer: it tells the next person what the tool is for before they open it.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A docstring is the first string inside a function and explains its purpose to humans and tools.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+This call is legal but difficult to interpret:
 
 ```python
-def area(width, height):
-    """Return the area of a rectangle."""
-    return width * height
+def mission_message(name, distance, precision, unit, urgent):
+    prefix = "URGENT: " if urgent else ""
+    return f"{prefix}{name}: {distance:.{precision}f} {unit}"
+
+
+message = mission_message("Moon Pass", 12.345, 1, "km", True)
 ```
 
-### Trace it line by line
+Which `1` controls precision? What does `True` mean? A clearer interface separates
+essential data from configuration:
 
-1. `def area(width, height):` — Python creates the function `area`; the indented body runs only when the function is called.
-2. `"""Return the area of a rectangle."""` — This string documents the contract for people and documentation tools.
-3. `return width * height` — Python evaluates the expression and sends that value back to the caller, ending this call.
+```python
+def mission_message(
+    name,
+    distance,
+    *,
+    precision=1,
+    unit="km",
+    urgent=False,
+):
+    prefix = "URGENT: " if urgent else ""
+    return f"{prefix}{name}: {distance:.{precision}f} {unit}"
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
 
-::: {.callout-warning title="Common mistake"}
-A docstring should explain why and what, not repeat every obvious line of code.
-:::
+message = mission_message("Moon Pass", 12.345, urgent=True)
+assert message == "URGENT: Moon Pass: 12.3 km"
+```
 
-### Practice docstrings
+`name` and `distance` may be supplied by position. Parameters after `*` are
+keyword-only, so their meaning appears at every call.
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Docstrings**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+### Questions this lesson will answer
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+- When does Python evaluate arguments, and how are they bound?
+- Which call shapes raise `TypeError` before the body starts?
+- Why can a mutable default remember earlier calls?
+- When do `*args`, `**kwargs`, `*sequence`, and `**mapping` help?
+- What do docstrings and annotations promise—and what do they not enforce?
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+## 2. Python evaluates arguments before the body begins
 
-</details>
+```python
+def announce(value):
+    print("body received", value)
+    return value
 
-### Check your understanding
+
+def prepare():
+    print("argument prepared")
+    return "map"
+
+
+result = announce(prepare())
+```
+
+The output order is:
+
+```text
+argument prepared
+body received map
+```
+
+Python evaluates the argument expression `prepare()` first. Only after it returns
+`"map"` can Python bind local parameter `value` and begin `announce`.
+
+Multiple argument expressions are evaluated left to right:
+
+```python
+def mark(label):
+    print(label)
+    return label
+
+
+def pair(left, right):
+    return left, right
+
+
+result = pair(mark("left"), mark("right"))
+assert result == ("left", "right")
+```
+
+Do not put surprising state changes inside arguments. The evaluation order is
+predictable, but explicit intermediate names are often clearer.
+
+## 3. Positional arguments bind by order
+
+```python
+def describe_stop(name, distance):
+    return f"{name} is {distance} km away"
+
+
+assert describe_stop("Ridge", 7) == "Ridge is 7 km away"
+```
+
+The first argument binds to `name`; the second binds to `distance`. Reversing them
+does not produce a binding error—it produces a nonsensical message:
+
+```python
+assert describe_stop(7, "Ridge") == "7 is Ridge km away"
+```
+
+Python binds by position, not intended meaning. Useful parameter names,
+annotations, and keyword calls help humans detect the mistake.
+
+## 4. Keyword arguments bind by parameter name
+
+```python
+assert describe_stop(distance=7, name="Ridge") == "Ridge is 7 km away"
+```
+
+Keyword arguments can appear in a different order because their labels determine
+binding. Positional arguments must come before ordinary keyword arguments in a
+call:
+
+```python
+assert describe_stop("Ridge", distance=7) == "Ridge is 7 km away"
+```
+
+A value cannot bind the same parameter twice:
+
+```python
+def describe_stop(name, distance):
+    return f"{name} is {distance} km away"
+
+
+# describe_stop("Ridge", name="Cave", distance=7)
+```
+
+If uncommented, Python raises `TypeError` because positional `"Ridge"` already
+bound `name`, then `name="Cave"` tries again. Binding fails before the body runs.
+
+### Checkpoint: argument binding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-function-contracts-docstrings",
-  "title": "Docstrings checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit5-parameters-binding",
+  "title": "Argument binding checkpoint",
+  "instructions": "Predict parameter bindings before considering the function body.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Docstrings?",
-      "options": [
-        "Type hints document expected value types and help tools catch mistakes before runtime.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A docstring is the first string inside a function and explains its purpose to humans and tools.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
-      ],
+      "id": "evaluation-first",
+      "prompt": "In `announce(prepare())`, when does `prepare()` run?",
+      "options": ["Before announce's body so its result can become the argument", "After announce returns", "Only if announce prints", "At function definition time"],
+      "answer_index": 0,
+      "explanation": "Argument expressions must be evaluated before Python can bind parameters and enter the called body."
+    },
+    {
+      "id": "keyword-order",
+      "prompt": "Why can `describe_stop(distance=7, name='Ridge')` reverse the signature order?",
+      "options": ["Strings are always first", "Keyword names determine which parameter receives each value", "Python sorts every argument", "distance has a hidden default"],
+      "answer_index": 1,
+      "explanation": "Explicit keyword labels bind values by parameter name."
+    },
+    {
+      "id": "duplicate-binding",
+      "prompt": "Why does `f(1, value=2)` fail when the first parameter is named `value`?",
+      "options": ["Integers cannot be arguments", "Keywords must be uppercase", "The same parameter receives both a positional and keyword value", "Function bodies cannot use value"],
       "answer_index": 2,
-      "explanation": "A docstring is the first string inside a function and explains its purpose to humans and tools."
+      "explanation": "Python rejects multiple values for one parameter before entering the body."
+    },
+    {
+      "id": "positional-risk",
+      "prompt": "What determines binding for two positional arguments?",
+      "options": ["Their runtime types", "Their variable names in the caller", "Alphabetical order", "Their order in the call relative to the signature"],
+      "answer_index": 3,
+      "explanation": "Positional values bind from left to right to positional parameters."
     }
   ]
 }
@@ -106,73 +203,163 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. Type Hints
+## 5. Call-shape mistakes fail before body execution
 
-Add optional type information to make function contracts clearer.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-Type hints are labels on electrical outlets: they tell you what fits safely before you plug it in.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Type hints document expected value types and help tools catch mistakes before runtime.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+For this definition:
 
 ```python
-def repeat(word: str, times: int) -> str:
-    return word * times
-
-print(repeat("ha", 3))
+def route_label(name, distance):
+    return f"{name}: {distance} km"
 ```
 
-### Trace it line by line
+These commented calls each have a different binding problem:
 
-1. `def repeat(word: str, times: int) -> str:` — Python creates the function `repeat`; the indented body runs only when the function is called.
-2. `return word * times` — Python evaluates the expression and sends that value back to the caller, ending this call.
-3. `print(repeat("ha", 3))` — Python evaluates the arguments and writes their display form to standard output.
+```python
+# route_label("Ridge")
+# route_label("Ridge", 7, "north")
+# route_label("Ridge", miles=7)
+```
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+If run separately, they raise `TypeError` for:
 
-::: {.callout-warning title="Common mistake"}
-Type hints are not automatic runtime conversions. Passing "3" to an int parameter does not magically become 3.
-:::
+1. a missing required `distance` argument;
+2. too many positional arguments; and
+3. an unexpected `miles` keyword.
 
-### Practice type hints
+Read the function name and parameter names in the message. Unit 8 develops a full
+traceback method; here the immediate fact is that no valid local parameter frame
+could be constructed.
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Type Hints**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+## 6. Defaults make an input optional for the caller
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```python
+def route_label(name, distance, unit="km"):
+    return f"{name}: {distance} {unit}"
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
 
-</details>
+assert route_label("Ridge", 7) == "Ridge: 7 km"
+assert route_label("Ridge", 7, "miles") == "Ridge: 7 miles"
+assert route_label("Ridge", 7, unit="m") == "Ridge: 7 m"
+```
 
-### Check your understanding
+The default is used only when the call supplies no value for `unit`. Required
+ordinary parameters must appear before defaulted ones in the definition.
+
+Defaults are part of the public contract. Changing `unit="km"` to `"miles"`
+changes existing calls that omitted that argument even though their code has not
+changed.
+
+## 7. A mutable default remembers earlier calls
+
+Default expressions run once when Python executes the definition:
+
+```python
+def record_stop(stop, log=[]):
+    log.append(stop)
+    return log
+
+
+first = record_stop("dock")
+second = record_stop("ridge")
+
+assert first == ["dock", "ridge"]
+assert second == ["dock", "ridge"]
+assert first is second
+```
+
+Both calls use the same default list. This may surprise callers expecting fresh
+per-call storage.
+
+Use `None` as a sentinel and create the list inside each call:
+
+```python
+def record_stop(stop, log=None):
+    if log is None:
+        log = []
+    log.append(stop)
+    return log
+
+
+first = record_stop("dock")
+second = record_stop("ridge")
+
+assert first == ["dock"]
+assert second == ["ridge"]
+assert first is not second
+```
+
+An explicitly supplied list is still deliberately changed:
+
+```python
+shared_log = []
+result = record_stop("dock", shared_log)
+assert shared_log == ["dock"]
+assert result is shared_log
+```
+
+Unit 6 develops identity and mutation in depth. The interface lesson’s rule is:
+never use a mutable default as accidental per-call state.
+
+## 8. Keyword-only parameters make configuration explicit
+
+```python
+def format_distance(distance, *, precision=1, unit="km"):
+    return f"{distance:.{precision}f} {unit}"
+
+
+assert format_distance(12.345) == "12.3 km"
+assert format_distance(12.345, precision=2) == "12.35 km"
+```
+
+A call such as `format_distance(12.345, 2)` raises `TypeError`; `precision` must be
+named. This is useful when optional values share types or when the call should
+read like configuration.
+
+Avoid “Boolean soup”:
+
+```python
+def report(name, *, uppercase=False, include_count=True):
+    pass
+```
+
+`report("ridge", uppercase=True, include_count=False)` communicates far more than
+`report("ridge", True, False)`.
+
+### Checkpoint: defaults and keyword-only inputs
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-function-contracts-type-hints",
-  "title": "Type Hints checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit5-parameters-defaults-keyword-only",
+  "title": "Defaults and keyword-only checkpoint",
+  "instructions": "Trace repeated calls and decide which interface makes configuration visible.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Type Hints?",
-      "options": [
-        "A docstring is the first string inside a function and explains its purpose to humans and tools.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
-        "Type hints document expected value types and help tools catch mistakes before runtime."
-      ],
+      "id": "default-use",
+      "prompt": "When does a function use a parameter's default value?",
+      "options": ["When the caller does not supply that parameter", "Whenever the argument is zero", "Only on the first call", "After the body returns"],
+      "answer_index": 0,
+      "explanation": "Omission selects the default; explicitly supplied falsy values remain real arguments."
+    },
+    {
+      "id": "mutable-default",
+      "prompt": "Why can `def f(items=[]):` preserve entries between calls?",
+      "options": ["Lists are global by syntax", "The default list is created once when the definition executes", "append creates a new list", "Python caches every return value"],
+      "answer_index": 1,
+      "explanation": "Later omitted arguments bind to the same default object."
+    },
+    {
+      "id": "none-repair",
+      "prompt": "How does a `None` default support fresh per-call list state?",
+      "options": ["None behaves like a list", "It copies every caller object", "The body detects None and creates a new list during that call", "It prevents explicit list arguments"],
+      "answer_index": 2,
+      "explanation": "Per-call initialization occurs inside the body only when no list was supplied."
+    },
+    {
+      "id": "keyword-only-marker",
+      "prompt": "What does `*` mean before `precision` in `def f(value, *, precision=1):`?",
+      "options": ["precision accepts any number of values", "value becomes optional", "All arguments become lists", "precision must be supplied by keyword if supplied"],
       "answer_index": 3,
-      "explanation": "Type hints document expected value types and help tools catch mistakes before runtime."
+      "explanation": "Parameters after the bare star are keyword-only."
     }
   ]
 }
@@ -180,44 +367,323 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. Design a stable signature
+## 9. Read positional-only markers in documentation
 
-A signature tells callers how arguments bind to parameters:
+Some built-ins display `/` in their signature. A small user-defined example is:
 
 ```python
-def format_score(name, score, *, precision=1, suffix="points"):
-    """Return one score label with controlled formatting."""
-    return f"{name}: {score:.{precision}f} {suffix}"
+def percentage(part, whole, /, *, precision=1):
+    value = part / whole * 100
+    return round(value, precision)
 
 
-assert format_score("Ada", 9) == "Ada: 9.0 points"
-assert format_score("Ada", 9, precision=0) == "Ada: 9 points"
+assert percentage(1, 4) == 25.0
+assert percentage(1, 3, precision=2) == 33.33
 ```
 
-`name` and `score` may be positional or keyword arguments. Parameters after `*`
-are keyword-only, making easy-to-confuse configuration explicit at each call.
-Default values are evaluated when the function is defined, so never use a
-mutable default as per-call storage.
+Parameters before `/` are positional-only. `percentage(part=1, whole=4)` would
+raise `TypeError`. Parameters after `*` are keyword-only. The ordinary parameters
+between those markers, if any, may be supplied either way.
 
-Learn ordinary positional, keyword, default, and keyword-only parameters before
-using `*args` and `**kwargs`. Variadic parameters are useful when forwarding a
-genuinely variable interface; they should not erase a small, knowable contract.
+You do not need to make every interface positional-only. Learn to read the marker
+because it appears in Python’s documentation and permits API designers to keep
+some parameter names from becoming caller commitments.
 
-## 5. Integrate the lesson
+## 10. `*args` collects extra positional arguments
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+```python
+def total_distance(*distances):
+    return sum(distances)
 
-## 6. Key points
 
-- **Docstrings:** A docstring is the first string inside a function and explains its purpose to humans and tools.
-- **Type Hints:** Type hints document expected value types and help tools catch mistakes before runtime.
-- A stable signature makes argument binding and configuration explicit to the
-  caller.
-- Avoid mutable defaults and do not use variadic parameters to hide a clear
-  fixed interface.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+assert total_distance() == 0
+assert total_distance(4, 7, 3) == 14
+```
+
+Inside the function, `distances` is a tuple. This interface is honest when any
+number of same-role values makes sense. It would be worse for a fixed record such
+as `(name, distance, unit)`, whose roles deserve explicit names.
+
+Ordinary parameters can come first:
+
+```python
+def route_message(name, *distances):
+    return f"{name}: {sum(distances)} km"
+
+
+assert route_message("ridge", 4, 7) == "ridge: 11 km"
+```
+
+## 11. `**kwargs` collects extra keyword arguments
+
+```python
+def format_tags(**tags):
+    parts = []
+    for key, value in tags.items():
+        parts.append(f"{key}={value}")
+    return ", ".join(parts)
+
+
+assert format_tags(zone="north", status="open") == "zone=north, status=open"
+```
+
+Inside, `tags` is a dictionary. Use this only when a genuinely open set of named
+options is part of the contract or when forwarding another interface. Do not
+replace three known parameters with `**kwargs`; that hides spelling errors and
+removes useful signature guidance.
+
+## 12. Stars at a call unpack existing collections
+
+A star in a call has a different role from a star in a definition:
+
+```python
+def coordinate_label(row, column):
+    return f"({row}, {column})"
+
+
+coordinate = (3, 7)
+assert coordinate_label(*coordinate) == "(3, 7)"
+```
+
+`*coordinate` supplies its items as positional arguments.
+
+Double-star supplies mapping entries as keyword arguments:
+
+```python
+settings = {"precision": 2, "unit": "miles"}
+assert format_distance(12.345, **settings) == "12.35 miles"
+```
+
+Keys must match accepted keyword names. A duplicate still fails:
+
+```python
+# format_distance(12.345, precision=1, **settings)
+```
+
+Here both the explicit keyword and mapping try to bind `precision`.
+
+## 13. Forward arguments without changing their call shape
+
+A small forwarding wrapper can accept and pass through another function’s call:
+
+```python
+def call_and_label(function, *args, **kwargs):
+    result = function(*args, **kwargs)
+    return f"result={result}"
+
+
+assert call_and_label(format_distance, 12.345, precision=2) == "result=12.35 km"
+```
+
+Lesson 8 uses this shape in decorators. Forwarding is a legitimate variadic use
+because the wrapper supports the wrapped callable’s argument interface rather
+than pretending its own domain has unknown fields.
+
+### Checkpoint: variadic and unpacked calls
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-parameters-variadic-unpacking",
+  "title": "Variadic and unpacking checkpoint",
+  "instructions": "Distinguish stars in definitions from stars in calls.",
+  "questions": [
+    {
+      "id": "args-tuple",
+      "prompt": "Inside `def total(*values):`, what is `values`?",
+      "options": ["A tuple of extra positional arguments", "A dictionary", "Only the final argument", "The function's return value"],
+      "answer_index": 0,
+      "explanation": "The variadic positional parameter collects supplied positional values into a tuple."
+    },
+    {
+      "id": "kwargs-dict",
+      "prompt": "Inside `def configure(**options):`, what is `options`?",
+      "options": ["A tuple", "A dictionary of extra keyword arguments", "A set of parameter names", "A string"],
+      "answer_index": 1,
+      "explanation": "Double-star collection creates a dictionary from extra named arguments."
+    },
+    {
+      "id": "call-star",
+      "prompt": "What does `coordinate_label(*(3, 7))` do?",
+      "options": ["Passes the tuple as one argument", "Multiplies the tuple", "Supplies 3 and 7 as separate positional arguments", "Creates keyword arguments"],
+      "answer_index": 2,
+      "explanation": "A star at the call expands iterable items into positional arguments."
+    },
+    {
+      "id": "double-star-call",
+      "prompt": "What must be true for `format_distance(12, **settings)` to bind successfully?",
+      "options": ["settings must be a list", "Every value must be text", "The function must return a dictionary", "The mapping keys must be accepted keyword names without duplicate bindings"],
+      "answer_index": 3,
+      "explanation": "Double-star expansion turns mapping entries into keyword arguments governed by normal binding rules."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 14. Docstrings and annotations communicate; they do not coerce
+
+```python
+def repeat_message(message: str, times: int = 1) -> str:
+    """Return message repeated times times."""
+    return message * times
+
+
+assert repeat_message("ha", 3) == "hahaha"
+```
+
+The docstring explains purpose. Annotations describe intended value roles to
+readers and tools. Python still permits a call such as
+`repeat_message("ha", "3")` to reach the body; annotations do not convert the
+string or automatically reject it. That operation then raises `TypeError`.
+
+Keep the lesson boundary clear:
+
+- Unit 5 uses annotations to make a signature legible.
+- Unit 14 develops annotation design and static checking.
+- Unit 15 develops docstring conventions and API documentation.
+
+You can inspect an interface:
+
+```python
+from inspect import signature
+
+assert str(signature(repeat_message)) == "(message: str, times: int = 1) -> str"
+```
+
+## 15. Build a mission-message interface
+
+Complete this scaffold:
+
+```python
+def build_mission_message(
+    name: str,
+    distance: float,
+    *,
+    precision: int = 1,
+    unit: str = "km",
+    urgent: bool = False,
+    notes=None,
+) -> str:
+    """Return one formatted mission message."""
+    pass
+```
+
+Contract:
+
+1. `name` and `distance` are the essential positional-or-keyword data.
+2. All configuration is keyword-only.
+3. `notes=None` creates fresh per-call notes storage; an explicitly supplied list
+   is read but not changed.
+4. Ignore empty note strings and join non-empty notes with `"; "` after the base
+   message.
+5. Prefix `"URGENT: "` only when requested.
+6. Format distance with the requested precision and unit.
+7. Return the string without printing.
+
+Run:
+
+```python
+assert build_mission_message("Moon Pass", 12.345) == "Moon Pass: 12.3 km"
+assert build_mission_message(
+    "Moon Pass", 12.345, precision=2, unit="miles", urgent=True
+) == "URGENT: Moon Pass: 12.35 miles"
+assert build_mission_message(
+    "Ridge", 7, notes=["windy", "", "bring rope"]
+) == "Ridge: 7.0 km | windy; bring rope"
+assert build_mission_message("Dock", 0, notes=[]) == "Dock: 0.0 km"
+
+notes = ["night route"]
+result = build_mission_message("Cave", 3, notes=notes)
+assert notes == ["night route"]
+assert result.endswith(" | night route")
+```
+
+Then call it with:
+
+```python
+mission_data = ("Garden", 5.5)
+mission_options = {"precision": 0, "urgent": True}
+```
+
+Use both unpacking operators and prove the result is
+`"URGENT: Garden: 6 km"`.
+
+<details>
+<summary>Hint: separate binding from message assembly</summary>
+
+Treat `notes is None` as no notes for this call. Build a list of non-empty note
+strings without changing the supplied collection. Assemble the base string,
+optional urgent prefix, and optional notes suffix in named stages.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def build_mission_message(
+    name: str,
+    distance: float,
+    *,
+    precision: int = 1,
+    unit: str = "km",
+    urgent: bool = False,
+    notes=None,
+) -> str:
+    """Return one formatted mission message."""
+    if notes is None:
+        notes = []
+
+    kept_notes = []
+    for note in notes:
+        if note:
+            kept_notes.append(note)
+
+    prefix = "URGENT: " if urgent else ""
+    message = f"{prefix}{name}: {distance:.{precision}f} {unit}"
+    if kept_notes:
+        message += " | " + "; ".join(kept_notes)
+    return message
+
+
+mission_data = ("Garden", 5.5)
+mission_options = {"precision": 0, "urgent": True}
+unpacked_message = build_mission_message(*mission_data, **mission_options)
+```
+
+The function does not mutate an explicit notes list. The `None` sentinel still
+makes the absence of notes distinct from a shared mutable default.
+
+</details>
+
+## 16. Explain the interface
+
+1. When are argument expressions evaluated relative to the body?
+2. Which calls bind by order, and which bind by parameter name?
+3. Why is a mutable default shared, and how does `None` change the timing?
+4. How do `*` and `**` differ in definitions and calls?
+5. What do annotations communicate without enforcing at runtime?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Python evaluates arguments, binds parameters, and only then begins the body.
+- Positional values bind by order; keyword values bind by name; duplicate,
+  missing, extra, or unexpected bindings raise `TypeError`.
+- Defaults are evaluated at definition time. Use a sentinel for fresh mutable
+  per-call state.
+- Keyword-only parameters make configuration visible; positional-only markers
+  commonly appear in built-in documentation.
+- `*args` and `**kwargs` collect variable arguments in definitions; `*iterable`
+  and `**mapping` expand arguments at calls.
+- Docstrings and annotations communicate the interface but do not perform runtime
+  conversion or validation.
+:::
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: default argument values](https://docs.python.org/3/tutorial/controlflow.html#default-argument-values)
+- [Python tutorial: keyword and special parameters](https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments)
+- [Python tutorial: unpacking argument lists](https://docs.python.org/3/tutorial/controlflow.html#unpacking-argument-lists)
+- [Python standard library: `inspect.signature`](https://docs.python.org/3/library/inspect.html#inspect.signature)

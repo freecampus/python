@@ -122,8 +122,9 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         ),
         (
             "functions-call-behavior",
-            "Functions and Call Behavior",
-            "design function contracts and trace values through calls",
+            "Building Reusable Functions",
+            "design, compose, and trace functions with explicit inputs, results, "
+            "scope, and reusable behavior",
         ),
         (
             "mutability-identity-copying",

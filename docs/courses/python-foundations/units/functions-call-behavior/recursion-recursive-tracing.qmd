@@ -1,132 +1,191 @@
 ---
-title: Recursion and Recursive Tracing
+title: Solving Smaller Problems with Recursion
 lesson_id: functions-call-behavior.recursion-recursive-tracing
-lesson_order: 50
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+lesson_order: 60
+description: Recognize recursively shaped data, write reachable base and progress cases, trace calls and returning results, and choose a loop when the problem is naturally flat.
+course_id: python-foundations
+unit_id: functions-call-behavior
+unit_number: 5
 execute:
   echo: true
 categories:
 - python-foundations
 - functions-call-behavior
-order: 50
+- recursion
+- tracing
+order: 60
 colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/recursion-recursive-tracing.ipynb
-course_id: python-foundations
-unit_id: functions-call-behavior
-unit_number: 5
 ---
 ::: {.lesson-meta}
-- **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Trace recursive progress and pass functions as configurable behavior.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Match recursion to nested data, define base and smaller-problem cases, trace frame creation and return unwinding, and compare recursion with iteration.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. Nested quests contain smaller quests
 
-Recursion calls the same function on a smaller problem and requires a reachable base case. Functions are also values: `sorted(key=...)` receives behavior without calling it in advance.
+A flat list has one level. A quest tree can contain branches that contain more
+branches:
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+```python
+quest = {
+    "name": "Moon Gate",
+    "reward": 1,
+    "children": [
+        {"name": "River Key", "reward": 3, "children": []},
+        {
+            "name": "Old Tower",
+            "reward": 2,
+            "children": [
+                {"name": "Star Lens", "reward": 5, "children": []},
+            ],
+        },
+    ],
+}
+```
+
+Every node has the same shape: a name, a reward, and a list of child nodes. A
+child is itself a quest tree. That recursive data definition suggests a
+recursive function: solve one node, then ask the same function to solve each
+smaller child.
+
+This lesson answers:
+
+- What stops a recursive chain of calls?
+- How does each call make the remaining problem smaller?
+- Why do returned results move in the opposite direction from calls?
+- When is an ordinary loop the clearer tool?
+
+## 2. Write the stopping case before the recursive case
+
+A recursive function needs two connected promises:
+
+1. **Base case:** solve a smallest input without another recursive call.
+2. **Recursive case:** reduce a larger input to one or more smaller inputs and
+   combine their results.
+
+For a countdown:
+
+```python
+def countdown(number):
+    if number <= 0:          # base case
+        return ["launch"]
+    rest = countdown(number - 1)  # smaller problem
+    return [number] + rest
+
+
+assert countdown(3) == [3, 2, 1, "launch"]
+assert countdown(0) == ["launch"]
+```
+
+`number <= 0` is reachable because every recursive call subtracts one. The
+function does not wait for a depth error to stop it; the contract deliberately
+defines a smallest supported case.
+
+Countdown is useful for tracing, but a loop is simpler for real flat countdowns.
+Nested trees provide the stronger motivation later in the lesson.
+
+## 3. Calls move down; results return up
+
+In `countdown(3)`, the first call cannot finish `[3] + rest` until
+`countdown(2)` produces `rest`. Each caller waits with a partly completed
+expression.
+
+::: {.concept-diagram}
+Calls descend toward the base case. Finished values then return toward the
+original caller.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A["countdown 3 waits"] -->|"call with 2"| B["countdown 2 waits"]
+  B -->|"call with 1"| C["countdown 1 waits"]
+  C -->|"call with 0"| D["base returns launch list"]
+  D -->|"return upward"| E["build 1 then launch"]
+  E -->|"return upward"| F["build 2, 1, then launch"]
+  F -->|"return upward"| G["build 3, 2, 1, then launch"]
+```
+
 :::
 
-## 2. Read and trace a complete case
+The frames are separate:
+
+| Active call | Local `number` | Suspended work | Child result arrives as |
+|---|---:|---|---|
+| `countdown(3)` | 3 | `[3] + rest` | `[2, 1, "launch"]` |
+| `countdown(2)` | 2 | `[2] + rest` | `[1, "launch"]` |
+| `countdown(1)` | 1 | `[1] + rest` | `["launch"]` |
+| `countdown(0)` | 0 | none; base case | returns `["launch"]` |
+
+Only after the deepest result exists can the waiting calls finish in reverse
+order.
+
+## 4. A numeric return trace exposes suspended expressions
 
 ```python
-def total_minutes(node):
-    if isinstance(node, int):
-        return node
-    return sum(total_minutes(child) for child in node)
-print(total_minutes([25, [10, 15], 20]))
-```
-
-### What Python does
-
-1. Integers are base cases.
-2. Lists trigger recursive calls on smaller nodes.
-3. Results combine as frames return.
-
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
-
-```python
-def countdown(number):
+def recursive_sum(number):
     if number == 0:
-        return
-    countdown(number)
+        return 0
+    return number + recursive_sum(number - 1)
+
+
+assert recursive_sum(4) == 10
 ```
 
-A focused repair is:
+Expand calls without skipping the return direction:
 
-```python
-def countdown(number):
-    if number <= 0:
-        return
-    countdown(number - 1)
+```text
+recursive_sum(4)
+4 + recursive_sum(3)
+4 + (3 + recursive_sum(2))
+4 + (3 + (2 + recursive_sum(1)))
+4 + (3 + (2 + (1 + recursive_sum(0))))
+4 + (3 + (2 + (1 + 0)))
+10
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+Each local `number` remains in its own waiting frame. There is no global
+accumulator. The final value is assembled from returned child values.
 
-## 4. Practice from trace to transfer
-
-1. Trace `factorial(4)` as frames and returns.
-2. Compare iterative and recursive solutions for flat data.
-3. Sort records with a named key function.
-
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
-
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
-
-</details>
-
-## 5. Check your understanding
+### Checkpoint: base cases and progress
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-recursion-and-functions-as-values",
-  "title": "Recursion and Functions as Values checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit5-recursion-progress",
+  "title": "Recursive progress checkpoint",
+  "instructions": "Identify the stopping rule and the strictly smaller problem.",
   "questions": [
     {
-      "id": "base",
-      "prompt": "What does a base case do?",
-      "options": [
-        "Stops recursion",
-        "Sorts input",
-        "Creates globals",
-        "Catches all errors"
-      ],
+      "id": "countdown-base",
+      "prompt": "What is the base case in `countdown`?",
+      "options": ["When `number <= 0`, return the launch list without another call", "Whenever a list has three items", "After Python raises an error", "When the caller prints"],
       "answer_index": 0,
-      "explanation": "It terminates recursive calls."
+      "explanation": "The explicit smallest case returns directly and stops adding frames."
     },
     {
-      "id": "progress",
-      "prompt": "What must recursion do?",
-      "options": [
-        "Keep input unchanged",
-        "Move toward the base case",
-        "Use lambda",
-        "Print every value"
-      ],
+      "id": "countdown-progress",
+      "prompt": "Why can `countdown(number - 1)` eventually reach the base case for a positive integer?",
+      "options": ["Lists stop recursion automatically", "Each call reduces `number` by one", "Every return becomes global", "Python guesses the final value"],
       "answer_index": 1,
-      "explanation": "The problem must become smaller."
+      "explanation": "The recursive argument is measurably smaller on every call."
     },
     {
-      "id": "key",
-      "prompt": "What does `key=` receive?",
-      "options": [
-        "A called result",
-        "A module path",
-        "A function returning comparison keys",
-        "Only a bool"
-      ],
+      "id": "waiting-frame",
+      "prompt": "What is `recursive_sum(3)` waiting to receive from `recursive_sum(2)`?",
+      "options": ["A new function definition", "The global number 3", "The returned sum for the smaller problem", "A printed traceback"],
       "answer_index": 2,
-      "explanation": "Sorted calls the function for items."
+      "explanation": "The caller suspends its addition until the child call returns a value."
+    },
+    {
+      "id": "return-direction",
+      "prompt": "In what order do finished results travel after the base case?",
+      "options": ["Directly to every frame at once", "Only toward deeper calls", "In random frame order", "Back through waiting callers in reverse call order"],
+      "answer_index": 3,
+      "explanation": "The newest active call returns first, allowing its caller to resume."
     }
   ]
 }
@@ -134,14 +193,409 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 5. A leaf is the base case in a tree
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+A leaf node has no children. Counting leaves follows the shape directly:
+
+```python
+def count_leaves(node):
+    if node["children"] == []:
+        return 1
+
+    total = 0
+    for child in node["children"]:
+        total += count_leaves(child)
+    return total
+
+
+assert count_leaves(quest) == 2
+```
+
+Line by line:
+
+1. A leaf returns `1` without another call.
+2. A branch creates local `total = 0` for that call.
+3. Each child is a smaller tree with the same structure.
+4. Each child count returns to the waiting parent frame.
+5. The parent combines child results and returns its subtotal.
+
+No child call edits a hidden shared counter. Separate returned subtotals make the
+flow observable and keep repeated calls independent.
+
+## 6. Include the current node when totaling rewards
+
+```python
+def total_reward(node):
+    total = node["reward"]
+    for child in node["children"]:
+        total += total_reward(child)
+    return total
+
+
+assert total_reward(quest) == 11
+```
+
+The current node contributes before the recursive loop. A leaf naturally works:
+its child loop runs zero times, then its own reward returns. This design does not
+need a separate leaf branch because the empty loop already supplies the base
+behavior.
+
+Both styles are valid:
+
+- `count_leaves` has an explicit leaf base case because a leaf contributes the
+  distinct value `1`;
+- `total_reward` uses an empty child list as an implicit no-more-calls boundary
+  and always returns the current reward plus child totals.
+
+## 7. Return paths instead of relying on global history
+
+Finding a target must distinguish “found here,” “found below,” and “not found”:
+
+```python
+def find_quest_path(node, target):
+    if node["name"] == target:
+        return [node["name"]]
+
+    for child in node["children"]:
+        child_path = find_quest_path(child, target)
+        if child_path is not None:
+            return [node["name"]] + child_path
+
+    return None
+
+
+assert find_quest_path(quest, "Star Lens") == [
+    "Moon Gate",
+    "Old Tower",
+    "Star Lens",
+]
+assert find_quest_path(quest, "Missing") is None
+```
+
+When a child finds the target, its path returns upward. Each parent prepends its
+own name. If all children return `None`, this call also returns `None`. Early
+return stops searching sibling branches after a match.
+
+### Checkpoint: combining nested results
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-recursion-trees",
+  "title": "Nested tree checkpoint",
+  "instructions": "Trace one node and the results returned by its children.",
+  "questions": [
+    {
+      "id": "leaf-count",
+      "prompt": "What does `count_leaves` return for a node whose children list is empty?",
+      "options": ["The node name", "1", "None", "The complete tree"],
+      "answer_index": 1,
+      "explanation": "One leaf contributes one to its parent's count."
+    },
+    {
+      "id": "local-subtotal",
+      "prompt": "How does a branch compute its leaf total?",
+      "options": ["By changing one hidden global", "By counting only its own name", "By adding the values returned for its child trees", "By printing every leaf"],
+      "answer_index": 2,
+      "explanation": "The parent combines independent results returned by smaller recursive calls."
+    },
+    {
+      "id": "missing-path",
+      "prompt": "When does `find_quest_path` return `None` for a branch?",
+      "options": ["As soon as it has children", "Only after a global error", "Whenever reward is zero", "After neither the branch nor any child contains the target"],
+      "answer_index": 3,
+      "explanation": "The sentinel reports that the complete subtree was searched without a match."
+    },
+    {
+      "id": "path-upward",
+      "prompt": "How does `Moon Gate` appear at the front of the returned path to `Star Lens`?",
+      "options": ["Its waiting frame prepends its name to the successful child path", "The leaf edits every parent dictionary", "Python sorts node names", "A global path is reused"],
+      "answer_index": 0,
+      "explanation": "Each returning parent adds its own contribution to the child result."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Empty, one-child, and deep branches test the contract
+
+Small shapes reveal missing cases:
+
+```python
+quiet_room = {"name": "Quiet Room", "reward": 0, "children": []}
+one_path = {
+    "name": "Gate",
+    "reward": 1,
+    "children": [quiet_room],
+}
+
+assert count_leaves(quiet_room) == 1
+assert total_reward(quiet_room) == 0
+assert count_leaves(one_path) == 1
+assert total_reward(one_path) == 1
+assert find_quest_path(one_path, "Quiet Room") == ["Gate", "Quiet Room"]
+```
+
+An empty **children collection** is different from an absent root node. These
+functions require one valid node as their input. If the application permits
+`None` as “no tree,” that additional boundary must be stated and handled
+explicitly rather than guessed inside every recursive call.
+
+## 9. Two recursion failures have different causes
+
+No reachable base case:
+
+```python
+def broken_countdown(number):
+    # return broken_countdown(number - 1)
+    return "The commented call would never test a stopping condition."
+```
+
+No progress toward the base case:
+
+```python
+def unchanged_countdown(number):
+    if number <= 0:
+        return "launch"
+    # return unchanged_countdown(number)
+    return "The commented call repeats the same positive problem."
+```
+
+If the recursive lines are used, calls continue until Python raises
+`RecursionError` after too many nested frames. The error is a safety symptom,
+not a stopping strategy. Repair the algorithm by proving that every supported
+path reaches a base case through smaller work.
+
+Also check that branch recursion actually receives `child`, not the unchanged
+parent `node`.
+
+## 10. Prefer a loop when the data is naturally flat
+
+The recursive countdown can be written directly:
+
+```python
+def countdown_with_loop(number):
+    values = []
+    while number > 0:
+        values.append(number)
+        number -= 1
+    values.append("launch")
+    return values
+
+
+assert countdown_with_loop(3) == [3, 2, 1, "launch"]
+```
+
+The loop uses one function frame and matches the flat sequence. Python does not
+automatically replace tail recursion with a loop, and recursion depth is limited.
+Choose recursion when the problem or data is recursively shaped and the base/
+smaller-case explanation is clearer. Choose iteration for straightforward flat
+repetition.
+
+## 11. A recursive generator can yield leaves later
+
+Lesson 7 develops generators fully. For now, notice how `yield from` can delegate
+to each smaller tree:
+
+```python
+def leaf_names(node):
+    if not node["children"]:
+        yield node["name"]
+        return
+
+    for child in node["children"]:
+        yield from leaf_names(child)
+
+
+assert list(leaf_names(quest)) == ["River Key", "Star Lens"]
+```
+
+The recursive shape is the same as `count_leaves`; instead of returning a total,
+the function produces leaf names one at a time. The next lesson explains when
+the body starts, where it pauses, and what exhaustion means.
+
+## 12. Lab: map a nested quest tree
+
+Implement three focused recursive functions:
+
+```python
+def count_leaves(node):
+    """Return the number of nodes that have no children."""
+    raise NotImplementedError
+
+
+def total_reward(node):
+    """Return this node's reward plus every descendant reward."""
+    raise NotImplementedError
+
+
+def find_quest_path(node, target):
+    """Return root-to-target names, or None when target is absent."""
+    raise NotImplementedError
+```
+
+Use this richer tree and preserve it:
+
+```python
+quest = {
+    "name": "Moon Gate",
+    "reward": 1,
+    "children": [
+        {"name": "River Key", "reward": 3, "children": []},
+        {
+            "name": "Old Tower",
+            "reward": 2,
+            "children": [
+                {"name": "Star Lens", "reward": 5, "children": []},
+                {"name": "Empty Loft", "reward": 0, "children": []},
+            ],
+        },
+    ],
+}
+
+import copy
+
+before = copy.deepcopy(quest)
+assert count_leaves(quest) == 3
+assert total_reward(quest) == 11
+assert find_quest_path(quest, "Moon Gate") == ["Moon Gate"]
+assert find_quest_path(quest, "Star Lens") == [
+    "Moon Gate",
+    "Old Tower",
+    "Star Lens",
+]
+assert find_quest_path(quest, "Empty Loft") == [
+    "Moon Gate",
+    "Old Tower",
+    "Empty Loft",
+]
+assert find_quest_path(quest, "Missing") is None
+assert quest == before
+```
+
+Write the base behavior in words first. During one trace, record the node name,
+the active local subtotal or child path, and the value returned to the parent.
+
+<details>
+<summary>Hint: let each child return a complete result for its own subtree</summary>
+
+For totals, begin with this node's contribution and add the result of each child
+call. For path search, return immediately when the current name matches; otherwise
+ask each child and prepend the current name only to a non-`None` path.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def count_leaves(node):
+    """Return the number of nodes that have no children."""
+    if not node["children"]:
+        return 1
+
+    total = 0
+    for child in node["children"]:
+        total += count_leaves(child)
+    return total
+
+
+def total_reward(node):
+    """Return this node's reward plus every descendant reward."""
+    total = node["reward"]
+    for child in node["children"]:
+        total += total_reward(child)
+    return total
+
+
+def find_quest_path(node, target):
+    """Return root-to-target names, or None when target is absent."""
+    if node["name"] == target:
+        return [node["name"]]
+
+    for child in node["children"]:
+        child_path = find_quest_path(child, target)
+        if child_path is not None:
+            return [node["name"]] + child_path
+    return None
+```
+
+</details>
+
+### Checkpoint: recursion or iteration
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-recursion-fit",
+  "title": "Recursive fit checkpoint",
+  "instructions": "Choose the form that matches the problem shape and stopping evidence.",
+  "questions": [
+    {
+      "id": "flat-countdown",
+      "prompt": "Which implementation is usually clearer for an ordinary flat countdown in Python?",
+      "options": ["A loop with an explicit changing counter", "Recursion with no base case", "A global list changed forever", "Repeatedly calling the same unchanged input"],
+      "answer_index": 0,
+      "explanation": "Flat sequential repetition maps directly to a loop and one frame."
+    },
+    {
+      "id": "tree-fit",
+      "prompt": "Why is recursion a natural fit for the quest tree?",
+      "options": ["Dictionaries force recursion", "Each child is a smaller value with the same tree shape", "Loops cannot read names", "Rewards are always integers"],
+      "answer_index": 1,
+      "explanation": "The data's own definition repeats at smaller child nodes."
+    },
+    {
+      "id": "recursion-error",
+      "prompt": "What does `RecursionError` usually reveal in these examples?",
+      "options": ["The correct base result", "Successful source preservation", "Too many nested calls, often because stopping or progress is wrong", "Automatic conversion to iteration"],
+      "answer_index": 2,
+      "explanation": "The depth failure is evidence to inspect the base case and recursive argument."
+    },
+    {
+      "id": "yield-preview",
+      "prompt": "What does `yield from leaf_names(child)` delegate?",
+      "options": ["Global name lookup", "Dictionary mutation", "Sorting policy", "Production of values from the child's recursive generator"],
+      "answer_index": 3,
+      "explanation": "Delegation relays each value produced while traversing the smaller child tree."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Explain both directions of the computation
+
+Use the lab to tell two stories:
+
+1. **Downward:** which smaller child reaches each new frame, and why will a base
+   case eventually occur?
+2. **Upward:** what exact subtotal or path returns to the parent, and how does the
+   parent combine it?
+
+Then add a new three-level branch and predict all three results before running.
+If you can only explain the final number, expand a small call tree again.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Recursion fits a problem that contains smaller instances of the same problem.
+- A base case returns without another recursive call; a recursive case must make
+  measurable progress toward it.
+- Every call has a separate frame and may wait for a smaller call's result.
+- Calls move toward the base case; combined results return through callers in the
+  opposite direction.
+- Return child subtotals or paths instead of relying on a hidden global
+  accumulator.
+- Check empty and leaf shapes, one-child branches, absent targets, and deeper
+  nesting.
+- Prefer iteration when the work is naturally flat and a loop states it more
+  directly.
+:::
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: defining functions](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+- [Python language reference: function calls](https://docs.python.org/3/reference/expressions.html#calls)
+- [Python exception reference: `RecursionError`](https://docs.python.org/3/library/exceptions.html#RecursionError)

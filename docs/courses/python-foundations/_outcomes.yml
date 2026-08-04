@@ -1,5 +1,5 @@
 schema_version: 1
-curriculum_version: 9
+curriculum_version: 10
 course_id: python-foundations
 graduate_outcomes:
   learn-independently: Use prediction, clean execution, documentation, deliberate practice, and responsible AI assistance to learn from evidence.
@@ -89,7 +89,7 @@ units:
     challenge_id: decisions-repetition.challenge
   - number: 5
     id: functions-call-behavior
-    outcome: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+    outcome: Design, call, compose, and trace reusable functions with clear parameters, returned results, documented contracts, and controlled side effects; pass behavior as data; and explain how recursive, lazy, closure-based, and decorated calls progress and finish.
     graduate_outcome_ids:
       - design-abstractions
       - trace-and-explain
@@ -98,8 +98,8 @@ units:
       - functions-call-behavior.parameters-stable-interfaces
       - functions-call-behavior.contracts-decomposition-side-effects
       - functions-call-behavior.scope-name-resolution-call-stack
-      - functions-call-behavior.recursion-recursive-tracing
       - functions-call-behavior.functions-values-callbacks
+      - functions-call-behavior.recursion-recursive-tracing
       - functions-call-behavior.iterators-generators-lazy-values
       - functions-call-behavior.decorators-function-contracts
     challenge_id: functions-call-behavior.challenge

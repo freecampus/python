@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 9
+curriculum_version: 10
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -9,13 +9,13 @@ courses:
     status: available
     pathway: both
     lesson_count: 89
-    estimated_effort: 180–275 hours
+    estimated_effort: 200–305 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 9
+      curriculum_version: 10
       rule_version: 9
       recognition: local-self-reported
       lesson_ids:
@@ -57,8 +57,8 @@ courses:
         - functions-call-behavior.parameters-stable-interfaces
         - functions-call-behavior.contracts-decomposition-side-effects
         - functions-call-behavior.scope-name-resolution-call-stack
-        - functions-call-behavior.recursion-recursive-tracing
         - functions-call-behavior.functions-values-callbacks
+        - functions-call-behavior.recursion-recursive-tracing
         - functions-call-behavior.iterators-generators-lazy-values
         - functions-call-behavior.decorators-function-contracts
         - mutability-identity-copying.equality-identity-references
@@ -130,7 +130,7 @@ courses:
           unit_id: decisions-repetition
           path: courses/python-foundations/units/decisions-repetition/challenge.qmd
         - id: functions-call-behavior.challenge
-          title: Build a Reusable Study-Session Analyzer
+          title: Unlock the Moonlit Library
           unit_id: functions-call-behavior
           path: courses/python-foundations/units/functions-call-behavior/challenge.qmd
         - id: mutability-identity-copying.challenge
@@ -206,7 +206,7 @@ courses:
         kind: instructional
       - number: 5
         id: functions-call-behavior
-        title: Functions and Call Behavior
+        title: Building Reusable Functions
         directory: courses/python-foundations/units/functions-call-behavior
         lesson_count: 8
         kind: instructional

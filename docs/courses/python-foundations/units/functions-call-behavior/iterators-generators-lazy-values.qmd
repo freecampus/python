@@ -1,104 +1,159 @@
 ---
-title: Iterators, Generators, and Lazy Values
+title: Producing Values One at a Time
 lesson_id: functions-call-behavior.iterators-generators-lazy-values
 lesson_order: 70
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+description: Trace iterable and iterator state, build finite generators that pause and resume, and compose lazy pipelines whose consumers can stop early.
+course_id: python-foundations
+unit_id: functions-call-behavior
+unit_number: 5
 execute:
   echo: true
 categories:
 - python-foundations
 - functions-call-behavior
+- iterators
+- generators
 order: 70
 colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/iterators-generators-lazy-values.ipynb
-course_id: python-foundations
-unit_id: functions-call-behavior
-unit_number: 5
 ---
 ::: {.lesson-meta}
-- **Level:** Intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Understand iteration and produce values lazily with generators.
-- **Practice in:** VS Code, Jupyter, or Colab
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 4–5.5 hours
+- **You will learn:** Distinguish reusable iterables from stateful iterators, predict partial consumption and exhaustion, and write finite generator functions, expressions, delegation, and lazy pipelines.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. Sometimes the caller needs only the next useful reading
 
-Understand iteration and produce values lazily with generators. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
+Suppose a remote sensor collected many values, but an alert needs only the first
+three readings above a threshold. Building every transformed result first can do
+unnecessary work. An iterator lets the consumer ask for one value at a time and
+stop early.
 
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Iterables and Generators** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
+This lesson separates several related terms:
 
-## 2. Iterables and Iterators
+- an **iterable** can provide an iterator;
+- an **iterator** remembers its current consumption position;
+- a **generator function** defines paused production with `yield`;
+- a **generator object** is the stateful iterator returned by calling that
+  function; and
+- a **generator expression** creates a compact lazy transformation.
 
-Understand objects that can be looped over and the mechanism that produces one item at a time.
+The important question is not merely “is this lazy?” It is: which object owns
+the current position, when does code run, and what happens after exhaustion?
 
-::: {.callout-tip title="A useful analogy—and its limit"}
-An iterator is a bookmark moving through a book one page at a time.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** An iterable can provide an iterator; an iterator remembers where it is in a sequence of values.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+## 2. A list is iterable; `iter` creates an iterator
 
 ```python
-numbers = iter([10, 20, 30])
-print(next(numbers))
-print(next(numbers))
+readings = [12, 18, 25]
+cursor = iter(readings)
+
+assert iter(cursor) is cursor
+assert next(cursor) == 12
+assert next(cursor) == 18
+assert next(cursor) == 25
 ```
 
-### Trace it line by line
+The list stores all three values and can create iterators. `cursor` is one
+iterator with a current position. Each `next(cursor)` returns the next item and
+advances that position.
 
-1. `numbers = iter([10, 20, 30])` — Python evaluates the right-hand expression and binds or updates `numbers` with the result.
-2. `print(next(numbers))` — Python evaluates the arguments and writes their display form to standard output.
-3. `print(next(numbers))` — Python evaluates the arguments and writes their display form to standard output.
+A `for` loop performs this protocol for you: it gets an iterator, requests next
+values, and stops normally when the iterator signals that no value remains.
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+## 3. Exhaustion is persistent
 
-::: {.callout-warning title="Common mistake"}
-An iterator can be consumed. If it is exhausted, looping over it again may produce nothing.
-:::
+After the third item, another plain `next(cursor)` raises `StopIteration`. Keep
+that failing call commented in the normal lesson run:
 
-### Practice iterables and iterators
+```python
+# next(cursor)
+```
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Iterables and Iterators**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+`next` also accepts a default result:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```python
+assert next(cursor, "no reading") == "no reading"
+assert next(cursor, "still empty") == "still empty"
+```
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+Exhaustion does not rewind the iterator. Once consumed, it stays consumed. A
+`for` loop catches the stop signal internally; ordinary application code rarely
+calls `StopIteration` handling directly.
 
-</details>
+## 4. Collections restart; iterator objects continue
 
-### Check your understanding
+Two loops over the list each start from a newly created iterator:
+
+```python
+readings = [12, 18, 25]
+assert [value for value in readings] == [12, 18, 25]
+assert [value for value in readings] == [12, 18, 25]
+```
+
+Two loops over the same iterator share its progress:
+
+```python
+cursor = iter(readings)
+first = next(cursor)
+remaining = [value for value in cursor]
+after_exhaustion = [value for value in cursor]
+
+assert first == 12
+assert remaining == [18, 25]
+assert after_exhaustion == []
+```
+
+Create independent positions by calling `iter` on the collection twice:
+
+```python
+left = iter(readings)
+right = iter(readings)
+
+assert next(left) == 12
+assert next(left) == 18
+assert next(right) == 12
+```
+
+The list is shared source data, but each iterator remembers its own position.
+
+### Checkpoint: iterator state
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-iterables-and-generators-iterables-and-iterators",
-  "title": "Iterables and Iterators checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit5-iterators-state",
+  "title": "Iterator state checkpoint",
+  "instructions": "Track the position owned by each iterator object.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Iterables and Iterators?",
-      "options": [
-        "A generator produces values one at a time, pausing between yields.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
-        "An iterable can provide an iterator; an iterator remembers where it is in a sequence of values."
-      ],
+      "id": "iterable-list",
+      "prompt": "What does `iter(readings)` create from the list?",
+      "options": ["An iterator with its own current position", "A permanently changed list", "The final sum", "A function definition"],
+      "answer_index": 0,
+      "explanation": "The iterable supplies an iterator that will yield its items in sequence."
+    },
+    {
+      "id": "next-effect",
+      "prompt": "What changes after `next(cursor)` returns a value?",
+      "options": ["The source list loses that value", "The iterator advances its remembered position", "Every iterator advances", "The caller becomes a generator"],
+      "answer_index": 1,
+      "explanation": "Consumption state belongs to that iterator, not to every possible iterator over the collection."
+    },
+    {
+      "id": "next-default",
+      "prompt": "What does `next(cursor, 'empty')` return after cursor is exhausted?",
+      "options": ["The first item again", "The cursor object", "The supplied string `empty`", "A new list"],
+      "answer_index": 2,
+      "explanation": "The default form returns the fallback instead of exposing `StopIteration`."
+    },
+    {
+      "id": "independent-position",
+      "prompt": "Why can `right` still return 12 after `left` has returned 12 and 18?",
+      "options": ["Integers copy the loop", "`next` runs randomly", "The list was rebuilt automatically", "`left` and `right` are separate iterators with separate positions"],
       "answer_index": 3,
-      "explanation": "An iterable can provide an iterator; an iterator remembers where it is in a sequence of values."
+      "explanation": "Each iterator tracks consumption independently even though both read the same list."
     }
   ]
 }
@@ -106,79 +161,134 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. Generators
+## 5. Calling a generator function does not run its body yet
 
-Write functions that yield values lazily instead of returning a complete collection.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A generator is a vending machine: it gives one item when asked, not the whole warehouse.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A generator produces values one at a time, pausing between yields.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+A function containing `yield` is a generator function:
 
 ```python
 def countdown(start):
+    print("generator body started")
     while start > 0:
         yield start
         start -= 1
 
-for number in countdown(3):
-    print(number)
+
+numbers = countdown(3)
 ```
 
-### Trace it line by line
+The assignment creates a generator object. It prints nothing yet. The first
+request begins execution:
 
-1. `def countdown(start):` — Python creates the function `countdown`; the indented body runs only when the function is called.
-2. `while start > 0:` — Python evaluates the condition before each iteration and runs the body only while it is true.
-3. `yield start` — Python pauses this generator and produces one value while preserving its current state.
-4. `start -= 1` — Python evaluates the right-hand expression and binds or updates `start -` with the result.
-5. `for number in countdown(3):` — Python takes the next item from the iterable, binds the loop name, and runs the indented body.
-6. `print(number)` — Python evaluates the arguments and writes their display form to standard output.
+```python
+assert next(numbers) == 3
+```
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+At that point Python:
 
-::: {.callout-warning title="Common mistake"}
-yield pauses the function; return ends it. Use yield when callers should receive a sequence over time.
+1. creates local `start = 3` for this generator call;
+2. prints the start message;
+3. reaches `yield start`;
+4. produces `3`; and
+5. suspends the frame before `start -= 1`.
+
+The call and first execution are separate moments. This timing is one of the
+most important differences between an ordinary function call and a generator
+function call.
+
+## 6. `yield` pauses without discarding local state
+
+The next request resumes after the earlier `yield`:
+
+```python
+assert next(numbers) == 2
+assert next(numbers) == 1
+assert next(numbers, "done") == "done"
+```
+
+Before yielding `2`, the resumed body executes `start -= 1`, changing the
+remembered local value from `3` to `2`. A later request repeats that sequence.
+
+::: {.concept-diagram}
+One generator object keeps its suspended frame between requests.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+stateDiagram-v2
+  [*] --> Created
+  Created --> Running: first next request
+  Running --> Suspended: yield one value
+  Suspended --> Running: next request resumes
+  Running --> Suspended: yield another value
+  Running --> Exhausted: return or body ends
+  Exhausted --> [*]
+```
+
 :::
 
-### Practice generators
+A normal function loses its ordinary frame after returning. A generator frame
+is deliberately retained while suspended, including local values and the next
+instruction position.
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Generators**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+## 7. `return` ends production; `yield` produces a stream item
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```python
+def limited_steps(limit):
+    step = 1
+    while step <= limit:
+        yield step
+        step += 1
+    return
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
 
-</details>
+assert list(limited_steps(3)) == [1, 2, 3]
+assert list(limited_steps(0)) == []
+```
 
-### Check your understanding
+Each `yield` contributes an item visible to ordinary iteration. Reaching `return`
+or the end signals exhaustion. Python generators can attach a value to
+`StopIteration`, but ordinary `for` and `list(...)` consumption does not treat
+that value as another yielded item. Foundations code should return only to stop
+unless a specialized protocol explicitly needs more.
+
+Make finite boundaries clear. This course avoids an unbounded generator unless
+the consumer has an equally visible limit.
+
+### Checkpoint: generator timing
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-iterables-and-generators-generators",
-  "title": "Generators checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit5-generators-timing",
+  "title": "Generator timing checkpoint",
+  "instructions": "Separate object creation, body execution, suspension, and exhaustion.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Generators?",
-      "options": [
-        "A generator produces values one at a time, pausing between yields.",
-        "An iterable can provide an iterator; an iterator remembers where it is in a sequence of values.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
-      ],
+      "id": "call-body",
+      "prompt": "What happens when `numbers = countdown(3)` runs?",
+      "options": ["All values print immediately", "A generator object is created without starting the body", "Only the final value is returned", "The list `[3, 2, 1]` is stored"],
+      "answer_index": 1,
+      "explanation": "Calling a generator function prepares suspended iteration; the first request starts the body."
+    },
+    {
+      "id": "yield-pause",
+      "prompt": "Where is execution suspended after the generator yields 3?",
+      "options": ["Before entering the function", "After the function frame is deleted", "At the yield point, before the following decrement", "Inside the source list"],
+      "answer_index": 2,
+      "explanation": "The generator preserves both its frame and the exact resume position."
+    },
+    {
+      "id": "resume-value",
+      "prompt": "Why does the second `next(numbers)` return 2?",
+      "options": ["The first yield changed the source list", "Python sorts yielded values", "A new generator starts at 2", "The suspended frame resumes, decrements its remembered `start`, then yields again"],
+      "answer_index": 3,
+      "explanation": "Resume continues after the previous yield with local state intact."
+    },
+    {
+      "id": "return-stop",
+      "prompt": "What does bare `return` do inside `limited_steps`?",
+      "options": ["Ends production without yielding another item", "Restarts the generator", "Returns the generator's source collection", "Makes every earlier item reusable"],
       "answer_index": 0,
-      "explanation": "A generator produces values one at a time, pausing between yields."
+      "explanation": "Return finishes the generator; yielded values are the ordinary stream items."
     }
   ]
 }
@@ -186,17 +296,301 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. Integrate the lesson
+## 8. `yield from` delegates to another iterable
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+Without delegation, a generator can relay items with a nested loop:
 
-## 5. Key points
+```python
+def flatten_groups(groups):
+    for group in groups:
+        for item in group:
+            yield item
+```
 
-- **Iterables and Iterators:** An iterable can provide an iterator; an iterator remembers where it is in a sequence of values.
-- **Generators:** A generator produces values one at a time, pausing between yields.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+`yield from` expresses the relay directly:
+
+```python
+def flatten_groups(groups):
+    for group in groups:
+        yield from group
+
+
+groups = [["red", "blue"], [], ["silver"]]
+assert list(flatten_groups(groups)) == ["red", "blue", "silver"]
+```
+
+When a group is empty, delegation produces no values and continues. In the
+recursive `leaf_names` preview, `yield from leaf_names(child)` delegates to a
+child generator rather than materializing its entire result first.
+
+## 9. Generator expressions are lazy comprehensions
+
+Square brackets create a list immediately. Parentheses create a generator
+expression:
+
+```python
+readings = [12, 18, 25, 30]
+
+eager = [value * 2 for value in readings]
+lazy = (value * 2 for value in readings)
+
+assert eager == [24, 36, 50, 60]
+assert next(lazy) == 24
+assert list(lazy) == [36, 50, 60]
+```
+
+The partial `next` consumed the first lazy result. Converting the same generator
+to a list continues from its current position; it does not repeat `24`.
+
+Use a list when the complete result will be reused, indexed, or measured. Use an
+iterator when one-pass incremental consumption is the desired contract.
+
+## 10. Consumers can stop a lazy source early
+
+`any` and `all` short-circuit. They stop as soon as the answer is known:
+
+```python
+def observed(values):
+    for value in values:
+        print("checked", value)
+        yield value
+
+
+has_large = any(value > 20 for value in observed([4, 25, 100]))
+assert has_large is True
+```
+
+The generator does not need to check `100` because `25 > 20` already makes
+`any(...)` true. Similar early stopping happens with `next` and bounded tools
+such as `itertools.islice`.
+
+Lazy execution changes timing: errors and side effects inside production occur
+when a consumer requests the relevant value, not necessarily when the generator
+object is created. Prefer generators that yield data without surprising effects;
+the `print` above exists only to reveal timing.
+
+## 11. Build a pipeline from small lazy stages
+
+```python
+def above_threshold(values, threshold):
+    for value in values:
+        if value >= threshold:
+            yield value
+
+
+def to_fahrenheit(celsius_values):
+    for value in celsius_values:
+        yield value * 9 / 5 + 32
+
+
+source = [12, 18, 25, 30]
+usable = above_threshold(source, 18)
+converted = to_fahrenheit(usable)
+
+assert next(converted) == 64.4
+assert list(converted) == [77.0, 86.0]
+```
+
+The first request flows through both stages only until one output is available.
+The pipeline resumes from its shared positions later. A stage should document
+that its input is consumed; passing the same iterator elsewhere means those
+consumers share progress.
+
+## 12. Shared consumers can surprise each other
+
+```python
+source = iter([10, 20, 30, 40])
+
+assert next(source) == 10
+assert list(source) == [20, 30, 40]
+assert next(source, None) is None
+```
+
+If two functions receive `source`, whichever consumes first determines what the
+other sees. To repeat work, keep a restartable collection or call a generator
+factory again:
+
+```python
+def reading_source():
+    yield from [10, 20, 30, 40]
+
+
+assert list(reading_source()) == [10, 20, 30, 40]
+assert list(reading_source()) == [10, 20, 30, 40]
+```
+
+Each function call returns a new generator object with new state.
+
+### Checkpoint: pipelines and exhaustion
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-generators-pipelines",
+  "title": "Lazy pipeline checkpoint",
+  "instructions": "Follow which consumer has requested which values.",
+  "questions": [
+    {
+      "id": "generator-expression-rest",
+      "prompt": "After `next(lazy)` returns 24, what does `list(lazy)` contain?",
+      "options": ["Every result including 24", "An error because partial use is forbidden", "Only the remaining results 36, 50, and 60", "The original source values"],
+      "answer_index": 2,
+      "explanation": "The generator expression continues from its current one-pass position."
+    },
+    {
+      "id": "short-circuit",
+      "prompt": "Why can `any(value > 20 for value in source)` stop after seeing 25?",
+      "options": ["25 is the last possible value", "The source list is deleted", "Generators always produce two items", "One true item already determines the result of `any`"],
+      "answer_index": 3,
+      "explanation": "The consumer requests only as much input as it needs to determine its answer."
+    },
+    {
+      "id": "fresh-factory",
+      "prompt": "How can code obtain a fresh pass over values produced by `reading_source`?",
+      "options": ["Call `reading_source()` again to create a new generator", "Call `next` on the exhausted object", "Rename the exhausted object", "Return its previous last item"],
+      "answer_index": 0,
+      "explanation": "A new generator-function call creates a new generator object and frame."
+    },
+    {
+      "id": "yield-from",
+      "prompt": "What does `yield from group` do in `flatten_groups`?",
+      "options": ["Yields the group list as one value only", "Relays each value from that iterable before continuing", "Sorts the group", "Restarts all earlier groups"],
+      "answer_index": 1,
+      "explanation": "Delegation forwards the sub-iterable's values through the outer generator."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Lab: stream usable sensor readings
+
+Build a finite source and two lazy stages:
+
+```python
+def sensor_readings(values):
+    """Yield each supplied sensor value in order."""
+    raise NotImplementedError
+
+
+def valid_readings(values, *, minimum=0, maximum=100):
+    """Yield values inside the inclusive supported range."""
+    raise NotImplementedError
+
+
+def changes(values):
+    """Yield each difference from the previous value."""
+    raise NotImplementedError
+```
+
+Use progressive consumption checks:
+
+```python
+source_values = [-5, 10, 14, 200, 20, 20]
+stream = sensor_readings(source_values)
+
+assert iter(stream) is stream
+assert next(stream) == -5
+assert next(stream) == 10
+assert list(stream) == [14, 200, 20, 20]
+assert next(stream, "exhausted") == "exhausted"
+
+fresh = sensor_readings(source_values)
+usable = valid_readings(fresh, minimum=0, maximum=100)
+assert next(usable) == 10
+assert list(usable) == [14, 20, 20]
+assert list(usable) == []
+
+pipeline = changes(valid_readings(sensor_readings(source_values)))
+assert next(pipeline) == 4
+assert list(pipeline) == [6, 0]
+assert source_values == [-5, 10, 14, 200, 20, 20]
+assert list(valid_readings([], minimum=0, maximum=100)) == []
+```
+
+`changes` needs one previous valid value before it can yield a difference. An
+empty or one-item input therefore yields no differences. Do not build hidden
+intermediate lists in these functions.
+
+<details>
+<summary>Hint: keep only the state each stage needs</summary>
+
+The source yields each input directly. The validator yields only values inside
+both boundaries. In `changes`, obtain the first item with
+`next(iterator, sentinel)`, then loop over the remaining items, yield
+`current - previous`, and update `previous`.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def sensor_readings(values):
+    """Yield each supplied sensor value in order."""
+    yield from values
+
+
+def valid_readings(values, *, minimum=0, maximum=100):
+    """Yield values inside the inclusive supported range."""
+    for value in values:
+        if minimum <= value <= maximum:
+            yield value
+
+
+def changes(values):
+    """Yield each difference from the previous value."""
+    iterator = iter(values)
+    missing = object()
+    previous = next(iterator, missing)
+    if previous is missing:
+        return
+
+    for current in iterator:
+        yield current - previous
+        previous = current
+```
+
+</details>
+
+After all assertions pass, predict `list(changes([7]))` and
+`list(changes([7, 3, 9]))` before running them. Explain why the source list stays
+unchanged while iterator positions advance.
+
+## 14. Explain the state owner
+
+For each object in the lab, state:
+
+1. when its generator body first runs;
+2. which local values remain during suspension;
+3. which consumer requests the next value;
+4. whether it can restart; and
+5. what proves exhaustion.
+
+Restart the notebook and run the full cell sequence once. Stateful examples are
+easy to misread when earlier exploratory calls already consumed values.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- An iterable can provide iterators; an iterator owns a one-pass consumption
+  position.
+- Collections commonly create fresh iterators, while reusing one iterator
+  continues from its current position.
+- Calling a generator function creates a generator object without running its
+  body.
+- The first request starts the body; `yield` produces a value and preserves the
+  suspended frame for a later request.
+- Reaching `return` or the end exhausts a generator permanently.
+- Generator expressions and pipelines perform work as consumers request it, so
+  short-circuit consumers can stop early.
+- Use a list for reusable materialized results and a generator when one-pass
+  incremental production is the intended contract.
+:::
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python glossary: iterable and iterator](https://docs.python.org/3/glossary.html#term-iterator)
+- [Python language reference: the `yield` statement](https://docs.python.org/3/reference/simple_stmts.html#the-yield-statement)
+- [Python language reference: generator expressions](https://docs.python.org/3/reference/expressions.html#generator-expressions)
+- [Python built-in function: `next`](https://docs.python.org/3/library/functions.html#next)

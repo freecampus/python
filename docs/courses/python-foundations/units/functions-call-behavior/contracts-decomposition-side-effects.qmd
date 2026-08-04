@@ -1,110 +1,258 @@
 ---
-title: Contracts, Decomposition, and Side Effects
+title: Breaking a Program into Small Functions
 lesson_id: functions-call-behavior.contracts-decomposition-side-effects
 lesson_order: 30
-description: Decompose behavior into functions with clear inputs, outputs, state effects, scopes, and reusable callable patterns.
+description: Split one useful program into cohesive calculations and presentation steps with explicit inputs, returned results, side effects, and empty-input policies.
+course_id: python-foundations
+unit_id: functions-call-behavior
+unit_number: 5
 execute:
   echo: true
 categories:
 - python-foundations
 - functions-call-behavior
+- decomposition
+- side-effects
 order: 30
 colab_notebook: notebooks/courses/python-foundations/units/functions-call-behavior/contracts-decomposition-side-effects.ipynb
-course_id: python-foundations
-unit_id: functions-call-behavior
-unit_number: 5
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Break problems into functions and protect behavior with focused tests.
-- **Practice in:** Google Colab, Jupyter, or VS Code
+- **Level:** Python Foundations · Unit 5
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Give each function one coherent responsibility, compose returned values, and keep calculation separate from deliberate printing or mutation.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. One long report is difficult to change safely
 
-Break problems into functions and protect behavior with focused tests. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
-
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Function Decomposition and Checks** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
-
-## 2. Decomposition
-
-Break a larger problem into smaller named functions.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-Decomposition is like planning a trip: choose destination, book travel, pack, and check in instead of saying only travel.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** Decomposition reduces complexity by solving one small responsibility at a time.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+Imagine a trail game that records checkpoints reached by each player:
 
 ```python
-def add_tax(price):
-    return price * 1.08
+records = [
+    {"player": "Ari", "distances": [3, 4, 2]},
+    {"player": "Bo", "distances": [5, 1]},
+    {"player": "Cy", "distances": []},
+]
 
-def format_price(price):
-    return f"${price:.2f}"
+lines = []
+for record in records:
+    if not record["player"]:
+        continue
+    distance = sum(record["distances"])
+    if distance >= 8:
+        status = "pathfinder"
+    elif distance > 0:
+        status = "explorer"
+    else:
+        status = "ready"
+    lines.append(f'{record["player"]}: {distance} km — {status}')
 
-print(format_price(add_tax(10)))
+headline = f"Trail report: {len(lines)} players"
+print(headline)
+for line in lines:
+    print(line)
 ```
 
-### Trace it line by line
+The block works, but validation, calculation, classification, formatting, and
+display are tangled together. Changing the status boundary risks disturbing the
+format. Reusing the totals without printing means copying part of the block.
 
-1. `def add_tax(price):` — Python creates the function `add_tax`; the indented body runs only when the function is called.
-2. `return price * 1.08` — Python evaluates the expression and sends that value back to the caller, ending this call.
-3. `def format_price(price):` — Python creates the function `format_price`; the indented body runs only when the function is called.
-4. `return f"${price:.2f}"` — Python evaluates the expression and sends that value back to the caller, ending this call.
-5. `print(format_price(add_tax(10)))` — Python evaluates the arguments and writes their display form to standard output.
+This lesson answers four practical questions:
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+- Where should one function end and another begin?
+- Which values should cross each function boundary?
+- How does returning data differ from printing or mutating it?
+- How can small functions form one understandable program?
 
-::: {.callout-warning title="Common mistake"}
-A function that does too many unrelated jobs is hard to test. Split by responsibility.
-:::
+## 2. Describe the transformations before extracting functions
 
-### Practice decomposition
+Start with observable examples, not arbitrary function names:
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Decomposition**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+| Input or situation | Required result |
+|---|---|
+| `[3, 4, 2]` | total distance `9` |
+| total `9` | status `"pathfinder"` |
+| name `"Ari"`, total `9`, status `"pathfinder"` | one complete report line |
+| empty distance list | total `0`, status `"ready"` |
+| complete source records | unchanged after building the report |
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+The table reveals a data path:
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+```text
+distances → total → status ─┐
+name ───────────────────────┼→ formatted line → displayed report
+record count ───────────────┘
+```
 
-</details>
+This is enough decomposition for now. Unit 7 develops a fuller method for
+ambiguous problems and algorithm choices. Here the problem is understood; the
+goal is to give its parts useful boundaries.
 
-### Check your understanding
+## 3. A contract says more than a function name
+
+Before writing a body, record five facts:
+
+| Contract part | Question | Example |
+|---|---|---|
+| Purpose | What one useful job does it own? | Classify one distance total. |
+| Inputs | What values must the caller supply? | A non-negative number. |
+| Result | What value comes back? | A status string. |
+| Side effects | What outside state changes? | None. |
+| Boundary | What happens for zero? | Return `"ready"`. |
+
+The contract for `classify_distance` can appear as a docstring plus examples:
+
+```python
+def classify_distance(distance):
+    """Return the trail status for one non-negative distance total."""
+    if distance >= 8:
+        return "pathfinder"
+    if distance > 0:
+        return "explorer"
+    return "ready"
+
+
+assert classify_distance(9) == "pathfinder"
+assert classify_distance(6) == "explorer"
+assert classify_distance(0) == "ready"
+```
+
+The docstring states the supported domain. The assertions provide concrete
+acceptance evidence. Unit 13 will turn this idea into a systematic pytest test
+suite; these local assertions simply keep the lesson contract visible.
+
+## 4. Calculation and presentation deserve different boundaries
+
+Compare these two total functions:
+
+```python
+def show_total(distances):
+    print(sum(distances))
+
+
+def total_distance(distances):
+    return sum(distances)
+```
+
+Both calculate. Only `total_distance` gives data back to its caller:
+
+```python
+distances = [3, 4, 2]
+total = total_distance(distances)
+
+assert total == 9
+assert classify_distance(total) == "pathfinder"
+```
+
+`show_total` has a visible side effect but implicitly returns `None`. It cannot
+conveniently feed the next calculation. Returning a value keeps options open:
+the caller may compare it, store it, format it, or eventually print it.
+
+Printing is not wrong. It belongs at the point where display is the intended
+effect:
+
+```python
+def display_report(report):
+    """Print a prepared report and return None."""
+    print(report)
+```
+
+The command-style name and docstring make that effect explicit.
+
+## 5. Pure functions are easy to reuse, but effects still have a place
+
+A **pure function** produces its result only from its inputs and does not change
+outside state:
+
+```python
+def add_bonus(score, bonus):
+    return score + bonus
+
+
+assert add_bonus(10, 2) == 12
+assert add_bonus(10, 2) == 12
+```
+
+The same inputs give the same result. Contrast a mutation:
+
+```python
+def add_badge(badges, badge):
+    """Append one badge to badges; return None."""
+    badges.append(badge)
+
+
+earned = ["starter"]
+result = add_badge(earned, "pathfinder")
+
+assert earned == ["starter", "pathfinder"]
+assert result is None
+```
+
+Mutation is the stated job, so the contract names it. Unit 6 explains aliases,
+identity, and copies in detail. For now, inspect both the returned result and
+the supplied collection whenever a function may mutate.
+
+Hidden global dependencies are harder to see:
+
+```python
+STATUS_LIMIT = 8
+
+
+def hidden_status(distance):
+    return "pathfinder" if distance >= STATUS_LIMIT else "explorer"
+```
+
+A fixed module constant can be reasonable. A changing rule is clearer as an
+input:
+
+```python
+def status_for(distance, pathfinder_at=8):
+    return "pathfinder" if distance >= pathfinder_at else "explorer"
+
+
+assert status_for(7) == "explorer"
+assert status_for(7, pathfinder_at=6) == "pathfinder"
+```
+
+The caller can now see and control the dependency.
+
+### Checkpoint: responsibilities and contracts
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-function-decomposition-and-checks-decomposition",
-  "title": "Decomposition checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit5-decomposition-contracts",
+  "title": "Function responsibility checkpoint",
+  "instructions": "Choose the boundary that makes each behavior explicit.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Decomposition?",
-      "options": [
-        "Decomposition reduces complexity by solving one small responsibility at a time.",
-        "A test is executable evidence that a function behaves as expected for a chosen case.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
-      ],
+      "id": "contract-boundary",
+      "prompt": "Which contract detail explains what `classify_distance(0)` should do?",
+      "options": ["Its empty or boundary policy", "Its indentation width", "Its file name", "Its caller's local variables"],
       "answer_index": 0,
-      "explanation": "Decomposition reduces complexity by solving one small responsibility at a time."
+      "explanation": "A useful contract states important edge behavior such as the result for zero."
+    },
+    {
+      "id": "coherent-job",
+      "prompt": "Why separate total calculation from line formatting?",
+      "options": ["Python limits functions to one operator", "They have different inputs and different reasons to change", "Formatting cannot use return", "A function may not call another function"],
+      "answer_index": 1,
+      "explanation": "Calculation rules and presentation rules can change independently and produce different reusable results."
+    },
+    {
+      "id": "visible-effect",
+      "prompt": "What should `add_badge` document because it appends to the supplied list?",
+      "options": ["That every list becomes global", "That append returns the new list", "That it mutates the `badges` argument", "That it can accept no arguments"],
+      "answer_index": 2,
+      "explanation": "Mutation changes state supplied by the caller and is therefore part of the function contract."
+    },
+    {
+      "id": "explicit-dependency",
+      "prompt": "Which design makes a changing status threshold easiest for a caller to control?",
+      "options": ["Read an undocumented global", "Repeat the number throughout the body", "Ask the user inside the calculation", "Accept a threshold parameter with a clear default"],
+      "answer_index": 3,
+      "explanation": "An explicit parameter exposes a changing dependency at the call boundary."
     }
   ]
 }
@@ -112,75 +260,161 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. Testing Functions
+## 6. Queries return information; commands perform an effect
 
-Check function behavior with examples and assertions.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A test is like a measuring cup: it tells you whether the recipe produced the amount you expected.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A test is executable evidence that a function behaves as expected for a chosen case.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+A **query** asks for information:
 
 ```python
-def add(a, b):
-    return a + b
-
-assert add(2, 3) == 5
-assert add(-1, 1) == 0
+def report_headline(player_count):
+    return f"Trail report: {player_count} players"
 ```
 
-### Trace it line by line
+A **command** asks the program to do something visible:
 
-1. `def add(a, b):` — Python creates the function `add`; the indented body runs only when the function is called.
-2. `return a + b` — Python evaluates the expression and sends that value back to the caller, ending this call.
-3. `assert add(2, 3) == 5` — Python checks the condition and raises `AssertionError` if the expected behavior is false.
-4. `assert add(-1, 1) == 0` — Python checks the condition and raises `AssertionError` if the expected behavior is false.
+```python
+def announce_headline(player_count):
+    print(report_headline(player_count))
+```
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+The distinction is a design aid, not an absolute law. A file-writing function
+may both perform an effect and return the number of bytes written. What matters
+is that its caller can discover both parts of the promise without reading every
+line of its body.
 
-::: {.callout-warning title="Common mistake"}
-Only testing happy paths can hide bugs. Include edge cases such as empty input or zero.
-:::
+For beginner programs, calculate first and place the final effect near the
+outside boundary:
 
-### Practice testing functions
+```python
+headline = report_headline(3)
+display_report(headline)
+```
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Testing Functions**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+This ordering makes accidental repeated output less likely and lets you inspect
+the completed string before displaying it.
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+## 7. Compose helpers through visible intermediate values
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+Functions become useful when one returned result becomes another input:
 
-</details>
+```python
+def build_player_line(record):
+    distance = total_distance(record["distances"])
+    status = classify_distance(distance)
+    return f'{record["player"]}: {distance} km — {status}'
 
-### Check your understanding
+
+ari = {"player": "Ari", "distances": [3, 4, 2]}
+line = build_player_line(ari)
+assert line == "Ari: 9 km — pathfinder"
+```
+
+Trace the data, not just the output:
+
+| Step | Expression | Result kept by `build_player_line` |
+|---:|---|---|
+| 1 | `record["distances"]` | `[3, 4, 2]` |
+| 2 | `total_distance(...)` | `9` in `distance` |
+| 3 | `classify_distance(distance)` | `"pathfinder"` in `status` |
+| 4 | formatted string | complete line returned to caller |
+
+This could be compressed into nested calls, but intermediate names are valuable
+when each result has meaning or may need inspection. Concision is not the same
+as clarity.
+
+## 8. Pass only what a helper needs
+
+Suppose a formatter receives all records even though it uses one name and two
+summary values. That broad input hides its true contract. Prefer:
+
+```python
+def format_player_line(name, distance, status):
+    return f"{name}: {distance} km — {status}"
+
+
+assert format_player_line("Ari", 9, "pathfinder") == (
+    "Ari: 9 km — pathfinder"
+)
+```
+
+Now formatting can be checked without reconstructing an entire game. The caller
+owns the data flow:
+
+```python
+distance = total_distance(ari["distances"])
+status = classify_distance(distance)
+line = format_player_line(ari["player"], distance, status)
+```
+
+Do not interpret this as “always use many scalar parameters.” A cohesive record
+can be the right input. The rule is to avoid making a function search unrelated
+state for the few values it actually needs.
+
+## 9. Split by reasons to change, not by line count
+
+A kitchen-sink function may validate, calculate, choose policy, format, and
+print. Those responsibilities change for different reasons. A report format
+change should not risk its distance calculation.
+
+The opposite extreme also hurts:
+
+```python
+def add(left, right):
+    return left + right
+
+
+def turn_into_text(value):
+    return str(value)
+```
+
+If these wrappers merely rename obvious operators once, they lengthen the call
+chain without adding a meaningful contract. Extraction earns its place when it
+provides reuse, independent policy, a meaningful name, or an independently
+checkable transformation.
+
+Use this decision list:
+
+1. Can the job be named as one short promise?
+2. Are its inputs and result narrower than the whole program?
+3. Might it be reused or checked separately?
+4. Does it change for a different reason from its neighbors?
+
+One “yes” can be enough. A line-count limit is not required.
+
+### Checkpoint: returns and effects
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "functions-call-behavior-function-decomposition-and-checks-testing-functions",
-  "title": "Testing Functions checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit5-decomposition-effects",
+  "title": "Data flow and side effects checkpoint",
+  "instructions": "Follow what crosses each function boundary.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to Testing Functions?",
-      "options": [
-        "Decomposition reduces complexity by solving one small responsibility at a time.",
-        "A test is executable evidence that a function behaves as expected for a chosen case.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
-      ],
+      "id": "print-result",
+      "prompt": "What result is assigned by `saved = show_total([2, 3])` when `show_total` only prints?",
+      "options": ["5", "None", "[2, 3]", "The text `saved`"],
       "answer_index": 1,
-      "explanation": "A test is executable evidence that a function behaves as expected for a chosen case."
+      "explanation": "Printing is an effect; reaching the end without return produces `None`."
+    },
+    {
+      "id": "pure-repeat",
+      "prompt": "What is expected from two calls to the pure function `add_bonus(10, 2)`?",
+      "options": ["The second call must fail", "The input becomes 12", "Both calls return 12 without outside state changes", "The second call returns 14"],
+      "answer_index": 2,
+      "explanation": "A pure result depends on inputs and does not accumulate hidden changing state."
+    },
+    {
+      "id": "query-command",
+      "prompt": "Which function is most clearly a command?",
+      "options": ["One that returns a distance", "One that classifies a score", "One that formats a string", "One whose documented purpose is printing a prepared report"],
+      "answer_index": 3,
+      "explanation": "A command is called for its effect; the name and contract should reveal that effect."
+    },
+    {
+      "id": "intermediate-name",
+      "prompt": "Why keep `distance` and `status` as intermediate names in a call chain?",
+      "options": ["They expose meaningful stages that can be inspected and explained", "Python forbids nested calls", "They make both values global", "They cause every helper to print"],
+      "answer_index": 0,
+      "explanation": "Named stages make the direction and meaning of returned data visible."
     }
   ]
 }
@@ -188,17 +422,251 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. Integrate the lesson
+## 10. A result can include both an answer and a reason
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+A plain status may not tell a caller why it was chosen. Return related evidence
+together when the caller needs both:
 
-## 5. Key points
+```python
+def classify_with_reason(distance):
+    if distance >= 8:
+        return {"status": "pathfinder", "reason": "distance reached 8 km"}
+    if distance > 0:
+        return {"status": "explorer", "reason": "distance is between 1 and 7 km"}
+    return {"status": "ready", "reason": "no distance recorded"}
 
-- **Decomposition:** Decomposition reduces complexity by solving one small responsibility at a time.
-- **Testing Functions:** A test is executable evidence that a function behaves as expected for a chosen case.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+
+result = classify_with_reason(9)
+assert result["status"] == "pathfinder"
+assert result["reason"] == "distance reached 8 km"
+```
+
+The dictionary labels the fields. A two-item tuple can also be suitable when the
+positions are obvious. Avoid returning a long unexplained tuple that forces every
+caller to memorize positions.
+
+## 11. Source preservation is part of the contract
+
+The following formatter reads records without changing them:
+
+```python
+def build_lines(records):
+    lines = []
+    for record in records:
+        distance = total_distance(record["distances"])
+        status = classify_distance(distance)
+        line = format_player_line(record["player"], distance, status)
+        lines.append(line)
+    return lines
+```
+
+Record a small snapshot before the call:
+
+```python
+records = [{"player": "Ari", "distances": [3, 4, 2]}]
+snapshot = [{"player": "Ari", "distances": [3, 4, 2]}]
+
+lines = build_lines(records)
+
+assert records == snapshot
+assert lines == ["Ari: 9 km — pathfinder"]
+```
+
+Equality is enough for this simple nested fixture. Unit 6 will explain why
+copying nested mutable data deserves more care.
+
+## 12. Lab: assemble an expedition report
+
+Build a small pipeline with these contracts:
+
+```python
+def valid_record(record):
+    """Return whether a record has a non-empty name and a distances list."""
+    raise NotImplementedError
+
+
+def summarize_record(record):
+    """Return a summary dictionary for one supported record."""
+    raise NotImplementedError
+
+
+def format_summary(summary):
+    """Return one display line for a summary dictionary."""
+    raise NotImplementedError
+
+
+def build_expedition_report(records):
+    """Return a complete report string without changing records."""
+    raise NotImplementedError
+```
+
+Use this source and keep it unchanged:
+
+```python
+expedition = [
+    {"name": "Ari", "distances": [3, 4, 2]},
+    {"name": "Bo", "distances": [5, 1]},
+    {"name": "Cy", "distances": []},
+    {"name": "", "distances": [100]},
+]
+
+expected_report = """Expedition report — 3 travelers
+Ari: 9 km — pathfinder
+Bo: 6 km — explorer
+Cy: 0 km — ready"""
+
+assert valid_record(expedition[0]) is True
+assert valid_record(expedition[-1]) is False
+assert summarize_record(expedition[0]) == {
+    "name": "Ari",
+    "distance": 9,
+    "status": "pathfinder",
+}
+assert format_summary({"name": "Cy", "distance": 0, "status": "ready"}) == (
+    "Cy: 0 km — ready"
+)
+
+before = [
+    {"name": "Ari", "distances": [3, 4, 2]},
+    {"name": "Bo", "distances": [5, 1]},
+    {"name": "Cy", "distances": []},
+    {"name": "", "distances": [100]},
+]
+assert build_expedition_report(expedition) == expected_report
+assert expedition == before
+assert build_expedition_report([]) == "Expedition report — 0 travelers"
+```
+
+Work from the inner calculations outward. Do not print inside these four
+functions. After the assertions pass, display the returned report once.
+
+<details>
+<summary>Hint: make each stage return the next stage's input</summary>
+
+Filter with `valid_record`, transform each valid record with
+`summarize_record`, format each summary, and finally join the headline and lines
+with `"\n".join(...)`.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+def valid_record(record):
+    """Return whether a record has a non-empty name and a distances list."""
+    return bool(record.get("name")) and isinstance(record.get("distances"), list)
+
+
+def summarize_record(record):
+    """Return a summary dictionary for one supported record."""
+    distance = sum(record["distances"])
+    if distance >= 8:
+        status = "pathfinder"
+    elif distance > 0:
+        status = "explorer"
+    else:
+        status = "ready"
+    return {"name": record["name"], "distance": distance, "status": status}
+
+
+def format_summary(summary):
+    """Return one display line for a summary dictionary."""
+    return (
+        f'{summary["name"]}: {summary["distance"]} km — '
+        f'{summary["status"]}'
+    )
+
+
+def build_expedition_report(records):
+    """Return a complete report string without changing records."""
+    summaries = []
+    for record in records:
+        if valid_record(record):
+            summaries.append(summarize_record(record))
+
+    headline = f"Expedition report — {len(summaries)} travelers"
+    lines = [headline]
+    for summary in summaries:
+        lines.append(format_summary(summary))
+    return "\n".join(lines)
+```
+
+</details>
+
+### Checkpoint: composition and preservation
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit5-decomposition-composition",
+  "title": "Composed report checkpoint",
+  "instructions": "Trace the report pipeline and its source data.",
+  "questions": [
+    {
+      "id": "flow-order",
+      "prompt": "Which order matches the expedition report's data flow?",
+      "options": ["Print, mutate, then validate", "Format every raw value, then guess totals", "Validate, summarize, format, then join", "Join records before calling any helper"],
+      "answer_index": 2,
+      "explanation": "Each stage returns the kind of value needed by the next stage."
+    },
+    {
+      "id": "invalid-record",
+      "prompt": "Where should a record with an empty name be excluded?",
+      "options": ["Inside every formatter", "Only after the report is printed", "By changing the source list", "At the explicit `valid_record` boundary"],
+      "answer_index": 3,
+      "explanation": "One validation boundary prevents later stages from repeating the same rule."
+    },
+    {
+      "id": "empty-report",
+      "prompt": "What does `build_expedition_report([])` return?",
+      "options": ["A headline stating that there are 0 travelers", "None after printing", "An exception because no lines exist", "The original list"],
+      "answer_index": 0,
+      "explanation": "The empty-input policy still returns a useful complete report."
+    },
+    {
+      "id": "source-check",
+      "prompt": "Why compare `expedition` with `before` after the call?",
+      "options": ["To force all helpers to be global", "To provide evidence that the pipeline preserved its source", "To sort the report", "To make print return a string"],
+      "answer_index": 1,
+      "explanation": "Source preservation is an observable part of this pipeline's contract."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Explain the design aloud
+
+Use the completed lab to answer:
+
+1. Which helper is a query, and where would a display command belong?
+2. What precise value crosses each call boundary?
+3. Which function owns the status policy?
+4. Why is the source-preservation assertion useful?
+5. Which two helpers might change for different reasons?
+
+Then modify the pathfinder threshold in one deliberate place. If you must edit
+several unrelated functions, the responsibility boundary needs another look.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A useful function owns one coherent responsibility, not an arbitrary number of
+  lines.
+- Contracts state purpose, inputs, returned results, side effects, and important
+  boundaries.
+- Returned data composes naturally; printing and mutation are effects that
+  should be explicit.
+- Pure functions are especially easy to reuse, but command-style functions are
+  appropriate when their documented job is an effect.
+- Intermediate names make a function pipeline observable and easier to explain.
+- Split a large function by reasons to change, while avoiding meaningless
+  wrappers around every tiny expression.
+:::
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python tutorial: defining functions](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+- [Python tutorial: documentation strings](https://docs.python.org/3/tutorial/controlflow.html#documentation-strings)
+- [Python built-in function: `sum`](https://docs.python.org/3/library/functions.html#sum)
