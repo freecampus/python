@@ -161,7 +161,7 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "command-line-applications",
             "Command-Line Applications",
-            "separate command parsing, domain behavior, streams, and exit status",
+            "decode deep-sea beacons through a clean, configurable command boundary",
         ),
         (
             "testing-python-programs",

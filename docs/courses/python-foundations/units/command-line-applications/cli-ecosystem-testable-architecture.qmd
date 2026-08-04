@@ -1,141 +1,193 @@
 ---
-title: CLI Ecosystem and Testable Architecture
+title: Keep the Command Thin and the Core Reusable
 lesson_id: command-line-applications.cli-ecosystem-testable-architecture
-lesson_order: 40
-description: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
-course_id: python-foundations
-unit_id: command-line-applications
-unit_number: 12
+lesson_order: 50
+description: Separate parser, configuration, resource, core, rendering, and process responsibilities; connect one main function to two entry routes; and verify the finished command outside its project.
 execute:
   echo: true
 categories:
 - python-foundations
 - command-line-applications
-order: 40
+- architecture
+- subprocess
+order: 50
 colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/cli-ecosystem-testable-architecture.ipynb
+course_id: python-foundations
+unit_id: command-line-applications
+unit_number: 12
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Level:** Python Foundations
+- **Estimated time:** 4.5–5.5 hours
+- **You will learn:** Untangle a script into explicit layers, keep argparse and global resources outside the core, share one main function across entry points, verify a real process, and choose CLI tools for the problems they actually solve.
+- **Practice in:** Google Colab or JupyterLab for direct checks, plus a local package and terminal for installation and process checks
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+The trail-report behavior now has a command grammar, clean streams, validated
+settings, and useful logging. It can still become difficult to change if all of
+those responsibilities live inside one function.
 
-CLI libraries can reduce interface boilerplate, but the program remains maintainable only when domain behavior is independent of its command framework.
+This lesson assembles the pieces as a small application. The command boundary
+will remain thin: translate process-facing details into ordinary values, call
+reusable code, render the result, and translate anticipated failures back into
+diagnostics and status.
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+As you work, answer these questions:
 
-## 1. Read and predict a complete case
+- Which responsibilities belong in the parser, settings resolver, resource
+  boundary, core, renderer, and `main()`?
+- Why should core functions not accept an argparse `Namespace`?
+- How can `python -m trail_report` and an installed `trail-report` command call
+  the same implementation?
+- What can a direct check prove, and what requires a real child process?
+- When would argparse, Click, Typer, or Rich improve the product?
 
-```python
-def convert_record(record):
-    """Return a normalized record without reading CLI state."""
-    return {
-        "name": record["name"].strip(),
-        "score": int(record["score"]),
-    }
+## 1. Annotate a tangled command before changing it
 
-
-def format_record(record):
-    """Return one stable machine-readable output line."""
-    return f"{record['name']},{record['score']}"
-
-
-normalized = convert_record({"name": " Ada ", "score": "9"})
-print(format_record(normalized))
-```
-
-### Step-by-step explanation
-
-1. The core function accepts ordinary Python data, not an `argparse` namespace.
-2. It normalizes and converts one record deterministically.
-3. Formatting is a separate boundary decision.
-4. A Click or Typer command can call the same functions without changing their contracts.
-
-::: {.callout-note title="Make one controlled change"}
-Add a `passed` field based on a supplied threshold parameter; do not read the threshold from a global or environment variable inside the core function.
-:::
-
-## 2. Investigate the important boundary
-
-Use `argparse` for the complete course path. Click offers decorator-based command composition, Typer derives interfaces from annotations, and Rich improves terminal presentation. None replaces separation, validation, streams, exit status, or tests.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+This function is valid Python and may even work for the first demo:
 
 ```python
-def run(records, threshold):
-    lines = []
-    for record in records:
-        normalized = convert_record(record)
-        normalized["passed"] = normalized["score"] >= threshold
-        lines.append(normalized)
-    return lines
+import argparse
+import json
+import logging
+import os
+from pathlib import Path
 
 
-print(run([{"name": " Lin ", "score": "8"}], threshold=7))
+def tangled_main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input")
+    parser.add_argument("--status", default=os.environ.get("TRAIL_STATUS", "closed"))
+    arguments = parser.parse_args()
+    logging.basicConfig(level=logging.INFO)
+
+    text = Path(arguments.input).read_text(encoding="utf-8")
+    for line in text.splitlines():
+        checkpoint, status, note = line.split("|", maxsplit=2)
+        if status == arguments.status:
+            print(json.dumps({"checkpoint": checkpoint, "note": note}))
+    return 0
 ```
 
-Then complete the learning loop:
+Before refactoring, annotate what each line **reads**, **decides**, and
+**changes**:
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+| Responsibility | Hidden dependency or effect |
+|---|---|
+| define and parse command grammar | real `sys.argv`; argparse exits on errors |
+| choose a status | process environment read during parser construction |
+| configure logging | global root handlers |
+| acquire input | filesystem and current directory |
+| parse and select records | mixed with adapters and rendering |
+| render JSON | real stdout |
+| return status | no translation of anticipated failures |
 
-<details>
-<summary>Check your practice process</summary>
+The problem is not that any one library is “bad.” The function has too many
+reasons to change. A new TOML rule, alternate renderer, notebook caller, or file
+error all require editing the same block.
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+::: {.concept-diagram}
+The tangled function depends directly on every external boundary, so the core
+behavior cannot be called without constructing process state.
 
-</details>
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A["tangled_main"] --> B["sys.argv and argparse"]
+  A --> C["os.environ"]
+  A --> D["filesystem"]
+  A --> E["global logging"]
+  A --> F["record rules"]
+  A --> G["JSON and stdout"]
+```
+:::
 
-## 4. Check your understanding
+### Make one controlled change
+
+Imagine a notebook needs to summarize a list already in memory. It should not
+invent an input filename, patch `sys.argv`, alter the process environment, or
+capture global stdout merely to reuse the selection rule. That requirement
+reveals the first useful extraction: the core should accept records and ordinary
+settings, then return ordinary result values.
+
+## 2. Give each boundary one job
+
+A small CLI does not need dozens of layers. It needs enough separation that
+each function has a clear contract:
+
+1. `build_parser()` describes command syntax and help;
+2. `resolve_settings()` converts raw configuration into validated settings;
+3. `open_input()` owns files or selects stdin;
+4. `parse_records()` turns external lines into domain records;
+5. `select_records()` performs reusable application behavior;
+6. `render_records()` writes the documented output format;
+7. `main()` coordinates adapters, translates anticipated failures, and returns
+   status; and
+8. the entry point calls `raise SystemExit(main())`.
+
+The names can vary. The direction of dependency matters more: core functions
+should not import argparse, read `os.environ`, open global streams, configure
+logging, or terminate the process.
+
+::: {.concept-diagram}
+External details point inward through adapters. The reusable core receives
+ordinary values and returns ordinary values; it does not point back to argparse
+or process globals.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["argv"] --> B["parser"]
+  C["TOML and environment"] --> D["settings resolver"]
+  E["file or stdin"] --> F["record parser"]
+  B --> G["main boundary"]
+  D --> G
+  F --> H["reusable core"]
+  G --> H
+  H --> I["renderer"]
+  I --> J["stdout"]
+  G --> K["stderr and status"]
+```
+:::
+
+This idea is sometimes called a **functional core with an imperative shell**.
+In ordinary language: keep the decisions as functions over explicit values;
+keep files, streams, environment state, logging setup, and process termination
+near the outside. The core does not have to be mathematically pure, but hidden
+I/O should not be required for an ordinary calculation.
+
+### Checkpoint: place each responsibility
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "command-line-applications-cli-ecosystem-testable-architecture",
-  "title": "CLI Ecosystem and Testable Architecture checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit12-architecture-responsibilities",
+  "title": "Place each responsibility in the right layer",
+  "instructions": "Choose the narrowest owner that preserves reuse and clear evidence.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "Which design makes it easiest to replace `argparse` with another CLI library?",
-      "options": [
-        "Pass the global parser object into every calculation.",
-        "Print all results inside data conversion functions.",
-        "Read environment variables repeatedly in each helper.",
-        "Keep parsing at the boundary and pass ordinary values into framework-independent functions."
-      ],
-      "answer_index": 3,
-      "explanation": "A thin adapter isolates framework decisions from behavior that can be called and tested directly."
+      "id": "unit12-architecture-q37-core-input",
+      "prompt": "What should select_records normally receive?",
+      "options": ["Ordinary records and validated settings", "The complete argparse Namespace", "The process environment mapping and real stdout", "A request to call sys.exit"],
+      "answer_index": 0,
+      "explanation": "Ordinary values keep selection behavior reusable from a notebook, CLI, or another application."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun."
-      ],
+      "id": "unit12-architecture-q38-file-owner",
+      "prompt": "Which layer should decide whether INPUT='-' means stdin or a UTF-8 file?",
+      "options": ["The status-counting core", "The resource/command boundary", "The JSON renderer", "A dataclass equality method"],
       "answer_index": 1,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "Selecting and owning an external stream is adapter work. The core can consume the iterable it receives."
+    },
+    {
+      "id": "unit12-architecture-q39-process-exit",
+      "prompt": "Where should main's integer become real process termination?",
+      "options": ["Inside every parsing helper", "Inside the settings dataclass", "At the entry point with raise SystemExit(main())", "Inside json.dumps"],
+      "answer_index": 2,
+      "explanation": "Only the outer entry point adapts an ordinary return value to process exit, leaving main callable directly."
     }
   ]
 }
@@ -143,17 +195,649 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 3. Pass domain values instead of a Namespace
+
+An argparse namespace belongs to the CLI adapter:
+
+```python
+def select_records_bad(records, arguments):
+    return [
+        record
+        for record in records
+        if record["status"] == arguments.status
+    ][: arguments.limit]
+```
+
+A caller must construct an object with attributes named exactly like CLI
+destinations. Renaming `--status` to `--state` could break core code even if the
+domain concept did not change.
+
+Pass ordinary parameters or a settings value:
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Selection:
+    status: str
+    limit: int
+
+
+def select_records(records, selection):
+    matching = [
+        record
+        for record in records
+        if record["status"] == selection.status
+    ]
+    return matching[: selection.limit]
+```
+
+The adapter translates names explicitly:
+
+```python
+def selection_from_arguments(arguments):
+    return Selection(status=arguments.status, limit=arguments.limit)
+```
+
+That small repetition is valuable. It states which command inputs enter the
+core and prevents parser-only fields such as `handler`, `command`, or `input`
+from leaking across the boundary.
+
+### Return results before rendering them
+
+When feasible, the core returns records rather than printing them:
+
+```python
+def summarize_records(records):
+    counts = {"open": 0, "limited": 0, "closed": 0}
+    for record in records:
+        counts[record["status"]] += 1
+    return counts
+```
+
+One renderer can write JSON and another can write a human table. Changing
+presentation does not change counting. For very large streams, returning a
+generator or accepting a result writer may be appropriate, but begin with the
+smallest interface that meets real size requirements.
+
+## 4. Assemble one small package
+
+An intentional package tree might be:
+
+```text
+trail-report/
+├── pyproject.toml
+└── src/
+    └── trail_report/
+        ├── __init__.py
+        ├── __main__.py
+        ├── cli.py
+        ├── config.py
+        ├── records.py
+        └── render.py
+```
+
+Responsibilities remain easy to state:
+
+- `records.py`: parse, validate, select, and summarize ordinary records;
+- `config.py`: load and resolve settings;
+- `render.py`: serialize results to a supplied stream;
+- `cli.py`: parser, resources, logging setup, `main()`; and
+- `__main__.py`: process entry adapter.
+
+### A reusable record module
+
+```python
+def parse_record(line):
+    parts = [part.strip() for part in line.split("|", maxsplit=2)]
+    if len(parts) != 3:
+        raise ValueError("expected CHECKPOINT|STATUS|NOTE")
+    checkpoint, status, note = parts
+    if not checkpoint or status not in {"open", "limited", "closed"} or not note:
+        raise ValueError("invalid checkpoint, status, or note")
+    return {"checkpoint": checkpoint, "status": status, "note": note}
+
+
+def select_status(records, status, limit):
+    return [record for record in records if record["status"] == status][:limit]
+```
+
+No CLI import appears. A notebook can call both functions naturally.
+
+### A renderer with an explicit destination
+
+```python
+import json
+
+
+def write_jsonl(records, stdout):
+    for record in records:
+        print(
+            json.dumps(record, ensure_ascii=False, sort_keys=True),
+            file=stdout,
+        )
+```
+
+The renderer owns JSON spelling and newlines, but not record selection.
+
+### A parser factory
+
+```python
+import argparse
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog="trail-report",
+        description="Select trail reports without polluting structured output.",
+    )
+    parser.add_argument("input", metavar="INPUT")
+    parser.add_argument(
+        "--status",
+        choices=("open", "limited", "closed"),
+        default=None,
+    )
+    parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("-v", "--verbose", action="count", default=0)
+    return parser
+```
+
+The settings lesson explains why configurable values default to `None`: an
+omitted CLI option must not erase weaker configuration.
+
+### One explicit coordinator
+
+```python
+import sys
+
+
+def main(argv=None, stdin=None, stdout=None, stderr=None, environment=None):
+    if stdin is None:
+        stdin = sys.stdin
+    if stdout is None:
+        stdout = sys.stdout
+    if stderr is None:
+        stderr = sys.stderr
+    if environment is None:
+        environment = dict()
+
+    arguments = build_parser().parse_args(argv)
+    status = arguments.status or environment.get("TRAIL_REPORT_STATUS", "closed")
+    limit = arguments.limit if arguments.limit is not None else 20
+
+    try:
+        records = [parse_record(line) for line in stdin if line.strip()]
+        selected = select_status(records, status, limit)
+    except ValueError as error:
+        print(f"trail-report: {error}", file=stderr)
+        return 1
+
+    write_jsonl(selected, stdout)
+    return 0
+```
+
+This compact snapshot omits the full TOML and file-input code to keep the
+architecture visible. Its important boundary is explicit. In the synthesis
+lab, restore the complete settings resolver and `open_input()` behavior from
+the earlier lessons.
+
+Do not use `arguments.status or ...` when empty string is meaningful. Here
+argparse choices prevent an explicit empty status, so the expression is safe;
+the more general resolver should still test `is not None`.
+
+## 5. Connect two entry routes to the same `main()`
+
+`__main__.py` supports module execution:
+
+```python
+from trail_report.cli import main
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+Now this invocation reaches the same coordinator:
+
+```bash
+python -m trail_report --help
+```
+
+Unit 10 introduced project scripts. In `pyproject.toml`, an installed console
+entry point can name the callable:
+
+```toml
+[project.scripts]
+trail-report = "trail_report.cli:main"
+```
+
+An installer creates the platform-appropriate wrapper. The callable returns an
+integer; the wrapper translates it to process status. Do not create a second
+implementation for the installed route.
+
+The two routes are valuable evidence:
+
+- `python -m trail_report` checks the package's module entry point; and
+- `trail-report` checks the installed project-script metadata and wrapper.
+
+They should expose the same parser, core, output, and status policy.
+
+### Checkpoint: choose direct or process evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-architecture-evidence",
+  "title": "Choose direct or process-level evidence",
+  "instructions": "Match each claim to evidence at the boundary it describes.",
+  "questions": [
+    {
+      "id": "unit12-architecture-q40-installed-wrapper",
+      "prompt": "Which check can prove that the installed trail-report wrapper is discoverable and returns status 1 for bad data?",
+      "options": ["Calling select_records directly", "Formatting parser help in memory", "Inspecting the Settings repr", "Running the installed command with subprocess and inspecting returncode"],
+      "answer_index": 3,
+      "explanation": "Only a process-level invocation exercises command discovery, wrapper wiring, streams, and operating-system status together."
+    },
+    {
+      "id": "unit12-architecture-q41-pure-rule",
+      "prompt": "What is the fastest focused evidence for the record-selection rule?",
+      "options": ["Call select_records with ordinary records and assert its returned values", "Install the package for every example", "Patch the whole process environment", "Inspect a shell screenshot"],
+      "answer_index": 0,
+      "explanation": "The reusable rule has no process dependency, so a direct call provides precise evidence with little setup."
+    },
+    {
+      "id": "unit12-architecture-q42-unrelated-cwd",
+      "prompt": "Why launch the module or installed command from a directory outside the project?",
+      "options": ["To make JSON sorting faster", "To expose accidental dependence on the repository's current directory or import path", "To disable argparse", "To force every status to 2"],
+      "answer_index": 1,
+      "explanation": "A command that works only from its source directory may rely on undeclared paths or imports. An unrelated working directory reveals that coupling."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Check each layer before the testing unit
+
+Unit 13 will organize checks with pytest. Here we need enough immediate
+evidence to know the CLI was assembled correctly.
+
+### Check the core directly
+
+```python
+records = [
+    {"checkpoint": "north-ridge", "status": "open", "note": "Windy"},
+    {"checkpoint": "river-gate", "status": "closed", "note": "Repair"},
+]
+
+assert select_status(records, "closed", 20) == [records[1]]
+assert select_status(records, "open", 0) == []
+```
+
+The second assertion documents how slicing treats a zero limit. If the public
+settings contract rejects zero, test that validation separately rather than
+pretending the selection algorithm cannot receive it.
+
+### Check `main()` with injected collaborators
+
+```python
+import io
+
+stdin = io.StringIO("north-ridge|open|Windy\n")
+stdout = io.StringIO()
+stderr = io.StringIO()
+
+status = main(
+    ["-", "--status", "open", "--limit", "5"],
+    stdin=stdin,
+    stdout=stdout,
+    stderr=stderr,
+    environment={},
+)
+
+assert status == 0
+assert '"checkpoint": "north-ridge"' in stdout.getvalue()
+assert stderr.getvalue() == ""
+```
+
+The compact `main()` snapshot above treats stdin as its source regardless of
+the input name; the final lab will connect file selection properly. This check
+still demonstrates explicit arguments and streams.
+
+### Check a real process from another directory
+
+After installing the local project into its virtual environment:
+
+```python
+import subprocess
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as directory:
+    completed = subprocess.run(
+        ["trail-report", "-", "--status", "open"],
+        input="north-ridge|open|Windy\n",
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=10,
+        cwd=Path(directory),
+    )
+
+assert completed.returncode == 0
+assert '"checkpoint": "north-ridge"' in completed.stdout
+assert completed.stderr == ""
+```
+
+The child cannot rely on the repository as its current directory. If the
+installed wrapper name is not portable in your environment, build the command
+list from the environment's scripts directory or verify
+`[sys.executable, "-m", "trail_report", ...]` first.
+
+Do not turn this one smoke check into the complete testing curriculum. Its role
+is to prove packaging and process integration before shipping the artifact.
+
+## 7. Treat command behavior as a public interface
+
+Users and automation may depend on:
+
+- program and option spelling;
+- position and meaning of arguments;
+- help and usage conventions;
+- stdout schema and ordering promises;
+- stderr diagnostic prefixes;
+- exit-status meanings;
+- configuration keys and precedence;
+- environment variable names; and
+- module and installed entry-point names.
+
+Adding an optional `--limit` with a sensible default can be compatible. Renaming
+`--status` to `--state`, changing JSON keys, or swapping the meanings of status
+1 and 2 is breaking unless a transition is designed.
+
+Not every personal script needs a formal deprecation policy. The moment another
+person, shell script, scheduled task, or service calls the command, treat
+observable behavior as an interface. Record intentional changes in release
+notes, preserve aliases for a stated period when compatibility matters, and
+never use undocumented output accidents as deliberate guarantees.
+
+### Trace a changed requirement through the layers
+
+Suppose a teammate requests `--format text` for people while keeping JSONL as
+the automation default. A tangled design edits parsing, selection, and printing
+inside one loop. The layered design makes the impact reviewable:
+
+| Layer | Necessary change | Behavior that should not change |
+|---|---|---|
+| parser | add `--format` with `jsonl` and `text` choices | input and status grammar |
+| adapter | pass the selected format to rendering | record selection |
+| renderer | choose one of two presentation functions | configuration precedence |
+| core | none | parsing, validation, filtering, counts |
+| process contract | document both stdout formats | stderr and exit status |
+
+Two focused renderers keep branches out of the domain rule:
+
+```python
+def write_text(records, stdout):
+    for record in records:
+        print(
+            f"{record['checkpoint']}: {record['status']} — {record['note']}",
+            file=stdout,
+        )
+
+
+def render_records(records, output_format, stdout):
+    if output_format == "jsonl":
+        write_jsonl(records, stdout)
+    elif output_format == "text":
+        write_text(records, stdout)
+    else:
+        raise ValueError(f"unsupported output format {output_format!r}")
+```
+
+Argparse choices normally prevent the final branch for a CLI caller. Keeping
+the renderer's own clear contract is still useful because another Python caller
+can call it directly. The core returns the same selected records in both cases.
+
+Now change the requirement again: text mode should sort by checkpoint, but
+JSONL must preserve streaming order. Sorting belongs in the text presentation
+path or in an explicitly named adapter step—not silently inside
+`select_records()`. Asking “which other behavior should remain unchanged?” is a
+practical architecture tool, not merely a testing question.
+
+### Make startup order visible
+
+Order also carries policy. Parse command syntax before opening a file, so
+`--help` does not fail because yesterday's input disappeared. Resolve and
+validate settings before processing the first record, so one invalid
+environment value cannot produce a partial result. Configure logging before
+opening external resources if file failures should be recorded. Open the input
+only after every earlier boundary is ready, and close only resources the
+application opened.
+
+A clear `main()` reads like that checklist. Clever nesting that opens a file
+while constructing parser defaults may save one line while making help,
+cleanup, and partial-output behavior much harder to defend.
+
+## 8. Choose a tool for the problem it solves
+
+The standard library is enough for this unit. Other tools can improve a real
+product after requirements justify them:
+
+| Tool | Principal value | Good fit | What it does not fix |
+|---|---|---|---|
+| `argparse` | dependency-free parsing, help, validation, subcommands | standard-library tools and explicit parser design | tangled core, stream contracts, settings policy |
+| Click | composable commands, nesting, decorators, established ecosystem | larger command groups and reusable command components | domain architecture or output discipline by itself |
+| Typer | type-hint-driven command declarations, help, completion | teams that prefer typed function-style command declarations | configuration ownership or secret safety automatically |
+| Rich | styled text, tables, panels, progress, terminal rendering | human-facing presentation modes | parsing, reusable core, machine-readable stdout |
+
+A team may combine a parser framework with Rich for a human display and still
+offer a plain JSON mode. The architecture remains the same: process adapters on
+the outside, ordinary core values inside.
+
+Evaluate a dependency with concrete questions:
+
+1. Which current requirement becomes simpler or safer?
+2. Does the team understand its public interface and release compatibility?
+3. What installation, startup, maintenance, and update cost does it add?
+4. Can core logic remain independent of framework-specific objects?
+5. Is the output still accessible and usable without terminal styling?
+
+Do not rewrite a working argparse command merely because a framework is
+popular. Do not reject a framework when it clearly reduces repeated complexity.
+Choose from evidence.
+
+### Checkpoint: choose a CLI tool without outsourcing architecture
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-architecture-tool-choice",
+  "title": "Choose a CLI tool without outsourcing architecture",
+  "instructions": "Match each requirement to the tool's primary role.",
+  "questions": [
+    {
+      "id": "unit12-architecture-q43-rich-role",
+      "prompt": "A human-only status view needs readable styled tables, while JSON mode already works. Which tool most directly addresses the new requirement?",
+      "options": ["tomllib", "subprocess", "Rich", "getpass"],
+      "answer_index": 2,
+      "explanation": "Rich focuses on terminal presentation. Keep it behind a human renderer so JSON output remains stable."
+    },
+    {
+      "id": "unit12-architecture-q44-framework-limit",
+      "prompt": "What happens if a tangled script is moved from argparse decorators to another CLI framework without separating its core?",
+      "options": ["All hidden dependencies disappear", "stdout becomes valid JSON automatically", "Configuration precedence becomes universal", "The script remains tangled even if parser declaration becomes nicer"],
+      "answer_index": 3,
+      "explanation": "A framework may improve parsing ergonomics, but it cannot decide or enforce the application's internal responsibility boundaries automatically."
+    },
+    {
+      "id": "unit12-architecture-q45-argparse-baseline",
+      "prompt": "Why keep argparse as this unit's complete baseline?",
+      "options": ["It supplies dependency-free parsing, help, validation, and subcommands while leaving architecture visible", "It automatically stores production secrets", "It is the only Python code that can print", "It replaces package installation"],
+      "answer_index": 0,
+      "explanation": "Argparse covers the command grammar with no new dependency, allowing the unit to focus on process and application boundaries."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Ship the complete trail-report package
+
+Assemble the lesson pieces into the package tree shown earlier. Preserve these
+contracts:
+
+- `build_parser()` accepts `INPUT`, configurable status and limit, strict mode,
+  and verbosity;
+- `resolve_settings()` applies default < TOML < environment < CLI;
+- `open_input()` maps `-` to supplied stdin and owns only files it opens;
+- core record parsing and selection import no argparse, environment, logging
+  configuration, or process-exit functions;
+- a JSONL renderer writes only data to supplied stdout;
+- concise anticipated failures go to supplied stderr;
+- logging is configured once on stderr and does not change JSONL;
+- `main()` accepts explicit argv, streams, and environment and returns 0 or 1;
+- argparse retains status 2 for grammar errors;
+- `__main__.py` and the installed project script call the same `main()`; and
+- one subprocess proof runs from outside the repository.
+
+Build evidence in this order:
+
+1. direct core assertions;
+2. parser help and invalid-value capture;
+3. settings precedence cases;
+4. `main()` with `StringIO` and an injected environment;
+5. module execution in the project environment;
+6. wheel or editable installation into a clean environment; and
+7. installed command from an unrelated current directory.
+
+<details>
+<summary>Hint 1: draw imports before writing glue</summary>
+
+`records.py` and `render.py` should not import `cli.py`. `cli.py` may import the
+core, configuration, and renderer. `__main__.py` imports only `main`. If arrows
+point from core modules back to the command adapter, reconsider the contract.
+</details>
+
+<details>
+<summary>Hint 2: make main a translation checklist</summary>
+
+Inside `main()`: resolve default collaborators, parse arguments, load/resolve
+settings, configure logging, acquire input, call core, render, translate only
+anticipated failures, and return status. Keep each step visible rather than
+nested inside one giant expression.
+</details>
+
+<details>
+<summary>Hint 3: prove installation rather than source-directory luck</summary>
+
+Create a temporary directory and use it as `cwd` for `subprocess.run()`. Pass
+stdin text, capture both outputs, disable automatic raising for nonzero status,
+set a timeout, and assert exact public behavior.
+</details>
+
+<details>
+<summary>Show a compact complete coordinator after attempting the lab</summary>
+
+```python
+import argparse
+import io
+import json
+import os
+import sys
+from contextlib import nullcontext
+from pathlib import Path
+
+
+def build_complete_parser():
+    parser = argparse.ArgumentParser(prog="trail-report")
+    parser.add_argument("input", metavar="INPUT")
+    parser.add_argument(
+        "--status", choices=("open", "limited", "closed"), default=None
+    )
+    parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--strict", action="store_true", default=None)
+    return parser
+
+
+def input_context(input_name, stdin):
+    if input_name == "-":
+        return nullcontext(stdin)
+    return Path(input_name).open(encoding="utf-8")
+
+
+def complete_main(argv=None, stdin=None, stdout=None, stderr=None, environment=None):
+    stdin = sys.stdin if stdin is None else stdin
+    stdout = sys.stdout if stdout is None else stdout
+    stderr = sys.stderr if stderr is None else stderr
+    environment = os.environ if environment is None else environment
+    arguments = build_complete_parser().parse_args(argv)
+
+    status_name = arguments.status
+    if status_name is None:
+        status_name = environment.get("TRAIL_REPORT_STATUS", "closed")
+    limit = 20 if arguments.limit is None else arguments.limit
+    if limit < 1:
+        print("trail-report: limit must be at least 1", file=stderr)
+        return 1
+
+    try:
+        with input_context(arguments.input, stdin) as lines:
+            parsed = [parse_record(line) for line in lines if line.strip()]
+        selected = select_status(parsed, status_name, limit)
+    except (OSError, ValueError) as error:
+        print(f"trail-report: {error}", file=stderr)
+        return 1
+
+    for record in selected:
+        print(json.dumps(record, ensure_ascii=False, sort_keys=True), file=stdout)
+    return 0
+
+
+sample_in = io.StringIO("north-ridge|open|Windy\n")
+sample_out = io.StringIO()
+sample_err = io.StringIO()
+sample_status = complete_main(
+    ["-", "--status", "open"],
+    stdin=sample_in,
+    stdout=sample_out,
+    stderr=sample_err,
+    environment={},
+)
+assert sample_status == 0
+assert '"north-ridge"' in sample_out.getvalue()
+assert sample_err.getvalue() == ""
+```
+
+This compact coordinator demonstrates the direction of dependencies. Your
+package version should reuse the complete settings and logging functions from
+the preceding lessons instead of copying their behavior into `cli.py`.
+</details>
+
 ## Key points
 
-::: {.callout-tip title="Key points"}
-- Teach one complete CLI baseline and compare alternatives by capability.
-- Keep command frameworks at the program boundary.
-- Core functions should accept and return ordinary values.
-:::
+- Untangle a CLI by separating command grammar, configuration, resources, core
+  behavior, rendering, diagnostics, and process termination.
+- Keep argparse namespaces and global process resources at the adapter boundary;
+  pass ordinary parameters or validated dataclasses into reusable code.
+- Connect module execution and installed project scripts to one callable
+  `main()` implementation.
+- Check pure rules directly, check orchestration with injected collaborators,
+  and check packaging and process behavior with a real subprocess from another
+  directory.
+- Treat argument spelling, help, output formats, diagnostics, configuration
+  names, and exit statuses as public interfaces once other people or programs
+  depend on them.
+- Click, Typer, and Rich can improve specific experiences, but no framework
+  automatically repairs tangled responsibilities or polluted streams.
 
-## References
+## Continue learning
 
-- https://docs.python.org/3/library/argparse.html
-- https://click.palletsprojects.com/
-- https://typer.tiangolo.com/
-- https://rich.readthedocs.io/
+- [Python argparse library reference](https://docs.python.org/3/library/argparse.html)
+- [Python `__main__` documentation](https://docs.python.org/3/library/__main__.html)
+- [Python subprocess documentation](https://docs.python.org/3/library/subprocess.html)
+- [Python packaging entry-points specification](https://packaging.python.org/en/latest/specifications/entry-points/)
+- [Click documentation](https://click.palletsprojects.com/en/stable/)
+- [Typer documentation](https://typer.tiangolo.com/)
+- [Rich documentation](https://rich.readthedocs.io/en/stable/introduction.html)

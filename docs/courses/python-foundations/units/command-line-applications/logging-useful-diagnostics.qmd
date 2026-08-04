@@ -1,0 +1,611 @@
+---
+title: Write Useful Logs Without Polluting Output
+lesson_id: command-line-applications.logging-useful-diagnostics
+lesson_order: 40
+description: Separate command results, user diagnostics, and operational log records while configuring handlers once, choosing useful levels, preserving exceptions, and redacting sensitive values.
+execute:
+  echo: true
+categories:
+- python-foundations
+- command-line-applications
+- logging
+- diagnostics
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/logging-useful-diagnostics.ipynb
+course_id: python-foundations
+unit_id: command-line-applications
+unit_number: 12
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 3.5–4.5 hours
+- **You will learn:** Distinguish output from diagnostics and logs, create module loggers, configure one application-owned handler, map verbosity to levels, retain exception context, and prevent sensitive values from entering records.
+- **Practice in:** Google Colab, JupyterLab, or a fresh local Python interpreter
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+`trail-report` already sends JSON data to stdout and record-rejection messages
+to stderr. An operator now asks questions that are different from either
+result: Which configuration source won? How many records were read? Which file
+was opened? Where did an unexpected decoder failure occur?
+
+Logging records operational events for later observation. It should make a
+command easier to operate without changing the data another program receives.
+
+As you work, answer these questions:
+
+- How is a log record different from a result or a concise user diagnostic?
+- Why do modules create loggers while the application chooses handlers and
+  formatting?
+- Which level fits a routine event, recoverable problem, or failed operation?
+- Why do logging calls normally use `%s` placeholders instead of f-strings?
+- How can verbose evidence remain useful without disclosing sensitive data?
+
+## 1. Decide who needs each message
+
+Consider one damaged line. Three messages might be useful:
+
+```text
+{"checkpoint": "north-ridge", "status": "closed"}
+trail-report: line 4: expected CHECKPOINT|STATUS|NOTE
+2026-08-04 14:23:10 WARNING trail_report.runner rejected line=4 reason=field-count
+```
+
+They have different audiences and stability promises:
+
+| Message | Audience | Mechanism | Stability expectation |
+|---|---|---|---|
+| JSON record | another program or user requesting data | stdout | documented output schema |
+| concise rejection | user repairing this invocation | stderr write | useful command diagnostic |
+| timestamped event | operator or developer investigating behavior | logging | configurable detail and format |
+
+A log record is not automatically better than `print()`. If a user explicitly
+requested a table, writing that table to stdout is correct. If invalid input
+needs one immediate repair sentence, writing it to stderr is correct. Logging
+is valuable when event severity, origin, filtering, and routing matter.
+
+This function pollutes a data stream:
+
+```python
+def emit_record_bad(record):
+    print("INFO: preparing record")
+    print(record)
+```
+
+Changing the first call to `logging.info()` helps only if the logging handler is
+configured for stderr. The command must own both the message choice and the
+handler destination.
+
+::: {.concept-diagram}
+Result data bypasses the logging system; module log records flow through an
+application-owned handler to stderr.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Reusable core result"] --> B["Renderer"]
+  B --> C["stdout"]
+  D["Module logger"] --> E["Application handler"]
+  E --> F["stderr"]
+  G["User diagnostic"] --> F
+```
+:::
+
+## 2. Create a logger for the module that knows the event
+
+Reusable modules conventionally create a logger named after the module:
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+```
+
+If this code is in `trail_report.runner`, the logger name is
+`trail_report.runner`. The name tells an operator where an event originated and
+allows configuration for related logger families.
+
+Use it inside work that knows what happened:
+
+```python
+def count_statuses(records):
+    counts = {"open": 0, "limited": 0, "closed": 0}
+    for record in records:
+        counts[record["status"]] += 1
+    logger.debug("counted %d records", sum(counts.values()))
+    return counts
+```
+
+The module **emits** a record. It does not decide whether DEBUG records appear,
+where they go, or how time and severity are formatted. That distinction lets a
+notebook, CLI, desktop application, and test use the same function with
+different observation needs.
+
+Do not configure logging during import:
+
+```python
+import logging
+
+
+def configure_during_import_bad():
+    logging.basicConfig(level=logging.DEBUG)
+```
+
+Calling that function from module top-level would seize a global presentation
+decision merely because another application imported the code. Libraries
+should normally create loggers and remain quiet unless the containing
+application configures handlers.
+
+### Logger level and handler level both filter
+
+A record must pass the logger's effective level and the handler's level. For a
+simple CLI, set a clear application logger level and one handler level together
+rather than creating a mystery of conflicting filters.
+
+```python
+def configure_logger(logger, stderr, level):
+    handler = logging.StreamHandler(stderr)
+    handler.setLevel(level)
+    handler.setFormatter(
+        logging.Formatter("%(levelname)s %(name)s: %(message)s")
+    )
+
+    logger.handlers.clear()
+    logger.setLevel(level)
+    logger.addHandler(handler)
+    logger.propagate = False
+    return handler
+```
+
+This focused course helper deliberately replaces handlers on the supplied
+application logger. A larger application may preserve externally installed
+handlers or configure a hierarchy instead. State ownership before clearing
+anything.
+
+`propagate = False` prevents the same record from also traveling to an ancestor
+handler in this self-contained design. It is not a magic setting every library
+should use; it follows from the application owning this logger's one handler.
+
+### Checkpoint: send each message to the right mechanism
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-logging-message-mechanism",
+  "title": "Send each message to the right mechanism",
+  "instructions": "Choose from the public data channel, immediate diagnostic, and configurable operational record.",
+  "questions": [
+    {
+      "id": "unit12-logging-q28-json-result",
+      "prompt": "The user selected --format jsonl and another process consumes the output. Which mechanism should emit each record?",
+      "options": ["logger.warning", "logger.debug", "stderr", "the renderer writing to stdout"],
+      "answer_index": 3,
+      "explanation": "Requested result data belongs to the stdout format contract, not the configurable logging system."
+    },
+    {
+      "id": "unit12-logging-q29-module-event",
+      "prompt": "A reusable module wants to report how many records it counted when debugging is enabled. What should it do?",
+      "options": ["Emit a DEBUG record through logging.getLogger(__name__)", "Call basicConfig during import", "Print the count into JSON stdout", "Always open its own log file"],
+      "answer_index": 0,
+      "explanation": "The module knows the event and emits it; the application decides whether and where the DEBUG record appears."
+    },
+    {
+      "id": "unit12-logging-q30-repair-message",
+      "prompt": "A user needs to repair malformed line 4 during this run. Which is the clearest baseline behavior?",
+      "options": ["Hide the issue unless DEBUG is enabled", "Write a concise line-numbered diagnostic to stderr", "Insert an English sentence into JSONL", "Return the malformed line as status"],
+      "answer_index": 1,
+      "explanation": "A concise stderr diagnostic serves the user immediately without corrupting stdout. Logging may add optional operational detail."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Configure logging once at the application boundary
+
+The CLI knows the selected verbosity and owns stderr. It can configure logging
+after parsing settings and before running the core:
+
+```python
+import logging
+import sys
+
+
+def level_for_verbosity(verbose, quiet=False):
+    if quiet:
+        return logging.ERROR
+    if verbose >= 2:
+        return logging.DEBUG
+    if verbose == 1:
+        return logging.INFO
+    return logging.WARNING
+
+
+application_logger = logging.getLogger("trail_report")
+handler = configure_logger(
+    application_logger,
+    sys.stderr,
+    level_for_verbosity(verbose=1),
+)
+```
+
+The command can now write stable result data independently while modules below
+`trail_report` emit records. The format can include severity and logger name
+without requiring every call site to type them.
+
+### Why `basicConfig()` can surprise a notebook
+
+`logging.basicConfig()` configures the root logging system only if no relevant
+handlers already exist, unless `force=True` is deliberately selected. A
+notebook kernel or imported tool may have configured logging earlier, so
+changing `basicConfig(level=...)` appears to do nothing.
+
+This experiment makes the state visible:
+
+```python
+root = logging.getLogger()
+print(len(root.handlers))
+print(root.getEffectiveLevel())
+```
+
+Do not teach “call `basicConfig()` repeatedly until it works.” In a standalone
+application, configure once. In a notebook lesson, either use an explicitly
+owned logger and handler as above or reset only the handlers the lesson created.
+`force=True` can be a deliberate application-level reset, but a reusable module
+must not force away another application's handlers.
+
+### Avoid duplicate output
+
+Adding one new handler every time a setup function runs causes duplicates:
+
+```python
+def add_handler_bad(logger, stream):
+    logger.addHandler(logging.StreamHandler(stream))
+```
+
+If called three times, one record may appear three times. Configuration should
+be idempotent for its declared ownership: reuse, replace, or first remove the
+handler it owns. The earlier `configure_logger()` clears handlers because its
+contract says the supplied logger belongs to this small CLI.
+
+### Verify configuration with an injected stream
+
+```python
+import io
+
+captured_logs = io.StringIO()
+demo_logger = logging.getLogger("trail_report.demo")
+configure_logger(demo_logger, captured_logs, logging.INFO)
+
+demo_logger.debug("hidden detail")
+demo_logger.info("loaded %d records", 3)
+demo_logger.warning("one record needs review")
+
+text = captured_logs.getvalue()
+assert "hidden detail" not in text
+assert "loaded 3 records" in text
+assert "one record needs review" in text
+```
+
+The direct check proves filtering and routing for this logger. It does not
+require reading a real log file or relying on global notebook capture.
+
+## 4. Choose levels from the action they support
+
+Level names are more useful when tied to specific events:
+
+| Level | Trail-report event | Why an operator might need it |
+|---|---|---|
+| DEBUG | selected config source or individual parser decision | investigate implementation details |
+| INFO | opened one input and processed 240 records | observe ordinary progress in verbose mode |
+| WARNING | skipped one malformed optional record and continued | notice degraded but continuing work |
+| ERROR | could not read the requested input | understand why the requested operation failed |
+| CRITICAL | application-wide resource makes safe operation impossible | reserve for severe system-level failure |
+
+Do not choose ERROR merely because a word sounds dramatic. Ask what happened to
+the requested operation and what the operator should do.
+
+The default trail-report mode shows WARNING and above. `-v` includes ordinary
+INFO events; `-vv` includes DEBUG details. `--quiet` raises the threshold to
+ERROR but does not suppress the explicit result requested on stdout.
+
+### Keep messages useful when formatting changes
+
+Call sites should record the event facts, not imitate the final terminal
+layout. This is useful:
+
+```python
+logger.info(
+    "opened input path=%s encoding=%s",
+    input_path,
+    "utf-8",
+)
+```
+
+The application formatter can add level, logger name, time, or another prefix.
+The call site should not manually prepend `INFO` or a timestamp; doing so would
+duplicate fields when the formatter changes.
+
+Prefer stable names such as `path=`, `encoding=`, `decoded=`, and `rejected=`
+when operators search text logs. Do not turn every local variable into a log
+field. Record only facts that answer a likely operational question, and keep
+units explicit—`elapsed_ms=42` is clearer than `elapsed=42`.
+
+Logging output is not automatically a forever-stable machine API. If another
+program must consume events, define and version an explicit structured event
+format rather than teaching it to scrape human log sentences. The JSONL result
+contract remains separate from that possible future interface.
+
+### Checkpoint: own configuration at the boundary
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-logging-boundary-levels",
+  "title": "Own configuration at the boundary",
+  "instructions": "Trace handler ownership and effective filtering.",
+  "questions": [
+    {
+      "id": "unit12-logging-q31-two-filters",
+      "prompt": "A DEBUG record reaches a logger set to DEBUG, but its only handler is set to INFO. What happens?",
+      "options": ["It is written twice", "It becomes an ERROR", "The handler filters it out", "It moves to stdout automatically"],
+      "answer_index": 2,
+      "explanation": "A record must pass both logger and handler filtering. INFO on the handler rejects DEBUG."
+    },
+    {
+      "id": "unit12-logging-q32-library-basicconfig",
+      "prompt": "Why should a reusable imported module avoid basicConfig()?",
+      "options": ["Modules cannot create log records", "It prevents all exceptions", "It changes JSON into bytes", "It would make a presentation decision that belongs to the containing application"],
+      "answer_index": 3,
+      "explanation": "Libraries emit records through named loggers; applications own handlers, levels, destinations, and formatting."
+    },
+    {
+      "id": "unit12-logging-q33-duplicate-handler",
+      "prompt": "A setup function adds a new handler on every call. What symptom is likely after three calls?",
+      "options": ["One event may be emitted three times", "The parser loses all options", "stdout closes itself", "Every level becomes CRITICAL"],
+      "answer_index": 0,
+      "explanation": "Each attached handler can emit the same record, so repeated unowned setup commonly creates duplicate lines."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Let logging delay message formatting
+
+Prefer logging placeholders:
+
+```python
+record_count = 240
+logger.info("processed %d records", record_count)
+```
+
+The logger receives a format string and arguments. If INFO is filtered out, the
+logging system need not build the final message. This also gives logging tools a
+consistent message template.
+
+An f-string is evaluated before the call:
+
+```python
+logger.info(f"processed {record_count} records")
+```
+
+For a small integer the cost is negligible, but the ownership distinction is
+important. Avoid calling expensive functions only to build a filtered message:
+
+```python
+if logger.isEnabledFor(logging.DEBUG):
+    logger.debug("full dependency map: %s", build_dependency_map())
+```
+
+Use the explicit guard only when computing the argument itself is expensive.
+Simple values can be passed directly with placeholders.
+
+## 6. Preserve exception context in diagnostic mode
+
+Inside an exception handler, `logger.exception()` emits an ERROR record and
+includes the current traceback:
+
+```python
+def load_optional_cache(path, logger):
+    try:
+        return path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        logger.info("cache is absent; starting empty")
+        return ""
+    except OSError:
+        logger.exception("could not read cache path=%s", path)
+        raise
+```
+
+The missing optional cache has normal fallback behavior and does not need a
+traceback. Another operating-system failure is re-raised after preserving
+debugging context. The outer command boundary can decide whether to show a
+concise user error, enable detailed diagnostics, or let an unexpected failure
+remain visible.
+
+Do not call `logger.exception()` outside an active exception handler; there is
+no meaningful current traceback to include. Do not log an exception and then
+raise it through several layers that all log it again. Choose the boundary that
+has both useful context and ownership of the diagnostic policy.
+
+## 7. Redact sensitive and oversized values
+
+Verbose mode is not permission to disclose everything. This call leaks a token:
+
+```python
+def log_upload_bad(logger, endpoint, token):
+    logger.debug("upload endpoint=%s token=%s", endpoint, token)
+```
+
+Repair it by logging a safe fact:
+
+```python
+def log_upload(logger, endpoint, token):
+    logger.debug(
+        "upload endpoint=%s token_configured=%s",
+        endpoint,
+        token is not None,
+    )
+```
+
+Also avoid full environment mappings, authorization headers, unbounded record
+payloads, personal information, and dataclass representations that contain
+sensitive fields. Prefer counts, safe IDs, source labels, field names, and
+bounded summaries.
+
+Before adding a record, answer:
+
+1. Who will use this information?
+2. At what level should it appear?
+3. Could any argument contain a secret or large payload?
+4. Will the same failure already be reported elsewhere?
+5. Does the message help a concrete investigation?
+
+### Checkpoint: read safe diagnostic evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-logging-safe-evidence",
+  "title": "Read safe diagnostic evidence",
+  "instructions": "Choose useful records without wasted work, duplicates, or disclosure.",
+  "questions": [
+    {
+      "id": "unit12-logging-q34-placeholder",
+      "prompt": "Why prefer logger.info('loaded %d records', count) over an f-string for ordinary logging?",
+      "options": ["Percent placeholders change count to a float", "Logging can delay final message formatting until the record is emitted", "F-strings always reveal secrets", "The call is written to stdout instead"],
+      "answer_index": 1,
+      "explanation": "Passing a template and arguments lets logging postpone final formatting when the level is disabled."
+    },
+    {
+      "id": "unit12-logging-q35-exception-call",
+      "prompt": "When is logger.exception most meaningful?",
+      "options": ["Before any operation starts", "For every successful record", "Inside an exception handler when the current traceback helps diagnosis", "Whenever stdout is JSON"],
+      "answer_index": 2,
+      "explanation": "logger.exception includes the active exception context, so use it at a deliberate failure boundary."
+    },
+    {
+      "id": "unit12-logging-q36-token-record",
+      "prompt": "Which DEBUG record preserves the most useful safe evidence?",
+      "options": ["token=%s with the full token", "environment=%s with every value", "record=%s with the entire payload", "upload endpoint=%s token_configured=%s with no token value"],
+      "answer_index": 3,
+      "explanation": "The repaired record identifies the operation and whether configuration exists without copying the sensitive value."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Add quiet and verbose modes to trail-report
+
+Build an application-owned logging setup with this contract:
+
+1. verbosity 0 emits WARNING and above;
+2. verbosity 1 emits INFO and above;
+3. verbosity 2 or more emits DEBUG and above;
+4. quiet mode emits only ERROR and above;
+5. the supplied logger has exactly one handler owned by this setup;
+6. the handler writes to the supplied stderr stream;
+7. the format is `LEVEL logger.name: message`;
+8. processing logs counts and safe checkpoint IDs, never full notes or tokens;
+9. JSONL stdout remains identical at every verbosity; and
+10. setup called twice does not duplicate records.
+
+Create separate `StringIO` streams for data and logs. Run the same record set at
+verbosity 0, 1, and 2. Assert exact presence or absence of DEBUG, INFO, WARNING,
+and ERROR events. Then call setup twice and confirm one warning appears once.
+
+<details>
+<summary>Hint 1: convert verbosity before configuring</summary>
+
+Write `level_for_verbosity(verbose, quiet)` as a pure function and check all
+four outcomes. Do not scatter level arithmetic across handler setup and record
+processing.
+</details>
+
+<details>
+<summary>Hint 2: make handler ownership explicit</summary>
+
+For this lab, the supplied named logger belongs to the setup function. Clear
+its existing handlers, attach exactly one configured `StreamHandler`, set its
+level and formatter, and disable propagation.
+</details>
+
+<details>
+<summary>Hint 3: compare stdout byte for byte</summary>
+
+Run the renderer with the same records and three log levels. Assert
+`quiet_stdout == info_stdout == debug_stdout`. Log detail may change; public
+data must not.
+</details>
+
+<details>
+<summary>Show a complete setup after attempting the lab</summary>
+
+```python
+import logging
+
+
+def trail_log_level(verbose, quiet=False):
+    """Return the application level for CLI verbosity settings."""
+    if quiet:
+        return logging.ERROR
+    if verbose >= 2:
+        return logging.DEBUG
+    if verbose == 1:
+        return logging.INFO
+    return logging.WARNING
+
+
+def configure_trail_logging(logger, stderr, verbose=0, quiet=False):
+    """Replace this application's handlers with one stderr handler."""
+    level = trail_log_level(verbose, quiet)
+    handler = logging.StreamHandler(stderr)
+    handler.setLevel(level)
+    handler.setFormatter(
+        logging.Formatter("%(levelname)s %(name)s: %(message)s")
+    )
+
+    logger.handlers.clear()
+    logger.setLevel(level)
+    logger.addHandler(handler)
+    logger.propagate = False
+    return logger
+
+
+def record_run(logger, processed, rejected, token=None):
+    """Emit safe operational facts for one completed run."""
+    logger.debug("token_configured=%s", token is not None)
+    logger.info("processed %d records", processed)
+    if rejected:
+        logger.warning("rejected %d records", rejected)
+```
+
+The CLI boundary should call `configure_trail_logging()` once after resolving
+arguments and settings. Reusable modules should call their module logger, not
+this configuration function.
+</details>
+
+## Key points
+
+- Result output, immediate user diagnostics, and operational log records serve
+  different audiences; do not replace all three with one mechanism.
+- Reusable modules create named loggers and emit events. The containing
+  application owns handlers, levels, destinations, and formatting.
+- Keep a machine-readable stdout clean by routing the CLI's log handler to
+  stderr.
+- Logger and handler levels both filter. Connect `-v`, `-vv`, and `--quiet` to
+  one documented policy.
+- Use logging placeholders, and use `logger.exception()` only where active
+  exception context belongs in the diagnostic policy.
+- Prevent repeated setup from adding duplicate handlers, and never log secrets,
+  full environments, or unbounded payloads merely because DEBUG is enabled.
+
+## Continue learning
+
+- [Python Logging HOWTO](https://docs.python.org/3/howto/logging.html)
+- [Python logging library reference](https://docs.python.org/3/library/logging.html)
+- [Logging cookbook](https://docs.python.org/3/howto/logging-cookbook.html)

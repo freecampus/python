@@ -1,15 +1,16 @@
 ---
-title: 'Unit Challenge: Ship a Record-Conversion CLI'
-description: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
+title: 'Unit Challenge: Decode the Deep-Sea Beacon'
+description: Build a streaming command that decodes beacon pings, resolves a shift from explicit sources, preserves clean JSON Lines, reports damaged signals, logs a safe summary, and proves real process behavior.
 challenge_id: command-line-applications.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 2
+assessment_version: 3
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
 - command-line-applications
 - unit-challenge
+- cli
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/challenge.ipynb
 course_id: python-foundations
@@ -19,186 +20,714 @@ unit_number: 12
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 12 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
-- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+- **Outcome assessed:** Design a discoverable command, preserve its data and diagnostic channels, resolve settings safely, keep the decoder reusable, and verify direct and process behavior.
+- **Evidence:** Thirty progressive checks, one debugging record, a real-process proof, and an explanation from a clean rerun
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
 
-The core conversion is directly testable, `main` accepts an argument list, streams are injectable, and ordinary data problems do not produce raw tracebacks.
+## 1. Receive a damaged signal from the ocean floor
 
-**Scenario:** Ship a command that reads JSON records, normalizes each name and score, writes valid records to stdout, reports rejected records to stderr, and returns a meaningful exit code.
+The research vessel *Asteria* has located two experimental beacons beneath a
+storm. Each ping contains an identifier and a message encoded with a backward
+Caesar shift:
 
-::: {.callout-note title="Work independently, but not without support"}
-Use the starter contract, run one group of checks at a time, and open hints only
-after you can state the evidence blocking your next step.
+```text
+NEREID|KHOOR GHSWK
+CALYPSO-7|PHHW DW WKH ULGJH
+```
+
+Your command, `deepbeacon`, must decode valid pings into JSON Lines so another
+research tool can consume them. A damaged ping must not corrupt that stream.
+Instead, the command writes a concise line-numbered explanation to stderr and
+returns a status that automation can inspect.
+
+The result is satisfying and visible:
+
+```bash
+$ deepbeacon pings.txt --shift 3
+{"beacon": "NEREID", "message": "HELLO DEPTH"}
+{"beacon": "CALYPSO-7", "message": "MEET AT THE RIDGE"}
+$ echo $?
+0
+```
+
+When input contains damage, ordinary mode recovers every valid signal it can:
+
+```bash
+$ cat mixed.txt | deepbeacon - --shift 3
+{"beacon": "NEREID", "message": "HELLO DEPTH"}
+deepbeacon: line 2: expected BEACON|MESSAGE
+{"beacon": "CALYPSO-7", "message": "MEET AT THE RIDGE"}
+$ echo $?
+1
+```
+
+The challenge changes the story and record shape from the trail-report lessons.
+You must select and combine their ideas rather than copy one finished function.
+
+::: {.callout-note title="Advance one green group at a time"}
+Implement one responsibility, run only its checks, and record the earliest
+failure. Open the hints only after you can name the check and evidence blocking
+your next step.
 :::
 
-## 2. Understand the acceptance example
+## 2. Translate the beacon rules into observable behavior
 
-Before implementation, restate the normal input, expected result, important
-boundary, and one anticipated failure in your own words.
+### Message decoding
 
-### Constraints
+`decode_message(text, shift)` moves ASCII letters **backward** by `shift` places:
 
-1. Keep `convert_record` independent of argparse and streams.
-2. Keep `main(argv, stdout, stderr)` injectable.
-3. Return `0` when all records convert and `2` when any record is rejected.
-4. Do not print inside `convert_record`.
+- `D` with shift 3 becomes `A`;
+- `A` with shift 3 wraps around to `X`;
+- lowercase letters remain lowercase;
+- spaces, digits, punctuation, and non-ASCII characters remain unchanged;
+- shift 0 leaves text unchanged; and
+- accepted configured shifts are integers from 0 through 25.
+
+You do not need cryptography knowledge beyond those rules. This is a playful
+substitution puzzle, not secure encryption.
+
+### Ping records
+
+Each non-blank input line must contain exactly one `|`:
+
+```text
+BEACON-ID|ENCODED MESSAGE
+```
+
+- Surrounding whitespace around both fields is ignored.
+- The beacon ID is non-empty and contains only uppercase ASCII letters, digits,
+  and internal hyphens.
+- It cannot begin or end with a hyphen.
+- The encoded message cannot be blank.
+- Blank physical lines are ignored and retain their physical line numbers for
+  later diagnostics.
+
+### Configuration and command grammar
+
+The public command is:
+
+```text
+deepbeacon [FILE|-] [--shift N] [--strict] [-v]
+```
+
+- `FILE` is optional and defaults to `-`, meaning stdin.
+- `--shift` has strongest precedence.
+- If the CLI value is omitted, `DEEPBEACON_SHIFT` is used when present.
+- If both are omitted, the shift is 3.
+- Invalid CLI shift syntax is an argparse grammar failure with status 2.
+- An invalid environment shift is a configuration failure with status 1.
+- `--strict` stops after the first damaged ping; ordinary mode continues.
+- `-v` writes one safe `INFO deepbeacon: decoded=N rejected=M` summary to
+  stderr. It never changes stdout.
+
+### Channels and status
+
+- Each valid ping becomes one JSON object on stdout with `beacon` and `message`
+  keys.
+- Each damaged ping writes
+  `deepbeacon: line N: REASON` to stderr.
+- Status is 0 when all processed pings are valid and configuration succeeds.
+- Status is 1 after any damaged ping, invalid environment setting, or
+  anticipated file failure.
+- Argparse owns status 2 for invalid command syntax.
+
+::: {.concept-diagram}
+Notice that decoding is an ordinary function inside the application; file,
+environment, logging, streams, and process status remain boundary concerns.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["FILE or stdin"] --> B["parse_ping"]
+  C["CLI and environment shift"] --> D["Settings"]
+  B --> E["decode_message"]
+  D --> E
+  E --> F["JSONL stdout"]
+  B --> G["rejection stderr"]
+  E --> H["summary log stderr"]
+  G --> I["status 1"]
+```
+:::
 
 ## 3. Start from the contract
+
+Copy this starter into one notebook cell or into `deepbeacon.py`. Required names
+remove blank-page uncertainty while leaving the central parsing, precedence,
+channel, and orchestration decisions to you.
 
 ```python
 import argparse
 import json
+import logging
+import os
 import sys
+from contextlib import nullcontext
+from dataclasses import dataclass
+from pathlib import Path
 
 
-def convert_record(record):
-    """Return a normalized name/score record."""
+@dataclass(frozen=True)
+class Settings:
+    """Validated behavior for one beacon-decoding run."""
+
+    shift: int
+    strict: bool
+    verbose: bool
+
+
+def decode_message(text, shift):
+    """Decode ASCII letters by shifting backward; preserve other characters."""
     raise NotImplementedError
 
 
-def main(argv=None, stdout=sys.stdout, stderr=sys.stderr):
-    """Run the records command and return an exit code."""
+def parse_ping(line):
+    """Return (beacon_id, encoded_message) from one valid physical line."""
+    raise NotImplementedError
+
+
+def parse_shift(text):
+    """Return an integer from 0 through 25 or raise a useful ValueError."""
+    raise NotImplementedError
+
+
+def argparse_shift(text):
+    """Adapt parse_shift failures to argparse's command-grammar error."""
+    raise NotImplementedError
+
+
+def resolve_shift(cli_shift, environment):
+    """Resolve CLI > DEEPBEACON_SHIFT > default 3."""
+    raise NotImplementedError
+
+
+def build_parser():
+    """Build the public deepbeacon command grammar."""
+    raise NotImplementedError
+
+
+def configure_logger(stderr, verbose):
+    """Return an application-owned logger whose handler writes to stderr."""
+    raise NotImplementedError
+
+
+def run(lines, settings, stdout, stderr, logger):
+    """Decode lines, write both channels, and return processing status."""
+    raise NotImplementedError
+
+
+def input_context(input_name, stdin):
+    """Return a context manager for supplied stdin or one opened UTF-8 file."""
+    raise NotImplementedError
+
+
+def main(argv=None, stdin=None, stdout=None, stderr=None, environment=None):
+    """Coordinate adapters and return the application status."""
     raise NotImplementedError
 ```
 
-## 4. Build in small stages
+Do not add Click, Typer, Rich, pytest, or another package. The standard library
+is sufficient. Do not put the argparse namespace, environment mapping, or real
+global streams into `decode_message()` or `parse_ping()`.
 
-1. Make the smallest normal case observable.
-2. Run the nearest check and read its complete failure evidence.
-3. Add one boundary behavior without weakening earlier checks.
-4. Restart and run the complete artifact from top to bottom.
+## 4. Build one responsibility at a time
+
+Use this order to keep failures local:
+
+1. implement letter shifting and wraparound;
+2. parse and validate one ping;
+3. validate and resolve the shift;
+4. build and inspect the parser;
+5. implement `run()` with explicit streams and logger;
+6. add ordinary versus strict behavior;
+7. select stdin or an owned file;
+8. coordinate everything in `main()`; and
+9. add the entry-point guard only after direct checks pass.
+
+For letter shifting, `ord()` converts one character to its integer code point
+and `chr()` converts back. The offset formula can preserve case:
+
+```text
+decoded_offset = (encoded_offset - shift) % 26
+```
+
+Use base `ord("A")` for uppercase and `ord("a")` for lowercase. Check the
+character with explicit ASCII ranges; methods such as `.isalpha()` also accept
+many non-ASCII letters that this challenge promises to preserve.
+
+For `run()`, keep counters named `decoded_count` and `rejected_count`. A boolean
+or the rejected count can determine final status. Write a rejection immediately
+so a long stream provides useful progress, but log only one summary after the
+loop.
 
 ## 5. Run progressive assertions
 
+The helper below lets a plain assertion check a failure without pytest:
+
 ```python
-from io import StringIO
-
-assert convert_record({"name": " Ada ", "score": "9"}) == {
-    "name": "Ada",
-    "score": 9,
-}
-
-stdout = StringIO()
-stderr = StringIO()
-status = main(
-    ["--record", '{"name": " Ada ", "score": "9"}'],
-    stdout=stdout,
-    stderr=stderr,
-)
-assert status == 0
-assert json.loads(stdout.getvalue()) == {"name": "Ada", "score": 9}
-assert stderr.getvalue() == ""
+def raises_value_error(function, *arguments):
+    try:
+        function(*arguments)
+    except ValueError as error:
+        return str(error)
+    raise AssertionError("expected ValueError")
 ```
 
-::: {.callout-warning title="Do not edit expected values to create a pass"}
-If a check appears wrong, explain the contract conflict before changing either
-side. Otherwise, repair the implementation and preserve the check.
-:::
+Run checks 1–9 after the two core functions, 10–17 after shift resolution, and
+18–30 after the parser and runner. Do not change expected values to match an
+incorrect implementation.
+
+```python
+import io
+
+# Decoder checks 1–7
+assert decode_message("KHOOR", 3) == "HELLO"                       # 1
+assert decode_message("khoor", 3) == "hello"                       # 2
+assert decode_message("ABC", 3) == "XYZ"                           # 3
+assert decode_message("abc", 3) == "xyz"                           # 4
+assert decode_message("PHHW 7! 深", 3) == "MEET 7! 深"               # 5
+assert decode_message("Stay", 0) == "Stay"                          # 6
+assert decode_message("Zz", 25) == "Aa"                            # 7
+
+# Ping checks 8–14
+assert parse_ping("NEREID|KHOOR GHSWK") == ("NEREID", "KHOOR GHSWK")  # 8
+assert parse_ping("  CALYPSO-7 | PHHW  ") == ("CALYPSO-7", "PHHW")    # 9
+assert "expected BEACON|MESSAGE" in raises_value_error(parse_ping, "BROKEN")  # 10
+assert "exactly one" in raises_value_error(parse_ping, "A|B|C")       # 11
+assert "beacon" in raises_value_error(parse_ping, " |KHOOR")          # 12
+assert "message" in raises_value_error(parse_ping, "NEREID| ")        # 13
+assert "beacon" in raises_value_error(parse_ping, "bad_id|KHOOR")     # 14
+
+# Shift checks 15–19
+assert resolve_shift(None, {}) == 3                                   # 15
+assert resolve_shift(None, {"DEEPBEACON_SHIFT": "7"}) == 7           # 16
+assert resolve_shift(2, {"DEEPBEACON_SHIFT": "7"}) == 2              # 17
+assert resolve_shift(None, {"DEEPBEACON_SHIFT": "0"}) == 0           # 18
+assert "0 through 25" in raises_value_error(                           # 19
+    resolve_shift, None, {"DEEPBEACON_SHIFT": "30"}
+)
+
+# Parser checks 20–21
+parser = build_parser()
+default_args = parser.parse_args([])
+assert (default_args.input, default_args.shift, default_args.strict) == ("-", None, False)  # 20
+chosen_args = parser.parse_args(["pings.txt", "--shift", "4", "--strict", "-v"])
+assert (chosen_args.input, chosen_args.shift, chosen_args.strict, chosen_args.verbose) == ("pings.txt", 4, True, True)  # 21
+
+# Runner checks 22–30
+quiet_logger = configure_logger(io.StringIO(), verbose=False)
+valid_out = io.StringIO()
+valid_err = io.StringIO()
+valid_status = run(
+    ["NEREID|KHOOR GHSWK\n"],
+    Settings(shift=3, strict=False, verbose=False),
+    valid_out,
+    valid_err,
+    quiet_logger,
+)
+assert valid_status == 0                                                # 22
+assert valid_out.getvalue() == '{"beacon": "NEREID", "message": "HELLO DEPTH"}\n'  # 23
+assert valid_err.getvalue() == ""                                      # 24
+
+mixed_lines = [
+    "NEREID|KHOOR\n",
+    "damaged\n",
+    "CALYPSO-7|PHHW\n",
+]
+mixed_out = io.StringIO()
+mixed_err = io.StringIO()
+mixed_status = run(
+    mixed_lines,
+    Settings(shift=3, strict=False, verbose=False),
+    mixed_out,
+    mixed_err,
+    quiet_logger,
+)
+assert mixed_status == 1                                                # 25
+assert mixed_out.getvalue().count("\n") == 2                           # 26
+assert mixed_err.getvalue() == "deepbeacon: line 2: expected BEACON|MESSAGE\n"  # 27
+
+strict_out = io.StringIO()
+strict_err = io.StringIO()
+run(
+    mixed_lines,
+    Settings(shift=3, strict=True, verbose=False),
+    strict_out,
+    strict_err,
+    quiet_logger,
+)
+assert "NEREID" in strict_out.getvalue() and "CALYPSO" not in strict_out.getvalue()  # 28
+
+verbose_err = io.StringIO()
+verbose_logger = configure_logger(verbose_err, verbose=True)
+verbose_out = io.StringIO()
+run(
+    ["NEREID|KHOOR\n"],
+    Settings(shift=3, strict=False, verbose=True),
+    verbose_out,
+    verbose_err,
+    verbose_logger,
+)
+assert "INFO deepbeacon: decoded=1 rejected=0" in verbose_err.getvalue()  # 29
+assert "INFO" not in verbose_out.getvalue()                              # 30
+```
+
+After each group passes, restart and run from the top. This exposes hidden
+notebook state such as an older `Settings` definition or logger handler.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
 <summary>Hint 1</summary>
 
-Let argparse collect repeatable `--record` text values.
-
+For each character, choose uppercase base, lowercase base, or preservation.
+Compute `(ord(character) - base - shift) % 26`, add the base again, and call
+`chr()`. Keep ping parsing separate: split on `|`, verify the part count, strip
+both fields, then validate beacon and message.
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Parse and convert one record inside a narrow error boundary in `main`.
-
+Let `parse_shift()` own the 0–25 rule. `argparse_shift()` should call it and
+translate `ValueError` to `argparse.ArgumentTypeError`. `resolve_shift()` should
+return the explicit integer immediately when it is not `None`; otherwise read
+the environment key if present, then use 3.
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-Use `print(..., file=stderr)` for anticipated errors and accumulate whether any row failed.
-
+In `run()`, enumerate physical lines from 1, skip blanks, catch only
+`ValueError` from `parse_ping()`, write the rejection, increment a counter, and
+break only in strict mode. Configure exactly one logger handler on stderr. In
+`main()`, resolve default collaborators with `is None`, catch configuration and
+file errors, and return rather than calling `sys.exit()`.
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing check. Record its inputs, actual result or exception,
-expected result, one hypothesis, one controlled change, and the verified rerun.
+Record one real failure before repairing it:
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
-|---|---|---|---|---|
-| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+| Field | Your evidence |
+|---|---|
+| Smallest failing check | |
+| Expected value, channel, or status | |
+| Actual value, channel, or status | |
+| First line/function that can explain the difference | |
+| One hypothesis | |
+| One controlled change | |
+| Focused rerun result | |
+| Clean checks 1–30 result | |
 
-## 8. Compare with a solution path
+Useful examples include `A` failing to wrap to `X`, a diagnostic appearing on
+stdout, an environment value overriding an explicit CLI shift, strict mode
+decoding the third line, or one verbose summary appearing twice. Fix the
+earliest false assumption instead of editing every downstream symptom.
+
+## 8. Compare a complete beacon command
+
+Open this only after attempting all progressive groups. Compare contracts and
+boundary ownership rather than requiring identical local variable names.
 
 <details>
-<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+<summary>Show the complete runnable module</summary>
 
 ```python
-def convert_record(record):
-    name = record["name"].strip()
-    if not name:
-        raise ValueError("name is empty")
-    return {"name": name, "score": int(record["score"])}
+import argparse
+import json
+import logging
+import os
+import sys
+from contextlib import nullcontext
+from dataclasses import dataclass
+from pathlib import Path
 
 
-def main(argv=None, stdout=sys.stdout, stderr=sys.stderr):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--record", action="append", default=[])
-    args = parser.parse_args(argv)
-    failed = False
-    for text in args.record:
-        try:
-            converted = convert_record(json.loads(text))
-        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
-            print(f"invalid record: {error}", file=stderr)
-            failed = True
+@dataclass(frozen=True)
+class Settings:
+    """Validated behavior for one beacon-decoding run."""
+
+    shift: int
+    strict: bool
+    verbose: bool
+
+
+def decode_message(text, shift):
+    """Decode ASCII letters by shifting backward; preserve other characters."""
+    decoded = []
+    for character in text:
+        if "A" <= character <= "Z":
+            base = ord("A")
+            offset = (ord(character) - base - shift) % 26
+            decoded.append(chr(base + offset))
+        elif "a" <= character <= "z":
+            base = ord("a")
+            offset = (ord(character) - base - shift) % 26
+            decoded.append(chr(base + offset))
         else:
-            print(json.dumps(converted, ensure_ascii=False), file=stdout)
-    return 2 if failed else 0
+            decoded.append(character)
+    return "".join(decoded)
+
+
+def parse_ping(line):
+    """Return (beacon_id, encoded_message) from one valid physical line."""
+    if "|" not in line:
+        raise ValueError("expected BEACON|MESSAGE")
+    if line.count("|") != 1:
+        raise ValueError("expected exactly one '|' separator")
+
+    beacon, message = (part.strip() for part in line.split("|"))
+    if not beacon:
+        raise ValueError("beacon cannot be blank")
+    valid_characters = all(
+        character.isascii()
+        and (character.isupper() or character.isdigit() or character == "-")
+        for character in beacon
+    )
+    if not valid_characters or beacon.startswith("-") or beacon.endswith("-"):
+        raise ValueError("beacon must use uppercase ASCII letters, digits, and internal hyphens")
+    if not message:
+        raise ValueError("message cannot be blank")
+    return beacon, message
+
+
+def parse_shift(text):
+    """Return an integer from 0 through 25 or raise a useful ValueError."""
+    try:
+        shift = int(text)
+    except (TypeError, ValueError) as error:
+        raise ValueError("shift must be an integer from 0 through 25") from error
+    if not 0 <= shift <= 25:
+        raise ValueError("shift must be an integer from 0 through 25")
+    return shift
+
+
+def argparse_shift(text):
+    """Adapt parse_shift failures to argparse's command-grammar error."""
+    try:
+        return parse_shift(text)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
+
+
+def resolve_shift(cli_shift, environment):
+    """Resolve CLI > DEEPBEACON_SHIFT > default 3."""
+    if cli_shift is not None:
+        return cli_shift
+    if "DEEPBEACON_SHIFT" in environment:
+        return parse_shift(environment["DEEPBEACON_SHIFT"])
+    return 3
+
+
+def build_parser():
+    """Build the public deepbeacon command grammar."""
+    parser = argparse.ArgumentParser(
+        prog="deepbeacon",
+        description="Decode streaming deep-sea beacon pings as JSON Lines.",
+        epilog="Use '-' or omit FILE to read pings from standard input.",
+    )
+    parser.add_argument("input", nargs="?", default="-", metavar="FILE")
+    parser.add_argument(
+        "--shift",
+        type=argparse_shift,
+        default=None,
+        metavar="N",
+        help="backward shift from 0 through 25",
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="stop after the first damaged ping",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="write one decoding summary to stderr",
+    )
+    return parser
+
+
+def configure_logger(stderr, verbose):
+    """Return an application-owned logger whose handler writes to stderr."""
+    logger = logging.getLogger("deepbeacon")
+    logger.handlers.clear()
+    logger.propagate = False
+    logger.setLevel(logging.INFO if verbose else logging.WARNING)
+
+    handler = logging.StreamHandler(stderr)
+    handler.setLevel(logging.INFO if verbose else logging.WARNING)
+    handler.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+    logger.addHandler(handler)
+    return logger
+
+
+def run(lines, settings, stdout, stderr, logger):
+    """Decode lines, write both channels, and return processing status."""
+    decoded_count = 0
+    rejected_count = 0
+
+    for line_number, raw_line in enumerate(lines, start=1):
+        if not raw_line.strip():
+            continue
+        try:
+            beacon, encoded_message = parse_ping(raw_line)
+        except ValueError as error:
+            print(f"deepbeacon: line {line_number}: {error}", file=stderr)
+            rejected_count += 1
+            if settings.strict:
+                break
+            continue
+
+        result = {
+            "beacon": beacon,
+            "message": decode_message(encoded_message, settings.shift),
+        }
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True), file=stdout)
+        decoded_count += 1
+
+    logger.info("decoded=%d rejected=%d", decoded_count, rejected_count)
+    return 1 if rejected_count else 0
+
+
+def input_context(input_name, stdin):
+    """Return a context manager for supplied stdin or one opened UTF-8 file."""
+    if input_name == "-":
+        return nullcontext(stdin)
+    return Path(input_name).open(encoding="utf-8")
+
+
+def main(argv=None, stdin=None, stdout=None, stderr=None, environment=None):
+    """Coordinate adapters and return the application status."""
+    stdin = sys.stdin if stdin is None else stdin
+    stdout = sys.stdout if stdout is None else stdout
+    stderr = sys.stderr if stderr is None else stderr
+    environment = os.environ if environment is None else environment
+
+    arguments = build_parser().parse_args(argv)
+    try:
+        shift = resolve_shift(arguments.shift, environment)
+    except ValueError as error:
+        print(f"deepbeacon: {error}", file=stderr)
+        return 1
+
+    settings = Settings(shift, arguments.strict, arguments.verbose)
+    logger = configure_logger(stderr, settings.verbose)
+    try:
+        with input_context(arguments.input, stdin) as lines:
+            return run(lines, settings, stdout, stderr, logger)
+    except (OSError, UnicodeError) as error:
+        print(f"deepbeacon: cannot read {arguments.input!r}: {error}", file=stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
 ```
 
-Compare contracts and decisions, not only line-for-line syntax. If your solution
-also satisfies the constraints and checks, explain one trade-off between the
-approaches.
-
+The core decoder and ping parser do not know about argparse, global streams, or
+process termination. `main()` resolves those adapters and translates only
+anticipated configuration and input failures.
 </details>
 
-## 9. Check your understanding
+## 9. Prove the changed requirement and real process
+
+Strict mode is the boundary case that prevents a happy-path-only solution. Use
+input with valid, invalid, then valid pings. Ordinary mode must decode both
+valid pings; strict mode must stop before the third line. Both return 1 and both
+write the same line-2 diagnostic.
+
+After saving the complete implementation as `deepbeacon.py`, run a real child
+process from a temporary directory:
+
+```python
+import subprocess
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+script = Path("deepbeacon.py").resolve()
+process_input = (
+    "NEREID|KHOOR GHSWK\n"
+    "damaged\n"
+    "CALYPSO-7|PHHW\n"
+)
+
+with TemporaryDirectory() as directory:
+    completed = subprocess.run(
+        [sys.executable, str(script), "-", "--shift", "3", "--strict"],
+        input=process_input,
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=10,
+        cwd=directory,
+    )
+
+assert completed.returncode == 1
+assert '"beacon": "NEREID"' in completed.stdout
+assert "CALYPSO-7" not in completed.stdout
+assert completed.stderr == "deepbeacon: line 2: expected BEACON|MESSAGE\n"
+```
+
+Using an absolute script path while changing `cwd` proves that file and stream
+behavior do not accidentally rely on the source directory. If you package the
+command, replace the script invocation with the installed `deepbeacon` entry
+point and keep the unrelated working directory.
+
+Finally run help and invalid CLI shift as processes. Help should use status 0
+and stdout. `--shift 30` should use status 2 and argparse's stderr. Invalid
+`DEEPBEACON_SHIFT=30` without `--shift` should use status 1 and the
+application's concise stderr. These similar-looking failures occur at different
+boundaries.
+
+## 10. Check your understanding
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-command-line-applications-challenge",
-  "title": "Ship a Record-Conversion CLI readiness check",
-  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "title": "Deep-Sea Beacon command check",
+  "instructions": "Connect every answer to stdout, stderr, status, precedence, or process evidence from your artifact.",
   "questions": [
     {
-      "id": "design-boundary",
-      "prompt": "Why does `main` accept `stdout` and `stderr` parameters?",
-      "options": [
-        "It makes JSON parsing unnecessary.",
-        "Tests can observe each stream without replacing global process streams.",
-        "It forces every result to be an error.",
-        "It prevents the command from returning an exit code."
-      ],
+      "id": "deepbeacon-json-channel",
+      "prompt": "Why must the verbose summary stay off stdout?",
+      "options": ["Logging cannot contain numbers", "A non-JSON summary would corrupt the JSON Lines contract consumed by another program", "stderr automatically encrypts it", "Exit status can contain the whole summary"],
       "answer_index": 1,
-      "explanation": "Tests can observe each stream without replacing global process streams."
+      "explanation": "Stdout is the published JSONL data channel. Operational detail belongs on the configured stderr log handler."
     },
     {
-      "id": "clean-evidence",
-      "prompt": "What should happen before recording this challenge as complete?",
-      "options": [
-        "The unchanged checks pass from a clean state and the important decisions can be explained.",
-        "The expected values are edited to match the current output.",
-        "Only the final successful line is kept.",
-        "Several unrelated features are added."
-      ],
+      "id": "deepbeacon-shift-precedence",
+      "prompt": "The environment sets shift 7 and the user supplies --shift 2. Which value reaches Settings?",
+      "options": ["3", "7", "2", "9"],
+      "answer_index": 2,
+      "explanation": "An explicit CLI value has stronger precedence than the environment and built-in default."
+    },
+    {
+      "id": "deepbeacon-run-return",
+      "prompt": "Why does run return 0 or 1 instead of calling sys.exit?",
+      "options": ["Python processes cannot exit", "Argparse forbids integers", "JSON requires a returned status", "The function remains directly callable; only the outer entry point translates status into process termination"],
+      "answer_index": 3,
+      "explanation": "Returning preserves reuse and direct checks. `raise SystemExit(main())` belongs only at the actual process entry point."
+    },
+    {
+      "id": "deepbeacon-strict-change",
+      "prompt": "What changes when --strict is supplied for valid, damaged, valid input?",
+      "options": ["Processing stops after the damaged line, so the final valid ping is not decoded", "The damaged line moves to stdout", "The shift always becomes zero", "The status becomes 0"],
       "answer_index": 0,
-      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+      "explanation": "Strict mode stops after the first rejection while preserving output already produced and returning status 1."
+    },
+    {
+      "id": "deepbeacon-process-proof",
+      "prompt": "What does the unrelated-directory subprocess check add beyond calling run with StringIO?",
+      "options": ["It proves the cipher is secure", "It exercises real entry-point wiring, operating-system streams, working-directory assumptions, and process status", "It removes the need for direct checks", "It makes invalid records valid"],
+      "answer_index": 1,
+      "explanation": "The subprocess crosses the real process boundary, complementing rather than replacing focused direct checks."
     }
   ]
 }
@@ -206,20 +735,23 @@ approaches.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 10. Decide whether the challenge is complete
+## 11. Record the challenge result
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | Acceptance examples and progressive checks pass unchanged. |
-| Scope | The artifact follows the constraints without unrelated features. |
-| Reasoning | Important values, boundaries, and design choices can be traced. |
-| Debugging | One record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+| Decoder | ASCII wraparound, case, shift boundaries, and preserved characters pass unchanged. |
+| Parser and configuration | Ping rules, CLI grammar, precedence, and invalid settings produce the documented result. |
+| Channels | JSONL, diagnostics, and the optional log summary stay in their exact channels. |
+| Status | Success, processing/configuration failure, and argparse usage failure remain distinct. |
+| Architecture | Core functions accept ordinary values; `main()` owns adapters and returns status. |
+| Changed requirement | Ordinary and strict mode differ only where the contract says they should. |
+| Reproducibility | Checks 1–30 and the unrelated-directory subprocess proof pass after a clean restart. |
+| Debugging | One evidence record connects a failing observation to one controlled repair. |
 
 This button stores a self-reported marker only in this browser. It does not
-submit work, grade it, verify identity, or issue a certificate.
+submit work, grade the artifact, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -233,7 +765,23 @@ submit work, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows design choices without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- A useful CLI challenge integrates grammar, configuration, resources, reusable
+  behavior, rendering, diagnostics, logging, and process status without mixing
+  them into one function.
+- Caesar shifting is the playful domain rule; it remains independently callable
+  and preserves characters outside explicit ASCII ranges.
+- Stdout contains only JSON Lines. Rejections and the optional operational
+  summary remain on stderr.
+- CLI shift overrides environment shift, which overrides the built-in default;
+  invalid values fail at the boundary that received them.
+- Ordinary mode recovers later pings, strict mode stops, and both retain output
+  produced before the rejection.
+- Direct assertions explain local behavior; a real subprocess proves the outer
+  entry point, streams, working-directory independence, and process status.
+
+## Continue learning
+
+- [Python argparse documentation](https://docs.python.org/3/library/argparse.html)
+- [Python JSON Lines building blocks](https://docs.python.org/3/library/json.html)
+- [Python logging documentation](https://docs.python.org/3/library/logging.html)
+- [Python subprocess documentation](https://docs.python.org/3/library/subprocess.html)

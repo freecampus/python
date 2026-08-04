@@ -1,13 +1,15 @@
 ---
-title: Standard Input, Output, Errors, and Exit Codes
+title: Put Output, Errors, and Exit Status in the Right Place
 lesson_id: command-line-applications.streams-errors-exit-codes
 lesson_order: 20
-description: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
+description: Build a pipe-friendly command that reads standard input, preserves machine-readable stdout, explains anticipated failures on stderr, and reports success through a documented exit status.
 execute:
   echo: true
 categories:
 - python-foundations
 - command-line-applications
+- streams
+- exit-status
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/streams-errors-exit-codes.ipynb
 course_id: python-foundations
@@ -16,124 +18,259 @@ unit_number: 12
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Separate normal output, diagnostics, and process status.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 4–5 hours
+- **You will learn:** Route data and diagnostics to separate streams, translate anticipated failures at the command boundary, return meaningful status, and compare direct stream checks with a real child-process check.
+- **Practice in:** Google Colab or JupyterLab for `StringIO`, plus a local terminal for pipes, redirects, and exit status
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+Our parser can describe `trail-report check - --status closed`. The dash says
+that report lines should arrive through standard input. The next program in a
+pipeline expects JSON Lines, while a person still needs to know why a damaged
+line was rejected.
 
-Command-line programs return data on stdout, diagnostics on stderr, and success/failure through an integer exit status. Keeping them separate makes commands composable and testable.
+One `print()` for everything cannot satisfy both readers. This lesson gives
+each result a deliberate channel.
 
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
+As you work, answer these questions:
+
+- What belongs on stdin, stdout, and stderr?
+- Why is stable stdout an interface for another program rather than a screen
+  decoration?
+- How is a returned data value different from a process exit status?
+- Which exceptions should a command boundary translate into concise messages?
+- What does a subprocess check prove that a direct function call cannot?
+
+## 1. Follow one line through a pipeline
+
+A running command normally begins with three text streams:
+
+| Stream | Python object | Direction | Typical CLI role |
+|---|---|---|---|
+| standard input | `sys.stdin` | into the process | records from a pipe, redirected file, or keyboard |
+| standard output | `sys.stdout` | out of the process | the promised result, suitable for another program |
+| standard error | `sys.stderr` | out of the process | diagnostics and operational logs |
+
+The process also finishes with an integer **exit status**. That status is not a
+text stream and not the result data. It is a compact signal to the shell or
+calling process.
+
+::: {.concept-diagram}
+The two outgoing text streams and the exit status are independent observations;
+a caller can capture each without mixing them.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["stdin text"] --> B["trail-report process"]
+  B --> C["stdout data"]
+  B --> D["stderr diagnostics"]
+  B --> E["integer exit status"]
+```
 :::
 
-## 2. Read and trace a complete case
+This shell pipeline sends the first command's stdout into the second command's
+stdin:
 
-```python
-import sys
-def main(argv=None):
-    args = sys.argv[1:] if argv is None else argv
-    if len(args) != 1:
-        print("usage: report FILE", file=sys.stderr)
-        return 2
-    print(f"processing {args[0]}")
-    return 0
+```bash
+cat signals.txt | trail-report check - | python count_json_lines.py
 ```
 
-### What Python does
+The pipe does not normally carry stderr. A diagnostic can remain visible to a
+person while clean JSON continues to `count_json_lines.py`.
 
-1. Injected arguments support direct tests.
-2. Usage diagnostics go to stderr.
-3. Zero means success; nonzero identifies failure.
+Common redirections include:
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
-
-## 3. Debug the boundary
-
-This version is valid Python but does not satisfy the lesson's intended contract:
-
-```python
-def parse_count(text: str) -> int:
-    try:
-        return int(text)
-    except ValueError as error:
-        print(f"error: {error}")
-        return 0
+```bash
+trail-report check signals.txt > valid.jsonl
+trail-report check - < signals.txt
 ```
 
-A focused repair is:
+Syntax varies between shells, especially for redirecting stderr. The Python
+design should not depend on the operator using a particular redirect. It should
+simply honor the stream contract.
+
+## 2. Read text without assuming a file path
+
+Core record processing can accept any iterable of text lines:
 
 ```python
-def parse_count(text: str) -> int:
-    try:
-        return int(text)
-    except ValueError as error:
-        print(f"error: {error}", file=sys.stderr)
-        return 1
+def cleaned_lines(lines):
+    """Yield non-blank input lines without their surrounding whitespace."""
+    for raw_line in lines:
+        line = raw_line.strip()
+        if line:
+            yield line
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+The function works with a list:
 
-## 4. Practice from trace to transfer
+```python
+sample = [" north-ridge|open|Windy \n", "\n", " river-gate|closed|Repair \n"]
+print(list(cleaned_lines(sample)))
+```
 
-1. Capture stdout and stderr separately.
-2. Return 2 for usage and 1 for domain failure.
-3. Keep logs out of pipeable stdout data.
+```text
+['north-ridge|open|Windy', 'river-gate|closed|Repair']
+```
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+It also works when `lines` is an open text file or `sys.stdin`. That is the
+benefit of accepting the narrow behavior needed—iteration over text—rather than
+opening a global path inside the core.
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+At the command boundary, choose the source and own its lifetime:
 
-</details>
+```python
+from contextlib import nullcontext
+from pathlib import Path
 
-## 5. Check your understanding
+
+def open_input(input_name, stdin):
+    """Return a context manager for stdin or a UTF-8 text file."""
+    if input_name == "-":
+        return nullcontext(stdin)
+    return Path(input_name).open(encoding="utf-8")
+```
+
+`nullcontext(stdin)` lets both branches appear in one `with` statement without
+closing the process's standard input. The file branch does close the file it
+opened. This applies the resource-ownership rule from Unit 9.
+
+## 3. Reserve stdout for the promised data
+
+Suppose each valid trail record becomes a dictionary:
+
+```python
+def parse_trail_record(line):
+    """Return a validated trail record parsed from one text line."""
+    parts = [part.strip() for part in line.split("|", maxsplit=2)]
+    if len(parts) != 3:
+        raise ValueError("expected CHECKPOINT|STATUS|NOTE")
+
+    checkpoint, status, note = parts
+    if not checkpoint:
+        raise ValueError("checkpoint cannot be blank")
+    if status not in {"open", "limited", "closed"}:
+        raise ValueError(f"unknown status {status!r}")
+    if not note:
+        raise ValueError("note cannot be blank")
+
+    return {"checkpoint": checkpoint, "status": status, "note": note}
+```
+
+JSON Lines puts one JSON value on each physical line. It is useful for streaming
+because a consumer need not wait for one giant array:
+
+```python
+import json
+
+record = parse_trail_record("north-ridge|open|Windy")
+rendered = json.dumps(record, ensure_ascii=False, sort_keys=True)
+print(rendered)
+```
+
+```text
+{"checkpoint": "north-ridge", "note": "Windy", "status": "open"}
+```
+
+The exact key ordering above is part of this teaching example because
+`sort_keys=True` requests it. A real format contract may care only that keys and
+values are correct. State which details are stable rather than relying on an
+accidental representation.
+
+This output is broken for a JSONL consumer:
+
+```text
+Processing north-ridge...
+{"checkpoint": "north-ridge", "note": "Windy", "status": "open"}
+Done!
+```
+
+Only the middle line is JSON. Progress announcements belong on stderr or in
+logging, if they belong at all. Decorative colors, headings, and tables are
+also unsuitable for a machine-readable stdout mode.
+
+### Write to an explicit stream
+
+`print()` accepts a `file` argument:
+
+```python
+import io
+import json
+
+destination = io.StringIO()
+record = {"checkpoint": "north-ridge", "status": "open"}
+print(json.dumps(record, sort_keys=True), file=destination)
+
+print(repr(destination.getvalue()))
+```
+
+```text
+'{"checkpoint": "north-ridge", "status": "open"}\n'
+```
+
+That final newline is desirable in JSONL. It lets another line follow without
+joining two JSON objects.
+
+### Decide whether partial output is part of the contract
+
+A streaming command may emit two valid records and then discover a damaged
+third record. It cannot pull bytes back from a pipe. In this lesson, valid
+results already written remain on stdout, the diagnostic identifies the later
+failure, and status 1 says the complete request was not successful.
+
+That policy supports large inputs and visible progress, but it means a caller
+must inspect status rather than assume every captured line represents a fully
+successful run. Document it and check it.
+
+Some tasks require all-or-nothing output. They must validate everything before
+writing, buffer a bounded result, or write to a temporary file and replace the
+destination only after success. Those designs use more memory or storage and
+delay the first output. Do not promise atomic output while streaming directly
+to stdout; the mechanisms contradict the promise.
+
+`--strict` also does not roll back earlier output. It changes what happens
+**after** the first rejection: stop rather than continue. Output produced before
+that line remains valid evidence. This distinction will matter in the unit
+challenge.
+
+Buffering can also affect when a downstream process sees text, even though the
+logical channel is correct. Newline-terminated `print()` calls are a clear
+baseline for this course. A long-running interactive pipeline may need an
+explicit flush policy, but flushing every tiny write has a performance cost.
+Treat delivery timing as another documented requirement instead of adding
+`flush=True` everywhere without evidence.
+
+### Checkpoint: choose the correct output channel
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "command-line-applications-streams-and-exit-codes",
-  "title": "Streams and Exit Codes checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "unit12-streams-channel-choice",
+  "title": "Choose the correct output channel",
+  "instructions": "Protect the published stream contract in each case.",
   "questions": [
     {
-      "id": "out",
-      "prompt": "What belongs on stdout?",
-      "options": [
-        "Debug traceback",
-        "Password",
-        "Requested normal data",
-        "Editor state"
-      ],
+      "id": "unit12-streams-q10-json-record",
+      "prompt": "The command promises JSON Lines for another program. Where should a valid record be written?",
+      "options": ["stderr", "stdout", "the exit status", "the parser description"],
+      "answer_index": 1,
+      "explanation": "The promised result data belongs on stdout so a pipe or redirect can consume it."
+    },
+    {
+      "id": "unit12-streams-q11-rejected-line",
+      "prompt": "Where should a concise explanation of a rejected input line normally go?",
+      "options": ["inside the JSON result on stdout even when the format forbids it", "into sys.argv", "stderr", "into status 0"],
       "answer_index": 2,
-      "explanation": "Stdout is the result stream."
+      "explanation": "A diagnostic belongs on stderr, leaving the machine-readable stdout contract intact."
     },
     {
-      "id": "err",
-      "prompt": "Where do usage diagnostics go?",
-      "options": [
-        "stdin",
-        "source code",
-        "a list",
-        "stderr"
-      ],
+      "id": "unit12-streams-q12-pipe-data",
+      "prompt": "In producer | consumer, which producer channel normally becomes the consumer's stdin?",
+      "options": ["The producer's stdin", "The producer's status", "The producer's stderr", "The producer's stdout"],
       "answer_index": 3,
-      "explanation": "Stderr carries diagnostics."
-    },
-    {
-      "id": "status",
-      "prompt": "Which means success?",
-      "options": [
-        "0",
-        "1",
-        "2",
-        "255 only"
-      ],
-      "answer_index": 0,
-      "explanation": "Zero is conventional success."
+      "explanation": "A normal pipe connects the producer's stdout to the consumer's stdin."
     }
   ]
 }
@@ -141,14 +278,476 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 4. Send repairable explanations to stderr
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+An anticipated invalid record should identify its location and reason:
 
-## References
+```python
+def write_rejection(stderr, line_number, error):
+    """Write one stable, concise record diagnostic."""
+    print(f"trail-report: line {line_number}: {error}", file=stderr)
+```
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+Check the exact text:
+
+```python
+import io
+
+errors = io.StringIO()
+write_rejection(errors, 3, "unknown status 'maybe'")
+assert errors.getvalue() == "trail-report: line 3: unknown status 'maybe'\n"
+```
+
+The message tells a user where to look and what rule failed. It does not include
+a full traceback because invalid external data is anticipated. A traceback is
+valuable when debugging an unexpected programming error; it is usually noise
+when a record merely violates a published input contract.
+
+Do not echo an entire sensitive or enormous record into the diagnostic. A line
+number, field name, safe identifier, and concise reason are often enough.
+
+## 5. Return a status instead of returning fake data
+
+This tempting function is ambiguous:
+
+```python
+def parse_count_bad(text):
+    try:
+        return int(text)
+    except ValueError:
+        return 1
+```
+
+Does `1` mean “the valid count is one” or “the operation failed”? The caller
+cannot know. Return data as data and use an exception for an invalid conversion:
+
+```python
+def parse_count(text):
+    """Return an integer count or raise ValueError for invalid text."""
+    return int(text)
+```
+
+The command boundary can translate that anticipated exception:
+
+```python
+def count_main(text, stderr):
+    """Display no result here; return a command status."""
+    try:
+        count = parse_count(text)
+    except ValueError:
+        print(f"count-demo: invalid count {text!r}", file=stderr)
+        return 1
+
+    print(f"accepted count {count}")
+    return 0
+```
+
+The reusable parser has one honest return meaning. The boundary has one status
+meaning. At the actual process entry point, connect the returned integer to the
+process:
+
+```python
+def main():
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+`return 1` inside `main()` does not by itself terminate Python with status 1 if
+someone merely calls and ignores it. `raise SystemExit(main())` is the adapter
+between the return value and process termination. Keeping it in the entry-point
+guard also allows another module to call `main()` and inspect its integer.
+
+### Use a small documented policy
+
+For this course artifact:
+
+- **0:** every requested record was processed successfully;
+- **1:** the command understood the request but an anticipated setting, file,
+  or record failure prevented complete success;
+- **2:** argparse rejected the command grammar.
+
+There is no universal requirement that all CLIs use exactly those application
+codes. There is a strong requirement to document and use one policy
+consistently. Do not invent a different code for every error sentence unless a
+real calling program needs those distinctions.
+
+## 6. Catch only failures the command can explain
+
+This boundary translates known failures:
+
+```python
+from pathlib import Path
+
+
+def read_text_for_command(path, stderr):
+    try:
+        return Path(path).read_text(encoding="utf-8"), 0
+    except FileNotFoundError:
+        print(f"trail-report: input not found: {path}", file=stderr)
+        return "", 1
+    except PermissionError:
+        print(f"trail-report: permission denied: {path}", file=stderr)
+        return "", 1
+    except UnicodeDecodeError as error:
+        print(
+            f"trail-report: {path}: invalid UTF-8 near byte {error.start}",
+            file=stderr,
+        )
+        return "", 1
+```
+
+Each branch can offer a useful next step. An unexpected `AttributeError` caused
+by a programming mistake is not included. Letting it retain a traceback helps a
+developer find the defect.
+
+Avoid these broad patterns:
+
+```python
+def hides_everything(operation):
+    try:
+        operation()
+    except Exception:
+        return 1
+```
+
+This valid Python is bad boundary design. It discards the exception type,
+message, traceback, and user diagnostic. It may turn a programming defect into
+a silent status that is hard to investigate. Catch narrow anticipated
+exceptions and preserve context when raising a more useful one.
+
+Do not catch `BaseException` in an ordinary CLI boundary. That also catches
+termination signals such as `KeyboardInterrupt` and `SystemExit`, interfering
+with normal process control.
+
+### Checkpoint: translate failures at the boundary
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-streams-status-boundary",
+  "title": "Translate failures at the boundary",
+  "instructions": "Keep domain values, exceptions, messages, and process status distinct.",
+  "questions": [
+    {
+      "id": "unit12-streams-q13-count-ambiguity",
+      "prompt": "Why is returning 1 from parse_count for invalid text a broken contract?",
+      "options": ["One can also be legitimate parsed data, so success and failure are indistinguishable", "Python forbids functions from returning integers", "Exit statuses must be strings", "ValueError can only be raised by argparse"],
+      "answer_index": 0,
+      "explanation": "One return channel should not represent both a valid count and an error signal. Let parsing raise and translate the error at the command boundary."
+    },
+    {
+      "id": "unit12-streams-q14-main-exit",
+      "prompt": "What does raise SystemExit(main()) add at the real entry point?",
+      "options": ["It converts stdin to JSON", "It turns main's returned integer into the process exit status", "It catches every exception", "It prints the integer on stdout"],
+      "answer_index": 1,
+      "explanation": "The entry point adapts the ordinary return value to process termination."
+    },
+    {
+      "id": "unit12-streams-q15-narrow-catch",
+      "prompt": "Which failure should the file boundary normally translate into a concise user diagnostic?",
+      "options": ["Every programming defect", "KeyboardInterrupt", "A known FileNotFoundError for the requested input", "SystemExit from --help"],
+      "answer_index": 2,
+      "explanation": "A missing requested file is an anticipated boundary failure the command can explain. Broad catches hide unrelated defects and process control."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Inject streams without binding them too early
+
+Default expressions are evaluated when Python executes the `def` statement.
+This design captures the current stdout object too early:
+
+```python
+import sys
+
+
+def announce_bad(message, stdout=sys.stdout):
+    print(message, file=stdout)
+```
+
+Explicitly passing a stream still works, but later redirecting or replacing
+`sys.stdout` may not affect the captured default. Resolve `None` at call time:
+
+```python
+import sys
+
+
+def announce(message, stdout=None):
+    if stdout is None:
+        stdout = sys.stdout
+    print(message, file=stdout)
+```
+
+Apply the same pattern to stdin, stderr, argument lists, and environment
+mappings when they must be replaceable:
+
+```python
+def main(argv=None, stdin=None, stdout=None, stderr=None):
+    if stdin is None:
+        stdin = sys.stdin
+    if stdout is None:
+        stdout = sys.stdout
+    if stderr is None:
+        stderr = sys.stderr
+    return 0
+```
+
+Do not use `stdin = stdin or sys.stdin`. An empty `StringIO` is a valid supplied
+stream even if a custom object might be falsey. Test explicitly for `None`.
+
+## 8. Process records and preserve all three results
+
+Here is a reusable runner for already-open streams:
+
+```python
+import json
+
+
+def run_check(lines, stdout, stderr, wanted_status="closed", strict=False):
+    """Write matching records and return 0 or 1 after processing lines."""
+    had_error = False
+
+    for line_number, raw_line in enumerate(lines, start=1):
+        if not raw_line.strip():
+            continue
+
+        try:
+            record = parse_trail_record(raw_line)
+        except ValueError as error:
+            write_rejection(stderr, line_number, error)
+            had_error = True
+            if strict:
+                break
+            continue
+
+        if record["status"] == wanted_status:
+            print(json.dumps(record, ensure_ascii=False, sort_keys=True), file=stdout)
+
+    return 1 if had_error else 0
+```
+
+Trace mixed input before running it:
+
+| Line | Parse result | Matches `closed`? | stdout | stderr | status so far |
+|---:|---|---|---|---|---:|
+| 1 | valid `open` | no | unchanged | unchanged | 0 |
+| 2 | invalid format | n/a | unchanged | line 2 message | 1 |
+| 3 | valid `closed` | yes | JSON record | unchanged | 1 |
+
+Now check the exact observations with in-memory streams:
+
+```python
+import io
+
+input_text = io.StringIO(
+    "north-ridge|open|Windy\n"
+    "broken line\n"
+    "river-gate|closed|Inspection\n"
+)
+output = io.StringIO()
+errors = io.StringIO()
+
+status = run_check(input_text, output, errors)
+
+assert status == 1
+assert '"checkpoint": "river-gate"' in output.getvalue()
+assert "north-ridge" not in output.getvalue()
+assert "line 2" in errors.getvalue()
+```
+
+`StringIO` proves the function routes exact text correctly when given these
+collaborators. It does not prove that module execution, shell argument passing,
+or the operating system's process status works.
+
+## 9. Inspect a real child process
+
+`subprocess.run()` can launch a command with an explicit argument list. This
+self-contained experiment uses Python's `-c` option so no project file is
+required:
+
+```python
+import subprocess
+import sys
+
+program = (
+    "import sys; "
+    "text = sys.stdin.read(); "
+    "print(text.upper(), end=''); "
+    "print('read', len(text), 'characters', file=sys.stderr); "
+    "raise SystemExit(0 if text else 1)"
+)
+
+completed = subprocess.run(
+    [sys.executable, "-c", program],
+    input="trail\n",
+    text=True,
+    capture_output=True,
+    check=False,
+    timeout=5,
+)
+
+assert completed.returncode == 0
+assert completed.stdout == "TRAIL\n"
+assert completed.stderr == "read 6 characters\n"
+```
+
+Important choices:
+
+- `sys.executable` uses the same Python interpreter running the notebook or
+  script;
+- the list passes arguments without asking a shell to reinterpret them;
+- `input=` supplies the child's stdin;
+- `text=True` uses strings rather than bytes;
+- `capture_output=True` keeps stdout and stderr separate;
+- `check=False` lets us inspect an expected nonzero result without
+  `CalledProcessError`; and
+- `timeout=5` prevents a broken experiment from waiting forever.
+
+Avoid `shell=True` for ordinary Python process checks. It adds shell parsing,
+platform differences, and an injection risk when untrusted text is composed
+into a command. A shell is useful when the shell itself is the behavior under
+study; it is unnecessary here.
+
+### Checkpoint: inspect direct and process evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-streams-process-evidence",
+  "title": "Inspect direct and process evidence",
+  "instructions": "Decide what each observation actually proves.",
+  "questions": [
+    {
+      "id": "unit12-streams-q16-stringio-proof",
+      "prompt": "A StringIO check passes for run_check. What has not yet been proved?",
+      "options": ["The function can write any text", "JSON is text", "StringIO has getvalue", "The installed or module command exposes the same stdout, stderr, and operating-system status"],
+      "answer_index": 3,
+      "explanation": "A direct call checks the function boundary. A child-process check is needed for entry-point wiring and real process behavior."
+    },
+    {
+      "id": "unit12-streams-q17-subprocess-list",
+      "prompt": "Why pass [sys.executable, '-c', program] rather than one shell command string?",
+      "options": ["It avoids unnecessary shell parsing and passes argument boundaries explicitly", "Lists automatically make every return code zero", "Python accepts only list input on stdin", "It merges stderr into stdout"],
+      "answer_index": 0,
+      "explanation": "An argument list avoids an extra shell boundary, improving portability and reducing injection risk."
+    },
+    {
+      "id": "unit12-streams-q18-check-false",
+      "prompt": "Why is check=False useful when verifying a CLI's documented failure case?",
+      "options": ["It disables the child program's validation", "It returns a CompletedProcess so the expected nonzero status and both streams can be inspected", "It forces all errors to status 0", "It skips launching the process"],
+      "answer_index": 1,
+      "explanation": "A nonzero status may be the expected contract. check=False preserves it as data on CompletedProcess for exact assertions."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Build a pipe-friendly trail filter
+
+Extend `run_check()` with this changed requirement:
+
+- ordinary mode continues after invalid records;
+- strict mode stops at the first invalid record;
+- valid records before that failure remain on stdout;
+- either mode returns 1 if a failure occurred; and
+- the same invalid record produces the same diagnostic in both modes.
+
+Use this input to make the difference visible:
+
+```python
+mixed_reports = (
+    "north-ridge|closed|Snow gate\n"
+    "broken record\n"
+    "river-gate|closed|Bridge review\n"
+)
+```
+
+Write two `StringIO` checks. Ordinary mode should emit north-ridge and
+river-gate; strict mode should emit only north-ridge. Both should report line 2
+and return 1. Then write a tiny temporary module and repeat one case through
+`subprocess.run()`.
+
+<details>
+<summary>Hint 1: preserve evidence gathered before failure</summary>
+
+Do not erase stdout when an error occurs. Keep a `had_error` boolean, write the
+diagnostic, and decide only whether to `break` or `continue`.
+</details>
+
+<details>
+<summary>Hint 2: inject every stream</summary>
+
+Let the runner receive `lines`, `stdout`, and `stderr`. Construct fresh
+`StringIO` objects for each case so ordinary-mode output cannot leak into the
+strict-mode observation.
+</details>
+
+<details>
+<summary>Hint 3: assert exact channel boundaries</summary>
+
+In addition to finding expected checkpoint names, assert that diagnostics do
+not appear in stdout and JSON records do not appear in stderr. A correct total
+with polluted channels is still a broken CLI.
+</details>
+
+<details>
+<summary>Show the complete runner after attempting the lab</summary>
+
+```python
+import json
+
+
+def filter_reports(lines, stdout, stderr, wanted_status="closed", strict=False):
+    """Write matching JSONL, report invalid records, and return a status."""
+    had_error = False
+
+    for line_number, raw_line in enumerate(lines, start=1):
+        if not raw_line.strip():
+            continue
+        try:
+            record = parse_trail_record(raw_line)
+        except ValueError as error:
+            print(f"trail-report: line {line_number}: {error}", file=stderr)
+            had_error = True
+            if strict:
+                break
+            continue
+
+        if record["status"] == wanted_status:
+            print(json.dumps(record, ensure_ascii=False, sort_keys=True), file=stdout)
+
+    return 1 if had_error else 0
+```
+
+The process entry point should call this function with opened input and real or
+injected output streams, return its integer, and use
+`raise SystemExit(main())` only under the entry-point guard.
+</details>
+
+## Key points
+
+- Stdin carries input text, stdout carries the promised result, stderr carries
+  diagnostics and logs, and the exit status is a separate integer signal.
+- Stable machine-readable stdout makes a CLI composable; progress chatter and
+  diagnostics must not corrupt it.
+- Return application status from `main()` and connect it to process termination
+  with `raise SystemExit(main())` at the entry point.
+- Keep data and failure meanings separate. Let core conversions raise useful
+  exceptions and translate anticipated boundary failures narrowly.
+- Resolve default streams from `None` at call time rather than capturing global
+  stream objects in function defaults.
+- `StringIO` checks direct behavior; `subprocess.run()` checks entry-point and
+  operating-system process behavior.
+
+## Continue learning
+
+- [Python `sys` documentation for standard streams and exit](https://docs.python.org/3/library/sys.html#sys.exit)
+- [Python `io.StringIO` documentation](https://docs.python.org/3/library/io.html#io.StringIO)
+- [Python `subprocess.run` documentation](https://docs.python.org/3/library/subprocess.html#subprocess.run)
+- [Python `contextlib.nullcontext` documentation](https://docs.python.org/3/library/contextlib.html#contextlib.nullcontext)

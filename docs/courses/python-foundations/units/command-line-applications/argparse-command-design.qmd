@@ -1,13 +1,15 @@
 ---
-title: Designing a Command and Parsing Arguments with argparse
+title: Design a Friendly Command with argparse
 lesson_id: command-line-applications.argparse-command-design
 lesson_order: 10
-description: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
+description: Turn example terminal invocations into a clear argparse grammar with positionals, options, flags, validation, generated help, and focused subcommands.
 execute:
   echo: true
 categories:
 - python-foundations
 - command-line-applications
+- argparse
+- command-design
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/argparse-command-design.ipynb
 course_id: python-foundations
@@ -15,163 +17,198 @@ unit_id: command-line-applications
 unit_number: 12
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner to intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Run scripts and accept command-line arguments with argparse.
-- **Practice in:** VS Code and the terminal
+- **Level:** Python Foundations
+- **Estimated time:** 4–5 hours
+- **You will learn:** Specify a command grammar, explain shell-to-argv conversion, choose clear argument shapes, validate command syntax, read generated help, and dispatch focused subcommands.
+- **Practice in:** Google Colab or JupyterLab for parser calls, plus a local terminal for real shell tokenization
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+A trail coordinator wants one program to summarize reports and check them for a
+particular status. These two invocations are the design sketch:
 
-Run scripts and accept command-line arguments with argparse. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
-
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Command-Line Programs** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
-
-## 2. Command-Line Scripts
-
-Run Python files as repeatable command-line programs.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A script is a small appliance: give it input, press run, and receive output.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A script is a Python file designed to be executed from the terminal.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-
+```bash
+trail-report summarize signals.txt --limit 5
+trail-report check - --status closed --tag weather --tag safety
 ```
 
-### Trace it line by line
+Before writing Python, a user can already infer much of the interface:
 
+- `summarize` and `check` select different jobs;
+- an input path follows the job, and `-` probably means standard input;
+- `--limit` and `--status` attach named values;
+- `--tag` may be repeated; and
+- ordering and spelling are intentional.
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+That public shape is a **command grammar**. `argparse` translates valid strings
+in that grammar into Python values, generates help, and rejects invalid shapes
+consistently.
 
-::: {.callout-warning title="Common mistake"}
-If a script depends on a relative file path, running from a different folder can break it.
+As you work, answer these questions:
+
+- How does text typed in a shell become a Python list of argument strings?
+- When is a positional, option, flag, repeatable option, or subcommand clearest?
+- Which invalid values should argparse reject before the core runs?
+- What can help and usage errors tell both a user and a developer?
+- How can a parser be inspected without changing the notebook's real arguments?
+
+## 1. Read the command before writing the parser
+
+Annotate this command one token at a time:
+
+```text
+trail-report check reports/today.txt --status closed --verbose
+```
+
+| Token | Role | Expected Python meaning |
+|---|---|---|
+| `trail-report` | program name | identifies the installed command |
+| `check` | subcommand | selects the check operation |
+| `reports/today.txt` | positional value | input path |
+| `--status` | option | names the next token's purpose |
+| `closed` | option value | text, later constrained to known statuses |
+| `--verbose` | flag | `True` when present |
+
+The table is more useful than immediately calling `add_argument()`. It answers
+which values are essential, which have defaults, and which combinations make
+sense. Add three more examples before implementation:
+
+```bash
+trail-report summarize signals.txt
+trail-report summarize signals.txt --limit 10
+trail-report check - --status open --tag river --tag bridge
+```
+
+Then list invalid shapes deliberately:
+
+```text
+trail-report summarize
+trail-report summarize signals.txt --limit zero
+trail-report check signals.txt --status maybe
+```
+
+A good parser should reject all three with usage evidence. The reusable trail
+logic should never need to interpret `"zero"` as an integer or guess what
+`"maybe"` means.
+
+## 2. Follow shell text into `sys.argv`
+
+The shell and Python do different jobs. The shell first turns a command line
+into argument strings. It starts the process and supplies those strings. Python
+exposes them as `sys.argv`:
+
+```python
+import sys
+
+for index, value in enumerate(sys.argv):
+    print(index, repr(value))
+```
+
+When a file named `show_args.py` contains that code, a shell session might be:
+
+```bash
+$ python show_args.py check "North Ridge.txt" --limit 3
+0 'show_args.py'
+1 'check'
+2 'North Ridge.txt'
+3 '--limit'
+4 '3'
+```
+
+Quotes kept `North Ridge.txt` together as one argument. The quote characters
+themselves are not normally part of the value. Every element is a string,
+including `"3"`. `argparse` can perform the requested integer conversion later.
+
+Different shells have different quoting and variable-expansion rules. Do not
+attempt to reproduce a shell by calling `.split()` on a string:
+
+```python
+command_text = 'check "North Ridge.txt" --limit 3'
+print(command_text.split())
+```
+
+```text
+['check', '"North', 'Ridge.txt"', '--limit', '3']
+```
+
+That list contains the quotes and splits the path incorrectly. In parser labs,
+write the already-tokenized list explicitly:
+
+```python
+example_argv = ["check", "North Ridge.txt", "--limit", "3"]
+print(example_argv)
+```
+
+`argparse.ArgumentParser.parse_args()` accepts such a list. When no list is
+passed, it reads the real process arguments after `sys.argv[0]`. Explicit lists
+make notebook experiments predictable.
+
+::: {.concept-diagram}
+Notice that quoting belongs to the shell step; argparse receives a list of
+strings and returns a namespace containing converted values.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Shell command text"] --> B["Shell tokenization"]
+  B --> C["sys.argv strings"]
+  C --> D["ArgumentParser"]
+  D --> E["Namespace with Python values"]
+```
 :::
 
-### Practice command-line scripts
+### Use `--` when a value resembles an option
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Command-Line Scripts**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "command-line-applications-command-line-programs-command-line-scripts",
-  "title": "Command-Line Scripts checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to Command-Line Scripts?",
-      "options": [
-        "argparse parses terminal text into named Python values and generates help messages.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A script is a Python file designed to be executed from the terminal.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state."
-      ],
-      "answer_index": 2,
-      "explanation": "A script is a Python file designed to be executed from the terminal."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 3. argparse
-
-Accept command-line options and arguments clearly.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-argparse is a receptionist for your script: it asks for the right information and explains the rules.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** argparse parses terminal text into named Python values and generates help messages.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+Suppose a file is literally named `--draft`. The parser may interpret it as an
+option. Many command grammars use a standalone `--` to end option processing:
 
 ```python
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument("name")
-args = parser.parse_args()
-print(f"Hello, {args.name}")
+parser = argparse.ArgumentParser(prog="show-input")
+parser.add_argument("input")
+namespace = parser.parse_args(["--", "--draft"])
+print(namespace.input)
 ```
 
-### Trace it line by line
+```text
+--draft
+```
 
-1. `import argparse` — Python loads the named module or object so later lines can use it.
-2. `parser = argparse.ArgumentParser()` — Python evaluates the right-hand expression and binds or updates `parser` with the result.
-3. `parser.add_argument("name")` — Python calls this operation with the supplied arguments and uses or discards its result as written.
-4. `args = parser.parse_args()` — Python evaluates the right-hand expression and binds or updates `args` with the result.
-5. `print(f"Hello, {args.name}")` — Python evaluates the arguments and writes their display form to standard output.
+This is not a universal promise that every application must accept every
+filename. It is a widely understood boundary worth preserving when argparse's
+normal grammar supports it.
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Command-line arguments are strings by default. Use type=int when you need numbers.
-:::
-
-### Practice argparse
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **argparse**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
+### Checkpoint: from shell tokens to namespace values
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "command-line-applications-command-line-programs-argparse",
-  "title": "argparse checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "unit12-argparse-shell-namespace",
+  "title": "From shell tokens to namespace values",
+  "instructions": "Choose the best explanation for each observed value.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to argparse?",
-      "options": [
-        "A script is a Python file designed to be executed from the terminal.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A breakpoint tells the debugger to pause before a chosen line so you can inspect program state.",
-        "argparse parses terminal text into named Python values and generates help messages."
-      ],
-      "answer_index": 3,
-      "explanation": "argparse parses terminal text into named Python values and generates help messages."
+      "id": "unit12-argparse-q01-quoted-path",
+      "prompt": "Why can \"North Ridge.txt\" appear as one sys.argv element after a normal shell invocation?",
+      "options": ["The shell uses the quotes to group the characters before starting Python", "argparse joins every pair of words", "Python file paths always ignore spaces", "sys.argv stores the entire command in one string"],
+      "answer_index": 0,
+      "explanation": "The shell performs tokenization first. Quotes group the path, and Python receives the resulting argument string without the grouping quotes."
+    },
+    {
+      "id": "unit12-argparse-q02-number-string",
+      "prompt": "A user types --limit 3. What reaches argparse before conversion?",
+      "options": ["The integer 3", "The string \"3\"", "A float created by the shell", "No value because options cannot contain numbers"],
+      "answer_index": 1,
+      "explanation": "Process arguments arrive as strings. An argparse type converter may then produce an integer."
+    },
+    {
+      "id": "unit12-argparse-q03-option-terminator",
+      "prompt": "What is the purpose of a standalone -- before --draft?",
+      "options": ["It comments out the rest of the command", "It turns every later value into an integer", "It ends option processing so --draft can be positional data", "It requests verbose help"],
+      "answer_index": 2,
+      "explanation": "The option terminator tells the parser to treat following tokens as positional values even when they begin with hyphens."
     }
   ]
 }
@@ -179,17 +216,613 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 4. Integrate the lesson
+## 3. Let argparse write useful help
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+Start with the smallest honest parser:
 
-## 5. Key points
+```python
+import argparse
 
-- **Command-Line Scripts:** A script is a Python file designed to be executed from the terminal.
-- **argparse:** argparse parses terminal text into named Python values and generates help messages.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
 
-## References
+def build_basic_parser():
+    parser = argparse.ArgumentParser(
+        prog="trail-report",
+        description="Summarize and validate trail checkpoint reports.",
+        epilog="Use '-' as INPUT to read from standard input.",
+    )
+    parser.add_argument("input", metavar="INPUT", help="report file or '-' for stdin")
+    return parser
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+
+parser = build_basic_parser()
+arguments = parser.parse_args(["signals.txt"])
+print(arguments)
+```
+
+```text
+Namespace(input='signals.txt')
+```
+
+The namespace is a simple object whose attributes correspond to parser
+destinations. `arguments.input` is still text because no conversion was
+requested.
+
+Generated help is part of the interface. In a terminal, argparse prints it and
+exits successfully:
+
+```bash
+$ trail-report --help
+usage: trail-report [-h] INPUT
+
+Summarize and validate trail checkpoint reports.
+
+positional arguments:
+  INPUT       report file or '-' for stdin
+
+options:
+  -h, --help  show this help message and exit
+
+Use '-' as INPUT to read from standard input.
+```
+
+Exact section labels can vary slightly by supported Python version. The stable
+design questions are more important: Can a new user tell what the command does?
+Does each metavariable communicate the expected kind of value? Does the help
+mention a special value such as `-`?
+
+You can capture help in a direct check. `--help` raises `SystemExit(0)` after
+writing to stdout:
+
+```python
+import contextlib
+import io
+
+help_output = io.StringIO()
+
+try:
+    with contextlib.redirect_stdout(help_output):
+        parser.parse_args(["--help"])
+except SystemExit as error:
+    help_status = error.code
+
+print(help_status)
+print("report file" in help_output.getvalue())
+```
+
+```text
+0
+True
+```
+
+Catch `SystemExit` here because observing help is the focused task. Do not wrap
+an entire application in `except SystemExit:` and discard the result; that
+would prevent argparse from fulfilling its process contract.
+
+## 4. Choose an argument shape that matches the decision
+
+### Positionals identify the central subject
+
+An input path is a good positional when almost every operation needs it:
+
+```python
+parser.add_argument("input", metavar="INPUT")
+```
+
+Positionals are concise, but their meaning depends on order. Five unexplained
+positionals make a command difficult to read. Move secondary choices behind
+named options.
+
+### Options attach a value to a visible name
+
+```python
+parser.add_argument(
+    "--limit",
+    type=int,
+    default=20,
+    metavar="COUNT",
+    help="show at most COUNT records (default: 20)",
+)
+```
+
+`type=int` converts the string during parsing. `default=20` is already an
+integer. The result is predictable:
+
+```python
+limit_parser = argparse.ArgumentParser(prog="limit-demo")
+limit_parser.add_argument("--limit", type=int, default=20)
+
+print(limit_parser.parse_args([]).limit)
+print(limit_parser.parse_args(["--limit", "3"]).limit)
+```
+
+```text
+20
+3
+```
+
+### Flags represent a switch
+
+`store_true` makes absence and presence readable:
+
+```python
+flag_parser = argparse.ArgumentParser(prog="flag-demo")
+flag_parser.add_argument("--strict", action="store_true")
+
+print(flag_parser.parse_args([]).strict)
+print(flag_parser.parse_args(["--strict"]).strict)
+```
+
+```text
+False
+True
+```
+
+Do not use `type=bool`. `bool("false")` is `True` because any non-empty string
+is truthy. A flag needs an action, or an option needs an explicit text-to-boolean
+converter.
+
+### Repeatable options collect several values
+
+```python
+tag_parser = argparse.ArgumentParser(prog="tag-demo")
+tag_parser.add_argument("--tag", action="append", default=[])
+tags = tag_parser.parse_args(["--tag", "weather", "--tag", "safety"]).tag
+print(tags)
+```
+
+```text
+['weather', 'safety']
+```
+
+`append` preserves order and makes repetition explicit. If no tag is supplied,
+the selected default controls whether the core sees `[]` or `None`. Choose that
+contract deliberately.
+
+### Counted flags support several detail levels
+
+```python
+verbosity_parser = argparse.ArgumentParser(prog="detail-demo")
+verbosity_parser.add_argument("-v", "--verbose", action="count", default=0)
+
+for argv in ([], ["-v"], ["-vv"]):
+    print(argv, verbosity_parser.parse_args(argv).verbose)
+```
+
+```text
+[] 0
+['-v'] 1
+['-vv'] 2
+```
+
+An explicit zero default prevents the absent value from being `None`. Later,
+the logging lesson will translate 0, 1, and 2 into logging levels.
+
+Short options are conveniences, not a second secret vocabulary. Reserve `-v`,
+`-q`, or `-o` for conventions the audience is likely to recognize, and always
+provide descriptive long forms for less obvious choices. Argparse accepts
+`-vv` for a counted `-v` and often accepts `--limit=3` as well as
+`--limit 3`; show the ordinary spelling in help and examples rather than
+requiring users to discover every compact form. Never reuse one short letter
+for different meanings inside related subcommands unless the distinction is
+genuinely clear.
+
+## 5. Reject invalid command syntax before the core runs
+
+`choices` is ideal for a short, stable set:
+
+```python
+status_parser = argparse.ArgumentParser(prog="status-demo")
+status_parser.add_argument(
+    "--status",
+    choices=("open", "limited", "closed"),
+    default="open",
+)
+
+print(status_parser.parse_args(["--status", "closed"]).status)
+```
+
+```text
+closed
+```
+
+An unsupported value produces usage and status 2. It should not reach a core
+function that silently guesses.
+
+For a value with a compact syntax rule, write a converter:
+
+```python
+def positive_count(text):
+    """Convert text to a positive integer for argparse."""
+    try:
+        value = int(text)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("must be an integer") from error
+    if value < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return value
+
+
+count_parser = argparse.ArgumentParser(prog="count-demo")
+count_parser.add_argument("--limit", type=positive_count, default=20)
+print(count_parser.parse_args(["--limit", "4"]).limit)
+```
+
+```text
+4
+```
+
+The converter owns **command syntax**: can this token represent a positive
+count? A domain function still owns questions such as whether 4 reports are
+available or allowed for this account. That separation keeps the core reusable
+when values come from a web request or another Python caller.
+
+Capture a usage error to inspect its channel and status:
+
+```python
+import contextlib
+import io
+
+error_output = io.StringIO()
+
+try:
+    with contextlib.redirect_stderr(error_output):
+        count_parser.parse_args(["--limit", "zero"])
+except SystemExit as error:
+    usage_status = error.code
+
+print(usage_status)
+print("must be an integer" in error_output.getvalue())
+```
+
+```text
+2
+True
+```
+
+Argparse owns this grammar failure. Later processing failures usually use a
+different application status, often 1, and a message written by the application
+boundary.
+
+::: {.callout-note title="Prefer Path values over an already-open file here"}
+`argparse.FileType` can open files during parsing, but passing a `pathlib.Path`
+or the special `"-"` string gives the application boundary control over
+encoding, lifetime, cleanup, and error translation. Unit 9 already established
+those responsibilities.
+:::
+
+### Checkpoint: choose the clearest argument shape
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-argparse-clear-shapes",
+  "title": "Choose the clearest argument shape",
+  "instructions": "Choose the argparse design that matches the stated command contract.",
+  "questions": [
+    {
+      "id": "unit12-argparse-q04-repeat-tags",
+      "prompt": "A user may write --tag river --tag bridge, and order matters. Which action matches that contract?",
+      "options": ["store_true", "count", "help", "append"],
+      "answer_index": 3,
+      "explanation": "append collects each supplied value in encounter order."
+    },
+    {
+      "id": "unit12-argparse-q05-strict-flag",
+      "prompt": "Which design makes --strict false when absent and true when present?",
+      "options": ["action=\"store_true\"", "type=bool", "action=\"append\"", "choices=(False, True)"],
+      "answer_index": 0,
+      "explanation": "store_true implements a presence switch. type=bool would treat non-empty text such as 'false' as true."
+    },
+    {
+      "id": "unit12-argparse-q06-converter-boundary",
+      "prompt": "What should the positive_count argparse converter decide?",
+      "options": ["Whether the user's account permits twenty reports", "Whether one token represents an integer of at least 1", "How the final report is rendered", "Whether the input file exists three stages later"],
+      "answer_index": 1,
+      "explanation": "The converter validates the token's command syntax. Application-specific rules remain in the reusable core or boundary."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Give different jobs focused subcommands
+
+One command with fifty flags often represents several jobs forced together.
+Subcommands give each job its own focused arguments and help:
+
+```python
+import argparse
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog="trail-report",
+        description="Summarize and validate trail checkpoint reports.",
+    )
+    subcommands = parser.add_subparsers(dest="command", required=True)
+
+    summarize = subcommands.add_parser(
+        "summarize", help="count reports by checkpoint status"
+    )
+    summarize.add_argument("input", metavar="INPUT")
+    summarize.add_argument("--limit", type=positive_count, default=20)
+    summarize.set_defaults(handler="summarize")
+
+    check = subcommands.add_parser(
+        "check", help="emit reports matching one status"
+    )
+    check.add_argument("input", metavar="INPUT")
+    check.add_argument(
+        "--status",
+        choices=("open", "limited", "closed"),
+        default="closed",
+    )
+    check.add_argument("--tag", action="append", default=[])
+    check.add_argument("--strict", action="store_true")
+    check.set_defaults(handler="check")
+
+    return parser
+```
+
+Inspect three calls directly:
+
+```python
+parser = build_parser()
+
+cases = [
+    ["summarize", "signals.txt"],
+    ["summarize", "signals.txt", "--limit", "5"],
+    ["check", "-", "--status", "open", "--tag", "river", "--strict"],
+]
+
+for argv in cases:
+    print(parser.parse_args(argv))
+```
+
+The namespace contains only data needed by the selected subcommand plus the
+dispatch marker. A later `main()` can choose a callable, but the core should not
+receive the namespace itself. A namespace couples domain behavior to the CLI
+framework and makes another caller invent fake command arguments.
+
+`set_defaults(handler="check")` uses a string here so the parsing example stays
+self-contained. A real application may store a function instead:
+
+```python
+def run_summary(arguments):
+    return f"summarize {arguments.input} with limit {arguments.limit}"
+
+
+def run_check(arguments):
+    return f"check {arguments.input} for {arguments.status}"
+```
+
+Then `set_defaults(handler=run_summary)` supports
+`arguments.handler(arguments)`. Both designs require an explicit adapter that
+extracts ordinary values before calling reusable application logic.
+
+### Do not create subcommands only for decoration
+
+If the program performs one job and merely changes format, one parser with a
+`--format` option may be clearer. Use subcommands when verbs have meaningfully
+different inputs or workflows. Ask a new user whether `convert --format json`
+or `json` as a mysterious subcommand is easier to predict.
+
+## 7. Improve help by reading it as a new user
+
+Help is generated, but it is still authored. Inspect each level:
+
+```python
+parser = build_parser()
+
+root_help = parser.format_help()
+print("summarize" in root_help)
+print("check" in root_help)
+```
+
+Subcommand help is separate:
+
+```python
+check_parser = next(
+    action
+    for action in parser._actions
+    if isinstance(action, argparse._SubParsersAction)
+).choices["check"]
+
+print(check_parser.format_usage())
+```
+
+The `_actions` access above deliberately inspects an internal attribute for a
+short learning experiment. Production code should normally keep the returned
+subparser while building, or test help through public process behavior, rather
+than depend on a private implementation detail.
+
+Review help with these questions:
+
+- Does the description say what result the command produces?
+- Does every positional have a useful metavar and explanation?
+- Are defaults stated when they affect behavior?
+- Are choices meaningful rather than internal abbreviations?
+- Does each subcommand help mention its special input and output?
+- Is the shortest ordinary invocation actually short?
+- Can invalid syntax be repaired by reading the usage line?
+
+Do not overload `epilog` with a manual. Give one or two examples, then link to
+longer documentation in the package README.
+
+### Checkpoint: read help and failure evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit12-argparse-help-errors",
+  "title": "Read help and failure evidence",
+  "instructions": "Use argparse's observable behavior, not a guess about implementation.",
+  "questions": [
+    {
+      "id": "unit12-argparse-q07-help-status",
+      "prompt": "What normally happens after argparse handles --help?",
+      "options": ["It returns an empty Namespace and continues", "It writes help to stderr and exits with 1", "It writes help and raises SystemExit with status 0", "It raises ValueError without output"],
+      "answer_index": 2,
+      "explanation": "Help is a successful process request. Argparse writes it and exits with status 0."
+    },
+    {
+      "id": "unit12-argparse-q08-invalid-choice",
+      "prompt": "The user supplies --status maybe when choices are open, limited, and closed. Which evidence should the parser produce?",
+      "options": ["A silent default to open", "A traceback from the domain core", "A JSON object on stdout", "Usage and an argparse error on stderr with status 2"],
+      "answer_index": 3,
+      "explanation": "An unsupported choice is a command-grammar error, so argparse explains it on stderr and uses status 2 before the core runs."
+    },
+    {
+      "id": "unit12-argparse-q09-namespace-core",
+      "prompt": "Why extract ordinary values before calling the reusable core?",
+      "options": ["It prevents the core from depending on argparse's Namespace and makes other callers natural", "Namespaces cannot contain strings", "The shell requires every function to have one argument", "It makes parser errors use status 0"],
+      "answer_index": 0,
+      "explanation": "The Namespace belongs to the CLI adapter. Ordinary parameters or a domain settings value keep the core usable from Python and easier to inspect."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Build the trail-report command grammar
+
+Create a parser that satisfies this contract:
+
+1. program name `trail-report` and a useful description;
+2. required `summarize` and `check` subcommands;
+3. both commands accept positional `INPUT`;
+4. `summarize` accepts positive `--limit`, default 20;
+5. `check` accepts `--status` from `open`, `limited`, or `closed`, default
+   `closed`;
+6. `check` accepts repeatable `--tag`, `--strict`, and counted `-v/--verbose`;
+7. both subcommands store a clear dispatch value; and
+8. help explains that `-` means stdin.
+
+Start by predicting the namespace for each case:
+
+```python
+lab_cases = [
+    ["summarize", "signals.txt"],
+    ["summarize", "signals.txt", "--limit", "5"],
+    ["check", "-", "--tag", "river", "--tag", "bridge", "-vv"],
+]
+```
+
+Then check field values rather than only printing the namespace:
+
+```python
+lab_parser = build_parser()
+
+summary = lab_parser.parse_args(lab_cases[1])
+assert summary.command == "summarize"
+assert summary.input == "signals.txt"
+assert summary.limit == 5
+
+check = lab_parser.parse_args(lab_cases[2])
+assert check.command == "check"
+assert check.input == "-"
+assert check.tag == ["river", "bridge"]
+assert check.verbose == 2
+assert check.strict is False
+```
+
+Add focused capture checks for `--help`, missing subcommand, invalid status, a
+non-integer limit, zero limit, and an input named `--draft` after `--`.
+
+<details>
+<summary>Hint 1: sketch the grammar tree</summary>
+
+Write `trail-report` at the root. Draw two child verbs. Put shared-looking
+`INPUT` on both children because argparse subparsers own their arguments. Add
+only the options meaningful to each child.
+</details>
+
+<details>
+<summary>Hint 2: implement conversion separately</summary>
+
+Write and check `positive_count(text)` before building the parser. It should
+catch `ValueError`, raise `ArgumentTypeError` with a useful message, reject
+values below 1, and return the integer otherwise.
+</details>
+
+<details>
+<summary>Hint 3: capture one exit at a time</summary>
+
+Use a fresh `StringIO`, `redirect_stdout` or `redirect_stderr`, and a focused
+`try/except SystemExit` around one `parse_args()` call. Record both `error.code`
+and the captured text.
+</details>
+
+<details>
+<summary>Show one complete parser after attempting the lab</summary>
+
+```python
+import argparse
+
+
+def positive_count(text):
+    """Return a positive integer parsed from text."""
+    try:
+        value = int(text)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("must be an integer") from error
+    if value < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return value
+
+
+def build_trail_parser():
+    parser = argparse.ArgumentParser(
+        prog="trail-report",
+        description="Summarize and validate trail checkpoint reports.",
+        epilog="Use '-' as INPUT to read from standard input.",
+    )
+    subcommands = parser.add_subparsers(dest="command", required=True)
+
+    summarize = subcommands.add_parser(
+        "summarize", help="count reports by status"
+    )
+    summarize.add_argument("input", metavar="INPUT")
+    summarize.add_argument("--limit", type=positive_count, default=20)
+    summarize.set_defaults(handler="summarize")
+
+    check = subcommands.add_parser(
+        "check", help="emit reports matching one status"
+    )
+    check.add_argument("input", metavar="INPUT")
+    check.add_argument(
+        "--status",
+        choices=("open", "limited", "closed"),
+        default="closed",
+    )
+    check.add_argument("--tag", action="append", default=[])
+    check.add_argument("--strict", action="store_true")
+    check.add_argument("-v", "--verbose", action="count", default=0)
+    check.set_defaults(handler="check")
+    return parser
+```
+
+This solution builds only the grammar. It does not open the input or run the
+trail logic; those jobs belong to later boundaries.
+</details>
+
+## Key points
+
+- Design example invocations and invalid shapes before writing parser calls.
+- The shell turns command text into strings; argparse parses the resulting
+  argument list into converted Python values.
+- Positionals identify central subjects, options label values, flags represent
+  switches, repeatable actions collect values, and subcommands separate jobs.
+- Use `type`, `choices`, and focused converters for command-syntax validation;
+  keep domain validation in reusable application code.
+- Generated help, usage text, and status 2 errors are observable parts of the
+  public command interface.
+- Pass an explicit list to `parse_args()` for direct experiments, and do not
+  pass the resulting Namespace into the reusable core.
+
+## Continue learning
+
+- [Python argparse tutorial](https://docs.python.org/3/howto/argparse.html)
+- [argparse library reference](https://docs.python.org/3/library/argparse.html)
+- [Python `sys.argv` documentation](https://docs.python.org/3/library/sys.html#sys.argv)
+- [Software Carpentry: Command-Line Programs](https://swcarpentry.github.io/python-novice-inflammation/12-cmdline.html)

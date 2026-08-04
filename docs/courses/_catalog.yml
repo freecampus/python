@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 16
+curriculum_version: 17
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -8,14 +8,14 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 89
-    estimated_effort: 285–420 hours
+    lesson_count: 90
+    estimated_effort: 305–445 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 16
+      curriculum_version: 17
       rule_version: 9
       recognition: local-self-reported
       lesson_ids:
@@ -91,7 +91,8 @@ courses:
         - object-oriented-python.road-crossing-game-model
         - command-line-applications.argparse-command-design
         - command-line-applications.streams-errors-exit-codes
-        - command-line-applications.configuration-logging-secrets
+        - command-line-applications.configuration-precedence-secrets
+        - command-line-applications.logging-useful-diagnostics
         - command-line-applications.cli-ecosystem-testable-architecture
         - testing-python-programs.what-tests-prove
         - testing-python-programs.pytest-discovery-failures
@@ -158,7 +159,7 @@ courses:
           unit_id: object-oriented-python
           path: courses/python-foundations/units/object-oriented-python/challenge.qmd
         - id: command-line-applications.challenge
-          title: Ship a Record-Conversion CLI
+          title: Decode the Deep-Sea Beacon
           unit_id: command-line-applications
           path: courses/python-foundations/units/command-line-applications/challenge.qmd
         - id: testing-python-programs.challenge
@@ -250,7 +251,7 @@ courses:
         id: command-line-applications
         title: Command-Line Applications
         directory: courses/python-foundations/units/command-line-applications
-        lesson_count: 4
+        lesson_count: 5
         kind: instructional
       - number: 13
         id: testing-python-programs

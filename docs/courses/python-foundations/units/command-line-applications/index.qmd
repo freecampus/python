@@ -1,66 +1,223 @@
 ---
 title: Command-Line Applications Overview
-description: Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
-course_id: python-foundations
-unit_id: command-line-applications
-unit_number: 12
+description: Learn how Unit 12 turns reusable Python into a discoverable, configurable command whose output, diagnostics, logs, and exit status form a dependable public interface.
+execute:
+  echo: true
 categories:
 - python-foundations
 - command-line-applications
 - overview
 order: 0
 colab_notebook: notebooks/courses/python-foundations/units/command-line-applications/index.ipynb
+course_id: python-foundations
+unit_id: command-line-applications
+unit_number: 12
 ---
 ::: {.lesson-meta}
-- **Level:** Python Foundations · Unit 12
-- **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Level:** Python Foundations
+- **Estimated time:** 45–60 minutes
+- **You will learn:** Identify the parts of a dependable command-line interface, prepare notebook and terminal workspaces, and plan the evidence you will collect across five connected lessons.
+- **Practice in:** Google Colab or JupyterLab for direct calls, plus a local terminal for real command behavior
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
 
-Build a composable command with explicit arguments, streams, exit status, logging, configuration, and a testable core.
+Imagine that a trail team receives status lines from several checkpoints:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+```text
+north-ridge|open|Windy above the tree line
+river-gate|closed|Bridge inspection in progress
+```
 
-## 2. Before you start
+The transformation code already works as a Python function. A command-line
+application makes that behavior useful outside one notebook. A teammate can ask
+for help, read a file or pipe data into the program, select an operation, and
+send the result into another program:
 
-**Prior knowledge:** Complete Unit 11 and bring its challenge notes and debugging record.
+```bash
+$ trail-report --help
+usage: trail-report [-h] {summarize,check} ...
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+$ cat trail.txt | trail-report check - --format jsonl
+{"checkpoint": "north-ridge", "status": "open"}
+trail-report: line 2: closed checkpoints require attention
+$ echo $?
+1
+```
 
-## 3. Lessons
+Four observations are visible in this short session:
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Designing a Command and Parsing Arguments with argparse](argparse-command-design.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Standard Input, Output, Errors, and Exit Codes](streams-errors-exit-codes.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Configuration, Environment Variables, Logging, and Secrets](configuration-logging-secrets.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [CLI Ecosystem and Testable Architecture](cli-ecosystem-testable-architecture.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+1. help describes a **command grammar** rather than forcing the user to inspect
+   Python source;
+2. standard input lets the command receive another program's output;
+3. JSON data goes to stdout while the explanation goes to stderr; and
+4. the exit status gives a calling shell or automation tool a small,
+   machine-readable result.
 
-## 4. How to study this unit
+A dependable CLI is therefore more than “a script that reads arguments.” It is
+a boundary between a person or another process and reusable application logic.
+Every visible behavior at that boundary is part of the command's interface.
 
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
+## What you will be able to build
 
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+By the end of Unit 12, you will be able to:
+
+- turn a written command contract into positionals, options, flags, and
+  subcommands with `argparse`;
+- explain how shell tokens become `sys.argv` strings and parsed Python values;
+- keep structured data on stdout and useful diagnostics or logs on stderr;
+- return an application status from `main()` and let the entry point turn it
+  into a process exit status;
+- resolve defaults, a TOML file, environment variables, and explicit CLI values
+  in a documented order;
+- validate settings once and avoid ordinary secret-disclosure mistakes;
+- configure logging at the application boundary without contaminating data;
+- keep core functions independent of argparse namespaces and global streams;
+- inspect behavior through direct calls and through a real child process; and
+- decide what argparse, Click, Typer, and Rich do—and what they do not repair.
+
+::: {.concept-diagram}
+Notice that the command adapter translates between process-facing details and
+ordinary Python values; the reusable core does not need to know about the shell.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A["Shell tokens and stdin"] --> B["CLI adapter"]
+  C["File and environment settings"] --> B
+  B --> D["Validated values"]
+  D --> E["Reusable core"]
+  E --> F["Rendered data on stdout"]
+  B --> G["Diagnostics and logs on stderr"]
+  B --> H["Exit status"]
+```
 :::
 
-## 5. Unit evidence
+## The five-stage trail-report build
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+The lessons add one boundary at a time. The same trail-report scenario makes
+the dependencies visible, but each page includes a complete snapshot so that a
+missed lesson fragment does not leave broken glue code.
+
+| Step | Lesson | What changes in the command | Evidence you keep |
+|---:|---|---|---|
+| 1 | [Design a Friendly Command with argparse](argparse-command-design.qmd) | `summarize` and `check` gain clear arguments, generated help, validation, and dispatch. | Example invocations, namespace values, help, and one usage error. |
+| 2 | [Put Output, Errors, and Exit Status in the Right Place](streams-errors-exit-codes.qmd) | The command accepts stdin, produces JSON Lines, reports rejected records separately, and returns a documented status. | Exact stdout, stderr, and status from direct and process calls. |
+| 3 | [Resolve Configuration Without Exposing Secrets](configuration-precedence-secrets.qmd) | Defaults, TOML, environment, and CLI values become one validated settings object. | A precedence trace, source labels, invalid-setting evidence, and a redacted secret. |
+| 4 | [Write Useful Logs Without Polluting Output](logging-useful-diagnostics.qmd) | Quiet and verbose modes add application-owned operational records on stderr. | Captured records at several levels and unchanged stdout. |
+| 5 | [Keep the Command Thin and the Core Reusable](cli-ecosystem-testable-architecture.qmd) | Parser, settings, core, rendering, boundary, and entry point become a small package. | Direct checks plus a real process launched from another directory. |
+
+The [unit challenge](challenge.qmd) then changes both the story and data. You
+will build **Decode the Deep-Sea Beacon**, a streaming command that decodes
+messages, resolves its shift, handles damaged pings, supports strict mode, and
+remains useful in a pipeline.
+
+## Bring forward what you already know
+
+Unit 12 combines earlier skills rather than starting a separate kind of Python:
+
+- **Unit 9:** paths, encodings, context managers, JSON, and validation at an
+  external-data boundary;
+- **Unit 10:** modules, packages, `__main__`, console entry points, virtual
+  environments, and installed-project checks;
+- **Unit 11:** small dataclasses, cohesive responsibilities, composition, and
+  explicit collaborators.
+
+You do not need to remember every detail. Keep those units available for
+reference. This unit will say when a task intentionally reuses them.
+
+Unit 13 will teach pytest and the design of maintainable test suites. Here, we
+use plain assertions, `StringIO`, and one `subprocess.run()` smoke check because
+we need immediate evidence while building a CLI. Those checks are useful, but
+they are not presented as a substitute for the testing unit.
+
+## Use two workspaces for two kinds of evidence
+
+### A notebook is excellent for direct calls
+
+In Colab or JupyterLab, you can pass argument lists explicitly:
+
+```python
+arguments = ["check", "signals.txt", "--status", "open"]
+print(arguments)
+```
+
+You can also use `io.StringIO` as a small in-memory text stream. This makes
+stdout and stderr easy to inspect without launching another process.
+
+### A terminal reveals the process boundary
+
+A local terminal is the best place to observe:
+
+- how your shell splits or quotes arguments;
+- pipes and redirects;
+- `python -m package` and an installed console command;
+- stdout and stderr as separate channels;
+- the process exit status; and
+- behavior when the current directory is not the project directory.
+
+Create a disposable practice directory. A virtual environment is useful but no
+third-party CLI library is required:
+
+```bash
+mkdir unit12-cli-lab
+cd unit12-cli-lab
+python --version
+python -c "import argparse, logging, tomllib; print('standard library ready')"
+```
+
+On Windows PowerShell, `py` may be the Python launcher and `$LASTEXITCODE`
+reports the most recent native process status. On POSIX-like shells, `python3`
+may be the command and `$?` reports the status. Use the spelling that works in
+your environment; the Python program itself should not depend on one shell.
+
+::: {.callout-warning title="A notebook cell is not a shell command"}
+Text such as `trail-report --help` is shell syntax. Calling
+`parser.parse_args(["--help"])` is a Python function call. Both are valuable,
+but they pass through different boundaries. Each lesson labels which one you
+are observing.
+:::
+
+## Keep a CLI evidence notebook
+
+For each lesson, record at least one row in this table:
+
+| Invocation or call | Expected stdout | Expected stderr | Expected status/exception | Actual result |
+|---|---|---|---|---|
+| `trail-report check good.txt` | one JSON object | empty | 0 | |
+| `trail-report check mixed.txt` | valid objects only | rejected line | 1 | |
+| `parse_args(["check", "--help"])` | help captured by the parser | empty | `SystemExit(0)` | |
+
+The exact output matters. “It failed” is weak evidence; the channel, message,
+and status explain what contract was observed. Restart a notebook and run from
+the top before declaring a direct-call example reproducible. Run process checks
+from outside the project before declaring an entry point installable.
+
+## Plan the active work
+
+Budget approximately **22–30 hours** for the unit, including typing examples,
+predicting behavior, checkpoints, repair clinics, lesson labs, and the
+challenge. A useful pace is:
+
+1. stop after the command-grammar lab;
+2. take a second session for streams and process status;
+3. split configuration and secrets across two shorter sessions;
+4. practice logging in a fresh interpreter so old handlers do not hide cause
+   and effect;
+5. give the architecture lab its own long session; and
+6. attempt the challenge later, without copying the trail-report solution.
+
+You are ready to continue when you can point to the adapter, core, stdout,
+stderr, and status in the opening diagram—even if you cannot implement all of
+them yet.
+
+::: {.callout-tip title="Begin by designing the public command"}
+Continue to [Design a Friendly Command with
+argparse](argparse-command-design.qmd). Keep this overview open when deciding
+whether a new piece belongs to the process boundary or the reusable core.
+:::
 
 <!-- fcpython-chapter-lab: end -->
