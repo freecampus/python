@@ -1,0 +1,607 @@
+---
+title: Combining Conditions Without Surprises
+lesson_id: decisions-repetition.boolean-rules-short-circuit
+lesson_order: 20
+description: Turn several facts into readable Boolean rules, use short-circuit evaluation as a safety guard, and avoid collapsing meaningful falsy states.
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+- boolean-logic
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/boolean-rules-short-circuit.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 3–4.5 hours
+- **You will learn:** Name and combine Boolean facts, group mixed rules, guard unsafe operations with short-circuiting, and preserve distinctions such as `None` versus zero.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Name the facts before combining the rule
+
+A museum security console unlocks an archive only for an authorized visitor when
+the room is open and no alarm is active. One dense condition can express that,
+but named facts let a reader inspect the reasoning:
+
+```python
+badge = "researcher"
+hour = 14
+alarm_active = False
+
+is_authorized = badge in {"researcher", "curator"}
+is_open = 9 <= hour < 17
+is_safe = not alarm_active
+can_enter = is_authorized and is_open and is_safe
+
+print(is_authorized, is_open, is_safe)
+print("Unlock archive:", can_enter)
+```
+
+Each comparison or membership test creates a Boolean. The final rule combines
+facts whose names say what they mean. If entry is unexpectedly denied, the three
+printed values immediately narrow the cause.
+
+Unit 2 established how comparisons, truthiness, `and`, `or`, and `not` work.
+Here you will use those rules to design control-flow questions that remain
+readable at boundaries and safe when some operations are not always valid.
+
+### Questions this lesson will answer
+
+- How do truth tables expose a rule’s complete behavior?
+- Where do parentheses matter when `and` and `or` appear together?
+- How can evaluation order prevent an invalid lookup or index?
+- Why do `None`, `0`, `""`, and `[]` sometimes need different outcomes?
+- When do `all()` and `any()` make a collection of facts clearer?
+
+## 2. Truth tables turn words into evidence
+
+For two facts, enumerate every combination instead of reasoning from one happy
+case:
+
+| `is_authorized` | `is_open` | `is_authorized and is_open` | `is_authorized or is_open` |
+|---:|---:|---:|---:|
+| `False` | `False` | `False` | `False` |
+| `False` | `True` | `False` | `True` |
+| `True` | `False` | `False` | `True` |
+| `True` | `True` | `True` | `True` |
+
+- `and` requires every combined requirement.
+- `or` accepts at least one alternative.
+- `not` reverses one truth value.
+
+Translate policy words deliberately:
+
+| Policy wording | Typical Boolean shape |
+|---|---|
+| “both,” “all,” “must also” | `A and B` |
+| “either,” “at least one” | `A or B` |
+| “unless,” “not,” “no alarm” | often includes `not A` |
+| “exactly one” | `(A and not B) or (B and not A)` |
+
+Do not assume everyday “or” means exactly one. Python’s `or` is inclusive: it is
+true when one or both sides are true.
+
+```python
+has_key = True
+knows_code = True
+
+print(has_key or knows_code)
+print((has_key and not knows_code) or (knows_code and not has_key))
+```
+
+The first result is true; the second is false because both alternatives are
+present.
+
+## 3. Parentheses make mixed rules visible
+
+Python evaluates `not` before `and`, and `and` before `or`. Therefore:
+
+```python
+is_staff = False
+has_ticket = True
+is_open = False
+
+allowed = is_staff or has_ticket and is_open
+print(allowed)
+```
+
+means:
+
+```python
+allowed = is_staff or (has_ticket and is_open)
+```
+
+A staff member can enter even while closed. If the intended rule is “the room
+must be open, and the person must be staff or have a ticket,” write:
+
+```python
+allowed = (is_staff or has_ticket) and is_open
+```
+
+The parentheses are not decoration. They identify one grouped idea before it is
+combined with another. Even when precedence would produce the same answer, use
+parentheses when the policy has an obvious phrase boundary.
+
+A quick review technique is to substitute Boolean values:
+
+```python
+print(False or True and False)
+print((False or True) and False)
+```
+
+Both happen to be false here, so also test a case that distinguishes the shapes:
+
+```python
+print(True or False and False)    # True
+print((True or False) and False)  # False
+```
+
+### Checkpoint: translating policies
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-boolean-policy-shapes",
+  "title": "Boolean policy checkpoint",
+  "instructions": "Choose the expression that matches the stated rule.",
+  "questions": [
+    {
+      "id": "all-requirements",
+      "prompt": "Entry requires a badge and an open room. Which expression matches?",
+      "options": ["`has_badge and is_open`", "`has_badge or is_open`", "`not has_badge`", "`has_badge == is_open == False`"],
+      "answer_index": 0,
+      "explanation": "Both requirements must be true, so and is the appropriate connective."
+    },
+    {
+      "id": "room-must-open",
+      "prompt": "The room must be open, and the visitor must be staff or have a ticket. Which expression is clearest?",
+      "options": ["`is_staff or has_ticket and is_open`", "`(is_staff or has_ticket) and is_open`", "`is_staff and has_ticket or is_open`", "`not is_open or is_staff`"],
+      "answer_index": 1,
+      "explanation": "Parentheses group the two visitor alternatives, while and makes the open room mandatory."
+    },
+    {
+      "id": "inclusive-or",
+      "prompt": "When is Python's `A or B` false?",
+      "options": ["When both are true", "When exactly one is true", "Only when both are false", "Whenever A and B differ"],
+      "answer_index": 2,
+      "explanation": "Inclusive or is false only when neither operand is truthy."
+    },
+    {
+      "id": "exactly-one",
+      "prompt": "Which shape means exactly one of A and B is true?",
+      "options": ["`A and B`", "`A or B`", "`not A and not B`", "`(A and not B) or (B and not A)`"],
+      "answer_index": 3,
+      "explanation": "The two alternatives explicitly allow A alone or B alone, excluding both and neither."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Short-circuiting can protect an unsafe lookup
+
+Python evaluates `and` from left to right. If the left side is falsy, the whole
+`and` expression cannot become truthy, so Python skips the right side:
+
+```python
+codes = []
+
+has_primary_code = bool(codes) and codes[0] == "A7"
+print(has_primary_code)
+```
+
+`bool(codes)` is false, so `codes[0]` is never evaluated. No `IndexError` occurs.
+Reverse the operands and the guard arrives too late:
+
+```python
+codes = []
+has_primary_code = codes[0] == "A7" and bool(codes)
+```
+
+Python attempts the unsafe index first and raises `IndexError`. A guard must be
+on the left of the operation it protects.
+
+A dictionary example uses membership before indexing:
+
+```python
+visitor = {"name": "Mina"}
+
+has_active_pass = (
+    "pass" in visitor
+    and visitor["pass"] == "active"
+)
+print(has_active_pass)
+```
+
+The membership test is false, so the missing key lookup is skipped. This is a
+control-flow effect inside an expression: not every written operand necessarily
+runs.
+
+::: {.callout-important title="A safety guard should prove the next operation is valid"}
+`data and data[0]` protects an index because a truthy sequence has at least one
+item. `"pass" in visitor and visitor["pass"] == "active"` protects a dictionary
+lookup because membership proves the key exists.
+:::
+
+## 5. `or` also stops when the outcome is known
+
+For `or`, a truthy left operand already determines success, so Python skips the
+right side:
+
+```python
+has_master_key = True
+entered_code = "wrong"
+
+can_open = has_master_key or entered_code == "A7"
+print(can_open)
+```
+
+The code comparison is not needed. Short-circuiting is observable when the right
+side would fail:
+
+```python
+manual_override = True
+settings = {}
+
+can_start = manual_override or settings["mode"] == "automatic"
+print(can_start)
+```
+
+This runs because the lookup is skipped. That does not mean missing settings are
+always acceptable; it means the policy explicitly permits the override to make
+the other fact irrelevant.
+
+Do not hide important work behind `and` or `or` merely to save lines. Use a
+normal conditional when the skipped action changes state, needs an explanation,
+or would surprise a reader.
+
+## 6. `and` and `or` return operands, not forced Booleans
+
+Unit 2 introduced this rule. It matters when a condition also constructs data:
+
+```python
+label = ""
+fallback = "untitled exhibit"
+
+display_label = label or fallback
+print(display_label)
+```
+
+Because `label` is falsy, `or` returns the second operand string. If `label` were
+`"Meteor Map"`, it would be returned unchanged.
+
+This defaulting pattern is safe only when **every** falsy first value means
+“absent.” It is wrong if `0` is meaningful:
+
+```python
+requested_floor = 0
+floor = requested_floor or 1
+print(floor)  # 1, although floor 0 was requested
+```
+
+Preserve the distinction explicitly:
+
+```python
+floor = 1 if requested_floor is None else requested_floor
+assert floor == 0
+```
+
+When you need a real Boolean for state or output, use a comparison or `bool(...)`
+instead of relying on the returned operand.
+
+### Checkpoint: evaluation order and guards
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-boolean-short-circuit",
+  "title": "Short-circuit checkpoint",
+  "instructions": "Trace which operands Python evaluates.",
+  "questions": [
+    {
+      "id": "empty-index-guard",
+      "prompt": "Why does `bool(items) and items[0] == 'key'` avoid an error for an empty list?",
+      "options": ["The falsy left operand makes Python skip the right operand", "Index zero exists in every list", "and catches IndexError", "bool() adds a placeholder item"],
+      "answer_index": 0,
+      "explanation": "A false left operand determines the and result, so the unsafe index is not evaluated."
+    },
+    {
+      "id": "guard-order",
+      "prompt": "Which expression safely tests a possibly missing `mode` key?",
+      "options": ["`settings['mode'] == 'auto' and 'mode' in settings`", "`'mode' in settings and settings['mode'] == 'auto'`", "`settings['mode'] or 'mode' in settings`", "`bool('mode') and settings['mode']`"],
+      "answer_index": 1,
+      "explanation": "Membership is evaluated first and protects the lookup when the key is absent."
+    },
+    {
+      "id": "or-skips-right",
+      "prompt": "For `True or missing['key']`, which statement is correct?",
+      "options": ["The dictionary is filled automatically", "The expression always raises KeyError", "The lookup is skipped because the left operand is truthy", "or evaluates from right to left"],
+      "answer_index": 2,
+      "explanation": "A truthy left operand determines the or result, so Python does not evaluate the right side."
+    },
+    {
+      "id": "zero-default",
+      "prompt": "Why can `value or default` be wrong when zero is valid?",
+      "options": ["or accepts only strings", "Zero raises a syntax error", "default must be zero too", "Zero is falsy, so the expression replaces it with the default"],
+      "answer_index": 3,
+      "explanation": "Truthiness collapses zero with other falsy values even when the program gives zero a distinct meaning."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. De Morgan's laws help invert a complete rule
+
+Suppose entry is allowed when a visitor is authorized **and** the alarm is not
+active:
+
+```python
+can_enter = is_authorized and not alarm_active
+```
+
+The denial condition is the negation of that whole expression:
+
+```python
+must_deny = not (is_authorized and not alarm_active)
+```
+
+De Morgan’s laws give an equivalent form:
+
+```python
+must_deny = (not is_authorized) or alarm_active
+```
+
+The two transformations are:
+
+- `not (A and B)` is equivalent to `(not A) or (not B)`;
+- `not (A or B)` is equivalent to `(not A) and (not B)`.
+
+Notice that the connective changes as each fact is negated. Test all Boolean
+combinations when an inversion controls access, safety, payment, or another
+important policy.
+
+```python
+for authorized in [False, True]:
+    for alarm in [False, True]:
+        original = not (authorized and not alarm)
+        rewritten = (not authorized) or alarm
+        assert original == rewritten
+```
+
+This small exhaustive check is possible because two Boolean facts have only four
+combinations.
+
+## 8. Impossible ranges reveal a broken rule
+
+Some conditions can never be true:
+
+```python
+age = 20
+impossible = age < 13 and age >= 18
+print(impossible)
+```
+
+No one value can be below 13 and at least 18 simultaneously. Perhaps the intended
+condition was `age < 13 or age >= 18`, describing values outside 13 through 17.
+
+Other rules are always true:
+
+```python
+always_true = age >= 13 or age < 18
+```
+
+Every number satisfies at least one side, including the overlapping middle.
+Writing a few boundary values—12, 13, 17, and 18—usually reveals the problem.
+Lesson 3 expands this technique into decision tables.
+
+## 9. `all()` and `any()` combine a collection of facts
+
+When facts already exist as a collection, built-ins can communicate the rule:
+
+```python
+checks = [True, True, False]
+
+print(all(checks))
+print(any(checks))
+```
+
+- `all(checks)` is true only if every item is truthy.
+- `any(checks)` is true if at least one item is truthy.
+
+They also short-circuit while visiting the collection: `all()` can stop at the
+first falsy item; `any()` can stop at the first truthy item.
+
+The empty cases are deliberate:
+
+```python
+assert all([]) is True
+assert any([]) is False
+```
+
+“All zero checks passed” is true because no failing check exists. “At least one
+of zero checks passed” is false because no successful check exists. Whether an
+empty collection should be accepted by your application is a separate policy;
+you can require both non-emptiness and `all(checks)`:
+
+```python
+checks = []
+ready = bool(checks) and all(checks)
+assert ready is False
+```
+
+### Checkpoint: complete Boolean reasoning
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-boolean-complete-rules",
+  "title": "Complete rule checkpoint",
+  "instructions": "Choose the result supported by Boolean identities and collection rules.",
+  "questions": [
+    {
+      "id": "de-morgan-and",
+      "prompt": "Which expression is equivalent to `not (A and B)`?",
+      "options": ["`(not A) or (not B)`", "`(not A) and (not B)`", "`A or B`", "`A and not B`"],
+      "answer_index": 0,
+      "explanation": "Negating a conjunction negates each fact and changes and to or."
+    },
+    {
+      "id": "impossible-range",
+      "prompt": "What is true of `value < 10 and value >= 20` for ordinary numbers?",
+      "options": ["It accepts values 10 through 20", "It is impossible because one value cannot satisfy both ranges", "It is true only at 20", "Python interprets it as or"],
+      "answer_index": 1,
+      "explanation": "The two required ranges do not overlap, so no number satisfies both."
+    },
+    {
+      "id": "empty-all",
+      "prompt": "What does `all([])` return?",
+      "options": ["None", "An empty list", "True", "False"],
+      "answer_index": 2,
+      "explanation": "With no falsy item to disprove the claim, all() returns True for an empty iterable."
+    },
+    {
+      "id": "require-nonempty-all",
+      "prompt": "Which expression requires at least one check and requires every check to be truthy?",
+      "options": ["`any(checks)`", "`all(checks)`", "`not checks or all(checks)`", "`bool(checks) and all(checks)`"],
+      "answer_index": 3,
+      "explanation": "The first operand requires non-emptiness; only then does all() verify every supplied fact."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Build a museum security console
+
+Use these inputs and create named facts rather than one unreadable condition:
+
+```python
+visitor = {"role": "researcher", "pass": "active"}
+hour = 16
+alarm_active = False
+restricted_exhibit = True
+escort_present = True
+
+access = None
+reason = None
+```
+
+The policy is:
+
+1. The museum is open from hour 9 through 16; hour 17 is closed.
+2. The visitor is authorized when the role is `"curator"` or `"researcher"`.
+3. A pass is valid only if the `"pass"` key exists and equals `"active"`.
+4. No one enters while the alarm is active.
+5. A restricted exhibit additionally requires either a curator or an escort.
+6. Assign Boolean `access` and one specific `reason`. Check general failures in
+   this order: closed museum, alarm, authorization/pass, restricted access.
+7. Do not index the pass before proving its key exists.
+
+Run these checks for the supplied case:
+
+```python
+assert is_open is True
+assert is_authorized is True
+assert has_active_pass is True
+assert restriction_satisfied is True
+assert access is True
+assert reason == "access granted"
+```
+
+Then try a missing pass, `hour = 17`, an active alarm, and a researcher at the
+restricted exhibit without an escort. For each case, predict the first failing
+fact and the resulting reason.
+
+<details>
+<summary>Hint: build facts from simple to dependent</summary>
+
+Create `is_open`, `is_authorized`, and `has_active_pass` separately. The pass fact
+should use membership on the left of `and`. Define the restricted-exhibit fact so
+that unrestricted exhibits pass without needing an escort. Use a branch chain to
+choose the most useful reason.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+visitor = {"role": "researcher", "pass": "active"}
+hour = 16
+alarm_active = False
+restricted_exhibit = True
+escort_present = True
+
+is_open = 9 <= hour < 17
+is_authorized = visitor["role"] in {"curator", "researcher"}
+has_active_pass = (
+    "pass" in visitor
+    and visitor["pass"] == "active"
+)
+restriction_satisfied = (
+    not restricted_exhibit
+    or visitor["role"] == "curator"
+    or escort_present
+)
+
+if not is_open:
+    access = False
+    reason = "museum closed"
+elif alarm_active:
+    access = False
+    reason = "alarm active"
+elif not (is_authorized and has_active_pass):
+    access = False
+    reason = "authorization failed"
+elif not restriction_satisfied:
+    access = False
+    reason = "escort required"
+else:
+    access = True
+    reason = "access granted"
+```
+
+The branch chain reports one precedence-ordered reason. The named facts preserve
+which part of the policy each expression represents.
+
+</details>
+
+## 11. Explain the choices
+
+1. Why are named Boolean facts easier to debug than one dense condition?
+2. How can parentheses change a policy that mixes `and` and `or`?
+3. What must a left-hand guard prove before Python reaches an unsafe right side?
+4. Why is `value or default` unable to preserve every valid zero?
+5. What do `all([])` and `any([])` mean, and when might a policy additionally
+   require a non-empty input?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Name meaningful facts, then combine those names into the policy.
+- Parenthesize mixed `and`/`or` rules according to their logical phrases.
+- `and` skips its right operand after a falsy left operand; `or` skips it after a
+  truthy left operand. Put safety guards before the operations they protect.
+- Truthiness can collapse meaningful states such as zero and `None`; compare
+  explicitly when the distinction matters.
+- De Morgan’s laws invert a whole rule, and boundary cases reveal impossible or
+  always-true ranges.
+- `all()` and `any()` combine collections of facts and have deliberate empty
+  behavior.
+:::
+
+## References
+
+- [Python standard types: Boolean operations](https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not)
+- [Python standard types: truth-value testing](https://docs.python.org/3/library/stdtypes.html#truth-value-testing)
+- [Python expression reference: evaluation order](https://docs.python.org/3/reference/expressions.html#evaluation-order)
+- [Python built-in function: `all`](https://docs.python.org/3/library/functions.html#all)
+- [Python built-in function: `any`](https://docs.python.org/3/library/functions.html#any)

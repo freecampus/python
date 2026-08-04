@@ -557,9 +557,8 @@ def test_lessons_use_clean_numbered_section_headings() -> None:
 def test_selected_lessons_include_mermaid_diagrams() -> None:
     expected = {
         FOUNDATIONS_ROOT / "units/python-syntax/values-names-assignment.qmd",
-        FOUNDATIONS_ROOT
-        / "units/decisions-repetition/conditionals-decision-tables.qmd",
-        FOUNDATIONS_ROOT / "units/decisions-repetition/for-loops-traversal.qmd",
+        FOUNDATIONS_ROOT / "units/decisions-repetition/conditional-branches.qmd",
+        FOUNDATIONS_ROOT / "units/decisions-repetition/for-loop-patterns.qmd",
         FOUNDATIONS_ROOT
         / "units/functions-call-behavior/defining-calling-returning.qmd",
         FOUNDATIONS_ROOT / "units/collections-iteration/lists.qmd",

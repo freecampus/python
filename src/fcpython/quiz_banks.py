@@ -116,8 +116,9 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         ),
         (
             "decisions-repetition",
-            "Decisions and Repetition",
-            "translate rules and repeated work into traceable control flow",
+            "Making Decisions and Repeating Work",
+            "build complete decisions and loops that transform, search, and stop "
+            "deliberately",
         ),
         (
             "functions-call-behavior",

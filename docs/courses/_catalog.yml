@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 8
+curriculum_version: 9
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -8,15 +8,15 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 86
-    estimated_effort: 160–245 hours
+    lesson_count: 89
+    estimated_effort: 180–275 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 8
-      rule_version: 8
+      curriculum_version: 9
+      rule_version: 9
       recognition: local-self-reported
       lesson_ids:
         - get-started.programming-python-ai
@@ -45,11 +45,14 @@ courses:
         - collections-iteration.traversing-collections
         - collections-iteration.sorting-collections
         - collections-iteration.nested-data-collection-choice
-        - decisions-repetition.conditionals-decision-tables
-        - decisions-repetition.boolean-reasoning-short-circuit
-        - decisions-repetition.for-loops-traversal
-        - decisions-repetition.while-loops-state-termination
-        - decisions-repetition.loop-control-comprehensions
+        - decisions-repetition.conditional-branches
+        - decisions-repetition.boolean-rules-short-circuit
+        - decisions-repetition.decision-tables-boundaries
+        - decisions-repetition.for-loop-patterns
+        - decisions-repetition.while-loops-termination
+        - decisions-repetition.search-loop-control
+        - decisions-repetition.nested-loops-grids
+        - decisions-repetition.comprehensions
         - functions-call-behavior.defining-calling-returning
         - functions-call-behavior.parameters-stable-interfaces
         - functions-call-behavior.contracts-decomposition-side-effects
@@ -123,7 +126,7 @@ courses:
           unit_id: collections-iteration
           path: courses/python-foundations/units/collections-iteration/challenge.qmd
         - id: decisions-repetition.challenge
-          title: Evaluate a Community Room Schedule
+          title: Escape the Clockwork Maze
           unit_id: decisions-repetition
           path: courses/python-foundations/units/decisions-repetition/challenge.qmd
         - id: functions-call-behavior.challenge
@@ -197,9 +200,9 @@ courses:
         kind: instructional
       - number: 4
         id: decisions-repetition
-        title: Decisions and Repetition
+        title: Making Decisions and Repeating Work
         directory: courses/python-foundations/units/decisions-repetition
-        lesson_count: 5
+        lesson_count: 8
         kind: instructional
       - number: 5
         id: functions-call-behavior

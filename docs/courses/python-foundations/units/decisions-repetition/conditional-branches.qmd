@@ -1,0 +1,609 @@
+---
+title: Choosing a Path with `if`, `elif`, and `else`
+lesson_id: decisions-repetition.conditional-branches
+lesson_order: 10
+description: Build conditional branches that choose deliberately, cover a fallback, preserve useful results, and distinguish one exclusive decision from several independent checks.
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+- conditionals
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/conditional-branches.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 3–5 hours
+- **You will learn:** Choose among paths with `if`, `elif`, and `else`, order branches safely, and ensure later code has a defined result.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Decide whether a ship can depart
+
+A spaceport gate should approve a departure only when its current facts allow it:
+
+```python
+fuel = 74
+weather = "clear"
+permit_active = True
+
+if fuel >= 60 and weather == "clear" and permit_active:
+    departure = "approved"
+else:
+    departure = "hold"
+
+print(departure)
+```
+
+Python evaluates the condition after `if`. Because it is `True`, Python runs the
+first indented block and skips the `else` block. The name `departure` refers to
+`"approved"` afterward.
+
+A conditional changes **which statements execute**. It does not make the facts
+true, repeat the block, or automatically validate every possible input. Your job
+is to state the rule and provide a useful path for each expected case.
+
+### Questions this lesson will answer
+
+- How do indentation and colons mark a branch?
+- When does an `elif` condition get evaluated?
+- When should several checks be independent `if` statements?
+- Why can branch order make a valid rule unreachable?
+- How can later code rely on a result from the decision?
+
+::: {.concept-diagram}
+Python tests a branch chain from top to bottom and runs at most one branch.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A[Reach the decision] --> B{Fuel below 20?}
+  B -- Yes --> C[Set status to critical]
+  B -- No --> D{Fuel below 60?}
+  D -- Yes --> E[Set status to refuel]
+  D -- No --> F[Set status to ready]
+  C --> G[Continue after the chain]
+  E --> G
+  F --> G
+```
+:::
+
+## 2. A colon opens a block and indentation owns its statements
+
+A one-branch conditional runs its body only when the condition is true:
+
+```python
+temperature = 2
+
+if temperature <= 3:
+    print("Protect the seedlings")
+
+print("Weather check complete")
+```
+
+The first `print()` belongs to the `if` because it is indented. The second is
+aligned with `if`, so it runs after the decision whether the condition was true
+or false.
+
+The four visible parts are:
+
+1. the `if` keyword;
+2. an expression whose truth is tested;
+3. a colon; and
+4. a consistently indented body.
+
+Omitting the colon is a syntax error. Removing the indentation is also a syntax
+error because Python expects a block after the header.
+
+::: {.callout-warning title="Indentation changes behavior"}
+Do not indent a later statement merely because it looks related in English. Its
+indentation decides whether it belongs to the branch.
+
+```python
+is_raining = False
+
+if is_raining:
+    print("Take a coat")
+    print("This line runs only when it is raining")
+
+print("This line always runs")
+```
+:::
+
+## 3. `else` supplies the remaining path
+
+`else` does not have its own condition. It means “none of the earlier branches in
+this chain ran.”
+
+```python
+has_pass = False
+
+if has_pass:
+    gate_message = "Welcome aboard"
+else:
+    gate_message = "Pass required"
+
+print(gate_message)
+```
+
+Exactly one assignment runs, so `gate_message` exists afterward for both cases.
+That property matters whenever later code needs a result.
+
+Contrast it with this incomplete decision:
+
+```python
+has_pass = False
+
+if has_pass:
+    gate_message = "Welcome aboard"
+
+print(gate_message)
+```
+
+The assignment is skipped, then `print()` tries to use a name that was never
+bound. Python raises `NameError`. Either assign a default before the decision or
+use an `else` when the two paths are the complete policy.
+
+```python
+gate_message = "Pass required"
+
+if has_pass:
+    gate_message = "Welcome aboard"
+```
+
+Both designs can be valid. `if`/`else` emphasizes two alternatives; a default
+followed by an override can be clearer when most inputs share the default.
+
+### Checkpoint: one or two paths
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-conditionals-basic-paths",
+  "title": "Branch structure checkpoint",
+  "instructions": "Choose the behavior guaranteed by the code.",
+  "questions": [
+    {
+      "id": "aligned-after-if",
+      "prompt": "A print statement is aligned with `if` rather than its body. When does it run?",
+      "options": ["After the conditional, regardless of which branch ran", "Only when the condition is true", "Only when the condition is false", "Before Python checks the condition"],
+      "answer_index": 0,
+      "explanation": "Alignment with the if header places the statement after the conditional block."
+    },
+    {
+      "id": "else-meaning",
+      "prompt": "When does an `else` body run?",
+      "options": ["Whenever its own hidden condition is true", "When no earlier branch in the same chain ran", "After every `if` body", "Only when a variable is `None`"],
+      "answer_index": 1,
+      "explanation": "else is the fallback for the chain; it has no separate condition."
+    },
+    {
+      "id": "missing-name",
+      "prompt": "Why can assigning `message` only inside an `if` cause `NameError` later?",
+      "options": ["Strings cannot be assigned in blocks", "Python deletes every branch variable", "The condition may be false, so the assignment may never execute", "print() cannot read assigned names"],
+      "answer_index": 2,
+      "explanation": "A skipped assignment does not bind the name. A complete fallback or earlier default prevents that path."
+    },
+    {
+      "id": "colon-role",
+      "prompt": "What belongs at the end of an `if condition` header?",
+      "options": ["A semicolon", "An equals sign", "A comma", "A colon"],
+      "answer_index": 3,
+      "explanation": "The colon ends the compound-statement header and introduces its indented suite."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Only the first true branch in a chain runs
+
+Use `elif` when one decision has more than two mutually exclusive outcomes:
+
+```python
+fuel = 42
+
+if fuel < 20:
+    fuel_status = "critical"
+elif fuel < 60:
+    fuel_status = "refuel"
+else:
+    fuel_status = "ready"
+
+print(fuel_status)
+```
+
+Python asks `fuel < 20` first. It is false, so Python evaluates `fuel < 60`.
+That is true, so Python assigns `"refuel"` and skips the rest of the chain. The
+`else` means `fuel` is neither below 20 nor below 60—in other words, it is at
+least 60.
+
+A useful trace is:
+
+| Condition in order | Result for `fuel = 42` | Action |
+|---|---:|---|
+| `fuel < 20` | `False` | continue down chain |
+| `fuel < 60` | `True` | assign `"refuel"` and leave chain |
+| `else` | not reached | skip |
+
+Test exact boundaries, not only typical values:
+
+```python
+for fuel in [19, 20, 59, 60]:
+    if fuel < 20:
+        status = "critical"
+    elif fuel < 60:
+        status = "refuel"
+    else:
+        status = "ready"
+    print(fuel, status)
+```
+
+`20` belongs to `"refuel"`; `60` belongs to `"ready"`. Changing `<` to `<=`
+would move those endpoints. The operator is part of the policy.
+
+## 5. Put specific cases before broader cases
+
+Branch order resolves overlaps. Consider this reversed policy:
+
+```python
+score = 96
+
+if score >= 70:
+    result = "pass"
+elif score >= 90:
+    result = "distinction"
+else:
+    result = "retry"
+```
+
+Both comparisons are true for 96, but the first one wins. The distinction branch
+is unreachable. Put the more specific high threshold first:
+
+```python
+if score >= 90:
+    result = "distinction"
+elif score >= 70:
+    result = "pass"
+else:
+    result = "retry"
+```
+
+This is not a Python preference for large values. It follows only from top-to-
+bottom, first-true evaluation. For low thresholds, the corresponding safe order
+may go from smallest to largest, as the fuel example did.
+
+::: {.callout-tip title="Read an `elif` using what already failed"}
+In `elif fuel < 60`, the program has already learned that `fuel < 20` is false.
+The effective case is therefore `20 <= fuel < 60`, even though the second line
+does not repeat the lower bound.
+:::
+
+## 6. Independent `if` statements answer independent questions
+
+An `if`/`elif` chain runs at most one branch. Separate `if` statements may both
+run:
+
+```python
+energy = 18
+alerts = []
+
+if energy < 25:
+    alerts.append("low energy")
+
+if energy % 2 == 0:
+    alerts.append("even calibration value")
+
+print(alerts)
+```
+
+Both facts are true, and both alerts are useful. Replacing the second `if` with
+`elif` would suppress the calibration alert whenever energy is low.
+
+Choose from the relationship between outcomes:
+
+- **one classification:** use an `if`/`elif`/`else` chain;
+- **several facts can coexist:** use independent `if` statements;
+- **one result with a special override:** consider a default followed by one or
+  more independent override checks, making precedence explicit.
+
+### Checkpoint: branch order and independence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-conditionals-order-independence",
+  "title": "Branch choice checkpoint",
+  "instructions": "Trace which conditions are reached and how many outcomes may apply.",
+  "questions": [
+    {
+      "id": "first-true",
+      "prompt": "In an `if`/`elif`/`else` chain, what happens after one condition is true?",
+      "options": ["Its body runs and the remaining chain is skipped", "Every later condition is still checked", "The first body is undone if `else` exists", "Python restarts the chain"],
+      "answer_index": 0,
+      "explanation": "A branch chain chooses the first true branch and then continues after the complete chain."
+    },
+    {
+      "id": "independent-alerts",
+      "prompt": "Two alerts may both be relevant for one input. Which structure expresses that?",
+      "options": ["One `if` followed by `elif`", "Two independent `if` statements", "An `else` with no `if`", "A conditional expression that discards one alert"],
+      "answer_index": 1,
+      "explanation": "Independent if statements allow zero, one, or both bodies to run."
+    },
+    {
+      "id": "broad-first",
+      "prompt": "Why is `elif score >= 90` unreachable after `if score >= 70`?",
+      "options": ["Python cannot compare scores twice", "elif supports only smaller numbers", "Every score at least 90 already satisfies the first broader condition", "The else branch blocks it"],
+      "answer_index": 2,
+      "explanation": "The broader first condition captures all values the later condition could accept."
+    },
+    {
+      "id": "fuel-boundary",
+      "prompt": "With `if fuel < 20`, `elif fuel < 60`, `else`, which branch receives `fuel = 60`?",
+      "options": ["The first branch", "The elif branch", "No branch", "The else branch"],
+      "answer_index": 3,
+      "explanation": "Both less-than comparisons are false at 60, so the fallback runs."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Nest only when the second question depends on the first
+
+A nested conditional can reveal dependency:
+
+```python
+has_ticket = True
+bag_weight = 14
+
+if has_ticket:
+    if bag_weight <= 20:
+        boarding = "ready"
+    else:
+        boarding = "check bag"
+else:
+    boarding = "ticket required"
+```
+
+The weight question matters only after the ticket check succeeds. A compound
+condition is shorter when only the success case matters:
+
+```python
+if has_ticket and bag_weight <= 20:
+    boarding = "ready"
+else:
+    boarding = "not ready"
+```
+
+But the shorter version collapses two useful failure explanations. Choose the
+shape from the result you need, not from line count.
+
+Avoid a deep staircase of nested branches. When cases form one classification,
+a flat `elif` chain is usually easier to scan. When decisions genuinely depend
+on earlier answers, one or two levels can make the dependency clearer.
+
+## 8. Common conditions read naturally
+
+Membership can replace repeated equality tests:
+
+```python
+command = "launch"
+
+if command in {"launch", "depart", "go"}:
+    action = "start engines"
+else:
+    action = "wait"
+```
+
+Use `is None` for an intentionally missing value:
+
+```python
+assigned_dock = None
+
+if assigned_dock is None:
+    message = "Await dock assignment"
+else:
+    message = f"Proceed to dock {assigned_dock}"
+```
+
+Truthiness is useful only when every falsy value means the same thing:
+
+```python
+crew_names = []
+
+if crew_names:
+    manifest_status = "crew listed"
+else:
+    manifest_status = "manifest empty"
+```
+
+Do not use `if assigned_dock:` if dock `0` is a valid dock. That would confuse a
+valid falsy integer with missing information. Unit 2’s truthiness rules still
+apply inside every branch.
+
+## 9. A conditional expression is for one small value choice
+
+Python can choose between two expressions in one line:
+
+```python
+is_night = True
+lamp_mode = "on" if is_night else "off"
+```
+
+Read it as: assign `"on"` when `is_night` is true, otherwise assign `"off"`.
+Use this form for one short, readable value choice. Prefer a normal statement when
+either path has several actions, needs comments, or becomes hard to say aloud.
+Nested conditional expressions are legal but rarely kind to a beginner or future
+maintainer.
+
+### Checkpoint: expressing the rule clearly
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-conditionals-rule-shape",
+  "title": "Rule shape checkpoint",
+  "instructions": "Choose the form that preserves the intended meaning.",
+  "questions": [
+    {
+      "id": "membership-choice",
+      "prompt": "Which condition clearly accepts `launch`, `depart`, or `go`?",
+      "options": ["`command in {'launch', 'depart', 'go'}`", "`command == {'launch', 'depart', 'go'}`", "`command is True`", "`command and 'launch'`"],
+      "answer_index": 0,
+      "explanation": "Membership tests whether the command equals one of the set members."
+    },
+    {
+      "id": "none-check",
+      "prompt": "Dock number 0 is valid and `None` means unassigned. Which check detects only unassigned?",
+      "options": ["`if not dock:`", "`if dock is None:`", "`if dock == 0:`", "`if bool(dock):`"],
+      "answer_index": 1,
+      "explanation": "Identity with None preserves the distinction between missing and valid falsy values such as 0."
+    },
+    {
+      "id": "nested-reason",
+      "prompt": "When can a nested conditional be clearer than one compound condition?",
+      "options": ["Whenever the file is long", "Whenever both conditions are Boolean", "When the second question applies only after the first and distinct failure results matter", "When indentation should be avoided"],
+      "answer_index": 2,
+      "explanation": "Nesting can represent a dependent question and preserve a different outcome for each failed stage."
+    },
+    {
+      "id": "conditional-expression-use",
+      "prompt": "Which task best suits a conditional expression?",
+      "options": ["Run three statements on each path", "Classify five score ranges", "Repeat until input changes", "Choose one short value from two alternatives"],
+      "answer_index": 3,
+      "explanation": "A conditional expression is clearest for one compact two-way value choice."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Build a spaceport departure gate
+
+Complete the lab from the contract before opening the support. The gate assigns
+one status and one explanation for every expected input.
+
+```python
+fuel = 58
+weather = "clear"
+permit_active = True
+medical_priority = False
+
+status = None
+reason = None
+```
+
+Apply these rules in the stated precedence:
+
+1. A medical-priority flight with an active permit is `"priority launch"`, even
+   when fuel is below the normal threshold, but it still cannot launch in a
+   storm.
+2. A missing permit produces `"hold"` and reason `"permit inactive"`.
+3. Storm weather produces `"hold"` and reason `"unsafe weather"`.
+4. Fuel below 60 produces `"refuel"` and reason `"fuel below 60"`.
+5. Every remaining flight is `"approved"` with reason `"all checks passed"`.
+6. Add the independent alert `"reserve fuel"` when fuel is from 50 through 64,
+   inclusive. It can coexist with any status.
+
+After writing the decision, run:
+
+```python
+assert status == "refuel"
+assert reason == "fuel below 60"
+assert fuel_alert == "reserve fuel"
+
+assert status in {"priority launch", "hold", "refuel", "approved"}
+assert reason is not None
+```
+
+Then rerun from clean inputs for these cases and record the expected pair before
+you execute:
+
+- `fuel = 10`, clear weather, active permit, medical priority;
+- `fuel = 80`, storm, active permit, medical priority;
+- `fuel = 80`, clear weather, inactive permit, no priority; and
+- `fuel = 64`, clear weather, active permit, no priority.
+
+<details>
+<summary>Hint: separate classification from the independent alert</summary>
+
+Use one `if`/`elif`/`else` chain for `status` and `reason`. Put the priority case
+before the ordinary restrictions, but include all facts that priority still
+requires. Use a separate `if`/`else` for `fuel_alert` because it is not another
+classification status.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+fuel = 58
+weather = "clear"
+permit_active = True
+medical_priority = False
+
+if medical_priority and permit_active and weather != "storm":
+    status = "priority launch"
+    reason = "medical priority"
+elif not permit_active:
+    status = "hold"
+    reason = "permit inactive"
+elif weather == "storm":
+    status = "hold"
+    reason = "unsafe weather"
+elif fuel < 60:
+    status = "refuel"
+    reason = "fuel below 60"
+else:
+    status = "approved"
+    reason = "all checks passed"
+
+if 50 <= fuel <= 64:
+    fuel_alert = "reserve fuel"
+else:
+    fuel_alert = "normal fuel band"
+```
+
+The classification chain selects exactly one status. The independent alert then
+answers a different question and can coexist with that result.
+
+</details>
+
+## 11. Explain the choices
+
+Before leaving the lesson, answer in your own words:
+
+1. How does alignment show which statements always run?
+2. Why does an `else` often make a result name safe to use afterward?
+3. What makes a broad condition dangerous before a more specific condition?
+4. When are two independent `if` statements correct rather than an `elif` chain?
+5. Why is `value is None` more precise than `not value` when zero is valid?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Python evaluates an `if`/`elif` chain from top to bottom and runs only the first
+  true branch, or `else` when no condition succeeds.
+- Colons and indentation define branch ownership; alignment resumes execution
+  after the statement.
+- Put specific overlapping cases before broader ones and test exact boundaries.
+- Use separate `if` statements when several outcomes may coexist.
+- Ensure every path establishes the result later code needs.
+- Use conditional expressions only for small two-way value choices.
+:::
+
+## References
+
+- [Python tutorial: `if` statements](https://docs.python.org/3/tutorial/controlflow.html#if-statements)
+- [Python language reference: the `if` statement](https://docs.python.org/3/reference/compound_stmts.html#the-if-statement)
+- [Python standard types: truth-value testing](https://docs.python.org/3/library/stdtypes.html#truth-value-testing)
+- [Python expression reference: conditional expressions](https://docs.python.org/3/reference/expressions.html#conditional-expressions)

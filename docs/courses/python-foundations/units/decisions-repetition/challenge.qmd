@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Evaluate a Community Room Schedule'
-description: Translate rules and repeated work into traceable control flow that handles boundaries and makes visible progress toward stopping.
+title: 'Unit Challenge: Escape the Clockwork Maze'
+description: Guide Pip through a clockwork maze by combining branch precedence, bounded while-loop progress, nested grid scanning, loop control, state collections, and a final comprehension.
 challenge_id: decisions-repetition.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 5
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,8 +19,8 @@ unit_number: 4
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 4 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Translate a written decision table into traceable Boolean expressions and mutually exclusive branches.
-- **Evidence:** Passing checks, a clean rerun, and a short debugging record
+- **Outcome assessed:** Build complete decisions and terminating loops that scan a grid, reject unusable commands, preserve state evidence, and stop for the correct reason.
+- **Evidence:** Twenty-four progressive checks, an escaped-maze artifact, three boundary reruns, and one debugging record
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
@@ -28,130 +28,507 @@ unit_number: 4
 <!-- fcpython-unit-challenge: practical -->
 ## 1. Challenge outcome
 
-A community room admits adults during open hours, supervised minors, and registered volunteers during setup. The result must explain the rule that decided the case.
+Pip, a palm-sized maintenance robot, wakes inside a clockwork maze. The exit is
+visible, but its brass door opens only after Pip collects the winding key. A
+scratched command tape includes useful moves, an unknown instruction, and one
+move directly into a wall.
 
-::: {.callout-note title="Work independently, but not without support"}
-Plan for one or two focused hours. Start with the contract, run the smallest
-relevant check after each change, and open a hint only after naming the evidence
-that has blocked you.
+Build the controller that scans the maze, follows the tape, spends energy,
+collects the key, records every event, and stops as soon as Pip escapes. The
+challenge is solved when the assertions pass unchanged and the final derived
+artifact says:
+
+```text
+PIP ESCAPED THE CLOCKWORK MAZE
+```
+
+::: {.callout-note title="Maze rule"}
+Run one assertion group at a time. Repair the first failed promise before moving
+on. Do not edit expected values, delete awkward commands, hard-code coordinates,
+or assign the final artifact as one ready-made string.
 :::
 
-## 2. Understand the acceptance examples
+## 2. Understand the acceptance example
 
-Before writing implementation code, write one ordinary example, one boundary,
-and one invalid or empty case. Predict the result for each. These examples are
-the specification you will compare against while working.
+The map uses these tiles:
 
-### Constraints
+| Tile | Meaning |
+|---|---|
+| `#` | wall; Pip cannot enter |
+| `.` | open floor |
+| `S` | starting coordinate |
+| `K` | winding key |
+| `E` | exit; escape succeeds only with the key |
+| `!` | gear hazard; entering it costs one additional energy |
 
-1. Name each intermediate Boolean rule.
-2. Use an if/elif/else chain for mutually exclusive outcomes.
-3. Test exact boundary ages and opening times.
-4. Produce both a decision and a reason.
+The command tape contains `NORTH`, `SOUTH`, `WEST`, and `EAST`. Any other command
+is unknown. Every command read—including unknown and blocked commands—uses one
+unit of energy. This guarantees visible progress even when Pip does not move.
+
+### Controller contracts
+
+1. Use nested `enumerate()` loops to count terrain and discover `start`,
+   `key_position`, and `exit_position`; do not type their coordinates into those
+   result names.
+2. The main simulation is a `while` loop controlled by remaining commands,
+   positive energy, and `not escaped`.
+3. Advance `command_index` and reduce energy before any `continue` path.
+4. Translate known commands with one complete branch chain.
+5. Log an unknown command, then continue without calculating a candidate cell.
+6. Use short-circuit evaluation so a row is proven in bounds before its length is
+   read.
+7. Log blocked candidates, then continue without changing position.
+8. Append every successfully entered coordinate to both an ordered `visited`
+   list and a membership-oriented `visited_set`.
+9. Stop immediately when Pip enters `E` with the key.
+10. Build path tiles and final artifact words from comprehensions after the loop.
+
+### Scope limits
+
+- Keep the supplied public variable names.
+- Do not use functions, recursion, exceptions, classes, files, randomness, or
+  third-party packages.
+- Do not mutate the maze or command tape.
+- Use `break` only for a successful escape; exhaustion and energy depletion are
+  normal condition-based stops.
+- Keep blocked and unknown commands in `event_log` rather than discarding them.
 
 ## 3. Start from the contract
 
-Preserve the supplied public names and comments so that each assertion gives a
-useful location signal.
+Copy this starter into a fresh cell:
 
 ```python
-age = 17
-hour = 18
-has_supervisor = True
-is_registered_volunteer = False
+maze = [
+    "#########",
+    "#S..#..E#",
+    "#.#.#.#.#",
+    "#.#K!...#",
+    "#.......#",
+    "#########",
+]
 
-is_open = False
-can_enter = False
-reason = ""
+commands = [
+    "SCAN",
+    "SOUTH",
+    "EAST",
+    "SOUTH",
+    "SOUTH",
+    "EAST",
+    "EAST",
+    "NORTH",
+    "SPIN",
+    "EAST",
+    "EAST",
+    "NORTH",
+    "NORTH",
+    "EAST",
+    "EAST",
+]
 
-# Implement the policy and assign can_enter and reason.
+# Stage A: discovered from the nested grid scan.
+start = None
+key_position = None
+exit_position = None
+special_tiles = {"S": [], "K": [], "E": []}
+terrain_counts = {}
+
+# Stage B: simulation state.
+position = None
+command_index = 0
+energy = 18
+has_key = False
+escaped = False
+exit_reason = None
+visited = []
+visited_set = set()
+event_log = []
+
+# Stage C: derived after the simulation.
+path_tiles = None
+artifact_words = None
+artifact = None
 ```
 
 ## 4. Build in small stages
 
-1. Make the ordinary example pass without adding behavior for every case.
-2. Trace the important state after each step and compare it with your prediction.
-3. Add the boundary case, then the empty or invalid case.
-4. Restart the notebook or process and run the complete solution from the top.
+### Stage A: scan the maze
+
+Use one outer loop for rows and one inner loop for cells. Count every tile. When
+a cell belongs to `special_tiles`, append its coordinate. Assign the three public
+coordinate names from those discovered lists only after scanning. The supplied
+maze has one of each, but use `None` for a missing key so the boundary variation
+can finish normally.
+
+```python
+for row_index, row in enumerate(maze):
+    for column_index, tile in enumerate(row):
+        # Count terrain and record S, K, and E coordinates here.
+        pass
+
+# Derive start, key_position, and exit_position from special_tiles.
+```
+
+Initialize simulation position and both visit collections with the discovered
+start. The list records route order; the set records whether a coordinate has
+already been entered.
+
+### Stage B: process one command per iteration
+
+Use this loop skeleton. Replace comments with the branch and state operations
+from the contract:
+
+```python
+while command_index < len(commands) and energy > 0 and not escaped:
+    command = commands[command_index]
+    command_index += 1
+    energy -= 1
+
+    # Translate a known command into row_delta and column_delta.
+    # For an unknown command, append an event and continue.
+
+    # Calculate next_row and next_column from position and the deltas.
+
+    # Prove the row is safe before reading maze[next_row]'s length.
+    # For an out-of-bounds or wall candidate, log it and continue.
+
+    # Move, record the coordinate, then handle K, !, and E tiles.
+```
+
+Every event begins with the one-based command number, which is the updated
+`command_index`. Use these exact message shapes:
+
+```text
+1: unknown SCAN
+3: blocked at (2, 2)
+8: key collected at (3, 3)
+15: exit reached at (1, 7)
+```
+
+Ordinary successful movement uses `"N: moved to (row, column)"`. If Pip reaches
+the exit without the key, use `"N: exit locked at (row, column)"` and keep
+processing. Entering `!` consumes one additional energy and logs
+`"N: hazard at (row, column)"`. After the loop choose `exit_reason` in this
+precedence: escaped, energy depleted, then commands exhausted.
+
+### Stage C: derive the route evidence and artifact
+
+Use a list comprehension over `visited` to create `path_tiles`. Use another
+comprehension to uppercase these supplied words, then join them:
+
+```python
+message_parts = ["Pip", "escaped", "the", "clockwork", "maze"]
+```
+
+Do not type the final uppercase sentence as the value of `artifact`.
 
 ## 5. Run progressive assertions
 
-Do not weaken an expected value to make a check pass. If a check appears wrong,
-write down the contract conflict before changing either side.
+Run each group only after the previous group passes.
+
+### Stage A checks: the scan found one of each special tile
 
 ```python
-assert is_open is True
-assert can_enter is True
-assert reason == "supervised minor during open hours"
-
-# Re-run with age=18 and has_supervisor=False: access should be allowed.
-# Re-run with hour=22: ordinary visitor access should be denied.
+assert start == (1, 1)
+assert key_position == (3, 3)
+assert exit_position == (1, 7)
+assert special_tiles == {"S": [(1, 1)], "K": [(3, 3)], "E": [(1, 7)]}
+assert terrain_counts == {"#": 31, "S": 1, ".": 19, "E": 1, "K": 1, "!": 1}
 ```
+
+### Stage B checks: the loop progressed and stopped for success
+
+```python
+assert command_index == 15
+assert energy == 2
+assert position == exit_position
+assert escaped is True
+assert has_key is True
+assert exit_reason == "escaped"
+```
+
+### Event checks: awkward commands remained visible
+
+```python
+assert len(event_log) == 15
+assert event_log[0] == "1: unknown SCAN"
+assert event_log[2] == "3: blocked at (2, 2)"
+assert event_log[7] == "8: key collected at (3, 3)"
+assert event_log[-1] == "15: exit reached at (1, 7)"
+```
+
+### Route checks: order and membership tell compatible stories
+
+```python
+assert visited == [
+    (1, 1),
+    (2, 1),
+    (3, 1),
+    (4, 1),
+    (4, 2),
+    (4, 3),
+    (3, 3),
+    (3, 4),
+    (3, 5),
+    (2, 5),
+    (1, 5),
+    (1, 6),
+    (1, 7),
+]
+assert visited[0] == start
+assert visited[-1] == exit_position
+assert visited_set == set(visited)
+assert len(visited_set) == 13
+```
+
+### Stage C checks: every final value was derived
+
+```python
+assert path_tiles == ["S", ".", ".", ".", ".", ".", "K", "!", ".", ".", ".", ".", "E"]
+assert artifact_words == ["PIP", "ESCAPED", "THE", "CLOCKWORK", "MAZE"]
+assert artifact == "PIP ESCAPED THE CLOCKWORK MAZE"
+```
+
+That is twenty-four assertions. Do not proceed while an earlier group is failing.
 
 ## 6. Use the hint ladder only when needed
 
 <details>
-<summary>Hint 1</summary>
+<summary>Hint 1: discover and initialize the state</summary>
 
-Translate each sentence of the policy into a named Boolean before writing branches.
-
-</details>
-
-<details>
-<summary>Hint 2</summary>
-
-Decide whether interval endpoints are included, then encode them with `<=` or `<`.
+Inside the nested scan, update `terrain_counts` with `.get(tile, 0) + 1`.
+Membership in `special_tiles` identifies the three special tile kinds. Append
+`(row_index, column_index)` to the matching list. Each should hold one coordinate,
+so the public position can select index zero. Initialize
+`position`, `visited`, and `visited_set` from `start` before the `while` loop.
 
 </details>
 
 <details>
-<summary>Hint 3</summary>
+<summary>Hint 2: make progress before every early exit</summary>
 
-Order the most specific reasons before the general fallback.
+Read the current command, increment `command_index`, and reduce energy at the top
+of the loop. An `if`/`elif` chain maps four known strings to `(row_delta,
+column_delta)`. Its `else` logs the unknown message and continues. For a candidate,
+use `0 <= next_row < len(maze) and 0 <= next_column < len(maze[next_row])` so the
+second length lookup is short-circuit protected.
+
+</details>
+
+<details>
+<summary>Hint 3: preserve movement before handling special tiles</summary>
+
+After a candidate passes bounds and wall checks, update `position`, append it to
+`visited`, and add it to `visited_set`. Inspect the entered tile. The key branch
+sets `has_key`; the hazard branch spends one more energy; the exit-with-key
+branch sets `escaped`, logs success, and breaks; the exit-without-key branch logs
+a locked door. Derive `exit_reason` only after the loop.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Keep one failure that helped you understand the program. Record the actual
-value or message, your single-cause hypothesis, the controlled change, and the
-clean rerun that confirmed or rejected it.
+Retain one complete record from a real failure:
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
-|---|---|---|---|---|
-| What did not work? | What did you observe? | Which cause fits? | What one thing changed? | Which check now passes? |
+| Field | Your evidence |
+|---|---|
+| First failing assertion | Paste the exact assertion and observed values. |
+| Current state | Record command number, command, position, energy, and latest event. |
+| Hypothesis | Name one branch, update, or stopping rule that could explain it. |
+| Controlled change | Describe the one change you made. |
+| Clean rerun | Record the first assertion group that passed afterward. |
 
-## 8. Check your understanding
+Useful temporary trace:
+
+```python
+print(
+    "command:", command_index,
+    "position:", position,
+    "energy:", energy,
+    "key:", has_key,
+    "latest:", event_log[-1],
+)
+```
+
+Remove or disable the trace after the checks pass. Keep the written evidence.
+
+## 8. Test three changed mazes
+
+Restart from the original starter before each variation.
+
+1. **Missing key:** replace `K` with `.`. Predict whether Pip reaches the exit,
+   whether it escapes, and whether the loop ends through exhaustion. Update only
+   assertions whose promised behavior changes.
+2. **Low energy:** start with energy 7. Predict the final command index, position,
+   and exit reason before running.
+3. **More invalid input:** insert `"JUMP"` immediately before the final `EAST`.
+   Prove it appears in the event log and consumes energy without changing the
+   successful route.
+
+For each variation, record the first condition that prevents another iteration
+or the exact `break` that stops it.
+
+After predicting, compare your results with this boundary table and write one
+assertion for each listed field:
+
+| Variation | Command index | Final position | Energy | Key | Escaped | Exit reason |
+|---|---:|---|---:|---:|---:|---|
+| key replaced by `.` | 15 | `(1, 7)` | 2 | false | false | `commands exhausted` |
+| starting energy 7 | 7 | `(4, 3)` | 0 | false | false | `energy depleted` |
+| `JUMP` before final `EAST` | 16 | `(1, 7)` | 1 | true | true | `escaped` |
+
+## 9. Compare with a solution path
+
+<details class="solution">
+<summary>Reveal after your checks pass or all three hints have been used</summary>
+
+```python
+maze = [
+    "#########",
+    "#S..#..E#",
+    "#.#.#.#.#",
+    "#.#K!...#",
+    "#.......#",
+    "#########",
+]
+commands = [
+    "SCAN", "SOUTH", "EAST", "SOUTH", "SOUTH",
+    "EAST", "EAST", "NORTH", "SPIN", "EAST",
+    "EAST", "NORTH", "NORTH", "EAST", "EAST",
+]
+
+special_tiles = {"S": [], "K": [], "E": []}
+terrain_counts = {}
+for row_index, row in enumerate(maze):
+    for column_index, tile in enumerate(row):
+        terrain_counts[tile] = terrain_counts.get(tile, 0) + 1
+        if tile in special_tiles:
+            special_tiles[tile].append((row_index, column_index))
+
+start = special_tiles["S"][0]
+key_position = special_tiles["K"][0] if special_tiles["K"] else None
+exit_position = special_tiles["E"][0]
+
+position = start
+command_index = 0
+energy = 18
+has_key = False
+escaped = False
+exit_reason = None
+visited = [start]
+visited_set = {start}
+event_log = []
+
+while command_index < len(commands) and energy > 0 and not escaped:
+    command = commands[command_index]
+    command_index += 1
+    energy -= 1
+
+    if command == "NORTH":
+        row_delta, column_delta = -1, 0
+    elif command == "SOUTH":
+        row_delta, column_delta = 1, 0
+    elif command == "WEST":
+        row_delta, column_delta = 0, -1
+    elif command == "EAST":
+        row_delta, column_delta = 0, 1
+    else:
+        event_log.append(f"{command_index}: unknown {command}")
+        continue
+
+    next_row = position[0] + row_delta
+    next_column = position[1] + column_delta
+    in_bounds = (
+        0 <= next_row < len(maze)
+        and 0 <= next_column < len(maze[next_row])
+    )
+
+    if not in_bounds or maze[next_row][next_column] == "#":
+        event_log.append(
+            f"{command_index}: blocked at {(next_row, next_column)}"
+        )
+        continue
+
+    position = (next_row, next_column)
+    visited.append(position)
+    visited_set.add(position)
+    tile = maze[next_row][next_column]
+
+    if tile == "K" and not has_key:
+        has_key = True
+        event_log.append(f"{command_index}: key collected at {position}")
+    elif tile == "!":
+        energy -= 1
+        event_log.append(f"{command_index}: hazard at {position}")
+    elif tile == "E" and has_key:
+        escaped = True
+        event_log.append(f"{command_index}: exit reached at {position}")
+        break
+    elif tile == "E":
+        event_log.append(f"{command_index}: exit locked at {position}")
+    else:
+        event_log.append(f"{command_index}: moved to {position}")
+
+if escaped:
+    exit_reason = "escaped"
+elif energy <= 0:
+    exit_reason = "energy depleted"
+else:
+    exit_reason = "commands exhausted"
+
+path_tiles = [maze[row][column] for row, column in visited]
+message_parts = ["Pip", "escaped", "the", "clockwork", "maze"]
+artifact_words = [word.upper() for word in message_parts]
+artifact = " ".join(artifact_words)
+
+print(artifact)
+```
+
+The command index and energy change before either `continue`, so unknown and
+blocked commands cannot trap the controller. The bounds expression protects the
+row lookup, and the ordered list plus set preserve two different route questions.
+
+</details>
+
+## 10. Check your understanding
+
+::: {.quiz-box}
+Answer these questions before recording the challenge. The quiz runs directly in
+your browser.
+:::
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-decisions-repetition-challenge",
-  "title": "Implement a Community Room Access Policy readiness check",
-  "instructions": "Trace the situation before choosing an answer.",
+  "title": "Clockwork-maze control decisions",
+  "instructions": "Choose the rule that keeps Pip's controller complete and terminating.",
   "questions": [
     {
-      "id": "boundary",
-      "prompt": "For an adult rule `age >= 18`, which age is the first accepted boundary?",
-      "options": [
-        "18",
-        "17",
-        "19",
-        "There is no boundary"
-      ],
+      "id": "progress-before-continue",
+      "prompt": "Why are command index and energy updated before an unknown-command `continue`?",
+      "options": ["Every iteration path must consume input and move toward stopping", "continue updates both names automatically", "Unknown commands should move Pip", "The maze is immutable"],
       "answer_index": 0,
-      "explanation": "The `>=` operator includes 18."
+      "explanation": "Progress before continue prevents the loop from processing the same command forever."
     },
     {
-      "id": "exclusive",
-      "prompt": "Why use `elif` for mutually exclusive outcome reasons?",
-      "options": [
-        "It converts text to Boolean values.",
-        "Only the first matching branch should choose the reason.",
-        "It repeats every branch.",
-        "It disables boundary checks."
-      ],
+      "id": "bounds-short-circuit",
+      "prompt": "Why check the candidate row bounds before `len(maze[next_row])`?",
+      "options": ["Rows cannot contain strings", "Short-circuiting skips the unsafe row lookup when the row is invalid", "len() moves Pip", "The column must always be zero"],
       "answer_index": 1,
-      "explanation": "An if/elif chain selects one outcome from ordered alternatives."
+      "explanation": "A falsy row check stops and before Python indexes the maze with an invalid row."
+    },
+    {
+      "id": "list-and-set",
+      "prompt": "Why preserve both `visited` and `visited_set`?",
+      "options": ["Sets preserve duplicate route order", "Lists provide faster membership in every case", "The list records route order while the set represents unique membership", "Python requires collections in pairs"],
+      "answer_index": 2,
+      "explanation": "Each collection answers a different route question without sacrificing the other relationship."
+    },
+    {
+      "id": "escape-break",
+      "prompt": "When is `break` justified in the simulation?",
+      "options": ["After every blocked move", "After every unknown command", "As soon as any key is visible", "After Pip enters the exit with the key, because later commands cannot improve success"],
+      "answer_index": 3,
+      "explanation": "Successful escape fulfills the contract, so further tape processing is unnecessary."
     }
   ]
 }
@@ -159,25 +536,30 @@ clean rerun that confirmed or rejected it.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 11. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+| Behavior | All twenty-four supplied assertions pass unchanged. |
+| Control flow | You can identify the selected branch, every progress update, each `continue`, and the successful `break`. |
+| State | The ordered route, unique visited coordinates, event log, energy, and exit reason agree. |
+| Boundaries | Missing-key, low-energy, and additional-invalid-command reruns match written predictions. |
+| Debugging | One failure record connects observed state, one hypothesis, one change, and a clean rerun. |
+| Reproducibility | The original and each variation work from separately initialized clean state. |
 
-- [ ] The acceptance examples and supplied checks pass.
-- [ ] The work runs from a clean state.
-- [ ] I can explain the important state changes and boundaries.
-- [ ] I kept one debugging record and verified a controlled modification.
+Record completion only when every statement is true:
 
-This button stores a self-reported marker only in this browser. It does not
-submit or grade the artifact.
+- [ ] All supplied assertions pass without editing expected values.
+- [ ] Coordinates and the final message are derived rather than hard-coded.
+- [ ] The work runs from a clean notebook state.
+- [ ] I can explain why every possible while-loop path progresses or exits.
+- [ ] I kept one complete debugging record.
+- [ ] I predicted and verified all three variations.
+
+This button stores a self-reported marker only in this browser. It does not submit
+the artifact, grade it, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -191,6 +573,12 @@ submit or grade the artifact.
 
 ## Key points
 
-- The contract narrows the design without supplying the implementation.
-- Progressive checks turn the task into observable behavior.
-- A clean rerun and explanation are part of the evidence.
+::: {.callout-tip title="Key points"}
+- Scan structured data instead of hard-coding facts the data already contains.
+- Make input, budget, or state progress before a path can continue.
+- Order guards so short-circuiting protects operations that are not always safe.
+- Keep ordered evidence, membership evidence, and event explanations in the
+  collection shapes that preserve their meaning.
+- Stop as soon as the promised success cannot be improved, and preserve an exit
+  reason for every other outcome.
+:::

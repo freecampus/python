@@ -1,0 +1,725 @@
+---
+title: Building Results with `for` Loops
+lesson_id: decisions-repetition.for-loop-patterns
+lesson_order: 40
+description: Use for-loop accumulator patterns to total, count, transform, filter, group, validate, and collect unique values while preserving source evidence.
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+- for-loops
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/for-loop-patterns.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 4–5.5 hours
+- **You will learn:** Initialize and update loop results for transforming, filtering, totaling, counting, grouping, validation, and unique collection.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. A loop needs a product, not only repeated output
+
+Unit 3 showed how a `for` loop receives collection values. Most useful loops do
+more than print them: they build a result that remains after traversal.
+
+```python
+distances = [4, 7, 3]
+total_distance = 0
+
+for distance in distances:
+    total_distance += distance
+
+print(total_distance)
+assert total_distance == 14
+```
+
+`total_distance` is an **accumulator**: state initialized before the loop and
+updated once for each relevant item. Its job can be stated precisely:
+
+> After each iteration, `total_distance` equals the sum of distances already
+> visited.
+
+That statement is a practical **loop invariant**. It helps you decide where to
+initialize the name, what each iteration must change, and what the final value
+means.
+
+### Questions this lesson will answer
+
+- Which starting value fits a total, count, list, dictionary, or set result?
+- How do transform and filter patterns differ?
+- How can one traversal preserve both accepted and rejected evidence?
+- How do counters and grouped records use dictionaries?
+- When is a built-in clearer and safer than a manual loop?
+
+::: {.concept-diagram}
+A result-building loop starts with an empty or neutral result, receives one item,
+and updates the result before moving to the next item.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Initialize result once] --> B[Receive next item]
+  B --> C{Use this item?}
+  C -- Yes --> D[Update result]
+  C -- No --> E[Preserve or skip evidence]
+  D --> F{Items remain?}
+  E --> F
+  F -- Yes --> B
+  F -- No --> G[Use final result]
+```
+:::
+
+## 2. Initialize once, before traversal
+
+Moving initialization inside the loop erases earlier work:
+
+```python
+distances = [4, 7, 3]
+
+for distance in distances:
+    total_distance = 0
+    total_distance += distance
+
+print(total_distance)
+```
+
+The displayed value is 3, the final item, because each iteration resets the
+total. On an empty list, the body never runs and `total_distance` would not exist
+at all.
+
+The correct pattern gives the result a meaningful empty-input value:
+
+```python
+total_distance = 0
+
+for distance in []:
+    total_distance += distance
+
+assert total_distance == 0
+```
+
+Common initial values follow the promised result:
+
+| Result job | Initial value | Update example |
+|---|---|---|
+| numeric total | `0` | `total += value` |
+| number of matches | `0` | `count += 1` |
+| ordered transformed or filtered values | `[]` | `result.append(value)` |
+| values grouped or counted by key | `{}` | update one key |
+| unique observed values | `set()` | `seen.add(value)` |
+| every item is valid | `True` | set false when one fails |
+| at least one item matches | `False` | set true when one matches |
+
+An initial value is not boilerplate. It defines what the result means before any
+input arrives.
+
+## 3. Total and count answer different questions
+
+A total adds item values. A count adds one for each qualifying item:
+
+```python
+readings = [8, -2, 0, 5, -1]
+usable_total = 0
+usable_count = 0
+
+for reading in readings:
+    if reading >= 0:
+        usable_total += reading
+        usable_count += 1
+
+print(usable_total, usable_count)
+assert usable_total == 13
+assert usable_count == 3
+```
+
+The zero reading contributes nothing to the total but still contributes one to
+the count. Using `if reading:` would incorrectly exclude it.
+
+The average requires both accumulators and an empty-case policy:
+
+```python
+if usable_count > 0:
+    usable_average = usable_total / usable_count
+else:
+    usable_average = None
+```
+
+`None` says no average exists. Returning zero would confuse “no readings” with
+“readings whose average is zero.”
+
+### Checkpoint: accumulator foundations
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-for-accumulator-foundations",
+  "title": "Accumulator foundations checkpoint",
+  "instructions": "Choose the state that remains correct before and after every iteration.",
+  "questions": [
+    {
+      "id": "list-initializer",
+      "prompt": "Which initial value fits an ordered collection of accepted items?",
+      "options": ["`[]`", "`0`", "`True`", "`None` with no later replacement"],
+      "answer_index": 0,
+      "explanation": "An empty list represents an ordered result before any accepted item has been appended."
+    },
+    {
+      "id": "initialize-location",
+      "prompt": "Why should a running total normally be initialized before the loop?",
+      "options": ["Python forbids assignment in loops", "Each iteration must preserve the contributions from earlier items", "The target item is unavailable in the body", "It makes every item equal"],
+      "answer_index": 1,
+      "explanation": "Initialization inside the body resets accumulated state and can leave no result for empty input."
+    },
+    {
+      "id": "zero-count",
+      "prompt": "For usable readings defined as `reading >= 0`, what does a zero reading contribute?",
+      "options": ["One to the total and zero to the count", "Nothing to either value", "Zero to the total and one to the count", "It stops the loop"],
+      "answer_index": 2,
+      "explanation": "Zero is a valid reading: its numeric contribution is zero, while it is still one accepted item."
+    },
+    {
+      "id": "empty-average",
+      "prompt": "Why can `None` be a better empty-input average than 0?",
+      "options": ["None can be divided safely", "Zero is not a number", "Lists cannot contain zero", "It distinguishes no average from an actual average of zero"],
+      "answer_index": 3,
+      "explanation": "The two situations have different meaning and should not be collapsed into the same value."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Transform every item into a new value
+
+A transformation produces one output for every input, usually preserving order:
+
+```python
+celsius_readings = [0, 10, 25]
+fahrenheit_readings = []
+
+for celsius in celsius_readings:
+    fahrenheit = celsius * 9 / 5 + 32
+    fahrenheit_readings.append(fahrenheit)
+
+assert fahrenheit_readings == [32.0, 50.0, 77.0]
+assert celsius_readings == [0, 10, 25]
+```
+
+The source remains evidence. Build a separate result rather than overwriting the
+input unless in-place mutation is an explicit requirement.
+
+For richer records, preserve relationships:
+
+```python
+stations = [
+    {"name": "north", "reading": 3},
+    {"name": "east", "reading": 7},
+]
+labels = []
+
+for station in stations:
+    label = f"{station['name']}: {station['reading']} units"
+    labels.append(label)
+
+assert labels == ["north: 3 units", "east: 7 units"]
+```
+
+The loop target `station` is rebound to each dictionary. The list accumulator
+keeps derived strings in source order.
+
+## 5. Filter by appending only accepted items
+
+A filter can produce zero or one output per input:
+
+```python
+readings = [8, -2, 0, 5, -1]
+usable = []
+
+for reading in readings:
+    if reading >= 0:
+        usable.append(reading)
+
+assert usable == [8, 0, 5]
+```
+
+The append belongs inside the conditional because acceptance decides whether the
+item enters the result. If it were aligned with `if`, every item would be added.
+
+Silently dropping rejected data may make debugging harder. Preserve it when the
+program needs an audit trail:
+
+```python
+usable = []
+rejected = []
+
+for reading in readings:
+    if reading >= 0:
+        usable.append(reading)
+    else:
+        rejected.append(reading)
+
+assert usable == [8, 0, 5]
+assert rejected == [-2, -1]
+```
+
+Now every source item belongs to exactly one result. A useful invariant is:
+
+> After each iteration, `len(usable) + len(rejected)` equals the number of items
+> visited so far.
+
+## 6. Combine transformation and filtering in an explicit order
+
+Validate before applying an operation that assumes valid data:
+
+```python
+raw_scores = ["8", "skip", "10"]
+clean_scores = []
+rejected_tokens = []
+
+for token in raw_scores:
+    if token.isdigit():
+        score = int(token)
+        clean_scores.append(score * 10)
+    else:
+        rejected_tokens.append(token)
+
+assert clean_scores == [80, 100]
+assert rejected_tokens == ["skip"]
+```
+
+The branch protects `int(token)`. The transformation happens only on accepted
+text. This is a small data pipeline: inspect, classify, convert, store.
+
+Unit 8 will teach exception handling for conversions whose valid forms are more
+complex. At this stage, choose inputs and guards that your current tools can
+explain.
+
+### Checkpoint: transform and filter
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-for-transform-filter",
+  "title": "Transform and filter checkpoint",
+  "instructions": "Trace how many outputs each input can create.",
+  "questions": [
+    {
+      "id": "transform-shape",
+      "prompt": "A loop converts every Celsius value and preserves order. How many outputs should each input create?",
+      "options": ["Exactly one", "Always zero", "Two or more", "Only one output for the whole list"],
+      "answer_index": 0,
+      "explanation": "A direct transformation maps each source value to one result value."
+    },
+    {
+      "id": "filter-append",
+      "prompt": "Where should `accepted.append(item)` appear in a filtering loop?",
+      "options": ["Before result initialization", "Inside the branch whose condition defines acceptance", "After the loop with no item name", "Inside the rejection branch"],
+      "answer_index": 1,
+      "explanation": "The acceptance condition controls whether that item is added."
+    },
+    {
+      "id": "preserve-rejected",
+      "prompt": "What is a benefit of collecting rejected values separately?",
+      "options": ["It mutates the source automatically", "It guarantees every value is valid", "It preserves evidence about what the filter excluded", "It eliminates conditional logic"],
+      "answer_index": 2,
+      "explanation": "A rejection collection makes loss observable and supports debugging or reporting."
+    },
+    {
+      "id": "guard-conversion",
+      "prompt": "Why check `token.isdigit()` before `int(token)` in this limited example?",
+      "options": ["isdigit() converts the token", "int() works only in loops", "The check sorts the strings", "The check prevents this conversion from running on the known rejected form"],
+      "answer_index": 3,
+      "explanation": "The condition ensures the conversion executes only on inputs this simple policy accepts."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Count occurrences with a dictionary
+
+A counter connects each observed value with how many times it appeared:
+
+```python
+signals = ["blue", "red", "blue", "gold", "red", "blue"]
+counts = {}
+
+for signal in signals:
+    if signal in counts:
+        counts[signal] += 1
+    else:
+        counts[signal] = 1
+
+assert counts == {"blue": 3, "red": 2, "gold": 1}
+```
+
+On the first occurrence, create the key with count 1. Later occurrences update
+the existing value. Dictionary `.get()` can express the same default:
+
+```python
+counts = {}
+
+for signal in signals:
+    counts[signal] = counts.get(signal, 0) + 1
+```
+
+Read the right side first: obtain the existing count or zero, add one, then store
+the new count at the same key.
+
+## 8. Group complete records by a key
+
+Grouping maps one key to several original records:
+
+```python
+observations = [
+    {"zone": "north", "species": "owl"},
+    {"zone": "south", "species": "fox"},
+    {"zone": "north", "species": "moth"},
+]
+by_zone = {}
+
+for observation in observations:
+    zone = observation["zone"]
+    if zone not in by_zone:
+        by_zone[zone] = []
+    by_zone[zone].append(observation)
+
+assert [item["species"] for item in by_zone["north"]] == ["owl", "moth"]
+```
+
+The empty list must be created separately for each new key. Assigning one shared
+list to many keys would mix groups. Unit 6 develops aliasing in depth; for now,
+create the group exactly when its key first appears.
+
+## 9. A set accumulator keeps unique observations
+
+```python
+species = ["owl", "fox", "owl", "moth"]
+unique_species = set()
+
+for name in species:
+    unique_species.add(name)
+
+assert unique_species == {"owl", "fox", "moth"}
+```
+
+The set answers uniqueness and membership questions. It does not preserve a
+numeric position. If you need unique values in first-seen order, combine a set
+for fast “seen?” checks with a list for ordered output:
+
+```python
+seen = set()
+first_seen = []
+
+for name in species:
+    if name not in seen:
+        seen.add(name)
+        first_seen.append(name)
+
+assert first_seen == ["owl", "fox", "moth"]
+```
+
+The two accumulators have different jobs and stay synchronized inside the same
+branch.
+
+## 10. Validation accumulates a Boolean claim
+
+To report whether every value is in range:
+
+```python
+levels = [4, 8, 11]
+all_valid = True
+
+for level in levels:
+    if not 0 <= level <= 10:
+        all_valid = False
+
+assert all_valid is False
+```
+
+`all_valid` starts true because no visited item has disproved the claim. Once
+false, it stays false. If you also need invalid values, collect them instead and
+derive `all_valid = not invalid_levels` afterward.
+
+A separate “at least one” claim starts false and becomes true when a match is
+seen. Lesson 6 shows how a search can stop early when no additional evidence is
+needed.
+
+## 11. Use positions and pairs only when the result needs them
+
+`enumerate()` supplies a position with each value:
+
+```python
+stops = ["dock", "ridge", "clinic"]
+numbered = []
+
+for number, stop in enumerate(stops, start=1):
+    numbered.append(f"{number}. {stop}")
+
+assert numbered == ["1. dock", "2. ridge", "3. clinic"]
+```
+
+`zip()` supplies aligned values from several collections and stops at the
+shortest:
+
+```python
+names = ["north", "east", "south"]
+readings = [4, 7, 2]
+station_readings = {}
+
+for name, reading in zip(names, readings, strict=True):
+    station_readings[name] = reading
+
+assert station_readings == {"north": 4, "east": 7, "south": 2}
+```
+
+Unit 3 taught those supply mechanics. Here they serve a result-building job.
+`strict=True` raises `ValueError` when one input ends early, preventing silent
+loss when aligned records are required.
+
+## 12. Prefer a built-in when it says the complete job
+
+Python already names common reductions:
+
+```python
+values = [4, 7, 3]
+
+assert sum(values) == 14
+assert len(values) == 3
+assert min(values) == 3
+assert max(values) == 7
+```
+
+`sum(values)` is clearer than a manual total when no special filtering or trace is
+needed. `min([])` and `max([])` raise `ValueError` because an empty collection has
+no smallest or largest item. Supply a policy when empty input is expected:
+
+```python
+values = []
+smallest = min(values) if values else None
+assert smallest is None
+```
+
+Do not replace a rich loop with a pile of built-ins if that hides the rule. Use
+the simplest operation that expresses the entire required artifact.
+
+### Checkpoint: structured results
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-for-structured-results",
+  "title": "Structured result checkpoint",
+  "instructions": "Choose the accumulator whose shape matches the promised artifact.",
+  "questions": [
+    {
+      "id": "counter-default",
+      "prompt": "What does `counts[item] = counts.get(item, 0) + 1` do for a first occurrence?",
+      "options": ["Uses zero, adds one, and stores count 1", "Deletes the item", "Stores zero without adding", "Raises KeyError before get can run"],
+      "answer_index": 0,
+      "explanation": "get returns the default zero for an absent key, then the expression stores one."
+    },
+    {
+      "id": "group-list",
+      "prompt": "Why create `groups[key] = []` when a group key first appears?",
+      "options": ["Dictionary values must always be lists", "That key needs its own collection before records can be appended", "It sorts the records", "It prevents future keys"],
+      "answer_index": 1,
+      "explanation": "Each group needs a destination list that can receive all records sharing that key."
+    },
+    {
+      "id": "ordered-unique",
+      "prompt": "Which result preserves first-seen unique order?",
+      "options": ["A set alone", "A numeric total", "A list of first occurrences supported by a seen set", "A dictionary that overwrites every record"],
+      "answer_index": 2,
+      "explanation": "The set detects repeats while the list preserves the first occurrence order."
+    },
+    {
+      "id": "empty-min",
+      "prompt": "What happens when `min([])` is evaluated without a default policy?",
+      "options": ["It returns 0", "It returns None", "It returns an empty list", "It raises ValueError because there is no smallest item"],
+      "answer_index": 3,
+      "explanation": "An empty iterable provides no candidate for a minimum."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Do not change the list you are currently traversing
+
+Removing items from a list while a `for` loop visits it can skip values because
+positions shift:
+
+```python
+numbers = [1, 2, 2, 3]
+
+for number in numbers:
+    if number == 2:
+        numbers.remove(number)
+
+print(numbers)
+```
+
+The result still contains a 2. After the first removal, the second 2 shifts into
+a position the loop has already advanced past.
+
+Build a new result instead:
+
+```python
+numbers = [1, 2, 2, 3]
+without_twos = []
+
+for number in numbers:
+    if number != 2:
+        without_twos.append(number)
+
+assert numbers == [1, 2, 2, 3]
+assert without_twos == [1, 3]
+```
+
+Preserving the source also makes before-and-after assertions possible.
+
+## 14. Build an expedition report
+
+Start with this source evidence:
+
+```python
+observations = [
+    {"station": "north", "species": "owl", "count": 2, "valid": True},
+    {"station": "east", "species": "fox", "count": 1, "valid": True},
+    {"station": "north", "species": "owl", "count": -1, "valid": False},
+    {"station": "south", "species": "moth", "count": 4, "valid": True},
+    {"station": "east", "species": "owl", "count": 3, "valid": True},
+]
+
+accepted = []
+rejected = []
+total_animals = 0
+species_counts = {}
+by_station = {}
+unique_species = set()
+```
+
+In one `for` loop:
+
+1. place valid non-negative records in `accepted` and all others in `rejected`;
+2. update the total only for accepted records;
+3. add each accepted record’s count to `species_counts`;
+4. group accepted species names by station, preserving observation order; and
+5. collect unique accepted species.
+
+Then derive `station_lines` with `enumerate(..., start=1)` over the station keys
+in their first-seen order. Run:
+
+```python
+assert observations[2]["count"] == -1
+assert len(accepted) == 4
+assert rejected == [observations[2]]
+assert total_animals == 10
+assert species_counts == {"owl": 5, "fox": 1, "moth": 4}
+assert by_station == {
+    "north": ["owl"],
+    "east": ["fox", "owl"],
+    "south": ["moth"],
+}
+assert unique_species == {"owl", "fox", "moth"}
+assert station_lines == ["1. north", "2. east", "3. south"]
+```
+
+<details>
+<summary>Hint: let the validity branch own every update</summary>
+
+Append rejected records in the first branch and accepted records in the other.
+Only the accepted branch should update totals, counters, groups, and the set. Use
+`.get(species, 0)` for totals by species, and create a station list only when its
+key is new.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+observations = [
+    {"station": "north", "species": "owl", "count": 2, "valid": True},
+    {"station": "east", "species": "fox", "count": 1, "valid": True},
+    {"station": "north", "species": "owl", "count": -1, "valid": False},
+    {"station": "south", "species": "moth", "count": 4, "valid": True},
+    {"station": "east", "species": "owl", "count": 3, "valid": True},
+]
+
+accepted = []
+rejected = []
+total_animals = 0
+species_counts = {}
+by_station = {}
+unique_species = set()
+
+for observation in observations:
+    if not observation["valid"] or observation["count"] < 0:
+        rejected.append(observation)
+    else:
+        accepted.append(observation)
+        total_animals += observation["count"]
+
+        species = observation["species"]
+        species_counts[species] = (
+            species_counts.get(species, 0) + observation["count"]
+        )
+        unique_species.add(species)
+
+        station = observation["station"]
+        if station not in by_station:
+            by_station[station] = []
+        by_station[station].append(species)
+
+station_lines = []
+for number, station in enumerate(by_station, start=1):
+    station_lines.append(f"{number}. {station}")
+```
+
+All result updates are controlled by the acceptance decision, and the original
+records remain available for comparison.
+
+</details>
+
+## 15. Explain the accumulator choices
+
+1. What does each accumulator mean before the first item arrives?
+2. Why does zero count as one accepted reading while adding zero to a total?
+3. How does collecting rejected records improve the audit trail?
+4. Why does each group key need its own list?
+5. When is `sum()` clearer than a manual loop, and when does a loop reveal needed
+   filtering or evidence?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Initialize a result once before traversal with a value that correctly describes
+  empty input.
+- A total adds values; a count adds one per match; transformation and filtering
+  produce different numbers of outputs per input.
+- Lists preserve result order, dictionaries count or group by key, and sets
+  preserve uniqueness.
+- State what an accumulator means after each iteration; that invariant guides
+  initialization and updates.
+- Preserve rejected evidence when loss matters, and avoid mutating the list being
+  traversed.
+- Prefer a built-in when it clearly states the whole job and its empty behavior is
+  acceptable.
+:::
+
+## References
+
+- [Python tutorial: `for` statements](https://docs.python.org/3/tutorial/controlflow.html#for-statements)
+- [Python tutorial: looping techniques](https://docs.python.org/3/tutorial/datastructures.html#looping-techniques)
+- [Python built-in functions: `enumerate`, `sum`, `min`, and `max`](https://docs.python.org/3/library/functions.html)
+- [Python standard types: mapping operations](https://docs.python.org/3/library/stdtypes.html#mapping-types-dict)

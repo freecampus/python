@@ -1,0 +1,567 @@
+---
+title: Working Through Grids and Pairs
+lesson_id: decisions-repetition.nested-loops-grids
+lesson_order: 70
+description: Traverse rectangular and ragged grids, generate intended pairs, trace nested targets, control inner-loop exits, and recognize multiplied work.
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+- nested-loops
+order: 70
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/nested-loops-grids.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Trace nested loops over grids and pairs, handle ragged rows, exit the intended loop, and estimate how often the inner body runs.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. A grid has an outer route and an inner route
+
+A treasure map can be represented as a list of row strings:
+
+```python
+grid = [
+    ".T.",
+    "...",
+    "T..",
+]
+
+treasures = []
+
+for row_index, row in enumerate(grid):
+    for column_index, cell in enumerate(row):
+        if cell == "T":
+            treasures.append((row_index, column_index))
+
+assert treasures == [(0, 1), (2, 0)]
+```
+
+The outer loop receives one row. For that row, the inner loop visits every cell.
+Only after the inner loop is exhausted does the outer loop advance to the next
+row.
+
+At each inner iteration, four values have a current meaning:
+
+- `row_index`: which row the outer loop selected;
+- `row`: the current row value;
+- `column_index`: which position the inner loop selected; and
+- `cell`: the character at that coordinate.
+
+Coordinates use zero-based `(row, column)` order. State that convention because
+some domains write x/y or column/row instead.
+
+### Questions this lesson will answer
+
+- How do you trace which target changes in the outer and inner loops?
+- Why does `len(grid[0])` fail as a rule for ragged data?
+- How do Cartesian pairs differ from aligned pairs made with `zip()`?
+- What does an inner `break` leave running?
+- How can work accidentally multiply inside nested loops?
+
+## 2. Trace one complete outer iteration at a time
+
+For a two-row grid:
+
+```python
+grid = ["AB", "CD"]
+trace = []
+
+for row_index, row in enumerate(grid):
+    for column_index, cell in enumerate(row):
+        trace.append((row_index, column_index, cell))
+
+assert trace == [
+    (0, 0, "A"),
+    (0, 1, "B"),
+    (1, 0, "C"),
+    (1, 1, "D"),
+]
+```
+
+The row index remains 0 while both cells in `"AB"` are visited. Then it becomes
+1 and the column index begins again at 0 for `"CD"`.
+
+| Inner trip | Row index | Row | Column index | Cell |
+|---:|---:|---|---:|---|
+| 1 | 0 | `"AB"` | 0 | `"A"` |
+| 2 | 0 | `"AB"` | 1 | `"B"` |
+| 3 | 1 | `"CD"` | 0 | `"C"` |
+| 4 | 1 | `"CD"` | 1 | `"D"` |
+
+When nested output surprises you, write the outer value once and indent its inner
+trace rows underneath. Do not try to hold all target changes in memory.
+
+## 3. Let each row supply its own columns
+
+A **rectangular** grid has equal row lengths. A **ragged** grid does not:
+
+```python
+ragged = ["ABC", "D", "EF"]
+coordinates = []
+
+for row_index, row in enumerate(ragged):
+    for column_index, cell in enumerate(row):
+        coordinates.append((row_index, column_index, cell))
+
+assert len(coordinates) == 6
+assert coordinates[-1] == (2, 1, "F")
+```
+
+Directly traversing each `row` is safe for both shapes. This indexed version is
+not:
+
+```python
+ragged = ["ABC", "D", "EF"]
+
+for row_index in range(len(ragged)):
+    for column_index in range(len(ragged[0])):
+        print(ragged[row_index][column_index])
+```
+
+The first row has three columns, so the inner range always includes indexes 0, 1,
+and 2. The second row has only index 0, and index 1 raises `IndexError`.
+
+If a rectangular shape is required by the application, validate it explicitly:
+
+```python
+grid = ["ABC", "DEF", "GHI"]
+expected_width = len(grid[0]) if grid else 0
+is_rectangular = all(len(row) == expected_width for row in grid)
+assert is_rectangular is True
+```
+
+An empty grid receives width zero by policy and passes the “all rows match” fact.
+Decide separately whether the application permits an empty map.
+
+### Checkpoint: tracing grids
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-nested-grid-tracing",
+  "title": "Grid traversal checkpoint",
+  "instructions": "Trace which collection supplies each target.",
+  "questions": [
+    {
+      "id": "outer-job",
+      "prompt": "In a nested grid traversal, what does the outer loop normally supply?",
+      "options": ["One row at a time", "Every coordinate at once", "Only the final cell", "A sorted copy of the grid"],
+      "answer_index": 0,
+      "explanation": "The outer collection contains rows, so each outer iteration supplies one row."
+    },
+    {
+      "id": "column-reset",
+      "prompt": "What happens to the column index when the outer loop advances to a new row?",
+      "options": ["It continues beyond the old row length", "The new inner enumerate starts again at zero", "It becomes the row string", "It is deleted before traversal"],
+      "answer_index": 1,
+      "explanation": "A fresh inner traversal begins for each row."
+    },
+    {
+      "id": "ragged-safe",
+      "prompt": "Why is `for cell in row` safe for ragged rows?",
+      "options": ["Python pads every row", "Ragged rows cannot be strings", "Each row supplies only its own existing cells", "The first row controls all lengths"],
+      "answer_index": 2,
+      "explanation": "Direct traversal does not request positions that the current row lacks."
+    },
+    {
+      "id": "ragged-risk",
+      "prompt": "Why can using `range(len(grid[0]))` for every row fail?",
+      "options": ["range works only once", "Strings have no length", "The outer loop skips row zero", "A shorter later row may not have all first-row positions"],
+      "answer_index": 3,
+      "explanation": "The first row's width is not proof that every later row is equally wide."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Flatten a nested collection with an explicit loop
+
+Flattening turns a list of lists into one ordered list:
+
+```python
+packs = [["map", "rope"], [], ["torch"]]
+all_items = []
+
+for pack in packs:
+    for item in pack:
+        all_items.append(item)
+
+assert all_items == ["map", "rope", "torch"]
+```
+
+The empty inner list contributes no iterations and needs no special case. The
+result preserves outer order, then inner order.
+
+Do not call `.append(pack)` if the contract needs individual items; that would
+produce another nested list. `.extend(pack)` can flatten one level without an
+inner loop, but the explicit version is useful when each item needs filtering,
+transformation, or a coordinate.
+
+## 5. Nested loops create Cartesian pairs
+
+Two independent loops combine every left value with every right value:
+
+```python
+characters = ["mage", "scout"]
+items = ["map", "key", "torch"]
+loadout_pairs = []
+
+for character in characters:
+    for item in items:
+        loadout_pairs.append((character, item))
+
+assert len(loadout_pairs) == 6
+```
+
+This is a Cartesian product: 2 characters × 3 items = 6 pairs. `zip()` means a
+different relationship:
+
+```python
+assigned = list(zip(characters, items))
+assert assigned == [("mage", "map"), ("scout", "key")]
+```
+
+`zip()` aligns first with first and second with second, then stops at the shorter
+input. Use nested loops for every combination; use `zip()` for already aligned
+positions.
+
+## 6. Avoid self-pairs and mirrored duplicates
+
+A tournament needs each distinct pair once. This naive loop includes self-pairs
+and both `(A, B)` and `(B, A)`:
+
+```python
+players = ["Ada", "Lin", "Mina"]
+pairs = []
+
+for left in players:
+    for right in players:
+        pairs.append((left, right))
+
+assert len(pairs) == 9
+```
+
+Use positions so the right player always appears later:
+
+```python
+pairs = []
+
+for left_index, left in enumerate(players):
+    for right in players[left_index + 1:]:
+        pairs.append((left, right))
+
+assert pairs == [
+    ("Ada", "Lin"),
+    ("Ada", "Mina"),
+    ("Lin", "Mina"),
+]
+```
+
+The slice excludes the current and earlier positions. For three players, the
+result has three unique unordered pairs.
+
+### Checkpoint: pairing relationships
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-nested-pairing",
+  "title": "Pair generation checkpoint",
+  "instructions": "Choose whether the task requires every combination or aligned positions.",
+  "questions": [
+    {
+      "id": "cartesian-count",
+      "prompt": "How many inner-body executions occur for 2 outer values and 3 inner values?",
+      "options": ["6", "5", "3", "2"],
+      "answer_index": 0,
+      "explanation": "Each of two outer values combines with all three inner values: 2 × 3."
+    },
+    {
+      "id": "zip-relationship",
+      "prompt": "What relationship does `zip(names, scores)` represent?",
+      "options": ["Every name with every score", "Values aligned by position, stopping at the shorter input", "Only duplicate values", "Pairs in reverse order automatically"],
+      "answer_index": 1,
+      "explanation": "zip advances the inputs together rather than forming all combinations."
+    },
+    {
+      "id": "unique-pairs",
+      "prompt": "Why use `players[left_index + 1:]` for tournament pairs?",
+      "options": ["It sorts player names", "It repeats self-pairs", "It excludes the current and earlier players, avoiding self and mirrored pairs", "It changes the source list"],
+      "answer_index": 2,
+      "explanation": "Only later positions remain available for the right side."
+    },
+    {
+      "id": "flatten-order",
+      "prompt": "What order does a standard two-loop flatten preserve?",
+      "options": ["Alphabetical order", "Reverse inner order", "No predictable order", "Outer collection order, then each inner collection's order"],
+      "answer_index": 3,
+      "explanation": "The inner loop is fully consumed for each outer item in its supplied order."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. An inner `break` leaves the outer loop active
+
+Find the first treasure in each row:
+
+```python
+grid = ["..T.T", ".....", ".T..."]
+first_in_each_row = []
+
+for row_index, row in enumerate(grid):
+    for column_index, cell in enumerate(row):
+        if cell == "T":
+            first_in_each_row.append((row_index, column_index))
+            break
+
+assert first_in_each_row == [(0, 2), (2, 1)]
+```
+
+The first `break` stops scanning row 0 after column 2, but the outer loop still
+visits rows 1 and 2. A row with no treasure simply completes its inner loop.
+
+To stop the entire search after the first treasure anywhere, use a flag or result
+checked by the outer loop:
+
+```python
+first_treasure = None
+
+for row_index, row in enumerate(grid):
+    for column_index, cell in enumerate(row):
+        if cell == "T":
+            first_treasure = (row_index, column_index)
+            break
+    if first_treasure is not None:
+        break
+
+assert first_treasure == (0, 2)
+```
+
+The result name doubles as the signal. It starts `None` and becomes a coordinate
+only on success.
+
+## 8. Inner loop `else` can report no row match
+
+```python
+grid = ["..T", "...", ".T."]
+row_results = []
+
+for row_index, row in enumerate(grid):
+    for column_index, cell in enumerate(row):
+        if cell == "T":
+            row_results.append((row_index, column_index))
+            break
+    else:
+        row_results.append((row_index, None))
+
+assert row_results == [(0, 2), (1, None), (2, 1)]
+```
+
+The `else` belongs to the inner `for`: it runs when that row exhausts without a
+break. Its indentation aligns with the inner loop, not the outer one.
+
+## 9. Count how often the inner body runs
+
+Nested loops multiply work. A 100-row by 100-column grid has 10,000 cell visits.
+That can be necessary; a full grid scan genuinely needs every cell. Problems
+arise when invariant work is repeated inside the inner body:
+
+```python
+rows = ["ABC", "DEF"]
+allowed = ["A", "B", "C", "D", "E", "F"]
+allowed_set = set(allowed)
+
+matches = []
+for row in rows:
+    for cell in row:
+        if cell in allowed_set:
+            matches.append(cell)
+```
+
+Build `allowed_set` once before the loops. Rebuilding it for every cell would
+produce the same answer but repeat work that does not depend on the current row
+or cell.
+
+Unit 7 will analyze algorithmic complexity formally. Here, ask a practical
+question: “How many times will this line run, and does it depend on either loop
+target?” Move loop-invariant preparation outward.
+
+### Checkpoint: exits and multiplied work
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-nested-exits-work",
+  "title": "Nested exits and work checkpoint",
+  "instructions": "Track which loop owns each control statement and how often work repeats.",
+  "questions": [
+    {
+      "id": "inner-break",
+      "prompt": "After `break` runs inside an inner grid loop, what normally happens next?",
+      "options": ["The outer loop may continue with its next row", "Both loops always stop", "The current row restarts", "Python deletes the grid"],
+      "answer_index": 0,
+      "explanation": "break exits only the nearest enclosing loop."
+    },
+    {
+      "id": "whole-search",
+      "prompt": "How can a nested search stop both loops after one result?",
+      "options": ["Use continue twice", "Break the inner loop, then test the result and break the outer loop", "Put pass after the inner break", "Remove indentation"],
+      "answer_index": 1,
+      "explanation": "The outer loop needs its own explicit decision to stop."
+    },
+    {
+      "id": "inner-else",
+      "prompt": "What does an `else` attached to the inner loop mean for one row?",
+      "options": ["The outer loop ended", "The row was empty only", "The inner row traversal finished without break", "Every cell matched"],
+      "answer_index": 2,
+      "explanation": "Normal inner exhaustion triggers that loop's else suite."
+    },
+    {
+      "id": "move-invariant",
+      "prompt": "Where should a set conversion go if it does not depend on either loop target?",
+      "options": ["In the innermost body", "After every match", "Inside only the final row", "Before both loops"],
+      "answer_index": 3,
+      "explanation": "Preparing invariant data once avoids rebuilding the same value for every combination."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Survey a treasure grid
+
+Use this ragged map:
+
+```python
+grid = [
+    ".T..",
+    "..#T.",
+    "T",
+    "....",
+]
+
+all_treasures = []
+first_by_row = []
+blocked_cells = []
+cell_visits = 0
+```
+
+Implement this contract in one full traversal:
+
+1. Count every visited cell.
+2. Collect every treasure coordinate in row-major order.
+3. Collect blocked `#` coordinates.
+4. Record only the first treasure coordinate for each row that has one. Do not
+   break the full traversal, because all treasures and blocks are still needed.
+5. Afterward, create every unique pair of treasure coordinates without self or
+   mirrored pairs.
+6. Preserve the ragged source unchanged.
+
+Run:
+
+```python
+assert cell_visits == 14
+assert all_treasures == [(0, 1), (1, 3), (2, 0)]
+assert first_by_row == [(0, 1), (1, 3), (2, 0)]
+assert blocked_cells == [(1, 2)]
+assert treasure_pairs == [
+    ((0, 1), (1, 3)),
+    ((0, 1), (2, 0)),
+    ((1, 3), (2, 0)),
+]
+assert grid[2] == "T"
+```
+
+Then add a second treasure to row 0 and prove that `all_treasures` changes while
+`first_by_row` still has only one coordinate for that row.
+
+<details>
+<summary>Hint: use a per-row flag rather than breaking</summary>
+
+At the beginning of each outer iteration, set `row_has_treasure = False`. When a
+cell is treasure, always append to `all_treasures`, but append to `first_by_row`
+only if the flag is still false; then set it true. Build unique pairs afterward
+using a slice that begins after the left position.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+grid = [
+    ".T..",
+    "..#T.",
+    "T",
+    "....",
+]
+
+all_treasures = []
+first_by_row = []
+blocked_cells = []
+cell_visits = 0
+
+for row_index, row in enumerate(grid):
+    row_has_treasure = False
+    for column_index, cell in enumerate(row):
+        cell_visits += 1
+        coordinate = (row_index, column_index)
+        if cell == "T":
+            all_treasures.append(coordinate)
+            if not row_has_treasure:
+                first_by_row.append(coordinate)
+                row_has_treasure = True
+        elif cell == "#":
+            blocked_cells.append(coordinate)
+
+treasure_pairs = []
+for left_index, left in enumerate(all_treasures):
+    for right in all_treasures[left_index + 1:]:
+        treasure_pairs.append((left, right))
+```
+
+The per-row flag protects the “first” result without ending the traversal that
+other artifacts require.
+
+</details>
+
+## 11. Explain the nested paths
+
+1. Which values remain constant during one complete inner traversal?
+2. Why is direct row traversal safe for ragged shapes?
+3. How do nested loops and `zip()` represent different pairing relationships?
+4. Why would an inner break lose the later treasure evidence required by the lab?
+5. Which work can be moved before both loops because it does not depend on either
+   target?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- The outer loop selects a collection such as a row; the inner loop consumes that
+  current collection before the outer target advances.
+- Directly enumerate each row to support rectangular and ragged shapes safely.
+- Nested independent loops form every combination; `zip()` aligns positions.
+- `break` exits only the nearest loop. Use a result or flag when the outer loop
+  must also stop or when traversal must continue for other artifacts.
+- Nested work multiplies; prepare values outside any loop whose targets they do
+  not depend on.
+:::
+
+## References
+
+- [Python tutorial: looping techniques](https://docs.python.org/3/tutorial/datastructures.html#looping-techniques)
+- [Python built-in function: `enumerate`](https://docs.python.org/3/library/functions.html#enumerate)
+- [Python built-in function: `zip`](https://docs.python.org/3/library/functions.html#zip)
+- [Python tutorial: `break` and loop `else`](https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements)

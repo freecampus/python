@@ -1,0 +1,627 @@
+---
+title: Building Collections with Comprehensions
+lesson_id: decisions-repetition.comprehensions
+lesson_order: 80
+description: Translate explicit loops into readable list, set, and dictionary comprehensions while preserving evaluation order, collision behavior, scope, and readability.
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+- comprehensions
+order: 80
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/comprehensions.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 3–4.5 hours
+- **You will learn:** Read and write list, set, and dictionary comprehensions, distinguish filters from conditional expressions, and choose an explicit loop when the compact form hides important work.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. A comprehension describes one new collection
+
+An explicit loop can transform every reading:
+
+```python
+celsius_values = [0, 10, 25]
+fahrenheit_values = []
+
+for celsius in celsius_values:
+    fahrenheit_values.append(celsius * 9 / 5 + 32)
+
+assert fahrenheit_values == [32.0, 50.0, 77.0]
+```
+
+A list comprehension expresses the same result:
+
+```python
+fahrenheit_values = [
+    celsius * 9 / 5 + 32
+    for celsius in celsius_values
+]
+```
+
+Read it in this order:
+
+1. `for celsius in celsius_values` supplies each source value;
+2. `celsius * 9 / 5 + 32` builds one output; and
+3. the surrounding brackets collect those outputs into a new list.
+
+The output expression appears first in the syntax, but the `for` clause tells you
+where its name comes from. A comprehension is useful when the complete result can
+be said as one short sentence: “the converted temperature for each source
+temperature.”
+
+### Questions this lesson will answer
+
+- How does a trailing `if` filter inputs?
+- How is a conditional expression different from that filter?
+- What do set and dictionary comprehensions collect?
+- What happens when several inputs produce the same dictionary key?
+- When does a comprehension become less readable than the loop it replaces?
+
+## 2. Translate back to a loop whenever the order is unclear
+
+For this comprehension:
+
+```python
+names = ["  ADA ", "", "  Lin  "]
+clean_names = [name.strip().title() for name in names]
+```
+
+The equivalent loop is:
+
+```python
+clean_names = []
+for name in names:
+    cleaned = name.strip().title()
+    clean_names.append(cleaned)
+```
+
+Both produce `['Ada', '', 'Lin']`. Write the expanded form when debugging:
+
+- the source clause becomes the loop header;
+- the leading expression becomes the value appended; and
+- a trailing filter, if present, becomes an `if` around the append.
+
+The comprehension builds a new outer list. It does not mutate `names`.
+
+## 3. A trailing `if` filters source items
+
+```python
+readings = [8, -2, 0, 5]
+usable = [reading for reading in readings if reading >= 0]
+
+assert usable == [8, 0, 5]
+assert readings == [8, -2, 0, 5]
+```
+
+Read the execution order as:
+
+1. receive a `reading`;
+2. check `reading >= 0`;
+3. only when true, evaluate and collect the leading `reading` expression.
+
+Transformation and filtering can coexist:
+
+```python
+scaled = [reading * 10 for reading in readings if reading >= 0]
+assert scaled == [80, 0, 50]
+```
+
+The condition protects the output expression. For example, filter nonzero values
+before division:
+
+```python
+values = [4, 0, 2]
+reciprocals = [1 / value for value in values if value != 0]
+assert reciprocals == [0.25, 0.5]
+```
+
+No division occurs for zero.
+
+### Checkpoint: reading list comprehensions
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-comprehensions-list-reading",
+  "title": "List comprehension checkpoint",
+  "instructions": "Translate the compact expression into its loop behavior.",
+  "questions": [
+    {
+      "id": "output-expression",
+      "prompt": "In `[value * 2 for value in values]`, what is collected for each source item?",
+      "options": ["`value * 2`", "The name `values`", "Only Boolean results", "Nothing until break"],
+      "answer_index": 0,
+      "explanation": "The leading expression produces one collected result for each supplied value."
+    },
+    {
+      "id": "trailing-filter",
+      "prompt": "What does the trailing clause do in `[x for x in values if x >= 0]`?",
+      "options": ["Chooses between two output values", "Excludes source items whose condition is false", "Stops after the first nonnegative value", "Mutates the source list"],
+      "answer_index": 1,
+      "explanation": "The trailing if is a filter controlling whether the current item contributes output."
+    },
+    {
+      "id": "filter-before-output",
+      "prompt": "Why is `[1 / x for x in values if x != 0]` safe for zero inputs?",
+      "options": ["Division by zero returns None in comprehensions", "The list removes errors afterward", "The filter rejects zero before evaluating `1 / x` for that item", "The output is always an integer"],
+      "answer_index": 2,
+      "explanation": "A failing trailing condition prevents evaluation of the output expression for that item."
+    },
+    {
+      "id": "source-mutation",
+      "prompt": "What normally happens to the source list when a comprehension builds transformed immutable values?",
+      "options": ["It becomes empty", "It receives the outputs too", "It is sorted", "It remains unchanged"],
+      "answer_index": 3,
+      "explanation": "The comprehension creates a new collection and does not assign through source positions."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. A conditional expression chooses an output for every item
+
+This form has an `if` and `else` before the `for`:
+
+```python
+scores = [82, 40, 71]
+labels = ["pass" if score >= 70 else "retry" for score in scores]
+
+assert labels == ["pass", "retry", "pass"]
+assert len(labels) == len(scores)
+```
+
+Every score produces exactly one label. Compare it with a trailing filter:
+
+```python
+passing_scores = [score for score in scores if score >= 70]
+assert passing_scores == [82, 71]
+```
+
+- `result_when_true if condition else result_when_false` is a **conditional
+  expression**. It transforms every input into one of two outputs.
+- `... for item in source if condition` is a **filter**. It may omit the input.
+
+The location and presence of `else` reveal the difference.
+
+A conditional expression and filter can both appear:
+
+```python
+values = [-3, 0, 4, None]
+labels = [
+    "positive" if value > 0 else "not positive"
+    for value in values
+    if value is not None
+]
+
+assert labels == ["not positive", "not positive", "positive"]
+```
+
+First the source supplies a value. The trailing filter excludes `None`. Then the
+conditional expression chooses a label for each remaining value.
+
+## 5. Set comprehensions collect unique results
+
+```python
+species = [" Owl ", "fox", "owl", "FOX"]
+normalized = {name.strip().lower() for name in species}
+
+assert normalized == {"owl", "fox"}
+```
+
+Curly braces with one expression create a set comprehension. Multiple inputs can
+produce the same normalized value, and the set keeps it once. Do not rely on a
+set’s display order; use a list when first-seen order matters.
+
+An empty set comprehension still returns a set:
+
+```python
+none_long = {name for name in species if len(name.strip()) > 10}
+assert none_long == set()
+```
+
+The literal `{}` is an empty dictionary, so `set()` remains the syntax for a
+standalone empty set.
+
+## 6. Dictionary comprehensions require a key and value
+
+```python
+stations = [
+    {"name": "north", "reading": 4},
+    {"name": "east", "reading": 7},
+]
+by_name = {
+    station["name"]: station["reading"]
+    for station in stations
+}
+
+assert by_name == {"north": 4, "east": 7}
+```
+
+The expression before the `for` has `key: value`. The equivalent loop assigns one
+dictionary entry per source record:
+
+```python
+by_name = {}
+for station in stations:
+    by_name[station["name"]] = station["reading"]
+```
+
+A dictionary comprehension can transform both sides:
+
+```python
+raw = {" North ": 4, " EAST ": 7}
+clean = {name.strip().lower(): reading * 10 for name, reading in raw.items()}
+assert clean == {"north": 40, "east": 70}
+```
+
+### Checkpoint: output collection shapes
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-comprehensions-shapes",
+  "title": "Comprehension shape checkpoint",
+  "instructions": "Choose the output cardinality and collection behavior.",
+  "questions": [
+    {
+      "id": "conditional-output-count",
+      "prompt": "How many outputs does `['yes' if x else 'no' for x in values]` produce?",
+      "options": ["One for every source item", "Only one total", "Only for truthy items", "None for falsy items"],
+      "answer_index": 0,
+      "explanation": "The conditional expression chooses one of two outputs for each supplied item."
+    },
+    {
+      "id": "set-output",
+      "prompt": "What happens when several source strings normalize to the same value in a set comprehension?",
+      "options": ["Python raises a duplicate error", "The result keeps one equal value", "The source strings are deleted", "The result becomes a list"],
+      "answer_index": 1,
+      "explanation": "Set semantics retain unique equal results."
+    },
+    {
+      "id": "dict-shape",
+      "prompt": "Which expression identifies a dictionary comprehension?",
+      "options": ["One expression inside parentheses", "One expression inside braces", "A `key: value` expression before the for clause", "A trailing else with no condition"],
+      "answer_index": 2,
+      "explanation": "Dictionary comprehensions construct a key-value pair for each accepted input."
+    },
+    {
+      "id": "empty-set",
+      "prompt": "What does a set comprehension with no accepted items return?",
+      "options": ["`{}` as an empty dictionary", "None", "An empty tuple", "An empty set equal to `set()`"],
+      "answer_index": 3,
+      "explanation": "The comprehension's set shape is preserved even when it collects no values."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Duplicate dictionary keys keep the last assigned value
+
+```python
+records = [
+    {"station": "north", "reading": 3},
+    {"station": "east", "reading": 7},
+    {"station": "north", "reading": 9},
+]
+latest = {record["station"]: record["reading"] for record in records}
+
+assert latest == {"north": 9, "east": 7}
+```
+
+The second `"north"` assignment replaces the first. That may be a deliberate
+“latest wins” policy, but it is not grouping. If all records per station matter,
+use the explicit grouping loop from Lesson 4.
+
+Before using a dictionary comprehension, ask whether keys are guaranteed unique,
+whether replacement is intended, and whether overwritten evidence must be
+preserved.
+
+## 8. `enumerate()` and `.items()` remain available
+
+Create a lookup from value to first-seen position only when source values are
+known unique:
+
+```python
+codes = ["A1", "B7", "C3"]
+positions = {code: index for index, code in enumerate(codes)}
+assert positions == {"A1": 0, "B7": 1, "C3": 2}
+```
+
+Transform a mapping through its items:
+
+```python
+inventory = {"maps": 2, "keys": 0, "torches": 3}
+available = {
+    item: quantity
+    for item, quantity in inventory.items()
+    if quantity > 0
+}
+assert available == {"maps": 2, "torches": 3}
+```
+
+The trailing filter checks the current quantity, and the key-value expression
+preserves accepted pairs.
+
+## 9. Nested comprehensions follow nested-loop order
+
+A small flattening comprehension mirrors two loops:
+
+```python
+rows = [[1, 2], [], [3, 4]]
+flat = [value for row in rows for value in row]
+assert flat == [1, 2, 3, 4]
+```
+
+Read the `for` clauses in the same order as expanded loops:
+
+```python
+flat = []
+for row in rows:
+    for value in row:
+        flat.append(value)
+```
+
+A small Cartesian product is similar:
+
+```python
+pairs = [(left, right) for left in ["A", "B"] for right in [1, 2]]
+assert pairs == [("A", 1), ("A", 2), ("B", 1), ("B", 2)]
+```
+
+Stop compacting when there are several filters, branching actions, or unfamiliar
+names. The explicit loop is not inferior; it provides space for intermediate
+state, rejection evidence, traces, and comments.
+
+## 10. Comprehension target names do not leak
+
+```python
+value = "outside"
+squares = [value * value for value in [1, 2, 3]]
+
+assert squares == [1, 4, 9]
+assert value == "outside"
+```
+
+In modern Python, the comprehension’s target has its own local scope and does not
+replace the outer `value`. Avoid relying on a comprehension target afterward;
+use the constructed collection.
+
+An ordinary `for` target behaves differently at top level:
+
+```python
+for number in [1, 2, 3]:
+    pass
+
+assert number == 3
+```
+
+This difference is another reason to keep target names local in meaning and not
+use them as later results.
+
+## 11. Do not use a comprehension only for side effects
+
+This creates a list of `None` values merely to print:
+
+```python
+messages = ["ready", "launch"]
+printed_results = [print(message) for message in messages]
+assert printed_results == [None, None]
+```
+
+The list is useless because `print()` returns `None`. Use a loop for actions:
+
+```python
+for message in messages:
+    print(message)
+```
+
+Comprehensions build collections. They do not support `break` or `continue`, and
+they are a poor home for several state changes. Choose an explicit loop for
+logging, multiple accumulators, early exit, error evidence, or a rule that needs
+several readable steps.
+
+## 12. Generator expressions avoid an intermediate collection
+
+A generator expression uses parentheses and supplies values lazily:
+
+```python
+values = [3, 5, 8]
+has_even = any(value % 2 == 0 for value in values)
+assert has_even is True
+```
+
+`any()` can stop at the first truthy result, and no full Boolean list is needed.
+Similarly:
+
+```python
+all_positive = all(value > 0 for value in values)
+total = sum(value * 2 for value in values)
+```
+
+This is a preview, not a full generator lesson. Unit 5 explains iterators,
+generators, lazy state, and one-pass behavior. For now, recognize the common form
+when a consuming built-in needs values rather than a reusable list.
+
+### Checkpoint: readability and behavior
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-comprehensions-boundaries",
+  "title": "Comprehension boundaries checkpoint",
+  "instructions": "Choose whether compact collection construction preserves the required behavior.",
+  "questions": [
+    {
+      "id": "dict-collision",
+      "prompt": "What happens when two inputs create the same key in a dictionary comprehension?",
+      "options": ["The later assignment replaces the earlier value for that key", "Both values are grouped automatically", "Python changes the key", "The result becomes a set"],
+      "answer_index": 0,
+      "explanation": "Dictionary assignment semantics apply; a repeated equal key receives the latest value."
+    },
+    {
+      "id": "nested-order",
+      "prompt": "How should `[x for row in rows for x in row]` be expanded?",
+      "options": ["Loop over x before rows", "Loop over each row, then each x in that row", "Zip all rows", "Sort rows before reading them"],
+      "answer_index": 1,
+      "explanation": "Comprehension for clauses follow the same left-to-right nesting order as explicit loops."
+    },
+    {
+      "id": "side-effect-smell",
+      "prompt": "Why is `[print(x) for x in values]` usually a poor design?",
+      "options": ["print is forbidden in loops", "Comprehensions cannot read values", "It constructs an unnecessary list of print's None return values", "It prints only the final value"],
+      "answer_index": 2,
+      "explanation": "The purpose is an action, not a collected result, so an explicit loop communicates it."
+    },
+    {
+      "id": "explicit-loop-choice",
+      "prompt": "Which task most clearly favors an explicit loop?",
+      "options": ["Double every integer", "Keep positive values", "Normalize unique names", "Collect accepted and rejected records, update totals, and stop on shutdown"],
+      "answer_index": 3,
+      "explanation": "Several artifacts and early control flow need the space and statements of an explicit loop."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 13. Clean an event log
+
+Use this source log:
+
+```python
+events = [
+    {"kind": " move ", "value": "N"},
+    {"kind": "noise", "value": "?"},
+    {"kind": "MOVE", "value": "E"},
+    {"kind": "score", "value": 4},
+    {"kind": "score", "value": 7},
+    {"kind": "move", "value": "N"},
+]
+```
+
+Build these artifacts with separate, readable comprehensions:
+
+1. `normalized_kinds`: one lowercase stripped kind for every event;
+2. `moves`: the move values in source order, accepting kind spellings after
+   normalization;
+3. `unique_moves`: a set of accepted move values;
+4. `score_by_position`: a dictionary mapping original positions to score values;
+5. `latest_by_kind`: a dictionary mapping normalized kind to its latest value;
+6. `move_labels`: strings such as `"1: N"` numbered from one; and
+7. `high_scores`: score values at least 5.
+
+Run:
+
+```python
+assert normalized_kinds == ["move", "noise", "move", "score", "score", "move"]
+assert moves == ["N", "E", "N"]
+assert unique_moves == {"N", "E"}
+assert score_by_position == {3: 4, 4: 7}
+assert latest_by_kind == {"move": "N", "noise": "?", "score": 7}
+assert move_labels == ["1: N", "2: E", "3: N"]
+assert high_scores == [7]
+assert events[0]["kind"] == " move "
+```
+
+Then expand any two comprehensions into loops and prove the results are equal.
+Explain why `latest_by_kind` loses earlier values and whether that is acceptable
+for its stated contract.
+
+<details>
+<summary>Hint: keep normalization beside each filter or output that needs it</summary>
+
+Use `event["kind"].strip().lower()` as the normalized expression. Use
+`enumerate(events)` for original positions and `enumerate(moves, start=1)` for
+labels. A dictionary comprehension naturally applies “latest value wins” when
+normalized keys repeat.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+events = [
+    {"kind": " move ", "value": "N"},
+    {"kind": "noise", "value": "?"},
+    {"kind": "MOVE", "value": "E"},
+    {"kind": "score", "value": 4},
+    {"kind": "score", "value": 7},
+    {"kind": "move", "value": "N"},
+]
+
+normalized_kinds = [event["kind"].strip().lower() for event in events]
+moves = [
+    event["value"]
+    for event in events
+    if event["kind"].strip().lower() == "move"
+]
+unique_moves = {move for move in moves}
+score_by_position = {
+    position: event["value"]
+    for position, event in enumerate(events)
+    if event["kind"].strip().lower() == "score"
+}
+latest_by_kind = {
+    event["kind"].strip().lower(): event["value"]
+    for event in events
+}
+move_labels = [
+    f"{number}: {move}"
+    for number, move in enumerate(moves, start=1)
+]
+high_scores = [
+    event["value"]
+    for event in events
+    if event["kind"].strip().lower() == "score" and event["value"] >= 5
+]
+```
+
+The expressions are independent so each artifact has one clear job. Repeated
+normalized keys deliberately leave only the latest event in `latest_by_kind`.
+
+</details>
+
+## 14. Explain the compact forms
+
+1. How do you translate a comprehension into an explicit loop?
+2. Why does a trailing filter produce fewer outputs while a conditional expression
+   produces one per input?
+3. What happens when transformed set values or dictionary keys collide?
+4. Why should code use the resulting collection rather than a target name after a
+   comprehension?
+5. Which kinds of state changes or exits are clearer in an explicit loop?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A comprehension builds one new list, set, or dictionary from source traversal.
+- A trailing `if` filters inputs; a leading conditional expression chooses one of
+  two outputs for every accepted input.
+- Sets remove equal outputs; repeated dictionary keys keep the latest assigned
+  value rather than grouping automatically.
+- Expand nested or surprising comprehensions into loops to verify evaluation
+  order.
+- Use comprehensions for readable collection construction, not side effects,
+  several accumulators, or early exit.
+- A generator expression can feed `any()`, `all()`, or `sum()` without building
+  an intermediate list; deeper lazy behavior belongs to Unit 5.
+:::
+
+## References
+
+- [Python tutorial: list comprehensions](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)
+- [Python tutorial: nested list comprehensions](https://docs.python.org/3/tutorial/datastructures.html#nested-list-comprehensions)
+- [Python expression reference: displays for lists, sets, and dictionaries](https://docs.python.org/3/reference/expressions.html#displays-for-lists-sets-and-dictionaries)
+- [Python expression reference: generator expressions](https://docs.python.org/3/reference/expressions.html#generator-expressions)

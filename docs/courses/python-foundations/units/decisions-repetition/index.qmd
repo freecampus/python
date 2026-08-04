@@ -1,6 +1,6 @@
 ---
-title: Decisions and Repetition Overview
-description: Translate rules and repeated work into traceable control flow that handles boundaries and makes visible progress toward stopping.
+title: Making Decisions and Repeating Work Overview
+description: Choose a control-flow tool from the question a program must answer, then build complete branches and loops that make visible progress.
 course_id: python-foundations
 unit_id: decisions-repetition
 unit_number: 4
@@ -13,55 +13,201 @@ colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 4
-- **Estimated time:** 5–10 hours including the challenge
-- **Unit outcome:** Translate rules and repeated work into traceable control flow that handles boundaries and makes visible progress toward stopping.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 45–75 minutes for orientation and readiness work
+- **You will learn:** Choose between a branch, a `for` loop, a `while` loop, early exit, nested traversal, and a comprehension from the behavior you need.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. One program uses three kinds of control
 
-Translate rules and repeated work into traceable control flow that handles boundaries and makes visible progress toward stopping.
+A supply drone receives a destination, checks whether launch is safe, and visits
+an ordered route. Those are different control-flow jobs:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+```python
+weather = "clear"
+route = ["hangar", "ridge", "clinic"]
+battery = 72
 
-## 2. Before you start
+if weather == "clear" and battery >= 50:
+    launch_status = "approved"
+else:
+    launch_status = "delayed"
 
-**Prior knowledge:** Complete Unit 3 and bring its challenge notes and debugging record.
+for stop in route:
+    print("Checking", stop)
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+while battery > 60:
+    battery -= 5
+    print("Calibration pulse; battery:", battery)
+```
 
-## 3. Lessons
+- The `if` statement chooses one path from the current facts.
+- The `for` loop performs work once for each route item.
+- The `while` loop repeats while a changing condition remains true.
 
-| Step | Lesson | Purpose |
+Control flow is not only punctuation. It is the order in which Python evaluates
+questions, enters or skips blocks, changes state, and eventually continues after
+the statement. In this unit you will make every one of those steps visible.
+
+## 2. Choose the tool from the question
+
+| Question the program must answer | Tool to consider | Correctness question |
+|---|---|---|
+| Which one of several results applies? | `if` / `elif` / `else` | Are the cases complete, and does order resolve overlaps deliberately? |
+| What should happen to every supplied item? | `for` | Is the result initialized once and updated for every relevant item? |
+| What should repeat until state changes? | `while` | What moves toward the stopping condition on every possible path? |
+| Can the search stop after one result? | `break` or a direct membership operation | Do you need the first match, every match, or only a yes/no fact? |
+| Should one unusable item be ignored? | `continue` or an inverted condition | Will later work and necessary progress still happen? |
+| Does every row combine with every column? | nested loops | Is the resulting amount of work intentional? |
+| Is a new collection described by one short rule? | comprehension | Is the compact form clearer than the equivalent loop? |
+
+The same data can lead to different choices. A list of temperatures suggests a
+`for` loop if every reading must be converted, `break` if one dangerous reading
+is enough to trigger an alarm, and a comprehension if the whole result is a
+small filtered list.
+
+## 3. Trace the path, not only the output
+
+Two programs can print the same result but reach it through different paths.
+Keep a small trace whenever the behavior is not obvious:
+
+| Moment | Current input | Question checked | State before | Action | State after |
+|---|---|---|---|---|---|
+| 1 | `"hangar"` | — | `visited = []` | append stop | `["hangar"]` |
+| 2 | `"ridge"` | blocked? | one visit | skip or append | depends on answer |
+| 3 | `"clinic"` | — | prior visits | append stop | final route |
+
+For a conditional, record the conditions in their evaluated order and mark the
+first selected branch. For a `for` loop, record the supplied item and changing
+result. For a `while` loop, also record why another iteration is or is not
+allowed. This turns “the code seems stuck” into evidence about one precise
+state transition.
+
+## 4. Your path through this unit
+
+| Lesson | Capability you will build | Main lab artifact |
 |---:|---|---|
-| 1 | [Conditionals and Decision Tables](conditionals-decision-tables.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Boolean Reasoning and Short-Circuit Evaluation](boolean-reasoning-short-circuit.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [for Loops and Structured Traversal](for-loops-traversal.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [while Loops, State, Sentinels, and Termination](while-loops-state-termination.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Loop Control, Nested Loops, and Comprehensions](loop-control-comprehensions.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+| 1 | [Choosing a Path with `if`, `elif`, and `else`](conditional-branches.qmd) — distinguish a branch chain from independent decisions and ensure a usable result exists. | Spaceport departure gate |
+| 2 | [Combining Conditions Without Surprises](boolean-rules-short-circuit.qmd) — name facts, group rules, protect unsafe work, and preserve meaningful falsy values. | Museum security console |
+| 3 | [Turning Rules into Complete Decisions](decision-tables-boundaries.qmd) — expose gaps, overlaps, precedence, and exact boundaries before writing code. | Festival ticket desk |
+| 4 | [Building Results with `for` Loops](for-loop-patterns.qmd) — transform, filter, total, count, group, and validate without losing source data. | Expedition report |
+| 5 | [Repeating Until Something Changes](while-loops-termination.qmd) — design progress, retry budgets, sentinels, and explicit exit reasons. | Docking controller |
+| 6 | [Searching, Skipping, and Stopping Loops](search-loop-control.qmd) — choose first, last, all, or existence results and explain loop `else`. | Signal scanner |
+| 7 | [Working Through Grids and Pairs](nested-loops-grids.qmd) — traverse coordinates, ragged rows, and combinations while controlling inner-loop exits. | Treasure-grid survey |
+| 8 | [Building Collections with Comprehensions](comprehensions.qmd) — translate between explicit loops and readable list, set, or dictionary comprehensions. | Event-log cleanup |
 
-## 4. How to study this unit
+The [Unit Challenge](challenge.qmd) combines these capabilities in a clockwork
+maze. You will guide a maintenance robot through a grid while keeping an event
+log and proving each stage with assertions.
 
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
+## 5. What Units 2 and 3 already supplied
 
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+Bring these skills forward rather than starting again:
+
+- Unit 2: comparisons, truthiness, `and`, `or`, `not`, precedence, short-circuit
+  evaluation, `None`, strings, and formatted output;
+- Unit 3: lists, tuples, dictionaries, sets, nested data, range objects,
+  `enumerate()`, `zip()`, sorting, membership, and safe traversal.
+
+This unit asks a new question: **how should execution respond to those values?**
+You will apply Boolean facts to complete policies and collection operations to
+small algorithms. Unit 5 then gives those algorithms reusable names, parameters,
+and return values. The examples here remain top-level code so you can focus on
+control flow before learning function contracts.
+
+## 6. Set up a control-flow laboratory
+
+Use one cell for inputs, one for the algorithm, and one for checks. Temporary
+trace rows belong beside the code while you investigate:
+
+```python
+readings = [3, -1, 5]
+accepted = []
+rejected = []
+
+for reading in readings:
+    before = (accepted.copy(), rejected.copy())
+    if reading >= 0:
+        accepted.append(reading)
+        action = "accepted"
+    else:
+        rejected.append(reading)
+        action = "rejected"
+    print(reading, before, action, accepted, rejected)
+
+assert accepted == [3, 5]
+assert rejected == [-1]
+assert readings == [3, -1, 5]
+```
+
+After the checks pass, remove the temporary `print()` if it no longer helps. The
+assertions remain as executable promises. Restart and run all before considering
+an exercise finished; loops can otherwise appear correct only because an old
+notebook cell left useful state behind.
+
+::: {.callout-warning title="A loop can run correctly and still solve the wrong job"}
+Visiting all items proves only that traversal happened. State the required
+artifact—such as “a new list of accepted readings in source order”—and assert
+that artifact, the empty case, and any important boundary.
 :::
 
-## 5. Unit evidence
+## 7. Choose a realistic pace
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+Unit 4 is planned for approximately **27–40 hours**, including examples,
+modifications, checkpoints, eight final labs, and the challenge. The range is a
+guide, not a speed target.
+
+A useful rhythm is:
+
+1. trace a complete example before changing it;
+2. change one boundary or input shape and update the prediction;
+3. answer a checkpoint without rerunning the earlier code;
+4. build the final lab from its contract before opening support; and
+5. retain one failure with the state that caused it and the check that guards the
+   repair.
+
+## 8. Check your readiness
+
+Run this short task from a clean cell:
+
+```python
+energy_readings = [8, 0, -2, 5]
+usable = []
+
+for reading in energy_readings:
+    if reading < 0:
+        continue
+    usable.append(reading)
+
+assert usable == [8, 0, 5]
+assert energy_readings == [8, 0, -2, 5]
+```
+
+Then make three controlled changes:
+
+1. collect negative readings in a separate `rejected` list instead of silently
+   losing them;
+2. add a `usable_total` accumulator and prove that it equals `13`; and
+3. explain why the zero reading belongs in `usable` even though `bool(0)` is
+   `False`.
+
+You are ready for Lesson 1 when you can identify what the loop supplies, which
+branch runs for every input, which names change, and what remains unchanged.
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- A branch chooses from current facts; a `for` loop consumes supplied items; a
+  `while` loop repeats while changing state permits it.
+- Trace conditions, supplied values, state changes, and the reason execution
+  leaves a loop.
+- Reuse Boolean and collection knowledge from Units 2 and 3 instead of hiding it
+  inside unexplained control flow.
+- Define and assert the result the program must produce, including boundaries
+  and empty inputs.
+:::
 
 <!-- fcpython-chapter-lab: end -->

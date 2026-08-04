@@ -1,0 +1,560 @@
+---
+title: Turning Rules into Complete Decisions
+lesson_id: decisions-repetition.decision-tables-boundaries
+lesson_order: 30
+description: Convert prose policies into decision tables, find boundary gaps and overlaps, encode precedence, and use simple match statements for discrete choices.
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+- decision-tables
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/decision-tables-boundaries.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 3–5 hours
+- **You will learn:** Design complete, non-overlapping decisions from tables, test exact boundaries, apply precedence, and recognize when `match` clarifies a discrete command.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Turn a ticket policy into rows before code
+
+A night festival publishes this policy:
+
+- children under 13 pay 8 credits;
+- visitors from 13 through 64 pay 18 credits;
+- visitors 65 or older pay 10 credits; and
+- volunteers with an active badge enter free.
+
+The words sound clear, but code forces exact answers. A **decision table** makes
+the cases and their precedence visible first:
+
+| Priority | Facts | Price | Reason |
+|---:|---|---:|---|
+| 1 | active volunteer badge | 0 | volunteer |
+| 2 | age below 13 | 8 | child |
+| 3 | age from 13 through 64 | 18 | standard |
+| 4 | age at least 65 | 10 | senior |
+
+The volunteer row is an override, so it appears first. The age rows are mutually
+exclusive and together cover every expected non-negative age.
+
+```python
+age = 12
+active_volunteer = False
+
+if active_volunteer:
+    price = 0
+    reason = "volunteer"
+elif age < 13:
+    price = 8
+    reason = "child"
+elif age < 65:
+    price = 18
+    reason = "standard"
+else:
+    price = 10
+    reason = "senior"
+
+print(price, reason)
+```
+
+The second age condition can say only `age < 65` because reaching it already
+proves `age >= 13`. The table preserves the full intended interval.
+
+### Questions this lesson will answer
+
+- How can a table reveal missing, overlapping, or unreachable cases?
+- Which endpoints belong on each side of a threshold?
+- How does precedence differ from an accidental branch-order effect?
+- When should a result include an explanation as well as a value?
+- When is `match` clearer than a chain of equality tests?
+
+## 2. Separate mutually exclusive cases from cumulative rules
+
+A single classification should select exactly one row. Ticket price is one
+classification: one visitor receives one base price. Use an `if`/`elif`/`else`
+chain.
+
+Cumulative rules may all apply. A visitor could receive several notices:
+
+```python
+notices = []
+age = 70
+active_volunteer = True
+
+if age >= 65:
+    notices.append("offer accessible seating")
+
+if active_volunteer:
+    notices.append("thank volunteer")
+
+print(notices)
+```
+
+Both independent facts are useful, so two `if` statements are correct. A table
+can identify this distinction:
+
+| Rule type | Expected selected rows | Python shape |
+|---|---:|---|
+| classification | exactly one | `if` / `elif` / `else` |
+| optional override followed by classification | first matching precedence row | ordered branch chain |
+| cumulative notices or effects | zero, one, or many | independent `if` statements |
+
+Mixing these purposes is a common source of missing work. Decide whether rows are
+alternatives or cumulative before translating them.
+
+## 3. Boundaries belong to one case, not two or none
+
+Suppose a temperature policy says cold is below 10 and warm is above 10:
+
+```python
+if temperature < 10:
+    label = "cold"
+elif temperature > 10:
+    label = "warm"
+```
+
+At exactly 10, neither branch runs. If `label` was not already defined, later use
+raises `NameError`. This is a **gap**.
+
+Now suppose the policy uses `temperature <= 10` and then `temperature >= 10`.
+Both conditions include 10. In an `elif` chain only the first wins, but the table
+still has an **overlap** whose outcome depends on row order.
+
+Write interval notation in ordinary words:
+
+| Case | Included values | Boundary checks |
+|---|---|---|
+| cold | below 10 | 9 |
+| mild | 10 through 19 | 10, 19 |
+| warm | 20 or above | 20 |
+
+```python
+if temperature < 10:
+    label = "cold"
+elif temperature < 20:
+    label = "mild"
+else:
+    label = "warm"
+```
+
+Test one value just below, exactly at, and just above every threshold: 9, 10, 11,
+19, 20, and 21. Typical middle values do not prove endpoint behavior.
+
+### Checkpoint: complete case design
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-decisions-complete-cases",
+  "title": "Complete cases checkpoint",
+  "instructions": "Identify the case relationship before choosing syntax.",
+  "questions": [
+    {
+      "id": "classification-shape",
+      "prompt": "Exactly one admission category must be assigned. Which structure best expresses that?",
+      "options": ["One `if`/`elif`/`else` chain", "Several unrelated `while` loops", "Independent `if` statements with no fallback", "A set literal alone"],
+      "answer_index": 0,
+      "explanation": "A branch chain chooses at most one category, and else can cover every remaining expected case."
+    },
+    {
+      "id": "cumulative-shape",
+      "prompt": "A visitor may need both an accessibility notice and a volunteer notice. Which structure fits?",
+      "options": ["An if/elif chain that stops after one notice", "Independent if statements", "One conditional expression", "An empty else branch"],
+      "answer_index": 1,
+      "explanation": "Independent checks allow both notices to be collected when both facts apply."
+    },
+    {
+      "id": "boundary-gap",
+      "prompt": "What is wrong with cases `value < 10` and `value > 10` if every number needs a result?",
+      "options": ["They overlap for every value", "They accept only strings", "The exact value 10 belongs to neither case", "The first comparison is always true"],
+      "answer_index": 2,
+      "explanation": "Strict comparisons on both sides leave an uncovered boundary at 10."
+    },
+    {
+      "id": "threshold-tests",
+      "prompt": "Which values best test a threshold at 20?",
+      "options": ["1, 2, 3", "20 only", "0 and 100", "19, 20, and 21"],
+      "answer_index": 3,
+      "explanation": "Just below, exactly at, and just above expose endpoint mistakes."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Precedence makes overrides deliberate
+
+Some rows overlap because the policy says one rule overrides another. The
+volunteer can also be a child or senior, yet the free-price row wins. Record that
+priority rather than pretending the cases are disjoint.
+
+A weather closure can override every ticket rule:
+
+| Priority | Condition | Result |
+|---:|---|---|
+| 1 | festival closed by weather | unavailable |
+| 2 | active volunteer | free |
+| 3 | age band | band price |
+
+```python
+festival_open = False
+active_volunteer = True
+age = 35
+
+if not festival_open:
+    price = None
+    reason = "festival closed"
+elif active_volunteer:
+    price = 0
+    reason = "volunteer"
+elif age < 13:
+    price = 8
+    reason = "child"
+elif age < 65:
+    price = 18
+    reason = "standard"
+else:
+    price = 10
+    reason = "senior"
+```
+
+`None` communicates that a price is unavailable, not zero. A zero price is a
+real price for a free admission. This distinction would disappear with a simple
+truthiness check.
+
+A precedence question should be answerable in words: “weather closure wins over
+volunteer status, which wins over age.” If you can only explain it as “whatever
+branch happens to come first,” the design is not finished.
+
+## 5. Keep a result and its reason together in the trace
+
+A lone result can be hard to diagnose. Produce a reason in the same selected
+branch:
+
+```python
+score = 84
+submitted = True
+
+if not submitted:
+    outcome = "incomplete"
+    reason = "submission missing"
+elif score >= 90:
+    outcome = "distinction"
+    reason = "score at least 90"
+elif score >= 70:
+    outcome = "pass"
+    reason = "score from 70 through 89"
+else:
+    outcome = "retry"
+    reason = "score below 70"
+
+print(outcome, "—", reason)
+```
+
+The two names should be assigned together on every path. A trace table can then
+record both:
+
+| Input | Conditions reached | Outcome | Reason |
+|---|---|---|---|
+| not submitted | first true | incomplete | submission missing |
+| submitted, 90 | second true | distinction | score at least 90 |
+| submitted, 70 | third true | pass | score from 70 through 89 |
+| submitted, 69 | fallback | retry | score below 70 |
+
+That table doubles as a compact test plan.
+
+## 6. Find overlaps mechanically with sample rows
+
+When intervals are complex, enumerate representative values and count matching
+rules:
+
+```python
+for value in [9, 10, 19, 20]:
+    matches = 0
+    matches += value <= 10
+    matches += 10 <= value < 20
+    matches += value >= 20
+    print(value, matches)
+```
+
+Booleans behave like 1 and 0 in this narrow counting use. A classification row
+with `matches == 0` has a gap. A row with `matches > 1` has an overlap. Here the
+value 10 matches two conditions.
+
+This diagnostic does not replace the final branch chain. It helps you inspect
+whether the written table matches the intended relationship.
+
+### Checkpoint: precedence and evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-decisions-precedence-evidence",
+  "title": "Precedence and evidence checkpoint",
+  "instructions": "Choose the design that keeps overlapping rules understandable.",
+  "questions": [
+    {
+      "id": "override-order",
+      "prompt": "Weather closure must override every admission price. Where should that row appear?",
+      "options": ["First in the precedence chain", "After the final else", "Inside every age comparison", "Its position cannot matter"],
+      "answer_index": 0,
+      "explanation": "The highest-priority overlapping rule must be checked before lower-priority pricing rules."
+    },
+    {
+      "id": "none-versus-zero",
+      "prompt": "Why use `None` for unavailable price and 0 for free admission?",
+      "options": ["Python cannot print negative prices", "They represent different states: no price versus a real zero price", "None is mathematically equal to zero", "Only None can enter an if statement"],
+      "answer_index": 1,
+      "explanation": "Distinct values preserve distinct meanings that truthiness alone would collapse."
+    },
+    {
+      "id": "reason-name",
+      "prompt": "What debugging benefit comes from assigning a reason beside the result?",
+      "options": ["It makes conditions run twice", "It removes the need for boundary tests", "It records which policy fact selected the result", "It automatically catches exceptions"],
+      "answer_index": 2,
+      "explanation": "The reason exposes the path and policy interpretation that produced the result."
+    },
+    {
+      "id": "match-count-two",
+      "prompt": "For mutually exclusive table rows, what does a sample with two matching rows reveal?",
+      "options": ["A syntax error", "A missing fallback", "A correctly empty case", "An overlap"],
+      "answer_index": 3,
+      "explanation": "Two selected rows mean the written cases overlap for that sample."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Use `match` for clear discrete choices
+
+Python’s `match` statement can make a menu of literal commands easy to scan:
+
+```python
+command = "map"
+
+match command:
+    case "map":
+        response = "show route"
+    case "scan" | "inspect":
+        response = "scan nearby area"
+    case "quit":
+        response = "end session"
+    case _:
+        response = "unknown command"
+
+print(response)
+```
+
+The cases are checked in order. The vertical bar means either literal pattern.
+The `_` wildcard is the fallback and should come last because it matches anything.
+
+For one or two equality checks, an `if` statement is often simpler. Use `match`
+when several **discrete shapes or commands** are the natural table. Do not use it
+to replace ordered numeric ranges:
+
+```python
+if age < 13:
+    price = 8
+elif age < 65:
+    price = 18
+else:
+    price = 10
+```
+
+This lesson uses only literal choices, alternatives, and the wildcard. More
+advanced structural patterns belong after you have reusable data models.
+
+## 8. Avoid a wildcard that hides a required error state
+
+A fallback needs a deliberate meaning. For an interactive command, `"unknown
+command"` is useful. For internal states that should already be validated, a
+wildcard that silently substitutes a normal result can hide a bug.
+
+```python
+status = "mystery"
+
+match status:
+    case "ready":
+        message = "launch"
+    case "hold":
+        message = "wait"
+    case _:
+        message = "invalid status"
+```
+
+The fallback keeps `message` defined but does not pretend the unknown state is
+ready. Unit 8 will introduce raising and handling exceptions. For now, preserve
+an unmistakable invalid result and assert the allowed states near their source.
+
+### Checkpoint: discrete choices
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-decisions-match",
+  "title": "Discrete choices checkpoint",
+  "instructions": "Choose when a simple match statement improves the decision.",
+  "questions": [
+    {
+      "id": "match-good-fit",
+      "prompt": "Which task is a good fit for a simple `match` statement?",
+      "options": ["Map several literal commands to responses", "Repeat while fuel changes", "Add every score", "Classify a continuous temperature range"],
+      "answer_index": 0,
+      "explanation": "A menu of discrete literal commands maps naturally to cases."
+    },
+    {
+      "id": "case-alternative",
+      "prompt": "What does `case 'scan' | 'inspect':` mean in this lesson?",
+      "options": ["Both strings must be concatenated", "Either literal selects the same case", "One command is divided by another", "The case repeats twice"],
+      "answer_index": 1,
+      "explanation": "The vertical bar joins alternative patterns that share one body."
+    },
+    {
+      "id": "wildcard",
+      "prompt": "What does `case _:` provide when placed last?",
+      "options": ["A numeric comparison", "A loop target", "A fallback for any unmatched value", "A comment"],
+      "answer_index": 2,
+      "explanation": "The wildcard matches any value not handled by an earlier case."
+    },
+    {
+      "id": "range-choice",
+      "prompt": "Which structure is clearer for ordered numeric bands such as below 13, below 65, otherwise?",
+      "options": ["A dictionary with no conditions", "A while loop", "A wildcard-only match", "An ordered if/elif/else chain"],
+      "answer_index": 3,
+      "explanation": "Comparisons in an ordered branch chain directly express numeric ranges."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 9. Build the festival ticket desk
+
+Create a complete decision for these inputs:
+
+```python
+festival_open = True
+age = 67
+active_volunteer = False
+time_slot = "evening"
+
+price = None
+category = None
+reason = None
+```
+
+Use this contract:
+
+1. If the festival is closed, `price` stays `None`, category is `"unavailable"`,
+   and the reason identifies closure.
+2. Active volunteers enter free before any age rule.
+3. Under 13 costs 8 credits; ages 13 through 64 cost 18; age 65 or above costs
+   10.
+4. A morning time slot subtracts 2 credits from any positive price. Free and
+   unavailable admission do not change.
+5. Keep the original category reason and add `"; morning discount"` only when the
+   discount applies.
+6. Produce `summary` containing the category, displayed price (`"N/A"` for
+   `None`), and reason.
+
+Run the supplied-case checks:
+
+```python
+assert price == 10
+assert category == "senior"
+assert reason == "age at least 65"
+assert summary == "senior | 10 credits | age at least 65"
+```
+
+Create a table and test at least these cases: closed volunteer, ages 12, 13, 64,
+65, a morning child, a morning senior, and a morning volunteer.
+
+<details>
+<summary>Hint: make classification and discount separate stages</summary>
+
+Use one precedence-ordered branch chain to set `price`, `category`, and `reason`
+together. Then use an independent condition requiring `price is not None` and
+`price > 0` before subtracting the morning discount.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+festival_open = True
+age = 67
+active_volunteer = False
+time_slot = "evening"
+
+if not festival_open:
+    price = None
+    category = "unavailable"
+    reason = "festival closed"
+elif active_volunteer:
+    price = 0
+    category = "volunteer"
+    reason = "active volunteer"
+elif age < 13:
+    price = 8
+    category = "child"
+    reason = "age below 13"
+elif age < 65:
+    price = 18
+    category = "standard"
+    reason = "age from 13 through 64"
+else:
+    price = 10
+    category = "senior"
+    reason = "age at least 65"
+
+if time_slot == "morning" and price is not None and price > 0:
+    price -= 2
+    reason += "; morning discount"
+
+price_text = "N/A" if price is None else f"{price} credits"
+summary = f"{category} | {price_text} | {reason}"
+```
+
+The second stage is cumulative policy, not another admission category. Explicit
+`is not None` preserves unavailable versus free.
+
+</details>
+
+## 10. Explain the table
+
+1. Which rows are mutually exclusive, and which rule is cumulative?
+2. Why does a volunteer override need a stated priority?
+3. How do 12, 13, 64, and 65 expose every age endpoint?
+4. Why are price and reason assigned in the same branch?
+5. When is a literal `match` clearer than an `if` chain, and when is it not?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Write facts, priorities, results, and reasons as table rows before translating a
+  multi-rule policy.
+- A classification selects one case; cumulative rules require independent checks.
+- Test just below, at, and just above every threshold to find gaps and overlaps.
+- State override precedence in words and encode the highest priority first.
+- Preserve a reason beside a result so the selected path remains observable.
+- Use simple `match` cases for discrete literals; use ordered comparisons for
+  numeric ranges.
+:::
+
+## References
+
+- [Python tutorial: `if` statements](https://docs.python.org/3/tutorial/controlflow.html#if-statements)
+- [Python tutorial: `match` statements](https://docs.python.org/3/tutorial/controlflow.html#match-statements)
+- [Python language reference: the `match` statement](https://docs.python.org/3/reference/compound_stmts.html#the-match-statement)
+- [Python standard types: comparisons](https://docs.python.org/3/library/stdtypes.html#comparisons)

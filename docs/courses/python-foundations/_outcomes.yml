@@ -1,5 +1,5 @@
 schema_version: 1
-curriculum_version: 8
+curriculum_version: 9
 course_id: python-foundations
 graduate_outcomes:
   learn-independently: Use prediction, clean execution, documentation, deliberate practice, and responsible AI assistance to learn from evidence.
@@ -73,16 +73,19 @@ units:
     challenge_id: collections-iteration.challenge
   - number: 4
     id: decisions-repetition
-    outcome: Translate rules and repeated work into traceable control flow that handles boundaries and makes visible progress toward stopping.
+    outcome: Turn written rules into complete, non-overlapping branches; use for and while loops to transform, filter, count, group, search, and traverse nested data; and explain how each loop progresses and stops without losing or skipping values.
     graduate_outcome_ids:
       - trace-and-explain
       - solve-problems
     lesson_ids:
-      - decisions-repetition.conditionals-decision-tables
-      - decisions-repetition.boolean-reasoning-short-circuit
-      - decisions-repetition.for-loops-traversal
-      - decisions-repetition.while-loops-state-termination
-      - decisions-repetition.loop-control-comprehensions
+      - decisions-repetition.conditional-branches
+      - decisions-repetition.boolean-rules-short-circuit
+      - decisions-repetition.decision-tables-boundaries
+      - decisions-repetition.for-loop-patterns
+      - decisions-repetition.while-loops-termination
+      - decisions-repetition.search-loop-control
+      - decisions-repetition.nested-loops-grids
+      - decisions-repetition.comprehensions
     challenge_id: decisions-repetition.challenge
   - number: 5
     id: functions-call-behavior

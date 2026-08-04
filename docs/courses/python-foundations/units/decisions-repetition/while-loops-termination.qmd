@@ -1,0 +1,622 @@
+---
+title: Repeating Until Something Changes
+lesson_id: decisions-repetition.while-loops-termination
+lesson_order: 50
+description: Design while loops with explicit initial state, progress, termination, sentinel handling, iteration limits, and observable exit reasons.
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+- while-loops
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/while-loops-termination.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Choose `while` for state-driven repetition, prove how every path progresses, handle sentinels and retry budgets, and report why the loop stopped.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Use `while` when the number of repetitions is not supplied
+
+A docking controller sends calibration pulses until its alignment error is small
+enough:
+
+```python
+error = 9
+pulses = 0
+
+while error > 2:
+    error -= 2
+    pulses += 1
+    print(f"pulse {pulses}: error {error}")
+
+assert error <= 2
+assert pulses == 4
+```
+
+Unlike `for`, the loop is not consuming a prepared collection. It rechecks a
+condition whose state changes in the body.
+
+Every dependable `while` loop answers four questions:
+
+1. **Initial state:** What values exist before the first check?
+2. **Continuation condition:** Exactly when may another iteration begin?
+3. **Progress:** Which update moves the state toward a stopping condition?
+4. **Termination:** Why must some future check become false or another explicit
+   exit occur?
+
+If one answer is missing, the loop deserves more design before execution.
+
+### Questions this lesson will answer
+
+- How do zero iterations and boundary overshoot affect the result?
+- How can an iteration cap turn “try until success” into a bounded process?
+- What is a sentinel, and how does it differ from normal data?
+- How can several stopping conditions produce one clear exit reason?
+- Why is `continue` especially dangerous before a progress update?
+
+::: {.concept-diagram}
+A while loop checks before every iteration, updates state in its body, and must
+eventually reach a false check or an explicit exit.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A[Initialize state] --> B{Condition true?}
+  B -- No --> F[Continue after loop]
+  B -- Yes --> C[Perform one iteration]
+  C --> D[Update progress state]
+  D --> E[Record evidence]
+  E --> B
+```
+:::
+
+## 2. The condition is checked before the first iteration
+
+A `while` loop may run zero times:
+
+```python
+error = 2
+pulses = 0
+
+while error > 2:
+    error -= 2
+    pulses += 1
+
+assert pulses == 0
+assert error == 2
+```
+
+The initial condition is false, so Python skips the body. Initialize any result
+needed later before the loop, just as with `for` accumulators.
+
+Trace a countdown at its boundary:
+
+```python
+count = 3
+visited = []
+
+while count > 0:
+    visited.append(count)
+    count -= 1
+
+assert visited == [3, 2, 1]
+assert count == 0
+```
+
+The sequence of checks is true for 3, 2, and 1, then false for 0. The value 0 is
+not appended because the condition is checked first.
+
+| Check | `count > 0` | Body receives | New count |
+|---:|---:|---:|---:|
+| 1 | true | 3 | 2 |
+| 2 | true | 2 | 1 |
+| 3 | true | 1 | 0 |
+| 4 | false | — | 0 |
+
+## 3. Progress may overshoot the exact target
+
+A loop does not promise to land exactly on a boundary:
+
+```python
+position = 0
+step = 3
+
+while position < 10:
+    position += step
+
+assert position == 12
+assert position >= 10
+```
+
+The correct postcondition is `position >= 10`, not `position == 10`. Starting at
+0 and adding 3 cannot reach 10 exactly. Choose the continuation condition and
+final assertion from the task:
+
+- “continue while below 10” permits overshoot;
+- “visit values no greater than 10” requires deciding whether to check the next
+  position before applying it;
+- “reach exactly 10” may require a different step rule.
+
+Off-by-one bugs often come from asserting an exact value the progress operation
+cannot guarantee.
+
+### Checkpoint: checks and progress
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-while-check-progress",
+  "title": "While-loop progress checkpoint",
+  "instructions": "Trace the check that happens before each possible iteration.",
+  "questions": [
+    {
+      "id": "zero-iterations",
+      "prompt": "When does a `while` loop run zero times?",
+      "options": ["When its condition is falsy at the first check", "Only when the body contains `pass`", "Whenever the state is numeric", "After exactly one update"],
+      "answer_index": 0,
+      "explanation": "while is a pre-test loop; a false initial condition skips the body entirely."
+    },
+    {
+      "id": "countdown-values",
+      "prompt": "For `count = 3` and `while count > 0`, which values enter the body if count decreases by one afterward?",
+      "options": ["3, 2, 1, 0", "3, 2, 1", "2, 1, 0", "3 only"],
+      "answer_index": 1,
+      "explanation": "The body runs for positive values; the check at zero is false."
+    },
+    {
+      "id": "overshoot",
+      "prompt": "Starting at 0 and adding 3 while position is below 10 produces which final position?",
+      "options": ["9", "10", "12", "The loop cannot stop"],
+      "answer_index": 2,
+      "explanation": "The body visits 0, 3, 6, and 9, then updates to 12 before the next false check."
+    },
+    {
+      "id": "progress-question",
+      "prompt": "Which question is essential for every while-loop path?",
+      "options": ["Does the body print?", "Is the target a list?", "Can the variable be renamed?", "What moves this state toward stopping?"],
+      "answer_index": 3,
+      "explanation": "Without guaranteed progress or another bounded exit, the continuation condition may remain true forever."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Recognize and interrupt a non-terminating loop
+
+This broken shape never changes the value in its condition:
+
+```python
+count = 3
+iterations = 0
+
+# The safety cap makes the demonstration terminate.
+while count > 0 and iterations < 4:
+    print("count is still", count)
+    iterations += 1
+
+assert count == 3
+assert iterations == 4
+```
+
+Without the temporary `iterations < 4` guard, `count > 0` would remain true
+forever. In a notebook, use the stop/interrupt control rather than waiting. In a
+terminal, `Ctrl+C` commonly requests interruption.
+
+After interrupting:
+
+1. inspect every name used by the condition;
+2. mark every path through the body;
+3. find the update or explicit exit on each path; and
+4. add a small trace or temporary cap before running again.
+
+A permanent iteration limit can also be part of the real contract, not merely a
+debugging device.
+
+## 5. Retry budgets bound an uncertain process
+
+Suppose a docking system receives prepared measurements one at a time. It may
+succeed early or exhaust three attempts:
+
+```python
+measurements = [8, 5, 2, 1]
+index = 0
+attempts = 0
+aligned = False
+max_attempts = 3
+
+while index < len(measurements) and attempts < max_attempts and not aligned:
+    error = measurements[index]
+    index += 1
+    attempts += 1
+    aligned = error <= 2
+
+assert aligned is True
+assert attempts == 3
+assert index == 3
+```
+
+Three facts can stop the loop: no measurements remain, the attempt budget is
+exhausted, or alignment succeeds. Both `index` and `attempts` progress on every
+iteration. The fourth reading is not consumed after success.
+
+Choose an exit reason afterward:
+
+```python
+if aligned:
+    exit_reason = "aligned"
+elif attempts >= max_attempts:
+    exit_reason = "attempt limit"
+else:
+    exit_reason = "measurements exhausted"
+
+assert exit_reason == "aligned"
+```
+
+The order matters if two facts become true on the final iteration. The most
+meaningful successful result is reported first.
+
+## 6. Sentinels end a stream without becoming data
+
+A **sentinel** is a special value that means “stop,” not an ordinary record. In a
+prepared sequence, an index lets us model a stream without introducing input or
+exceptions yet:
+
+```python
+commands = ["north", "scan", "STOP", "east"]
+index = 0
+processed = []
+
+while index < len(commands):
+    command = commands[index]
+    index += 1
+
+    if command == "STOP":
+        exit_reason = "sentinel received"
+        break
+
+    processed.append(command)
+else:
+    exit_reason = "commands exhausted"
+
+assert processed == ["north", "scan"]
+assert exit_reason == "sentinel received"
+assert index == 3
+```
+
+The index update occurs immediately after reading, so every iteration consumes
+one item. The sentinel is checked before appending, so it does not enter the data.
+`break` is developed fully in Lesson 6; here it makes the distinct stop event
+visible. The loop’s `else` runs only if no `break` occurs.
+
+### Checkpoint: bounded stopping
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-while-bounded-stopping",
+  "title": "Bounded stopping checkpoint",
+  "instructions": "Identify every possible reason the loop can finish.",
+  "questions": [
+    {
+      "id": "real-cap",
+      "prompt": "When is a maximum-attempt counter part of the real algorithm?",
+      "options": ["When the process must stop after a bounded number of failures", "Only when printing a trace", "Whenever a for loop exists", "When no state changes"],
+      "answer_index": 0,
+      "explanation": "A retry budget is a product requirement when unlimited attempts would be unsafe or unhelpful."
+    },
+    {
+      "id": "sentinel-role",
+      "prompt": "What does a sentinel value represent?",
+      "options": ["The largest valid data item", "A special signal that ends processing rather than ordinary data", "An automatic exception", "The loop's initial value"],
+      "answer_index": 1,
+      "explanation": "A sentinel is recognized and handled as control information, so it should not enter normal results."
+    },
+    {
+      "id": "exit-reason",
+      "prompt": "Why record an exit reason after a loop with several stopping conditions?",
+      "options": ["It forces another iteration", "It changes while into for", "It distinguishes success, exhaustion, limits, and other outcomes", "It guarantees every input is valid"],
+      "answer_index": 2,
+      "explanation": "The final condition alone may not communicate why processing ended."
+    },
+    {
+      "id": "sentinel-not-data",
+      "prompt": "Where should a sentinel check occur if the sentinel must not enter `processed`?",
+      "options": ["After appending it", "Only before the loop starts", "After all commands are exhausted", "Before appending the current command"],
+      "answer_index": 3,
+      "explanation": "Recognizing the stop signal before normal processing prevents it from being treated as data."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. `continue` must not skip the progress update
+
+This is a dangerous while-loop shape:
+
+```python
+values = [3, -1, 5]
+index = 0
+steps = 0
+
+# A safety cap prevents the demonstration from hanging.
+while index < len(values) and steps < 5:
+    steps += 1
+    value = values[index]
+    if value < 0:
+        continue
+    index += 1
+```
+
+At index 1, the negative value triggers `continue` before `index += 1`. Every
+later iteration sees the same value. The safety cap ends the demonstration, but
+the intended traversal is broken.
+
+Move unavoidable progress before any early continuation:
+
+```python
+values = [3, -1, 5]
+index = 0
+accepted = []
+
+while index < len(values):
+    value = values[index]
+    index += 1
+
+    if value < 0:
+        continue
+
+    accepted.append(value)
+
+assert accepted == [3, 5]
+assert index == len(values)
+```
+
+Or invert the condition and avoid `continue`:
+
+```python
+index = 0
+accepted = []
+
+while index < len(values):
+    value = values[index]
+    index += 1
+    if value >= 0:
+        accepted.append(value)
+```
+
+Use whichever shape makes progress easiest to verify.
+
+## 8. Prefer `for` when a collection already determines the repetitions
+
+The previous indexed loop can be simpler:
+
+```python
+accepted = []
+
+for value in values:
+    if value >= 0:
+        accepted.append(value)
+```
+
+Choose `for` when the main job is “for every item supplied by this collection.”
+Choose `while` when the main job is “repeat while this changing state allows it,”
+such as retrying, advancing until a target, or consuming until a sentinel.
+
+Do not use `while` merely because it can imitate a `for` loop. Manual index state
+adds an off-by-one and non-termination risk that direct traversal avoids.
+
+## 9. Multiple progress variables need a shared trace
+
+A simulation may update position, energy, and step count:
+
+```python
+position = 0
+energy = 7
+steps = 0
+history = []
+
+while position < 5 and energy >= 2:
+    before = (position, energy)
+    position += 2
+    energy -= 2
+    steps += 1
+    history.append((before, (position, energy)))
+
+assert position == 6
+assert energy == 1
+assert steps == 3
+```
+
+The loop stops with both `position >= 5` and `energy < 2`. Decide which result has
+reporting precedence. The history proves each iteration changed the required
+state and makes overshoot visible.
+
+### Checkpoint: safe loop design
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-while-safe-design",
+  "title": "Safe while-loop design checkpoint",
+  "instructions": "Choose the design that makes progress and stopping easiest to verify.",
+  "questions": [
+    {
+      "id": "continue-progress",
+      "prompt": "Where should an index update go when a later `continue` may run?",
+      "options": ["Before any path that can continue", "Only after the loop", "Inside the false initial condition", "Nowhere; indexes update automatically"],
+      "answer_index": 0,
+      "explanation": "Every iteration path must make progress before it can skip the remaining body."
+    },
+    {
+      "id": "for-choice",
+      "prompt": "Which job normally favors a `for` loop over a manual indexed `while` loop?",
+      "options": ["Retry until success or a limit", "Process every item already supplied by a list", "Advance until energy is empty", "Read until a sentinel"],
+      "answer_index": 1,
+      "explanation": "Direct traversal expresses collection-driven repetition without manual index state."
+    },
+    {
+      "id": "several-stops",
+      "prompt": "Position reaches its target on the same iteration that energy runs out. What should the program do?",
+      "options": ["Pretend only one fact is true", "Run forever", "Apply a documented exit-reason precedence and preserve both final facts", "Delete the final state"],
+      "answer_index": 2,
+      "explanation": "Multiple stop facts can coincide; the reporting policy should deliberately choose the main reason."
+    },
+    {
+      "id": "while-evidence",
+      "prompt": "Which trace best diagnoses a while loop?",
+      "options": ["Only its final print", "Only the source line number", "A list of Python keywords", "Condition state and progress values before and after each iteration"],
+      "answer_index": 3,
+      "explanation": "A before/after state trace exposes skipped updates, overshoot, and the exact stopping transition."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Build a docking controller
+
+Use a prepared measurement stream so the lab remains deterministic:
+
+```python
+measurements = [9, None, 6, 3, 2, 1]
+max_attempts = 4
+threshold = 2
+
+index = 0
+attempts = 0
+skipped = 0
+history = []
+aligned = False
+exit_reason = None
+```
+
+Implement this contract:
+
+1. Inspect measurements in order while data remains, attempts remain, and the
+   controller is not aligned.
+2. Reading one list position always advances `index`.
+3. `None` is a missing measurement: increment `skipped`, record
+   `"missing measurement"`, and do not use an attempt.
+4. A numeric measurement uses one attempt and adds a history string containing
+   its attempt number and error.
+5. Alignment succeeds when error is at most `threshold` and stops immediately.
+6. After the loop, report one reason in this precedence: `"aligned"`,
+   `"attempt limit"`, or `"measurements exhausted"`.
+7. Every possible body path must make progress.
+
+Run:
+
+```python
+assert index == 5
+assert attempts == 4
+assert skipped == 1
+assert aligned is True
+assert exit_reason == "aligned"
+assert history == [
+    "attempt 1: error 9",
+    "missing measurement",
+    "attempt 2: error 6",
+    "attempt 3: error 3",
+    "attempt 4: error 2",
+]
+```
+
+Then test `[]`, `[None, None]`, `[7, 6, 5, 4, 1]` with three attempts, and a first
+measurement already within the threshold.
+
+<details>
+<summary>Hint: consume first, then classify the measurement</summary>
+
+At the top of each iteration, copy `measurements[index]` into `measurement` and
+increment `index`. Handle `None` with a history append and `continue`; the index
+has already progressed. Numeric values increment attempts and may set aligned.
+Choose the reason only after the loop.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+measurements = [9, None, 6, 3, 2, 1]
+max_attempts = 4
+threshold = 2
+
+index = 0
+attempts = 0
+skipped = 0
+history = []
+aligned = False
+exit_reason = None
+
+while (
+    index < len(measurements)
+    and attempts < max_attempts
+    and not aligned
+):
+    measurement = measurements[index]
+    index += 1
+
+    if measurement is None:
+        skipped += 1
+        history.append("missing measurement")
+        continue
+
+    attempts += 1
+    history.append(f"attempt {attempts}: error {measurement}")
+    if measurement <= threshold:
+        aligned = True
+
+if aligned:
+    exit_reason = "aligned"
+elif attempts >= max_attempts:
+    exit_reason = "attempt limit"
+else:
+    exit_reason = "measurements exhausted"
+```
+
+The index progresses even on the `continue` path, while only numeric measurements
+consume the attempt budget.
+
+</details>
+
+## 11. Explain why it stops
+
+1. What is the initial state and what could make the body run zero times?
+2. Which names make progress on every path through the docking loop?
+3. Why can a valid final position overshoot its target?
+4. How does a sentinel differ from rejected ordinary data?
+5. Why should an exit reason be chosen from final state rather than guessed from
+   the last printed line?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- `while` is a pre-test loop for repetition controlled by changing state rather
+  than a supplied collection.
+- State the initial state, continuation condition, progress operation, and reason
+  termination is guaranteed.
+- Zero iterations and overshoot are normal possibilities that need explicit
+  postconditions.
+- Retry limits and sentinels provide bounded, meaningful stop conditions.
+- Update essential progress before any `continue` path can skip it.
+- Record final state and an exit reason when several conditions can stop the loop.
+:::
+
+## References
+
+- [Python language reference: the `while` statement](https://docs.python.org/3/reference/compound_stmts.html#the-while-statement)
+- [Python tutorial: `break`, `continue`, and loop `else`](https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements)
+- [Python built-in exception: `KeyboardInterrupt`](https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt)

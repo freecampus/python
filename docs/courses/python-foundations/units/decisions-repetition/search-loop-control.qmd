@@ -1,0 +1,595 @@
+---
+title: Searching, Skipping, and Stopping Loops
+lesson_id: decisions-repetition.search-loop-control
+lesson_order: 60
+description: Design searches for first, last, all, or existence results; use break, continue, and loop else deliberately; and preserve an explicit exit reason.
+course_id: python-foundations
+unit_id: decisions-repetition
+unit_number: 4
+execute:
+  echo: true
+categories:
+- python-foundations
+- decisions-repetition
+- loop-control
+order: 60
+colab_notebook: notebooks/courses/python-foundations/units/decisions-repetition/search-loop-control.ipynb
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations · Unit 4
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Define the search result before looping, skip unusable values, stop after sufficient evidence, and explain loop `else` and nearest-loop behavior.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. Define what “find” means before searching
+
+A signal scanner receives several readings:
+
+```python
+signals = [
+    {"code": "A1", "strength": 2},
+    {"code": "B7", "strength": 9},
+    {"code": "B7", "strength": 6},
+]
+```
+
+“Find B7” is incomplete. The required artifact might be:
+
+- the **first** matching record;
+- the **last** matching record;
+- **all** matching records;
+- whether **any** match exists; or
+- the position of the first match.
+
+Each contract implies different loop behavior. A first-match search can stop as
+soon as it has sufficient evidence:
+
+```python
+first_match = None
+
+for signal in signals:
+    if signal["code"] == "B7":
+        first_match = signal
+        break
+
+assert first_match == {"code": "B7", "strength": 9}
+```
+
+`break` exits the loop immediately. The final record is never inspected, which is
+correct only because later matches cannot change the first result.
+
+### Questions this lesson will answer
+
+- When should a search stop, and when must it inspect every item?
+- How does `continue` differ from `break` and `pass`?
+- What does a loop’s `else` really mean?
+- Which loop receives a `break` inside nested code?
+- When should membership or `any()` replace a manual search?
+
+## 2. First, last, and all matches require different updates
+
+A last-match search must keep traversing:
+
+```python
+last_match = None
+
+for signal in signals:
+    if signal["code"] == "B7":
+        last_match = signal
+
+assert last_match == {"code": "B7", "strength": 6}
+```
+
+Every new match replaces the prior one. An all-match search collects instead:
+
+```python
+all_matches = []
+
+for signal in signals:
+    if signal["code"] == "B7":
+        all_matches.append(signal)
+
+assert all_matches == [signals[1], signals[2]]
+```
+
+An existence search needs only a Boolean:
+
+```python
+found = False
+
+for signal in signals:
+    if signal["code"] == "B7":
+        found = True
+        break
+
+assert found is True
+```
+
+State the no-match result too: `None` for no selected record, `[]` for no
+collected records, and `False` for no existence evidence. Empty input should
+produce the same defined values without special repair after the loop.
+
+## 3. `continue` rejects one iteration, not the whole search
+
+Suppose malformed records lack a usable code:
+
+```python
+signals = [
+    {"code": ""},
+    {"strength": 8},
+    {"code": "B7", "strength": 9},
+]
+rejected = []
+first_match = None
+
+for position, signal in enumerate(signals):
+    if "code" not in signal or not signal["code"]:
+        rejected.append((position, signal))
+        continue
+
+    if signal["code"] == "B7":
+        first_match = signal
+        break
+
+assert len(rejected) == 2
+assert first_match == signals[2]
+```
+
+`continue` skips the rest of the current body and asks the `for` loop for its next
+item. Recording the rejection before continuing prevents silent loss.
+
+`break` would be wrong for a bad first record because later valid records still
+need inspection. Conversely, `continue` would be wrong after a first-match
+success because it would keep searching after the contract is satisfied.
+
+### Checkpoint: search contracts
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-search-contracts",
+  "title": "Search contract checkpoint",
+  "instructions": "Choose the loop behavior from the exact result required.",
+  "questions": [
+    {
+      "id": "first-match-break",
+      "prompt": "Why can a first-match search break after assigning its result?",
+      "options": ["Later items cannot change which match was first", "break sorts the remaining items", "Every search must stop after one item", "The result is always the final item"],
+      "answer_index": 0,
+      "explanation": "Once the first match is found, later evidence cannot improve that contract."
+    },
+    {
+      "id": "last-match",
+      "prompt": "How does a last-match search normally behave?",
+      "options": ["Break at the first match", "Keep traversing and replace the selected result at each match", "Append only rejected records", "Stop before reading input"],
+      "answer_index": 1,
+      "explanation": "A later match must be allowed to replace an earlier one."
+    },
+    {
+      "id": "continue-reject",
+      "prompt": "What does `continue` do after recording one unusable record in a for loop?",
+      "options": ["Ends the entire program", "Restarts the list from the beginning", "Skips the remaining body for that record and requests the next item", "Deletes the record from the source"],
+      "answer_index": 2,
+      "explanation": "continue affects only the current iteration and leaves the loop active."
+    },
+    {
+      "id": "no-match-all",
+      "prompt": "What is a natural no-match result for an all-matches search?",
+      "options": ["The first source item", "True", "An undefined name", "An empty list"],
+      "answer_index": 3,
+      "explanation": "An initialized list remains empty when no item satisfies the condition."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Loop `else` means no `break` occurred
+
+A loop may have an `else` aligned with it:
+
+```python
+codes = ["A1", "C3", "B7"]
+target = "B7"
+
+for code in codes:
+    if code == target:
+        result = f"found {target}"
+        break
+else:
+    result = f"{target} not found"
+
+assert result == "found B7"
+```
+
+The `else` runs only if the loop finishes **without `break`**. It does not mean
+the final `if` condition was false. Several nonmatching iterations may occur,
+but a later break still skips the loop `else`.
+
+For no match:
+
+```python
+codes = ["A1", "C3"]
+target = "B7"
+
+for code in codes:
+    if code == target:
+        result = f"found {target}"
+        break
+else:
+    result = f"{target} not found"
+
+assert result == "B7 not found"
+```
+
+An empty collection also reaches `else` because no `break` occurred.
+
+::: {.callout-tip title="Attach the meaning to `break`"}
+Read loop `else` as “normal exhaustion.” Use it when `break` has one clear meaning
+such as success. If several unrelated breaks exist, an explicit exit-reason name
+may be easier to understand.
+:::
+
+## 5. A `while` loop can also have `else`
+
+```python
+values = [3, 5, 8]
+index = 0
+
+while index < len(values):
+    if values[index] % 2 == 0:
+        first_even = values[index]
+        break
+    index += 1
+else:
+    first_even = None
+
+assert first_even == 8
+```
+
+The `else` runs if the condition becomes false normally. A `break` skips it. As in
+Lesson 5, every path that stays in the loop must advance `index`; here the break
+path exits, and the nonmatch path increments.
+
+## 6. Record why a loop exited
+
+One scanner can encounter success, shutdown, exhaustion, or an invalid limit:
+
+```python
+commands = ["noise", "target", "shutdown"]
+exit_reason = "exhausted"
+found = None
+
+for command in commands:
+    if command == "shutdown":
+        exit_reason = "shutdown"
+        break
+    if command == "target":
+        found = command
+        exit_reason = "target found"
+        break
+
+assert exit_reason == "target found"
+assert found == "target"
+```
+
+Initialize the normal-exhaustion reason before the loop; replace it immediately
+before each break. This leaves an explicit result after all paths.
+
+A loop `else` would also work for exhaustion, but it would not distinguish two
+kinds of break by itself. Choose the form that makes exit states most visible.
+
+### Checkpoint: loop `else` and exit reasons
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-search-loop-else",
+  "title": "Loop exit checkpoint",
+  "instructions": "Trace whether a break occurred and which result remains afterward.",
+  "questions": [
+    {
+      "id": "for-else-meaning",
+      "prompt": "When does the `else` attached to a `for` loop run?",
+      "options": ["When traversal finishes without a break", "After every continue", "Only after the first match", "Whenever the collection is non-empty"],
+      "answer_index": 0,
+      "explanation": "Loop else represents normal completion rather than a particular if condition."
+    },
+    {
+      "id": "empty-loop-else",
+      "prompt": "What happens to loop `else` when a for loop receives an empty list?",
+      "options": ["Python raises a loop error", "It runs because no break occurred", "It is skipped because no body ran", "It creates one placeholder item"],
+      "answer_index": 1,
+      "explanation": "The loop exhausts normally immediately, so its else suite runs."
+    },
+    {
+      "id": "several-breaks",
+      "prompt": "Why can an explicit `exit_reason` help when a loop has breaks for success and shutdown?",
+      "options": ["It makes break exit two loops", "It disables else", "It preserves which event caused the exit", "It repeats the final iteration"],
+      "answer_index": 2,
+      "explanation": "The state distinguishes break causes that loop else alone cannot name."
+    },
+    {
+      "id": "while-else",
+      "prompt": "When is a while loop's `else` skipped?",
+      "options": ["When the condition eventually becomes false", "When it runs zero times", "After every normal iteration", "When a `break` exits that loop"],
+      "answer_index": 3,
+      "explanation": "Both for and while skip their else suite when terminated by break."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. `break` exits only the nearest loop
+
+Nested loops make the target important:
+
+```python
+groups = [
+    ["noise", "target", "noise"],
+    ["target", "noise"],
+]
+visited = []
+
+for group_number, group in enumerate(groups):
+    for signal in group:
+        visited.append((group_number, signal))
+        if signal == "target":
+            break
+
+assert visited == [
+    (0, "noise"),
+    (0, "target"),
+    (1, "target"),
+]
+```
+
+Each `break` exits only the inner loop. The outer loop proceeds to the next group.
+If the whole search should stop, preserve a flag and check it in the outer loop:
+
+```python
+found = None
+
+for group_number, group in enumerate(groups):
+    for signal in group:
+        if signal == "target":
+            found = (group_number, signal)
+            break
+    if found is not None:
+        break
+
+assert found == (0, "target")
+```
+
+Lesson 7 applies this behavior to grids.
+
+## 8. `pass` does nothing; it does not skip the body
+
+`pass` is a placeholder statement:
+
+```python
+for value in [1, 2, 3]:
+    if value == 2:
+        pass
+    print(value)
+```
+
+All three values print. For value 2, `pass` performs no action, then execution
+continues with the next statement in the same body.
+
+With `continue`, the value 2 would not print:
+
+```python
+for value in [1, 2, 3]:
+    if value == 2:
+        continue
+    print(value)
+```
+
+Use `pass` only when Python requires a statement but the block is intentionally
+empty during development or by design. It is not a synonym for “skip this item.”
+
+## 9. Prefer direct operations for direct questions
+
+Manual loops are excellent for learning and for collecting rich evidence. When
+the final question is already a built-in operation, say it directly:
+
+```python
+codes = ["A1", "C3", "B7"]
+
+assert "B7" in codes
+assert any(code.startswith("C") for code in codes)
+assert all(len(code) == 2 for code in codes)
+```
+
+- Membership answers whether an equal value exists.
+- `any(...)` answers whether at least one generated fact is truthy.
+- `all(...)` answers whether every generated fact is truthy.
+
+The expressions inside `any` and `all` are **generator expressions**, a lazy form
+previewed here because the built-ins consume it directly. Lesson 8 focuses on
+comprehensions and explains why square brackets would unnecessarily build an
+intermediate list for this yes/no question.
+
+Use an explicit loop when you need the matching record, position, rejection log,
+or exit reason—not only a Boolean.
+
+### Checkpoint: control statements and direct questions
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit4-search-control-choice",
+  "title": "Control choice checkpoint",
+  "instructions": "Choose the statement or operation whose behavior matches the task.",
+  "questions": [
+    {
+      "id": "nearest-break",
+      "prompt": "What does `break` inside the inner of two nested loops exit?",
+      "options": ["Only the nearest inner loop", "Both loops automatically", "The complete Python process", "Neither loop"],
+      "answer_index": 0,
+      "explanation": "break applies to the innermost enclosing loop."
+    },
+    {
+      "id": "pass-behavior",
+      "prompt": "What does `pass` do inside an if body?",
+      "options": ["Skips the rest of the loop body", "Nothing; execution continues with the following statement", "Exits the nearest loop", "Repeats the current item"],
+      "answer_index": 1,
+      "explanation": "pass is a no-operation placeholder, unlike continue."
+    },
+    {
+      "id": "membership-fit",
+      "prompt": "You need only to know whether exact string `B7` exists in a list. What is the clearest operation?",
+      "options": ["A while loop with two counters", "A nested loop", "`'B7' in codes`", "Collect every nonmatch"],
+      "answer_index": 2,
+      "explanation": "Membership states the complete yes/no question directly."
+    },
+    {
+      "id": "manual-search-fit",
+      "prompt": "When is an explicit search loop more useful than membership alone?",
+      "options": ["When no input exists", "When every value is the same", "When syntax must be longer", "When you need the matching record, its position, or rejection evidence"],
+      "answer_index": 3,
+      "explanation": "A loop can preserve richer artifacts than a direct Boolean membership result."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 10. Build a signal scanner
+
+Use this ordered signal stream:
+
+```python
+signals = [
+    {"code": "", "strength": 8},
+    {"strength": 9},
+    {"code": "A1", "strength": 4},
+    {"code": "B7", "strength": 3},
+    {"code": "B7", "strength": 9},
+    {"code": "SHUTDOWN", "strength": 0},
+    {"code": "B7", "strength": 10},
+]
+target = "B7"
+minimum_strength = 7
+
+rejected = []
+first_match = None
+first_position = None
+exit_reason = "exhausted"
+```
+
+Implement this contract:
+
+1. Reject a record when the code key is absent or the code is empty; preserve its
+   position and reason, then continue.
+2. Stop with reason `"shutdown"` when code is `"SHUTDOWN"`.
+3. A target qualifies only when strength is at least the minimum.
+4. Stop at the first qualifying target, preserving the record and its position.
+5. If traversal exhausts normally, keep reason `"exhausted"`.
+6. Preserve the source list unchanged.
+
+Run:
+
+```python
+assert rejected == [
+    (0, "empty code"),
+    (1, "missing code"),
+]
+assert first_match == {"code": "B7", "strength": 9}
+assert first_position == 4
+assert exit_reason == "target found"
+assert signals[-1]["strength"] == 10
+```
+
+Then test no target, shutdown before a target, an empty list, and a qualifying
+target in the first position. Explain whether loop `else` or the initialized exit
+reason better communicates your implementation.
+
+<details>
+<summary>Hint: order rejection, shutdown, and success checks</summary>
+
+Use `enumerate(signals)` and make the missing-key check before indexing `code`.
+Give missing and empty codes distinct rejection tuples. Set `exit_reason`
+immediately before each `break`. A loop `else` can explicitly restore or confirm
+`"exhausted"`.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete solution after attempting the lab</summary>
+
+```python
+signals = [
+    {"code": "", "strength": 8},
+    {"strength": 9},
+    {"code": "A1", "strength": 4},
+    {"code": "B7", "strength": 3},
+    {"code": "B7", "strength": 9},
+    {"code": "SHUTDOWN", "strength": 0},
+    {"code": "B7", "strength": 10},
+]
+target = "B7"
+minimum_strength = 7
+
+rejected = []
+first_match = None
+first_position = None
+exit_reason = "exhausted"
+
+for position, signal in enumerate(signals):
+    if "code" not in signal:
+        rejected.append((position, "missing code"))
+        continue
+    if not signal["code"]:
+        rejected.append((position, "empty code"))
+        continue
+    if signal["code"] == "SHUTDOWN":
+        exit_reason = "shutdown"
+        break
+    if signal["code"] == target and signal["strength"] >= minimum_strength:
+        first_match = signal
+        first_position = position
+        exit_reason = "target found"
+        break
+else:
+    exit_reason = "exhausted"
+```
+
+The two target records at positions 3 and 4 demonstrate that matching the code is
+not enough; the strength rule still decides qualification.
+
+</details>
+
+## 11. Explain the stopping decision
+
+1. Why can a first-match loop stop but an all-match loop cannot?
+2. What evidence should be recorded before `continue` discards the current path?
+3. Why does loop `else` mean no break rather than “the final if was false”?
+4. How would you stop both loops in a nested search?
+5. When do membership, `any()`, or `all()` express the entire question?
+
+## Key points
+
+::: {.callout-tip title="Key points"}
+- Define whether the result is first, last, all, existence, or position before
+  choosing loop control.
+- `break` exits the nearest loop; `continue` skips the remaining current body;
+  `pass` does nothing.
+- A loop’s `else` runs after normal exhaustion and is skipped by `break`.
+- Record rejection evidence before continuing and an exit reason before breaking
+  when several exit states matter.
+- Use membership, `any()`, or `all()` when a direct Boolean is the whole result;
+  keep an explicit loop for richer artifacts.
+:::
+
+## References
+
+- [Python tutorial: `break`, `continue`, and loop `else`](https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements)
+- [Python language reference: the `for` statement](https://docs.python.org/3/reference/compound_stmts.html#the-for-statement)
+- [Python built-in function: `any`](https://docs.python.org/3/library/functions.html#any)
+- [Python built-in function: `all`](https://docs.python.org/3/library/functions.html#all)
