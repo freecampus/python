@@ -1,10 +1,10 @@
 ---
-title: 'Unit Challenge: Rescue a Hard-to-Maintain Report Tool'
-description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+title: 'Unit Challenge: Untangle the Clockwork Observatory'
+description: Rescue a working but difficult signal-ranking project by preserving its report while adding clear structure, strict types, local hooks, and a reproducible CI gate.
 challenge_id: code-quality-maintainability.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 1
+assessment_version: 2
 estimated_time: 60–120 minutes
 categories:
 - python-foundations
@@ -19,109 +19,326 @@ unit_number: 14
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Python Foundations · Unit 14 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Improve readability and static quality without changing checked behavior.
-- **Evidence:** Complete the checks and explain the result in your own words.
+- **Outcome assessed:** Preserve a signal report while making its source, type contracts, tool policy, local gate, and CI workflow understandable and reproducible.
+- **Evidence:** Passing progressive assertions, a clean check-only gate, one reviewed refactoring log, and an explained workflow.
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
+## 1. Open the observatory without changing its signals
 
-Document, type, format, lint, rename, and simplify a messy report function while preserving its output.
+The Clockwork Observatory receives unusual sky signals. Its clockwork dome opens
+only for high-priority observations. The current script prints the correct
+sample report, but one large function mixes validation, scoring, classification,
+sorting, and text rendering. Names are vague, the quality configuration is
+missing, and no clean runner repeats the local result.
 
-**Scenario:** A report script works for the supplied records but has unclear names, compressed statements, and avoidable lint findings. Protect its behavior first, then improve it in small passes.
+Your goal is to **untangle the project without changing the published report or
+boundary behavior**.
 
-::: {.callout-note title="Work independently, but not without support"}
-This challenge should take about one or two focused hours. Use the starter
-contract, run one group of assertions at a time, and open hints only after you
-can state what evidence is blocking you.
+The supplied scoring rules are complete:
+
+- `clarity` is an integer from 0 through 100 and contributes twice its value;
+- a rare signal earns 25 bonus points;
+- each minute of age subtracts one point, capped at a 60-point penalty;
+- a score of 180 or more means `OPEN DOME`;
+- a score from 120 through 179 means `REVIEW`;
+- a lower score means `ARCHIVE`;
+- ranking uses descending score, then ascending signal name;
+- caller-provided records must not be mutated; and
+- invalid name, clarity, and age values raise the exact errors supplied below.
+
+::: {.callout-note title="Aim for a sequence of small rescues"}
+Run the baseline first. Make one extraction or configuration change, run the
+smallest matching check, and record the result. The challenge is difficult
+because several quality signals must agree—not because you must invent hidden
+domain rules.
 :::
 
 ## 2. Understand the acceptance example
 
-Before writing code, predict the important values and the exact final result.
-For the supplied input, the expected evidence is:
+The observatory receives:
 
-`build_report` still returns `"Ari: 25 minutes\nBo: 15 minutes"`, while formatter and linter checks pass.
+```python
+signals = [
+    {"name": "Lyra Echo", "clarity": 90, "age_minutes": 5, "rare": True},
+    {"name": "Orion Bell", "clarity": 80, "age_minutes": 10, "rare": False},
+    {"name": "Cygnus Key", "clarity": 80, "age_minutes": 10, "rare": False},
+    {"name": "Moth Light", "clarity": 50, "age_minutes": 80, "rare": False},
+]
+```
 
-Write your prediction in a notebook text cell or project note. Do not change
-the sample input until the matching assertions pass.
+The exact result is:
 
-### Constraints
+```text
+CLOCKWORK OBSERVATORY
+1. Lyra Echo | 200 | OPEN DOME
+2. Cygnus Key | 150 | REVIEW
+3. Orion Bell | 150 | REVIEW
+4. Moth Light | 40 | ARCHIVE
+```
 
-1. Run behavioral assertions before and after every style pass.
-2. Use descriptive names and one statement per line.
-3. Remove unused names rather than suppressing the linter.
-4. Do not combine unrelated refactoring with a behavior change.
-5. Give the record shape and function return value useful type information; run mypy as part of the evidence.
+Before editing, calculate all four scores by hand. Explain why `Cygnus Key`
+appears before `Orion Bell`, and predict the report for an empty sequence.
+
+### Project shape
+
+Create this local project:
+
+```text
+clockwork-observatory/
+├── pyproject.toml
+├── .pre-commit-config.yaml
+├── .github/
+│   └── workflows/
+│       └── quality.yml
+├── src/
+│   └── clockwork_observatory/
+│       ├── __init__.py
+│       └── signals.py
+└── tests/
+    └── test_signals.py
+```
+
+Use the notebook for calculation experiments if useful, but the hook and CI
+artifacts belong in a Git project.
 
 ## 3. Start from the contract
 
-Copy this scaffold into the generated notebook or the indicated local project
-files. Preserve the supplied public names and docstrings so the checks can guide
-you.
+Place this valid but difficult implementation in `signals.py`. It establishes
+the baseline public report; you will replace its internal structure while
+keeping `build_observatory_report` public.
 
 ```python
+from collections.abc import Sequence
 from typing import TypedDict
 
 
-class StudyRecord(TypedDict):
+class Signal(TypedDict):
     name: str
-    minutes: int
+    clarity: int
+    age_minutes: int
+    rare: bool
 
 
-unused_label = "study"
+def build_observatory_report(signals: Sequence[Signal]) -> str:
+    """Return the complete ranked observatory report."""
+    rows = []
+    for item in signals:
+        n = item["name"].strip()
+        c = item["clarity"]
+        a = item["age_minutes"]
+        if not n:
+            raise ValueError("signal name cannot be empty")
+        if not 0 <= c <= 100:
+            raise ValueError("clarity must be between 0 and 100")
+        if a < 0:
+            raise ValueError("age_minutes cannot be negative")
+        s = c * 2 + (25 if item["rare"] else 0) - min(a, 60)
+        if s >= 180:
+            d = "OPEN DOME"
+        elif s >= 120:
+            d = "REVIEW"
+        else:
+            d = "ARCHIVE"
+        rows.append({"name": n, "score": s, "decision": d})
+    rows.sort(key=lambda row: (-row["score"], row["name"]))
+    lines = ["CLOCKWORK OBSERVATORY"]
+    for position, row in enumerate(rows, start=1):
+        lines.append(
+            f"{position}. {row['name']} | {row['score']} | {row['decision']}"
+        )
+    return "\n".join(lines)
+```
+
+Preserve these names and signatures in the completed design:
+
+```python
+class RankedSignal(TypedDict):
+    """A validated signal with its computed score and decision."""
+
+    name: str
+    score: int
+    decision: str
 
 
-def build_report(x: list[StudyRecord]) -> str:
-    """Return one learner-and-minutes line for each study record."""
-    result = []
-    for y in x:
-        n = y["name"]
-        m = y["minutes"]
-        result.append(f"{n}: {m} minutes")
-    return "\n".join(result)
+def score_signal(signal: Signal) -> int:
+    """Return priority points for one validated signal."""
+    ...
 
 
-records: list[StudyRecord] = [
-    {"name": "Ari", "minutes": 25},
-    {"name": "Bo", "minutes": 15},
-]
+def classify_signal(score: int) -> str:
+    """Return the observatory decision for a signal score."""
+    ...
+
+
+def rank_signals(signals: Sequence[Signal]) -> list[RankedSignal]:
+    """Return ranked copies without changing the caller's sequence."""
+    ...
+
+
+def build_observatory_report(signals: Sequence[Signal]) -> str:
+    """Return the complete ranked observatory report."""
+    ...
+```
+
+The ellipses are design placeholders for this displayed contract; replace them
+with working bodies in the project. Do not change the public names to make tests
+pass.
+
+### Quality configuration contract
+
+Configure these policies in `pyproject.toml`:
+
+- project requires Python 3.10 or newer;
+- Ruff targets `py310`, line length 88, and `src`/`tests`;
+- Ruff selects `E`, `F`, `I`, `UP`, `B`, and `RUF`;
+- MyPy uses Python 3.10, strict mode, and visible error codes; and
+- pytest adds `src` to its import path and discovers `tests`.
+
+The final check-only command sequence is:
+
+```text
+ruff check src tests
+ruff format --check src tests
+mypy src
+pytest -q
 ```
 
 ## 4. Build in small stages
 
-1. Run the assertions and save their passing output as the baseline.
-2. Run the formatter and inspect its changes before doing anything else.
-3. Run the linter, remove the unused name, and improve vague parameter/local names.
-4. Run mypy, repair contract mismatches instead of hiding them, and document the public function.
-5. Rerun behavior, format-check, lint-check, and type-check commands from a clean file.
+Use this order to keep cause and evidence connected:
 
-After each stage, rerun only the smallest relevant check. When it passes, run
-all earlier checks before moving forward.
+1. Copy the starter and run the report assertions as a green baseline.
+2. Add `RankedSignal`; run MyPy and explain every diagnostic before repairing
+   it.
+3. Extract `score_signal`; rerun only score and validation checks.
+4. Extract `classify_signal`; rerun threshold boundaries.
+5. Extract `rank_signals`; verify tie order and no input mutation.
+6. Reduce `build_observatory_report` to orchestration and rendering; compare the
+   exact report.
+7. Add Ruff/MyPy/pytest configuration and finish a clean manual gate.
+8. Add local pre-commit hooks for all four commands. Use check-only formatting
+   in the final gate.
+9. Complete `quality.yml` so a clean GitHub Actions runner checks out source,
+   sets up Python 3.10, installs the tools, and runs the same commands.
+10. Inspect the final diff and explain why each extracted function has one
+    reason to change.
+
+Do not combine a scoring behavior change with the refactor. If you think a rule
+could be improved, record it as a future requirement after the challenge.
+
+::: {.concept-diagram}
+The dome opens only after the same source passes behavior, static, local, and clean-runner checks.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Refactored signals] --> B[Progressive assertions]
+  B --> C[Ruff and MyPy]
+  C --> D[Pre-commit gate]
+  D --> E[CI workflow]
+  E --> F[Open observatory dome]
+```
+:::
 
 ## 5. Run progressive assertions
 
-These checks describe observable behavior. A failed assertion is a
-location signal: read its message, inspect the actual value, and change one
-cause rather than weakening the assertion.
+Run these after the matching stage. A failing assertion identifies the earliest
+contract difference; do not edit expected values to manufacture a pass.
 
 ```python
-expected = "Ari: 25 minutes\nBo: 15 minutes"
-assert build_report(records) == expected
-assert build_report([]) == ""
-assert records == [
-    {"name": "Ari", "minutes": 25},
-    {"name": "Bo", "minutes": 15},
-]
+from copy import deepcopy
+
+lyra = {
+    "name": "Lyra Echo",
+    "clarity": 90,
+    "age_minutes": 5,
+    "rare": True,
+}
+moth = {
+    "name": "Moth Light",
+    "clarity": 50,
+    "age_minutes": 80,
+    "rare": False,
+}
+
+assert score_signal(lyra) == 200
+assert score_signal(moth) == 40
+assert classify_signal(180) == "OPEN DOME"
+assert classify_signal(179) == "REVIEW"
+assert classify_signal(120) == "REVIEW"
+assert classify_signal(119) == "ARCHIVE"
 ```
 
-::: {.callout-warning title="Do not edit the expected values to create a pass"}
-Change the implementation until the stated behavior is true. If you believe an
-assertion is wrong, explain the contract conflict in writing before changing
-either side.
+```python
+signals = [
+    {"name": "Lyra Echo", "clarity": 90, "age_minutes": 5, "rare": True},
+    {"name": "Orion Bell", "clarity": 80, "age_minutes": 10, "rare": False},
+    {"name": "Cygnus Key", "clarity": 80, "age_minutes": 10, "rare": False},
+    {"name": "Moth Light", "clarity": 50, "age_minutes": 80, "rare": False},
+]
+original = deepcopy(signals)
+ranked = rank_signals(signals)
+
+assert [item["name"] for item in ranked] == [
+    "Lyra Echo",
+    "Cygnus Key",
+    "Orion Bell",
+    "Moth Light",
+]
+assert signals == original
+assert build_observatory_report([]) == "CLOCKWORK OBSERVATORY"
+```
+
+```python
+expected_report = """CLOCKWORK OBSERVATORY
+1. Lyra Echo | 200 | OPEN DOME
+2. Cygnus Key | 150 | REVIEW
+3. Orion Bell | 150 | REVIEW
+4. Moth Light | 40 | ARCHIVE"""
+assert build_observatory_report(signals) == expected_report
+```
+
+Validation checks:
+
+```python
+invalid_signals = [
+    ({"name": " ", "clarity": 50, "age_minutes": 1, "rare": False}, "signal name cannot be empty"),
+    ({"name": "Nova", "clarity": 101, "age_minutes": 1, "rare": False}, "clarity must be between 0 and 100"),
+    ({"name": "Nova", "clarity": 50, "age_minutes": -1, "rare": False}, "age_minutes cannot be negative"),
+]
+
+for signal, expected_message in invalid_signals:
+    try:
+        score_signal(signal)
+    except ValueError as error:
+        assert str(error) == expected_message
+    else:
+        raise AssertionError("invalid signal was accepted")
+```
+
+### Gate evidence targets
+
+Your final record should show:
+
+```text
+All checks passed!
+3 files already formatted
+Success: no issues found in 2 source files
+11 passed
+```
+
+Exact timing and file counts can differ if your test layout differs. The four
+commands must exit zero, and a second `pre-commit run --all-files` must make no
+new modification.
+
+::: {.callout-warning title="Expected values are the contract"}
+Do not change `200`, tie order, exception messages, or the report to match an
+incorrect implementation. Trace the first mismatch to one scoring, validation,
+ranking, or rendering stage.
 :::
 
 ## 6. Use the hint ladder only when needed
@@ -129,70 +346,263 @@ either side.
 <details>
 <summary>Hint 1</summary>
 
-Protect behavior before editing style; a clean linter cannot tell you whether output changed.
+Extract `score_signal` without changing a single expression first. Keep
+validation in the same order, name the three score components, and run only the
+score/invalid checks.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Names such as `records`, `record`, `name`, and `minutes` communicate the represented values.
+In `rank_signals`, calculate `score = score_signal(signal)` once, then construct
+`RankedSignal(name=..., score=score, decision=classify_signal(score))`. Return
+`sorted(ranked, key=lambda signal: (-signal["score"], signal["name"]))`.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-Run `ruff format`, `ruff check`, `mypy`, the assertions, and then `ruff format --check` as the final evidence sequence.
+Use local pre-commit hooks with `language: system`; set `pass_filenames: false`
+for `mypy src` and `pytest -q`. The CI workflow should use check-only commands
+and must not contain `|| true` or rewrite formatting.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Keep one formatter or linter finding and explain it in plain language. Show the smallest repair and the rerun proving both style and behavior remain correct.
-
-Use this short record:
+Keep one real failure from the rescue. Good candidates include a reversed tie,
+a score calculated twice with inconsistent data, a MyPy TypedDict mismatch, a
+hook modification, or a CI step running from the wrong directory.
 
 | Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
 |---|---|---|---|---|
-| What did not work? | What value, output, or error did you observe? | What single cause fits that evidence? | What one thing did you change? | Which check now passes? |
+| What failed first? | Exact assertion, diagnostic, or hook line | Which single cause fits? | What one edit tested it? | Which focused and full checks now pass? |
 
-## 8. Check your understanding
+Also keep a refactoring log:
 
-::: {.quiz-box}
-Answer these questions before recording the challenge. The quiz runs directly
-in your browser.
-:::
+| Stage | Structural purpose | Behavior check | Diff observation |
+|---|---|---|---|
+| Extract scoring | Isolate policy calculation | score/validation checks | Report untouched |
+| Extract ranking | Expose tie and ownership rules | rank/mutation checks | Input still copied |
+| Add gate | Reproduce policy | four zero exits | No tool rewrites remain |
+
+## 8. Inspect a complete solution only after your attempt
+
+<details class="solution">
+<summary>Show the complete source and quality configuration</summary>
+
+A complete `signals.py` is:
+
+```python
+from collections.abc import Sequence
+from typing import TypedDict
+
+
+class Signal(TypedDict):
+    """One signal received by the observatory."""
+
+    name: str
+    clarity: int
+    age_minutes: int
+    rare: bool
+
+
+class RankedSignal(TypedDict):
+    """A validated signal with its computed score and decision."""
+
+    name: str
+    score: int
+    decision: str
+
+
+def score_signal(signal: Signal) -> int:
+    """Return priority points for one validated signal."""
+    name = signal["name"].strip()
+    clarity = signal["clarity"]
+    age_minutes = signal["age_minutes"]
+
+    if not name:
+        raise ValueError("signal name cannot be empty")
+    if not 0 <= clarity <= 100:
+        raise ValueError("clarity must be between 0 and 100")
+    if age_minutes < 0:
+        raise ValueError("age_minutes cannot be negative")
+
+    rarity_bonus = 25 if signal["rare"] else 0
+    freshness_penalty = min(age_minutes, 60)
+    return clarity * 2 + rarity_bonus - freshness_penalty
+
+
+def classify_signal(score: int) -> str:
+    """Return the observatory decision for a signal score."""
+    if score >= 180:
+        return "OPEN DOME"
+    if score >= 120:
+        return "REVIEW"
+    return "ARCHIVE"
+
+
+def rank_signals(signals: Sequence[Signal]) -> list[RankedSignal]:
+    """Return ranked copies without changing the caller's sequence."""
+    ranked: list[RankedSignal] = []
+    for signal in signals:
+        score = score_signal(signal)
+        ranked.append(
+            RankedSignal(
+                name=signal["name"].strip(),
+                score=score,
+                decision=classify_signal(score),
+            )
+        )
+    return sorted(
+        ranked,
+        key=lambda signal: (-signal["score"], signal["name"]),
+    )
+
+
+def build_observatory_report(signals: Sequence[Signal]) -> str:
+    """Return the complete ranked observatory report."""
+    lines = ["CLOCKWORK OBSERVATORY"]
+    lines.extend(
+        f"{position}. {signal['name']} | {signal['score']} | {signal['decision']}"
+        for position, signal in enumerate(rank_signals(signals), start=1)
+    )
+    return "\n".join(lines)
+```
+
+Use this `pyproject.toml`:
+
+```toml
+[project]
+name = "clockwork-observatory"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "RUF"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+```
+
+Use this local `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff lint
+        entry: ruff check
+        language: system
+        types: [python]
+      - id: ruff-format-check
+        name: Ruff format check
+        entry: ruff format --check
+        language: system
+        types: [python]
+      - id: mypy
+        name: MyPy
+        entry: mypy src
+        language: system
+        pass_filenames: false
+      - id: pytest
+        name: pytest
+        entry: pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+```
+
+Use this `.github/workflows/quality.yml`:
+
+```yaml
+name: Quality
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install quality tools
+        run: python -m pip install pytest ruff mypy
+      - name: Lint
+        run: ruff check src tests
+      - name: Check formatting
+        run: ruff format --check src tests
+      - name: Check types
+        run: mypy src
+      - name: Run tests
+        run: pytest -q
+```
+
+The verified reference project passes Ruff 0.15.20, MyPy 2.2.0 strict mode,
+pytest 9.1.1 with 11 collected cases, and the local pre-commit gate.
+
+</details>
+
+## 9. Check the observatory-specific decisions
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
   "id": "foundations-code-quality-maintainability-challenge",
-  "title": "Messy Report Rescue readiness check",
-  "instructions": "Choose an answer, then check your work.",
+  "title": "Clockwork Observatory readiness check",
+  "instructions": "Use the challenge's source, assertions, and gate—not generic definitions—to choose.",
   "questions": [
     {
-      "id": "format-vs-behavior",
-      "prompt": "What must remain true after formatting and renaming a script?",
-      "options": [
-        "Every line becomes the same length.",
-        "All functions are removed.",
-        "Its checked observable behavior remains unchanged.",
-        "The script prints more output."
-      ],
-      "answer_index": 2,
-      "explanation": "Style improvements should not silently change the behavior protected by assertions."
+      "id": "tie-key",
+      "prompt": "Which key preserves descending score and ascending signal name?",
+      "options": ["lambda signal: (signal['score'], signal['name'])", "lambda signal: signal['name']", "lambda signal: (-signal['score'], -signal['name'])", "lambda signal: (-signal['score'], signal['name'])"],
+      "answer_index": 3,
+      "explanation": "Negating the numeric score produces descending score under normal ascending sort; the name remains ascending."
     },
     {
-      "id": "linter-evidence",
-      "prompt": "What does a clean linter run demonstrate?",
-      "options": [
-        "The program has no possible bugs.",
-        "Every design choice is ideal.",
-        "Runtime tests are no longer useful.",
-        "The configured static checks found no remaining reported issues."
-      ],
+      "id": "age-cap",
+      "prompt": "What freshness penalty applies to a signal aged 80 minutes?",
+      "options": ["60 points", "80 points", "20 points", "0 points"],
+      "answer_index": 0,
+      "explanation": "The contract caps the one-point-per-minute penalty at 60."
+    },
+    {
+      "id": "mutation-check",
+      "prompt": "Which evidence protects caller ownership during `rank_signals`?",
+      "options": ["A formatter pass", "Deep-copy the input before the call and assert equality afterward", "Only the exact report heading", "A MyPy success message"],
+      "answer_index": 1,
+      "explanation": "The before/after equality assertion directly observes whether ranking changed caller-owned records."
+    },
+    {
+      "id": "ci-format",
+      "prompt": "Which formatting command belongs in the observatory CI gate?",
+      "options": ["ruff format src tests", "ruff check --fix", "ruff format --check src tests", "git add src tests"],
+      "answer_index": 2,
+      "explanation": "CI should report formatting drift with a nonzero status, not rewrite files on the runner."
+    },
+    {
+      "id": "refactor-proof",
+      "prompt": "What is the strongest final evidence that the extraction preserved the published observatory behavior?",
+      "options": ["The source has more functions", "Every name is long", "Ruff alone is clean", "The original progressive assertions, strict types, static checks, and exact report all pass from a clean project"],
       "answer_index": 3,
-      "explanation": "Linting is one form of evidence, not a proof of complete correctness."
+      "explanation": "The complete evidence chain covers the stated behavior plus the new static and reproducibility contracts."
     }
   ]
 }
@@ -200,28 +610,30 @@ in your browser.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 9. Decide whether the challenge is complete
+## 10. Decide whether the challenge is complete
 
 ### Evidence rubric
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | The acceptance examples and progressive checks pass unchanged. |
-| Scope | The solution follows the stated constraints without unrelated features. |
-| Reasoning | You can trace the important values, boundaries, and design choices. |
-| Debugging | One failure record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The complete artifact works from a clean notebook state or documented project root. |
+| Behavior | Score, threshold, validation, ordering, mutation, empty, and exact-report checks pass unchanged |
+| Readability | Extracted names expose validation, scoring, classification, ranking, and rendering responsibilities |
+| Static quality | Ruff lint/format check and strict MyPy exit zero without broad suppression |
+| Automation | A second all-files hook run is clean and CI repeats the check-only command contract |
+| Reasoning | One debugging record and refactoring log connect each change to evidence |
+| Reproducibility | The complete project works from its documented root without hidden notebook state |
 
 Record completion only when every statement is true:
 
-- [ ] All supplied assertions pass without editing their expected values.
-- [ ] The work runs from a clean notebook state or documented project root.
-- [ ] I can explain the important state changes and boundaries in my own words.
-- [ ] I kept one complete debugging record.
-- [ ] I predicted and verified one controlled modification.
+- [ ] All progressive assertions pass without editing expected behavior.
+- [ ] Ruff, MyPy, pytest, and format-check all exit zero.
+- [ ] The second pre-commit all-files run makes no change.
+- [ ] The CI workflow repeats the same four check-only commands.
+- [ ] I can explain the scoring, tie, ownership, and validation boundaries.
+- [ ] I retained one real failure and its controlled repair.
 
 This button stores a self-reported marker only in this browser. It does not
-submit the artifact, grade it, verify identity, or issue a certificate.
+submit the project, grade it, verify identity, or issue a certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -235,7 +647,15 @@ submit the artifact, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows the design without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- A maintenance rescue begins with a green behavior baseline and a named
+  structural problem.
+- Extract validation, scoring, classification, ranking, and rendering one stage
+  at a time; rerun the smallest matching evidence.
+- Types and tools should make the contract more visible, not hide problems with
+  `Any`, ignores, or rewritten expected values.
+- A local hook shortens feedback; a check-only CI workflow tests committed state
+  on a clean runner.
+- The finished artifact includes the source, configuration, exact report,
+  debugging record, and an explanation another maintainer can follow.
+
+[Next: Documentation as Part of the Product Overview](../documentation-publishing/index.qmd){.btn .btn-primary}

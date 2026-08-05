@@ -1,6 +1,6 @@
 ---
 title: Code Quality and Maintainability Overview
-description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+description: Prepare a tested Python project for a sequence of readability, typing, automation, and behavior-preserving refactoring labs.
 course_id: python-foundations
 unit_id: code-quality-maintainability
 unit_number: 14
@@ -13,55 +13,206 @@ colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintain
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations · Unit 14
-- **Estimated time:** 5–10 hours including the challenge
-- **Unit outcome:** Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 24–34 hours including the challenge
+- **Unit outcome:** Make Python projects easier to read and safer to change by combining human-readable code, useful types, automated checks, and small verified refactors.
+- **Practice in:** A local Git project and terminal, with generated notebooks for focused code experiments
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. Two programs can return the same answer and still differ in quality
 
-Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+The Midnight Museum Quest awards points to teams that solve hidden clues. These
+two functions return the same score for the supplied attempt:
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+```python
+def s(x):
+    return x[0] * 30 + (25 if x[2] else 0) - max(0, x[1] - 45) * 2
 
-## 2. Before you start
 
-**Prior knowledge:** Complete Unit 13 and bring its challenge notes and debugging record.
+def score_attempt(clues_found, elapsed_minutes, found_bonus_clue):
+    clue_points = clues_found * 30
+    bonus_points = 25 if found_bonus_clue else 0
+    overtime_minutes = max(0, elapsed_minutes - 45)
+    overtime_penalty = overtime_minutes * 2
+    return clue_points + bonus_points - overtime_penalty
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
 
-## 3. Lessons
+assert s((6, 42, True)) == 205
+assert score_attempt(6, 42, True) == 205
+```
 
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Readable Python and PEP 8](readable-python-pep8.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Type Annotations and Static Checking](type-annotations-static-checking.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Formatting, Linting, and Configuration](formatting-linting-configuration.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Pre-commit Hooks and Local Quality Gates](precommit-quality-gates.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Evidence-Driven Refactoring](evidence-driven-refactoring.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 6 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
+The first version is shorter. The second exposes the represented values, their
+units, and the stages of the rule. Now imagine that overtime becomes three
+points per minute, but only after minute 50. Which version can you verify more
+quickly? Which names would help you find every affected line? What behavior
+must stay unchanged for attempts completed before minute 50?
 
-## 4. How to study this unit
+Code quality is not a beauty contest. It is the practical cost of answering
+questions like those accurately. In this unit, you will use human reading,
+static tools, tests, and small diffs as different kinds of evidence. No single
+check proves that software is correct or maintainable.
 
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
+::: {.concept-diagram}
+Notice that each check answers a different question before a change is accepted.
 
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Source change] --> B[Human review]
+  B --> C[Formatter]
+  C --> D[Linter]
+  D --> E[Type checker]
+  E --> F[Behavior tests]
+  F --> G[Reviewable result]
+```
 :::
 
-## 5. Unit evidence
+## 2. Questions this unit will help you answer
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+By the end of the unit, you should be able to answer these with code, command
+output, or a focused explanation:
+
+1. Which names, boundaries, and intermediate values make a change safer to
+   review?
+2. What does an annotation communicate, and what still needs runtime
+   validation?
+3. How did MyPy or Ruff reach a diagnostic, and should the source or the
+   configuration change?
+4. Why did a pre-commit hook modify, skip, pass, or fail a file?
+5. Can a clean CI runner reproduce the same quality result as your local
+   project?
+6. How can you improve structure one step at a time without silently changing
+   observable behavior?
+
+You will answer them while improving a small `src`-layout project called
+**Midnight Museum Quest**. Its tests begin green. Each lesson adds one kind of
+quality evidence without turning the project into a different application.
+
+## 3. The learning sequence
+
+| Step | Lesson | What you will leave behind |
+|---:|---|---|
+| 1 | [Write Python People Can Follow](readable-python-pep8.qmd) | A readable scorer and a justification for choices no formatter can make |
+| 2 | [Make Contracts Visible with Type Annotations](type-annotations-static-checking.qmd) | Honest input, result, collection, and structured-record annotations |
+| 3 | [Read MyPy Errors and Close Type Gaps](mypy-diagnostics-boundaries.qmd) | An annotated diagnostic log and a strict clean run |
+| 4 | [Format and Lint a Project with Ruff](formatting-linting-configuration.qmd) | A reviewed Ruff patch and committed project policy |
+| 5 | [Catch Small Problems Before Commit](precommit-quality-gates.qmd) | A local hook gate with modified-file and failure evidence |
+| 6 | [Repeat the Quality Gate in CI](continuous-integration-quality-gates.qmd) | A CI workflow that repeats the local commands on a clean runner |
+| 7 | [Refactor in Small, Verified Steps](evidence-driven-refactoring.qmd) | A sequence of small diffs protected by the complete gate |
+| 8 | [Unit Challenge](challenge.qmd) | A maintainable Clockwork Observatory project and its quality record |
+
+The order matters. Readability gives you a vocabulary for intent. Annotations
+make selected contracts checkable. Ruff and MyPy turn committed policy into
+repeatable feedback. Hooks shorten the feedback loop; CI checks committed state
+on a clean machine. Only then do you use the whole gate to support a larger
+refactor.
+
+## 4. Prepare the local project
+
+Unit 10 introduced environments, `pyproject.toml`, `src/` layouts, and Git.
+Unit 13 introduced pytest and behavior baselines. Bring those skills forward;
+this unit applies them rather than reteaching every command.
+
+Use this shape for the connected project:
+
+```text
+midnight-museum/
+├── pyproject.toml
+├── .pre-commit-config.yaml
+├── .github/
+│   └── workflows/
+│       └── quality.yml
+├── src/
+│   └── midnight_museum/
+│       ├── __init__.py
+│       └── quest.py
+└── tests/
+    └── test_quest.py
+```
+
+From the project root, confirm the tools that are already declared by the
+course repository or install them in your own development environment:
+
+```bash
+python --version
+ruff --version
+mypy --version
+pre-commit --version
+pytest --version
+```
+
+The course examples are verified with Python 3.10-compatible syntax, Ruff
+0.15.20, MyPy 2.2.0, pre-commit 4.6.0, and pytest 9.1.1. A later compatible
+version may format or phrase a diagnostic differently. When output differs,
+compare the rule code and behavior instead of forcing your terminal to match a
+screenshot character for character.
+
+Before changing style or types, establish the behavior baseline:
+
+```bash
+pytest -q
+```
+
+```text
+3 passed in 0.01s
+```
+
+::: {.callout-important title="Start green, then keep the evidence"}
+A green baseline does not prove the program has no defects. It proves that the
+current tests pass in the current environment. Save the command, result, and
+commit state so a later failure can be attributed to a controlled change.
+:::
+
+## 5. Use notebooks and the project for different jobs
+
+The generated notebooks are useful for comparing two functions, inspecting
+annotations, tracing a type narrowing branch, and experimenting with small
+refactors. They are not a substitute for a Git working tree:
+
+- pre-commit installs scripts under `.git/hooks/`;
+- Ruff and MyPy discover committed project configuration from the filesystem;
+- CI reads a workflow from `.github/workflows/`; and
+- a clean runner is valuable precisely because it does not inherit notebook
+  state.
+
+Complete the project-shaped labs in a local directory. If a managed learning
+environment prevents GitHub access, you can still author the workflow and
+investigate the supplied CI transcripts; pushing a repository is not required
+to understand the gate.
+
+## 6. Plan realistic stopping points
+
+This unit involves more active setup and diagnosis than a syntax lesson. A
+reasonable rhythm is:
+
+- **Session 1:** overview and readable Python;
+- **Session 2:** type annotations;
+- **Session 3:** MyPy diagnostics;
+- **Session 4:** Ruff configuration and repair;
+- **Session 5:** pre-commit hooks;
+- **Session 6:** CI workflows;
+- **Sessions 7–8:** refactoring lab and challenge.
+
+Stop after a clean checkpoint rather than halfway through an unexplained tool
+failure. Keep an evidence log with these columns:
+
+| Command or change | Expected result | Observed result | Explanation or next step |
+|---|---|---|---|
+| `pytest -q` before edits | Existing suite passes | 3 passed | Baseline is usable |
+| One naming change | Same test result | … | … |
+| `mypy src` | No type errors | … | … |
+| Complete local gate | Every command exits zero | … | … |
+
+## 7. Begin with the human reader
+
+Automated tools are fast, but they cannot decide whether `m` means minutes,
+meters, a museum, or a mysterious temporary value. Start by learning which
+choices belong to the maintainer and how to justify them with the next likely
+change.
+
+[Start Lesson 1: Write Python People Can Follow](readable-python-pep8.qmd){.btn .btn-primary}
 
 <!-- fcpython-chapter-lab: end -->

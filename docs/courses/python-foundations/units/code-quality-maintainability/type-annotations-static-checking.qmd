@@ -1,13 +1,15 @@
 ---
-title: Type Annotations and Static Checking
+title: Make Contracts Visible with Type Annotations
 lesson_id: code-quality-maintainability.type-annotations-static-checking
 lesson_order: 20
-description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+description: Annotate function boundaries, collections, optional results, and structured records without confusing static information with runtime validation.
 execute:
   echo: true
 categories:
 - python-foundations
 - code-quality-maintainability
+- typing
+- contracts
 order: 20
 colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintainability/type-annotations-static-checking.ipynb
 course_id: python-foundations
@@ -16,112 +18,171 @@ unit_number: 14
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Use type hints and a checker to catch mismatched value types early.
-- **Practice in:** Generated Colab notebook and a local project when appropriate
+- **Estimated time:** 4–5 hours
+- **You will learn:** Express honest, useful type contracts for real project boundaries while keeping runtime validation where external values enter.
+- **Practice in:** A notebook for type shapes and the Midnight Museum local project
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. An annotation makes an agreement visible
 
-Type hints document the values that cross a boundary and let static tools compare implementations with those contracts. They supplement runtime tests; they do not validate external data automatically.
+The readable scorer from Lesson 1 still leaves some questions unanswered. Can
+`clues_found` be text? Can the function return `None`? Is `found_bonus_clue`
+really a boolean or a string such as `"yes"`?
 
-::: {.callout-note title="Prediction"}
-Before running the example, write the output or failure you expect and identify the line that will produce it.
+Annotations place those expectations in the function signature:
+
+```python
+def score_attempt(
+    clues_found: int,
+    elapsed_minutes: int,
+    found_bonus_clue: bool,
+) -> int:
+    clue_points = clues_found * 30
+    bonus_points = 25 if found_bonus_clue else 0
+    overtime_minutes = max(0, elapsed_minutes - 45)
+    return max(0, clue_points + bonus_points - overtime_minutes * 2)
+
+
+assert score_attempt(6, 42, True) == 205
+```
+
+Before continuing, answer these questions:
+
+1. Which values cross the function boundary?
+2. What value leaves after a successful call?
+3. Does `: int` reject a negative integer?
+4. Does Python automatically convert `"6"` to `6`?
+5. Which tool can compare callers with this declared contract before runtime?
+
+The signature answers the first two. It does **not** enforce the domain rules or
+convert input. Python stores annotations as metadata. A static checker, editor,
+or documentation tool may inspect them, but an ordinary call still receives the
+objects supplied by the caller.
+
+```python
+def repeat_clue(clue: str, times: int) -> str:
+    return clue * times
+
+
+assert repeat_clue("★", 3) == "★★★"
+```
+
+This call is allowed to begin at runtime even though it conflicts with the
+annotation:
+
+```python
+def repeat_clue(clue: str, times: int) -> str:
+    return clue * times
+
+
+bad_times = "3"
+```
+
+Calling `repeat_clue("★", bad_times)` would raise `TypeError` at multiplication;
+the annotation itself does not intercept the call. MyPy can report the mismatch
+without executing it. The next lesson teaches that diagnostic workflow.
+
+::: {.concept-diagram}
+Annotations are inspected by static tools, while runtime execution still uses the supplied objects.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Annotated source] --> B[Static checker]
+  B --> C[Type diagnostics]
+  A --> D[Python runtime]
+  E[Supplied objects] --> D
+  D --> F[Result or exception]
+```
 :::
 
-## 2. Type a record summarizer without replacing input validation.
+## 2. Annotate boundaries, not every obvious temporary value
+
+Parameters and returned values are high-value annotation sites because other
+code depends on them. A function that performs an action and returns no useful
+value should state `-> None`:
 
 ```python
-from collections.abc import Iterable
-
-def total_minutes(values: Iterable[int]) -> int:
-    """Return the sum of non-negative minute counts."""
-    total = 0
-    for value in values:
-        if value < 0:
-            raise ValueError("minutes cannot be negative")
-        total += value
-    return total
-
-assert total_minutes([20, 35]) == 55
+def announce_team(team_name: str) -> None:
+    print(f"Next team: {team_name}")
 ```
 
-### Step-by-step explanation
-
-1. `Iterable[int]` accepts any iterable producing integers rather than demanding one concrete container.
-2. The return annotation states that successful calls produce an integer.
-3. The explicit comparison still enforces the runtime domain rule; annotations alone do not reject negative values.
-
-Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
-
-## 3. Debug a contract violation
-
-This version is syntactically valid but communicates or implements the wrong contract:
+Local values are usually inferred from their expressions:
 
 ```python
-def repeat(word: str, times: int) -> str:
-    return word * times
-
-repeat("ha", "3")
+def overtime_penalty(elapsed_minutes: int) -> int:
+    overtime_minutes = max(0, elapsed_minutes - 45)
+    penalty = overtime_minutes * 2
+    return penalty
 ```
 
-A focused repair is:
+A checker can infer that `overtime_minutes` and `penalty` are integers. Adding
+`: int` to every local repeats information and can make the important boundary
+harder to see.
+
+Annotate a local when it declares an initially empty collection or resolves an
+ambiguity:
 
 ```python
-def repeat(word: str, times: int) -> str:
-    return word * times
-
-assert repeat("ha", 3) == "hahaha"
+def collect_team_names(records: list[dict[str, object]]) -> list[str]:
+    team_names: list[str] = []
+    for record in records:
+        team = record.get("team")
+        if isinstance(team, str):
+            team_names.append(team)
+    return team_names
 ```
 
-Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
+Without `list[str]`, an empty list has no element from which a checker can infer
+the intended item type at that point.
 
-## 4. Practice from trace to transfer
+### Built-in collections describe their contents
 
-1. Add annotations to a function that may return `None`.
-2. Use a dataclass or TypedDict to describe a structured record.
-3. Run mypy on a deliberate argument mismatch, then repair the caller rather than hiding the error.
+Python 3.10 supports the built-in generic forms used by this course:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the tasks</summary>
+```python
+team_names: list[str] = ["Moon Moths", "Brass Bats"]
+score_by_team: dict[str, int] = {"Moon Moths": 205}
+position: tuple[int, str] = (1, "Moon Moths")
+coordinates: tuple[int, ...] = (4, 9, 12)
+unique_galleries: set[str] = {"Atrium", "Clock Hall"}
+```
 
-Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
+Read `dict[str, int]` as “a dictionary whose keys are strings and whose values
+are integers.” `tuple[int, str]` describes two fixed positions with different
+types; `tuple[int, ...]` describes any number of integer positions.
 
-</details>
-
-## 5. Check your understanding
+### Checkpoint: annotations and runtime
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "code-quality-maintainability-type-checking",
-  "title": "Type Checking checkpoint",
-  "instructions": "Trace the code and contract before choosing.",
+  "id": "quality-typing-runtime",
+  "title": "What annotations do—and do not do",
+  "instructions": "Choose the statement supported by ordinary Python runtime behavior.",
   "questions": [
     {
-      "id": "runtime",
-      "prompt": "What happens to annotations during an ordinary Python call?",
-      "options": [
-        "They do not automatically convert or validate arguments",
-        "They convert every string to the annotated type",
-        "They prevent exceptions",
-        "They run pytest"
-      ],
-      "answer_index": 0,
-      "explanation": "Static tools inspect annotations, but ordinary calls still receive the supplied runtime objects."
+      "id": "runtime-enforcement",
+      "prompt": "What does `times: int` do during an ordinary call to `repeat_clue`?",
+      "options": ["It converts any string to an integer", "It records expected type information but does not automatically validate or convert the argument", "It prevents every TypeError", "It runs MyPy before the function body"],
+      "answer_index": 1,
+      "explanation": "Python stores the annotation, but the runtime still receives the supplied object unless the program performs validation."
     },
     {
-      "id": "abstract",
-      "prompt": "Why accept `Iterable[int]` instead of `list[int]` when only iteration is needed?",
-      "options": [
-        "It forces the result to be a tuple",
-        "It documents the smallest useful input interface",
-        "It makes values immutable",
-        "It disables generators"
-      ],
-      "answer_index": 1,
-      "explanation": "A narrow behavioral interface supports more valid callers without weakening the contract."
+      "id": "none-return",
+      "prompt": "Which return annotation best describes a function that prints an announcement and intentionally returns no useful value?",
+      "options": ["-> str", "-> bool", "-> None", "No annotation, because printing cannot be typed"],
+      "answer_index": 2,
+      "explanation": "`-> None` makes the action-only contract explicit and lets a checker reject callers that treat the result as a value."
+    },
+    {
+      "id": "empty-list",
+      "prompt": "Why is `team_names: list[str] = []` a useful local annotation?",
+      "options": ["It makes append run faster", "It makes the list immutable", "It changes the empty list into a tuple", "It declares the intended element type before any element exists to support inference"],
+      "answer_index": 3,
+      "explanation": "The empty expression supplies no item whose type can be inferred, so the annotation records the intended contents."
     }
   ]
 }
@@ -129,13 +190,475 @@ Write one ordinary acceptance example and one boundary before implementation. Ma
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 3. Say when a result can be absent
 
-- State the behavior contract before selecting syntax or tools.
-- Trace the values and boundaries that provide observable evidence.
-- Preserve one useful failure and verify the repair from a clean state.
+A search might find a matching team or find nothing. Do not annotate it as
+`str` if `None` is a real result:
+
+```python
+def first_team_over(
+    scores: dict[str, int],
+    minimum_score: int,
+) -> str | None:
+    for team_name, score in scores.items():
+        if score >= minimum_score:
+            return team_name
+    return None
+```
+
+`str | None` is a union: the result may be either type. The caller must separate
+those cases before using string operations:
+
+```python
+winner = first_team_over({"Moon Moths": 205}, 200)
+if winner is None:
+    message = "No team reached the threshold"
+else:
+    message = winner.upper()
+
+assert message == "MOON MOTHS"
+```
+
+The `is None` branch does more than prevent an exception. It narrows the value:
+a static checker can treat `winner` as `str` inside the `else` block.
+
+Do not use a falsey check when empty text is a valid, distinct result:
+
+```python
+def display_search_result(result: str | None) -> str:
+    if result is None:
+        return "No match"
+    if result == "":
+        return "The matching label is empty"
+    return result
+```
+
+`if not result` would combine `None` and `""` even though the contract gives
+them different meanings.
+
+### Unions should represent real cases
+
+`str | int | float | list[str] | None` may be honest for a raw external value,
+but it is burdensome inside the core of a program. Validate or convert at the
+boundary so deeper functions receive a smaller, more useful type.
+
+```python
+def parse_clue_count(raw_value: object) -> int:
+    if isinstance(raw_value, bool):
+        raise ValueError("clue count cannot be boolean")
+    if isinstance(raw_value, int):
+        return raw_value
+    if isinstance(raw_value, str) and raw_value.isdigit():
+        return int(raw_value)
+    raise ValueError("clue count must be an integer")
+
+
+assert parse_clue_count("6") == 6
+assert parse_clue_count(6) == 6
+```
+
+`object` says the boundary may receive any Python object, but only operations
+valid for all objects are initially allowed. The `isinstance` branches both
+validate at runtime and narrow the type for static analysis.
+
+## 4. Choose the smallest honest collection interface
+
+A parameter annotated `list[Attempt]` promises that the implementation may
+need list-specific, mutable behavior. If the function only loops, that contract
+is unnecessarily narrow.
+
+```python
+from collections.abc import Iterable
+
+
+def total_scores(scores: Iterable[int]) -> int:
+    return sum(scores)
+
+
+assert total_scores([205, 200]) == 405
+assert total_scores((205, 200)) == 405
+assert total_scores(score for score in [205, 200]) == 405
+```
+
+`Iterable[int]` accepts anything that can produce integers one at a time,
+including a generator. That flexibility creates a responsibility: an iterable
+may be single-use. This implementation is wrong for a generator because it
+tries to traverse twice:
+
+```python
+def average_score(scores: Iterable[int]) -> float | None:
+    values = list(scores)
+    if not values:
+        return None
+    return sum(values) / len(values)
+```
+
+Materializing once makes the intended two operations honest. For other needs:
+
+- `Collection[T]` supports iteration, `len()`, and membership;
+- `Sequence[T]` adds stable integer indexing and order;
+- `Mapping[K, V]` supports read-only key lookup;
+- `MutableSequence[T]` or `list[T]` is appropriate when mutation is part of the
+  contract.
+
+```python
+from collections.abc import Mapping, Sequence
+
+
+def team_score(scores: Mapping[str, int], team_name: str) -> int:
+    return scores[team_name]
+
+
+def first_team(team_names: Sequence[str]) -> str | None:
+    if not team_names:
+        return None
+    return team_names[0]
+```
+
+Choose from the operations the function actually needs, not from the concrete
+object used by the initial caller.
+
+### Checkpoint: absence and collection contracts
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-typing-collections",
+  "title": "Honest result and collection shapes",
+  "instructions": "Match each annotation to the behavior the function actually needs.",
+  "questions": [
+    {
+      "id": "optional-result",
+      "prompt": "A search returns a team name or no match. Which annotation states both outcomes?",
+      "options": ["-> str | None", "-> str", "-> object", "-> list[str]"],
+      "answer_index": 0,
+      "explanation": "The union makes absence an explicit case that callers must handle."
+    },
+    {
+      "id": "small-interface",
+      "prompt": "A function only loops once over integer scores. Which input contract is the least restrictive honest choice?",
+      "options": ["list[int]", "Iterable[int]", "dict[str, int]", "tuple[int, int]"],
+      "answer_index": 1,
+      "explanation": "`Iterable[int]` promises exactly the operation used: producing integers during one traversal."
+    },
+    {
+      "id": "generator-boundary",
+      "prompt": "Why can counting an `Iterable[int]` and then summing it in a second loop fail?",
+      "options": ["Integers cannot be iterated", "Every iterable is unordered", "A generator may be exhausted by the first traversal", "Type annotations remove values after use"],
+      "answer_index": 2,
+      "explanation": "Some iterables are single-use; materialize once or require a stronger reusable collection contract."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Give structured records a reusable shape
+
+Repeated `dict[str, object]` annotations say little about available keys. A
+`TypedDict` describes a dictionary record while leaving its runtime value as an
+ordinary dictionary:
+
+```python
+from typing import TypedDict
+
+
+class Attempt(TypedDict):
+    team: str
+    clues_found: int
+    elapsed_minutes: int
+    bonus_clue: bool
+
+
+def score_attempt(attempt: Attempt) -> int:
+    clue_points = attempt["clues_found"] * 30
+    bonus_points = 25 if attempt["bonus_clue"] else 0
+    overtime_penalty = max(0, attempt["elapsed_minutes"] - 45) * 2
+    return max(0, clue_points + bonus_points - overtime_penalty)
+
+
+museum_attempt: Attempt = {
+    "team": "Moon Moths",
+    "clues_found": 6,
+    "elapsed_minutes": 42,
+    "bonus_clue": True,
+}
+assert score_attempt(museum_attempt) == 205
+```
+
+A checker can now report a missing `team` key or a string assigned to
+`elapsed_minutes`. At runtime, `museum_attempt` remains `dict`:
+
+```python
+assert isinstance(museum_attempt, dict)
+```
+
+Use a dataclass when the record is a Python object with constructor behavior,
+methods, equality, or controlled mutability:
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class QuestResult:
+    team: str
+    score: int
+    elapsed_minutes: int
+
+
+result = QuestResult("Moon Moths", 205, 42)
+assert result.team == "Moon Moths"
+```
+
+`TypedDict` is often natural near JSON-shaped dictionaries. A dataclass is
+usually clearer for a core domain object. Neither validates an untrusted JSON
+file automatically; Unit 9's boundary validation still applies.
+
+### Use an alias to name a repeated domain type
+
+Python 3.10-compatible aliases can use `TypeAlias`:
+
+```python
+from typing import Literal, TypeAlias
+
+Decision: TypeAlias = Literal["winner", "runner-up", "participant"]
+ScoreByTeam: TypeAlias = dict[str, int]
+
+
+def decision_for(position: int) -> Decision:
+    if position == 1:
+        return "winner"
+    if position == 2:
+        return "runner-up"
+    return "participant"
+```
+
+`Literal` is useful when a value really is limited to a small closed vocabulary.
+Do not list hundreds of dynamic strings as literals. A class, enum, or validated
+string may fit better depending on the domain.
+
+## 6. Keep external validation and static checking together
+
+Suppose a JSON record enters as `dict[str, object]`. An annotation claiming it
+is already `Attempt` would make the checker quiet by lying about the boundary.
+Validate first:
+
+```python
+def require_attempt(record: dict[str, object]) -> Attempt:
+    team = record.get("team")
+    clues_found = record.get("clues_found")
+    elapsed_minutes = record.get("elapsed_minutes")
+    bonus_clue = record.get("bonus_clue")
+
+    if not isinstance(team, str) or not team.strip():
+        raise ValueError("team must be non-empty text")
+    if isinstance(clues_found, bool) or not isinstance(clues_found, int):
+        raise ValueError("clues_found must be an integer")
+    if isinstance(elapsed_minutes, bool) or not isinstance(elapsed_minutes, int):
+        raise ValueError("elapsed_minutes must be an integer")
+    if not isinstance(bonus_clue, bool):
+        raise ValueError("bonus_clue must be boolean")
+
+    return Attempt(
+        team=team,
+        clues_found=clues_found,
+        elapsed_minutes=elapsed_minutes,
+        bonus_clue=bonus_clue,
+    )
+```
+
+Notice the explicit boolean checks for integer fields. At runtime, `bool` is a
+subclass of `int`, so `isinstance(True, int)` is true. The domain rejects that
+otherwise surprising value.
+
+Annotations document the verified result of the boundary. Runtime checks make
+that claim true. Tests exercise representative behavior. The three forms of
+evidence reinforce rather than replace one another.
+
+### Checkpoint: structured data and validation
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-typing-structured",
+  "title": "Structured records at a real boundary",
+  "instructions": "Choose the type or validation step supported by the code's actual runtime shape.",
+  "questions": [
+    {
+      "id": "typed-dict-runtime",
+      "prompt": "What is an `Attempt` TypedDict value at runtime?",
+      "options": ["A dataclass instance", "A tuple", "A new dictionary subclass with automatic validation", "An ordinary dictionary whose expected keys and values can be checked statically"],
+      "answer_index": 3,
+      "explanation": "TypedDict describes dictionary structure to type checkers; it does not replace the runtime dictionary or validate external data."
+    },
+    {
+      "id": "boundary-order",
+      "prompt": "A JSON object arrives as `dict[str, object]`. What should happen before returning it as `Attempt`?",
+      "options": ["Validate and narrow each required field, then construct the typed record", "Use a broad ignore so MyPy accepts it", "Change every value annotation to Any", "Assume valid JSON has the correct domain types"],
+      "answer_index": 0,
+      "explanation": "Runtime validation establishes the facts that make the narrower static contract honest."
+    },
+    {
+      "id": "dataclass-choice",
+      "prompt": "When is a frozen dataclass usually clearer than TypedDict?",
+      "options": ["When data must remain JSON text", "When the program wants a domain object with named attributes, constructor behavior, and value equality", "When keys are unknown until runtime", "When no fields have types"],
+      "answer_index": 1,
+      "explanation": "A dataclass models a runtime object; TypedDict is best when dictionary shape itself is the intended representation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: give the museum package an honest contract
+
+Annotate this small package boundary without changing its behavior:
+
+```python
+def rank_attempts(attempts):
+    results = []
+    for attempt in attempts:
+        results.append(
+            {
+                "team": attempt["team"],
+                "score": score_attempt(attempt),
+                "elapsed_minutes": attempt["elapsed_minutes"],
+            }
+        )
+    return sorted(
+        results,
+        key=lambda result: (
+            -result["score"],
+            result["elapsed_minutes"],
+            result["team"],
+        ),
+    )
+```
+
+Requirements:
+
+- define `Attempt` with the four fields used earlier;
+- define a `Result` record containing `team`, `score`, and `elapsed_minutes`;
+- accept any reusable, ordered or unordered sequence that the function only
+  iterates; choose and justify the abstract input type;
+- return `list[Result]`;
+- preserve alphabetical ascending team names after equal score and elapsed time;
+- add an `optional_winner(results)` function returning `Result | None`;
+- keep runtime validation outside `rank_attempts`; it receives verified
+  attempts; and
+- run the behavior assertions after annotating.
+
+```python
+attempts = [
+    {"team": "Moon Moths", "clues_found": 6, "elapsed_minutes": 42, "bonus_clue": True},
+    {"team": "Brass Bats", "clues_found": 7, "elapsed_minutes": 50, "bonus_clue": False},
+]
+ranked = rank_attempts(attempts)
+assert ranked[0]["team"] == "Moon Moths"
+assert optional_winner(ranked) == ranked[0]
+assert optional_winner([]) is None
+```
+
+<details>
+<summary>Hint A: choose the input interface</summary>
+
+The function only iterates over attempts. `Iterable[Attempt]` is sufficient and
+allows a list, tuple, or generator. If you intend to promise reusable ordered
+input to callers, `Sequence[Attempt]` is also honest but stronger than necessary
+for this implementation.
+
+</details>
+
+<details>
+<summary>Hint B: construct a TypedDict result</summary>
+
+After defining `class Result(TypedDict)`, use `Result(team=..., score=...,
+elapsed_minutes=...)`. It creates an ordinary dictionary while making the
+intended keys visible to the checker.
+
+</details>
+
+<details>
+<summary>Hint C: handle the empty result explicitly</summary>
+
+Check `if not results: return None` before returning `results[0]`. The check
+narrows the behavior and prevents `IndexError`.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete annotated solution</summary>
+
+```python
+from collections.abc import Iterable, Sequence
+from typing import TypedDict
+
+
+class Attempt(TypedDict):
+    team: str
+    clues_found: int
+    elapsed_minutes: int
+    bonus_clue: bool
+
+
+class Result(TypedDict):
+    team: str
+    score: int
+    elapsed_minutes: int
+
+
+def rank_attempts(attempts: Iterable[Attempt]) -> list[Result]:
+    results: list[Result] = []
+    for attempt in attempts:
+        results.append(
+            Result(
+                team=attempt["team"],
+                score=score_attempt(attempt),
+                elapsed_minutes=attempt["elapsed_minutes"],
+            )
+        )
+    return sorted(
+        results,
+        key=lambda result: (
+            -result["score"],
+            result["elapsed_minutes"],
+            result["team"],
+        ),
+    )
+
+
+def optional_winner(results: Sequence[Result]) -> Result | None:
+    if not results:
+        return None
+    return results[0]
+```
+
+`Iterable` is enough for ranking because the function traverses once.
+`Sequence` is useful for `optional_winner` because it checks length/truth and
+indexes position zero.
+
+</details>
+
+## Key points
+
+- Annotations communicate static expectations; Python does not automatically
+  validate or convert arguments at runtime.
+- Annotate public boundaries and ambiguous empty values; let a checker infer
+  obvious locals.
+- Use `T | None` when absence is real, then handle it explicitly.
+- Choose `Iterable`, `Collection`, `Sequence`, `Mapping`, or a concrete mutable
+  type from the operations the function needs.
+- TypedDict describes dictionary-shaped data; a dataclass creates a runtime
+  domain object.
+- Validate untrusted values before claiming a narrow type. Types, validation,
+  and tests answer different questions.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Python `typing` module](https://docs.python.org/3/library/typing.html)
+- [Typing best practices](https://typing.python.org/en/latest/reference/best_practices.html)
+- [Python typing specification: Typed dictionaries](https://typing.python.org/en/latest/spec/typeddict.html)
+- [Python collections abstract base classes](https://docs.python.org/3/library/collections.abc.html)
+
+[Continue to Lesson 3: Read MyPy Errors and Close Type Gaps](mypy-diagnostics-boundaries.qmd){.btn .btn-primary}

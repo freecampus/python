@@ -1,238 +1,165 @@
 ---
-title: Formatting, Linting, and Configuration
+title: Format and Lint a Project with Ruff
 lesson_id: code-quality-maintainability.formatting-linting-configuration
-lesson_order: 30
-description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+lesson_order: 40
+description: Configure Ruff, interpret rule diagnostics, review automatic fixes, and separate deterministic layout from human design and behavior evidence.
 execute:
   echo: true
 categories:
 - python-foundations
 - code-quality-maintainability
-order: 30
+- ruff
+- linting
+- formatting
+order: 40
 colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintainability/formatting-linting-configuration.ipynb
 course_id: python-foundations
 unit_id: code-quality-maintainability
 unit_number: 14
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner to intermediate
-- **Estimated time:** 35–50 minutes
-- **You will learn:** Use PEP 8 and Ruff to keep Python readable and consistent.
-- **Practice in:** VS Code, terminal, pytest, and ruff
+- **Level:** Python Foundations
+- **Estimated time:** 3–4 hours
+- **You will learn:** Run Ruff's formatter and linter as distinct tools, trace findings to configured rules, and turn a noisy file into a reviewed patch.
+- **Practice in:** The Midnight Museum local project, terminal, and Git diff
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. Decide which question you are asking
 
-Use PEP 8 and Ruff to keep Python readable and consistent. This lesson connects the concept to observable behavior, boundaries, and maintainable code.
-
-::: {.callout-note title="Questions to answer with evidence"}
-- What problem does **Style, Formatting, and Linting** solve?
-- What value, output, or failure demonstrates that it works?
-- Which boundary or misuse would expose an incorrect implementation?
-:::
-
-## 2. PEP 8
-
-Use Python's style guide to make code easier to read with other Python users.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-PEP 8 is like road markings: everyone moves more safely when conventions are predictable.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** PEP 8 is a community style guide for naming, spacing, imports, and readability.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
+A teammate sends this museum helper:
 
 ```python
-def calculate_total(price, quantity):
-    return price * quantity
+import os
+import json
+from pathlib import Path
+
+
+def load_team(path: Path):
+    data = json.loads(path.read_text())
+    return data
 ```
 
-### Trace it line by line
+Before running a tool, ask:
 
-1. `def calculate_total(price, quantity):` — Python creates the function `calculate_total`; the indented body runs only when the function is called.
-2. `return price * quantity` — Python evaluates the expression and sends that value back to the caller, ending this call.
+1. Is the layout consistent with the project?
+2. Does static source contain a suspicious or unused construct?
+3. Do the declared types agree across calls?
+4. Does the function return the correct data for real files and failures?
+5. Is the interface understandable to a future maintainer?
 
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
+Those are different questions:
 
-::: {.callout-warning title="Common mistake"}
-Style is not about decoration. Consistent code lowers the mental effort of reading.
-:::
+- `ruff format` rewrites deterministic layout.
+- `ruff check` reports configured lint rules and can fix selected findings.
+- MyPy compares static type contracts.
+- pytest executes behavioral examples.
+- a human decides whether `load_team` has a useful name, contract, error policy,
+  and responsibility.
 
-### Practice pep 8
+Do not treat a clean result from one as a substitute for the others.
 
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **PEP 8**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
+From the project root, run the linter without changing files:
 
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
+```bash
+ruff check src tests
+```
 
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
+For the helper above, Ruff 0.15.20 with the course project's rules reports:
 
-</details>
+```text
+I001 [*] Import block is un-sorted or un-formatted
+ --> src/midnight_museum/storage.py:1:1
+help: Organize imports
 
-### Check your understanding
+F401 [*] `os` imported but unused
+ --> src/midnight_museum/storage.py:1:8
+help: Remove unused import: `os`
+
+Found 2 errors.
+[*] 2 fixable with the `--fix` option.
+```
+
+The file is valid Python and might even pass a happy-path test. The report gives
+a different form of evidence.
+
+## 2. Read a Ruff finding before fixing it
+
+Each diagnostic tells you:
+
+| Field | Meaning in the sample |
+|---|---|
+| `I001` | Rule code; `I` is the import-sorting family |
+| `[*]` | Ruff marks an automatic fix as available |
+| Message | The import block is not in configured order |
+| Path and `1:1` | File, line, and column where the finding is anchored |
+| Help | Proposed action, not proof that the action fits every intention |
+
+`F401` comes from the Pyflakes-compatible `F` family. It says the imported name
+is unused in this module. Usually deleting `os` is correct. Sometimes an import
+is deliberately re-exported from a package. In that case, make the public
+interface explicit—often through `__all__`—rather than accumulating unexplained
+ignores.
+
+### Run one rule or one file while investigating
+
+Focus shortens the feedback loop:
+
+```bash
+ruff check src/midnight_museum/storage.py
+ruff check src/midnight_museum/storage.py --select F401
+ruff rule F401
+```
+
+The first selects a file, the second selects a rule for this run, and the third
+opens Ruff's local explanation. Command-line selection is useful for diagnosis;
+the committed project configuration remains the shared policy.
+
+### Common rule families in this course
+
+The repository selects a deliberate, moderate set:
+
+| Prefix | Kind of evidence | Example |
+|---|---|---|
+| `E` | pycodestyle errors | ambiguous whitespace or a configured long line |
+| `F` | Pyflakes correctness signals | undefined or unused names |
+| `I` | import organization | standard-library and local imports out of order |
+| `UP` | syntax compatible with the target Python | older typing syntax that can be modernized |
+| `B` | bug-prone patterns | a mutable default or loop-variable capture |
+| `RUF` | Ruff-specific checks | ambiguous or unsafe source patterns |
+
+A rule family is not inherently right for every project. Select it because the
+team understands and wants its policy.
+
+### Checkpoint: classify Ruff evidence
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "code-quality-maintainability-style-formatting-and-linting-pep-8",
-  "title": "PEP 8 checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
+  "id": "quality-ruff-diagnostics",
+  "title": "Read the Ruff report",
+  "instructions": "Choose the conclusion supported by the shown command and diagnostic.",
   "questions": [
     {
-      "id": "contract",
-      "prompt": "Which description belongs to PEP 8?",
-      "options": [
-        "A formatter rewrites spacing and layout according to consistent rules.",
-        "PEP 8 is a community style guide for naming, spacing, imports, and readability.",
-        "A linter scans code for likely mistakes and style problems.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
-      "answer_index": 1,
-      "explanation": "PEP 8 is a community style guide for naming, spacing, imports, and readability."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 3. Formatting with Ruff
-
-Automatically format Python code so humans can focus on meaning.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A formatter is like an automatic dishwasher: you still cook, but cleanup is consistent.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A formatter rewrites spacing and layout according to consistent rules.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-
-```
-
-### Trace it line by line
-
-
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Formatting changes layout, not program logic. Review diffs, but do not hand-fight every spacing rule.
-:::
-
-### Practice formatting with ruff
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Formatting with Ruff**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "code-quality-maintainability-style-formatting-and-linting-formatting-with-ruff",
-  "title": "Formatting with Ruff checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to Formatting with Ruff?",
-      "options": [
-        "PEP 8 is a community style guide for naming, spacing, imports, and readability.",
-        "A linter scans code for likely mistakes and style problems.",
-        "A formatter rewrites spacing and layout according to consistent rules.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time."
-      ],
-      "answer_index": 2,
-      "explanation": "A formatter rewrites spacing and layout according to consistent rules."
-    }
-  ]
-}
-</script>
-
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
-
-## 4. Linting with Ruff
-
-Find suspicious code patterns before they become bugs.
-
-::: {.callout-tip title="A useful analogy—and its limit"}
-A linter is a spellchecker for code: it cannot understand everything, but it catches many slips quickly.
-
-The analogy explains the role, not every Python rule. Use the code and its observed result to test where the comparison stops being useful.
-:::
-
-**Contract:** A linter scans code for likely mistakes and style problems.
-
-### Read and predict the example
-
-Before running it, write the values or output you expect and identify the line that produces each one.
-
-```python
-
-```
-
-### Trace it line by line
-
-
-Run from a clean state. Compare the result with the written prediction; if they differ, preserve both as debugging evidence.
-
-::: {.callout-warning title="Common mistake"}
-Ignoring all linter warnings trains you to miss useful feedback. Fix or intentionally configure rules.
-:::
-
-### Practice linting with ruff
-
-1. Recreate the example and annotate the value or state produced by each line.
-2. Choose one input or boundary that matters specifically to **Linting with Ruff**. Predict and test it.
-3. Introduce the common mistake above, capture the evidence, and repair one cause.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the practice</summary>
-
-Keep the original example as a control. Make the smallest change that reaches the chosen boundary, print or assert the important value, and compare it with the contract. Restore a clean state before confirming the repair.
-
-</details>
-
-### Check your understanding
-
-<script type="application/json" class="fcpython-ojs-quiz-config">
-{
-  "id": "code-quality-maintainability-style-formatting-and-linting-linting-with-ruff",
-  "title": "Linting with Ruff checkpoint",
-  "instructions": "Choose the description that matches the code and contract in this section.",
-  "questions": [
-    {
-      "id": "contract",
-      "prompt": "Which description belongs to Linting with Ruff?",
-      "options": [
-        "PEP 8 is a community style guide for naming, spacing, imports, and readability.",
-        "A formatter rewrites spacing and layout according to consistent rules.",
-        "Print debugging adds temporary observations so you can see what the program knows at a point in time.",
-        "A linter scans code for likely mistakes and style problems."
-      ],
+      "id": "f401-meaning",
+      "prompt": "What does `F401 os imported but unused` demonstrate?",
+      "options": ["The program failed every runtime test", "The os package is broken", "The file cannot be parsed", "The configured linter found an imported name with no use in that module"],
       "answer_index": 3,
-      "explanation": "A linter scans code for likely mistakes and style problems."
+      "explanation": "F401 is a bounded static finding. Review whether the import is unnecessary or an intentional public re-export."
+    },
+    {
+      "id": "focus-command",
+      "prompt": "Which command investigates only F401 in one file without editing it?",
+      "options": ["ruff check src/midnight_museum/storage.py --select F401", "ruff format --check", "pytest -q", "mypy --strict"],
+      "answer_index": 0,
+      "explanation": "The selected path and rule narrow the lint run while leaving the file unchanged."
+    },
+    {
+      "id": "human-decision",
+      "prompt": "Which question remains primarily a human design decision after Ruff is clean?",
+      "options": ["Whether imports follow configured ordering", "Whether `load_team` owns an understandable responsibility and error policy", "Whether the file has unused imports", "Whether configured layout is stable"],
+      "answer_index": 1,
+      "explanation": "Domain responsibility and public error policy require knowledge beyond mechanical source rules."
     }
   ]
 }
@@ -240,18 +167,431 @@ Keep the original example as a control. Make the smallest change that reaches th
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 5. Integrate the lesson
+## 3. Let the formatter own mechanical layout
 
-Choose two sections above and build one small example that uses them together. State the input, expected result, and one failure boundary before coding. Keep the result small enough to rerun from a clean state.
+This function is valid Python but inconsistent with the project:
 
-## 6. Key points
+```python
+def museum_label( team:str,score:int )->str:
+    return f"{team}:{score}"
+```
 
-- **PEP 8:** PEP 8 is a community style guide for naming, spacing, imports, and readability.
-- **Formatting with Ruff:** A formatter rewrites spacing and layout according to consistent rules.
-- **Linting with Ruff:** A linter scans code for likely mistakes and style problems.
-- Correctness evidence includes the prediction, observed result, boundary check, and clean rerun.
+Run the formatter in place:
+
+```bash
+ruff format src/midnight_museum/labels.py
+```
+
+The result is deterministic for the selected Ruff version and configuration:
+
+```python
+def museum_label(team: str, score: int) -> str:
+    return f"{team}:{score}"
+```
+
+To check without rewriting—appropriate for a gate—use:
+
+```bash
+ruff format --check src tests
+```
+
+A file needing changes produces a nonzero exit status. A clean run looks like:
+
+```text
+3 files already formatted
+```
+
+### Review formatting as a diff
+
+Even a deterministic tool can touch many lines. Use Git to see the patch:
+
+```bash
+git diff -- src tests
+```
+
+Check that only layout changed, then run behavior tests. A formatter aims to
+preserve behavior, but project confidence comes from the complete evidence
+chain, not trust in a slogan.
+
+### Do not fight the formatter line by line
+
+Ruff's formatter deliberately has a small configuration surface. Agree on a
+line length and a few stable preferences rather than hand-arranging every
+expression. If a formatted expression is difficult to read, improve the source
+structure—extract an intermediate value or function—instead of adding fragile
+spacing.
+
+```python
+def score_attempt(attempt):
+    clue_points = attempt["clues_found"] * 30
+    bonus_points = 25 if attempt["bonus_clue"] else 0
+    overtime_penalty = max(0, attempt["elapsed_minutes"] - 45) * 2
+    return max(0, clue_points + bonus_points - overtime_penalty)
+```
+
+The names solve a reading problem that line wrapping cannot.
+
+## 4. Apply fixes in an order you can explain
+
+Ruff can apply marked safe fixes:
+
+```bash
+ruff check src tests --fix
+ruff format src tests
+```
+
+For the import sample, the first command removes `os` and sorts the remaining
+imports:
+
+```python
+import json
+from pathlib import Path
+
+
+def load_team(path: Path):
+    data = json.loads(path.read_text())
+    return data
+```
+
+Run lint fixes before formatting because a fix may reorganize imports or source
+that then needs formatting. After both commands:
+
+```bash
+git diff --check
+ruff check src tests
+ruff format --check src tests
+pytest -q
+```
+
+### Safe does not mean semantically proven
+
+A “safe fix” means Ruff classifies it as preserving runtime behavior for the
+rule's model. It cannot know external reflection, unusual import side effects,
+or every dynamic dependency. Review the diff.
+
+Ruff can expose fixes it labels unsafe, but do not enable them as a blanket
+shortcut:
+
+```bash
+ruff check src tests --unsafe-fixes
+```
+
+This displays availability; adding `--fix --unsafe-fixes` would apply them. Use
+an unsafe fix only after reading the rule, understanding the behavior risk, and
+having checks that cover the affected contract.
+
+### Fix the cause or document a narrow exception
+
+Suppose a pytest fixture intentionally receives an unused conventional
+argument. A per-file or rule-specific exception can be clearer than renaming
+values throughout production code. But an unexplained global ignore trains
+future maintainers to disregard useful output.
+
+Use this decision order:
+
+1. Is the finding a real bug or unnecessary construct? Fix the source.
+2. Does a safe mechanical fix match the intention? Apply and review it.
+3. Is the rule wrong for the whole project? Change the explicit policy with a
+   reason and review.
+4. Is one file genuinely different? Add the narrowest documented exception.
+5. Never change configuration merely to make a dashboard green.
+
+### Checkpoint: formatter and fixer workflow
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-ruff-fixes",
+  "title": "Turn findings into a reviewed patch",
+  "instructions": "Choose the command or sequence that preserves the clearest evidence.",
+  "questions": [
+    {
+      "id": "check-only",
+      "prompt": "Which command verifies formatting without rewriting source?",
+      "options": ["ruff check --fix", "git diff", "ruff format --check src tests", "pytest -q"],
+      "answer_index": 2,
+      "explanation": "`ruff format --check` reports and exits nonzero for files that would be reformatted while leaving them unchanged."
+    },
+    {
+      "id": "tool-order",
+      "prompt": "Why should Ruff lint fixes usually run before Ruff formatting?",
+      "options": ["Formatting disables linting", "Tests cannot run after formatting", "MyPy requires unsorted imports", "Lint fixes may rewrite imports or source that then needs deterministic formatting"],
+      "answer_index": 3,
+      "explanation": "Run rewrite-producing lint fixes first, then let the formatter normalize their final layout."
+    },
+    {
+      "id": "unsafe-choice",
+      "prompt": "What is the responsible response to an available unsafe fix?",
+      "options": ["Read the rule and behavior risk, apply only deliberately, review the diff, and rerun checks", "Enable all unsafe fixes permanently", "Assume unsafe means syntax error", "Disable every rule in the family"],
+      "answer_index": 0,
+      "explanation": "Unsafe fixes require human judgment and behavior evidence; availability alone is not permission."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Commit the policy in pyproject.toml
+
+A shared project should not depend on one person's editor settings. Put the
+policy beside other project metadata:
+
+```toml
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "UP",
+  "B",
+  "RUF",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+```
+
+### Understand each field
+
+- `line-length` guides wrapping and relevant lint rules; it is not permission
+  to compress every statement up to character 88.
+- `target-version` lets Ruff avoid syntax unavailable to the oldest supported
+  Python. It must agree with `[project].requires-python`.
+- `src` helps import classification for a `src` layout.
+- `select` makes the chosen rule families explicit. Ruff documentation advises
+  adding families deliberately; `ALL` silently grows when a new release adds
+  rules.
+- formatter options choose a few stable preferences without attempting to
+  encode personal layout for every construct.
+
+Ruff discovers `pyproject.toml`, `ruff.toml`, or `.ruff.toml` by walking from a
+file toward parent directories. Run from the expected project root and inspect
+configuration when a result surprises you:
+
+```bash
+ruff check src/midnight_museum/quest.py --show-settings
+```
+
+### File discovery and Git ignores
+
+By default, current Ruff versions discover Python files and Jupyter notebooks
+and respect common ignore files. Passing a file explicitly can override ordinary
+exclusion unless `force-exclude` is configured. This distinction explains why
+“Ruff skipped the generated directory during a project run” and “Ruff checked
+a named generated file” can both be true.
+
+Use tool-specific exclusion when lint and format policy differ:
+
+```toml
+[tool.ruff.format]
+exclude = ["generated/*.py"]
+```
+
+Avoid excluding tests merely because they reveal findings. Tests can have
+narrow, justified differences:
+
+```toml
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+```
+
+Only add a rule that is actually selected and understood. `S101` is shown as a
+configuration-shape example; it is not selected by this unit's base policy.
+
+## 6. Diagnose configuration instead of guessing
+
+Three common surprises have different causes:
+
+### “The formatter passed, but lint failed”
+
+Expected. Formatting handles layout; lint rules inspect other source patterns.
+Run and interpret both.
+
+### “My editor and terminal disagree”
+
+Check whether the editor uses the project configuration and the same Ruff
+version. An editor-specific override can take precedence. Run the committed
+command in the declared environment as the reproducible result.
+
+### “A rule appeared after an upgrade”
+
+An explicit rule family can gain rules in a later tool release. Review the
+release and new diagnostic, then either repair, configure a reasoned exception,
+or pin/update the tool deliberately. Do not combine a large tool upgrade with an
+unrelated refactor if you want a reviewable diff.
+
+::: {.concept-diagram}
+Committed configuration and a resolved tool version produce the repeatable Ruff result.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Python files] --> D[Ruff run]
+  B[pyproject policy] --> D
+  C[Resolved Ruff version] --> D
+  D --> E[Diagnostics]
+  D --> F[Formatted diff]
+  E --> G[Human review]
+  F --> G
+```
+:::
+
+### Checkpoint: configuration boundaries
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-ruff-configuration",
+  "title": "Make Ruff reproducible",
+  "instructions": "Choose the configuration decision that best explains or controls the project result.",
+  "questions": [
+    {
+      "id": "target-version",
+      "prompt": "Why should Ruff's target-version agree with the project's minimum Python version?",
+      "options": ["It changes pytest discovery", "It prevents Ruff from recommending or formatting syntax unavailable to supported interpreters", "It installs Python automatically", "It makes all dependencies typed"],
+      "answer_index": 1,
+      "explanation": "Target version constrains version-sensitive rules and formatting to syntax the project promises to support."
+    },
+    {
+      "id": "all-rules",
+      "prompt": "Why prefer an explicit small `select` list over enabling `ALL` without review?",
+      "options": ["ALL disables fixes", "ALL checks only Markdown", "New releases can add rules, silently changing the project's policy", "Explicit lists make Ruff slower"],
+      "answer_index": 2,
+      "explanation": "A deliberate list keeps policy reviewable when Ruff evolves."
+    },
+    {
+      "id": "editor-disagreement",
+      "prompt": "The editor passes but the terminal gate fails. What should you compare first?",
+      "options": ["Team names in test data", "Only the operating-system theme", "The number of comments", "The Ruff version, discovered project configuration, target path, and editor overrides"],
+      "answer_index": 3,
+      "explanation": "Different versions, config sources, paths, or overrides can legitimately produce different checks."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: turn six findings into a reviewed patch
+
+Create `src/midnight_museum/cleanup.py` with this valid source:
+
+```python
+import os
+import json
+from pathlib import Path
+
+
+BONUS = 25
+
+
+def load_score(path: Path):
+    data = json.loads(path.read_text())
+    score = data["clues"] * 30
+    if data["bonus"] == True:
+        score += BONUS
+    return score
+
+
+def labels(names=[]):
+    names.append("MIDNIGHT MUSEUM")
+    return names
+```
+
+Use the unit configuration, then:
+
+1. run `ruff check` without fixes and classify every finding by rule code;
+2. predict which findings `--fix` will change;
+3. apply safe fixes, then run `ruff format`;
+4. inspect the diff before editing remaining findings;
+5. replace the mutable default with `None` and create a fresh list;
+6. replace the explicit `== True` comparison with the boolean condition;
+7. add useful parameter/return annotations without turning this into the MyPy
+   lesson again;
+8. run lint, format check, MyPy, and pytest; and
+9. explain one choice Ruff made and one design choice you made.
+
+<details>
+<summary>Hint A: start with imports</summary>
+
+`os` is unused and the import block is out of order. Ruff can remove and sort
+those safely. Review the resulting import group.
+
+</details>
+
+<details>
+<summary>Hint B: repair the mutable default</summary>
+
+Use `def labels(names: list[str] | None = None) -> list[str]:`, then create
+`result = [] if names is None else list(names)`. Returning a copy also avoids
+mutating a caller's supplied list.
+
+</details>
+
+<details>
+<summary>Hint C: finish with check-only commands</summary>
+
+After edits, run `ruff check src tests`, `ruff format --check src tests`,
+`mypy src`, and `pytest -q`. The final gate should not rewrite anything.
+
+</details>
+
+<details class="solution">
+<summary>Show one reviewed result</summary>
+
+```python
+import json
+from pathlib import Path
+
+BONUS_POINTS = 25
+
+
+def load_score(path: Path) -> int:
+    data = json.loads(path.read_text())
+    score = data["clues"] * 30
+    if data["bonus"]:
+        score += BONUS_POINTS
+    return score
+
+
+def labels(names: list[str] | None = None) -> list[str]:
+    result = [] if names is None else list(names)
+    result.append("MIDNIGHT MUSEUM")
+    return result
+```
+
+The automatic pass can remove/sort imports and normalize layout. A maintainer
+chooses the name `BONUS_POINTS`, the mutable-default repair, copy behavior, and
+boundary annotations. Add runtime JSON validation in the appropriate boundary
+lesson/project rather than claiming the decoded object is statically safe.
+
+</details>
+
+## Key points
+
+- Formatter, linter, type checker, tests, and human review answer different
+  questions.
+- Read path, position, rule code, message, and fix status before changing code.
+- Apply lint fixes before formatting, inspect the diff, and rerun check-only
+  commands.
+- Safe fixes are still reviewed changes; unsafe fixes require explicit behavior
+  reasoning.
+- Commit a small understood policy and a compatible tool version instead of
+  relying on editor state.
+- A narrow justified exception is better than a global ignore, but repairing
+  the source is usually the first choice.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [Ruff linter](https://docs.astral.sh/ruff/linter/)
+- [Ruff formatter](https://docs.astral.sh/ruff/formatter/)
+- [Configuring Ruff](https://docs.astral.sh/ruff/configuration/)
+- [Ruff rules reference](https://docs.astral.sh/ruff/rules/)
+- [Ruff integrations and tool ordering](https://docs.astral.sh/ruff/integrations/)
+
+[Continue to Lesson 5: Catch Small Problems Before Commit](precommit-quality-gates.qmd){.btn .btn-primary}

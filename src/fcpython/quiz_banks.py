@@ -172,7 +172,8 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "code-quality-maintainability",
             "Code Quality and Maintainability",
-            "improve clarity while preserving behavior with automated checks",
+            "untangle the Clockwork Observatory while preserving its report "
+            "through types and automated quality gates",
         ),
         (
             "documentation-publishing",

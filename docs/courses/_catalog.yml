@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 18
+curriculum_version: 19
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -8,15 +8,15 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 91
-    estimated_effort: 330–475 hours
+    lesson_count: 93
+    estimated_effort: 350–500 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 18
-      rule_version: 9
+      curriculum_version: 19
+      rule_version: 10
       recognition: local-self-reported
       lesson_ids:
         - get-started.programming-python-ai
@@ -103,8 +103,10 @@ courses:
         - testing-python-programs.properties-regressions-tdd
         - code-quality-maintainability.readable-python-pep8
         - code-quality-maintainability.type-annotations-static-checking
+        - code-quality-maintainability.mypy-diagnostics-boundaries
         - code-quality-maintainability.formatting-linting-configuration
         - code-quality-maintainability.precommit-quality-gates
+        - code-quality-maintainability.continuous-integration-quality-gates
         - code-quality-maintainability.evidence-driven-refactoring
         - documentation-publishing.documentation-audiences-readme
         - documentation-publishing.docstrings-api-documentation
@@ -168,7 +170,7 @@ courses:
           unit_id: testing-python-programs
           path: courses/python-foundations/units/testing-python-programs/challenge.qmd
         - id: code-quality-maintainability.challenge
-          title: Rescue a Hard-to-Maintain Report Tool
+          title: Untangle the Clockwork Observatory
           unit_id: code-quality-maintainability
           path: courses/python-foundations/units/code-quality-maintainability/challenge.qmd
         - id: documentation-publishing.challenge
@@ -264,7 +266,7 @@ courses:
         id: code-quality-maintainability
         title: Code Quality and Maintainability
         directory: courses/python-foundations/units/code-quality-maintainability
-        lesson_count: 5
+        lesson_count: 7
         kind: instructional
       - number: 15
         id: documentation-publishing

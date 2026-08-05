@@ -1,0 +1,627 @@
+---
+title: Read MyPy Errors and Close Type Gaps
+lesson_id: code-quality-maintainability.mypy-diagnostics-boundaries
+lesson_order: 30
+description: Run MyPy in strict mode, trace diagnostics through inference and narrowing, and repair real contract mismatches without broad ignores.
+execute:
+  echo: true
+categories:
+- python-foundations
+- code-quality-maintainability
+- mypy
+- static-analysis
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintainability/mypy-diagnostics-boundaries.ipynb
+course_id: python-foundations
+unit_id: code-quality-maintainability
+unit_number: 14
+---
+::: {.lesson-meta}
+- **Level:** Python Foundations
+- **Estimated time:** 3–4 hours
+- **You will learn:** Follow MyPy's evidence from a declared contract to the incompatible value, narrow uncertain types, and keep unchecked `Any` from spreading.
+- **Practice in:** The Midnight Museum local project with MyPy 2.2-compatible examples
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+## 1. A diagnostic is a trail, not a verdict
+
+Suppose the museum package declares this function:
+
+```python
+def overtime_penalty(elapsed_minutes: int) -> int:
+    return max(0, elapsed_minutes - 45) * 2
+```
+
+A caller reads a text field but passes it without conversion:
+
+```python
+raw_minutes: str = "50"
+penalty = overtime_penalty(raw_minutes)
+```
+
+Both snippets are valid Python syntax. Running the caller would eventually
+raise `TypeError` in subtraction. MyPy can compare the declared types without
+executing the call:
+
+```bash
+mypy src
+```
+
+```text
+src/midnight_museum/report.py:4: error: Argument 1 to "overtime_penalty" has incompatible type "str"; expected "int"  [arg-type]
+Found 1 error in 1 file (checked 3 source files)
+```
+
+Before changing anything, answer these questions:
+
+1. Which file and line contains the incompatible call?
+2. What type did MyPy infer or read for the supplied value?
+3. What type does the function contract require?
+4. Is the annotation wrong, or did validation/conversion fail at the caller?
+5. Which focused command will prove that the repair closes this diagnostic?
+
+Read the message from left to right:
+
+| Part | Evidence |
+|---|---|
+| `src/midnight_museum/report.py` | File containing the reported use |
+| `:4` | Line where MyPy can demonstrate the mismatch |
+| `error` | Severity |
+| `Argument 1 ...` | Operation being checked |
+| `str`; expected `int` | Actual and required static types |
+| `[arg-type]` | Stable error-code family for documentation or a precise ignore |
+
+The diagnostic line is not always the original source of the bad assumption.
+Here the boundary accepted text earlier. Repairing `overtime_penalty` to accept
+`str` would weaken a clear numeric contract. Validate or parse before the call:
+
+```python
+def parse_elapsed_minutes(raw_minutes: str) -> int:
+    minutes = int(raw_minutes)
+    if minutes < 0:
+        raise ValueError("elapsed minutes cannot be negative")
+    return minutes
+
+
+raw_minutes = "50"
+penalty = overtime_penalty(parse_elapsed_minutes(raw_minutes))
+assert penalty == 10
+```
+
+Then rerun the smallest useful target and the project target:
+
+```bash
+mypy src/midnight_museum/report.py
+mypy src
+```
+
+## 2. Let inference do useful work, then inspect it deliberately
+
+MyPy follows assignments and return paths even when every local has no explicit
+annotation:
+
+```python
+def score_label(score: int) -> str:
+    points_after_bonus = score + 25
+    return f"{points_after_bonus} points"
+```
+
+It infers `points_after_bonus` as `int` from `score + 25`. If you are unsure what
+it knows, use `reveal_type` temporarily inside a static-only branch:
+
+```python
+from typing import TYPE_CHECKING
+
+
+def score_label(score: int) -> str:
+    points_after_bonus = score + 25
+    if TYPE_CHECKING:
+        reveal_type(points_after_bonus)
+    return f"{points_after_bonus} points"
+```
+
+```text
+src/midnight_museum/scoring.py:7: note: Revealed type is "builtins.int"
+Success: no issues found in 1 source file
+```
+
+`TYPE_CHECKING` is false at ordinary runtime, so the undefined MyPy helper is
+not called. Remove the investigation after it answers the question; a project
+full of stale `reveal_type` notes becomes noise.
+
+Inference is local evidence, not a reason to omit public contracts. Without
+parameter annotations, a function can become dynamically typed:
+
+```python
+def unsafe_label(score):
+    return score.missing_method() + 1
+```
+
+In permissive settings, `score` may become `Any`, and almost every operation is
+accepted. Strict mode reports the missing annotations and checks more of the
+body.
+
+### Checkpoint: read the diagnostic
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-mypy-diagnostic",
+  "title": "Follow MyPy's evidence",
+  "instructions": "Use the shown diagnostic fields and contracts to choose the repair.",
+  "questions": [
+    {
+      "id": "arg-evidence",
+      "prompt": "The message says an argument has type `str` but `overtime_penalty` expects `int`. What is the strongest first investigation?",
+      "options": ["Delete the return annotation", "Ignore every arg-type error", "Find where the text enters and parse or validate it before the numeric boundary", "Change the penalty formula"],
+      "answer_index": 2,
+      "explanation": "The numeric contract is coherent; trace the string back to the external boundary and make the conversion explicit."
+    },
+    {
+      "id": "error-code",
+      "prompt": "What does `[arg-type]` identify in the diagnostic?",
+      "options": ["The Python version", "The runtime exception class", "The test node ID", "The MyPy error-code family for an incompatible argument"],
+      "answer_index": 3,
+      "explanation": "The code names the category and supports targeted documentation or a narrowly scoped ignore."
+    },
+    {
+      "id": "reveal-purpose",
+      "prompt": "When is temporary `reveal_type` useful?",
+      "options": ["When you need to inspect the type MyPy inferred at a specific expression", "To convert a value at runtime", "To install missing dependencies", "To replace a public annotation"],
+      "answer_index": 0,
+      "explanation": "It reports the checker's inferred type, helping trace how a later diagnostic was reached."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Narrow a union along the same branches the runtime checks
+
+MyPy rejects a string operation while `winner` might still be `None`:
+
+```python
+def winner_name(scores: dict[str, int]) -> str | None:
+    if not scores:
+        return None
+    return max(scores, key=scores.get)
+
+
+winner = winner_name({})
+```
+
+Trying `winner.upper()` would produce a union diagnostic because `None` has no
+`upper`. Narrow it with the real runtime decision:
+
+```python
+winner = winner_name({"Moon Moths": 205})
+if winner is None:
+    heading = "NO WINNER"
+else:
+    heading = winner.upper()
+
+assert heading == "MOON MOTHS"
+```
+
+Inside `else`, the impossible `None` case has been removed. The same idea works
+with `object` and `isinstance`:
+
+```python
+def require_score(value: object) -> int:
+    if isinstance(value, bool):
+        raise ValueError("score cannot be boolean")
+    if not isinstance(value, int):
+        raise ValueError("score must be an integer")
+    return value
+
+
+assert require_score(205) == 205
+```
+
+The second branch narrows `value` to `int`. The boolean check comes first
+because booleans are integer subclasses at runtime.
+
+### Exhaust every declared case
+
+A small literal vocabulary can be checked with an explicit final assertion:
+
+```python
+from typing import Literal
+
+Decision = Literal["winner", "runner-up", "participant"]
+
+
+def badge_for(decision: Decision) -> str:
+    if decision == "winner":
+        return "gold"
+    if decision == "runner-up":
+        return "silver"
+    if decision == "participant":
+        return "blue"
+    raise AssertionError("unreachable decision")
+```
+
+For this foundations lesson, the explicit branches are enough. Later Python and
+typing tools offer specialized exhaustive-check helpers, but do not introduce a
+new abstraction when the small vocabulary is already clear.
+
+::: {.concept-diagram}
+Each runtime branch removes impossible members from the static union.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A[Value is str or None] --> B{Value is None?}
+  B -- Yes --> C[Handle absence]
+  B -- No --> D[Value is str]
+  D --> E[Use string operations]
+```
+:::
+
+## 4. Treat Any as a gap in the fence
+
+`Any` is compatible with every type in both directions. That makes it useful at
+rare integration boundaries and dangerous as a default:
+
+```python
+from typing import Any
+
+
+def unchecked_score(payload: Any) -> int:
+    return payload["result"].mystery().points
+```
+
+A checker permits the indexing, nonexistent method, attribute access, and
+`int` return claim because each value derived from `Any` is usually also `Any`.
+The code can fail anywhere at runtime.
+
+`object` is safer when the boundary truly accepts any object:
+
+```python
+def checked_score(payload: object) -> int:
+    if not isinstance(payload, dict):
+        raise ValueError("payload must be a dictionary")
+
+    raw_score = payload.get("score")
+    if isinstance(raw_score, bool) or not isinstance(raw_score, int):
+        raise ValueError("score must be an integer")
+    return raw_score
+```
+
+With `object`, MyPy allows only operations valid for all objects until runtime
+checks narrow it. Use `Any` when interoperability genuinely requires opting out
+of static checking, not because a precise type takes another minute to design.
+
+### Find how Any entered
+
+Common paths include:
+
+- an unannotated function parameter or return value;
+- a third-party library without type information;
+- JSON decoded and immediately claimed to be a domain record;
+- an overbroad `cast` or ignore; and
+- a library configured with `ignore_missing_imports` for every module.
+
+Strict settings such as `disallow_untyped_defs` and
+`warn_return_any` help stop unchecked values from crossing public boundaries.
+Do not respond by annotating everything as `Any`; that satisfies syntax while
+removing the evidence you wanted.
+
+### Checkpoint: narrowing and Any
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-mypy-narrowing",
+  "title": "Close uncertain paths deliberately",
+  "instructions": "Choose the branch or type that preserves the strongest useful checking.",
+  "questions": [
+    {
+      "id": "none-narrow",
+      "prompt": "After `if winner is None: ... else:`, what type can MyPy use for `winner` inside the else branch?",
+      "options": ["object", "str", "None", "Any"],
+      "answer_index": 1,
+      "explanation": "The branch removes the None case, leaving the string member of the declared union."
+    },
+    {
+      "id": "object-any",
+      "prompt": "Why is `object` safer than `Any` for an untrusted boundary?",
+      "options": ["object converts every input", "object is always a dictionary", "A checker requires narrowing before operations that are not valid for every object", "object disables runtime validation"],
+      "answer_index": 2,
+      "explanation": "`object` accepts any value but retains static restrictions; `Any` permits unchecked operations to spread."
+    },
+    {
+      "id": "any-propagation",
+      "prompt": "What usually happens to a value returned by a method called on an `Any` value?",
+      "options": ["It becomes None", "It is inferred as str", "MyPy rejects every method", "It is usually also Any, allowing the unchecked gap to propagate"],
+      "answer_index": 3,
+      "explanation": "Operations on Any generally produce more Any, which can hide mistakes far from the original boundary."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Put strict policy in the project
+
+Command-line flags are easy to forget. Commit the shared contract in
+`pyproject.toml`:
+
+```toml
+[tool.mypy]
+python_version = "3.10"
+strict = true
+show_error_codes = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+```
+
+`strict = true` enables a documented bundle of stricter checks. The bundle may
+evolve across major MyPy versions, which is one reason the development
+dependency and lock matter. The other warnings catch configuration or escape
+hatches that no longer serve a purpose.
+
+Run the same target from the project root:
+
+```bash
+mypy src
+```
+
+```text
+Success: no issues found in 2 source files
+```
+
+A clean result means MyPy found no issue covered by the configured checks. It
+does not mean inputs have been validated, branches have been tested, or the
+business rule is correct.
+
+### Adopt checking in manageable slices
+
+For an older untyped project, turning on strict mode for everything can produce
+hundreds of interacting messages. Start with a coherent boundary:
+
+1. annotate a widely used public function;
+2. annotate the data entering and leaving it;
+3. remove the `Any` gaps revealed nearby;
+4. run a focused MyPy target;
+5. add that target to the quality gate; and
+6. expand without allowing new unchecked functions in the completed area.
+
+A narrow configuration override can document a temporary boundary:
+
+```toml
+[[tool.mypy.overrides]]
+module = ["legacy_importer"]
+ignore_errors = true
+```
+
+This is visible debt, not a finished solution. Prefer a module-scoped migration
+over global `ignore_missing_imports = true`, which can hide misspelled imports
+and missing type information everywhere.
+
+## 6. Understand library types and precise ignores
+
+A typed installed package may include inline annotations and a `py.typed` marker,
+or supply separate stub files ending in `.pyi`. A checker uses those records to
+understand imported functions. If no information is available, MyPy may report
+an import or treat values as `Any`, depending on configuration.
+
+Do not silence every import problem first. Check:
+
+1. Is the import name spelled correctly?
+2. Is the dependency installed in the same environment as MyPy?
+3. Does the library ship types or recommend a stub package?
+4. Is a small local boundary wrapper easier to validate than allowing `Any`
+   through the project?
+
+If an ignore is truly required, name the exact code and explain the external
+constraint:
+
+```python
+from old_museum_reader import load_attempts  # type: ignore[import-untyped]
+```
+
+A precise ignore can become stale. With `warn_unused_ignores`, MyPy reports it
+when the library later gains type information.
+
+Avoid changing an expected return annotation merely to make a real
+implementation error disappear:
+
+```python
+def team_label(team_name: str) -> str:
+    return 42
+```
+
+The right repair is to return text, not claim the public function returns
+`str | int` unless both types are genuine behavior:
+
+```python
+def team_label(team_name: str) -> str:
+    return f"Team: {team_name}"
+
+
+assert team_label("Moon Moths") == "Team: Moon Moths"
+```
+
+### Checkpoint: project policy and repair choices
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-mypy-policy",
+  "title": "Keep the checker trustworthy",
+  "instructions": "Choose the action that preserves an honest project contract.",
+  "questions": [
+    {
+      "id": "wrong-return",
+      "prompt": "`team_label` is declared to return str but returns 42. Which repair best matches its stated purpose?",
+      "options": ["Return formatted text and keep `-> str`", "Change the return to Any", "Add a global ignore", "Delete the function's tests"],
+      "answer_index": 0,
+      "explanation": "The implementation conflicts with a coherent text-label contract; repairing the value preserves the useful interface."
+    },
+    {
+      "id": "precise-ignore",
+      "prompt": "If an untyped legacy dependency genuinely requires an ignore, which form is most reviewable?",
+      "options": ["# type: ignore on every line", "A narrow `# type: ignore[import-untyped]` with the external reason", "strict = false for the whole project", "Annotate every returned value as Any"],
+      "answer_index": 1,
+      "explanation": "A code-specific ignore documents the exact gap and can be reported when it becomes unnecessary."
+    },
+    {
+      "id": "clean-proof",
+      "prompt": "What does `Success: no issues found` demonstrate?",
+      "options": ["All runtime inputs are valid", "Every branch has tests", "The configured MyPy checks found no type issue in the selected target", "The program has no defects"],
+      "answer_index": 2,
+      "explanation": "A clean static run is one bounded kind of evidence, not proof of runtime behavior or complete correctness."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: close seven type gaps
+
+Place this valid Python in `src/midnight_museum/repairs.py`, enable the strict
+configuration above, and run `mypy src/midnight_museum/repairs.py`:
+
+```python
+from typing import Any
+
+
+def first_team(teams):
+    if teams:
+        return teams[0]
+
+
+def score_from_payload(payload: Any) -> int:
+    return payload["score"]
+
+
+def render_score(score: int) -> str:
+    return score
+
+
+def add_bonus(score: int, bonus: str) -> int:
+    return score + bonus
+
+
+winner = first_team(["Moon Moths"])
+print(winner.upper())
+```
+
+Repair these seven gaps without weakening the intended behavior:
+
+1. annotate `teams` with the smallest interface needed for truth and position
+   zero;
+2. make `first_team` declare and return the absent case explicitly;
+3. replace the `Any` payload with `object` and validate a dictionary integer
+   field;
+4. return text from `render_score`;
+5. give `bonus` its actual numeric type;
+6. narrow `winner` before calling `.upper()`; and
+7. keep strict mode and finish with both a clean MyPy run and behavior
+   assertions.
+
+<details>
+<summary>Hint A: start at the outer signatures</summary>
+
+Use `Sequence[str]` for teams and `str | None` for the search result. Use
+`object` for the untrusted payload so every operation must be justified.
+
+</details>
+
+<details>
+<summary>Hint B: narrow the payload in stages</summary>
+
+First require `dict`; then use `.get("score")`; reject booleans and require an
+integer before returning the value.
+
+</details>
+
+<details>
+<summary>Hint C: do not hide the winner case</summary>
+
+Use an explicit `if winner is None` branch. The ordinary branch can safely call
+`.upper()` after the check.
+
+</details>
+
+<details class="solution">
+<summary>Show a complete strict solution</summary>
+
+```python
+from collections.abc import Sequence
+
+
+def first_team(teams: Sequence[str]) -> str | None:
+    if not teams:
+        return None
+    return teams[0]
+
+
+def score_from_payload(payload: object) -> int:
+    if not isinstance(payload, dict):
+        raise ValueError("payload must be a dictionary")
+    score = payload.get("score")
+    if isinstance(score, bool) or not isinstance(score, int):
+        raise ValueError("score must be an integer")
+    return score
+
+
+def render_score(score: int) -> str:
+    return f"{score} points"
+
+
+def add_bonus(score: int, bonus: int) -> int:
+    return score + bonus
+
+
+winner = first_team(["Moon Moths"])
+if winner is None:
+    winner_heading = "NO WINNER"
+else:
+    winner_heading = winner.upper()
+
+assert winner_heading == "MOON MOTHS"
+assert score_from_payload({"score": 205}) == 205
+assert render_score(205) == "205 points"
+assert add_bonus(180, 25) == 205
+```
+
+Run:
+
+```bash
+mypy src/midnight_museum/repairs.py
+pytest -q
+```
+
+Do not accept the repair until static contracts and checked behavior both pass.
+
+</details>
+
+## Key points
+
+- Read a MyPy diagnostic as a trail from reported use to actual and expected
+  types; the highlighted line may not be the original boundary mistake.
+- Use inference for obvious locals and temporary `reveal_type` to inspect a
+  confusing path.
+- Narrow unions and `object` with the same runtime branches that make operations
+  safe.
+- `Any` disables useful checking and tends to propagate; locate and contain its
+  entry point.
+- Commit strict project policy, run a consistent target, and prefer precise,
+  explained ignores over global silence.
+- A clean MyPy run complements runtime validation and tests; it replaces neither.
+
+## References
+
+- [MyPy: Getting started](https://mypy.readthedocs.io/en/stable/getting_started.html)
+- [MyPy: Type narrowing](https://mypy.readthedocs.io/en/stable/type_narrowing.html)
+- [MyPy: Dynamically typed code and Any](https://mypy.readthedocs.io/en/stable/dynamic_typing.html)
+- [MyPy configuration file](https://mypy.readthedocs.io/en/stable/config_file.html)
+- [Typing specification: Distributing type information](https://typing.python.org/en/latest/spec/distributing.html)
+
+[Continue to Lesson 4: Format and Lint a Project with Ruff](formatting-linting-configuration.qmd){.btn .btn-primary}

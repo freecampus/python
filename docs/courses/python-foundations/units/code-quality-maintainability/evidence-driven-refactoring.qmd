@@ -1,14 +1,16 @@
 ---
-title: Evidence-Driven Refactoring
+title: Refactor in Small, Verified Steps
 lesson_id: code-quality-maintainability.evidence-driven-refactoring
-lesson_order: 50
-description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+lesson_order: 70
+description: Improve names, functions, conditionals, duplication, and side-effect boundaries through small diffs that preserve checked behavior.
 execute:
   echo: true
 categories:
 - python-foundations
 - code-quality-maintainability
-order: 50
+- refactoring
+- maintainability
+order: 70
 colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintainability/evidence-driven-refactoring.ipynb
 course_id: python-foundations
 unit_id: code-quality-maintainability
@@ -16,117 +18,154 @@ unit_number: 14
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Improve names and interfaces while checks protect behavior.
-- **Practice in:** Colab, Jupyter, or a local Python project
+- **Estimated time:** 4–5 hours
+- **You will learn:** Name a concrete maintenance cost, make one structural change, and use tests, types, lint, formatting, and diffs to show that observable behavior stayed stable.
+- **Practice in:** The complete Midnight Museum Git project and quality gate
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. Refactoring changes structure on purpose
 
-Refactoring changes structure without intentionally changing observable behavior. Capture tests first, make one coherent change, rerun focused checks, and keep the diff explainable.
-
-::: {.callout-note title="Prediction"}
-Trace the example by hand. Record the important value, output, or failure before running it.
-:::
-
-## 2. Read and trace a complete case
+The Midnight Museum scorer works and its tests pass. A new requirement is
+coming: different galleries will apply different bonus rules. The current
+function combines validation, scoring, sorting, and text output:
 
 ```python
-def active_total(records):
-    """Return amount for records whose status is active."""
-    return sum(
-        record["amount"]
-        for record in records
-        if record["status"] == "active"
-    )
+def build_board(attempts):
+    rows = []
+    for attempt in attempts:
+        if not attempt["team"].strip():
+            raise ValueError("team cannot be empty")
+        if not 0 <= attempt["clues_found"] <= 8:
+            raise ValueError("clues_found must be between 0 and 8")
+        score = attempt["clues_found"] * 30
+        score += 25 if attempt["bonus_clue"] else 0
+        score -= max(0, attempt["elapsed_minutes"] - 45) * 2
+        rows.append((max(0, score), attempt["team"]))
+    rows.sort(reverse=True)
+    return "\n".join(f"{team}: {score}" for score, team in rows)
 ```
 
-### What Python does
+Before editing, answer:
 
-1. The name states result and filter.
-2. The docstring adds a contract rather than narrating syntax.
-3. The expression stays focused on one transformation.
+1. Which observable behaviors already belong to the contract?
+2. What specific maintenance task is expensive in the current structure?
+3. Which smallest structural move would reduce that cost?
+4. Which focused check should run immediately after the move?
+5. Which final gate and diff will show the complete result?
 
-Run the example from a clean state. Compare the evidence with your prediction and identify the first point where they differ.
+**Refactoring** changes internal structure without intentionally changing
+observable behavior. These are not the same activity:
 
-## 3. Debug the boundary
+- changing the bonus from 25 to 40 is a behavior change;
+- repairing a wrong tie order is a bug fix;
+- formatting layout is a mechanical style pass;
+- renaming a private local without changing output is a refactor; and
+- replacing the whole project from memory is a rewrite, not a sequence of
+  controlled refactors.
 
-This version is valid Python but does not satisfy the lesson's intended contract:
+Separate behavior changes from structural changes when possible. A reviewer can
+then ask one clear question of each patch.
+
+## 2. Freeze the behavior you intend to preserve
+
+Start from a known commit and run the complete gate:
+
+```bash
+git status --short
+pytest -q
+ruff check src tests
+ruff format --check src tests
+mypy src
+```
+
+Write down the exact result. Then identify behavior that matters to callers:
+
+- public function names and accepted arguments;
+- returned values and types;
+- exception types and messages promised by the interface;
+- output text and ordering;
+- whether caller-owned collections are mutated;
+- file, terminal, or collaborator side effects; and
+- performance only when it is part of a real requirement.
+
+A characterization test records important existing behavior when the original
+intent is unclear. It is not an endorsement of the behavior; it creates a
+safety boundary for structural work. If the behavior is wrong, change it later
+with an explicit new requirement and test.
 
 ```python
-def calc(a):
-    # add a because we need total
-    return sum(a)
+def test_build_board_preserves_current_tie_order() -> None:
+    attempts = [
+        {"team": "Amber", "clues_found": 2, "elapsed_minutes": 40, "bonus_clue": False},
+        {"team": "Blue", "clues_found": 2, "elapsed_minutes": 40, "bonus_clue": False},
+    ]
+    assert build_board(attempts) == "Blue: 60\nAmber: 60"
 ```
 
-A focused repair is:
+The descending team tie order may be surprising. Preserve it during the
+refactor. A later product decision can change it to alphabetical ascending with
+a separate failing test and release note.
+
+### Tests protect selected behavior, not intention by magic
+
+A weak suite may miss input mutation:
 
 ```python
-def total_amount(amounts):
-    """Return the sum of amounts."""
-    return sum(amounts)
+def test_board_text() -> None:
+    attempts = [
+        {"team": "Moon Moths", "clues_found": 6, "elapsed_minutes": 42, "bonus_clue": True},
+    ]
+    assert build_board(attempts) == "Moon Moths: 205"
 ```
 
-Explain the repair in terms of the contract and observable evidence. Do not accept a change only because the error disappeared.
+Add the ownership boundary if callers rely on it:
 
-## 4. Practice from trace to transfer
+```python
+from copy import deepcopy
 
-1. Refactor vague names with tests in place.
-2. Remove a syntax-narrating comment.
-3. Follow README commands from a clean copy.
 
-<details class="solution">
-<summary>Show a solution strategy after attempting the tasks</summary>
+def test_build_board_does_not_mutate_attempts() -> None:
+    attempts = [
+        {"team": "Moon Moths", "clues_found": 6, "elapsed_minutes": 42, "bonus_clue": True},
+    ]
+    original = deepcopy(attempts)
+    build_board(attempts)
+    assert attempts == original
+```
 
-Start with the smallest acceptance example. Keep inputs explicit, implement one behavior, and rerun the matching check. Add a boundary only after the ordinary case is explained. Compare alternative code by correctness and clarity rather than line count.
+Do not write assertions for every private line. Protect the behavior a caller
+or collaborator can observe.
 
-</details>
-
-## 5. Check your understanding
+### Checkpoint: define the change boundary
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "code-quality-maintainability-documentation-and-refactoring",
-  "title": "Documentation and Evidence-Driven Refactoring checkpoint",
-  "instructions": "Trace the situation before choosing.",
+  "id": "quality-refactor-boundary",
+  "title": "Separate structure from behavior",
+  "instructions": "Choose the classification or evidence that matches the proposed change.",
   "questions": [
     {
-      "id": "preserve",
-      "prompt": "What must refactor preserve?",
-      "options": [
-        "Behavior",
-        "Local names",
-        "Line order",
-        "All comments"
-      ],
-      "answer_index": 0,
-      "explanation": "Refactoring preserves behavior."
-    },
-    {
-      "id": "comment",
-      "prompt": "What is valuable comment?",
-      "options": [
-        "Translate `i += 1`",
-        "Explain a surprising constraint",
-        "Copy code",
-        "State filename"
-      ],
-      "answer_index": 1,
-      "explanation": "Intent adds information."
-    },
-    {
-      "id": "readme",
-      "prompt": "Where verify README commands?",
-      "options": [
-        "Hidden author state",
-        "Only screenshot",
-        "Clean environment",
-        "After errors"
-      ],
+      "id": "bonus-change",
+      "prompt": "Changing the bonus from 25 to 40 is primarily what kind of work?",
+      "options": ["Formatting", "Import sorting", "A behavior/requirement change", "A private rename"],
       "answer_index": 2,
-      "explanation": "Clean setup exposes assumptions."
+      "explanation": "Callers can observe a different score, so the change needs new expected behavior rather than being hidden inside a refactor."
+    },
+    {
+      "id": "characterization",
+      "prompt": "Why add a characterization test for a surprising current tie order before refactoring?",
+      "options": ["To prove the order is ideal", "To make sorting faster", "To replace the requirements", "To detect an accidental structural change while the product decision remains separate"],
+      "answer_index": 3,
+      "explanation": "The test freezes current observable behavior so refactoring and a future behavior decision do not become one ambiguous patch."
+    },
+    {
+      "id": "mutation-evidence",
+      "prompt": "Which check detects accidental mutation of caller-owned attempts?",
+      "options": ["Copy input before the call and assert it is equal afterward", "Count source lines", "Run only Ruff format", "Assert the output is a string"],
+      "answer_index": 0,
+      "explanation": "A before/after ownership assertion observes the boundary that output-only checks miss."
     }
   ]
 }
@@ -134,14 +173,469 @@ Start with the smallest acceptance example. Keep inputs explicit, implement one 
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 3. Make one named move and stop
 
-- Make the behavior and boundary explicit before implementation.
-- Trace values and preserve useful failure evidence.
-- Prefer an interface that can be checked independently.
-- Reuse this skill in the unit challenge rather than treating it as isolated syntax.
+A safe rhythm is deliberately small:
+
+1. state the maintenance problem;
+2. choose one refactoring move;
+3. make only that move;
+4. run the smallest relevant check;
+5. inspect the diff;
+6. run the broader gate at a meaningful checkpoint; and
+7. commit or continue only when the state is understood.
+
+::: {.concept-diagram}
+Each verified move returns to a known state before another structural decision begins.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Green baseline] --> B[One named refactor]
+  B --> C[Focused check]
+  C -- Fail --> D[Inspect earliest difference]
+  D --> B
+  C -- Pass --> E[Review diff]
+  E --> F[Full gate]
+  F --> G[Next move or stop]
+```
+:::
+
+### Rename for the represented concept
+
+Rename a private variable and all its uses together:
+
+```python
+def overtime_penalty(elapsed_minutes: int) -> int:
+    overtime_minutes = max(0, elapsed_minutes - 45)
+    return overtime_minutes * 2
+```
+
+Avoid search-and-replace across unrelated `time` names. Editor rename tools and
+static checks help, but inspect the diff to ensure strings, docs, public names,
+or other scopes did not change accidentally.
+
+### Extract a named intermediate value
+
+This expression is correct but makes three rules compete:
+
+```python
+score = max(0, attempt["clues_found"] * 30 + (25 if attempt["bonus_clue"] else 0) - max(0, attempt["elapsed_minutes"] - 45) * 2)
+```
+
+Expose the stages:
+
+```python
+clue_points = attempt["clues_found"] * 30
+bonus_points = 25 if attempt["bonus_clue"] else 0
+overtime_minutes = max(0, attempt["elapsed_minutes"] - 45)
+overtime_penalty = overtime_minutes * 2
+score = max(0, clue_points + bonus_points - overtime_penalty)
+```
+
+The goal is not more locals. The next bonus/overtime change now has named
+locations and separately inspectable values.
+
+### Extract a cohesive function
+
+After named stages are stable, extract scoring:
+
+```python
+def score_attempt(attempt: Attempt) -> int:
+    clue_points = attempt["clues_found"] * 30
+    bonus_points = 25 if attempt["bonus_clue"] else 0
+    overtime_minutes = max(0, attempt["elapsed_minutes"] - 45)
+    overtime_penalty = overtime_minutes * 2
+    return max(0, clue_points + bonus_points - overtime_penalty)
+```
+
+Keep validation either inside this function by contract or in a clear boundary
+function; do not accidentally remove it during extraction. Run focused scoring
+and invalid-input tests immediately.
+
+### Introduce a named constant when the name explains policy
+
+```python
+BONUS_POINTS = 25
+OVERTIME_START_MINUTES = 45
+OVERTIME_POINTS_PER_MINUTE = 2
+```
+
+A constant is valuable when the name exposes why a number matters or several
+uses must stay synchronized. Replacing every `0`, `1`, and `2` with a constant
+can make ordinary operations harder to read.
+
+## 4. Simplify decisions without changing their edges
+
+Nested code can often become guard clauses:
+
+```python
+def validate_attempt(attempt: Attempt) -> None:
+    if not attempt["team"].strip():
+        raise ValueError("team cannot be empty")
+    if not 0 <= attempt["clues_found"] <= 8:
+        raise ValueError("clues_found must be between 0 and 8")
+    if attempt["elapsed_minutes"] < 0:
+        raise ValueError("elapsed_minutes cannot be negative")
+```
+
+The order is observable when more than one field is invalid because the first
+exception wins. Preserve that order unless a behavior change is intended.
+
+### Replace duplication only after identifying what is truly shared
+
+These branches repeat text shape:
+
+```python
+def badge_message(position: int, team: str) -> str:
+    if position == 1:
+        return f"Gold badge for {team}"
+    if position == 2:
+        return f"Silver badge for {team}"
+    return f"Blue badge for {team}"
+```
+
+Extract the changing value:
+
+```python
+def badge_message(position: int, team: str) -> str:
+    if position == 1:
+        color = "Gold"
+    elif position == 2:
+        color = "Silver"
+    else:
+        color = "Blue"
+    return f"{color} badge for {team}"
+```
+
+A lookup table can be clearer for stable data:
+
+```python
+BADGE_BY_POSITION = {1: "Gold", 2: "Silver"}
+
+
+def badge_message(position: int, team: str) -> str:
+    color = BADGE_BY_POSITION.get(position, "Blue")
+    return f"{color} badge for {team}"
+```
+
+Do not force conditions into data when the branches perform distinct behavior
+or need different validation. Compare the next likely change: adding a third
+special color is simple in the table; adding a branch with a notification side
+effect may deserve explicit control flow.
+
+### Shorter can be less clear
+
+This one-liner combines validation, defaulting, selection, and formatting:
+
+```python
+def label(record):
+    return f"{record.get('team', '').strip() or 'UNKNOWN'}:{max(0, record.get('score', 0))}"
+```
+
+A few named statements give failures and decisions visible homes. Refactoring
+should reduce reasoning cost, not win a line-count contest.
+
+### Checkpoint: choose a useful move
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-refactor-moves",
+  "title": "Choose one structural improvement",
+  "instructions": "Choose the move that addresses the stated maintenance cost without changing the contract.",
+  "questions": [
+    {
+      "id": "extract-function",
+      "prompt": "Bonus and overtime rules change independently from report wording. Which refactor creates the clearest boundary?",
+      "options": ["Put every statement on one line", "Extract `score_attempt` and keep rendering separate", "Delete intermediate names", "Change the public output"],
+      "answer_index": 1,
+      "explanation": "Scoring and presentation have different reasons to change and can be checked through separate interfaces."
+    },
+    {
+      "id": "constant-value",
+      "prompt": "When does `OVERTIME_START_MINUTES = 45` improve the code most?",
+      "options": ["Whenever any integer appears", "Because constants execute faster", "When the name exposes policy/units or synchronized uses of the threshold", "When tests are absent"],
+      "answer_index": 2,
+      "explanation": "A named constant is valuable when its domain meaning or shared policy reduces ambiguity."
+    },
+    {
+      "id": "validation-order",
+      "prompt": "Why preserve guard-clause order during a behavior-preserving extraction?",
+      "options": ["Python requires alphabetical fields", "Ruff sorts conditions", "MyPy cannot check exceptions", "For input with several invalid fields, the first raised exception is observable"],
+      "answer_index": 3,
+      "explanation": "Exception order can be part of observed behavior even when every individual validation rule remains."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Separate pure calculation from effects
+
+A function that reads a file, calculates scores, prints, and writes output is
+hard to check without arranging all effects. Move boundaries outward:
+
+```python
+from pathlib import Path
+
+
+def build_report(attempts: list[Attempt]) -> str:
+    ranked = rank_attempts(attempts)
+    return render_leaderboard(ranked)
+
+
+def write_report(input_path: Path, output_path: Path) -> None:
+    attempts = load_attempts(input_path)
+    report = build_report(attempts)
+    output_path.write_text(report, encoding="utf-8")
+```
+
+Now `build_report` is a pure value transformation. `write_report` owns file
+interaction. This is a structural improvement only if paths, encoding, output,
+exceptions, and call behavior remain compatible with the existing contract.
+
+### Refactors can move side effects accidentally
+
+Compare:
+
+```python
+def announce_and_score(attempt: Attempt) -> int:
+    print(f"Scoring {attempt['team']}")
+    validate_attempt(attempt)
+    return score_attempt(attempt)
+```
+
+Moving validation before printing changes output for invalid input. That may be
+a better design, but it is observable. Decide explicitly and test the intended
+order rather than calling it an invisible cleanup.
+
+### Public names are contracts; private names are freer
+
+Renaming `_calculate_bonus` is usually internal. Renaming `score_attempt` breaks
+imports and callers unless the project updates them or provides a migration.
+This course is pre-release and can approve route/ID resets, but an application
+API still needs an intentional contract decision. A public rename is not a
+behavior-preserving local refactor merely because tests were edited at the same
+time.
+
+## 6. Use the diff as the review artifact
+
+After each move:
+
+```bash
+git diff --stat
+git diff -- src/midnight_museum/quest.py
+git diff --check
+```
+
+Ask:
+
+- Does the diff contain one explainable structural purpose?
+- Did a formatter rewrite unrelated files?
+- Did expected values change without a requirement change?
+- Did public names, exceptions, ordering, mutation, or output move?
+- Are new abstractions named from the domain rather than implementation trivia?
+- Can the old and new behavior be compared with the same tests?
+
+Then run the gate:
+
+```bash
+ruff check src tests
+ruff format --check src tests
+mypy src
+pytest -q
+```
+
+A small diff plus a green gate is strong evidence, not certainty. Explain what
+the tests and checks cover and what remains a judgment.
+
+### Know when to stop
+
+An abstraction has a cost: another name, file, call, and navigation step. Stop
+when the present maintenance problem is solved and the code has a coherent
+shape. Do not add a strategy class, plugin registry, or generic framework for a
+single fixed bonus rule. Future requirements may arrive differently from the
+one you imagined.
+
+### Checkpoint: review and stopping
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-refactor-review",
+  "title": "Review the refactor as evidence",
+  "instructions": "Choose the check or stopping rule that keeps the patch defensible.",
+  "questions": [
+    {
+      "id": "diff-purpose",
+      "prompt": "What makes a refactoring diff easiest to review?",
+      "options": ["It combines a feature, tool upgrade, and rename", "It changes every file", "It removes all tests", "It has one named structural purpose and no unexplained expected-value changes"],
+      "answer_index": 0,
+      "explanation": "A focused patch lets reviewers compare the same behavior against one understandable structural move."
+    },
+    {
+      "id": "effect-order",
+      "prompt": "Moving validation before a print changes output for invalid input. How should that be treated?",
+      "options": ["As invisible formatting", "As an observable behavior decision with its own requirement/check", "As proof that print is wrong", "As a type-only change"],
+      "answer_index": 1,
+      "explanation": "Side-effect order is observable; choose and test the new behavior explicitly rather than hiding it in a refactor."
+    },
+    {
+      "id": "stop-rule",
+      "prompt": "When should you stop extracting abstractions?",
+      "options": ["Only after every line is a function", "When no constants remain", "When the stated maintenance problem is solved and another layer would add indirection without present value", "Never; more layers are always clearer"],
+      "answer_index": 2,
+      "explanation": "Maintainability balances local clarity with navigation and abstraction cost."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: refactor the museum ranking pipeline without a rewrite
+
+Use the complete `build_board` function from Section 1 and the existing green
+tests. Preserve:
+
+- public name `build_board`;
+- exact report text;
+- zero score floor;
+- validation exception types/messages/order;
+- descending score and descending team tie order;
+- no mutation of input; and
+- Python 3.10-compatible typed interfaces.
+
+Perform these moves separately:
+
+1. add missing characterization checks for tie order and mutation;
+2. extract named score stages;
+3. extract `validate_attempt` without changing exception order;
+4. extract `score_attempt` and rerun only scoring/invalid tests;
+5. introduce only constants whose names expose policy;
+6. extract ranking and rendering boundaries;
+7. annotate the completed private/public boundaries honestly;
+8. run Ruff and review its formatting separately;
+9. inspect the full diff for an accidental behavior edit; and
+10. run the complete local gate.
+
+Keep a change log:
+
+| Move | Maintenance problem | Focused check | Diff observation |
+|---|---|---|---|
+| Add tie test | Current order was implicit | tie test passes | No production edit |
+| Extract scoring | Bonus rule mixed with report | scoring tests pass | Public output unchanged |
+| … | … | … | … |
+
+<details>
+<summary>Hint A: freeze unusual behavior first</summary>
+
+Use the descending `Blue` then `Amber` tie example and a deep copy of attempts.
+Do not “improve” the tie policy during this structural lab.
+
+</details>
+
+<details>
+<summary>Hint B: extract in two stages</summary>
+
+First create named intermediate scoring values inside `build_board`. When the
+focused tests pass, move those same statements into `score_attempt`. This makes
+a failed extraction easier to compare.
+
+</details>
+
+<details>
+<summary>Hint C: preserve tuple sorting exactly</summary>
+
+`ranked.sort(reverse=True)` on `(score, team)` tuples implements descending
+order for both fields. Keep that operation if exact current behavior is the
+contract. A key using `(-score, team)` would change ties.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete behavior-preserving result</summary>
+
+```python
+from collections.abc import Sequence
+from typing import TypedDict
+
+CLUE_POINTS = 30
+BONUS_POINTS = 25
+OVERTIME_START_MINUTES = 45
+OVERTIME_POINTS_PER_MINUTE = 2
+
+
+class Attempt(TypedDict):
+    team: str
+    clues_found: int
+    elapsed_minutes: int
+    bonus_clue: bool
+
+
+def validate_attempt(attempt: Attempt) -> None:
+    if not attempt["team"].strip():
+        raise ValueError("team cannot be empty")
+    if not 0 <= attempt["clues_found"] <= 8:
+        raise ValueError("clues_found must be between 0 and 8")
+
+
+def score_attempt(attempt: Attempt) -> int:
+    validate_attempt(attempt)
+    clue_points = attempt["clues_found"] * CLUE_POINTS
+    bonus_points = BONUS_POINTS if attempt["bonus_clue"] else 0
+    overtime_minutes = max(
+        0,
+        attempt["elapsed_minutes"] - OVERTIME_START_MINUTES,
+    )
+    overtime_penalty = overtime_minutes * OVERTIME_POINTS_PER_MINUTE
+    return max(0, clue_points + bonus_points - overtime_penalty)
+
+
+def rank_attempts(attempts: Sequence[Attempt]) -> list[tuple[int, str]]:
+    ranked = [
+        (score_attempt(attempt), attempt["team"])
+        for attempt in attempts
+    ]
+    ranked.sort(reverse=True)
+    return ranked
+
+
+def build_board(attempts: Sequence[Attempt]) -> str:
+    return "\n".join(
+        f"{team}: {score}" for score, team in rank_attempts(attempts)
+    )
+```
+
+This solution intentionally preserves the original validation shown in Section
+1: team and clue count. If the project contract also rejects negative elapsed
+minutes, add that as a separate behavior change with a failing example first.
+The constants and extra functions are justified by the planned bonus-rule
+change and independently checkable stages.
+
+</details>
+
+## Key points
+
+- Refactoring changes structure without intentionally changing observable
+  behavior; features and bug fixes need separate requirements and evidence.
+- Freeze important output, exceptions, ordering, mutation, and side effects
+  before moving code.
+- Make one named move, run a focused check, inspect the diff, and return to the
+  full gate at useful checkpoints.
+- Rename, extract values/functions, introduce policy constants, simplify
+  branches, remove real duplication, and isolate effects only when they solve a
+  stated maintenance problem.
+- Shorter and more abstract are not synonyms for clearer.
+- Stop when the problem is solved; every new layer has a reading and navigation
+  cost.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [pytest: Good integration practices](https://docs.pytest.org/en/stable/explanation/goodpractices.html)
+- [Python tutorial: Coding Style](https://docs.python.org/3/tutorial/controlflow.html#intermezzo-coding-style)
+- [Git diff documentation](https://git-scm.com/docs/git-diff)
+- [Refactoring catalog](https://refactoring.com/catalog/)
+
+[Continue to the Unit Challenge](challenge.qmd){.btn .btn-primary}

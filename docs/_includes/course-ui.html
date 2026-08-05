@@ -137,8 +137,8 @@
       }
       if (!progress.courses[id] && create) {
         progress.courses[id] = {
-          curriculum_version: 18,
-          completion_rule_version: 9,
+          curriculum_version: 19,
+          completion_rule_version: 10,
           completed_lessons: {},
           completed_challenges: {},
           capstone_status: "not_started",
@@ -149,8 +149,8 @@
       }
       const state = progress.courses[id] || null;
       if (state) {
-        state.curriculum_version = 18;
-        state.completion_rule_version = 9;
+        state.curriculum_version = 19;
+        state.completion_rule_version = 10;
         state.completed_lessons = state.completed_lessons || {};
         state.completed_challenges = state.completed_challenges || {};
         state.capstone_status = state.capstone_status || "not_started";

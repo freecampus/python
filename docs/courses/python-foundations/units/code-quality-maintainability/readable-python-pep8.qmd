@@ -1,8 +1,8 @@
 ---
-title: Readable Python and PEP 8
+title: Write Python People Can Follow
 lesson_id: code-quality-maintainability.readable-python-pep8
 lesson_order: 10
-description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+description: Improve names, layout, expressions, and function structure so a reader can verify a change without translating the program first.
 course_id: python-foundations
 unit_id: code-quality-maintainability
 unit_number: 14
@@ -11,126 +11,190 @@ execute:
 categories:
 - python-foundations
 - code-quality-maintainability
+- readability
+- pep8
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintainability/readable-python-pep8.ipynb
 ---
 ::: {.lesson-meta}
-- **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Level:** Beginner project maintainer
+- **Estimated time:** 3–4 hours
+- **You will learn:** Make readability choices that expose represented values, units, control flow, and the next likely change while preserving behavior.
+- **Practice in:** The Midnight Museum project, a notebook for comparisons, and a local test runner
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+## 1. Readability reduces the work before the real work
 
-Code is read far more often than it is first typed. Consistent names and small visible steps reduce the work needed to verify behavior and locate defects.
-
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
-
-## 1. Read and predict a complete case
+A Midnight Museum team earns 30 points per clue, 25 points for a bonus clue,
+and loses 2 points for every minute after minute 45. You need to change the
+bonus from 25 to 40. Start with this valid implementation:
 
 ```python
-def average_score(scores):
-    """Return the arithmetic mean, or None when no scores exist."""
-    if not scores:
-        return None
-
-    total = sum(scores)
-    return total / len(scores)
+def calc(x):
+    a = x[0] * 30
+    b = 25 if x[2] else 0
+    c = max(0, x[1] - 45) * 2
+    return a + b - c
 
 
-result = average_score([8, 9, 10])
-print(result)
+assert calc((6, 42, True)) == 205
 ```
 
-### Step-by-step explanation
+Before editing, answer four questions:
 
-1. The function name states the returned concept.
-2. The early return handles the empty boundary before the main calculation.
-3. `total` names an intermediate value with domain meaning.
-4. Spacing and blank lines follow common Python conventions without affecting output.
+1. Which position contains elapsed minutes?
+2. Does `b` represent the presence of a bonus, the clue, or the awarded points?
+3. Can the result become negative?
+4. Which line must change, and how will you prove that ordinary attempts did not
+   change accidentally?
 
-::: {.callout-note title="Make one controlled change"}
-Rename `scores` to `values` and decide which name communicates the contract more precisely in this domain.
-:::
+The interpreter has enough information. A maintainer does not. The tuple
+positions and short names force the reader to reconstruct meaning before
+reasoning about the change.
 
-## 2. Investigate the important boundary
-
-PEP 8 is a communication convention, not proof of correct design. A perfectly formatted function can still have vague responsibilities, hidden state, or incorrect boundaries.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+Rewrite only the representation and names:
 
 ```python
-def passing_names(records, minimum_score):
-    names = []
-    for record in records:
-        if record["score"] >= minimum_score:
-            names.append(record["name"])
-    return names
+def score_attempt(clues_found, elapsed_minutes, found_bonus_clue):
+    clue_points = clues_found * 30
+    bonus_points = 25 if found_bonus_clue else 0
+    overtime_minutes = max(0, elapsed_minutes - 45)
+    overtime_penalty = overtime_minutes * 2
+    return clue_points + bonus_points - overtime_penalty
 
 
-assert passing_names([{"name": "Ada", "score": 9}], 8) == ["Ada"]
+assert score_attempt(6, 42, True) == 205
 ```
 
-Then complete the learning loop:
+The second function is longer, but each line answers a domain question. A
+future change to overtime has a visible location. Length is not the goal;
+reducing unnecessary reconstruction is.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+### Name the value and its unit
 
-<details>
-<summary>Check your practice process</summary>
+A strong name usually combines the represented idea with information needed to
+use it safely:
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+| Name | What the reader still has to discover |
+|---|---|
+| `t` | Everything |
+| `time` | Elapsed time, start time, deadline, or clock time? Which unit? |
+| `elapsed` | Which unit? |
+| `elapsed_minutes` | The represented duration and unit are visible |
 
-</details>
+Units matter whenever two values of the same Python type are not
+interchangeable. `elapsed_minutes`, `distance_km`, and `price_cents` make a
+wrong calculation easier to spot even before the type lesson.
 
-## 4. Check your understanding
+::: {.callout-warning title="Longer is not automatically clearer"}
+`number_of_clues_found_by_the_current_team` repeats context already supplied by
+`score_attempt`. Prefer the shortest name that stays unambiguous in its scope.
+:::
+
+## 2. Let conventions carry familiar information
+
+[PEP 8](https://peps.python.org/pep-0008/) gives Python projects a shared set of
+reading conventions. It is guidance for consistency, not a law that overrides
+clarity. PEP 8 itself says consistency within a project and within a function
+matters greatly, and that a recommendation can be ignored when following it
+would reduce readability.
+
+Common naming shapes communicate a role before the reader opens the definition:
+
+```python
+MAX_CLUES = 8
+OVERTIME_START_MINUTES = 45
+
+
+def score_attempt(clues_found, elapsed_minutes, found_bonus_clue):
+    ...
+
+
+class QuestResult:
+    ...
+
+
+def _validate_attempt(clues_found, elapsed_minutes):
+    ...
+```
+
+- `lowercase_with_underscores` is conventional for functions and variables.
+- `CapitalizedWords` identifies classes.
+- `UPPER_CASE_WITH_UNDERSCORES` signals a module-level value treated as a
+  constant by the project.
+- One leading underscore marks an implementation detail such as
+  `_validate_attempt`; it does not create security or runtime privacy.
+- Avoid inventing `__double_underscore__` names. Python reserves that shape for
+  documented language protocols.
+
+A trailing underscore avoids a keyword collision without an obscure
+abbreviation:
+
+```python
+def group_by_class(class_):
+    return f"Gallery class: {class_}"
+
+
+assert group_by_class("clockwork") == "Gallery class: clockwork"
+```
+
+### Make booleans read as questions
+
+Compare the branch conditions:
+
+```python
+def bonus_points(bonus):
+    return 25 if bonus else 0
+
+
+def bonus_points(found_bonus_clue):
+    return 25 if found_bonus_clue else 0
+```
+
+`if found_bonus_clue` can be read aloud as a yes/no statement. Names beginning
+with `is_`, `has_`, `can_`, or a past-tense action often help, but choose the
+wording that matches the domain. Avoid double negatives:
+
+```python
+def can_enter_gallery(has_ticket, is_gallery_closed):
+    return has_ticket and not is_gallery_closed
+
+
+assert can_enter_gallery(True, False) is True
+```
+
+`not is_not_open` would make the reader perform an avoidable logic conversion.
+
+### Checkpoint: names and conventions
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "code-quality-maintainability-readable-python-pep8",
-  "title": "Readable Python and PEP 8 checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "quality-readable-names",
+  "title": "Names that carry meaning",
+  "instructions": "Choose the option that gives a future reader the strongest evidence.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "Why is `minimum_score` clearer than a short name such as `m`?",
-      "options": [
-        "Python requires every parameter to contain an underscore.",
-        "Long names make all code execute faster.",
-        "PEP 8 forbids one-letter names in every context.",
-        "It communicates the argument's role at the point where the function is read or called."
-      ],
-      "answer_index": 3,
-      "explanation": "A domain-specific name reduces the context a reader must reconstruct."
+      "id": "unit-name",
+      "prompt": "A function receives a duration used in a per-minute penalty. Which parameter is clearest?",
+      "options": ["elapsed_minutes", "value", "elapsed", "e"],
+      "answer_index": 0,
+      "explanation": "The name exposes both the represented duration and the unit used by the calculation."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun."
-      ],
+      "id": "constant-shape",
+      "prompt": "Which name follows the usual Python convention for a module-level overtime threshold treated as constant?",
+      "options": ["OvertimeStart", "OVERTIME_START_MINUTES", "overtimeStart", "__overtime__"],
       "answer_index": 1,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "Uppercase words separated by underscores communicate a project constant; the unit also remains visible."
+    },
+    {
+      "id": "boolean-read",
+      "prompt": "Which condition communicates its yes/no meaning most directly?",
+      "options": ["if b:", "if not not_open:", "if found_bonus_clue:", "if value == True:"],
+      "answer_index": 2,
+      "explanation": "The condition reads as a domain statement and avoids a double negative or redundant comparison."
     }
   ]
 }
@@ -138,14 +202,453 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 3. Shape the file so its groups are visible
+
+Whitespace does not repair poor design, but consistent layout helps readers see
+where one idea ends and another begins. Put imports at the top, group standard
+library, third-party, and local imports, and keep one import per line unless a
+`from` import is clearer:
+
+```python
+from dataclasses import dataclass
+from pathlib import Path
+
+import pytest
+
+from midnight_museum.scoring import score_attempt
+```
+
+In an ordinary module, separate top-level classes and functions with two blank
+lines. Within a function, use a blank line to separate meaningful stages—not
+after every statement.
+
+Long expressions are safest to wrap inside parentheses, brackets, or braces.
+The delimiters make continuation explicit and let every indentation level remain
+four spaces:
+
+```python
+leaderboard_line = (
+    f"{position}. {team_name} — "
+    f"{score} points in {elapsed_minutes} minutes"
+)
+```
+
+A trailing comma makes multi-line collections and calls easier to extend and
+produces smaller diffs:
+
+```python
+quality_commands = [
+    "ruff check src tests",
+    "mypy src",
+    "pytest -q",
+]
+```
+
+Do not compress independent actions onto one physical line:
+
+```python
+def record_score(scores, team, score):
+    scores[team] = score
+    return scores[team]
+
+
+scores = {}
+assert record_score(scores, "Moon Moths", 205) == 205
+```
+
+The equivalent `scores[team] = score; return scores[team]` is valid Python, but
+it hides two actions on a line and produces a worse location when one action
+fails.
+
+### Formatting exposes structure; it does not choose structure
+
+A formatter can normalize spaces, wrapping, quotes, and trailing commas. It
+cannot decide that `x[1]` should become `elapsed_minutes`, that a tuple should
+be a structured record, or that one function owns too many responsibilities.
+Those choices require domain knowledge. Lesson 4 will show exactly what Ruff
+can and cannot automate.
+
+## 4. Keep the main path easy to find
+
+Nested branches make a reader hold unfinished conditions in memory:
+
+```python
+def admission_message(has_ticket, is_gallery_open, age):
+    if has_ticket:
+        if is_gallery_open:
+            if age >= 12:
+                return "Enter the puzzle gallery"
+            return "Enter with an adult"
+        return "The gallery is closed"
+    return "A ticket is required"
+```
+
+Guard clauses handle rejected cases first and leave the ordinary successful
+path at the lowest indentation level:
+
+```python
+def admission_message(has_ticket, is_gallery_open, age):
+    if not has_ticket:
+        return "A ticket is required"
+    if not is_gallery_open:
+        return "The gallery is closed"
+    if age < 12:
+        return "Enter with an adult"
+    return "Enter the puzzle gallery"
+```
+
+Both functions can be correct. The second is helpful when the rejected cases
+are independent and the final path is the main action. Guard clauses are not a
+rule to apply blindly: a small two-sided `if/else` can remain clearer when both
+branches have equal importance.
+
+::: {.concept-diagram}
+The guard-clause version closes rejected paths before the main result.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A[Admission request] --> B{Has ticket?}
+  B -- No --> C[Require ticket]
+  B -- Yes --> D{Gallery open?}
+  D -- No --> E[Report closed]
+  D -- Yes --> F{Age at least 12?}
+  F -- No --> G[Enter with adult]
+  F -- Yes --> H[Enter gallery]
+```
+:::
+
+### Keep one level of detail in view
+
+This function mixes scoring rules, sorting, and text presentation:
+
+```python
+def leaderboard(attempts):
+    rows = []
+    for attempt in attempts:
+        score = attempt["clues_found"] * 30
+        if attempt["bonus_clue"]:
+            score += 25
+        score -= max(0, attempt["elapsed_minutes"] - 45) * 2
+        rows.append((score, attempt["team"]))
+    rows.sort(reverse=True)
+    return "\n".join(f"{team}: {score}" for score, team in rows)
+```
+
+Do not split it merely to maximize the number of functions. Split when the
+parts have distinct reasons to change and useful names:
+
+```python
+def score_attempt(attempt):
+    clue_points = attempt["clues_found"] * 30
+    bonus_points = 25 if attempt["bonus_clue"] else 0
+    overtime_penalty = max(0, attempt["elapsed_minutes"] - 45) * 2
+    return clue_points + bonus_points - overtime_penalty
+
+
+def rank_attempts(attempts):
+    scored = [(score_attempt(attempt), attempt["team"]) for attempt in attempts]
+    return sorted(scored, reverse=True)
+
+
+def render_leaderboard(attempts):
+    return "\n".join(
+        f"{team}: {score}" for score, team in rank_attempts(attempts)
+    )
+```
+
+Now a scoring change has a named home, and presentation can change without
+editing the calculation. Later lessons will refine the record types and tie
+rule.
+
+### Checkpoint: layout and control flow
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-readable-layout",
+  "title": "Layout that reveals the program",
+  "instructions": "Choose the answer that best supports the stated maintenance task.",
+  "questions": [
+    {
+      "id": "formatter-limit",
+      "prompt": "Which improvement requires domain knowledge rather than an automatic formatter?",
+      "options": ["Normalize spaces around an operator", "Wrap a long call", "Add a trailing comma", "Rename `t` to `elapsed_minutes` because the penalty is per minute"],
+      "answer_index": 3,
+      "explanation": "A formatter can apply layout rules, but it cannot know which real-world value and unit `t` represents."
+    },
+    {
+      "id": "guard-path",
+      "prompt": "Why can independent guard clauses make `admission_message` easier to change?",
+      "options": ["They close rejected cases early and leave the successful path visible", "They make every function execute faster", "They remove the need for tests", "They force all branches to return the same text"],
+      "answer_index": 0,
+      "explanation": "Each rejected case finishes, so the reader does not carry several open conditions into the main path."
+    },
+    {
+      "id": "split-reason",
+      "prompt": "What is the strongest reason to separate scoring from leaderboard rendering?",
+      "options": ["Every function must contain exactly three lines", "The calculation and text format have different reasons to change", "Python cannot sort values inside a rendering function", "PEP 8 forbids loops and strings in one function"],
+      "answer_index": 1,
+      "explanation": "Separate responsibilities are useful when they change for different reasons and can be checked independently."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Prefer clarity over clever compression
+
+A concise expression can be excellent when its shape is familiar:
+
+```python
+active_teams = [
+    attempt["team"]
+    for attempt in attempts
+    if attempt["clues_found"] > 0
+]
+```
+
+Compression becomes expensive when it hides several rules:
+
+```python
+scores = {
+    attempt["team"]: max(
+        0,
+        attempt["clues_found"] * 30
+        + (25 if attempt["bonus_clue"] else 0)
+        - max(0, attempt["elapsed_minutes"] - 45) * 2,
+    )
+    for attempt in attempts
+    if attempt["team"].strip()
+}
+```
+
+The expression is valid, but validation, scoring, filtering, and construction
+compete for attention. A loop with named stages makes debugging easier:
+
+```python
+scores = {}
+for attempt in attempts:
+    team_name = attempt["team"].strip()
+    if not team_name:
+        continue
+
+    score = score_attempt(attempt)
+    scores[team_name] = max(0, score)
+```
+
+Choose based on what the next reader must verify. A comprehension with one
+mapping and one filter is often clear. Several nested conditions, side effects,
+or independent domain rules usually deserve statements and names.
+
+### Comments should add missing reasons
+
+This comment merely translates syntax:
+
+```python
+# Add 25 to score.
+score += 25
+```
+
+This one preserves information that the expression cannot show:
+
+```python
+# The paper-map clue stays worth 25 points to match the printed rule cards.
+score += 25
+```
+
+A stale comment is worse than no comment because it sends the maintainer toward
+a false contract. Keep the rule in tests or project documentation as well when
+it is public behavior. Unit 15 will teach documentation design in depth.
+
+## 6. Review a change by behavior and readability
+
+Suppose the requirement changes to “overtime begins after 50 minutes and costs
+3 points per minute.” A controlled patch should:
+
+1. update or add behavior examples at minutes 50 and 51;
+2. rename a misleading threshold if necessary;
+3. change the threshold and rate in one visible calculation;
+4. rerun the focused tests; and
+5. inspect the diff for an unrelated style rewrite.
+
+```python
+OVERTIME_START_MINUTES = 50
+OVERTIME_PENALTY_PER_MINUTE = 3
+
+
+def overtime_penalty(elapsed_minutes):
+    overtime_minutes = max(0, elapsed_minutes - OVERTIME_START_MINUTES)
+    return overtime_minutes * OVERTIME_PENALTY_PER_MINUTE
+
+
+assert overtime_penalty(50) == 0
+assert overtime_penalty(51) == 3
+```
+
+The names make both axes of the change explicit. The assertions establish the
+threshold boundary. A later type annotation will show that the values are
+integers, but only these names show that they are minutes and points.
+
+### Checkpoint: readable change evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-readable-change",
+  "title": "A change another maintainer can verify",
+  "instructions": "Use the requirement and code evidence, not line count, to choose.",
+  "questions": [
+    {
+      "id": "compression-cost",
+      "prompt": "When is a loop preferable to the dense score comprehension shown above?",
+      "options": ["Only when the collection has more than ten items", "Whenever a formatter changes quotes", "When several rules and decisions need names or separate debugging evidence", "Because comprehensions are not Python"],
+      "answer_index": 2,
+      "explanation": "Statements and intermediate names help when a reader must verify multiple independent rules."
+    },
+    {
+      "id": "comment-value",
+      "prompt": "Which comment adds information that is not already visible in `score += 25`?",
+      "options": ["Add points", "Increase score by twenty-five", "Use plus equals", "Keep 25 points to match the printed rule cards"],
+      "answer_index": 3,
+      "explanation": "The printed-card constraint explains why the value exists and what must remain synchronized."
+    },
+    {
+      "id": "change-first",
+      "prompt": "Before changing the overtime threshold from 45 to 50, what is the strongest first evidence to add?",
+      "options": ["Checks for minutes 50 and 51 with the expected penalties", "A screenshot of the formatted source", "A shorter function name", "An assertion that every score is an integer"],
+      "answer_index": 0,
+      "explanation": "The changed threshold needs examples on both sides so the intended behavior is explicit before the implementation moves."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: make the museum scorer reviewable
+
+Start from this behavior-correct but difficult function:
+
+```python
+def make_board(xs):
+    out = []
+    for x in xs:
+        n = x["c"] * 30 + (25 if x["b"] else 0) - max(0, x["m"] - 45) * 2
+        out.append((max(0, n), x["t"]))
+    out.sort(reverse=True)
+    return "\n".join(f"{t}: {n}" for n, t in out)
+```
+
+Use these acceptance checks before and after every controlled change:
+
+```python
+attempts = [
+    {"t": "Moon Moths", "c": 6, "m": 42, "b": True},
+    {"t": "Brass Bats", "c": 7, "m": 50, "b": False},
+]
+
+expected = "Moon Moths: 205\nBrass Bats: 200"
+assert make_board(attempts) == expected
+assert make_board([]) == ""
+```
+
+Complete these stages:
+
+1. Write a table explaining every current key and local name.
+2. Replace vague names with domain names without changing the record keys yet.
+3. Extract a scoring function whose intermediate values reveal the rule.
+4. Extract rendering only if its responsibility becomes clearer.
+5. Decide whether `reverse=True` expresses the tie behavior you want. Do not
+   change the public behavior during this lab; record the concern for a future
+   requirement.
+6. Run the assertions after each stage and keep one before/after diff.
+7. Explain three decisions that a formatter could not make for you.
+
+<details>
+<summary>Hint A: map the current keys</summary>
+
+`t` is the team name, `c` is clues found, `m` is elapsed minutes, and `b` records
+whether the team found the bonus clue. Rename locals first; changing keys and
+structure simultaneously makes a failure harder to locate.
+
+</details>
+
+<details>
+<summary>Hint B: extract the calculation</summary>
+
+A useful extracted function can name `clue_points`, `bonus_points`,
+`overtime_minutes`, and `overtime_penalty`. Keep the final `max(0, ...)` because
+that is current observable behavior.
+
+</details>
+
+<details>
+<summary>Hint C: inspect the tie rule</summary>
+
+Sorting `(score, team)` tuples with `reverse=True` orders both score and team in
+descending order. Preserve it for this behavior-preserving lab, but write down
+whether an alphabetical ascending tie rule would be more understandable as a
+future behavior change.
+
+</details>
+
+<details class="solution">
+<summary>Show one complete behavior-preserving refactor</summary>
+
+```python
+def score_attempt(attempt):
+    clue_points = attempt["c"] * 30
+    bonus_points = 25 if attempt["b"] else 0
+    overtime_minutes = max(0, attempt["m"] - 45)
+    overtime_penalty = overtime_minutes * 2
+    return max(0, clue_points + bonus_points - overtime_penalty)
+
+
+def make_board(attempts):
+    ranked_scores = []
+    for attempt in attempts:
+        team_name = attempt["t"]
+        score = score_attempt(attempt)
+        ranked_scores.append((score, team_name))
+
+    ranked_scores.sort(reverse=True)
+    return "\n".join(
+        f"{team_name}: {score}" for score, team_name in ranked_scores
+    )
+
+
+attempts = [
+    {"t": "Moon Moths", "c": 6, "m": 42, "b": True},
+    {"t": "Brass Bats", "c": 7, "m": 50, "b": False},
+]
+assert make_board(attempts) == "Moon Moths: 205\nBrass Bats: 200"
+assert make_board([]) == ""
+```
+
+This version keeps the public function name, input keys, output, zero floor,
+and descending tuple tie rule. Changing the data shape or tie policy would be a
+separate behavior/interface change with its own tests.
+
+</details>
+
 ## Key points
 
-::: {.callout-tip title="Key points"}
-- Choose names that expose domain roles and boundaries.
-- Use structure and early returns to make the main path visible.
-- Formatting supports communication but does not replace design or behavior checks.
-:::
+- Readability is the effort required to verify meaning and make a safe change,
+  not the fewest lines.
+- Names should expose domain roles and units without repeating obvious scope.
+- PEP 8 supplies shared conventions, but project consistency and clarity take
+  priority over mechanical obedience.
+- Layout, guard clauses, and cohesive functions can reveal structure; a
+  formatter cannot choose the right domain structure for you.
+- Prefer a clear loop when compression hides several rules or debugging points.
+- Protect behavior before renaming or restructuring, and keep each diff focused.
 
 ## References
 
-- https://peps.python.org/pep-0008/
+- [PEP 8: Style Guide for Python Code](https://peps.python.org/pep-0008/)
+- [PEP 20: The Zen of Python](https://peps.python.org/pep-0020/)
+- [Software Carpentry: Programming Style](https://swcarpentry.github.io/python-novice-gapminder/instructor/18-style.html)
+- [Python tutorial: Coding Style](https://docs.python.org/3/tutorial/controlflow.html#intermezzo-coding-style)
+
+[Continue to Lesson 2: Make Contracts Visible with Type Annotations](type-annotations-static-checking.qmd){.btn .btn-primary}

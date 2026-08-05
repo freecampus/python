@@ -1,14 +1,16 @@
 ---
-title: Pre-commit Hooks and Local Quality Gates
+title: Catch Small Problems Before Commit
 lesson_id: code-quality-maintainability.precommit-quality-gates
-lesson_order: 40
-description: Make behavior-preserving improvements using readable conventions, types, automated checks, and evidence rather than taste alone.
+lesson_order: 50
+description: Configure and diagnose pre-commit hooks so staged changes receive fast, visible feedback before they reach shared review.
 execute:
   echo: true
 categories:
 - python-foundations
 - code-quality-maintainability
-order: 40
+- pre-commit
+- git-hooks
+order: 50
 colab_notebook: notebooks/courses/python-foundations/units/code-quality-maintainability/precommit-quality-gates.ipynb
 course_id: python-foundations
 unit_id: code-quality-maintainability
@@ -16,111 +18,181 @@ unit_number: 14
 ---
 ::: {.lesson-meta}
 - **Level:** Python Foundations
-- **Estimated time:** 60–90 minutes
-- **You will learn:** Run checks automatically before commits and on shared repositories.
-- **Practice in:** Generated Colab notebook and a local project when appropriate
+- **Estimated time:** 3–4 hours
+- **You will learn:** Install, run, and debug a local pre-commit gate, including staged-file selection, tool modifications, failed hooks, and reproducible configuration.
+- **Practice in:** A local Git checkout of the Midnight Museum project
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## 1. The problem this lesson solves
+## 1. Move feedback closer to the edit
 
-A project’s quality agreement is useful only when it runs consistently. Local hooks provide fast feedback; continuous integration repeats the documented commands in a clean shared environment.
+By the end of Lesson 4, the museum project has a reliable manual sequence:
 
-::: {.callout-note title="Prediction"}
-Before running the example, write the output or failure you expect and identify the line that will produce it.
+```bash
+ruff check src tests
+ruff format --check src tests
+mypy src
+pytest -q
+```
+
+The sequence works only when someone remembers to run it. A Git pre-commit hook
+runs after `git commit` begins but before Git creates the commit. The
+**pre-commit** framework manages those hook programs and their configuration.
+
+Before installing anything, answer these questions:
+
+1. Which files will an ordinary hook run inspect?
+2. What happens if a formatter changes a file during the hook?
+3. How does a hook communicate failure to Git?
+4. Where are shared hook definitions stored, and where is the installed Git
+   script stored?
+5. Why does a local hook improve feedback without replacing CI?
+
+Start with a Git repository and a committed configuration file named
+`.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff lint
+        entry: ruff check
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: Ruff format
+        entry: ruff format
+        language: system
+        types: [python]
+      - id: mypy
+        name: MyPy
+        entry: mypy src
+        language: system
+        pass_filenames: false
+      - id: pytest
+        name: pytest
+        entry: pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+```
+
+Install the Git hook script once per clone:
+
+```bash
+pre-commit install
+```
+
+```text
+pre-commit installed at .git/hooks/pre-commit
+```
+
+The YAML belongs in version control. The installed `.git/hooks/pre-commit`
+script is local to this checkout. A new clone must run `pre-commit install`
+again.
+
+::: {.concept-diagram}
+The framework selects staged files, runs configured hooks, and lets Git continue only after a successful result.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Working tree] --> B[git add]
+  B --> C[Staged snapshot]
+  C --> D[git commit]
+  D --> E[pre-commit hooks]
+  E -- Pass --> F[Commit created]
+  E -- Fail or modify --> G[Review and repair]
+  G --> B
+```
 :::
 
-## 2. Define one quality command sequence and distinguish local convenience from the authoritative CI result.
+## 2. Read configuration as an execution contract
 
-```python
-quality_steps = [
-    "ruff check src tests",
-    "ruff format --check src tests",
-    "mypy src",
-    "pytest -q",
-]
+Each field answers a practical question:
 
-for step in quality_steps:
-    print(step)
+- `repos` lists sources of hook definitions.
+- `repo: local` means this project supplies the command instead of downloading a
+  hook repository.
+- `id` is the stable name used to select one hook.
+- `name` is the label shown in output.
+- `entry` is the command executed; pre-commit does not split a shell pipeline
+  for you unless the hook intentionally invokes a shell.
+- `language: system` uses commands already available in the active environment.
+- `types: [python]` filters filenames by identified file type.
+- `pass_filenames: false` prevents pre-commit from appending selected filenames
+  to a project-level command such as `mypy src` or `pytest -q`.
+- `always_run: true` runs the test hook even when no selected Python filename
+  would otherwise reach it.
+
+### Isolated hooks versus system commands
+
+A remote hook repository can declare its own language environment and revision:
+
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.20
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
 ```
 
-### Step-by-step explanation
+Pre-commit downloads and caches the pinned hook environment. This improves
+isolation and makes the revision visible. It also needs network access on the
+first run.
 
-1. The ordered list makes the project quality contract visible rather than relying on memory.
-2. Fast static checks run before the broader test suite, shortening feedback.
-3. CI should invoke the same commands from committed configuration in a clean environment.
+`language: system` is convenient when the project already installs all tools in
+one locked development environment. It assumes that environment is active and
+contains compatible commands. Neither style is universally correct; choose and
+document the environment boundary. The course repository uses system hooks for
+Ruff and MyPy because its Poetry/Conda development environment owns those tools.
 
-Run from a clean state and compare the observed result with your prediction. Keep the mismatch if it reveals an incorrect assumption.
+### Put rewrite-producing hooks first
 
-## 3. Debug a contract violation
+If lint fixes or formatters change source, run them before check-only tools:
 
-This version is syntactically valid but communicates or implements the wrong contract:
+1. Ruff lint/fix;
+2. Ruff formatting;
+3. MyPy;
+4. pytest.
 
-```python
-quality_steps = [
-    "ruff check src tests || true",
-    "pytest -q || true",
-]
-```
+A later check should examine the final source shape. In CI, use check-only
+commands because automation should report an unformatted commit rather than
+silently create an uncommitted correction.
 
-A focused repair is:
-
-```python
-quality_steps = [
-    "ruff check src tests",
-    "ruff format --check src tests",
-    "mypy src",
-    "pytest -q",
-]
-```
-
-Explain why the repair changes the observable behavior. A disappearing error is not enough evidence by itself.
-
-## 4. Practice from trace to transfer
-
-1. Write a pre-commit configuration for formatting and linting.
-2. Sketch a CI job that installs the locked project before checks.
-3. Create one deliberate lint failure and locate it in local and CI output.
-
-<details class="solution">
-<summary>Show a verification strategy after attempting the tasks</summary>
-
-Write one ordinary acceptance example and one boundary before implementation. Make one change, rerun the smallest matching check, then rerun the complete example from a clean state.
-
-</details>
-
-## 5. Check your understanding
+### Checkpoint: configuration anatomy
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "code-quality-maintainability-pre-commit-and-ci",
-  "title": "Pre-commit and CI checkpoint",
-  "instructions": "Trace the code and contract before choosing.",
+  "id": "quality-precommit-config",
+  "title": "Read a hook configuration",
+  "instructions": "Choose the field or trade-off supported by the YAML.",
   "questions": [
     {
-      "id": "authority",
-      "prompt": "What extra evidence does CI provide beyond a local hook?",
-      "options": [
-        "The code has no possible defects",
-        "Every contributor uses the same editor",
-        "No dependency can ever change",
-        "The committed workflow passes in a clean shared environment"
-      ],
-      "answer_index": 3,
-      "explanation": "CI reduces dependence on one developer’s uncommitted state and machine configuration."
+      "id": "pass-filenames",
+      "prompt": "Why set `pass_filenames: false` for `entry: mypy src`?",
+      "options": ["To prevent pre-commit from appending selected filenames to a command intentionally checking the whole src target", "To disable MyPy", "To make Git stage every file", "To run the command only on Markdown"],
+      "answer_index": 0,
+      "explanation": "The command already owns its target; appended filenames could change scope or produce a confusing invocation."
     },
     {
-      "id": "failure",
-      "prompt": "Why is `pytest -q || true` unsuitable for a quality gate?",
-      "options": [
-        "It converts a failing test command into a successful shell status",
-        "It makes tests too fast",
-        "It installs pytest twice",
-        "It hides only passing tests"
-      ],
-      "answer_index": 0,
-      "explanation": "A gate must propagate failure so automation can stop and report it."
+      "id": "system-tradeoff",
+      "prompt": "What does `language: system` require?",
+      "options": ["A Docker daemon", "The entry command must already exist in the active environment", "Every hook must be written in Bash", "The hook revision is downloaded automatically"],
+      "answer_index": 1,
+      "explanation": "System hooks reuse installed commands, so the project environment must provide compatible versions."
+    },
+    {
+      "id": "install-location",
+      "prompt": "Which file is shared, and which installation is local to a clone?",
+      "options": ["Both files live only on GitHub", "The .git hook is committed and YAML is generated", "`.pre-commit-config.yaml` is committed; the script under `.git/hooks/` is installed locally", "Both are Python modules"],
+      "answer_index": 2,
+      "explanation": "The repository shares configuration, while each checkout installs its own Git hook script."
     }
   ]
 }
@@ -128,13 +200,334 @@ Write one ordinary acceptance example and one boundary before implementation. Ma
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 6. Key points
+## 3. Ordinary commits check the staged snapshot
 
-- State the behavior contract before selecting syntax or tools.
-- Trace the values and boundaries that provide observable evidence.
-- Preserve one useful failure and verify the repair from a clean state.
+Git distinguishes the working tree from the staged snapshot. If you edit
+`quest.py` and run `git add`, the current content becomes staged. If you edit it
+again without staging, the working tree and staged version differ.
+
+Inspect both deliberately:
+
+```bash
+git status --short
+git diff
+git diff --cached
+```
+
+- `git diff` shows unstaged working-tree changes.
+- `git diff --cached` shows the patch the next commit would contain.
+- pre-commit temporarily manages unstaged changes so hooks can check the staged
+  snapshot without mixing it with unrelated work.
+
+A normal commit might show:
+
+```text
+Ruff lint...............................................................Passed
+Ruff format.............................................................Passed
+MyPy...................................................................Passed
+pytest.................................................................Passed
+```
+
+A pass means each configured hook exited successfully for the selected state.
+It does not prove that every repository file was checked: file filters and the
+ordinary staged-file selection still matter.
+
+### Run the whole repository when adding or changing hooks
+
+The first time a hook is introduced, existing unstaged files might contain the
+very problem it checks. Run:
+
+```bash
+pre-commit run --all-files
+```
+
+Run one hook while diagnosing:
+
+```bash
+pre-commit run ruff-check --all-files --verbose
+```
+
+`--verbose` displays more command output even when useful details would
+otherwise be hidden.
+
+### Passed, skipped, modified, and failed mean different things
+
+```text
+Ruff lint...............................................................Passed
+Check YAML.........................................(no files to check)Skipped
+Ruff format.............................................................Failed
+- hook id: ruff-format
+- files were modified by this hook
+MyPy...................................................................Failed
+- hook id: mypy
+- exit code: 1
+```
+
+- **Passed:** the hook returned success and made no disallowed change.
+- **Skipped:** no selected file matched or the configured stage did not apply.
+- **Modified/Failed:** a rewriting hook changed a file. Review the diff, stage
+  the new content, and run again.
+- **Failed with exit code:** the command found a problem or could not run. Read
+  its diagnostic before editing.
+
+Do not immediately rerun `git commit` after a formatter modification. First:
+
+```bash
+git diff
+git add src/midnight_museum/quest.py
+pre-commit run --all-files
+```
+
+The second clean run proves no hook has another change to make.
+
+## 4. Diagnose the earliest surprising result
+
+### A hook says “command not found”
+
+For a system hook, activate/install the declared development environment and
+confirm `command --version`. For an isolated remote hook, inspect environment
+creation output and network/cache availability.
+
+### A hook skips a file you expected
+
+Check `files`, `exclude`, `types`, `types_or`, the Git stage, and whether the
+file is tracked. Use `pre-commit run <id> --files path/to/file.py --verbose` to
+test selection explicitly.
+
+### MyPy receives unexpected filenames
+
+Project commands often need `pass_filenames: false`. Otherwise pre-commit
+appends selected files to the entry. Inspect verbose output and make the command
+contract explicit.
+
+### pytest does not run on a documentation-only commit
+
+If tests are part of every commit's local gate, use `always_run: true` with
+`pass_filenames: false`. If the project intentionally runs tests only on Python
+changes, document that policy and rely on CI for the authoritative full gate.
+
+### A formatter keeps failing on every run
+
+Inspect the diff and tool order. A lint fix after formatting may rewrite code
+back into a shape that needs another format pass. Put fixers before formatters,
+then ensure the second run is idempotent.
+
+### Checkpoint: interpret hook results
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-precommit-results",
+  "title": "Respond to hook evidence",
+  "instructions": "Choose the next action that preserves staged-state and diagnostic evidence.",
+  "questions": [
+    {
+      "id": "modified-file",
+      "prompt": "Ruff format reports that files were modified. What should happen next?",
+      "options": ["Use --no-verify", "Delete the formatter hook", "Commit the old staged snapshot", "Review the diff, stage the intended formatting, and rerun the hooks"],
+      "answer_index": 3,
+      "explanation": "The hook produced a new working-tree state; review and stage it, then prove a clean idempotent rerun."
+    },
+    {
+      "id": "skipped-hook",
+      "prompt": "A YAML hook says `(no files to check) Skipped`. What does that mean?",
+      "options": ["No selected staged file matched that hook's filters", "The whole repository is valid YAML", "The hook was deleted", "CI has already passed"],
+      "answer_index": 0,
+      "explanation": "Skipped is a selection result, not evidence about files outside the hook's current target."
+    },
+    {
+      "id": "all-files",
+      "prompt": "Why run `pre-commit run --all-files` when introducing a hook?",
+      "options": ["To create a commit automatically", "To apply the new policy to existing tracked files, not only the next staged patch", "To bypass file filters", "To push the branch"],
+      "answer_index": 1,
+      "explanation": "An ordinary commit checks staged changes; all-files establishes the baseline across existing tracked content."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Keep hooks fast, visible, and bypassable
+
+A hook that takes twenty minutes encourages people to avoid it. Put fast
+formatting, linting, and focused type checks early. Whether the full test suite
+belongs in pre-commit or pre-push depends on project size. The Midnight Museum
+suite is small enough to run locally on each commit.
+
+Git permits bypassing verification with `git commit --no-verify`. This is useful
+for rare recovery workflows and is also why a local hook cannot be the shared
+authority. A contributor may not install it, may have a different environment,
+or may bypass it. CI repeats the committed contract on a clean shared runner.
+
+Do not describe pre-commit as a security boundary. It is a feedback and
+consistency tool running code defined by a repository. Review hook sources and
+revisions before executing an unfamiliar project's configuration.
+
+### Update revisions as real dependency changes
+
+For remote hooks:
+
+```bash
+pre-commit autoupdate
+pre-commit run --all-files
+```
+
+Inspect the revision diff and tool behavior. An automatic version edit is a
+proposal, not evidence that the new version fits the project. Keep the update in
+a focused patch when possible.
+
+::: {.callout-warning title="Never erase user work to satisfy a hook"}
+A formatter or fixer should touch only intended files. Inspect `git status` and
+`git diff`; do not reset, clean, or overwrite unrelated working-tree changes.
+:::
+
+## 6. Build one named local quality contract
+
+A project is easier to automate when the commands are stable and visible:
+
+```text
+ruff check src tests
+ruff format --check src tests
+mypy src
+pytest -q
+```
+
+The pre-commit configuration may use a rewriting `ruff format` for convenience,
+while the final manual/CI gate uses `ruff format --check`. Keep that distinction
+explicit:
+
+- **local repair loop:** tools may make reviewable changes;
+- **acceptance gate:** commands report nonzero rather than modifying committed
+  source.
+
+Lesson 6 will place the check-only sequence in CI.
+
+### Checkpoint: limits of a local gate
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "quality-precommit-boundary",
+  "title": "Know what the local gate proves",
+  "instructions": "Choose the conclusion supported by the local hook design.",
+  "questions": [
+    {
+      "id": "hook-limit",
+      "prompt": "Why does a passing pre-commit hook not replace CI?",
+      "options": ["Hooks cannot run Python", "CI never runs commands", "A local hook can be absent, bypassed, or affected by uncommitted machine state", "Git forbids hooks in projects"],
+      "answer_index": 2,
+      "explanation": "CI adds a committed workflow and clean shared environment instead of relying on one checkout."
+    },
+    {
+      "id": "repair-vs-gate",
+      "prompt": "Which command belongs in a check-only acceptance gate?",
+      "options": ["ruff format src tests", "ruff check --fix", "git add -A", "ruff format --check src tests"],
+      "answer_index": 3,
+      "explanation": "The gate should report formatting drift with a nonzero exit status, not rewrite uncommitted files."
+    },
+    {
+      "id": "update-proof",
+      "prompt": "After `pre-commit autoupdate` changes revisions, what provides meaningful acceptance evidence?",
+      "options": ["Review the revision diff and rerun all hooks and project checks", "Assume latest always passes", "Delete the lock file", "Hide the changed YAML"],
+      "answer_index": 0,
+      "explanation": "A version update changes executable tooling and must be reviewed and verified like another dependency change."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: build the museum project's local gate
+
+In the Midnight Museum Git project:
+
+1. add local hooks for Ruff lint, Ruff format, MyPy, and pytest;
+2. ensure project-wide tools do not receive appended staged filenames;
+3. install the hook;
+4. create and stage an unsorted import plus an unused import;
+5. commit or run the hook and capture the first modified/failed output;
+6. inspect, stage, and rerun the repaired file;
+7. introduce a real MyPy argument mismatch and explain its diagnostic;
+8. repair it rather than suppressing it; and
+9. finish with a clean `pre-commit run --all-files` transcript.
+
+<details>
+<summary>Hint A: use the verified local order</summary>
+
+Place Ruff lint before Ruff format, then MyPy and pytest. Use `language: system`
+for this lab because the active project environment already owns the tools.
+
+</details>
+
+<details>
+<summary>Hint B: select the full-project commands</summary>
+
+Set `pass_filenames: false` for `mypy src` and `pytest -q`. Add
+`always_run: true` to pytest if it should run on every commit.
+
+</details>
+
+<details>
+<summary>Hint C: prove the second run is clean</summary>
+
+After a hook modifies a file, inspect `git diff`, stage the intended result, and
+run `pre-commit run --all-files` again. A single modifying run is not completion.
+
+</details>
+
+<details class="solution">
+<summary>Show a complete local configuration</summary>
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff lint
+        entry: ruff check
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: Ruff format
+        entry: ruff format
+        language: system
+        types: [python]
+      - id: mypy
+        name: MyPy
+        entry: mypy src
+        language: system
+        pass_filenames: false
+      - id: pytest
+        name: pytest
+        entry: pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+```
+
+A clean run should end with four `Passed` statuses. Preserve the earlier
+modified-file and MyPy failure records too; they demonstrate that the gate
+actually detected and helped repair intended problems.
+
+</details>
+
+## Key points
+
+- Git hooks are local event scripts; pre-commit shares and manages their
+  configuration and environments.
+- Ordinary commit hooks check the staged snapshot, while `--all-files`
+  establishes a repository-wide baseline.
+- Passed, skipped, modified, and failed outputs carry different evidence.
+- Review and stage tool modifications, then rerun until the gate is idempotent.
+- Use explicit filters, `pass_filenames`, ordering, and environment choices so
+  commands run in the intended scope.
+- A fast local hook shortens feedback but remains bypassable and machine-local;
+  CI is the shared clean gate.
 
 ## References
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/)
-- [The Python Standard Library](https://docs.python.org/3/library/)
+- [pre-commit official documentation](https://pre-commit.com/)
+- [Git hooks documentation](https://git-scm.com/docs/githooks)
+- [Ruff integration with pre-commit](https://docs.astral.sh/ruff/integrations/#pre-commit)
+
+[Continue to Lesson 6: Repeat the Quality Gate in CI](continuous-integration-quality-gates.qmd){.btn .btn-primary}
