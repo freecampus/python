@@ -644,6 +644,105 @@ process.stdout.write(JSON.stringify({{
     assert observed["newProgress"] is None
 
 
+def test_course_continue_uses_recorded_progress_not_the_last_page_visited() -> None:
+    course_ui = Path("docs/_includes/course-ui.html").read_text()
+    script = course_ui.split("<script>", 1)[1].rsplit("</script>", 1)[0]
+    course_home = Path("docs/courses/python-foundations/index.qmd").read_text()
+    site = "https://freecampus.github.io/python/"
+    overview = f"{site}courses/python-foundations/units/get-started/"
+    first_lesson = f"{overview}meet-python-first-program.html"
+    second_lesson = f"{overview}learn-with-evidence.html"
+    unit_two_lesson = (
+        f"{site}courses/python-foundations/units/core-values-types/"
+        "values-types-none-conversion.html"
+    )
+    activities = [
+        first_lesson,
+        second_lesson,
+        f"{overview}challenge.html",
+        unit_two_lesson,
+    ]
+
+    def render_resume(completed_lessons: dict[str, str]) -> dict[str, str]:
+        storage = {
+            "fcpython.progress.v6": json.dumps(
+                {
+                    "schema_version": 6,
+                    "courses": {
+                        "python-foundations": {
+                            "completed_lessons": completed_lessons,
+                            "completed_challenges": {},
+                        }
+                    },
+                }
+            ),
+            "fcpython.last-lesson.v6": json.dumps(
+                {
+                    "schema_version": 6,
+                    "global": None,
+                    "courses": {
+                        "python-foundations": {
+                            "key": (
+                                "courses/python-foundations/units/"
+                                "core-values-types/values-types-none-conversion"
+                            )
+                        }
+                    },
+                }
+            ),
+        }
+        harness = f"""
+const storage = new Map(Object.entries({json.dumps(storage)}));
+const resumeLink = {{
+  dataset: {{fcCourseResume: "python-foundations"}},
+  href: {json.dumps(overview)},
+  textContent: "Start Unit 0",
+}};
+const activityLinks = {json.dumps(activities)}.map((href) => ({{href}}));
+const sidebar = {{
+  querySelector: () => null,
+  querySelectorAll: () => activityLinks,
+}};
+global.window = {{
+  location: {{
+    href: {json.dumps(f"{site}courses/python-foundations/")},
+    pathname: "/python/courses/python-foundations/",
+  }},
+  localStorage: {{
+    getItem: (key) => storage.has(key) ? storage.get(key) : null,
+    setItem: (key, value) => storage.set(key, value),
+  }},
+}};
+global.document = {{
+  querySelector: (selector) => selector === "#quarto-sidebar" ? sidebar : null,
+  querySelectorAll: (selector) =>
+    selector === "[data-fc-course-resume]" ? [resumeLink] : [],
+  body: {{classList: {{add: () => {{}}}}}},
+  title: "Python Foundations",
+}};
+{script}
+process.stdout.write(JSON.stringify(resumeLink));
+"""
+        result = subprocess.run(
+            ["node"], input=harness, text=True, capture_output=True, check=True
+        )
+        return json.loads(result.stdout)
+
+    not_started = render_resume({})
+    in_progress = render_resume(
+        {"get-started.meet-python-first-program": "2026-08-05T00:00:00Z"}
+    )
+
+    assert "[Start Unit 0](units/get-started/index.qmd)" in course_home
+    assert not_started == {
+        "dataset": {"fcCourseResume": "python-foundations"},
+        "href": overview,
+        "textContent": "Start Unit 0",
+    }
+    assert in_progress["href"] == second_lesson
+    assert in_progress["textContent"] == "Continue course"
+
+
 def test_navbar_links_every_course() -> None:
     quarto = _yaml(Path("docs/_quarto.yml"))
     courses = _yaml(Path("docs/courses/_catalog.yml"))["courses"]

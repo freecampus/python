@@ -183,6 +183,38 @@
       });
     }
 
+    function courseActivityLinks(id) {
+      const prefix = `courses/${id}/`;
+      const seen = new Set();
+      const links = [
+        ...(sidebar?.querySelectorAll("a.sidebar-link[href]") || []),
+      ];
+      return links.filter((link) => {
+        const key = pageKey(link.href);
+        const isActivity =
+          isLessonKey(key) || isChallengeKey(key) || isProjectKey(key);
+        if (!key.startsWith(prefix) || !isActivity || seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function courseActivityIsComplete(id, key) {
+      const activityLessonId = lessonIdFromKey(key);
+      const activityChallengeId = challengeIdFromKey(key);
+      if (activityLessonId) {
+        return Boolean(completedLessons(id)[activityLessonId]);
+      }
+      if (activityChallengeId) {
+        return Boolean(completedChallenges(id)[activityChallengeId]);
+      }
+      return Boolean(
+        isProjectKey(key) && courseState(id)?.capstone_status === "complete",
+      );
+    }
+
     function idsFromDataset(value) {
       return (value || "").split(/\s+/).filter(Boolean);
     }
@@ -529,7 +561,7 @@
           document.querySelector("h1.title")?.textContent.trim() ||
           document.title,
       };
-      saved.schema_version = 5;
+      saved.schema_version = 6;
       saved.global = lesson;
       saved.courses = saved.courses || {};
       saved.courses[courseId] = lesson;
@@ -553,14 +585,25 @@
     }
 
     function setupCourseResumeLinks() {
-      const saved = readJson(lastLessonKey, null);
       document.querySelectorAll("[data-fc-course-resume]").forEach((link) => {
         const id = link.dataset.fcCourseResume;
-        const lastLesson = saved?.courses?.[id];
-        if (!lastLesson?.key) {
+        const activities = courseActivityLinks(id);
+        const started = activities.some((activity) =>
+          courseActivityIsComplete(id, pageKey(activity.href)),
+        );
+        if (!started) {
           return;
         }
-        link.href = hrefForKey(lastLesson.key);
+
+        const next = activities.find(
+          (activity) => !courseActivityIsComplete(id, pageKey(activity.href)),
+        );
+        if (!next) {
+          link.textContent = "Review course";
+          return;
+        }
+
+        link.href = next.href;
         link.textContent = "Continue course";
       });
     }
