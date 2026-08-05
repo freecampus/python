@@ -1,66 +1,168 @@
 ---
 title: Get Started Overview
-description: Choose a dependable learning environment and use prediction, execution, explanation, modification, debugging, and responsible AI assistance as a repeatable learning loop.
+description: Prepare a dependable Python learning lab, practise from observable evidence, and choose browser or local tools without assuming previous programming experience.
 course_id: python-foundations
 unit_id: get-started
 unit_number: 0
 categories:
-- python-foundations
-- get-started
-- overview
+  - python-foundations
+  - get-started
+  - overview
 order: 0
 colab_notebook: notebooks/courses/python-foundations/units/get-started/index.ipynb
 ---
 ::: {.lesson-meta}
+
 - **Level:** Python Foundations · Unit 0
-- **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Choose a dependable learning environment and use prediction, execution, explanation, modification, debugging, and responsible AI assistance as a repeatable learning loop.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 13–20 hours including the challenge
+- **Unit outcome:** Run and explain a small Python program, keep trustworthy evidence in a clean notebook, choose a suitable practice environment, diagnose common first-run problems, and use AI assistance without surrendering prediction or verification.
+- **Practice in:** Google Colab or Jupyter, then a local editor and terminal when your device permits
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. Start with a working place to learn
 
-Choose a dependable learning environment and use prediction, execution, explanation, modification, debugging, and responsible AI assistance as a repeatable learning loop.
+You do not need programming experience before this unit. You do not need to
+memorize Python words, choose a career specialty, or install every tool you have
+heard about. You need one place where you can run a small program, observe what
+happens, preserve useful notes, and try again without hiding the evidence.
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+The fastest route is a browser notebook such as Google Colab. It lets you begin
+without installing Python. A local workspace becomes important when you need to
+work with saved files, project folders, terminals, editors, and isolated
+environments. This unit teaches both routes. If a school or work computer blocks
+installation, you will record that constraint, continue in Colab, and identify
+what access you will need before later project units.
 
-## 2. Before you start
+::: {.concept-diagram}
+Notice that both routes lead to the same learning loop and a clean rerun.
 
-**Prior knowledge:** No previous unit. Bring curiosity and a place to record evidence.
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Choose a practice route] --> B[Browser notebook]
+  A --> C[Local workspace]
+  B --> D[Predict]
+  C --> D
+  D --> E[Run]
+  E --> F[Compare evidence]
+  F --> G[Explain and change one thing]
+  G --> H[Clean rerun]
+```
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
-
-## 3. Lessons
-
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [What Programming Does—and Why Python Still Matters](programming-python-ai.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Learn Python by Predicting, Running, Explaining, and Debugging](learning-loop-ai.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Notebooks and Literate Programming Workflows](notebooks-literate-workflows.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Local Python: Interpreter, Terminal, Editor, and Environment](local-python-environment.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
-
-## 4. How to study this unit
-
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
-
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
 :::
 
-## 5. Unit evidence
+You will run Python in the first lesson. Formal details about names, values,
+expressions, functions, and errors come later. When one of those shapes appears
+here, the lesson explains only what you need for the current task and points
+forward to the unit that develops it.
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+## 2. Build a Python Learning Lab
+
+The unit produces a small collection of evidence:
+
+```text
+python-learning-lab/
+├── first_run.py
+├── learning-log.md
+├── first_notebook.ipynb
+└── launch-card.md
+```
+
+A browser-first learner may keep the same material in a Colab notebook and
+Google Drive, then download a copy. A local learner creates the folder on their
+computer. The filenames are less important than what they prove:
+
+- `first_run.py` contains a complete program whose three output lines you can
+  predict and explain;
+- `learning-log.md` preserves a prediction, observed result, explanation,
+  controlled change, and repaired failure;
+- `first_notebook.ipynb` combines readable notes with code and succeeds after a
+  clean restart and top-to-bottom run; and
+- `launch-card.md` records the environment, working command, project location,
+  interpreter evidence, fallback, and help route you can depend on.
+
+These are not polished portfolio projects. They are the workshop bench on which
+you will build later projects.
+
+## 3. Follow the five-step sequence
+
+| Step | Lesson | What it adds to the Learning Lab |
+|---:|---|---|
+| 1 | [Meet Python Through a Tiny Program](meet-python-first-program.qmd) | Run `first_run.py`, connect each source line to its output, change one message, and repair a missing delimiter. |
+| 2 | [Learn with Predictions and Evidence](learn-with-evidence.qmd) | Build `learning-log.md` and use observations rather than guesses to decide the next change. |
+| 3 | [Use AI While Keeping the Thinking Yours](use-ai-responsibly.qmd) | Review a supplied AI answer, verify it locally, protect private information, and retain your own conclusion. |
+| 4 | [Work Reliably in Colab and Jupyter](notebook-workflows.qmd) | Create `first_notebook.ipynb`, expose hidden state, and prove a clean top-to-bottom run. |
+| 5 | [Build a Dependable Local Python Workspace](local-python-workspace.qmd) | Run the saved script from a known folder, align the editor and interpreter, verify `.venv`, and finish `launch-card.md`. |
+| 6 | [Unit Challenge](challenge.qmd) | Complete three scenario rounds and confirm that your learning lab is ready for Unit 1. |
+
+Each lesson asks you to predict, run, compare, explain, modify, and repair, but
+those words will not appear as one generic practice section copied five times.
+You will use them on different evidence: source code, an experiment record, an
+AI claim, notebook history, and local paths.
+
+## 4. Prepare without buying anything
+
+Bring:
+
+- a modern web browser;
+- a place to save a notebook or download files;
+- permission to create a small folder if you will practise locally; and
+- a plain-text note for commands, outputs, and questions.
+
+The course does not require a paid editor, notebook service, or AI subscription.
+You can complete the AI lesson using the supplied responses. Do not paste
+passwords, API keys, private repository code, personal records, or assessment
+answers into an external service.
+
+::: {.callout-important title="Choose one route before adding tools"}
+Begin in Colab if installation would delay your first run. Begin locally if
+Python is already available and you can create files. Do not install Python,
+Conda, Anaconda, multiple editors, and several notebook systems at once. One
+working route creates better evidence than five half-configured routes.
+:::
+
+## 5. Plan realistic stopping points
+
+The estimate is active work rather than silent reading:
+
+- **First program:** about 2–3 hours, including predictions, repair cases,
+  checkpoints, and the final script.
+- **Learning with evidence:** about 2.5–3.5 hours, including a complete debugging
+  record.
+- **Responsible AI assistance:** about 2–3 hours, with no live AI account
+  required.
+- **Notebook workflow:** about 2.5–4 hours, including a clean restart and run.
+- **Local workspace:** about 3–5 hours. Installation and platform recovery vary
+  by device.
+- **Launch challenge:** about 35–50 minutes.
+
+A good stopping point is the end of a final lab. Save the artifact and its exact
+observed result. When you return, rerun the nearest check before assuming the
+old environment still matches your notes.
+
+## 6. Know what success looks like
+
+You are ready for Unit 1 when you can:
+
+1. point to the source line responsible for each line of a tiny program's
+   output;
+2. keep prediction, observation, explanation, and next change separate;
+3. treat an AI response as a claim to verify rather than permission to stop
+   thinking;
+4. restart a notebook and run every cell from the top without relying on hidden
+   state;
+5. state which Python command and environment you are using; and
+6. preserve the exact command, output, and relevant file when you need help.
+
+Progress in this site is local and self-reported. It is not a verified exam,
+identity check, or certificate record. A Foundations final project and
+certificate are planned but are not available yet; they will be announced
+later.
+
+[Begin with Meet Python Through a Tiny Program](meet-python-first-program.qmd){.btn .btn-primary}
 
 <!-- fcpython-chapter-lab: end -->

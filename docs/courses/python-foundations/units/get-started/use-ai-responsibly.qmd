@@ -1,0 +1,601 @@
+---
+title: Use AI While Keeping the Thinking Yours
+lesson_id: get-started.use-ai-responsibly
+lesson_order: 30
+description: Ask for bounded programming help, inspect a plausible response, verify every important claim locally, and protect private information.
+execute:
+  echo: true
+categories:
+  - python-foundations
+  - get-started
+  - responsible-ai
+  - verification
+order: 30
+colab_notebook: notebooks/courses/python-foundations/units/get-started/use-ai-responsibly.ipynb
+course_id: python-foundations
+unit_id: get-started
+unit_number: 0
+---
+::: {.lesson-meta}
+
+- **Level:** Beginner
+- **Estimated time:** 2–3 hours
+- **You will learn:** Use AI for a bounded next step while keeping predictions, local execution, privacy decisions, and the final explanation under your control.
+- **Practice in:** The supplied responses plus Google Colab, JupyterLab, or a local editor; no AI account is required
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+An AI assistant can produce fluent explanations and plausible code quickly.
+Fluency is not execution evidence. A response may misunderstand the goal,
+invent a function, assume a different software version, omit a boundary, or
+suggest a command that should not be trusted. The useful skill is not refusing
+all assistance or accepting all assistance. It is asking for a bounded next
+step and verifying the response against the program you actually have.
+
+::: {.callout-note title="Questions to answer"}
+
+- Which work should you attempt before asking an AI assistant?
+- What context makes a programming question focused without exposing private
+  material?
+- How can you test a confident but incorrect answer?
+- When should primary documentation take priority over generated prose?
+- What assistance should you record in your learning log?
+:::
+
+## 1. Keep the learning loop outside the chat window
+
+Your evidence still belongs in the Python Learning Lab:
+
+1. read the current source;
+2. write your own prediction;
+3. run the smallest relevant example;
+4. preserve the exact observation or error;
+5. identify the first difference;
+6. ask for one kind of assistance if needed;
+7. treat the answer as a hypothesis;
+8. run a focused check; and
+9. write the conclusion in your own words.
+
+If the assistant supplies the prediction, the run, the explanation, and the
+final answer before you attempt them, it has completed the part that was meant
+to exercise your reasoning. A useful request creates a next step without hiding
+your responsibility for the result.
+
+::: {.concept-diagram}
+The assistant can inform a hypothesis, but verified evidence must return to your local learning loop.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Your attempt and exact evidence] --> B[Bounded request]
+  B --> C[AI response]
+  C --> D[Treat as hypothesis]
+  D --> E[Run focused local check]
+  E --> F[Consult primary source if needed]
+  F --> G[Write your conclusion]
+```
+
+:::
+
+Consider the first program:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+Before asking anything, you can already predict three lines, run them, and map
+each result to a source line. If a closing quote is missing, you can compare the
+line with a complete neighbor. Ask for help when the evidence leaves a focused
+question, not simply because a chat box is available.
+
+## 2. Ask for one useful kind of help
+
+Four request shapes work well in this course.
+
+### Ask for a hint
+
+```text
+I am learning to pair delimiters. This Python line raises SyntaxError:
+print("Status: ready)
+Do not give me a complete replacement program. Point to the first unmatched
+opening symbol and ask me what should close it.
+```
+
+The request states the goal, supplies the smallest source and exact exception
+type, and limits the answer.
+
+### Ask for an explanation to review
+
+```text
+I predicted three output lines for the source below, and the prediction matched.
+Explain which source line produces each output line. Keep the explanation to
+three numbered sentences so I can compare it with my own trace.
+```
+
+Write your trace first. Then compare claims rather than copying the response.
+
+### Ask for a counterexample
+
+```text
+My claim is: if a Python program runs without SyntaxError, its output must meet
+the requirement. Give one two-line counterexample using only print calls. Do not
+explain it until after the code block.
+```
+
+This asks the assistant to challenge a claim. You still run the counterexample
+and explain why it matters.
+
+### Ask for a review of your reasoning
+
+```text
+Here are my prediction, observed output, and explanation. Identify one sentence
+that is not supported by the source or output. Ask a question instead of
+rewriting the explanation for me.
+```
+
+A review request can reveal an unsupported leap while leaving the revision to
+you.
+
+### A vague request hides the next step
+
+```text
+Teach me Python and fix my code.
+```
+
+This does not identify the code, expected behavior, evidence, or boundary. A
+long answer may still fail to address your actual obstacle. Narrow the request
+to one discrepancy.
+
+### Checkpoint: choose a bounded request
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-ai-bounded-requests",
+  "title": "Bounded assistance checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "ai-hint-request",
+      "prompt": "Which request best preserves the learner's work on an unmatched quote?",
+      "options": [
+        "Point to the first unmatched delimiter and ask me what should close it; do not replace the whole program",
+        "Complete every course exercise for me",
+        "Return only a final file with no explanation",
+        "Assume any red output means Python is broken"
+      ],
+      "answer_index": 0,
+      "explanation": "The request asks for one diagnostic hint while leaving the repair and verification to the learner."
+    },
+    {
+      "id": "ai-context-packet",
+      "prompt": "Which context makes a programming question focused?",
+      "options": [
+        "Every file and credential on the device",
+        "Goal, smallest relevant source, exact evidence, prediction, attempted check, and one question",
+        "Only the words it does not work",
+        "A screenshot with the important text cropped out"
+      ],
+      "answer_index": 1,
+      "explanation": "That packet gives reproducible context while limiting unrelated and sensitive material."
+    },
+    {
+      "id": "ai-own-prediction",
+      "prompt": "When should you normally write your prediction?",
+      "options": [
+        "After copying the assistant's final answer",
+        "Only when the assistant refuses",
+        "Before requesting the assistant's prediction or explanation",
+        "After deleting the observed result"
+      ],
+      "answer_index": 2,
+      "explanation": "Your pre-run prediction preserves the reasoning practice and gives you a claim to compare."
+    },
+    {
+      "id": "ai-vague-request",
+      "prompt": "Why is Teach me Python and fix my code a weak debugging request?",
+      "options": [
+        "It contains too much exact output",
+        "It reveals a precise controlled experiment",
+        "It forbids a complete solution",
+        "It omits the specific goal, source, evidence, and discrepancy"
+      ],
+      "answer_index": 3,
+      "explanation": "Without a bounded problem, even a fluent response may solve the wrong task or obscure the useful next check."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Test a plausible response instead of admiring it
+
+You do not need a live service for this practice. Review this supplied response:
+
+> Replace `print` with `echo`; `echo` is the standard Python command for showing
+> text, and the output will remain the same.
+
+The response is confident and wrong for ordinary Python. Turn it into a
+prediction before running:
+
+```python
+echo("Python Learning Lab")
+```
+
+The source has balanced punctuation, so Python can begin running it. In a normal
+fresh Python environment, however, there is no built-in name `echo`; the run
+raises `NameError`. The original built-in used in this course is `print`:
+
+```python
+print("Python Learning Lab")
+```
+
+Your verification record can say:
+
+```text
+AI claim: echo is the standard Python display command.
+Prediction from the claim: echo("Python Learning Lab") displays the title.
+Observed evidence: NameError says echo is not defined in a fresh environment.
+Primary/local check: print("Python Learning Lab") displays the title.
+Conclusion: reject the claim; keep print for this program.
+```
+
+Do not merely say “the AI hallucinated.” Identify the exact claim, the test that
+could disprove it, and the evidence that did.
+
+### A response can be partly right
+
+Review a second supplied response:
+
+> The three `print` calls display three lines. Because computers can execute
+> quickly, the order of those lines is not guaranteed.
+
+The first sentence fits the source. The second conflicts with the ordinary
+sequential behavior of this script. Run the same program several times:
+
+```python
+print("one")
+print("two")
+print("three")
+```
+
+Repeated matching runs are useful evidence for this example, though they do not
+prove every possible program is sequential in the same simple way. Rewrite only
+the unsupported sentence:
+
+```text
+For this script, Python reaches the three print calls from top to bottom, so the
+observed output is one, two, three in that order.
+```
+
+A mixed response should be repaired claim by claim. Rejecting everything can
+throw away a useful clue; accepting everything imports the unsupported part.
+
+### A working answer can solve the wrong requirement
+
+Suppose the requirement is exactly:
+
+```text
+Status: ready
+```
+
+An assistant suggests:
+
+```python
+print("The Python Learning Lab is ready to begin")
+```
+
+This source runs, and the general meaning is similar, but the exact output does
+not meet the contract. Verification is against the stated requirement, not
+against whether the answer looks polished.
+
+## 4. Prefer primary sources for version-sensitive claims
+
+Generated prose may mix older and newer interfaces. When a claim concerns an
+installation command, supported Python version, editor menu, notebook behavior,
+security setting, or library API:
+
+1. identify the exact claim;
+2. note the software and version in your environment;
+3. open the official documentation for that software;
+4. find the page that directly owns the behavior;
+5. compare it with a small local check; and
+6. record any remaining uncertainty.
+
+Do not ask an assistant to fabricate a citation and then trust the link title.
+Open the page and confirm that it contains the relevant instruction. Search
+results, forum snippets, and generated summaries can help locate a source; they
+are not substitutes for reading it.
+
+For Python's `print`, the built-in functions documentation is the owning
+reference. Unit 0 does not require you to understand the complete signature.
+You only need to confirm that `print` is a Python built-in and compare that fact
+with the local run.
+
+### Checkpoint: verify claims with evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-ai-verification",
+  "title": "AI claim verification checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "ai-echo-check",
+      "prompt": "An answer claims echo(\"Ready\") is the ordinary Python replacement for print. What is the best first verification?",
+      "options": [
+        "Predict the claim's effect, run the smallest echo call in a fresh Python environment, and preserve the exact result",
+        "Repeat the claim more confidently",
+        "Change the whole project before running it",
+        "Assume a code block proves execution"
+      ],
+      "answer_index": 0,
+      "explanation": "The smallest local run directly challenges the named behavior and produces inspectable evidence."
+    },
+    {
+      "id": "ai-partly-right",
+      "prompt": "A response has one supported sentence and one unsupported sentence. What should you do?",
+      "options": [
+        "Accept both because one is right",
+        "Evaluate and revise each claim against source, output, and the requirement",
+        "Reject all future assistance",
+        "Hide the unsupported sentence from the log"
+      ],
+      "answer_index": 1,
+      "explanation": "Claim-by-claim review preserves useful information without importing the incorrect part."
+    },
+    {
+      "id": "ai-version-claim",
+      "prompt": "An assistant gives a version-sensitive installation instruction. Which evidence is strongest?",
+      "options": [
+        "The answer uses a confident tone",
+        "The command appears in many generated paragraphs",
+        "Current official documentation for the identified tool/version plus a focused local check",
+        "An unrelated tutorial screenshot"
+      ],
+      "answer_index": 2,
+      "explanation": "The owning documentation and actual environment are better evidence than generated confidence."
+    },
+    {
+      "id": "ai-wrong-requirement",
+      "prompt": "Suggested code runs, but its output differs from the exact required line. What has been verified?",
+      "options": [
+        "The requirement is unnecessary",
+        "Every future case is correct",
+        "The assistant understood the goal perfectly",
+        "Only that the source ran; it still fails the stated output contract"
+      ],
+      "answer_index": 3,
+      "explanation": "Execution success and requirement success are separate claims."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Protect information before sending a request
+
+Treat text sent to an external service as information leaving your current
+workspace. Before pasting, ask:
+
+- Does this contain a password, API key, recovery code, private URL, or session
+  token?
+- Does it contain names, addresses, health information, grades, or other
+  personal records?
+- Does a school, employer, research agreement, or client prohibit sharing this
+  code or data?
+- Does it reveal the answer to an assessment that you are expected to complete
+  yourself?
+- Can I replace the real material with a tiny invented example that preserves
+  the technical problem?
+
+Never “anonymize” a secret by changing only one character. Remove it completely
+and rotate a real credential if it was exposed. Do not paste `.env` files,
+authentication headers, private keys, or full proprietary repositories.
+
+### Reduce a private case to an invented one
+
+Unsafe request:
+
+```text
+Here is our private customer export, internal server address, and access token.
+Why does this script fail?
+```
+
+Safer request:
+
+```text
+I replaced the private data with these three invented lines and removed all
+credentials. My tiny Python example should display three labels but raises this
+exact error: [...]. Which source delimiter should I inspect first?
+```
+
+The reduced case is often easier to debug because it removes unrelated details.
+
+### Treat commands as proposals, not instructions
+
+An assistant may suggest a shell command that downloads and immediately runs
+unreviewed code, deletes files, changes permissions, or installs software outside
+your intended environment. Do not run a command merely because it is formatted
+as code.
+
+Before any unfamiliar command:
+
+1. identify what executable it invokes;
+2. read each argument and path;
+3. determine which files, network services, or permissions it affects;
+4. compare it with official installation or tool documentation;
+5. remove pipelines that hide downloaded content before execution;
+6. ask a trusted maintainer or administrator when the effect is unclear; and
+7. keep a backup or disposable environment when a legitimate operation is
+   destructive.
+
+Unit 0 never requires disabling security controls. A managed device restriction
+is evidence to record and escalate, not an obstacle to bypass.
+
+## 6. Record assistance without surrendering authorship
+
+A useful assistance record is short:
+
+```markdown
+## Assistance record
+
+- **Question asked:** Identify the first unmatched delimiter; do not rewrite the program.
+- **Suggestion received:** The text opened after `print(` has no closing quote.
+- **Verification:** Added only the quote, reran the original three lines, and observed the required output.
+- **My conclusion:** The repair worked because the opening and closing text delimiters now form a complete source instruction.
+```
+
+Record assistance when it materially changes your reasoning, source, or next
+step. Follow any school, employer, publication, or project disclosure policy
+that applies. A record does not turn unverified code into your understanding;
+you must still be able to explain and maintain it.
+
+A copied explanation can be detected by a simple test: close the response, look
+at your source and output, and explain the connection without its wording. If
+you cannot, ask for a smaller hint or reconstruct the evidence.
+
+### Checkpoint: protect and disclose
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-ai-privacy-and-ownership",
+  "title": "Privacy and ownership checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "ai-private-reduction",
+      "prompt": "A failure occurs while processing a private customer file. What is the safest useful request?",
+      "options": [
+        "Remove credentials and private data, create a tiny invented case with the same technical shape, and share exact non-sensitive evidence",
+        "Paste the full export and access token",
+        "Send the entire private repository",
+        "Publish the customer file before asking"
+      ],
+      "answer_index": 0,
+      "explanation": "A minimal invented case protects unrelated information and often makes the technical boundary clearer."
+    },
+    {
+      "id": "ai-unfamiliar-command",
+      "prompt": "An assistant proposes an unfamiliar command that downloads and executes a script. What should you do first?",
+      "options": [
+        "Run it because it is in a code block",
+        "Inspect the executable, arguments, paths, permissions, and official documentation before deciding",
+        "Add administrator privileges automatically",
+        "Disable security controls"
+      ],
+      "answer_index": 1,
+      "explanation": "Formatting is not a safety review; understand the command's effects and source before execution."
+    },
+    {
+      "id": "ai-assistance-record",
+      "prompt": "Which assistance record best preserves ownership of the work?",
+      "options": [
+        "AI fixed it",
+        "A pasted answer with no run",
+        "Question, suggestion, focused verification, observed result, and learner's own conclusion",
+        "No record even when policy requires disclosure"
+      ],
+      "answer_index": 2,
+      "explanation": "The record separates external suggestion from local evidence and the learner's reasoning."
+    },
+    {
+      "id": "ai-no-account",
+      "prompt": "A learner does not have or want an AI account. How can they complete this lesson?",
+      "options": [
+        "They cannot learn Python",
+        "They must share someone else's account",
+        "They should skip verification",
+        "They can analyze the supplied responses and run the same focused local checks"
+      ],
+      "answer_index": 3,
+      "explanation": "The learning outcome is critical verification, which the supplied cases support without a live service."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: audit a confident answer
+
+Use this supplied answer; do not consult a live service unless you choose to:
+
+> Your script should use `echo` because Python 3 replaced `print`. Change all
+> three calls at once. If the code still fails, install a different Python and
+> paste your environment file into the chat so I can inspect it.
+
+Complete an assistance entry in `learning-log.md`:
+
+1. Break the response into at least four separate claims or instructions.
+2. Mark which claims concern Python behavior, environment changes, and private
+   information.
+3. Predict the result of the smallest `echo("Python Learning Lab")` check.
+4. Run it in a fresh cell or from a clean script and copy the exact result.
+5. Run the documented `print("Python Learning Lab")` comparison.
+6. Use the Python built-in functions documentation to identify the supported
+   display function.
+7. Explain why changing all calls and the interpreter together would be a weak
+   experiment.
+8. Explain why an environment or credential file should not be pasted.
+9. Write a safer follow-up request that asks for one hint without the final
+   program.
+10. Finish with your own two-sentence conclusion.
+
+<details>
+<summary>Hint: separate behavior from safety</summary>
+
+Test the `echo` claim with one line. Review the “change all three,” “install a
+different Python,” and “paste your environment file” instructions separately;
+they require different evidence and carry different risks.
+
+</details>
+
+<details class="solution">
+<summary>Show one possible audit path</summary>
+
+A fresh ordinary Python run of:
+
+```python
+echo("Python Learning Lab")
+```
+
+raises `NameError` because `echo` has not been defined. This comparison:
+
+```python
+print("Python Learning Lab")
+```
+
+displays the required title, and Python's built-in functions reference owns the
+`print` behavior. Reject the unsupported replacement claim. Test one call before
+three; do not replace the interpreter without evidence; do not share environment
+files until you have inspected them and removed secrets. A safer request is,
+“Using the exact `NameError` below, point me to the Python built-in I should
+verify in the official reference; do not rewrite the complete script.”
+
+</details>
+
+## Key points
+
+- Make your own attempt and prediction before requesting generated reasoning.
+- Ask for one bounded kind of help: a hint, explanation to review,
+  counterexample, or critique of your reasoning.
+- Treat every important response claim as a hypothesis until code, output, the
+  requirement, and primary documentation support it.
+- A program can run successfully and still solve the wrong task.
+- Remove secrets, personal data, private code, and assessment answers before
+  sending anything to an external service.
+- Inspect unfamiliar commands and never bypass security controls just because a
+  response suggests it.
+- Record material assistance, local verification, and your own conclusion.
+
+## References
+
+- [Python built-in functions reference: `print`](https://docs.python.org/3/library/functions.html#print)
+- [NIST Generative Artificial Intelligence Profile](https://doi.org/10.6028/NIST.AI.600-1)
+- [OWASP guidance for generative AI and large language model applications](https://genai.owasp.org/llm-top-10/)

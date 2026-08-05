@@ -1,0 +1,599 @@
+---
+title: Meet Python Through a Tiny Program
+lesson_id: get-started.meet-python-first-program
+lesson_order: 10
+description: Run a complete three-line Python program, connect source lines to exact output, make a controlled change, and repair a first syntax error.
+execute:
+  echo: true
+categories:
+  - python-foundations
+  - get-started
+  - first-program
+  - interpreter
+order: 10
+colab_notebook: notebooks/courses/python-foundations/units/get-started/meet-python-first-program.ipynb
+course_id: python-foundations
+unit_id: get-started
+unit_number: 0
+---
+::: {.lesson-meta}
+
+- **Level:** Beginner · no programming experience assumed
+- **Estimated time:** 2–3 hours
+- **You will learn:** Distinguish source code, the Python interpreter, output, and an error by running and repairing a tiny complete program.
+- **Practice in:** Google Colab, JupyterLab, or a local editor
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+Your Python Learning Lab begins with something observable: three lines of source
+code that should produce three exact lines of output. You will not study every
+symbol formally yet. You will learn enough to run the program, follow its order,
+and make one defensible change.
+
+::: {.callout-note title="Questions to answer"}
+
+- What is the difference between a program, source code, Python, and the Python
+  interpreter?
+- Which source line produces each output line?
+- What does Python do when it reaches an instruction it cannot read?
+- How can one small edit create a predictable change?
+- What evidence should you preserve when the first run fails?
+:::
+
+## 1. Give Python one complete instruction
+
+A **program** is a set of instructions for a computer. **Source code** is the
+text in which those instructions are written. Python is the language used here;
+the **Python interpreter** is software that attempts to run Python source code.
+
+Start with one instruction:
+
+```python
+print("Python Learning Lab")
+```
+
+Predict before running: what text will appear, and will the quotation marks be
+part of the displayed result?
+
+Expected output:
+
+```text
+Python Learning Lab
+```
+
+The source contains more than the output:
+
+- `print` asks Python to display a value;
+- `(` and `)` enclose what will be supplied to `print`;
+- the quotation marks mark the beginning and end of text in the source; and
+- `Python Learning Lab` is the text value displayed.
+
+The quotation marks help Python read the source. They are not part of this
+output. Unit 1 studies the words and symbols in much more detail, and Unit 2
+studies text values. For now, recognize the complete visible shape
+`print("message")`.
+
+Try three valid messages separately:
+
+```python
+print("Ready")
+```
+
+```python
+print("Ready for Python")
+```
+
+```python
+print("Ready: tools checked")
+```
+
+Spaces and punctuation *inside* the quotes belong to the message. Compare the
+exact outputs rather than saying only that each example “worked.”
+
+## 2. Follow instructions from top to bottom
+
+Now run the first Learning Lab program:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+Write all three predicted output lines before executing it. Python normally
+attempts this short script from the first visible instruction to the last:
+
+| Source position | Instruction's message | Expected output position |
+|---:|---|---:|
+| 1 | `Python Learning Lab` | 1 |
+| 2 | `Status: ready` | 2 |
+| 3 | `Next step: predict before running` | 3 |
+
+Expected output:
+
+```text
+Python Learning Lab
+Status: ready
+Next step: predict before running
+```
+
+::: {.concept-diagram}
+Trace each source instruction through the interpreter to its output line.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Source line 1] --> D[Python interpreter]
+  B[Source line 2] --> D
+  C[Source line 3] --> D
+  D --> E[Output line 1]
+  D --> F[Output line 2]
+  D --> G[Output line 3]
+```
+
+:::
+
+Reorder the source deliberately:
+
+```python
+print("Next step: predict before running")
+print("Python Learning Lab")
+print("Status: ready")
+```
+
+The messages did not change, but the order did. Predict the complete output.
+Then run and check line 1, line 2, and line 3 separately. “The same text
+appeared” is incomplete evidence because order is part of the behavior.
+
+### Checkpoint: connect source to output
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-first-program-source-output",
+  "title": "Source and output checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "first-program-source-meaning",
+      "prompt": "Which description best fits source code?",
+      "options": [
+        "The text containing instructions that a programmer writes",
+        "Only the text displayed after a program runs",
+        "A screenshot of an editor",
+        "An automatic explanation created by Python"
+      ],
+      "answer_index": 0,
+      "explanation": "Source code is the written program that the interpreter attempts to run; output is evidence produced by that run."
+    },
+    {
+      "id": "first-program-interpreter-job",
+      "prompt": "What does the Python interpreter do in this lesson?",
+      "options": [
+        "It guesses the learner's unstated goal",
+        "It attempts to run the Python source and reports output or an error",
+        "It changes every message into a number",
+        "It saves every notebook automatically"
+      ],
+      "answer_index": 1,
+      "explanation": "The interpreter follows readable Python instructions and reports evidence; it does not infer missing requirements."
+    },
+    {
+      "id": "first-program-second-output",
+      "prompt": "What is the second output line from print(\"Lab\"); print(\"Ready\"); print(\"Go\") when the calls are on three separate source lines?",
+      "options": [
+        "Lab",
+        "Go",
+        "Ready",
+        "print"
+      ],
+      "answer_index": 2,
+      "explanation": "Python reaches the calls in source order, so the second call displays Ready as the second output line."
+    },
+    {
+      "id": "first-program-quotes-output",
+      "prompt": "For print(\"Status: ready\"), what normally appears as output?",
+      "options": [
+        "print",
+        "The quotation marks only",
+        "Nothing",
+        "Status: ready without the source quotation marks"
+      ],
+      "answer_index": 3,
+      "explanation": "The quotes delimit the text in source code; print displays the contained text."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Read code and output as different records
+
+A common beginner mistake is to copy the output back into a code cell:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+Python Learning Lab
+Status: ready
+```
+
+Those lines are useful output, but they are not the original Python
+instructions. Keep each kind of record in its proper place:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+```
+
+```text
+Python Learning Lab
+Status: ready
+```
+
+In a notebook, code belongs in a code cell and an explanation or copied result
+belongs in a Markdown cell. In a `.py` file, keep the Python source in the file
+and observe output in the terminal. Lesson 4 develops the notebook distinction.
+
+Another misleading record shows source and guessed output without a label:
+
+```text
+print("Status: ready")
+Status: ready
+```
+
+A future reader cannot tell whether the second line was observed or merely
+predicted. A better learning note is explicit:
+
+```text
+Source: print("Status: ready")
+Prediction: Status: ready
+Observed output: Status: ready
+```
+
+When prediction and observation match, preserve both. Matching evidence is
+still evidence. When they differ, do not edit the old prediction to pretend it
+matched; the difference tells you what to investigate.
+
+## 4. Make one controlled change
+
+Return to the understood program:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+Change only `ready` to `checked`:
+
+```python
+print("Python Learning Lab")
+print("Status: checked")
+print("Next step: predict before running")
+```
+
+Before running, identify every expected downstream effect:
+
+- output line 1 should remain unchanged;
+- output line 2 should change from `Status: ready` to `Status: checked`; and
+- output line 3 should remain unchanged.
+
+This is a **controlled change**: one source difference gives you a clear claim
+to check. Contrast it with this edit:
+
+```python
+print("Learning Station")
+print("Status: checked")
+print("Next action: open Unit 1")
+```
+
+This program is valid, but all three messages changed. If the output surprises
+you, there are three possible source changes to inspect. Large changes are
+sometimes necessary; they are simply weaker experiments when you are learning
+one relationship.
+
+### Checkpoint: predict a controlled edit
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-first-program-controlled-change",
+  "title": "Controlled change checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "first-program-one-change",
+      "prompt": "The only edit is changing print(\"Status: ready\") to print(\"Status: checked\"). Which output should change?",
+      "options": [
+        "Only the status output line",
+        "Every output line",
+        "No output line",
+        "Only the program title"
+      ],
+      "answer_index": 0,
+      "explanation": "The changed message belongs to one print call, so the controlled prediction affects that line only."
+    },
+    {
+      "id": "first-program-reorder-effect",
+      "prompt": "Three print calls keep the same messages but exchange positions. What behavior changes?",
+      "options": [
+        "The messages become invalid",
+        "The order of the output lines",
+        "Python stops displaying text",
+        "The quotation marks appear in output"
+      ],
+      "answer_index": 1,
+      "explanation": "Python still displays the messages, but it reaches the reordered calls in their new top-to-bottom order."
+    },
+    {
+      "id": "first-program-strong-comparison",
+      "prompt": "Which record best demonstrates a controlled experiment?",
+      "options": [
+        "Only the final screenshot",
+        "Three edited messages with no original output",
+        "Original source and output, one marked edit, predicted effect, and new output",
+        "A copied program that was never run"
+      ],
+      "answer_index": 2,
+      "explanation": "That record connects one source change to a predicted and observed effect."
+    },
+    {
+      "id": "first-program-exact-check",
+      "prompt": "The expected output has three lines in a stated order. Which check is strongest?",
+      "options": [
+        "Confirm that some text appeared",
+        "Count only the source lines",
+        "Check whether the editor stayed open",
+        "Compare all three observed lines and their order with the expectation"
+      ],
+      "answer_index": 3,
+      "explanation": "Exact behavior includes the content and position of every expected line."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Let the first error narrow the repair
+
+Python must be able to recognize the source before it can follow the
+instructions. This example begins a text value with `"` but never closes it:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Status: ready)
+```
+
+Run it only after predicting that it will fail. The exact wording and caret may
+vary by Python version and environment, but the evidence will identify a
+`SyntaxError` and point near the unfinished text. Python is not saying your idea
+is bad. It is saying the source does not form a complete readable instruction.
+
+Use a four-part first-error record:
+
+| Record | Example |
+|---|---|
+| Source attempted | `print("Status: ready)` |
+| Observed evidence | `SyntaxError` near the unfinished text |
+| Smallest hypothesis | The opening quote has no matching closing quote |
+| One repair | Add `"` after `ready` and rerun |
+
+The repair is:
+
+```python
+print("Status: ready")
+```
+
+Do not make unrelated edits before checking it. If you also rename the message,
+move the line, and replace punctuation, you will not know which edit repaired
+the readable shape.
+
+A second case has balanced quotes but no closing parenthesis:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Next step: predict before running"
+```
+
+Pair the visible delimiters:
+
+1. opening parenthesis `(` needs closing parenthesis `)`;
+2. opening quote `"` already has closing quote `"`;
+3. therefore add only the missing `)`.
+
+```python
+print("Next step: predict before running")
+```
+
+A third case is valid Python but has an unintended message:
+
+```python
+print("Status: raedy")
+```
+
+It runs and displays `Status: raedy`. No syntax error can detect that spelling
+contradicts your intention. Compare output with the stated expectation, locate
+the first difference, change only the text, and rerun:
+
+```python
+print("Status: ready")
+```
+
+This distinction matters throughout programming: a run can succeed while the
+result is wrong for the task.
+
+## 6. Preserve the evidence someone else needs
+
+“Python does not work” is hard to investigate. A useful help request preserves:
+
+- the environment, such as Colab or a local terminal;
+- the complete smallest source that demonstrates the problem;
+- the exact command or action used to run it;
+- the complete output or error text;
+- the result you expected; and
+- the one repair already attempted.
+
+For this source:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Python Learning Lab")
+print("Status: ready)
+print("Next step: predict before running")
+```
+
+an effective note is:
+
+```text
+Environment: Google Colab code cell
+Expected: three output lines
+Observed: SyntaxError while reading line 2
+Smallest clue: line 2 opens text but does not close it
+Next check: add the closing quote on line 2, then rerun unchanged lines 1 and 3
+```
+
+You do not yet need to understand a full traceback. Unit 8 teaches error and
+traceback diagnosis systematically. Here, learn to preserve exact evidence and
+repair the earliest visible incomplete instruction.
+
+### Checkpoint: repair the earliest failure
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-first-program-repair",
+  "title": "First repair checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "first-program-missing-quote",
+      "prompt": "Python reports a SyntaxError for print(\"Ready). What is the smallest relevant repair?",
+      "options": [
+        "Add the closing quotation mark before the parenthesis",
+        "Add two unrelated print calls",
+        "Rename the file three times",
+        "Delete the complete message"
+      ],
+      "answer_index": 0,
+      "explanation": "The source opens a quoted text value but does not close it, so pairing that delimiter addresses the evidence."
+    },
+    {
+      "id": "first-program-valid-wrong",
+      "prompt": "print(\"Status: raedy\") runs, but the required output is Status: ready. What kind of evidence is this?",
+      "options": [
+        "Python could not read the source",
+        "The source ran, but the observed result differs from the requirement",
+        "The interpreter is definitely missing",
+        "The notebook has no code cell"
+      ],
+      "answer_index": 1,
+      "explanation": "Valid source can still produce an unintended result; the exact output comparison reveals it."
+    },
+    {
+      "id": "first-program-help-record",
+      "prompt": "Which information makes a first-run help request most useful?",
+      "options": [
+        "Only the sentence It is broken",
+        "Only a picture of the keyboard",
+        "Smallest source, exact run action, exact evidence, expected result, and attempted repair",
+        "A different large program"
+      ],
+      "answer_index": 2,
+      "explanation": "Those details let another person reproduce the same boundary and evaluate the hypothesis."
+    },
+    {
+      "id": "first-program-first-repair",
+      "prompt": "A three-line program stops at an incomplete line 2. What should you check before rewriting line 3?",
+      "options": [
+        "Whether every message uses different words",
+        "Whether the browser theme is dark",
+        "Whether a longer program exists online",
+        "Whether repairing line 2 lets Python continue to the later line"
+      ],
+      "answer_index": 3,
+      "explanation": "The earliest failure may prevent later instructions from being reached, so repair and rerun it first."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: create `first_run.py`
+
+Create a folder named `python-learning-lab`. In Colab, you may place the source
+in one code cell now and download a `.py` copy after it works. Locally, create
+`first_run.py` inside the folder.
+
+Your contract is exact:
+
+```text
+Python Learning Lab
+Status: ready
+Next step: predict before running
+```
+
+Complete these stages:
+
+1. Write the three `print(...)` instructions.
+2. Before running, copy the expected output into your learning notes.
+3. Run the program and compare all three lines and their order.
+4. Change only `ready` to `checked`; predict that only line 2 changes.
+5. Observe the changed run, then restore `ready`.
+6. Remove one closing quote deliberately, run once, and preserve the error.
+7. Restore the quote and prove the original three-line output again.
+
+::: {.callout-important title="Observable completion checks"}
+Your final source has three complete calls. A clean run displays the three
+contract lines in order. Your notes contain the original prediction, the
+controlled-change prediction and result, and one error-and-repair record.
+:::
+
+<details>
+<summary>Hint: pair the visible shapes</summary>
+
+Each line has `print(`, an opening quote, message text, a closing quote, and `)`.
+Compare one incomplete line with a complete line character by character.
+
+</details>
+
+<details class="solution">
+<summary>Show one possible solution path</summary>
+
+Create this final file:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+Run it once unchanged. For the controlled experiment, make a copy or preserve
+the original result, replace only `ready` with `checked`, and rerun. Restore
+`ready`. For the repair record, remove only the quote after `ready`, capture the
+resulting `SyntaxError`, replace the quote, and rerun from the complete source.
+
+</details>
+
+## Key points
+
+- Source code is the program text; output is evidence produced by running it.
+- The Python interpreter attempts complete instructions in visible order.
+- Quotation marks and parentheses belong to the readable source shape even when
+  they do not appear in output.
+- One controlled edit supports a precise prediction about what should change and
+  what should remain stable.
+- A successful run can still produce the wrong result for the requirement.
+- Preserve the smallest source, exact action, observed evidence, expectation,
+  and one attempted repair when you need help.
+
+## References
+
+- [The Python tutorial: an informal introduction](https://docs.python.org/3/tutorial/introduction.html)
+- [Python documentation glossary: interpreter](https://docs.python.org/3/glossary.html#term-interpreter)
+- [Google Colab introduction](https://colab.research.google.com/notebooks/intro.ipynb)

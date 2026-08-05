@@ -148,7 +148,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
     lesson_ids: set[str] = set()
 
     assert catalog["schema_version"] == 2
-    assert catalog["curriculum_version"] == 20
+    assert catalog["curriculum_version"] == 21
     for course in courses:
         assert "modules" not in course
         course_total = 0
@@ -196,7 +196,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
         if _front_matter(page).get("lesson_id")
     }
     assert owned_paths == expected
-    assert len(lesson_ids) == 111
+    assert len(lesson_ids) == 112
 
 
 def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
@@ -249,6 +249,16 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         (foundations_root / "units" / directory).exists()
         for directory in replaced_unit_directories
     )
+    retired_get_started_pages = {
+        "programming-python-ai.qmd",
+        "learning-loop-ai.qmd",
+        "notebooks-literate-workflows.qmd",
+        "local-python-environment.qmd",
+    }
+    get_started_root = foundations_root / "units" / "get-started"
+    assert not any(
+        (get_started_root / page).exists() for page in retired_get_started_pages
+    )
 
     public_pages = []
     notebook_paths: set[str] = set()
@@ -263,8 +273,8 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         assert notebook not in notebook_paths, page
         notebook_paths.add(notebook)
 
-    assert len(public_pages) == 128
-    assert len(notebook_paths) == 128
+    assert len(public_pages) == 129
+    assert len(notebook_paths) == 129
 
 
 def test_course_homes_and_sidebars_match_catalog() -> None:
@@ -388,18 +398,18 @@ def test_foundations_has_versioned_course_sequence() -> None:
     course_ui = Path("docs/_includes/course-ui.html").read_text()
     progress_ids_match = re.search(r'data-course-lesson-ids="([^"]+)"', home_text)
 
-    assert completion["curriculum_version"] == 20
-    assert completion["rule_version"] == 11
+    assert completion["curriculum_version"] == 21
+    assert completion["rule_version"] == 12
     assert completion["recognition"] == "local-self-reported"
-    assert len(lesson_ids) == foundations["lesson_count"] == 96
+    assert len(lesson_ids) == foundations["lesson_count"] == 97
     assert home_metadata["lesson_ids"] == completion["lesson_ids"]
     assert progress_ids_match is not None
     assert progress_ids_match.group(1).split() == completion["lesson_ids"]
     assert f"curriculum version {completion['curriculum_version']}" in home_text
-    assert "curriculum_version: 20" in course_ui
-    assert "state.curriculum_version = 20" in course_ui
-    assert "completion_rule_version: 11" in course_ui
-    assert "state.completion_rule_version = 11" in course_ui
+    assert "curriculum_version: 21" in course_ui
+    assert "state.curriculum_version = 21" in course_ui
+    assert "completion_rule_version: 12" in course_ui
+    assert "state.completion_rule_version = 12" in course_ui
     assert "required_lesson_count" not in foundations
     assert "optional_lesson_count" not in foundations
 
@@ -495,7 +505,7 @@ def test_foundations_unit_challenges_are_guided_and_self_checking() -> None:
         if unit_id == "get-started":
             assert front_matter["challenge_format"] == "quiz"
             assert "<!-- fcpython-unit-challenge: quiz -->" in text
-            assert "8 of 10" in text
+            assert "10 of 12" in text
             continue
 
         assert front_matter["challenge_format"] == "guided-programming"
@@ -517,7 +527,7 @@ def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None
     intermediate = by_id["intermediate-python"]
     advanced = by_id["advanced-python"]
 
-    assert foundations["lesson_count"] == 96
+    assert foundations["lesson_count"] == 97
     assert [unit["id"] for unit in foundations["units"]] == [
         "get-started",
         "python-syntax",

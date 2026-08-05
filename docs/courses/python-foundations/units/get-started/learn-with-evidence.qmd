@@ -1,0 +1,642 @@
+---
+title: Learn with Predictions and Evidence
+lesson_id: get-started.learn-with-evidence
+lesson_order: 20
+description: Turn each small Python experiment into a trustworthy record of prediction, observation, explanation, controlled change, and repair.
+execute:
+  echo: true
+categories:
+  - python-foundations
+  - get-started
+  - learning-workflow
+  - debugging-evidence
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/get-started/learn-with-evidence.ipynb
+course_id: python-foundations
+unit_id: get-started
+unit_number: 0
+---
+::: {.lesson-meta}
+
+- **Level:** Beginner
+- **Estimated time:** 2.5–3.5 hours
+- **You will learn:** Keep prediction, observation, explanation, experiment, and repair separate enough to learn from both expected and surprising runs.
+- **Practice in:** Google Colab, JupyterLab, or a local editor plus `learning-log.md`
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+A program that runs once gives you a result. A result becomes learning evidence
+when you state what you expected, preserve what actually happened, explain the
+connection to the source, and use one controlled change to challenge that
+explanation. This lesson turns that cycle into a record you can revisit.
+
+::: {.callout-note title="Questions to answer"}
+
+- What makes a prediction precise enough to test?
+- How are an observation and an explanation different?
+- Why should one experiment change only one relevant cause?
+- What should you record before asking for help?
+- How can a surprising run improve your understanding instead of erasing it?
+:::
+
+## 1. Make a prediction that could be wrong
+
+Return to a complete program:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+“Something will appear” is hard to disprove. A useful prediction states the
+observable behavior:
+
+```text
+Prediction
+1. Python Learning Lab
+2. Status: ready
+3. Next step: predict before running
+The lines will appear in this order with no quotation marks.
+```
+
+This prediction could be wrong in several visible ways: missing text, different
+punctuation, extra quotation marks, or a different order. That precision is a
+strength, not a risk. Learning requires a claim that the run can confirm or
+challenge.
+
+Compare three predictions:
+
+| Prediction | Testable? | Why |
+|---|---|---|
+| “It should work.” | Weak | `work` does not identify an observable result. |
+| “It will show ready.” | Partial | It names one fragment but not the complete behavior. |
+| “Line 2 will be `Status: ready`; lines 1 and 3 will remain as stated.” | Strong | The output and stable boundaries are explicit. |
+
+Do not run first and write the result in the prediction box afterward. Put the
+prediction somewhere visible before execution: a Markdown cell, paper, or
+`learning-log.md`.
+
+### Predict punctuation, spacing, and order
+
+Run this only after writing the exact one-line output:
+
+```python
+print("Status : ready")
+```
+
+`Status : ready` has a space before the colon. If your expected requirement is
+`Status: ready`, the code is readable but the result differs. Exact predictions
+train you to notice details that “looks about right” hides.
+
+Now predict these two outputs separately:
+
+```python
+print("A")
+print("B")
+```
+
+```python
+print("B")
+print("A")
+```
+
+Same instructions, different order, different behavior.
+
+## 2. Keep observation separate from explanation
+
+An **observation** reports what the run presented. An **explanation** connects
+that evidence to the source or environment.
+
+```text
+Observation: The output had Status: ready on line 2.
+Explanation: The second source instruction is print("Status: ready"), and the
+interpreter reached it after line 1.
+```
+
+The observation can be copied from the run. The explanation is a claim that
+could still be incomplete. Keeping them separate lets you improve the
+explanation without rewriting the evidence.
+
+Here is a bad record:
+
+```text
+It printed ready because Python knew the lab was ready.
+```
+
+The run did display `ready`, but Python did not inspect your tools and make that
+decision. The literal message was already in the source. A stronger explanation
+names the visible cause:
+
+```text
+The second print call contains the text Status: ready, so that call displayed
+that text when Python reached it.
+```
+
+This line-by-line table slows the program down:
+
+| Line | Python reads | Visible result | State to carry forward |
+|---:|---|---|---|
+| 1 | first `print(...)` call | `Python Learning Lab` | no hidden requirement for line 2 |
+| 2 | second `print(...)` call | `Status: ready` | line 1 remains displayed |
+| 3 | third `print(...)` call | `Next step: predict before running` | program reaches its end |
+
+Later units use richer state tables for names, collections, branches, and loops.
+Here the key question is simple: which source line explains each output line?
+
+::: {.concept-diagram}
+A useful learning cycle preserves prediction and observation before revising the explanation.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Write prediction] --> B[Run unchanged source]
+  B --> C[Record observation]
+  C --> D[Explain from source evidence]
+  D --> E[Change one cause]
+  E --> F[Predict and rerun]
+  F --> G[Keep repair evidence]
+```
+
+:::
+
+### Checkpoint: distinguish the records
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-evidence-record-types",
+  "title": "Prediction and evidence checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "evidence-testable-prediction",
+      "prompt": "Which prediction is most testable for a three-line program?",
+      "options": [
+        "It will display the three stated messages in source order with no extra line",
+        "It will probably work somehow",
+        "Python likes short programs",
+        "The editor will solve it"
+      ],
+      "answer_index": 0,
+      "explanation": "The first prediction names observable content, order, and a boundary that the run can confirm or challenge."
+    },
+    {
+      "id": "evidence-observation",
+      "prompt": "Which sentence is an observation rather than an explanation?",
+      "options": [
+        "Python chose ready because it understood the project",
+        "The run displayed Status: ready as its second output line",
+        "The second call caused the result because calls always run",
+        "The code is good"
+      ],
+      "answer_index": 1,
+      "explanation": "The sentence reports directly visible evidence without yet claiming why it occurred."
+    },
+    {
+      "id": "evidence-explanation",
+      "prompt": "Which explanation is supported by the source print(\"Status: ready\")?",
+      "options": [
+        "The computer inspected every installed tool",
+        "The notebook guessed the learner's intention",
+        "The call contains the message that appears when Python reaches that line",
+        "The output proves every future run will succeed"
+      ],
+      "answer_index": 2,
+      "explanation": "The explanation points to the visible message in the source and does not invent unobserved behavior."
+    },
+    {
+      "id": "evidence-prediction-timing",
+      "prompt": "When should the prediction be preserved?",
+      "options": [
+        "After replacing it with the observed result",
+        "Only after a successful run",
+        "After several unrelated edits",
+        "Before the run, so comparison remains honest"
+      ],
+      "answer_index": 3,
+      "explanation": "A pre-run record prevents hindsight from turning the observation into a pretend prediction."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Change one cause and name every expected effect
+
+A controlled experiment begins from a state you understand:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+Experiment A changes only line 2's message:
+
+```python
+print("Python Learning Lab")
+print("Status: checked")
+print("Next step: predict before running")
+```
+
+Record both change and non-change:
+
+```text
+Changed cause: ready became checked in source line 2.
+Predicted effect: output line 2 becomes Status: checked.
+Stable boundary: output lines 1 and 3 remain exactly unchanged.
+Observed result: [copy all three lines after running]
+Conclusion: [state whether the effect and stable boundary matched]
+```
+
+A stable boundary prevents selective checking. If line 2 is correct but line 1
+vanishes, the experiment did not fully match your prediction.
+
+Experiment B changes order rather than text:
+
+```python
+print("Status: ready")
+print("Python Learning Lab")
+print("Next step: predict before running")
+```
+
+The changed cause is the position of the first two calls. The messages should
+remain the same; only their positions should exchange. This is a different
+hypothesis from changing message content.
+
+### Compare two experiments instead of mixing them
+
+This version changes content and order together:
+
+```python
+print("Status: checked")
+print("Learning Station")
+print("Next action: open Unit 1")
+```
+
+It may be a useful final program, but it is a poor first experiment. Split it
+into stages:
+
+1. change only `ready` to `checked`, then run;
+2. change only the title, then run;
+3. change only the final message, then run; and
+4. reorder only if order is part of the requirement.
+
+The intermediate runs cost a little time and save much more time when a result
+surprises you.
+
+## 4. Treat surprise as a difference to investigate
+
+Suppose you predicted three lines but observed only two:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+```
+
+Do not begin with “Python ignored line 3.” Inspect the current source first.
+There is no third instruction in this version. A useful record is:
+
+```text
+Prediction: three output lines.
+Observation: two output lines.
+First difference: the saved source currently contains only two print calls.
+Hypothesis: line 3 was removed or not saved before the run.
+One check: restore/save line 3, then rerun the same file.
+```
+
+Now consider a file that contains all three lines, but the terminal still shows
+an old two-line result. Possible hypotheses include:
+
+- the file was edited but not saved;
+- the terminal ran a different file with the same name;
+- the current folder is not the expected folder; or
+- the output shown is from an earlier run.
+
+Do not choose all four repairs at once. Gather the cheapest discriminating
+evidence: save the file, read the exact run command, confirm the folder and file,
+then rerun. Lesson 5 practices those checks locally.
+
+### Use the earliest useful clue
+
+This program cannot be read completely:
+
+<!-- fcpython-intentional-invalid-python -->
+
+```python
+print("Python Learning Lab")
+print("Status: ready)
+print("Next step: predict before running")
+```
+
+If Python reports a `SyntaxError` near line 2, do not first rewrite the complete
+line 3. Your current evidence points to the unclosed text on line 2. Repair one
+quote, rerun, and learn whether any later problem remains.
+
+The repair:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+A debugging claim should be allowed to fail. “The missing quote is the cause”
+becomes stronger only after replacing that quote lets the complete program run.
+
+### Checkpoint: design one useful experiment
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-evidence-controlled-experiments",
+  "title": "Controlled experiment checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "evidence-stable-boundary",
+      "prompt": "Only ready changes to checked in line 2. What should the experiment record?",
+      "options": [
+        "Line 2 should change and lines 1 and 3 should remain unchanged",
+        "Every line should change",
+        "Only that the program ran",
+        "Nothing until the file is much larger"
+      ],
+      "answer_index": 0,
+      "explanation": "A controlled prediction names the intended effect and the boundaries that should stay stable."
+    },
+    {
+      "id": "evidence-two-causes",
+      "prompt": "Why separate a message edit from a line reorder?",
+      "options": [
+        "Python cannot run two lines",
+        "Separate runs make it clearer which cause produced each observed effect",
+        "Every source line must be identical",
+        "Reordering always creates a syntax error"
+      ],
+      "answer_index": 1,
+      "explanation": "Changing one relevant cause preserves a clear connection between the edit and the evidence."
+    },
+    {
+      "id": "evidence-earliest-clue",
+      "prompt": "A SyntaxError points near an unclosed quote on line 2. What is the best first experiment?",
+      "options": [
+        "Replace the entire program with unrelated code",
+        "Edit line 3 before inspecting line 2",
+        "Close the quote on line 2 and rerun the otherwise unchanged source",
+        "Assume the interpreter installation is broken"
+      ],
+      "answer_index": 2,
+      "explanation": "The repair directly tests the smallest hypothesis supported by the earliest evidence."
+    },
+    {
+      "id": "evidence-unsaved-hypothesis",
+      "prompt": "The editor shows three calls but a rerun still displays an old two-line result. Which evidence should you check before rewriting code?",
+      "options": [
+        "How many tutorials exist online",
+        "Whether another programming language is installed",
+        "Whether every message is capitalized",
+        "Whether the file was saved and the command ran that exact file from the expected folder"
+      ],
+      "answer_index": 3,
+      "explanation": "Saved-file and path evidence can distinguish stale or wrong-file execution from a source-code defect."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Build a learning log another person can follow
+
+Create `learning-log.md` with one record per experiment. Use this structure:
+
+```markdown
+# Python Learning Lab log
+
+## Experiment: change the status message
+
+**Source before:** `print("Status: ready")`
+
+**Prediction:** Only output line 2 will become `Status: checked`.
+
+**Observed result:** Record all three output lines.
+
+**Explanation:** Connect the changed source text to line 2 and confirm the
+stable lines.
+
+**Next controlled change:** State one change, but do not perform it in this
+record.
+```
+
+A log is not a diary of every keystroke. It is a compact chain of reasoning. A
+future reader needs enough evidence to reproduce the run and understand why you
+chose the next step.
+
+### Mark uncertainty honestly
+
+This is acceptable:
+
+```text
+Observation: SyntaxError points near line 2.
+Hypothesis: the unclosed quote prevents Python from reading the program.
+Confidence: likely, but not yet verified.
+Check: close only the quote and rerun.
+```
+
+This overstates the evidence:
+
+```text
+Python is definitely broken because red text appeared.
+```
+
+An error color belongs to the interface, not the cause. The environment might
+use a different color, and a readable error message can still identify a simple
+source problem.
+
+### Record failures you repaired
+
+Keeping only the final green result removes valuable information. Preserve one
+small failure:
+
+```text
+Failure: SyntaxError after I removed the closing quote on line 2.
+Evidence: the message pointed near the unfinished text.
+Hypothesis: the opening quote was unmatched.
+Change: restored one closing quote.
+Verified rerun: all three expected lines appeared in order.
+```
+
+This record is more useful than “fixed typo” because it contains evidence,
+hypothesis, change, and verification.
+
+## 6. Ask for help without giving away the investigation
+
+Before asking another person, a forum, or an AI assistant, prepare a minimal
+help packet:
+
+```text
+Goal: display the three Learning Lab status lines.
+Environment: Colab code cell.
+Smallest source: [paste the complete three lines]
+Prediction: [exact lines]
+Observation: [exact output or error]
+Difference: [first mismatch]
+Attempted check: [one change and rerun]
+Question: [one bounded question]
+```
+
+A bounded question might be, “Which pair of delimiters is incomplete on line
+2?” It is more useful than “Write the whole exercise for me.” Lesson 3 develops
+how to use the same packet with AI while protecting private information.
+
+Know when to pause. If two controlled checks reject your hypotheses:
+
+1. restore the last source whose behavior you understood;
+2. reduce the example to the smallest failing lines;
+3. copy the exact current evidence into the log;
+4. reread the relevant section or primary documentation; and
+5. ask a bounded question with the packet.
+
+Repeated guessing is not persistence. Persistence means preserving evidence and
+choosing a better next experiment.
+
+### Checkpoint: decide what the evidence supports
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-evidence-help-and-repair",
+  "title": "Evidence and help checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "evidence-useful-failure-log",
+      "prompt": "Which failure record is most useful?",
+      "options": [
+        "Exact error evidence, smallest hypothesis, one repair, and verified rerun",
+        "It was red and then it worked",
+        "A final screenshot with no source",
+        "Several guesses with no rerun"
+      ],
+      "answer_index": 0,
+      "explanation": "The complete record shows how evidence justified a change and whether the change repaired the behavior."
+    },
+    {
+      "id": "evidence-help-packet",
+      "prompt": "What should a bounded help packet include?",
+      "options": [
+        "Only the final question",
+        "Goal, environment, smallest source, prediction, exact observation, attempted check, and focused question",
+        "Every file on the computer",
+        "Private credentials so the helper can log in"
+      ],
+      "answer_index": 1,
+      "explanation": "Those details provide reproducible context without exposing unrelated or sensitive material."
+    },
+    {
+      "id": "evidence-two-rejected-hypotheses",
+      "prompt": "Two controlled checks reject your hypotheses. What is the strongest next move?",
+      "options": [
+        "Make many random edits",
+        "Delete the evidence log",
+        "Restore the last understood state, reduce the case, preserve evidence, and ask a bounded question",
+        "Claim that Python is random"
+      ],
+      "answer_index": 2,
+      "explanation": "Reduction and a preserved baseline create better evidence for the next investigation."
+    },
+    {
+      "id": "evidence-honest-conclusion",
+      "prompt": "A repair has not been rerun yet. Which conclusion is honest?",
+      "options": [
+        "The problem is permanently solved",
+        "Every future input will work",
+        "The interpreter has been proven correct",
+        "The change is a hypothesis until the rerun supplies evidence"
+      ],
+      "answer_index": 3,
+      "explanation": "Editing source does not itself prove the resulting behavior; the focused rerun is the verification."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: write a complete evidence chain
+
+Use this starting program:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+Create `learning-log.md` and complete four linked records:
+
+1. **Baseline:** predict and observe the exact three-line output.
+2. **Controlled content change:** replace only `ready` with `checked`, predict
+   the changed and stable lines, then observe them.
+3. **Controlled order change:** restore `ready`, exchange only the first two
+   source lines, predict the order, then observe it.
+4. **Repair:** restore the baseline, remove only the closing parenthesis from
+   line 3, run once, preserve the evidence, restore the delimiter, and verify
+   the baseline again.
+
+For each record, include:
+
+- source or a precise source difference;
+- prediction made before the run;
+- complete observed output or error;
+- explanation tied to the source;
+- conclusion stating whether the prediction matched; and
+- the next controlled step.
+
+<details>
+<summary>Hint: use stable boundaries</summary>
+
+For each experiment, list what must remain unchanged before listing what should
+change. This makes partial success harder to mistake for complete success.
+
+</details>
+
+<details class="solution">
+<summary>Show the shape of a strong solution</summary>
+
+A controlled-change record can say:
+
+```text
+Source difference: line 2 contains checked instead of ready.
+Prediction: line 2 becomes Status: checked; lines 1 and 3 remain exact.
+Observation: [copy three lines]
+Explanation: only the message supplied to the second print call changed.
+Conclusion: matched / did not match, with the first difference.
+Next step: restore ready before testing order.
+```
+
+For the repair, do not merely write “syntax error.” Copy the exception type and
+the portion that points near the incomplete third call. State that the missing
+`)` is a hypothesis, restore only it, and record the clean three-line rerun.
+
+</details>
+
+## Key points
+
+- A useful prediction names observable behavior precisely enough to be wrong.
+- Observation records what happened; explanation claims why it happened.
+- Preserve the original prediction instead of rewriting history after a run.
+- A controlled experiment names one changed cause, its expected effect, and the
+  boundaries that should stay stable.
+- Debugging moves from evidence to a small hypothesis, one change, and a focused
+  rerun.
+- A strong help request includes the smallest reproducible source and exact
+  evidence without unrelated or private material.
+
+## References
+
+- [The Python tutorial: using Python as a calculator and running simple statements](https://docs.python.org/3/tutorial/introduction.html)
+- [Python errors and exceptions tutorial](https://docs.python.org/3/tutorial/errors.html)
+- [Jupyter documentation: running code](https://docs.jupyter.org/en/latest/running.html)

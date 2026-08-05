@@ -1,15 +1,15 @@
 ---
-title: 'Unit Challenge: Learning Workflow Readiness Check'
-description: Choose a dependable learning environment and use prediction, execution, explanation, modification, debugging, and responsible AI assistance as a repeatable learning loop.
+title: 'Unit Challenge: Launch Your Python Learning Lab'
+description: Complete three evidence-based launch rounds covering a first Python run, responsible assistance, notebook state, and local environment recovery.
 challenge_id: get-started.challenge
 assessment_type: unit-challenge
 challenge_format: quiz
-assessment_version: 1
-estimated_time: 20–30 minutes
+assessment_version: 2
+estimated_time: 35–50 minutes
 categories:
-- python-foundations
-- get-started
-- unit-challenge
+  - python-foundations
+  - get-started
+  - unit-challenge
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/get-started/challenge.ipynb
 course_id: python-foundations
@@ -17,162 +17,98 @@ unit_id: get-started
 unit_number: 0
 ---
 ::: {.lesson-meta .challenge-meta}
+
 - **Level:** Python Foundations · Unit 0 challenge
-- **Estimated time:** 20–30 minutes
-- **Outcome assessed:** Demonstrate readiness to use the course workflow and practice tools deliberately.
-- **Evidence:** Complete the checks and explain the result in your own words.
+- **Estimated time:** 35–50 minutes
+- **Outcome assessed:** Run and explain a small Python program, preserve clean notebook evidence, choose and diagnose a practice environment, and verify assistance responsibly.
+- **Evidence:** Complete three scenario rounds and confirm the launch card for your Python Learning Lab.
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-
 <!-- fcpython-unit-challenge: quiz -->
-## 1. What this challenge checks
+## 1. Open the lab before launch
 
-Unit 0 prepares you to learn independently rather than asking you to build a
-program before the language foundations are in place. This challenge
-checks whether you can:
+Tomorrow begins Unit 1. Tonight, you are checking a small Python Learning Lab so
+that an error, stale notebook, or confident generated answer cannot quietly
+control the next session.
 
-- predict before running and compare the prediction with evidence;
-- make one controlled change at a time;
-- choose Colab or local tools for an appropriate task;
-- rerun a notebook from a clean state;
-- read the useful parts of an error before editing code;
-- explain and modify an example instead of only copying it.
+The launch program should display exactly:
 
-::: {.callout-tip title="Use explanations as feedback"}
-Aim for at least **8 of 10** correct. If an explanation exposes a gap, return
-to the relevant Unit 0 lesson, reset the quiz, and try again. Unlimited retries
-are part of the learning process.
-:::
+```text
+Python Learning Lab
+Status: ready
+Next step: predict before running
+```
 
-## 2. Complete the readiness quiz
+The intended source is:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+Complete all three rounds. The questions use exact source, output, commands,
+notebook history, and learner records rather than asking you to memorize tool
+names. Aim for **10 of 12 after reviewing the explanations**. If one round
+reveals a gap, revisit the linked lesson, reset that round, and try it again.
+
+## 2. Round one: run the first program
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "foundations-get-started-challenge",
-  "title": "Learning Workflow Readiness Check",
-  "instructions": "Choose an answer, then check your work.",
+  "id": "get-started-challenge-first-run",
+  "title": "Launch round 1: first program",
+  "instructions": "Use the launch contract and choose the best evidence-based answer.",
   "questions": [
     {
-      "id": "predict-first",
-      "prompt": "A code cell prints a value you did not expect. What should you do first?",
+      "id": "challenge-first-run-source-output",
+      "prompt": "The three print calls run unchanged. Which result matches the launch contract?",
       "options": [
-        "Replace several lines until the output changes.",
-        "Write down the output you expected and trace the current values.",
-        "Restart the course from the beginning.",
-        "Ignore the result if the cell ran without an error."
-      ],
-      "answer_index": 1,
-      "explanation": "A written prediction gives you something precise to compare with the evidence from the run."
-    },
-    {
-      "id": "controlled-change",
-      "prompt": "Which experiment is a controlled change?",
-      "options": [
-        "Rename every variable and change all input values at once.",
-        "Copy a different program and compare screenshots.",
-        "Change one input value, predict the result, and rerun the same code.",
-        "Keep editing without rerunning."
-      ],
-      "answer_index": 2,
-      "explanation": "Changing one thing preserves a clear connection between the change and the new evidence."
-    },
-    {
-      "id": "colab-order",
-      "prompt": "A Colab cell uses a name created in an earlier cell, but the name is undefined. What is the best first check?",
-      "options": [
-        "Whether the notebook title contains Python.",
-        "Whether the browser window is maximized.",
-        "Whether every cell has exactly the same length.",
-        "Whether the earlier cell has run in the current session."
-      ],
-      "answer_index": 3,
-      "explanation": "Notebook state depends on which cells ran and in what order; rerunning from the top exposes hidden state."
-    },
-    {
-      "id": "clean-rerun",
-      "prompt": "Why restart the runtime and run all cells before calling notebook work reproducible?",
-      "options": [
-        "It proves the result does not depend on forgotten hidden state.",
-        "It makes every program faster.",
-        "It automatically fixes syntax errors.",
-        "It installs every possible package."
+        "The three messages appear without source quotation marks and in source order",
+        "Only the word print appears",
+        "The messages appear in reverse order automatically",
+        "The source code itself is the output"
       ],
       "answer_index": 0,
-      "explanation": "A clean rerun checks that the visible notebook contains every step needed to reproduce the result."
+      "explanation": "Each call displays its contained message when Python reaches it from top to bottom."
     },
     {
-      "id": "choose-colab",
-      "prompt": "When is Colab the most useful starting environment for this course?",
+      "id": "challenge-first-run-control",
+      "prompt": "Only ready changes to checked on source line 2. Which prediction is complete?",
       "options": [
-        "When you must test a local command-line package layout.",
-        "When you want to begin in a browser without installing Python locally.",
-        "When you need to inspect a local virtual environment.",
-        "When the program must run without a web browser or internet access."
+        "Every output line changes",
+        "Only output line 2 changes; lines 1 and 3 remain exact",
+        "The script can no longer run because checked is text",
+        "No output can change"
       ],
       "answer_index": 1,
-      "explanation": "Colab removes the initial installation barrier and is suitable for the course's early notebook exercises."
+      "explanation": "The prediction names both the intended effect and the stable boundaries of one controlled edit."
     },
     {
-      "id": "choose-local",
-      "prompt": "Which task is a strong reason to use local Python tools later in the course?",
+      "id": "challenge-first-run-delimiter",
+      "prompt": "The source is print(\"Status: ready). What is the smallest repair supported by the syntax evidence?",
       "options": [
-        "Selecting an answer in a browser quiz.",
-        "Reading a short code example.",
-        "Practising project folders, virtual environments, and command-line programs.",
-        "Changing one number in an isolated expression."
+        "Install a different editor",
+        "Rewrite all three messages",
+        "Add the closing quote before the closing parenthesis, then rerun",
+        "Delete the Learning Lab folder"
       ],
       "answer_index": 2,
-      "explanation": "Project layout, environments, and CLI work depend on filesystem and terminal behavior that local tools expose directly."
+      "explanation": "The opening quote has no partner; repairing only that delimiter tests the focused hypothesis."
     },
     {
-      "id": "read-error",
-      "prompt": "Python shows a traceback. Which information should you identify before editing code?",
+      "id": "challenge-first-run-wrong-output",
+      "prompt": "print(\"Status: raedy\") runs successfully. Why is the launch still blocked?",
       "options": [
-        "Only the color of the error output.",
-        "A package to reinstall immediately.",
-        "Every comment in the program.",
-        "The exception type, message, and relevant line."
+        "Every successful run is automatically correct",
+        "The interpreter is missing",
+        "Quotation marks must appear in output",
+        "The observed text differs from the exact required Status: ready line"
       ],
       "answer_index": 3,
-      "explanation": "The exception type, message, and line are evidence about what Python could not do."
-    },
-    {
-      "id": "explain-copy",
-      "prompt": "A copied example works. What turns it into useful learning evidence?",
-      "options": [
-        "Explaining the important lines and predicting a small modification.",
-        "Keeping it unchanged so it always matches the source.",
-        "Running it many times without reading it.",
-        "Removing every variable name."
-      ],
-      "answer_index": 0,
-      "explanation": "Explanation and controlled modification show that you understand the behavior rather than only reproducing it."
-    },
-    {
-      "id": "input-output",
-      "prompt": "A program asks for a name and then displays a greeting. Which statement is correct?",
-      "options": [
-        "Both values are comments.",
-        "The typed name is input and the displayed greeting is output.",
-        "The greeting is input because Python created it.",
-        "The typed name is an error message."
-      ],
-      "answer_index": 1,
-      "explanation": "Input enters the program; output is information the program presents after processing."
-    },
-    {
-      "id": "stuck-routine",
-      "prompt": "You are stuck after two guesses. Which next step best follows the course method?",
-      "options": [
-        "Make several more guesses quickly.",
-        "Delete the failing example.",
-        "Reduce the problem, inspect one value, and make one evidence-based change.",
-        "Assume the tool is broken."
-      ],
-      "answer_index": 2,
-      "explanation": "A smaller reproduction and one inspected value create evidence that can confirm or reject a hypothesis."
+      "explanation": "Readable source can still produce the wrong result for the contract."
     }
   ]
 }
@@ -180,18 +116,164 @@ are part of the learning process.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
-## 3. Confirm your learning workflow
+## 3. Round two: protect the learning process
 
-Before recording completion, verify each statement:
+A helper sends this response:
 
-- [ ] I can state a prediction before running a small example.
-- [ ] I know how to restart and rerun a Colab notebook from the top.
-- [ ] I can explain when local tools become more useful than Colab.
-- [ ] I read the exception type, message, and relevant line before guessing.
-- [ ] I scored at least 8 of 10 after reviewing any missed explanations.
+> Replace `print` with `echo`; Python 3 prefers it. Change all three lines at
+> once. If it fails, paste your complete environment and access token.
 
-This is a local, self-reported readiness record. It is not a grade, submission,
-identity check, or certificate.
+Use your evidence protocol rather than the response's confidence.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-challenge-assistance",
+  "title": "Launch round 2: assistance and evidence",
+  "instructions": "Choose the action that protects both learning evidence and private information.",
+  "questions": [
+    {
+      "id": "challenge-ai-small-check",
+      "prompt": "What is the strongest first check of the echo claim?",
+      "options": [
+        "Predict and run one echo(\"Python Learning Lab\") call in a fresh Python environment, preserving the exact result",
+        "Change all three lines and the interpreter together",
+        "Accept the answer because it sounds current",
+        "Remove the original working source"
+      ],
+      "answer_index": 0,
+      "explanation": "One local call directly tests the named behavior without mixing other changes."
+    },
+    {
+      "id": "challenge-ai-learning-record",
+      "prompt": "Which assistance record best supports learning?",
+      "options": [
+        "The AI fixed everything",
+        "Question, response claim, prediction, local result, primary-source check, and learner conclusion",
+        "Only the pasted final code",
+        "No record of a material suggestion"
+      ],
+      "answer_index": 1,
+      "explanation": "The record separates external claims from verification and the learner's own reasoning."
+    },
+    {
+      "id": "challenge-ai-private-token",
+      "prompt": "What should happen to the requested access token?",
+      "options": [
+        "Change one character and paste it",
+        "Include it only with the full environment file",
+        "Do not share it; remove sensitive material and reduce the issue to an invented example",
+        "Publish it before asking"
+      ],
+      "answer_index": 2,
+      "explanation": "Credentials and private environment content do not belong in an external debugging request."
+    },
+    {
+      "id": "challenge-ai-bounded-followup",
+      "prompt": "Which follow-up keeps the learner responsible for the repair?",
+      "options": [
+        "Complete the course for me",
+        "Replace every file without explaining it",
+        "Assume the requirement does not matter",
+        "Using this exact NameError, point me to the official built-in I should verify; do not rewrite the full script"
+      ],
+      "answer_index": 3,
+      "explanation": "The request asks for a bounded next step and preserves local verification and final explanation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Round three: recover the workspace
+
+The saved notebook shows a `status = "ready"` cell above `print(status)`, but the
+print cell displays `checked`. In the local workspace, `python first_run.py`
+reports that the file cannot be opened. Diagnose the boundaries separately.
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-challenge-workspace",
+  "title": "Launch round 3: notebook and workspace",
+  "instructions": "Choose the smallest check supported by each piece of evidence.",
+  "questions": [
+    {
+      "id": "challenge-notebook-hidden-state",
+      "prompt": "What best explains checked output beneath a visible ready assignment?",
+      "options": [
+        "A later or deleted cell may have changed the live runtime before print(status) was rerun",
+        "Python always reverses those words",
+        "Markdown automatically edits strings",
+        "The notebook document and runtime must have identical histories"
+      ],
+      "answer_index": 0,
+      "explanation": "Current runtime state can come from an out-of-order or no-longer-visible execution history."
+    },
+    {
+      "id": "challenge-notebook-clean-run",
+      "prompt": "Which action best proves the visible notebook is dependable?",
+      "options": [
+        "Run only the cell that already looks correct",
+        "Restart the runtime and run every visible code cell from top to bottom",
+        "Keep old output after editing source",
+        "Copy a screenshot without rerunning"
+      ],
+      "answer_index": 1,
+      "explanation": "A clean runtime exposes missing and out-of-order dependencies."
+    },
+    {
+      "id": "challenge-local-file-path",
+      "prompt": "Python runs but says first_run.py cannot be opened. What should be checked first?",
+      "options": [
+        "Whether a second Python distribution exists",
+        "Whether every package is installed",
+        "Current folder, file listing, exact filename/extension, and run command",
+        "Whether Colab has a dark theme"
+      ],
+      "answer_index": 2,
+      "explanation": "The interpreter exists; the evidence points to the file path supplied to it."
+    },
+    {
+      "id": "challenge-local-interpreter",
+      "prompt": "VS Code and the terminal disagree about installed packages. Which comparison is most useful?",
+      "options": [
+        "Editor font sizes",
+        "Numbers of output lines",
+        "Notebook and script titles",
+        "The sys.executable paths and python -m pip location for each environment"
+      ],
+      "answer_index": 3,
+      "explanation": "Those paths reveal whether installation and execution use different interpreters."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Confirm the launch card
+
+Before recording completion, verify these statements from your actual artifacts:
+
+- [ ] `first_run.py` or its notebook equivalent displays the three launch lines
+  in the required order.
+- [ ] `learning-log.md` contains a prediction, complete observation,
+  source-based explanation, controlled change, and verified repair.
+- [ ] I can reject or revise a supplied AI claim using a focused local check.
+- [ ] I know which information must not be sent to an external service.
+- [ ] `first_notebook.ipynb` succeeds after a restart and top-to-bottom run.
+- [ ] `launch-card.md` identifies my local or hosted route, durable save
+  location, fallback, and authorized help path.
+- [ ] If I use local Python, the card records my working launcher, folder,
+  interpreter path, and environment evidence.
+- [ ] I reached at least 10 of 12 after reviewing any missed explanations.
+
+If a managed device blocks local work, your card should name the exact
+restriction and support plan. Do not mark local commands as executed when they
+were not; honest hosted evidence is more useful than invented local output.
+
+This record remains local and self-reported. It is not a grade, submission,
+identity check, verified assessment, or certificate.
 
 ```{=html}
 <div class="fc-assessment-action" data-fc-challenge-action>
@@ -205,7 +287,10 @@ identity check, or certificate.
 
 ## Key points
 
-- Productive practice starts with a prediction and ends with evidence.
-- Clean reruns reveal hidden notebook state.
-- Small controlled changes are easier to explain and debug.
-- Colab and local tools solve different practice problems.
+- Launch readiness comes from exact source, output, notebook, path, and
+  interpreter evidence.
+- A confident answer remains a hypothesis until a focused check supports it.
+- Clean notebook execution exposes hidden state.
+- File errors and interpreter mismatches name different boundaries.
+- Preserve a hosted fallback and authorized help route instead of bypassing
+  device security.

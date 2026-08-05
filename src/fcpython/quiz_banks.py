@@ -94,7 +94,8 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "get-started",
             "Get Started",
-            "predict, run, explain, modify, and cleanly rerun a small example",
+            "launch a Python learning lab with exact run, notebook, environment, "
+            "and verified-assistance evidence",
         ),
         (
             "python-syntax",

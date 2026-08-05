@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 20
+curriculum_version: 21
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -8,21 +8,22 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 96
-    estimated_effort: 370–525 hours
+    lesson_count: 97
+    estimated_effort: 380–540 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 20
-      rule_version: 11
+      curriculum_version: 21
+      rule_version: 12
       recognition: local-self-reported
       lesson_ids:
-        - get-started.programming-python-ai
-        - get-started.learning-loop-ai
-        - get-started.notebooks-literate-workflows
-        - get-started.local-python-environment
+        - get-started.meet-python-first-program
+        - get-started.learn-with-evidence
+        - get-started.use-ai-responsibly
+        - get-started.notebook-workflows
+        - get-started.local-python-workspace
         - python-syntax.values-names-assignment
         - python-syntax.expressions-statements-execution-order
         - python-syntax.python-words-symbols
@@ -117,7 +118,7 @@ courses:
         - documentation-publishing.publishing-maintaining-documentation
       challenges:
         - id: get-started.challenge
-          title: Learning Workflow Readiness Check
+          title: Launch Your Python Learning Lab
           unit_id: get-started
           path: courses/python-foundations/units/get-started/challenge.qmd
         - id: python-syntax.challenge
@@ -185,7 +186,7 @@ courses:
         id: get-started
         title: Get Started
         directory: courses/python-foundations/units/get-started
-        lesson_count: 4
+        lesson_count: 5
         kind: instructional
       - number: 1
         id: python-syntax

@@ -1,0 +1,635 @@
+---
+title: Work Reliably in Colab and Jupyter
+lesson_id: get-started.notebook-workflows
+lesson_order: 40
+description: Build a readable practice notebook, diagnose stale output and hidden runtime state, then prove the notebook works from a clean top-to-bottom run.
+execute:
+  echo: true
+categories:
+  - python-foundations
+  - get-started
+  - notebooks
+  - reproducibility
+order: 40
+colab_notebook: notebooks/courses/python-foundations/units/get-started/notebook-workflows.ipynb
+course_id: python-foundations
+unit_id: get-started
+unit_number: 0
+---
+::: {.lesson-meta}
+
+- **Level:** Beginner
+- **Estimated time:** 2.5–4 hours
+- **You will learn:** Keep the saved notebook, live Python runtime, cell execution order, and displayed output consistent enough for a clean rerun.
+- **Practice in:** Google Colab or JupyterLab
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+A notebook places explanation, code, and output close together. That makes it a
+friendly learning environment—and makes it possible to create a convincing page
+whose visible cells do not reproduce the visible result. This lesson builds a
+Python Learning Lab notebook that another person can restart and run from top to
+bottom.
+
+::: {.callout-note title="Questions to answer"}
+
+- What is saved in a notebook document, and what exists only in the live
+  runtime?
+- Why can cell order differ from the order shown on the page?
+- How can displayed output become stale?
+- What does restart-and-run-all actually test?
+- Which notebook files and information should you save, download, or avoid
+  sharing?
+:::
+
+## 1. Separate the document from the runtime
+
+A notebook interface brings several things together:
+
+| Part | What it is | What can happen to it |
+|---|---|---|
+| Notebook document | Saved cells, their order, metadata, and possibly stored output | Can be renamed, copied, downloaded, or shared |
+| Code cell | Editable Python source inside the document | Can be changed without being run |
+| Markdown cell | Formatted explanation, headings, links, and predictions | Does not execute as Python |
+| Runtime or kernel | The live Python process that executes code | Can disconnect, restart, or remember hidden state |
+| Displayed output | A record shown beneath a cell | Can remain visible after source changes |
+| Runtime file | A file created on the current remote or local machine | May disappear when a hosted runtime resets |
+
+The notebook page and the Python process are related but not identical. Saving a
+notebook does not keep a hosted runtime alive forever. Restarting a runtime does
+not normally delete the saved source cells. Editing a cell does not
+automatically rerun it.
+
+::: {.concept-diagram}
+The saved notebook supplies cells to a temporary runtime, which returns output that the page displays.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Saved notebook document] --> B[Code cell source]
+  B --> C[Live Python runtime]
+  C --> D[Displayed output]
+  A --> E[Markdown explanations]
+  C --> F[Temporary runtime state]
+  F -. lost on restart .-> G[Clean runtime]
+```
+
+:::
+
+In Google Colab, make or save a copy you control before treating a shared
+notebook as your work record. In JupyterLab, confirm the file is inside the
+folder you intend to preserve. Give it the clear name `first_notebook.ipynb`.
+
+## 2. Build a notebook that explains its own run
+
+Use four cells.
+
+**Cell 1 — Markdown**
+
+```markdown
+# Python Learning Lab
+
+Prediction: the next code cell will display three status lines in source order.
+```
+
+**Cell 2 — Python**
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+**Cell 3 — Markdown**
+
+```markdown
+## Observation
+
+Record all three observed lines and explain which source call produced each one.
+```
+
+**Cell 4 — Python experiment**
+
+```python
+print("Python Learning Lab")
+print("Status: checked")
+print("Next step: predict before running")
+```
+
+The notebook should tell a future reader what question the code answers. A page
+of unlabeled code and old output is not yet a learning record.
+
+### Markdown is part of the artifact
+
+Use Markdown headings to expose structure rather than decorating every sentence.
+A useful notebook can be scanned for:
+
+- goal;
+- prediction;
+- original source;
+- observed output;
+- controlled experiment;
+- repair evidence; and
+- conclusion.
+
+Do not place Python source inside a Markdown cell and expect it to run. Do not
+place a prose heading inside a code cell and expect Python to treat it as page
+structure.
+
+### Checkpoint: identify notebook parts
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-notebooks-parts",
+  "title": "Notebook parts checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "notebook-document-runtime",
+      "prompt": "Which statement correctly distinguishes a notebook document from its runtime?",
+      "options": [
+        "The document stores cells; the runtime is the live Python process that executes code",
+        "They are always the same permanent object",
+        "The runtime is only a Markdown heading",
+        "The document disappears after every code cell"
+      ],
+      "answer_index": 0,
+      "explanation": "The saved document and temporary execution process have different lifecycles."
+    },
+    {
+      "id": "notebook-markdown-job",
+      "prompt": "What is a strong use for a Markdown cell?",
+      "options": [
+        "Running an unlabeled Python instruction",
+        "Recording a heading, prediction, observation, and explanation",
+        "Selecting the Python executable",
+        "Installing every local tool"
+      ],
+      "answer_index": 1,
+      "explanation": "Markdown cells make the reasoning and structure readable beside executable code."
+    },
+    {
+      "id": "notebook-edit-no-run",
+      "prompt": "You edit a code cell but do not run it. What happens to the old displayed output?",
+      "options": [
+        "It proves the new source is correct",
+        "It must vanish in every notebook system",
+        "It may remain visible even though it belongs to an earlier version of the source",
+        "It automatically updates to the predicted output"
+      ],
+      "answer_index": 2,
+      "explanation": "Source edits and execution are separate actions, so visible output can become stale."
+    },
+    {
+      "id": "notebook-hosted-file",
+      "prompt": "A file exists only on a temporary hosted runtime. What should you assume?",
+      "options": [
+        "It is permanently stored in every account",
+        "It is automatically committed to Git",
+        "It can never be downloaded",
+        "It may disappear when the runtime resets unless you deliberately preserve it"
+      ],
+      "answer_index": 3,
+      "explanation": "Hosted execution storage can be temporary; save important artifacts to a durable location."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Cell position is not execution history
+
+A notebook lets you run cell 4 before cell 2. The page order remains 1, 2, 3, 4,
+but runtime history follows the order in which you pressed Run.
+
+This pair previews **assignment**, which Unit 1 teaches formally. For this
+notebook diagnosis, understand only that the first cell creates the name
+`status` in the current runtime and the second tries to display its current
+value.
+
+**Visible Cell A**
+
+```python
+status = "ready"
+```
+
+**Visible Cell B**
+
+```python
+print(status)
+```
+
+A fresh runtime that runs B before A raises `NameError` because `status` has not
+been created there. Run A and then B; the output becomes `ready`.
+
+Now add a third cell later on the page:
+
+```python
+status = "checked"
+```
+
+If you run the third cell and then return to run B, B displays `checked` even
+though the visible assignment above it still says `ready`. The result depends on
+runtime history that the top-to-bottom page does not reveal.
+
+Use a trace table:
+
+| Action order | Cell run | Runtime state after the action | Output |
+|---:|---|---|---|
+| 1 | `status = "ready"` | `status` refers to `ready` | none |
+| 2 | `status = "checked"` | `status` now refers to `checked` | none |
+| 3 | `print(status)` | still `checked` | `checked` |
+
+The notebook is not random. It followed the actual execution order. The page is
+misleading because that history is not the order a fresh reader will use.
+
+### A clean top-to-bottom trace
+
+Restart the runtime. Now run:
+
+```python
+status = "ready"
+```
+
+then:
+
+```python
+print(status)
+```
+
+then:
+
+```python
+status = "checked"
+```
+
+then:
+
+```python
+print(status)
+```
+
+Expected output sequence:
+
+```text
+ready
+checked
+```
+
+Every dependency now appears before the cell that uses it.
+
+## 4. Stale output can tell a false story
+
+Suppose a cell originally contains:
+
+```python
+print("Status: ready")
+```
+
+You run it and see:
+
+```text
+Status: ready
+```
+
+Then you edit the source to:
+
+```python
+print("Status: checked")
+```
+
+but do not rerun. Some notebook interfaces keep the old `Status: ready` output
+visible. A screenshot would show new source beside old evidence.
+
+Before trusting a notebook:
+
+1. mark any edited-but-not-run cell;
+2. run the changed cell and inspect new output;
+3. restart the runtime;
+4. run every code cell from the top in page order;
+5. confirm no cell fails or depends on a value created later; and
+6. save the notebook after the clean run.
+
+A stored output is a useful record only when you know which source and runtime
+state produced it.
+
+### Checkpoint: reconstruct execution history
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-notebooks-state",
+  "title": "Notebook state checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "notebook-name-fresh-runtime",
+      "prompt": "A fresh runtime runs print(status) before any cell creates status. What should you expect?",
+      "options": [
+        "A NameError because the name does not yet exist in that runtime",
+        "The notebook guesses ready",
+        "Every previous session is restored automatically",
+        "The cell becomes Markdown"
+      ],
+      "answer_index": 0,
+      "explanation": "A fresh runtime knows only what has been executed in the current session."
+    },
+    {
+      "id": "notebook-later-assignment",
+      "prompt": "A later cell changes status to checked, then an earlier print(status) cell is rerun. What will that print use?",
+      "options": [
+        "The nearest visible text regardless of history",
+        "The current runtime value checked",
+        "No value because earlier cells cannot rerun",
+        "Always ready"
+      ],
+      "answer_index": 1,
+      "explanation": "Execution history controls current runtime state; visible position does not rewind the value."
+    },
+    {
+      "id": "notebook-stale-output",
+      "prompt": "Source now says print(\"Status: checked\") but visible output still says Status: ready. What is the best first explanation to test?",
+      "options": [
+        "Python changes text randomly",
+        "Quotation marks reverse the word",
+        "The cell was edited after its last run, so the visible output may be stale",
+        "The notebook cannot display strings"
+      ],
+      "answer_index": 2,
+      "explanation": "Editing does not execute a cell, so the output may belong to the previous source."
+    },
+    {
+      "id": "notebook-page-order",
+      "prompt": "Why can a notebook work for its author but fail top-to-bottom for a new reader?",
+      "options": [
+        "New readers cannot run Python",
+        "Markdown deletes all code",
+        "Saved notebooks never contain cells",
+        "The author's runtime may contain values created by a hidden out-of-order history"
+      ],
+      "answer_index": 3,
+      "explanation": "A clean reader does not inherit the author's unrecorded execution history."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Restart and run all is an experiment
+
+“Restart and run all” is not a ritual that repairs every notebook. It tests a
+specific claim:
+
+> The visible notebook contains every required step in an order that succeeds
+> from an empty runtime.
+
+The experiment has a baseline and observable result:
+
+1. save your current source cells;
+2. restart or disconnect and reconnect to obtain an empty runtime;
+3. run cells from the first code cell to the last without manually jumping
+   ahead;
+4. stop at the first error;
+5. record the cell, exception, and missing dependency;
+6. repair the notebook's visible order or source;
+7. restart again; and
+8. repeat until a clean run succeeds.
+
+If you repair the runtime by manually running a later setup cell first, the page
+still fails its clean-run contract. Move or rewrite the dependency so page order
+works.
+
+### Read execution indicators carefully
+
+Many notebook interfaces show an execution count or running indicator beside a
+code cell. Counts can reveal that lower cells ran earlier, but do not rely on
+one interface's exact appearance. The strongest test is a restart and complete
+run, not a tidy-looking sequence of old numbers.
+
+### Interrupt work that will not finish
+
+A cell can remain busy because it is doing a large task or because the code does
+not stop. Use the interface's interrupt or stop action rather than refreshing
+repeatedly. Preserve the source and note which cell was running. Unit 4 teaches
+loop termination; Unit 8 teaches systematic debugging. Unit 0 asks only that
+you know the runtime can be interrupted and restarted.
+
+Do not use this deliberately endless example as normal practice; read its shape
+only:
+
+```text
+while True:
+    keep_working_forever
+```
+
+The text fence prevents the generated notebook from running it. Later you will
+learn what a loop condition means.
+
+## 6. Save the right artifact and share it carefully
+
+A hosted runtime may disappear. Preserve:
+
+- the notebook document in a durable location you control;
+- important input files or instructions for recreating them;
+- the environment or package information when external packages become
+  relevant; and
+- the clean-run evidence in Markdown.
+
+Do not assume a notebook saved in a shared course location belongs to your
+account. Make your own copy or download it. Reopen that copy before deleting the
+original session.
+
+Before sharing, inspect:
+
+- Markdown cells for names, email addresses, class identifiers, or private
+  notes;
+- source cells for passwords, tokens, paths containing personal names, or
+  private URLs;
+- output cells for data that the cleaned source no longer shows; and
+- notebook metadata and attached files when the context is sensitive.
+
+Deleting a secret from the current source is not enough if an old output cell
+still displays it. Rotate any real credential that was exposed.
+
+### Choose a notebook, script, or published page for its job
+
+| Artifact | Best fit now | Important boundary |
+|---|---|---|
+| Colab/Jupyter notebook | Explore, predict, explain, and display nearby output | Runtime state can be hidden and hosted files can be temporary |
+| `.py` script | Run saved source from top to bottom | Rich prose and old output do not live beside the source |
+| Quarto page | Publish structured teaching or documentation | Rendering is not the same as the learner's live runtime |
+
+Unit 10 moves reusable behavior into modules and project structure. Unit 15
+builds published documentation. Here, use a notebook as an honest lab record.
+
+### Checkpoint: prove a clean notebook
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-notebooks-clean-run",
+  "title": "Clean notebook checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "notebook-clean-claim",
+      "prompt": "What claim does restart and run all test?",
+      "options": [
+        "The visible notebook contains the required steps in a successful top-to-bottom order",
+        "Every possible input is correct",
+        "The runtime can never disconnect",
+        "The notebook has no Markdown"
+      ],
+      "answer_index": 0,
+      "explanation": "An empty runtime exposes missing or out-of-order visible dependencies."
+    },
+    {
+      "id": "notebook-first-clean-failure",
+      "prompt": "A clean run fails at the third code cell. What should you preserve first?",
+      "options": [
+        "Only the final cell",
+        "The failing cell, exact exception, and dependency it expected from earlier visible cells",
+        "A different notebook's output",
+        "Several unrelated edits"
+      ],
+      "answer_index": 1,
+      "explanation": "The first failing cell and its dependency provide the most direct evidence for repairing page order or source."
+    },
+    {
+      "id": "notebook-share-output",
+      "prompt": "A secret was removed from source, but an old output cell still shows it. What is true?",
+      "options": [
+        "The notebook is safe because source changed",
+        "Old output cannot be shared",
+        "The notebook still exposes the secret; remove the output and rotate the real credential",
+        "Restarting guarantees nobody saw it"
+      ],
+      "answer_index": 2,
+      "explanation": "Output is part of the saved/shareable artifact and must be inspected independently."
+    },
+    {
+      "id": "notebook-interrupt",
+      "prompt": "A cell does not finish. What is the safest first runtime action?",
+      "options": [
+        "Run many more copies of the cell",
+        "Install another Python immediately",
+        "Assume the device is permanently broken",
+        "Use the notebook's interrupt/stop action, preserve the cell, and inspect it before rerunning"
+      ],
+      "answer_index": 3,
+      "explanation": "Interrupting regains control without multiplying the same unknown work."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: prove `first_notebook.ipynb` from a clean runtime
+
+Create or rename a notebook to `first_notebook.ipynb`. Build these sections:
+
+1. `# Python Learning Lab`
+2. a Markdown prediction for the exact three-line baseline;
+3. one baseline code cell with the three `print(...)` calls;
+4. a Markdown observation that maps source lines to output lines;
+5. a controlled experiment cell that changes only `ready` to `checked`;
+6. a Markdown comparison naming the changed and stable output;
+7. two state cells: one creates `status = "ready"`, and the next displays it;
+8. a Markdown note explaining that assignment is a Unit 1 preview; and
+9. a final clean-run record.
+
+Then create one hidden-state failure deliberately:
+
+1. run the state-creation cell;
+2. change the live value in a temporary lower cell to `checked`;
+3. rerun the display cell and observe the surprising result;
+4. delete the temporary cell;
+5. restart the runtime; and
+6. run all visible cells from the top.
+
+Completion evidence:
+
+```text
+Notebook filename:
+Clean-run action used:
+First code cell result:
+Controlled experiment result:
+State display result after restart:
+Any warning or failure and its repair:
+Durable save/download location:
+```
+
+<details>
+<summary>Hint: repair the page, not only the runtime</summary>
+
+After exposing hidden state, remove the temporary mutation and make sure every
+visible use has its required creation above it. Then restart again; do not rely
+on manually running a cell out of order.
+
+</details>
+
+<details class="solution">
+<summary>Show one possible notebook order</summary>
+
+Use this sequence:
+
+1. Markdown title and prediction.
+2. Baseline program:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+3. Markdown observation.
+4. Controlled experiment:
+
+```python
+print("Python Learning Lab")
+print("Status: checked")
+print("Next step: predict before running")
+```
+
+5. Markdown comparison.
+6. State preview:
+
+```python
+status = "ready"
+```
+
+7. Display:
+
+```python
+print(status)
+```
+
+8. Markdown clean-run record.
+
+Restart and run all. The baseline and controlled experiment each display their
+three expected lines; the final display is `ready`. Save after this clean run.
+
+</details>
+
+## Key points
+
+- The notebook document, live runtime, displayed output, and temporary files
+  have different lifecycles.
+- Page position does not prove execution order.
+- Editing source does not refresh old output.
+- Restart-and-run-all tests whether visible dependencies succeed from an empty
+  runtime in page order.
+- Repair the notebook's source or order instead of manually recreating hidden
+  state.
+- Save important notebooks and files deliberately, and inspect source, output,
+  metadata, and attachments before sharing.
+
+## References
+
+- [Project Jupyter documentation: running notebooks and kernels](https://docs.jupyter.org/en/latest/running.html)
+- [JupyterLab user guide: notebooks](https://jupyterlab.readthedocs.io/en/stable/user/notebook.html)
+- [Google Colab FAQ](https://research.google.com/colaboratory/faq.html)
+- [CommonMark Markdown reference](https://commonmark.org/help/)

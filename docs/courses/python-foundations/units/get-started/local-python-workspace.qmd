@@ -1,0 +1,769 @@
+---
+title: Build a Dependable Local Python Workspace
+lesson_id: get-started.local-python-workspace
+lesson_order: 50
+description: Verify one Python launcher, run a saved script from a known folder, align VS Code with that interpreter, and confirm a minimal isolated environment.
+execute:
+  echo: true
+categories:
+  - python-foundations
+  - get-started
+  - local-python
+  - virtual-environments
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/get-started/local-python-workspace.ipynb
+course_id: python-foundations
+unit_id: get-started
+unit_number: 0
+---
+::: {.lesson-meta}
+
+- **Level:** Beginner
+- **Estimated time:** 3–5 hours; installation time varies by device
+- **You will learn:** Build and diagnose one local path from project folder to script, interpreter, editor, virtual environment, and optional local notebook.
+- **Practice in:** A terminal and VS Code on Windows, macOS, or Linux, with Colab as the hosted fallback for restricted devices
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+A local Python workspace lets you keep source files in folders, run them from a
+terminal, connect an editor to a known interpreter, and isolate tools for one
+project. The goal is not to collect software. It is to create one path you can
+verify from beginning to end.
+
+Installation screens and commands evolve. This lesson uses current official
+Python, VS Code, and Jupyter guidance and teaches evidence that remains useful
+when an interface changes.
+
+::: {.callout-note title="Questions to answer"}
+
+- Which Python launcher does your terminal actually run?
+- How do the current folder and script path determine which file runs?
+- Why can VS Code and the terminal disagree about an interpreter?
+- What does a virtual environment isolate, and how can you verify it without
+  trusting a prompt label?
+- What should you record when installation is blocked by a managed device?
+:::
+
+## 1. Choose a route your device permits
+
+Use the local route when you can install or already have a supported Python and
+can create files. Use the hosted route when a managed school, work, library, or
+mobile device prevents local installation. Both routes complete the lesson by
+producing exact environment evidence.
+
+| Evidence | Local route | Hosted/restricted route |
+|---|---|---|
+| Python runtime | verified terminal launcher | Colab runtime information |
+| Learning Lab | local folder and `first_run.py` | saved Colab notebook and downloaded script copy |
+| Clean run | command plus exact output | restart/run-all plus exact output |
+| Constraint | any warning or mismatch | installation restriction and who can authorize access |
+| Fallback | Colab link or saved notebook | durable copy/download and future local-access plan |
+
+Do not bypass administrator policy, disable antivirus, change execution policy,
+or weaken certificate checks for this course. Record the restriction and ask the
+device owner or administrator. Later project units require filesystem and
+terminal practice, so include a concrete plan rather than silently assuming the
+hosted route solves every future task.
+
+## 2. Install Python from an owning source
+
+If Python is already available, verify it before installing another copy. If it
+is not available, use the current official instructions for your platform:
+
+- **Windows:** Python's current documentation directs most learners to the
+  Python Install Manager available through Python's downloads page or the
+  Microsoft Store. Older tutorials may describe the legacy launcher or an old
+  installer screen; prefer the current official Windows page.
+- **macOS:** Python.org provides signed installer packages and platform-specific
+  completion steps. Do not remove or modify the Apple-controlled system Python.
+- **Linux:** distribution package managers commonly own system Python. Follow
+  the Python Unix guidance and your distribution's documentation rather than
+  replacing system-managed files manually.
+
+This repository declares Python 3.10 or newer for its helper package. Record the
+version you actually have. A version is evidence, not a command to upgrade every
+working system immediately.
+
+### Find one working launcher
+
+Open a new terminal after installation. Try only the commands appropriate to
+your platform until one works:
+
+| Platform | First checks |
+|---|---|
+| Windows PowerShell or Command Prompt | `python --version`, then `py --version` if needed |
+| macOS terminal | `python3 --version` |
+| Linux terminal | `python3 --version`, or the launcher documented by the distribution |
+
+A successful result resembles:
+
+```text
+Python 3.13.5
+```
+
+Your exact supported version may differ. Record the launcher—`python`, `py`, or
+`python3`—as **your Python command**. Use that same command in the following
+checks. Do not randomly alternate among them.
+
+For example, if your command is `python3`:
+
+```bash
+python3 -c "print('Python Learning Lab')"
+python3 -m pip --version
+```
+
+If your command is `python`:
+
+```bash
+python -c "print('Python Learning Lab')"
+python -m pip --version
+```
+
+On current Windows installations, this may be:
+
+```powershell
+python -c "print('Python Learning Lab')"
+python -m pip --version
+```
+
+The first command proves that the launcher can execute a one-line program. The
+second asks that same interpreter to run its package installer. It is stronger
+than invoking a bare `pip`, which might belong to another installation.
+
+### Preserve the executable path
+
+Run one form with your chosen launcher:
+
+```bash
+python -c "import sys; print(sys.executable)"
+```
+
+or:
+
+```bash
+python3 -c "import sys; print(sys.executable)"
+```
+
+This line previews `import` and the standard-library `sys` module, taught in Unit
+10. You do not need to explain those mechanisms yet. Preserve the path because
+it identifies the executable that produced your evidence.
+
+::: {.concept-diagram}
+A dependable run connects the terminal command to one interpreter, one source file, and observed output.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Terminal in known folder] --> B[Chosen Python launcher]
+  B --> C[Verified interpreter path]
+  A --> D[first_run.py]
+  C --> E[Execute source]
+  D --> E
+  E --> F[Exact output or error]
+```
+
+:::
+
+### Checkpoint: verify the launcher
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-local-launcher",
+  "title": "Python launcher checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "local-one-launcher",
+      "prompt": "python3 --version works on a learner's computer. What is the best next habit?",
+      "options": [
+        "Record python3 as the working launcher and use it consistently in the next checks",
+        "Install three more Python distributions immediately",
+        "Alternate randomly among python, py, and python3",
+        "Assume every editor already uses it"
+      ],
+      "answer_index": 0,
+      "explanation": "One recorded working launcher gives later commands a consistent interpreter boundary."
+    },
+    {
+      "id": "local-module-pip",
+      "prompt": "Why prefer the chosen launcher followed by -m pip for this setup?",
+      "options": [
+        "It makes every package safe",
+        "It asks that identified Python interpreter to run its pip module",
+        "It disables virtual environments",
+        "It turns a script into Markdown"
+      ],
+      "answer_index": 1,
+      "explanation": "Connecting pip to the chosen interpreter reduces mismatches between installation and execution."
+    },
+    {
+      "id": "local-sys-executable",
+      "prompt": "What useful evidence does print(sys.executable) provide here?",
+      "options": [
+        "The complete Python language specification",
+        "Every package ever installed",
+        "The filesystem path of the interpreter running the check",
+        "A permanent guarantee about VS Code"
+      ],
+      "answer_index": 2,
+      "explanation": "The executable path lets you compare terminal, environment, editor, and notebook interpreter choices."
+    },
+    {
+      "id": "local-managed-device",
+      "prompt": "A managed device blocks Python installation. What should the learner do?",
+      "options": [
+        "Disable its security controls",
+        "Use an unknown administrator password",
+        "Delete system files",
+        "Record the restriction, continue through the hosted route, and identify the authorized support needed later"
+      ],
+      "answer_index": 3,
+      "explanation": "A restriction is an environment constraint to document and escalate, not a security control to bypass."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Know which folder the terminal is using
+
+A terminal command operates from a **current working directory**. Before running
+a relative filename such as `first_run.py`, confirm that the terminal is in the
+folder containing it.
+
+### macOS and Linux shell
+
+Show the current folder and list its entries:
+
+```bash
+pwd
+ls
+```
+
+Create the Learning Lab if needed, move into it, and list it:
+
+```bash
+mkdir python-learning-lab
+cd python-learning-lab
+pwd
+ls
+```
+
+### Windows PowerShell
+
+Use PowerShell's explicit commands:
+
+```powershell
+Get-Location
+Get-ChildItem
+New-Item -ItemType Directory -Name python-learning-lab
+Set-Location python-learning-lab
+Get-Location
+Get-ChildItem
+```
+
+PowerShell also provides familiar aliases such as `cd` and `dir`, but the
+explicit names make the first record easier to explain.
+
+Do not type both platform branches. Choose the one that matches your terminal.
+Record the final folder path.
+
+### Save the script in that folder
+
+Create `first_run.py` with a plain-text editor:
+
+```python
+print("Python Learning Lab")
+print("Status: ready")
+print("Next step: predict before running")
+```
+
+Confirm the filename ends with `.py`, not `.py.txt`. Some file managers hide
+known extensions, so inspect the editor tab and terminal listing.
+
+Run it with your chosen launcher. Examples:
+
+```bash
+python3 first_run.py
+```
+
+```bash
+python first_run.py
+```
+
+```powershell
+python first_run.py
+```
+
+Expected output:
+
+```text
+Python Learning Lab
+Status: ready
+Next step: predict before running
+```
+
+### Diagnose a file-not-found boundary
+
+Suppose the terminal says it cannot open `first_run.py`. Do not reinstall Python
+first: Python ran far enough to report that the supplied file path was not
+found. Check:
+
+1. the current folder path;
+2. the entries listed in that folder;
+3. the exact filename and extension;
+4. spelling and capitalization; and
+5. the run command.
+
+A useful record:
+
+```text
+Command: python first_run.py
+Evidence: Python reports that first_run.py cannot be opened.
+Current folder: [copy Get-Location or pwd result]
+Listed files: [copy the relevant names]
+First hypothesis: the file is saved in a different folder / named first_run.py.txt.
+One check: move to the containing folder or correct the filename, then rerun.
+```
+
+The fact that Python produced a file error is evidence that the launcher exists.
+Do not replace a working interpreter while the current evidence concerns a path.
+
+## 4. Open a folder in VS Code and align the interpreter
+
+VS Code is an editor; its Python extension connects editor actions to a Python
+interpreter. Installing the extension does not install Python itself.
+
+Use this sequence:
+
+1. open VS Code;
+2. choose **Open Folder** and select `python-learning-lab`;
+3. confirm `first_run.py` appears in the Explorer;
+4. install the official Python extension if it is not already available and
+   your device permits it;
+5. use **Python: Select Interpreter**;
+6. choose the interpreter whose path matches your recorded terminal evidence;
+7. save `first_run.py`;
+8. open VS Code's integrated terminal; and
+9. run the same command and compare the exact output.
+
+Opening the folder gives the editor a workspace boundary for files, terminals,
+and interpreter discovery. Opening only a floating file makes it easier to lose
+track of the current folder.
+
+### Saved source and editor source can differ
+
+If the editor shows `Status: checked` but the terminal run still shows
+`Status: ready`, check whether the file was saved. The terminal runs the saved
+file on disk, not unsaved editor changes.
+
+### Editor and terminal interpreters can differ
+
+If VS Code reports that a package is missing while a separate terminal can use
+it, compare:
+
+```python
+import sys
+print(sys.executable)
+```
+
+Run it through the terminal and through the editor's Python action. Different
+paths mean different interpreters. Select the intended one rather than
+installing the package repeatedly into unknown locations.
+
+This diagnostic preview uses `import`, which Unit 10 develops. Preserve the
+paths now; formal module behavior can wait.
+
+### Checkpoint: locate the file and interpreter
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-local-files-editor",
+  "title": "Files and editor checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "local-file-not-found",
+      "prompt": "The Python launcher works but reports that first_run.py cannot be opened. What should you inspect first?",
+      "options": [
+        "Current folder, listed files, exact filename/extension, and run command",
+        "A different programming language",
+        "Every installed browser extension",
+        "The course certificate"
+      ],
+      "answer_index": 0,
+      "explanation": "The evidence points to a file path boundary rather than proving an interpreter installation failure."
+    },
+    {
+      "id": "local-open-folder",
+      "prompt": "Why open python-learning-lab as a folder in VS Code?",
+      "options": [
+        "It removes the need for Python",
+        "It connects the visible files, integrated terminal, and interpreter choice to one workspace",
+        "It automatically proves every script",
+        "It turns all files into notebooks"
+      ],
+      "answer_index": 1,
+      "explanation": "A workspace folder makes file and interpreter context easier to inspect."
+    },
+    {
+      "id": "local-unsaved-source",
+      "prompt": "The editor shows checked, but the terminal script still prints ready. Which first check is strongest?",
+      "options": [
+        "Whether Python understands any strings",
+        "Whether the monitor is on",
+        "Whether the edited file was saved before the terminal rerun",
+        "Whether a second editor can be installed"
+      ],
+      "answer_index": 2,
+      "explanation": "The terminal executes saved source, so unsaved editor state can explain the mismatch."
+    },
+    {
+      "id": "local-interpreter-mismatch",
+      "prompt": "VS Code and the terminal disagree about available packages. What evidence should you compare?",
+      "options": [
+        "Only the color theme",
+        "Only the file's line count",
+        "The notebook title",
+        "The sys.executable paths from the editor run and terminal run"
+      ],
+      "answer_index": 3,
+      "explanation": "Different executable paths identify different Python environments with potentially different packages."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Create `.venv` before installing local tools
+
+A **virtual environment** gives this workspace its own Python executable and
+package installation location, built from a base Python. It does not copy your
+project source into a magical container. The `.venv` folder is disposable and
+should be recreated rather than moved between computers.
+
+From inside `python-learning-lab`, use your verified launcher:
+
+```bash
+python -m venv .venv
+```
+
+or:
+
+```bash
+python3 -m venv .venv
+```
+
+Current Windows Python also supports:
+
+```powershell
+python -m venv .venv
+```
+
+The command creates `.venv` in the current project folder. Do not place
+`first_run.py` inside `.venv`; source belongs in the Learning Lab folder, and
+the environment remains disposable.
+
+### Activation is convenient, not proof
+
+Activation changes command lookup so an unqualified `python` usually finds the
+environment's interpreter first. A prompt label such as `(.venv)` is a hint,
+not sufficient evidence.
+
+Common activation commands are:
+
+```bash
+source .venv/bin/activate
+```
+
+for bash/zsh on macOS or Linux,
+
+```cmd
+.venv\Scripts\activate.bat
+```
+
+for Windows Command Prompt, and:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+for Windows PowerShell when local policy permits it.
+
+If activation is blocked on a managed Windows device, do **not** change execution
+policy for this course. Activation is not required. Invoke the environment's
+interpreter directly:
+
+```powershell
+.venv\Scripts\python.exe -c "import sys; print(sys.executable)"
+.venv\Scripts\python.exe first_run.py
+```
+
+On macOS or Linux, the direct equivalent is:
+
+```bash
+.venv/bin/python -c "import sys; print(sys.executable)"
+.venv/bin/python first_run.py
+```
+
+### Verify isolation from evidence
+
+After activation, or using the direct path, run:
+
+```python
+import sys
+print(sys.executable)
+print(sys.prefix)
+print(sys.base_prefix)
+print(sys.prefix != sys.base_prefix)
+```
+
+Run it with `python -c` or in a small temporary cell. Inside a normal virtual
+environment, the last line displays `True`, and the executable/prefix point
+inside `.venv`. This check is stronger than trusting the shell prompt.
+
+Then verify pip through that interpreter:
+
+```bash
+python -m pip --version
+```
+
+or directly:
+
+```bash
+.venv/bin/python -m pip --version
+```
+
+```powershell
+.venv\Scripts\python.exe -m pip --version
+```
+
+The reported location should belong to `.venv`.
+
+### Install Jupyter only into the selected route
+
+If you want a local JupyterLab for the notebook lesson, install it *after*
+creating and verifying `.venv`:
+
+```bash
+python -m pip install jupyterlab
+python -m jupyter lab
+```
+
+When not activated, replace `python` with the environment's direct interpreter
+path. Installation requires network access and may be governed by your device.
+If it is blocked, preserve the exact error and continue using your saved Colab
+notebook; do not install into random global interpreters until one command
+happens to work.
+
+Conda and Anaconda can be appropriate for projects that need broader scientific
+or non-Python dependency management. They are not additional Python languages,
+and you do not need to install them alongside this course baseline. Scientific
+Python revisits environment choices when those trade-offs become concrete.
+
+## 6. Diagnose the boundary named by the evidence
+
+Use this table before replacing tools:
+
+| Evidence | Likely boundary to inspect | First focused check |
+|---|---|---|
+| command not found | launcher installation or command lookup | current official platform setup and a new terminal |
+| cannot open `first_run.py` | current folder or filename | location/listing plus exact extension |
+| old output after an edit | unsaved or wrong file | save, show folder, rerun exact path |
+| package installed but import fails | interpreter/pip mismatch | compare `sys.executable` and `python -m pip --version` |
+| VS Code and terminal disagree | selected interpreter | compare paths, then select `.venv` |
+| notebook kernel lacks package | selected kernel/environment | inspect kernel interpreter path |
+| activation blocked | shell policy | use direct `.venv` Python; ask administrator if needed |
+| installation forbidden | managed-device permission | hosted fallback plus support request |
+
+Do not interpret every failure as “Python is broken.” Each line names a smaller
+boundary with a cheaper check.
+
+### Checkpoint: verify `.venv` and recover deliberately
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "get-started-local-venv",
+  "title": "Virtual environment checkpoint",
+  "instructions": "Choose the best answer for each question.",
+  "questions": [
+    {
+      "id": "local-venv-purpose",
+      "prompt": "What does .venv provide for this Learning Lab?",
+      "options": [
+        "A project-specific Python and package location isolated from other environments by default",
+        "A permanent backup of every source file",
+        "A replacement for the project folder",
+        "Proof that all code is correct"
+      ],
+      "answer_index": 0,
+      "explanation": "The environment isolates interpreter/package context; project source remains outside it."
+    },
+    {
+      "id": "local-activation-proof",
+      "prompt": "Why is a (.venv) prompt label not enough proof?",
+      "options": [
+        "Prompts cannot contain text",
+        "Executable and prefix paths provide direct evidence of which interpreter is running",
+        "Activation deletes Python",
+        "Virtual environments have no executables"
+      ],
+      "answer_index": 1,
+      "explanation": "Prompt decoration can be stale or customized, while interpreter paths identify the running process."
+    },
+    {
+      "id": "local-powershell-blocked",
+      "prompt": "PowerShell blocks the activation script on a managed device. What is the safest course action?",
+      "options": [
+        "Disable all execution restrictions",
+        "Run an unknown downloaded bypass",
+        "Invoke .venv\\Scripts\\python.exe directly and ask authorized support if activation is needed",
+        "Delete the operating system Python"
+      ],
+      "answer_index": 2,
+      "explanation": "Activation is optional; the direct environment interpreter avoids changing security policy."
+    },
+    {
+      "id": "local-pip-mismatch",
+      "prompt": "A package seems installed but the script cannot import it. What should you compare first?",
+      "options": [
+        "The editor font and terminal color",
+        "Two unrelated package tutorials",
+        "The number of Python files",
+        "The running sys.executable and the interpreter/location reported by python -m pip --version"
+      ],
+      "answer_index": 3,
+      "explanation": "The comparison tests whether installation and execution use the same environment."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: complete `launch-card.md`
+
+From a fresh terminal, complete one evidence branch.
+
+### Local evidence branch
+
+1. Navigate into `python-learning-lab`.
+2. Record the current folder and file listing.
+3. Record the chosen Python launcher and `--version` output.
+4. Run `first_run.py` and compare all three output lines.
+5. Record the base interpreter path.
+6. Create `.venv` if it does not exist.
+7. Run the environment's Python directly and record `sys.executable`.
+8. Verify `sys.prefix != sys.base_prefix` is `True`.
+9. Verify environment pip with `-m pip --version`.
+10. Open the folder in VS Code and select the `.venv` interpreter.
+11. Run `first_run.py` in the integrated terminal.
+12. Close the terminal, open a fresh one, and repeat the clean script check.
+
+### Hosted/restricted evidence branch
+
+1. Record the device and the exact installation or permission boundary.
+2. Record which authorized person or support channel can change that boundary.
+3. Open your saved `first_notebook.ipynb` in Colab.
+4. Restart and run all, then copy the three-line baseline evidence.
+5. Download a durable notebook copy and a `first_run.py` copy.
+6. Record where the copies are stored.
+7. State when local folders/terminals will become necessary later in the course.
+8. Record the local-access plan and Colab fallback link.
+
+Use this launch card:
+
+```markdown
+# Python Learning Lab launch card
+
+- **Practice route:**
+- **Device/operating system:**
+- **Learning Lab location:**
+- **Working Python launcher or hosted runtime:**
+- **Version evidence:**
+- **Interpreter path evidence:**
+- **Script/notebook clean-run evidence:**
+- **Environment evidence or device restriction:**
+- **VS Code/kernel interpreter evidence:**
+- **Durable save location:**
+- **Fallback route:**
+- **Authorized help route:**
+```
+
+<details>
+<summary>Hint: diagnose one connection at a time</summary>
+
+Verify folder → file, launcher → interpreter, interpreter → pip, and editor →
+interpreter as separate connections. Do not install another distribution merely
+because one later connection fails.
+
+</details>
+
+<details class="solution">
+<summary>Show one possible local evidence path</summary>
+
+On a macOS/Linux system whose working launcher is `python3`:
+
+```bash
+cd python-learning-lab
+pwd
+ls
+python3 --version
+python3 first_run.py
+python3 -c "import sys; print(sys.executable)"
+python3 -m venv .venv
+.venv/bin/python -c "import sys; print(sys.executable); print(sys.prefix != sys.base_prefix)"
+.venv/bin/python -m pip --version
+.venv/bin/python first_run.py
+```
+
+On Windows with the `python` command:
+
+```powershell
+Set-Location python-learning-lab
+Get-Location
+Get-ChildItem
+python --version
+python first_run.py
+python -c "import sys; print(sys.executable)"
+python -m venv .venv
+.venv\Scripts\python.exe -c "import sys; print(sys.executable); print(sys.prefix != sys.base_prefix)"
+.venv\Scripts\python.exe -m pip --version
+.venv\Scripts\python.exe first_run.py
+```
+
+Copy real outputs into the launch card instead of copying these example paths.
+Select that `.venv` interpreter in VS Code and rerun from a fresh integrated
+terminal.
+
+</details>
+
+## Key points
+
+- Choose one browser or local route and preserve evidence before adding tools.
+- Verify one Python launcher, version, and executable path; use the command
+  consistently.
+- A terminal runs relative files from its current folder.
+- Saved files, exact extensions, and current paths matter when a script cannot
+  be found or appears stale.
+- VS Code's Python extension uses a selected interpreter; compare
+  `sys.executable` when editor and terminal behavior differ.
+- Create `.venv` before installing local project tools, and verify its
+  interpreter and pip locations.
+- Activation changes command lookup but is not required; never bypass managed
+  security policy merely to activate an environment.
+- Record a hosted fallback and authorized help route.
+
+## References
+
+- [Python setup and usage by operating system](https://docs.python.org/3/using/)
+- [Using Python on Windows and the Python Install Manager](https://docs.python.org/3/using/windows.html)
+- [Using Python on macOS](https://docs.python.org/3/using/mac.html)
+- [Using Python on Unix platforms](https://docs.python.org/3/using/unix.html)
+- [Python `venv` reference and activation table](https://docs.python.org/3/library/venv.html)
+- [Python in Visual Studio Code](https://code.visualstudio.com/docs/languages/python)
+- [Project Jupyter installation guidance](https://jupyter.org/install)
