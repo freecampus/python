@@ -95,6 +95,8 @@ def test_lesson_header_exposes_course_and_progress_identity() -> None:
     assert "isOptionalSidebarLink" not in course_ui
     assert "currentUnit" in course_ui
     assert "currentModule" not in course_ui
+    assert "markSameOriginLinksInternal" in course_ui
+    assert 'link.classList.add("no-external")' in course_ui
 
 
 def test_course_catalog_is_generated_and_filterable() -> None:

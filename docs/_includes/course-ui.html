@@ -53,6 +53,20 @@
       return `${siteBasePath()}${key}.html`;
     }
 
+    function markSameOriginLinksInternal() {
+      const currentOrigin = new URL(window.location.href).origin;
+      document.querySelectorAll("a[href]").forEach((link) => {
+        try {
+          const destination = new URL(link.href, window.location.href);
+          if (destination.origin === currentOrigin) {
+            link.classList.add("no-external");
+          }
+        } catch (_error) {
+          // Leave malformed destinations unchanged for the browser to handle.
+        }
+      });
+    }
+
     function isChallengeKey(key) {
       const parts = key.split("/");
       return (
@@ -813,6 +827,7 @@
     if (challengeId || projectId) {
       document.body.classList.add("fc-assessment-page");
     }
+    markSameOriginLinksInternal();
     enrichTitle();
     restoreNavigationState();
     paintSidebarCompletion();
