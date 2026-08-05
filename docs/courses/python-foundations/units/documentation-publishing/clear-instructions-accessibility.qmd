@@ -1,0 +1,574 @@
+---
+title: Write Instructions People Can Follow
+lesson_id: documentation-publishing.clear-instructions-accessibility
+lesson_order: 20
+description: Write and repair technical instructions with explicit prerequisites, focused steps, observable results, recovery guidance, and accessible structure.
+execute:
+  echo: true
+categories:
+  - python-foundations
+  - documentation-publishing
+  - technical-writing
+  - accessibility
+order: 20
+colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/clear-instructions-accessibility.ipynb
+course_id: python-foundations
+unit_id: documentation-publishing
+unit_number: 15
+---
+::: {.lesson-meta}
+
+- **Level:** Beginner
+- **Estimated time:** 2.5–3.5 hours
+- **You will learn:** Turn an ambiguous procedure into instructions another person can follow, verify, scan, and recover from without the author's hidden knowledge.
+- **Practice in:** A local Markdown/QMD page, with Colab or JupyterLab for the Python results
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+Readers usually open instructions because they want a result, not because they
+want to admire prose. The writing is successful when they can tell whether the
+page fits their situation, perform each action safely, recognize the expected
+state, and recover from a predictable mistake.
+
+This lesson asks:
+
+1. What must a reader know or prepare before step 1?
+2. Where should each command run, and which text is literal or replaceable?
+3. What observable result tells the reader that a step succeeded?
+4. How do headings, link text, and image descriptions affect navigation?
+5. How can a fresh-reader test expose assumptions the author no longer notices?
+
+## 1. Promise one result in the title and opening
+
+Compare these titles:
+
+- `More details`
+- `Museum operation information`
+- `Change the Open Time for an Exhibit Ranking`
+
+Only the third title lets a returning user predict the page's task. The opening
+should confirm the result and identify the reader:
+
+```markdown
+# Change the Open Time for an Exhibit Ranking
+
+Use this guide after you have completed the quick start. You will change the
+`minutes_open` input, rerun one public call, and verify the new score.
+```
+
+The page does not promise to explain the entire ranking formula or teach package
+installation. It states a prerequisite by outcome (“completed the quick start”)
+and a visible result.
+
+A tutorial opening makes a different promise:
+
+```markdown
+# Rank Your First Museum Exhibit
+
+In this guided visit, you will prepare the lesson project, rank the supplied
+Moon Dial exhibit, and compare the returned score with a known result. No
+ranking-policy knowledge is required.
+```
+
+Both pages contain actions, but their relationship with the reader differs. A
+tutorial chooses safe inputs and teaches orientation. A how-to respects an
+already-oriented reader's time and concentrates on the requested change.
+
+::: {.concept-diagram}
+A usable instruction page connects preparation, action, evidence, and recovery.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Prerequisites] --> B[Focused action]
+  B --> C[Expected result]
+  C --> D{Result matches?}
+  D -->|Yes| E[Next task]
+  D -->|No| F[Recovery evidence]
+  F --> B
+```
+
+:::
+
+## 2. Put prerequisites before dependent actions
+
+“Install it normally” forces the reader to guess the tool, directory, package
+state, and supported Python version. State only prerequisites that affect this
+page:
+
+```markdown
+## Before you begin
+
+- Use Python 3.10 or newer.
+- Complete the README quick start once.
+- Open a terminal at the `midnight-museum/` project root.
+- Keep the existing tests unchanged.
+```
+
+A prerequisite is useful when a reader can check it. “Know Python” is vague.
+“Be able to run `python --version` and see Python 3.10 or newer” is observable:
+
+```bash
+python --version
+```
+
+Expected shape:
+
+```text
+Python 3.13.5
+```
+
+The exact patch version may differ. Say which part matters rather than showing
+one output and implying it is universal.
+
+### Name the command context
+
+These commands are not equivalent when run from arbitrary directories:
+
+```bash
+python examples/rank_moon_dial.py
+pytest tests/test_ranking.py -q
+quarto render docs
+```
+
+A short context line prevents three different path failures:
+
+> Run the following commands from the project root, the directory containing
+> `pyproject.toml` and `docs/`.
+
+Do not put a shell prompt inside a copyable block:
+
+```text
+$ python examples/rank_moon_dial.py
+```
+
+The `$` may be mistaken for part of the command. Use prose or a block label to
+distinguish command from output.
+
+### Checkpoint: make preparation observable
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-instructions-context-check",
+  "title": "Prepare the reader before step 1",
+  "instructions": "Choose the revision that removes the hidden assumption.",
+  "questions": [
+    {
+      "id": "unit15-instructions-context-root",
+      "prompt": "A command uses `docs/_quarto.yml`, but the page never names a working directory. Which revision helps most?",
+      "options": ["Say that paths are obvious", "Tell the reader to run it from the project root and identify that root by a visible file", "Replace every path with the author's home directory", "Move the command into an unexplained screenshot"],
+      "answer_index": 1,
+      "explanation": "The reader can locate the directory by a project file and then reproduce the relative path."
+    },
+    {
+      "id": "unit15-instructions-context-version",
+      "prompt": "The project needs Python 3.10 or newer. Which prerequisite is checkable?",
+      "options": ["Use a modern Python", "Know programming", "Run `python --version` and confirm the major/minor version is at least 3.10", "Upgrade everything without reading the output"],
+      "answer_index": 2,
+      "explanation": "The command and comparison give the reader an observable readiness check."
+    },
+    {
+      "id": "unit15-instructions-context-tutorial",
+      "prompt": "Which opening best fits a tutorial for a new user?",
+      "options": ["Reference: all function signatures", "Change one setting after completing setup", "Implementation history since version 0.1", "Follow a guided path to rank the supplied exhibit; no ranking-policy knowledge is required"],
+      "answer_index": 3,
+      "explanation": "The opening promises a safe learning result and states what prior knowledge is not needed."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Make each step answer three questions
+
+A procedural step should make three facts easy to find:
+
+1. **Action:** What should the reader do?
+2. **Location or input:** Where, or with which exact value?
+3. **Evidence:** What changes or appears afterward?
+
+This step hides all three:
+
+> Update it and run things. If it fails, fix the configuration.
+
+A focused version is longer but less costly:
+
+````markdown
+1. Open `examples/rank_moon_dial.py` from the project root.
+2. Change only `minutes_open=75` to `minutes_open=105`.
+3. Save the file and run:
+
+   ```text
+   python examples/rank_moon_dial.py
+   ```
+
+4. Confirm that the complete result is:
+
+   ```text
+   ExhibitScore(name='Moon Dial', score=46)
+   ```
+````
+
+The controlled input change adds one complete 30-minute period. The expected
+score changes from 44 to 46. If the policy needs explanation, link to the design
+page after the reader verifies the task.
+
+### Separate literal text from placeholders
+
+This command is ambiguous:
+
+```text
+python examples/rank.py name votes minutes
+```
+
+The words might be literal arguments or placeholders. Mark replacement points
+and supply a concrete invocation:
+
+```text
+python examples/rank.py <name> <votes> <minutes-open>
+python examples/rank.py "Moon Dial" 4 75
+```
+
+If angle brackets have special meaning in the shell being taught, describe the
+notation and tell the reader not to type the brackets. Better still, prefer a
+real command when the task allows it.
+
+### Show expected state, not ceremonial success
+
+“Success!” teaches nothing if the program always prints it. Prefer evidence that
+contains the task's important values:
+
+```python
+from museum_quest import rank_exhibit
+
+result = rank_exhibit("Moon Dial", votes=4, minutes_open=105)
+assert result.name == "Moon Dial"
+assert result.score == 46
+print(result)
+```
+
+Expected output:
+
+```text
+ExhibitScore(name='Moon Dial', score=46)
+```
+
+The assertions make the promised name and score explicit. They still check one
+case, not all behavior.
+
+## 4. Put recovery beside the failure it repairs
+
+A common failure belongs near the step that can cause it. Avoid a remote
+“Troubleshooting” dump that makes readers search for every error.
+
+```markdown
+::: {.callout-warning title="If Python cannot import museum_quest"}
+Confirm that the virtual environment is active and that you ran
+`python -m pip install -e .` from the directory containing `pyproject.toml`.
+Then rerun the import command. Do not add a machine-specific `sys.path` entry.
+:::
+```
+
+A recovery note should use exact evidence. “If it doesn't work, reinstall” may
+erase useful state and still leave the original cause.
+
+Consider this output:
+
+```text
+python: can't open file '/work/docs/examples/rank_moon_dial.py':
+[Errno 2] No such file or directory
+```
+
+The path includes `/work/docs/examples`, but the example file is under
+`/work/examples`. The earliest useful hypothesis is wrong working directory,
+not a defect in `rank_exhibit`.
+
+A good recovery sequence is:
+
+1. Print or inspect the current directory.
+2. Locate `pyproject.toml` and `examples/`.
+3. Move to that project root.
+4. Rerun the unchanged command.
+5. Record the path evidence if it still fails.
+
+### Checkpoint: write actions and recovery
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-instructions-steps-check",
+  "title": "Make each step verifiable",
+  "instructions": "Choose the instruction that best supports the reader's task.",
+  "questions": [
+    {
+      "id": "unit15-instructions-steps-focused",
+      "prompt": "Which instruction makes one controlled edit?",
+      "options": ["Change `minutes_open=75` to `minutes_open=105`, save, and leave every other input unchanged", "Improve all values and configuration", "Experiment until the score looks right", "Replace the function with another design"],
+      "answer_index": 0,
+      "explanation": "The named old/new value and unchanged inputs preserve the connection between edit and result."
+    },
+    {
+      "id": "unit15-instructions-steps-evidence",
+      "prompt": "Which expected result is most useful after ranking the Moon Dial?",
+      "options": ["No news is good news", "The complete `ExhibitScore(name='Moon Dial', score=46)` value", "A screenshot cropped before the result", "A message that says only `done`"],
+      "answer_index": 1,
+      "explanation": "The complete domain value lets the reader verify the exhibit identity and changed score."
+    },
+    {
+      "id": "unit15-instructions-steps-path",
+      "prompt": "The error path shows `/work/docs/examples/rank_moon_dial.py`, but the file is under `/work/examples`. What should the reader check first?",
+      "options": ["Rewrite the score formula", "Delete the virtual environment", "Whether the command ran from the project root", "Change the expected score"],
+      "answer_index": 2,
+      "explanation": "The error already shows that relative path resolution began from the wrong directory."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Let headings and links carry meaning
+
+Readers often scan a page before reading paragraphs. Read this outline alone:
+
+```text
+Overview
+Details
+More details
+Notes
+Other
+```
+
+It does not reveal the task. A meaningful outline does:
+
+```text
+Before you change the ranking
+Change only the open-time input
+Confirm the new ExhibitScore
+Recover from an import failure
+Choose the next museum task
+```
+
+Use heading levels as structure, not decoration. A page title is the top-level
+heading supplied by Quarto. Major sections use `##`; subsections inside them use
+`###`. Do not choose `####` because it looks visually smaller while skipping
+the hierarchy a screen reader or outline tool depends on.
+
+### Write links that make sense outside the sentence
+
+Compare:
+
+```markdown
+For API details, [click here](api.qmd "API reference").
+
+[Look up the `rank_exhibit` contract](api.qmd "API reference").
+```
+
+The second link remains meaningful in a list of links. Avoid repeating the raw
+URL as the visible label unless the URL itself is what readers need to copy.
+
+### Describe the image's purpose
+
+An informative diagram needs alternative text that communicates its relevant
+content:
+
+```markdown
+![The README branches to a tutorial, how-to guide, explanation, and API reference.](reader-paths.svg)
+```
+
+“Diagram” or “image123” merely announces that an image exists. A decorative
+flourish should not force a screen-reader user through a useless filename; use
+the output format's decorative-image mechanism or omit it when it contributes
+nothing.
+
+Captions and surrounding prose can provide longer context. Alternative text
+should deliver the image's purpose in this page, not inventory every color and
+pixel.
+
+### Tables need a reason
+
+The reader/task matrix works as a table because rows share the same comparable
+fields. A single sequence of steps belongs in a numbered list. A table with
+paragraphs, code blocks, and hidden reading order can be harder on narrow
+screens and assistive technology.
+
+## 6. Edit vague prose into domain language
+
+Generated-sounding text often replaces concrete actions with abstractions:
+
+> Leverage the configuration capability to facilitate the production of the
+> artifact and ensure successful execution.
+
+Ask what the reader actually does:
+
+> In `docs/_quarto.yml`, add `api.qmd` to the sidebar. Run `quarto render docs`
+> and confirm that `_site/api.html` exists.
+
+The revision names the file, field, command, and evidence. It is shorter because
+it carries more information per sentence.
+
+Watch for these repair opportunities:
+
+| Vague wording | Question to ask | Concrete replacement |
+|---|---|---|
+| “it” | Which file, command, or value? | “the `docs/_quarto.yml` file” |
+| “properly” | Which result proves that? | “with zero doctest failures” |
+| “handle” | Validate, convert, raise, log, or return? | Name the actual action |
+| “the artifact” | Source page or rendered site? | “`docs/_site/index.html`” |
+| “simply” | Which prerequisite is being hidden? | State the prerequisite |
+| “obviously” | What evidence makes it visible? | Show the evidence |
+
+Direct language does not mean abrupt language. Tell the reader why a dangerous
+or surprising step matters, and state consequences before the action:
+
+> Removing `docs/_site` deletes generated files only; it does not delete QMD
+> source. Confirm that your project config uses `_site` as its output directory
+> before cleaning it.
+
+### Checkpoint: improve structure and language
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-instructions-access-check",
+  "title": "Make the page scannable and accessible",
+  "instructions": "Choose the revision that communicates the intended structure or purpose.",
+  "questions": [
+    {
+      "id": "unit15-instructions-access-alt",
+      "prompt": "A diagram shows the README branching to four reader paths. Which alternative text is useful here?",
+      "options": ["diagram.png", "A colorful picture", "Documentation", "The README links to tutorial, how-to, explanation, and API reference paths"],
+      "answer_index": 3,
+      "explanation": "The text communicates the relationship the diagram contributes to this lesson."
+    },
+    {
+      "id": "unit15-instructions-access-link",
+      "prompt": "Which link text remains meaningful when read by itself?",
+      "options": ["Look up the `rank_exhibit` API contract", "Click here", "More", "This page"],
+      "answer_index": 0,
+      "explanation": "The link names both the action and destination subject."
+    },
+    {
+      "id": "unit15-instructions-access-heading",
+      "prompt": "Which heading best helps a reader scan for recovery from an import error?",
+      "options": ["Details", "Recover from `ModuleNotFoundError`", "Other", "Notes 2"],
+      "answer_index": 1,
+      "explanation": "The heading names the exact failure and the purpose of the section."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: repair a guide using only its words
+
+The museum team wrote this page:
+
+```markdown
+# Configuration
+
+Make sure everything is ready. Open it and change the value. Run the command.
+It will work properly. If not, fix your environment. Then click
+[here](api.qmd "API reference"). The image below explains it.
+
+![diagram](ranking.png)
+```
+
+Turn it into a how-to guide for changing `minutes_open` from 75 to 105.
+
+Your revision must include:
+
+- a task-specific title and one-sentence outcome;
+- checkable prerequisites and a project-root statement;
+- the exact filename and old/new value;
+- a copyable command without a prompt character;
+- the complete expected result with score 46;
+- recovery for the wrong-working-directory error shown earlier;
+- a descriptive API link;
+- a useful image description, or a reason to remove the image;
+- headings whose outline explains the task.
+
+Follow the finished guide from a clean terminal state. Keep a table:
+
+| Step | What the page told you | What you observed | Missing assumption or revision |
+|---:|---|---|---|
+| 1 | | | |
+| 2 | | | |
+| 3 | | | |
+
+Then ask a second question: if the same content were a tutorial for someone who
+had never ranked an exhibit, what orientation and safe supplied choices would
+you add? Do not bloat the how-to; describe the separate tutorial changes.
+
+<details>
+<summary>Hint: write the expected result before polishing prose</summary>
+
+Anchor the page on `ExhibitScore(name='Moon Dial', score=46)`. Work backward to
+the one input edit and the context needed to produce it.
+
+</details>
+
+<details>
+<summary>Reveal a concise solution outline</summary>
+
+A strong guide can use this outline:
+
+````markdown
+# Change the Open Time for an Exhibit Ranking
+
+Use this guide after the README quick start to rerun the Moon Dial with 105 open
+minutes.
+
+## Before you change the ranking
+
+Run from the project root with the editable installation active.
+
+## Change only `minutes_open`
+
+In `examples/rank_moon_dial.py`, replace `75` with `105`. Run:
+
+```text
+python examples/rank_moon_dial.py
+```
+
+## Confirm the returned score
+
+Expect `ExhibitScore(name='Moon Dial', score=46)`.
+
+## Recover from a missing example path
+
+If the error path contains `docs/examples`, return to the directory containing
+`pyproject.toml` and rerun the unchanged command.
+
+## Look up related facts
+
+[Look up the `rank_exhibit` API contract](api.qmd "API reference").
+````
+
+Your wording can differ. Verify that every action, location, and result remains
+observable.
+
+</details>
+
+## Key points
+
+- A useful instruction page promises one result for a named reader context.
+- Put checkable prerequisites and working-directory context before dependent
+  actions.
+- Focus each step on an action, exact input or location, and observable result.
+- Place evidence-based recovery near the failure-producing step.
+- Meaningful headings, links, and image descriptions help every reader scan and
+  navigate.
+- Replace vague abstractions with the real file, command, value, result, or
+  failure.
+
+## References
+
+- [W3C tips for writing accessible web content](https://www.w3.org/WAI/tips/writing/)
+- [GitHub Docs writing practices](https://docs.github.com/en/contributing/writing-for-github-docs/best-practices-for-github-docs)
+- [Diátaxis how-to guide principles](https://diataxis.fr/how-to-guides/)
+- [Diátaxis tutorial principles](https://diataxis.fr/tutorials/)
+
+[Next: Document a Public Python API](docstrings-api-documentation.qmd){.btn .btn-primary}

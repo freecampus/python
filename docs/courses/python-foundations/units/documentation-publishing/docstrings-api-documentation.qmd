@@ -1,142 +1,139 @@
 ---
-title: Docstring Conventions and API Documentation
+title: Document a Public Python API
 lesson_id: documentation-publishing.docstrings-api-documentation
-lesson_order: 20
-description: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
-course_id: python-foundations
-unit_id: documentation-publishing
-unit_number: 15
+lesson_order: 30
+description: Write caller-facing module, function, and result contracts, then inspect the interface that help, pydoc, signatures, and docstrings expose.
 execute:
   echo: true
 categories:
-- python-foundations
-- documentation-publishing
-order: 20
+  - python-foundations
+  - documentation-publishing
+  - docstrings
+  - api-reference
+order: 30
 colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/docstrings-api-documentation.ipynb
+course_id: python-foundations
+unit_id: documentation-publishing
+unit_number: 15
 ---
 ::: {.lesson-meta}
+
 - **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Estimated time:** 3–4 hours
+- **You will learn:** Document public Python behavior, inputs, results, side effects, and anticipated failures without duplicating signatures or narrating implementation.
+- **Practice in:** Google Colab, JupyterLab, or a local `museum_quest` package
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+A caller can see a function's name and signature, yet still not know what its
+numbers mean, which inputs are valid, whether it mutates anything, or what to do
+with a failure. A useful public docstring completes that contract and appears
+where Python users naturally look: editor help, `help()`, `pydoc`, and generated
+reference.
 
-Generated API pages are only as useful as the public interface and docstrings they expose. A docstring must state a caller-visible contract rather than narrate implementation lines.
+This lesson asks:
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+1. Which names are public enough to document as promises?
+2. What does a signature or type annotation already say, and what remains
+   unexplained?
+3. What belongs in module, class, method, property, and function docstrings?
+4. Which exceptions and side effects matter to a caller?
+5. How can you inspect the documentation Python actually exposes?
 
-## 1. Read and predict a complete case
+## 1. Document the interface a caller is invited to use
 
-```python
-def percentage(part, whole):
-    """Return part as a percentage of whole.
-
-    Args:
-        part: The portion being measured.
-        whole: The non-zero total.
-
-    Returns:
-        The percentage as a float.
-
-    Raises:
-        ValueError: If whole is zero.
-    """
-    if whole == 0:
-        raise ValueError("whole cannot be zero")
-    return part / whole * 100
-
-
-print(percentage(3, 4))
-```
-
-### Step-by-step explanation
-
-1. The summary says what the caller receives.
-2. Arguments are described by domain role rather than repeating their names.
-3. The return and anticipated exception are visible contracts.
-4. The implementation checks the documented failure boundary and returns `75.0`.
-
-::: {.callout-note title="Make one controlled change"}
-Add a short example to the docstring, then confirm that it uses only the public interface.
-:::
-
-## 2. Investigate the important boundary
-
-Google, NumPy, and reStructuredText docstring styles encode similar contract information with different syntax. Choose one house style for consistency, but learn to recognize all three when reading projects.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+The package initializer selects its public entrance:
 
 ```python
-print(percentage.__name__)
-print(percentage.__doc__.splitlines()[0])
+from .ranking import ExhibitScore, rank_exhibit
 
-try:
-    percentage(2, 0)
-except ValueError as error:
-    print(error)
+__all__ = ["ExhibitScore", "rank_exhibit"]
 ```
 
-Then complete the learning loop:
+A caller should not need `_score_time_bonus` or `_validate_count` to complete a
+normal task. Documenting every private helper as if it were stable creates more
+promises than the project intends to keep.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+Public does not mean “every name without an underscore” by magic. Look for
+evidence:
 
-<details>
-<summary>Check your practice process</summary>
+- the package exports the name;
+- the README or examples invite callers to use it;
+- tests protect caller-visible behavior;
+- another package or application depends on it; or
+- maintainers explicitly commit to compatibility.
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+Comments, docstrings, and long-form pages serve different readers:
 
-</details>
+```python
+POINTS_PER_VOTE = 10  # Keep the public score policy visible near the formula.
 
-## 4. Check your understanding
+
+def rank_exhibit(name: str, votes: int, minutes_open: int) -> "ExhibitScore":
+    """Return the score for one named exhibit."""
+    ...
+```
+
+- The comment explains a source-level maintenance decision.
+- The docstring states caller-visible behavior at runtime.
+- A tutorial can guide a new user through a supplied call.
+- An explanation page can defend the scoring policy and trade-offs.
+- API reference can organize signatures and contracts for lookup.
+
+Do not paste the same paragraph into all five places. Decide where each fact has
+one maintained source and link when a reader needs more context.
+
+::: {.concept-diagram}
+The signature, annotation, docstring, tests, and longer pages contribute
+different evidence about one public promise.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A[Public API promise] --> B[Signature and types]
+  A --> C[Docstring contract]
+  A --> D[Behavioral tests]
+  A --> E[Tutorial and how-to]
+  A --> F[Design explanation]
+  B --> G[Caller understanding]
+  C --> G
+  D --> H[Checked examples]
+  E --> G
+  F --> G
+```
+
+:::
+
+### Checkpoint: choose the documentation layer
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "documentation-publishing-docstrings-api-documentation",
-  "title": "Docstring Conventions and API Documentation checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit15-api-layers-check",
+  "title": "Put each fact where readers look for it",
+  "instructions": "Choose the documentation layer that best fits the fact.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "What belongs in the `Raises` section of a public function docstring?",
-      "options": [
-        "Every possible hardware failure.",
-        "Exceptions the caller is expected to understand and handle as part of the contract.",
-        "Only syntax errors in the source file.",
-        "A copy of the entire traceback from development."
-      ],
-      "answer_index": 1,
-      "explanation": "API documentation should describe anticipated caller-visible failure behavior."
+      "id": "unit15-api-layers-units",
+      "prompt": "The integer parameter `minutes_open` is measured in minutes, not seconds. Where should a caller see that contract?",
+      "options": ["Only in a private helper comment", "Only in Git history", "The public parameter documentation", "Nowhere because the type is `int`"],
+      "answer_index": 2,
+      "explanation": "`int` does not communicate a unit; the public contract should."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun.",
-        "A written prediction, the observed result, and an explanation tied to the changed line."
-      ],
+      "id": "unit15-api-layers-policy",
+      "prompt": "A maintainer wants to understand why votes count more than open time. Which page best develops that reasoning?",
+      "options": ["A list of private names", "The return annotation", "A one-line installation command", "A scoring-policy explanation"],
       "answer_index": 3,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "Explanation can develop rationale and trade-offs without crowding reference."
+    },
+    {
+      "id": "unit15-api-layers-private",
+      "prompt": "Which name should normally be omitted from the stable caller reference?",
+      "options": ["The private helper `_score_time_bonus`", "The exported `rank_exhibit` function", "The exported `ExhibitScore` result", "The documented `ValueError` boundary"],
+      "answer_index": 0,
+      "explanation": "The underscore and lack of public use signal an implementation detail rather than a caller promise."
     }
   ]
 }
@@ -144,15 +141,509 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 2. Let the summary line state behavior
+
+PEP 257 recommends a short summary that fits on one line. For a function, begin
+with the action or returned meaning:
+
+```python
+def normalize_label(value: str) -> str:
+    """Return a display label with outer whitespace removed."""
+    return value.strip()
+```
+
+Avoid repeating the signature:
+
+```python
+def normalize_label(value: str) -> str:
+    """normalize_label(value: str) -> str"""
+    return value.strip()
+```
+
+Python and editor tools already inspect the signature. The useful missing fact
+is what “normalize” means here. It removes outer whitespace; it does not change
+capitalization, Unicode normalization, or internal spaces.
+
+A multi-line docstring keeps the summary separate:
+
+```python
+def score_time_bonus(minutes_open: int) -> int:
+    """Return two points for each complete 30-minute period.
+
+    Partial periods do not contribute points. ``minutes_open`` must be
+    non-negative and is measured in minutes.
+    """
+    if minutes_open < 0:
+        raise ValueError("minutes_open must be non-negative")
+    return minutes_open // 30 * 2
+```
+
+The summary supports indexes and compact help. The body names rounding,
+validation, and units—facts the implementation alone should not force every
+caller to reverse engineer.
+
+### Types complement domain meaning
+
+Compare what this signature communicates:
+
+```python
+def rank_exhibit(
+    name: str,
+    votes: int,
+    minutes_open: int,
+) -> ExhibitScore:
+    ...
+```
+
+It says:
+
+- the caller supplies text and two integers;
+- the function returns an `ExhibitScore`;
+- argument order and names are visible.
+
+It does not say:
+
+- whether empty names are accepted;
+- whether counts can be negative;
+- whether open time is seconds or minutes;
+- how partial periods behave;
+- whether the function writes a file;
+- which exception communicates invalid data.
+
+Do not duplicate `votes: int` as “votes (int): an integer.” Add the domain role:
+“Non-negative visitor vote count.”
+
+## 3. Write the complete caller contract
+
+The museum function uses a consistent Google-style layout, but the information
+matters more than the punctuation:
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class ExhibitScore:
+    """Store the public result of ranking one exhibit.
+
+    Attributes:
+        name: Visitor-facing exhibit name.
+        score: Total ranking points.
+    """
+
+    name: str
+    score: int
+
+
+def rank_exhibit(name: str, votes: int, minutes_open: int) -> ExhibitScore:
+    """Return the score for one named exhibit.
+
+    Each vote contributes 10 points. Each complete 30-minute period contributes
+    2 points; a partial period contributes no time points.
+
+    Args:
+        name: Non-empty visitor-facing exhibit name.
+        votes: Non-negative visitor vote count.
+        minutes_open: Non-negative open duration measured in minutes.
+
+    Returns:
+        The exhibit name and calculated score as an immutable result.
+
+    Raises:
+        ValueError: If the name is blank or either count is negative.
+
+    Examples:
+        >>> rank_exhibit("Moon Dial", votes=4, minutes_open=75)
+        ExhibitScore(name='Moon Dial', score=44)
+    """
+    clean_name = name.strip()
+    if not clean_name:
+        raise ValueError("name cannot be blank")
+    if votes < 0 or minutes_open < 0:
+        raise ValueError("votes and minutes_open must be non-negative")
+    score = votes * 10 + minutes_open // 30 * 2
+    return ExhibitScore(name=clean_name, score=score)
+```
+
+Read the contract from the caller's side:
+
+- **Behavior:** one exhibit becomes one result; it does not save or print.
+- **Policy:** votes and complete time periods contribute named amounts.
+- **Inputs:** names are cleaned; values have units and non-negative boundaries.
+- **Result:** an immutable value carries name and score.
+- **Failures:** anticipated invalid inputs use `ValueError` with two boundaries.
+- **Example:** a small deterministic public call illustrates the ordinary path.
+
+Do not list exceptions the function does not deliberately expose. Hardware
+failure, `MemoryError`, or a bug in a future dependency is not an anticipated
+caller contract merely because it is theoretically possible.
+
+### Side effects belong in the promise
+
+A function that writes a file must say so:
+
+```python
+from pathlib import Path
+
+
+def save_score(result: ExhibitScore, destination: Path) -> None:
+    """Write one exhibit score as UTF-8 text, replacing `destination`.
+
+    Args:
+        result: Public result to serialize.
+        destination: File to create or replace.
+
+    Raises:
+        OSError: If the destination cannot be written.
+    """
+    destination.write_text(
+        f"{result.name}: {result.score}\n",
+        encoding="utf-8",
+    )
+```
+
+`-> None` does not communicate replacement, encoding, newline shape, or the
+anticipated `OSError`. A caller deciding whether the function is safe needs
+those facts.
+
+### Checkpoint: complete the public contract
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-api-contract-check",
+  "title": "Document facts types cannot carry",
+  "instructions": "Choose the contract statement supported by the implementation.",
+  "questions": [
+    {
+      "id": "unit15-api-contract-partial",
+      "prompt": "What should the `minutes_open` documentation say about 75 minutes?",
+      "options": ["All 75 minutes become separate bonus periods", "Only two complete 30-minute periods contribute time points", "Open time is interpreted as seconds", "Partial periods raise an exception"],
+      "answer_index": 1,
+      "explanation": "Integer division counts two complete periods and ignores the remaining 15 minutes."
+    },
+    {
+      "id": "unit15-api-contract-types",
+      "prompt": "What important fact is missing from `minutes_open: int`?",
+      "options": ["That Python has integers", "The function name", "The minutes unit and non-negative boundary", "The source filename"],
+      "answer_index": 2,
+      "explanation": "A type narrows representation but does not supply unit or valid domain."
+    },
+    {
+      "id": "unit15-api-contract-write",
+      "prompt": "Which caller-visible fact belongs in `save_score` documentation?",
+      "options": ["The author's editor theme", "The private variable name", "Every possible operating-system implementation detail", "The destination is replaced using UTF-8 text"],
+      "answer_index": 3,
+      "explanation": "Replacement and encoding affect caller data and safe use."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Document modules, classes, methods, and properties at their level
+
+A module docstring tells a reader what the module groups and which public
+entrances matter:
+
+```python
+"""Rank museum exhibits using explicit votes and open-time inputs.
+
+Use `rank_exhibit` for the public calculation and `ExhibitScore` for its
+immutable result. This module performs no file or network I/O.
+"""
+```
+
+A class docstring explains what an instance represents and important
+invariants. It should not copy every method's documentation.
+
+```python
+class ExhibitCatalog:
+    """Collect unique exhibits by their visitor-facing name."""
+
+    def add(self, result: ExhibitScore) -> None:
+        """Add `result`, raising `ValueError` when its name already exists."""
+        ...
+
+    @property
+    def count(self) -> int:
+        """Return the number of stored exhibits."""
+        ...
+```
+
+The method states its change and duplicate-name failure. The property states the
+meaning of the exposed number. A constructor docstring is useful when creating
+the object has rules that the class summary does not explain.
+
+### Recognize styles without turning them into rival contracts
+
+Projects commonly encode parameters and results with Google, NumPy, or
+reStructuredText/Sphinx conventions. For example:
+
+```python
+def rank_exhibit(name: str, votes: int, minutes_open: int) -> ExhibitScore:
+    """Return the score for one named exhibit.
+
+    Parameters
+    ----------
+    name
+        Non-empty visitor-facing exhibit name.
+    votes
+        Non-negative visitor vote count.
+    minutes_open
+        Non-negative open duration in minutes.
+
+    Returns
+    -------
+    ExhibitScore
+        Immutable exhibit name and calculated score.
+    """
+    ...
+```
+
+The syntax differs from `Args:` and `Returns:`, but the caller needs the same
+facts. Choose a house style compatible with the project's tooling, use it
+consistently, and review information quality rather than debating section names
+in isolation.
+
+## 5. Inspect what Python exposes
+
+A source docstring is not useful merely because it exists. Inspect the caller's
+view:
+
+```python
+import inspect
+
+print(inspect.signature(rank_exhibit))
+print(rank_exhibit.__doc__.splitlines()[0])
+```
+
+Expected output begins:
+
+```text
+(name: str, votes: int, minutes_open: int) -> __main__.ExhibitScore
+Return the score for one named exhibit.
+```
+
+The exact qualified return name can differ by module context. The important
+checks are parameter order/names and the summary line.
+
+Use built-in help:
+
+```python
+help(rank_exhibit)
+```
+
+From a local installed project, `pydoc` produces text outside the interpreter:
+
+```bash
+python -m pydoc museum_quest.rank_exhibit
+```
+
+Or inspect the module:
+
+```bash
+python -m pydoc museum_quest
+```
+
+`pydoc` imports the module. If importing starts an interactive prompt, writes a
+file, reads secrets, or launches the application, documentation generation will
+trigger those side effects. Unit 10's `if __name__ == "__main__":` boundary and
+Unit 14's import-safe design matter here.
+
+### Diagnose a stale promise
+
+Suppose help says:
+
+```text
+Raises:
+    ValueError: If votes is negative.
+```
+
+But the implementation now also rejects blank names and negative open time.
+Passing tests do not repair prose automatically. Choose the source of truth from
+an explicit public decision:
+
+1. Confirm intended behavior in tests and release expectations.
+2. Reproduce each boundary.
+3. Update the docstring to match the intended contract.
+4. Update longer reference or how-to recovery that mentions the old behavior.
+5. Rerun help, doctest, pytest, and the documentation build.
+
+Do not change code to accept invalid values merely to preserve stale prose, and
+do not change prose to excuse an accidental regression. Resolve the contract
+first.
+
+### Checkpoint: inspect and repair exposed documentation
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-api-inspection-check",
+  "title": "Read the interface a caller receives",
+  "instructions": "Choose the action supported by the displayed evidence.",
+  "questions": [
+    {
+      "id": "unit15-api-inspection-help",
+      "prompt": "Which tool shows the runtime signature and docstring through Python's built-in help system?",
+      "options": ["`help(rank_exhibit)`", "A screenshot of the source tree", "The Git branch name", "A formatter check"],
+      "answer_index": 0,
+      "explanation": "Built-in help uses Python's documentation system for the object exposed at runtime."
+    },
+    {
+      "id": "unit15-api-inspection-import",
+      "prompt": "Why can automatic API documentation expose an import-design problem?",
+      "options": ["It converts every function to a class", "Tools may import modules to inspect their objects and docstrings", "It disables all type annotations", "It ignores public names"],
+      "answer_index": 1,
+      "explanation": "Import-time prompts or effects run when an introspection-based tool imports the module."
+    },
+    {
+      "id": "unit15-api-inspection-stale",
+      "prompt": "The implementation intentionally rejects blank names, but the public docstring omits that boundary. What should the team do?",
+      "options": ["Ignore the mismatch because tests pass", "Delete validation", "Confirm the intended contract, update every affected document, and rerun the checks", "Add a private comment only"],
+      "answer_index": 2,
+      "explanation": "The public behavior and public documentation must be reconciled through an explicit contract decision."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Repair docstrings that create false confidence
+
+### Implementation narration
+
+```python
+def score_time_bonus(minutes_open: int) -> int:
+    """Divide minutes_open by 30 with // and multiply the result by 2."""
+    return minutes_open // 30 * 2
+```
+
+The sentence will become stale if implementation changes, and it makes the
+caller reconstruct the policy. Prefer: “Return two points for each complete
+30-minute period.”
+
+### Impossible certainty
+
+```python
+def load_catalog(path: str) -> list[str]:
+    """Always load a valid catalog without errors."""
+    ...
+```
+
+File paths can be missing, unreadable, or contain invalid data. Document
+anticipated failure and validation instead of promising away the boundary.
+
+### Copying types without meaning
+
+```python
+def rank_exhibit(name: str, votes: int, minutes_open: int) -> ExhibitScore:
+    """Rank an exhibit.
+
+    Args:
+        name: A string.
+        votes: An integer.
+        minutes_open: An integer.
+    """
+    ...
+```
+
+Add non-empty visitor-facing name, non-negative vote count, and non-negative
+minutes. Those facts help a caller choose values.
+
+### Leaking a private mechanism
+
+```python
+def rank_exhibit(name: str, votes: int, minutes_open: int) -> ExhibitScore:
+    """Call `_validate_count`, then `_score_time_bonus`, then create `_Result`."""
+    ...
+```
+
+Private helpers can change during a behavior-preserving refactor. The public
+contract should survive that change.
+
+## 7. Lab: document and inspect a small public module
+
+Create `src/museum_quest/ranking.py` with:
+
+- a module docstring;
+- frozen `ExhibitScore` with meaningful attribute documentation;
+- the complete `rank_exhibit` signature and implementation from this lesson;
+- one private scoring helper whose name does not enter public reference.
+
+Create `src/museum_quest/__init__.py` that exports only the result and public
+function. Then:
+
+1. Predict the signature and summary line `help()` will display.
+2. Inspect `inspect.signature(rank_exhibit)` and `rank_exhibit.__doc__`.
+3. Run `python -m pydoc museum_quest` from the installed project.
+4. Confirm public names appear and the private helper is not presented as the
+   supported entry path.
+5. Call the ordinary case and both failure categories.
+6. Temporarily make the docstring promise that 75 minutes creates three complete
+   periods. Identify the behavior/doc mismatch without editing the test to hide
+   it.
+7. Repair the promise and list every longer page that should be reviewed.
+
+<details>
+<summary>Hint: write the caller table before the prose</summary>
+
+Use columns for name, representation/type, domain meaning, ordinary example,
+boundary, result, side effect, and anticipated exception. Omit facts that do not
+apply; translate the table into a concise contract.
+
+</details>
+
+<details>
+<summary>Reveal a public-interface check</summary>
+
+```python
+import inspect
+
+from museum_quest import ExhibitScore, rank_exhibit
+
+assert list(inspect.signature(rank_exhibit).parameters) == [
+    "name",
+    "votes",
+    "minutes_open",
+]
+assert rank_exhibit.__doc__ is not None
+assert rank_exhibit.__doc__.splitlines()[0] == (
+    "Return the score for one named exhibit."
+)
+assert rank_exhibit("Moon Dial", 4, 75) == ExhibitScore("Moon Dial", 44)
+
+try:
+    rank_exhibit("   ", 4, 75)
+except ValueError as error:
+    assert str(error) == "name cannot be blank"
+else:
+    raise AssertionError("blank name was accepted")
+```
+
+Also inspect the actual `help()`/`pydoc` output; assertions over one summary line
+cannot judge the whole contract's usefulness.
+
+</details>
+
 ## Key points
 
-::: {.callout-tip title="Key points"}
-- Document public behavior, inputs, results, and anticipated failures.
-- Generated API pages do not replace intentional explanations and examples.
-- Use one consistent house style while recognizing common alternatives.
-:::
+- Document the interface callers are invited to depend on, not every private
+  helper.
+- Signatures and types carry structure; docstrings add domain meaning, units,
+  boundaries, side effects, and anticipated failures.
+- Summary lines state behavior rather than copying signatures or code steps.
+- Module, class, method, property, and function docstrings describe their own
+  level of the public interface.
+- `help()`, `inspect`, and `pydoc` reveal the runtime documentation callers see.
+- Resolve stale behavior/documentation disagreements through an explicit public
+  contract, then update every affected source and check.
 
 ## References
 
-- https://peps.python.org/pep-0257/
-- https://docs.python.org/3/library/inspect.html
+- [PEP 257 — Docstring Conventions](https://peps.python.org/pep-0257/)
+- [Python `pydoc` documentation](https://docs.python.org/3/library/pydoc.html)
+- [Python `inspect` documentation](https://docs.python.org/3/library/inspect.html)
+- [Sphinx autodoc and its import boundary](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html)
+
+[Next: Keep Small Examples Honest with Doctest](doctest-executable-documentation.qmd){.btn .btn-primary}

@@ -1,15 +1,16 @@
 ---
-title: 'Unit Challenge: Publish Trustworthy Utility Documentation'
-description: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+title: 'Unit Challenge: Publish the Puzzle Garden Field Guide'
+description: Repair and publish the documentation for a playful clue-path package so a new player can reveal, customize, understand, and verify a garden route.
 challenge_id: documentation-publishing.challenge
 assessment_type: unit-challenge
 challenge_format: guided-programming
-assessment_version: 2
+assessment_version: 3
 estimated_time: 60–120 minutes
 categories:
-- python-foundations
-- documentation-publishing
-- unit-challenge
+  - python-foundations
+  - documentation-publishing
+  - unit-challenge
+  - puzzle-garden
 order: 90
 colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/challenge.ipynb
 course_id: python-foundations
@@ -17,96 +18,372 @@ unit_id: documentation-publishing
 unit_number: 15
 ---
 ::: {.lesson-meta .challenge-meta}
+
 - **Level:** Python Foundations · Unit 15 challenge
 - **Estimated time:** 60–120 minutes
-- **Outcome assessed:** Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
-- **Evidence:** Passing checks, one debugging record, and an explanation from a clean rerun
+- **Outcome assessed:** Design, write, test, build, and publish documentation that guides real readers from first contact to successful use, explains a stable public Python API, and remains trustworthy as the code changes.
+- **Evidence:** Reader-focused source, executable examples, resolved links, clean rendered pages, a publication gate, and one debugging record
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
-## 1. Challenge outcome
+## 1. Reopen the Puzzle Garden
 
-A new reader can install and use the package, generated API material reflects the public contract, examples run, links resolve, and the site renders from a clean checkout.
+The Puzzle Garden's code still works, but its field guide does not. The quick
+start calls a retired function, the expected path is stale, the public docstring
+hides an invalid-clue failure, two pages are missing from navigation, and the
+workflow publishes source instead of the rendered site.
 
-**Scenario:** Document the `studytext` utility as a product: create a verified README path, public API docstring, executable example, Quarto navigation, and a clean publishing check.
+Your goal is to publish a small field guide that lets another player:
 
-::: {.callout-note title="Work independently, but not without support"}
-Use the starter contract, run one group of checks at a time, and open hints only
-after you can state the evidence blocking your next step.
+1. understand what the package reveals;
+2. prepare the lesson project and reveal one exact path;
+3. replace the clue legend for a new theme;
+4. understand why the same seed repeats the same path;
+5. look up the public call and anticipated failure; and
+6. trust that the examples, links, pages, and deployment artifact were checked.
+
+The satisfying result is visible. The quick start should reveal:
+
+```text
+('Moss arch', 'Blue gate', 'Lantern lilies')
+```
+
+::: {.concept-diagram}
+Each reader path must reach a checked source page, and every page must reach the
+same rendered field guide artifact.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[README] --> B[Reveal a route]
+  A --> C[Replace the legend]
+  A --> D[Why seeds repeat]
+  A --> E[Public API]
+  B --> F[Quarto field guide]
+  C --> F
+  D --> F
+  E --> F
+  F --> G[Verified deployment]
+```
+
 :::
 
-## 2. Understand the acceptance example
+::: {.callout-note title="Use the scaffold to avoid blank-page work"}
+The package behavior, file names, public signature, initial page headings, and
+progressive checks are supplied. Your central work is deciding what each reader
+needs, repairing public promises, and connecting the checked artifact to
+publication.
+:::
 
-Before implementation, restate the normal input, expected result, important
-boundary, and one anticipated failure in your own words.
+## 2. Inspect the supplied project
 
-### Constraints
+Begin with this tree:
 
-1. Document only the public `studytext.normalize_name` interface.
-2. Include purpose, installation, quick start, limits, and support in the README.
-3. Keep examples deterministic and executable.
-4. Publish only after tests and a clean docs build pass.
+```text
+puzzle-garden/
+├── README.md
+├── pyproject.toml
+├── src/puzzle_garden/
+│   ├── __init__.py
+│   └── trail.py
+├── tests/
+│   ├── test_trail.py
+│   └── test_documentation.py
+├── docs/
+│   ├── _quarto.yml
+│   ├── index.qmd
+│   ├── first-route.qmd
+│   ├── customize-legend.qmd
+│   ├── why-seeds-repeat.qmd
+│   └── api.qmd
+└── .github/workflows/docs.yml
+```
+
+The public package implementation already passes its ordinary unit tests. Do
+not redesign its algorithm. Documentation changes may improve the public
+module/function docstrings, examples, README, QMD pages, checks, and workflow.
+
+The source uses three clue symbols:
+
+| Symbol | Default location |
+|---|---|
+| `L` | Lantern lilies |
+| `M` | Moss arch |
+| `B` | Blue gate |
+
+A seed rotates the explicit clue sequence. It does not use global randomness or
+remember an earlier call.
+
+### Acceptance example
+
+```python
+from puzzle_garden import reveal_path
+
+route = reveal_path("L M B", seed=1)
+assert route == ("Moss arch", "Blue gate", "Lantern lilies")
+print(route)
+```
+
+Changed legend:
+
+```python
+from puzzle_garden import reveal_path
+
+moon_legend = {
+    "L": "Lunar pond",
+    "M": "Meteor arch",
+    "B": "Blue moon gate",
+}
+assert reveal_path("L M B", legend=moon_legend) == (
+    "Lunar pond",
+    "Meteor arch",
+    "Blue moon gate",
+)
+```
+
+Important failure:
+
+```python
+from puzzle_garden import reveal_path
+
+try:
+    reveal_path("L X")
+except ValueError as error:
+    assert str(error) == "unknown clue: X"
+else:
+    raise AssertionError("unknown clue was accepted")
+```
 
 ## 3. Start from the contract
 
+Create `src/puzzle_garden/trail.py` from this supplied implementation. Complete
+its docstring; do not change the observable algorithm to make stale prose pass.
+
 ```python
-def normalize_name(value):
-    """Return whitespace-normalized title-case text.
+from collections.abc import Mapping
 
-    >>> normalize_name("  ada   lovelace ")
-    'Ada Lovelace'
+DEFAULT_LEGEND = {
+    "L": "Lantern lilies",
+    "M": "Moss arch",
+    "B": "Blue gate",
+}
+
+
+def reveal_path(
+    clues: str,
+    *,
+    seed: int = 0,
+    legend: Mapping[str, str] = DEFAULT_LEGEND,
+) -> tuple[str, ...]:
+    """Return decoded clue names rotated by a repeatable seed.
+
+    TODO: Document parameter meaning, returned order, empty/unknown clue
+    failures, and two deterministic examples.
     """
-    return " ".join(value.split()).title()
-
-
-README_HEADINGS = [
-    "Purpose",
-    "Installation",
-    "Quick start",
-    "Limitations",
-    "Support",
-]
+    symbols = clues.split()
+    if not symbols:
+        raise ValueError("clues cannot be empty")
+    for symbol in symbols:
+        if symbol not in legend:
+            raise ValueError(f"unknown clue: {symbol}")
+    offset = seed % len(symbols)
+    ordered = symbols[offset:] + symbols[:offset]
+    return tuple(legend[symbol] for symbol in ordered)
 ```
 
-## 4. Build in small stages
+Export the public names in `src/puzzle_garden/__init__.py`:
 
-1. Make the smallest normal case observable.
-2. Run the nearest check and read its complete failure evidence.
-3. Add one boundary behavior without weakening earlier checks.
-4. Restart and run the complete artifact from top to bottom.
+```python
+from .trail import DEFAULT_LEGEND, reveal_path
+
+__all__ = ["DEFAULT_LEGEND", "reveal_path"]
+```
+
+The starter README currently contains these defects:
+
+```markdown
+# Garden Tool
+
+Install it normally. Run `make_path("L M B")` and expect
+`('Lantern lilies', 'Moss arch', 'Blue gate')`.
+
+[Click here](docs/guide.qmd "retired guide") for more.
+```
+
+The starter Quarto sidebar lists only `index.qmd`, `first-route.qmd`, and
+`api.qmd`. The starter workflow ends with `publish_dir: docs`.
+
+## 4. Build the field guide in small stages
+
+### Stage A — Repair the project entrance
+
+Write a README with:
+
+- a specific purpose and Python 3.10+ context;
+- a truthful preparation/install path for the supplied source project;
+- a complete public import and seed-1 quick start;
+- the exact Moss arch → Blue gate → Lantern lilies result;
+- limitations and support sections;
+- descriptive relative links to the four deeper reader pages.
+
+### Stage B — Give every page one job
+
+Finish these pages:
+
+- `first-route.qmd`: a guided path using supplied clues and seed;
+- `customize-legend.qmd`: a focused task for replacing every used symbol;
+- `why-seeds-repeat.qmd`: explanation of rotation over explicit input and no
+  hidden state;
+- `api.qmd`: exact signature, parameters, return, and `ValueError` cases.
+
+Use informative titles, visible prerequisites, expected output, meaningful link
+text, and recovery close to the failure it repairs.
+
+### Stage C — Make examples executable
+
+Complete the public docstring with one ordinary example and the unknown-clue
+failure. Ensure doctest reports **2 attempted, 0 failed**. Keep the custom-legend
+boundary in pytest where a structured tuple assertion is clearer.
+
+### Stage D — Build and connect the site
+
+Repair `_quarto.yml` so all five QMD pages appear in reader order. Render from a
+clean output directory and verify all five HTML files. Repair every local source
+link before publication.
+
+### Stage E — Publish only checked output
+
+The workflow should run ordinary tests and doctests, render the complete site,
+verify the HTML inventory, and publish `docs/_site` only after success on the
+accepted branch. Never commit a personal token.
 
 ## 5. Run progressive assertions
 
+Run these stages in order. Keep the expected values unchanged unless you can
+explain an approved contract change.
+
+### Check 1 — Public behavior
+
 ```python
-import doctest
-from pathlib import Path
+from puzzle_garden import reveal_path
 
-assert normalize_name("  ada   lovelace ") == "Ada Lovelace"
-assert doctest.run_docstring_examples(
-    normalize_name,
-    globals(),
-    name="normalize_name",
-) is None
-assert README_HEADINGS == [
-    "Purpose",
-    "Installation",
-    "Quick start",
-    "Limitations",
-    "Support",
-]
+assert reveal_path("L M B", seed=1) == (
+    "Moss arch",
+    "Blue gate",
+    "Lantern lilies",
+)
+assert reveal_path("L M", seed=0) == (
+    "Lantern lilies",
+    "Moss arch",
+)
 
-# Evidence targets:
-# quarto render docs
-# pytest -q
-# link check reports no missing internal targets
-# generated site contains the README journey and public API page
+try:
+    reveal_path("L X")
+except ValueError as error:
+    assert str(error) == "unknown clue: X"
+else:
+    raise AssertionError("unknown clue was accepted")
 ```
 
-::: {.callout-warning title="Do not edit expected values to create a pass"}
-If a check appears wrong, explain the contract conflict before changing either
-side. Otherwise, repair the implementation and preserve the check.
+### Check 2 — Discovered examples
+
+```python
+import doctest
+import puzzle_garden.trail
+
+results = doctest.testmod(puzzle_garden.trail, verbose=False)
+assert results.attempted == 2
+assert results.failed == 0
+```
+
+### Check 3 — Real README and source pages
+
+```python
+from pathlib import Path
+
+root = Path(".").resolve()
+readme = (root / "README.md").read_text(encoding="utf-8")
+
+for heading in (
+    "## Requirements",
+    "## Installation",
+    "## Quick start",
+    "## Limitations",
+    "## Support",
+    "## Learn more",
+):
+    assert heading in readme, f"README missing {heading}"
+
+assert "from puzzle_garden import reveal_path" in readme
+assert "seed=1" in readme
+assert "('Moss arch', 'Blue gate', 'Lantern lilies')" in readme
+
+source_pages = {
+    "index.qmd",
+    "first-route.qmd",
+    "customize-legend.qmd",
+    "why-seeds-repeat.qmd",
+    "api.qmd",
+}
+assert source_pages == {path.name for path in (root / "docs").glob("*.qmd")}
+```
+
+### Check 4 — Local README targets
+
+```python
+from pathlib import Path
+
+root = Path(".").resolve()
+targets = {
+    root / "docs/first-route.qmd",
+    root / "docs/customize-legend.qmd",
+    root / "docs/why-seeds-repeat.qmd",
+    root / "docs/api.qmd",
+}
+assert all(path.is_file() for path in targets), sorted(targets)
+```
+
+Then run the broader source-link checker from Lesson 5 so links inside QMD pages
+are also resolved relative to their source.
+
+### Check 5 — Clean rendered artifact
+
+```bash
+quarto render docs
+```
+
+```python
+from pathlib import Path
+
+site = Path("docs/_site")
+expected_html = {
+    "index.html",
+    "first-route.html",
+    "customize-legend.html",
+    "why-seeds-repeat.html",
+    "api.html",
+}
+observed_html = {path.name for path in site.glob("*.html")}
+assert expected_html <= observed_html, sorted(expected_html - observed_html)
+```
+
+### Check 6 — Local/CI contract
+
+```text
+pytest --doctest-modules src tests -q
+quarto render docs
+python tests/check_rendered_docs.py
+```
+
+Confirm the workflow contains the same responsibilities in this order and that
+its deployment input is `docs/_site`.
+
+::: {.callout-warning title="A list of headings is not a README check"}
+Do not replace file inspection with `README_HEADINGS = [...]` and then assert the
+list against itself. The checks must read the artifact the learner will publish.
 :::
 
 ## 6. Use the hint ladder only when needed
@@ -114,84 +391,300 @@ side. Otherwise, repair the implementation and preserve the check.
 <details>
 <summary>Hint 1</summary>
 
-Write the README quick start as the shortest clean-install-to-result path.
+Anchor the README on the seed-1 route. State the project-root context, import
+`reveal_path`, show the exact tuple, and link each later reader question to its
+own page.
 
 </details>
 
 <details>
 <summary>Hint 2</summary>
 
-Generate API reference from the docstring, then add explanation the generator cannot infer.
+For the docstring, document `clues`, keyword-only `seed`, and `legend`; explain
+rotation and the returned tuple; include the ordinary call plus a traceback
+ending in `ValueError: unknown clue: X`. Verify attempted count as well as
+failures.
 
 </details>
 
 <details>
 <summary>Hint 3</summary>
 
-Run the documented commands in a clean environment and make publishing depend on the same checks.
+List all five QMD paths in `website.sidebar.contents`. Render from `docs/` or
+target the docs project from root. Publish `docs/_site` only after pytest,
+doctest, render, and page-inventory checks pass.
 
 </details>
 
 ## 7. Keep debugging evidence
 
-Preserve one failing check. Record its inputs, actual result or exception,
-expected result, one hypothesis, one controlled change, and the verified rerun.
+Preserve one real failing check before repairing it. Use the earliest useful
+evidence rather than the final symptom.
 
-| Failure | Evidence | Hypothesis | Controlled change | Verified rerun |
+| Failure | Exact evidence | One hypothesis | Controlled change | Verified rerun |
 |---|---|---|---|---|
-| What failed? | What exactly occurred? | What single cause fits? | What one thing changed? | Which check now passes? |
+| What command/check failed? | Expected, observed, file/line/path | Which single cause fits? | What one source changed? | Which unchanged checks now pass? |
 
-## 8. Compare with a solution path
+Good candidates include:
+
+- zero doctest attempts because the transcript prompt is malformed;
+- expected default-order output while the quick start passes `seed=1`;
+- `customize-legend.qmd` missing from the sidebar;
+- a README link to retired `guide.qmd`;
+- a clean render missing `api.html`; or
+- workflow `publish_dir` pointing at source `docs` instead of `docs/_site`.
+
+Do not use “changed everything and it worked” as the record. A reader should be
+able to connect the evidence to your one repair.
+
+## 8. Compare with a complete solution path
 
 <details>
-<summary>Reveal after your checks pass or you have exhausted all three hints</summary>
+<summary>Reveal after your checks pass or all three hints are exhausted</summary>
+
+A complete public docstring can be:
 
 ```python
-# A complete solution contains the package docstring above plus:
-# - a verified README with the five named sections;
-# - a task-oriented guide and public API reference;
-# - Quarto navigation and internal links;
-# - doctest/pytest checks for code snippets;
-# - a reproducible clean render whose artifact is the deployment input.
+from collections.abc import Mapping
+
+DEFAULT_LEGEND = {
+    "L": "Lantern lilies",
+    "M": "Moss arch",
+    "B": "Blue gate",
+}
+
+
+def reveal_path(
+    clues: str,
+    *,
+    seed: int = 0,
+    legend: Mapping[str, str] = DEFAULT_LEGEND,
+) -> tuple[str, ...]:
+    """Return decoded clue names rotated by a repeatable seed.
+
+    Args:
+        clues: Space-separated clue symbols.
+        seed: Integer offset selecting the first clue in the returned route.
+        legend: Mapping from clue symbols to visitor-facing location names.
+
+    Returns:
+        Decoded location names rotated by `seed`.
+
+    Raises:
+        ValueError: If `clues` is empty or contains an unknown symbol.
+
+    Examples:
+        >>> reveal_path("L M B", seed=1)
+        ('Moss arch', 'Blue gate', 'Lantern lilies')
+        >>> reveal_path("L X")
+        Traceback (most recent call last):
+        ...
+        ValueError: unknown clue: X
+    """
+    symbols = clues.split()
+    if not symbols:
+        raise ValueError("clues cannot be empty")
+    for symbol in symbols:
+        if symbol not in legend:
+            raise ValueError(f"unknown clue: {symbol}")
+    offset = seed % len(symbols)
+    ordered = symbols[offset:] + symbols[:offset]
+    return tuple(legend[symbol] for symbol in ordered)
 ```
 
-Compare contracts and decisions, not only line-for-line syntax. If your solution
-also satisfies the constraints and checks, explain one trade-off between the
-approaches.
+A complete README entry path can be:
+
+````markdown
+# Puzzle Garden Field Guide
+
+Reveal repeatable routes through a tiny symbolic garden puzzle.
+
+## Requirements
+
+Use Python 3.10 or newer and run commands from the project root.
+
+## Installation
+
+For this supplied source project, install in editable mode:
+
+```text
+python -m pip install -e .
+```
+
+## Quick start
+
+```python
+from puzzle_garden import reveal_path
+
+print(reveal_path("L M B", seed=1))
+```
+
+Expected result: `('Moss arch', 'Blue gate', 'Lantern lilies')`.
+
+## Limitations
+
+Every clue must exist in the selected legend. The package stores no route state.
+
+## Support
+
+Report the clue string, seed, complete error, and Python version.
+
+## Learn more
+
+- [Reveal your first garden route](docs/first-route.qmd "first route")
+- [Replace the clue legend](docs/customize-legend.qmd "customize legend")
+- [Understand why seeds repeat](docs/why-seeds-repeat.qmd "seed explanation")
+- [Look up the public API](docs/api.qmd "API reference")
+````
+
+The complete site configuration can be:
+
+```yaml
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: Puzzle Garden Field Guide
+  page-navigation: true
+  search: true
+  sidebar:
+    contents:
+      - href: index.qmd
+        text: Start Here
+      - href: first-route.qmd
+        text: Reveal a Route
+      - href: customize-legend.qmd
+        text: Replace the Legend
+      - href: why-seeds-repeat.qmd
+        text: Why Seeds Repeat
+      - href: api.qmd
+        text: Public API
+
+format:
+  html:
+    toc: true
+```
+
+Each QMD file still needs its own content. A concise complete set includes:
+
+```markdown
+---
+title: Reveal Your First Garden Route
+---
+
+## Prepare the project
+
+Use Python 3.10+ and the editable installation from the README.
+
+## Reveal the path
+
+Run `reveal_path("L M B", seed=1)` and confirm the exact Moss arch, Blue gate,
+Lantern lilies tuple.
+
+## Recover from an unknown clue
+
+Read the symbol named by `ValueError`, then add it to the legend or correct the
+clue string.
+```
+
+```markdown
+---
+title: Replace the Clue Legend
+---
+
+## Supply every used symbol
+
+Create a mapping for `L`, `M`, and `B`; pass it through `legend=` and confirm the
+returned tuple uses only the new location names.
+```
+
+```markdown
+---
+title: Why the Same Seed Repeats a Path
+---
+
+The function rotates an explicit symbol list by `seed % len(symbols)`. Equal
+clues, seed, and legend therefore produce the same tuple without global state.
+```
+
+```markdown
+---
+title: Public API Reference
+---
+
+`reveal_path(clues, *, seed=0, legend=DEFAULT_LEGEND)` returns a tuple of decoded
+names. It raises `ValueError` for empty clues or an unknown symbol.
+```
+
+Finally, the workflow's gate and publication boundary should read clearly:
+
+```yaml
+- name: Test code and documentation
+  run: pytest --doctest-modules src tests -q
+
+- name: Render field guide
+  run: quarto render docs
+
+- name: Verify rendered pages
+  run: python tests/check_rendered_docs.py
+
+- name: Publish verified field guide
+  if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+  uses: peaceiris/actions-gh-pages@v4
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    publish_dir: docs/_site
+```
+
+Compare reader outcomes, public contracts, checks, and artifact paths—not only
+sentence order. A different site structure is sound when it satisfies the same
+observable promises.
 
 </details>
 
-## 9. Check your understanding
+## 9. Check the field guide decisions
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "foundations-documentation-publishing-challenge",
-  "title": "Publish Trustworthy Utility Documentation readiness check",
-  "instructions": "Choose an answer, then connect it to evidence from your artifact.",
+  "id": "unit15-puzzle-garden-challenge-check",
+  "title": "Puzzle Garden publication check",
+  "instructions": "Choose the answer supported by your finished field guide and its evidence.",
   "questions": [
     {
-      "id": "design-boundary",
-      "prompt": "What is the strongest evidence that the quick start is trustworthy?",
-      "options": [
-        "The prose is long.",
-        "The author remembers that it worked once.",
-        "The page contains every private helper.",
-        "Its commands and examples succeed from the documented clean setup in automation."
-      ],
+      "id": "unit15-puzzle-challenge-doctest",
+      "prompt": "Which result proves that both intended public transcript examples were collected and passed?",
+      "options": ["Zero failed without an attempted count", "The docstring contains text", "The package imports once", "Two attempted and zero failed"],
       "answer_index": 3,
-      "explanation": "Its commands and examples succeed from the documented clean setup in automation."
+      "explanation": "Both discovery and comparison are visible in the attempted/failed pair."
     },
     {
-      "id": "clean-evidence",
-      "prompt": "What should happen before recording this challenge as complete?",
-      "options": [
-        "The unchanged checks pass from a clean state and the important decisions can be explained.",
-        "The expected values are edited to match the current output.",
-        "Only the final successful line is kept.",
-        "Several unrelated features are added."
-      ],
+      "id": "unit15-puzzle-challenge-reader",
+      "prompt": "Where should a returning player learn only how to replace clue names?",
+      "options": ["The focused legend how-to", "A repeated installation tutorial", "The deployment permission reference", "A private helper comment"],
       "answer_index": 0,
-      "explanation": "A clean rerun and explanation show that visible inputs and code reproduce the promised behavior."
+      "explanation": "The reader already knows the package and needs one task-oriented guide."
+    },
+    {
+      "id": "unit15-puzzle-challenge-seed",
+      "prompt": "Why does `reveal_path('L M B', seed=1)` begin at Moss arch?",
+      "options": ["The function reads yesterday's route", "The seed rotates the explicit symbols by one position", "Sets sort Moss first", "Quarto changes the tuple"],
+      "answer_index": 1,
+      "explanation": "Offset one changes `L M B` to `M B L` before names are decoded."
+    },
+    {
+      "id": "unit15-puzzle-challenge-link",
+      "prompt": "What is the strongest local evidence for the README's four deeper links?",
+      "options": ["Their labels are all `click here`", "They worked in the author's browser cache", "Each target resolves relative to README and the destination answers the named task", "The URLs are copied as plain text"],
+      "answer_index": 2,
+      "explanation": "Resolution is automatable; task relevance still needs reader review."
+    },
+    {
+      "id": "unit15-puzzle-challenge-publish",
+      "prompt": "Which directory should the workflow publish after a clean render and page check?",
+      "options": ["`src/puzzle_garden`", "Repository root", "Source `docs`", "Generated `docs/_site`"],
+      "answer_index": 3,
+      "explanation": "The verified `_site` directory is the generated public artifact."
     }
   ]
 }
@@ -201,15 +694,17 @@ approaches.
 
 ## 10. Decide whether the challenge is complete
 
-### Evidence rubric
+Use the evidence rather than page length:
 
 | Evidence | Ready to record when |
 |---|---|
-| Behavior | Acceptance examples and progressive checks pass unchanged. |
-| Scope | The artifact follows the constraints without unrelated features. |
-| Reasoning | Important values, boundaries, and design choices can be traced. |
-| Debugging | One record connects evidence, hypothesis, change, and rerun. |
-| Reproducibility | The artifact works from a clean notebook state or documented project root. |
+| Reader entrance | A clean learner can prepare the project and reproduce the seed-1 route using only README. |
+| Page purposes | Tutorial, how-to, explanation, and API pages answer distinct questions and link meaningfully. |
+| Public API | `help()`/docstring state inputs, rotation result, and both `ValueError` boundaries. |
+| Executable examples | Exactly two intended doctest attempts pass; structured boundaries remain in pytest. |
+| Site artifact | A clean render produces all five named HTML pages with repaired navigation and links. |
+| Publication | CI repeats the local gate and publishes only the verified `_site` artifact. |
+| Debugging | One record connects exact evidence to one hypothesis, controlled change, and clean rerun. |
 
 This button stores a self-reported marker only in this browser. It does not
 submit work, grade it, verify identity, or issue a certificate.
@@ -226,7 +721,11 @@ submit work, grade it, verify identity, or issue a certificate.
 
 ## Key points
 
-- The starter contract narrows design choices without supplying the implementation.
-- Progressive assertions turn a large task into observable behaviors.
-- Hints support the next decision; they do not replace prediction and evidence.
-- A clean rerun and explanation matter as much as the final output.
+- Documentation is part of the Puzzle Garden result: it lets another player
+  reveal and understand the route without the author's hidden state.
+- Progressive checks inspect real README, docstring, QMD, HTML, and workflow
+  artifacts rather than stand-in lists.
+- A reader-focused page, executable example, resolved link, clean render, and
+  verified deployment each contribute different evidence.
+- The strongest solution keeps the public API stable while repairing the
+  promises around it.

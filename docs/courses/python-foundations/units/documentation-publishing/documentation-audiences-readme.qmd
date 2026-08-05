@@ -1,133 +1,169 @@
 ---
-title: Documentation Audiences and a Useful README
+title: Design Documentation Around Reader Needs
 lesson_id: documentation-publishing.documentation-audiences-readme
 lesson_order: 10
-description: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
-course_id: python-foundations
-unit_id: documentation-publishing
-unit_number: 15
+description: Map reader questions to suitable documentation and build a README whose clean quick start reaches an exact, useful result.
 execute:
   echo: true
 categories:
-- python-foundations
-- documentation-publishing
+  - python-foundations
+  - documentation-publishing
+  - readme
+  - reader-needs
 order: 10
 colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/documentation-audiences-readme.ipynb
+course_id: python-foundations
+unit_id: documentation-publishing
+unit_number: 15
 ---
 ::: {.lesson-meta}
+
 - **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Estimated time:** 2.5–3.5 hours
+- **You will learn:** Choose documentation from a reader's task and verify the README path from project discovery to a meaningful Python result.
+- **Practice in:** Google Colab, JupyterLab, or the Midnight Museum project
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+A README often becomes the first conversation between a project and a person.
+It cannot anticipate every question. It can tell the right reader, “This project
+is for you,” lead them to one dependable result, and point them toward the next
+page for their situation.
 
-One long document cannot serve every reader equally. A useful documentation set separates learning, task completion, explanation, and exact reference while the README gives a verified entry path.
+By the end of this lesson, you should be able to answer:
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+1. What does this reader know before opening the project?
+2. What result are they trying to achieve now?
+3. Does the reader need a tutorial, a how-to guide, explanation, or reference?
+4. Which promises belong in the README, and which should link elsewhere?
+5. What clean evidence makes a quick start trustworthy?
 
-## 1. Read and predict a complete case
+## 1. Start with a reader and a task
 
-```python
-README_SECTIONS = [
-    "Purpose",
-    "Installation",
-    "Quick start",
-    "Common failures",
-    "Support",
-]
+“Developers” is too broad to guide a document. Compare these Midnight Museum
+visitors:
 
-for position, section in enumerate(README_SECTIONS, start=1):
-    print(f"{position}. {section}")
-```
+| Reader | Current situation | Immediate question | Useful destination |
+|---|---|---|---|
+| Curious visitor | Has not installed the package | What does it do, and is it for me? | README opening |
+| New user | Knows basic Python | How do I rank one exhibit successfully? | Tutorial/quick start |
+| Returning user | Already ranked an exhibit | How do I change the ranking inputs? | How-to guide |
+| Maintainer | Understands the API | Why are repeated rankings deterministic? | Explanation |
+| Active caller | Is writing code now | What does `rank_exhibit` accept, return, and raise? | API reference |
 
-### Step-by-step explanation
+A good audience statement includes **context** and **work**. “For beginners”
+only describes presumed experience. “For a learner who has Python 3.10 and
+wants to rank one exhibit from a local project” gives the author decisions to
+make: name the required version, identify the project root, show the import, and
+show the result.
 
-1. The list names the minimum journey a new reader needs.
-2. `enumerate` adds human-facing numbering without manual index state.
-3. Purpose and quick start answer different questions.
-4. Failures and support prevent the happy path from being the only documented path.
-
-::: {.callout-note title="Make one controlled change"}
-Add a `Limitations` section and write one sentence explaining what the package deliberately does not do.
-:::
-
-## 2. Investigate the important boundary
-
-A tutorial teaches through a guided learning path; a how-to solves a concrete task; explanation develops understanding; reference states exact facts. Mixing all four into every page makes each task harder to scan.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
+Use a small record before drafting:
 
 ```python
-quick_start = """from studytools import total_minutes
+reader = {
+    "context": "Python learner at the project root",
+    "goal": "rank one exhibit",
+    "prerequisites": ["Python 3.10+", "project files downloaded"],
+    "success": "ExhibitScore(name='Moon Dial', score=44)",
+}
 
-print(total_minutes([20, 35]))
-"""
-
-compile(quick_start, "README quick start", "exec")
-print("Quick-start Python parses successfully.")
+for label, value in reader.items():
+    print(f"{label}: {value}")
 ```
 
-Then complete the learning loop:
+The dictionary does not become the documentation. It forces an author to name
+assumptions before they disappear into prose.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+::: {.callout-note title="Name one concrete reader"}
+Write a reader record for someone who already completed the quick start and now
+needs to rank an exhibit with a different open time. Which fields change? Which
+page should receive that task?
+:::
 
-<details>
-<summary>Check your practice process</summary>
+## 2. Give each kind of documentation one job
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+Tutorials, how-to guides, explanation, and reference answer different questions.
+The distinction is about reader need, not file extensions.
 
-</details>
+- A **tutorial** creates a successful learning experience. It controls the path,
+  supplies safe choices, and explains only enough to keep the learner oriented.
+- A **how-to guide** helps an already-oriented reader achieve a particular
+  result. It begins from stated prerequisites and does not stop to teach the
+  entire system.
+- **Explanation** helps a reader understand why the system behaves as it does,
+  which alternatives exist, or which trade-off shaped a decision.
+- **Reference** describes the product accurately and consistently: public
+  signatures, parameters, returned values, exceptions, commands, and formats.
 
-## 4. Check your understanding
+::: {.concept-diagram}
+The reader's question selects the document; the framework does not select it for
+them.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A[What does the reader need now?] --> B[Learn through a guided path]
+  A --> C[Complete a known task]
+  A --> D[Understand a design]
+  A --> E[Look up exact facts]
+  B --> F[Tutorial]
+  C --> G[How-to guide]
+  D --> H[Explanation]
+  E --> I[Reference]
+```
+
+:::
+
+Consider this crowded paragraph:
+
+> Install the package, then call `rank_exhibit(name, votes, minutes_open)`. The
+> score uses ten points per vote because visitor choices matter most. The
+> function returns `ExhibitScore` and raises `ValueError` for negative values.
+> To compare three exhibits, loop over their records and sort the results.
+
+It tries to install, explain policy, state reference facts, and solve a later
+task at once. Separate the information:
+
+- Quick start: install and rank one supplied exhibit.
+- Explanation: why votes and time contribute different weights.
+- Reference: signature, result type, and `ValueError` contract.
+- How-to: rank and compare several exhibits.
+
+Do not create empty `tutorials/`, `how-to/`, `explanation/`, and `reference/`
+directories merely to appear organized. Create the page that answers an actual
+reader question, label its purpose, and link it from the places where that
+question arises.
+
+### Checkpoint: choose the reader's page
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "documentation-publishing-documentation-audiences-readme",
-  "title": "Documentation Audiences and a Useful README checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit15-reader-purpose-check",
+  "title": "Match the question to the document",
+  "instructions": "Choose the page that best fits each reader's immediate need.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "What should a README quick start optimize for?",
-      "options": [
-        "The shortest verified path from installation to a meaningful result.",
-        "A complete dump of every internal function.",
-        "An undocumented command that only works on the author's machine.",
-        "A history of every source-code edit."
-      ],
+      "id": "unit15-reader-purpose-new",
+      "prompt": "A learner has never used the package and wants a guided path to one successful ranking. What should they open?",
+      "options": ["A tutorial", "A complete API index", "A design-history explanation", "A release manifest"],
       "answer_index": 0,
-      "explanation": "A quick start establishes early success and a dependable entry point before readers choose deeper documentation."
+      "explanation": "A tutorial controls a safe learning path and produces an early successful result."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "Several simultaneous edits with no earlier result.",
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "A copied solution whose behavior was not rerun."
-      ],
+      "id": "unit15-reader-purpose-task",
+      "prompt": "A returning user knows the package and needs to rank a batch of exhibits. Which page is the best fit?",
+      "options": ["A beginner tutorial repeated from installation", "A focused how-to guide", "An alphabetical parameter table only", "A history of scoring policy"],
+      "answer_index": 1,
+      "explanation": "A how-to assumes orientation and guides the reader toward a particular practical result."
+    },
+    {
+      "id": "unit15-reader-purpose-facts",
+      "prompt": "A caller needs the accepted parameter types and documented exceptions for `rank_exhibit`. Where should those exact facts live?",
+      "options": ["Only in a blog announcement", "Only in an architecture diagram", "API reference", "A contributor biography"],
       "answer_index": 2,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "explanation": "Reference describes the public interface precisely for a reader working with it now."
     }
   ]
 }
@@ -135,15 +171,406 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 3. Make the README a dependable doorway
+
+A useful project README normally answers these questions in a scannable order:
+
+1. **What is this?** Name the product and its visible purpose.
+2. **Why would I use it?** Show the useful result, not internal architecture.
+3. **Can I run it?** State supported Python and any important platform limit.
+4. **How do I install or prepare it?** Give one maintained path and its context.
+5. **What is the shortest meaningful use?** Provide a complete quick start.
+6. **What should I see?** Show a small expected result.
+7. **What should I read next?** Link by reader task.
+8. **What are the important limits and support path?** Do not hide them below a
+   wall of badges or history.
+
+Here is a compact entry point:
+
+````markdown
+# Midnight Museum Quest
+
+Rank museum exhibits with a small, deterministic Python API.
+
+## Requirements
+
+Use Python 3.10 or newer. Run the commands below from the project root.
+
+## Quick start
+
+```python
+from museum_quest import rank_exhibit
+
+result = rank_exhibit("Moon Dial", votes=4, minutes_open=75)
+print(result)
+```
+
+Expected result:
+
+```text
+ExhibitScore(name='Moon Dial', score=44)
+```
+
+Continue with the [guided museum visit](docs/tutorial.qmd "tutorial"), or see the
+[public API contract](docs/api.qmd "API reference").
+````
+
+The opening tells a visitor what the package does before asking them to install
+anything. The requirement establishes version and working directory. The code
+shows every name it needs. The exact result proves more than “it works”: the
+reader can compare the class name, exhibit name, and score.
+
+### Keep installation honest
+
+In a real published package, installation might be:
+
+```bash
+python -m pip install midnight-museum
+```
+
+In a lesson-sized source checkout that has not been published, claiming that
+command would be false. Use the path the learner can actually run, such as an
+editable install from the project root:
+
+```bash
+python -m pip install -e .
+```
+
+Name the context. A command that succeeds only because the author previously
+set `PYTHONPATH`, installed an unpublished wheel, or left a notebook import in
+memory is not a clean quick start.
+
+When `pyproject.toml` declares the README, that same entry point can become
+package metadata:
+
+```toml
+[project]
+name = "midnight-museum"
+version = "0.1.0"
+requires-python = ">=3.10"
+readme = "README.md"
+```
+
+This connection increases the cost of repository-only relative links or markup
+that a package index cannot render. Build and inspect the distribution in Unit
+10's workflow when package publication is relevant; Unit 15 concentrates on
+whether the entry content remains accurate.
+
+## 4. A quick start needs meaningful evidence
+
+Syntax is only one boundary. This check proves that a text fragment parses:
+
+```python
+quick_start = '''from museum_quest import rank_exhibit
+
+print(rank_exhibit("Moon Dial", votes=4, minutes_open=75))
+'''
+
+compile(quick_start, "README quick start", "exec")
+print("The Python syntax is valid.")
+```
+
+It does **not** prove that `museum_quest` is installed, the exported name still
+exists, the arguments match the public interface, or the displayed score is
+current.
+
+A stronger documentation check runs the same public call and compares the
+promised result:
+
+```python
+from museum_quest import ExhibitScore, rank_exhibit
+
+result = rank_exhibit("Moon Dial", votes=4, minutes_open=75)
+expected = ExhibitScore(name="Moon Dial", score=44)
+assert result == expected
+print(result)
+```
+
+Expected output:
+
+```text
+ExhibitScore(name='Moon Dial', score=44)
+```
+
+The cleanest test executes from the environment and directory the README names.
+For a full project, record both context and command:
+
+```bash
+python -m venv .venv
+# Activate the environment using the command for your shell.
+python -m pip install -e .
+python examples/quick_start.py
+```
+
+Avoid shell prompts such as `$` inside copyable command blocks. If a placeholder
+is required, label it:
+
+```text
+python -m pip install <path-to-project>
+```
+
+`<path-to-project>` signals replacement. `project` without brackets may look
+like a literal directory name.
+
+### Checkpoint: trust the quick start
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-readme-evidence-check",
+  "title": "Decide what the quick-start evidence proves",
+  "instructions": "Choose the strongest evidence for the stated claim.",
+  "questions": [
+    {
+      "id": "unit15-readme-evidence-parse",
+      "prompt": "`compile()` accepts the README code string. What has been established?",
+      "options": ["The package installs on every platform", "The expected score is current", "All links resolve", "The string is valid Python syntax"],
+      "answer_index": 3,
+      "explanation": "Compilation checks syntax; it does not import the package or compare behavior."
+    },
+    {
+      "id": "unit15-readme-evidence-clean",
+      "prompt": "Which check gives the strongest evidence for a clean-install quick start?",
+      "options": ["Create a fresh environment, follow only the documented steps, and compare the meaningful result", "Run the code in a notebook that already imported the package", "Read the code without executing it", "Check that the README contains a Python fence"],
+      "answer_index": 0,
+      "explanation": "A fresh environment exposes missing installation steps and hidden local state while the result checks the public promise."
+    },
+    {
+      "id": "unit15-readme-evidence-output",
+      "prompt": "Why should a quick start show a small expected result?",
+      "options": ["It makes every test unnecessary", "It gives the reader a concrete comparison for successful behavior", "It guarantees the project has no defects", "It replaces the API reference"],
+      "answer_index": 1,
+      "explanation": "Expected output lets a reader distinguish success from a command that merely exits without an obvious error."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Link readers forward without trapping them
+
+A README becomes hard to scan when it contains every advanced task, complete
+API detail, design discussion, contributor procedure, and release history.
+Keep the entry path short and use descriptive links:
+
+```markdown
+## Learn more
+
+- [Rank your first exhibit](docs/tutorial.qmd "tutorial")
+- [Change ranking inputs](docs/how-to-rank-exhibits.qmd "ranking how-to")
+- [Understand deterministic scoring](docs/why-ranking-is-deterministic.qmd "design explanation")
+- [Look up the public API](docs/api.qmd "API reference")
+```
+
+“Click here” hides the destination when a reader scans links or uses assistive
+technology to list them. “API” is better, but “Look up the public API” also
+states why the reader would follow it.
+
+Use paths relative to the file containing the link. From root `README.md`,
+`docs/api.qmd` points into the documentation folder. From `docs/tutorial.qmd`,
+`api.qmd` points to a sibling. A path beginning with a developer's home
+directory can never be a portable project link.
+
+This small standard-library check verifies known local targets:
+
+```python
+from pathlib import Path
+
+root = Path(".")
+targets = [
+    Path("docs/tutorial.qmd"),
+    Path("docs/how-to-rank-exhibits.qmd"),
+    Path("docs/why-ranking-is-deterministic.qmd"),
+    Path("docs/api.qmd"),
+]
+
+missing = [str(target) for target in targets if not (root / target).is_file()]
+assert missing == [], f"missing README targets: {missing}"
+```
+
+This is stronger than checking hand-written labels in isolation, but it is not
+a general Markdown link parser. Lesson 5 builds a more honest documentation
+review: check the source page, target, rendered navigation, and reader meaning.
+
+## 6. Diagnose a README that works only for its author
+
+Suppose a new learner reports:
+
+```text
+ModuleNotFoundError: No module named 'museum_quest'
+```
+
+The README said:
+
+```markdown
+Run `python examples/quick_start.py` to rank an exhibit.
+```
+
+Use the evidence in order:
+
+1. The failure happens at import, before ranking logic runs.
+2. The README names neither installation nor a project-root requirement.
+3. The author had previously installed the project in an existing environment.
+4. Reproducing in a fresh environment confirms the missing step.
+5. Add the real editable-install command and rerun the whole path.
+
+Do not “repair” this by changing the example to import from `src` through a
+machine-specific path. That transfers the hidden assumption into public prose.
+
+::: {.callout-warning title="The README must not promise an unpublished command"}
+If the package is not on a package index, do not tell learners to install it by
+its future package name. Document the source-checkout path that exists now and
+revise the README when distribution actually changes.
+:::
+
+### Checkpoint: keep the README focused
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-readme-focus-check",
+  "title": "Choose what belongs at the project entrance",
+  "instructions": "Use the reader journey and link evidence from this section.",
+  "questions": [
+    {
+      "id": "unit15-readme-focus-link",
+      "prompt": "Which README link is most useful to a returning reader who wants one specific task?",
+      "options": ["Click here", "More", "Change ranking inputs", "docs/how-to-rank-exhibits.qmd"],
+      "answer_index": 2,
+      "explanation": "The descriptive text names the task while the target remains encoded in the Markdown link destination."
+    },
+    {
+      "id": "unit15-readme-focus-scope",
+      "prompt": "The README has grown into a 70-page API dump. What is the most reader-focused revision?",
+      "options": ["Delete all API information without a replacement", "Add the same dump above the quick start", "Hide the quick start at the end", "Move exact API detail to navigable reference and link to it from the README"],
+      "answer_index": 3,
+      "explanation": "Reference can carry exact API detail while the README remains a short entry path with a descriptive link."
+    },
+    {
+      "id": "unit15-readme-focus-hidden-state",
+      "prompt": "A quick start works only after the author manually installed the package yesterday. What should happen next?",
+      "options": ["Document and verify the missing installation step from a fresh environment", "Describe the author's machine as the supported environment", "Remove the import from the example", "Claim that imports are outside documentation scope"],
+      "answer_index": 0,
+      "explanation": "A clean rerun reveals and then verifies the prerequisite that a new reader needs."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Lab: rebuild the museum entrance
+
+Start with this flawed README:
+
+````markdown
+# Tool
+
+This uses our architecture to do rankings. Install it normally. Click
+[here](file:///home/author/museum/docs/api.html) for more.
+
+```python
+print(rank_exhibit("Moon Dial", 4, 75))
+```
+
+It should work. The implementation has a scorer, validators, dataclasses,
+private helpers, and other details. Version history follows...
+````
+
+Create a revised `README.md` that includes:
+
+- a specific project name and one-sentence value statement;
+- Python version and project-root context;
+- the actual installation path for the project state you have;
+- a complete import and call;
+- the exact expected `ExhibitScore` result;
+- a limitations statement and support path;
+- relative, descriptive links to tutorial, how-to, explanation, and API pages;
+- no private implementation inventory in the entry journey.
+
+Then check it:
+
+1. Create or reset a clean environment.
+2. Follow only the README.
+3. Record the complete command that produces the first result.
+4. Compare the result with the documented value.
+5. Check that each local target exists.
+6. Ask which reader question each linked page answers.
+7. Introduce one stale expected score, observe the mismatch, and repair the
+   documentation or code according to the actual public contract.
+
+<details>
+<summary>Hint: choose the first visible success</summary>
+
+Use one exhibit, one public import, and one returned value. Batch ranking,
+custom policies, and internal helpers belong after the entry path.
+
+</details>
+
+<details>
+<summary>Reveal a representative README after attempting the checks</summary>
+
+````markdown
+# Midnight Museum Quest
+
+Rank museum exhibits with a small, deterministic Python API.
+
+## Requirements
+
+Use Python 3.10 or newer. Run commands from the project root.
+
+## Installation
+
+```text
+python -m pip install -e .
+```
+
+## Quick start
+
+```python
+from museum_quest import rank_exhibit
+
+result = rank_exhibit("Moon Dial", votes=4, minutes_open=75)
+print(result)
+```
+
+Expected result: `ExhibitScore(name='Moon Dial', score=44)`.
+
+## Limitations
+
+This teaching package stores no rankings between runs.
+
+## Support
+
+Open a project issue with the command, complete error, and Python version.
+
+## Learn more
+
+- [Follow the guided museum visit](docs/tutorial.qmd "tutorial")
+- [Change ranking inputs](docs/how-to-rank-exhibits.qmd "ranking how-to")
+- [Understand deterministic scoring](docs/why-ranking-is-deterministic.qmd "design explanation")
+- [Look up the public API](docs/api.qmd "API reference")
+````
+
+A different structure is valid if the path remains short, complete, and
+verified for the named reader.
+
+</details>
+
 ## Key points
 
-::: {.callout-tip title="Key points"}
-- Write for a named audience and task.
-- Separate tutorials, how-to guides, explanations, and reference by purpose.
-- Run README commands and examples instead of trusting copied output.
-:::
+- Begin with one reader's context, question, and observable success.
+- Tutorials, how-to guides, explanation, and reference serve different needs.
+- A README should establish value and a verified first result, then route
+  readers to deeper pages.
+- Valid syntax is weaker evidence than a clean installation, public call, exact
+  result, and resolved links.
+- Document the project state that exists now, not an imagined future release.
 
 ## References
 
-- https://documentation.divio.com/
-- https://www.writethedocs.org/guide/writing/beginners-guide-to-docs/
+- [Diátaxis in five minutes](https://diataxis.fr/start-here/)
+- [The difference between tutorials and how-to guides](https://diataxis.fr/tutorials-how-to/)
+- [GitHub guidance for repository README files](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes)
+- [Python project metadata for a README](https://packaging.python.org/en/latest/specifications/declaring-project-metadata/#readme)
+
+[Next: Write Instructions People Can Follow](clear-instructions-accessibility.qmd){.btn .btn-primary}

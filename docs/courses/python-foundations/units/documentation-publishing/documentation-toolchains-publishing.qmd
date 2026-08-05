@@ -1,139 +1,168 @@
 ---
-title: Documentation Toolchains and Publishing
+title: Build a Documentation Site with Quarto
 lesson_id: documentation-publishing.documentation-toolchains-publishing
-lesson_order: 40
-description: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
-course_id: python-foundations
-unit_id: documentation-publishing
-unit_number: 15
+lesson_order: 60
+description: Organize a multi-page Quarto website, configure reader-focused navigation and cross-references, diagnose render failures, and inspect the clean HTML artifact.
 execute:
   echo: true
 categories:
-- python-foundations
-- documentation-publishing
-order: 40
+  - python-foundations
+  - documentation-publishing
+  - quarto
+  - documentation-sites
+order: 60
 colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/documentation-toolchains-publishing.ipynb
+course_id: python-foundations
+unit_id: documentation-publishing
+unit_number: 15
 ---
 ::: {.lesson-meta}
+
 - **Level:** Beginner
-- **Estimated time:** 45–70 minutes
-- **You will learn:** Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
-- **Practice in:** Google Colab, JupyterLab, or a local editor
+- **Estimated time:** 3.5–5 hours
+- **You will learn:** Turn QMD source and project configuration into a complete, navigable documentation site and repair failures using file, line, link, and output evidence.
+- **Practice in:** A local Midnight Museum Quarto project; Colab is a reading companion rather than the site builder
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
-## The problem this lesson solves
+A documentation site is not a pile of HTML files written by hand. Source pages,
+project configuration, navigation, assets, and a renderer combine into an output
+artifact. The source belongs in version control; the generated `_site` directory
+can be rebuilt and published after its checks pass.
 
-Documentation source is not the published site. A reliable toolchain renders navigation and links in a clean build, then deploys exactly the reviewed artifact.
+This lesson asks:
 
-Write a prediction before running the example. A useful prediction names the
-value or failure you expect and the line responsible for it.
+1. Which files are source, configuration, cache, and public output?
+2. How should navigation reflect reader tasks rather than alphabetical filenames?
+3. Why should internal links point to QMD source paths?
+4. When is preview useful, and why must deployment use a complete render?
+5. How do you locate a failure in YAML, a page, a cross-reference, or generated
+   output?
 
-## 1. Read and predict a complete case
+## 1. Separate source from rendered output
 
-```python
-from pathlib import Path
+Use this learner-sized project:
 
-
-def markdown_links_exist(document, root):
-    """Return missing local Markdown targets from simple link tuples."""
-    missing = []
-    for label, target in document:
-        if not (root / target).exists():
-            missing.append((label, target))
-    return missing
-
-
-links = [("Guide", "guide.md"), ("API", "api.md")]
-root = Path("docs")
-print(markdown_links_exist(links, root))
+```text
+midnight-museum/
+├── README.md
+├── pyproject.toml
+├── src/museum_quest/
+├── tests/
+└── docs/
+    ├── _quarto.yml
+    ├── index.qmd
+    ├── tutorial.qmd
+    ├── how-to-rank-exhibits.qmd
+    ├── why-ranking-is-deterministic.qmd
+    ├── api.qmd
+    └── images/
+        └── reader-paths.svg
 ```
 
-### Step-by-step explanation
+After a render, Quarto creates:
 
-1. Documentation links are data that a build can verify.
-2. The function receives the documentation root instead of assuming a working directory.
-3. Each missing target retains its label and path as actionable evidence.
-4. A publishing workflow should fail before deployment when internal navigation is broken.
-
-::: {.callout-note title="Make one controlled change"}
-Create a temporary directory with one target file and assert that only the other target remains missing.
-:::
-
-## 2. Investigate the important boundary
-
-This course uses Quarto for the complete path. Sphinx is especially established for Python API/reference documentation, while MkDocs emphasizes Markdown sites. Compare their roles, but do not maintain three parallel builds.
-
-::: {.callout-warning title="Common mistake"}
-Changing several inputs or rules before rerunning destroys the connection
-between cause and evidence. Restore the last understood state, change one cause,
-and run the smallest relevant check.
-:::
-
-## 3. Practice from prediction to explanation
-
-Run this smaller case from a clean state:
-
-```python
-commands = [
-    "quarto render docs",
-    "pytest -q",
-    "python scripts/build_colab_notebooks.py",
-]
-
-for command in commands:
-    print(f"quality step: {command}")
+```text
+docs/
+├── .quarto/          # local project state/cache
+└── _site/            # generated public artifact
+    ├── index.html
+    ├── tutorial.html
+    ├── how-to-rank-exhibits.html
+    ├── why-ranking-is-deterministic.html
+    ├── api.html
+    ├── search.json
+    └── site_libs/
 ```
 
-Then complete the learning loop:
+Do not hand-edit `_site/api.html` to fix source content. The next render will
+replace the edit. Find the owning QMD file or project configuration, repair it,
+and render again.
 
-1. Record the output or exception before changing anything.
-2. Explain which line establishes each important value.
-3. Change one input or boundary named in this lesson.
-4. Rerun and explain why the new evidence differs.
+::: {.concept-diagram}
+Quarto transforms reviewed source and configuration into a replaceable site
+artifact.
 
-<details>
-<summary>Check your practice process</summary>
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[QMD and Markdown source] --> D[Quarto render]
+  B[_quarto.yml] --> D
+  C[Images and styles] --> D
+  D --> E[_site HTML artifact]
+  E --> F[Inspection]
+  F --> G[Publication]
+```
 
-Your record should contain the original prediction, actual result, one
-controlled change, new result, and a sentence connecting the changed line to the
-new behavior. If it contains only successful output, reproduce and explain one
-boundary or failure case as well.
+:::
 
-</details>
+### Create the smallest useful project file
 
-## 4. Check your understanding
+Place `_quarto.yml` inside `docs/`:
+
+```yaml
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: Midnight Museum Quest
+  page-navigation: true
+  sidebar:
+    contents:
+      - index.qmd
+      - tutorial.qmd
+      - how-to-rank-exhibits.qmd
+      - why-ranking-is-deterministic.qmd
+      - api.qmd
+
+format:
+  html:
+    toc: true
+```
+
+Read the fields by responsibility:
+
+- `project.type` tells Quarto to build a website rather than unrelated documents.
+- `output-dir` gives generated files one replaceable boundary.
+- `website.title` labels the site.
+- `page-navigation` adds previous/next movement through the declared order.
+- `sidebar.contents` owns visible page sequence.
+- `format.html.toc` gives longer pages local heading navigation.
+
+YAML indentation carries structure. `contents` belongs under `sidebar`, which
+belongs under `website`. Use spaces consistently; do not use tabs.
+
+### Checkpoint: identify the owning file
 
 <script type="application/json" class="fcpython-ojs-quiz-config">
 {
-  "id": "documentation-publishing-documentation-toolchains-publishing",
-  "title": "Documentation Toolchains and Publishing checkpoint",
-  "instructions": "Choose an answer, then explain the evidence in your own words.",
+  "id": "unit15-quarto-source-check",
+  "title": "Repair the source, not generated output",
+  "instructions": "Choose the file or field that owns the observed behavior.",
   "questions": [
     {
-      "id": "concept",
-      "prompt": "What should a documentation deployment publish?",
-      "options": [
-        "Unrendered local cache files from one developer's machine.",
-        "A site built even when link checks fail.",
-        "Different source than the reviewed commit.",
-        "The artifact produced by a clean, successful, reviewed build."
-      ],
-      "answer_index": 3,
-      "explanation": "Publishing the verified build artifact connects deployed documentation to reviewable source and reproducible checks."
+      "id": "unit15-quarto-source-page",
+      "prompt": "The API paragraph is wrong in `_site/api.html`. Where should the content repair normally be made?",
+      "options": ["Inside the generated HTML only", "In `docs/api.qmd`, then rerender", "In the browser cache", "In `search.json`"],
+      "answer_index": 1,
+      "explanation": "QMD is the maintained source; the generated HTML is replaceable output."
     },
     {
-      "id": "evidence",
-      "prompt": "Which record gives the strongest evidence that a controlled modification is understood?",
-      "options": [
-        "Only a screenshot of the final output.",
-        "A written prediction, the observed result, and an explanation tied to the changed line.",
-        "Several simultaneous edits with no earlier result.",
-        "A copied solution whose behavior was not rerun."
-      ],
-      "answer_index": 1,
-      "explanation": "A controlled experiment connects one predicted cause to an observed effect and an explanation."
+      "id": "unit15-quarto-source-order",
+      "prompt": "The how-to appears before the tutorial in the sidebar. Which record owns this sequence?",
+      "options": ["The Python function order", "The HTML file modification time", "`website.sidebar.contents` in `_quarto.yml`", "The README word count"],
+      "answer_index": 2,
+      "explanation": "The declared sidebar content order controls visible navigation."
+    },
+    {
+      "id": "unit15-quarto-source-output",
+      "prompt": "Which directory should a clean render be able to replace completely?",
+      "options": ["`src/`", "`tests/`", "`docs/images/`", "`docs/_site/`"],
+      "answer_index": 3,
+      "explanation": "`_site` is generated from maintained source, configuration, and assets."
     }
   ]
 }
@@ -141,16 +170,475 @@ boundary or failure case as well.
 
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
 
+## 2. Give each page an informative entrance
+
+A minimal QMD page uses YAML front matter and meaningful headings:
+
+````markdown
+---
+title: Rank Your First Museum Exhibit
+description: Follow a guided path from a clean project to one verified score.
+---
+
+## Before the museum opens
+
+Use Python 3.10 or newer and complete the project installation.
+
+## Rank the Moon Dial
+
+```python
+from museum_quest import rank_exhibit
+
+result = rank_exhibit("Moon Dial", votes=4, minutes_open=75)
+print(result)
+```
+
+Expected result: `ExhibitScore(name='Moon Dial', score=44)`.
+````
+
+The title becomes the page heading and default navigation label. The description
+can support previews and metadata. The page itself retains the reader-focused
+prerequisites, action, and expected result from Lesson 2.
+
+Quarto features should clarify the task. A normal note uses a callout:
+
+```markdown
+::: {.callout-note title="Why 75 minutes adds four points"}
+Only complete 30-minute periods count. Seventy-five minutes contains two
+complete periods.
+:::
+```
+
+Do not put every paragraph into a colored box. Reserve callouts for information
+whose role—note, tip, warning, important point—helps a reader decide how to use
+it.
+
+### Link to source pages, not generated filenames
+
+From `tutorial.qmd`, link to a sibling source:
+
+```markdown
+[Look up the `rank_exhibit` contract](api.qmd "API reference")
+```
+
+Quarto resolves that source link to the appropriate output. A direct
+`api.html` link binds the source to one output format and is easier to break if
+the project later becomes a book or another format.
+
+From root `README.md`, the same target uses its actual relative depth:
+
+```markdown
+[Look up the `rank_exhibit` contract](docs/api.qmd "API reference")
+```
+
+Paths are relative to the page containing them, not to whichever terminal the
+author happens to use.
+
+## 3. Design navigation around reader movement
+
+The flat list works for five pages. Labels make the purpose even clearer:
+
+```yaml
+website:
+  title: Midnight Museum Quest
+  page-navigation: true
+  search: true
+  sidebar:
+    style: floating
+    contents:
+      - href: index.qmd
+        text: Start Here
+      - href: tutorial.qmd
+        text: Guided Museum Visit
+      - href: how-to-rank-exhibits.qmd
+        text: Change a Ranking
+      - href: why-ranking-is-deterministic.qmd
+        text: Why Rankings Repeat
+      - href: api.qmd
+        text: Public API
+```
+
+The order moves from entry to guided use, focused task, understanding, and exact
+lookup. Alphabetical order would begin with API, not the most useful entrance.
+
+For a larger site, sections can group related pages:
+
+```yaml
+website:
+  sidebar:
+    contents:
+      - href: index.qmd
+        text: Start Here
+      - section: Learn
+        contents:
+          - tutorial.qmd
+      - section: Use the Package
+        contents:
+          - how-to-rank-exhibits.qmd
+          - why-ranking-is-deterministic.qmd
+          - api.qmd
+```
+
+Avoid creating a one-page section under every documentation type. A hierarchy
+should reduce choice, not make every click reveal another nearly empty menu.
+
+Search helps when the site has enough content and readers know the term to find.
+It does not replace a clear entry journey for someone who does not yet know the
+function name.
+
+### Repository actions create feedback paths
+
+A published project can expose edit and issue actions:
+
+```yaml
+website:
+  repo-url: https://github.com/example/midnight-museum
+  repo-actions:
+    - edit
+    - issue
+```
+
+Use the real repository URL. A feedback link without ownership or response
+expectations is not a complete support plan, but it gives readers an observable
+route to report stale content.
+
+### Checkpoint: organize the reader path
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-quarto-navigation-check",
+  "title": "Make site navigation answer reader questions",
+  "instructions": "Choose the configuration or link that preserves the intended path.",
+  "questions": [
+    {
+      "id": "unit15-quarto-navigation-order",
+      "prompt": "Which page should normally appear before API reference for a new museum learner?",
+      "options": ["The guided museum tutorial", "An alphabetical list of private helpers", "Generated cache files", "The deployment workflow source"],
+      "answer_index": 0,
+      "explanation": "A new learner needs a safe first success before exact lookup material."
+    },
+    {
+      "id": "unit15-quarto-navigation-link",
+      "prompt": "From `docs/tutorial.qmd`, which internal link best targets the sibling API source?",
+      "options": ["The author's absolute `/home/.../api.qmd` path", "A descriptive source-relative link targeting `api.qmd`", "A `click` link targeting generated `api.html`", "A link that repeats the `docs/docs/` directory"],
+      "answer_index": 1,
+      "explanation": "The source-relative QMD link is portable and the label states the destination's purpose."
+    },
+    {
+      "id": "unit15-quarto-navigation-search",
+      "prompt": "What limitation does site search have?",
+      "options": ["It cannot index text", "It always changes public APIs", "It cannot replace an entry path for readers who do not know the terms to search", "It prevents sidebars"],
+      "answer_index": 2,
+      "explanation": "Navigation still needs to orient readers who lack product vocabulary."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 4. Use cross-references when they reduce hunting
+
+A figure with an identifier can be referenced by name:
+
+```markdown
+![The README branches to tutorial, how-to, explanation, and API pages.](images/reader-paths.svg){#fig-reader-paths}
+
+The four destinations in @fig-reader-paths answer different reader questions.
+```
+
+Quarto requires a type prefix such as `fig-`, `tbl-`, or `lst-`. Use hyphens in
+identifiers and keep them stable when other pages link to them.
+
+A table can carry a caption and ID:
+
+```markdown
+| Reader | Destination |
+|---|---|
+| New learner | Tutorial |
+| Active caller | API reference |
+
+: Reader questions choose documentation paths {#tbl-reader-paths}
+```
+
+Reference it as `@tbl-reader-paths`. The rendered number and link update if the
+table moves.
+
+Do not cross-reference every short code block. A nearby sentence may be easier
+than “see Listing 14.” Use a reference when a reader needs to find or revisit a
+named object.
+
+### Diagnose an unresolved reference
+
+Suppose the render warns that `@fig-reader_path` cannot be resolved. Compare the
+reference with the label:
+
+```text
+Reference: @fig-reader_path
+Label:     #fig-reader-paths
+```
+
+There are two differences: underscore versus hyphen, and singular versus
+plural. Repair the source reference to the exact stable ID, then perform a full
+render and follow the link in HTML.
+
+## 5. Preview quickly, render completely
+
+From the `docs/` project directory:
+
+```bash
+quarto preview
+```
+
+Preview starts a local server and rerenders affected pages while you work. It is
+useful for checking headings, navigation, and layout in a browser. Stop the
+server before treating its current screen as a deployable artifact.
+
+From the repository root, target the project explicitly:
+
+```bash
+quarto render docs
+```
+
+A successful full render reports an output such as:
+
+```text
+Output created: _site/index.html
+```
+
+When the project root is `docs/`, `_site` is normally `docs/_site`. Read paths in
+context instead of copying one output line into every project.
+
+Why render again after preview?
+
+- a page may never have been opened during preview;
+- changes to `_quarto.yml`, shared includes, styles, or navigation affect more
+  than the active page;
+- caches can preserve state that a clean build will not have; and
+- publication needs one complete artifact tied to reviewed source.
+
+Clean generated output safely, rerender, and compare the named page inventory.
+Generated `_site` can be removed; QMD source cannot.
+
+### Checkpoint: choose preview or render
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-quarto-render-check",
+  "title": "Use the build mode that fits the decision",
+  "instructions": "Choose the command or evidence appropriate to the situation.",
+  "questions": [
+    {
+      "id": "unit15-quarto-render-global",
+      "prompt": "You changed shared navigation in `_quarto.yml` and are preparing deployment. What should you run?",
+      "options": ["Open one cached HTML file", "Trust the last preview screen", "Render only an unrelated page", "A complete `quarto render` for the site"],
+      "answer_index": 3,
+      "explanation": "Global configuration can affect every page, and deployment needs a complete artifact."
+    },
+    {
+      "id": "unit15-quarto-render-iterate",
+      "prompt": "When is `quarto preview` especially useful?",
+      "options": ["While iterating locally and inspecting page changes in a browser", "As proof that CI will install dependencies", "As a permanent hosting service", "To avoid the final complete render"],
+      "answer_index": 0,
+      "explanation": "Preview shortens local feedback but does not replace the deployment build."
+    },
+    {
+      "id": "unit15-quarto-render-evidence",
+      "prompt": "Quarto exits zero. Which additional check protects the public page set?",
+      "options": ["Count source comments", "Confirm each expected HTML path exists under `_site`", "Inspect only cache size", "Change the output directory after rendering"],
+      "answer_index": 1,
+      "explanation": "A successful process can still render an incomplete target set; named outputs protect the intended artifact."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 6. Read failures from the owning layer
+
+### Invalid YAML
+
+```text
+ERROR: YAMLException: bad indentation of a mapping entry
+  at docs/_quarto.yml:9:7
+```
+
+Open the named file and line. Compare indentation with parent keys. Do not edit a
+QMD paragraph or generated HTML for a configuration parse error.
+
+A common defect is:
+
+```yaml
+website:
+  sidebar:
+  contents:
+    - index.qmd
+```
+
+`contents` must be nested beneath `sidebar`:
+
+```yaml
+website:
+  sidebar:
+    contents:
+      - index.qmd
+```
+
+### Missing source target
+
+```text
+Unable to resolve link target: reference/api.qmd
+```
+
+Start from the source page containing the link. Resolve `reference/api.qmd`
+relative to that page. Check whether the link depth is wrong, the file moved, or
+navigation still names a retired route.
+
+### Page parses but a diagram fails
+
+A Mermaid error belongs to the diagram source. Keep labels simple, quote
+punctuation-sensitive labels, and preserve the required execution options. Run
+the focused Mermaid parser and render again rather than replacing the diagram
+with an unverified screenshot.
+
+### Render succeeds but a page is missing
+
+Inspect project render targets and sidebar paths. A page excluded by project
+configuration will not reappear because its old HTML remains in an uncleared
+`_site`. This is why a clean output directory matters: stale files can conceal a
+missing render target.
+
+## 7. Compare toolchains without maintaining three sites
+
+Quarto is the complete path here because this course already uses QMD, code
+examples, diagrams, and a Quarto website. Other projects may choose differently:
+
+- **Sphinx** has a mature Python domain and autodoc ecosystem for API-heavy
+  libraries, often using reStructuredText or MyST.
+- **MkDocs** emphasizes Markdown-oriented documentation websites and a plugin
+  ecosystem.
+- **Quarto** supports technical documents, executable content, cross-references,
+  websites, books, and multiple output formats.
+
+Choose from reader and maintainer needs: API generation, markup familiarity,
+execution model, extension ecosystem, output formats, accessibility, and team
+capacity. Do not build three versions before the project has one trustworthy
+site.
+
+## 8. Lab: assemble the Midnight Museum site
+
+Create the five-page source tree and `_quarto.yml` from this lesson. Your site
+must provide:
+
+- `index.qmd` with value, prerequisites, and direct tutorial link;
+- `tutorial.qmd` with the verified Moon Dial result;
+- `how-to-rank-exhibits.qmd` for changing one input;
+- `why-ranking-is-deterministic.qmd` explaining explicit inputs and no hidden
+  state;
+- `api.qmd` describing the public signature, result, and failures;
+- reader-focused sidebar text and page navigation;
+- one figure or table with a stable cross-reference;
+- descriptive internal QMD links;
+- repository feedback actions only if a real URL is supplied.
+
+Run:
+
+```bash
+quarto render docs
+```
+
+Verify:
+
+```python
+from pathlib import Path
+
+site = Path("docs/_site")
+expected = {
+    "index.html",
+    "tutorial.html",
+    "how-to-rank-exhibits.html",
+    "why-ranking-is-deterministic.html",
+    "api.html",
+}
+assert expected <= {path.name for path in site.glob("*.html")}
+```
+
+Then introduce and repair:
+
+1. one incorrectly indented `contents` key;
+2. one link to `reference/api.qmd` that should target `api.qmd`;
+3. one cross-reference whose ID differs by an underscore;
+4. one page removed from navigation while stale HTML remains.
+
+Clear generated output before verifying the final repair so a stale file cannot
+produce a false pass.
+
+<details>
+<summary>Hint: build one navigable page before adding features</summary>
+
+Start with `index.qmd`, `tutorial.qmd`, and a two-item sidebar. Render. Add one
+page and link at a time, rerendering after each structural change.
+
+</details>
+
+<details>
+<summary>Reveal a complete minimal configuration</summary>
+
+```yaml
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: Midnight Museum Quest
+  page-navigation: true
+  search: true
+  sidebar:
+    style: floating
+    contents:
+      - href: index.qmd
+        text: Start Here
+      - href: tutorial.qmd
+        text: Guided Museum Visit
+      - href: how-to-rank-exhibits.qmd
+        text: Change a Ranking
+      - href: why-ranking-is-deterministic.qmd
+        text: Why Rankings Repeat
+      - href: api.qmd
+        text: Public API
+
+format:
+  html:
+    toc: true
+```
+
+The content of each page still owns reader quality. This configuration only
+makes the intended source set and order explicit.
+
+</details>
+
 ## Key points
 
-::: {.callout-tip title="Key points"}
-- Treat documentation source, build configuration, checks, and deployment as one pipeline.
-- Teach Quarto completely and compare Sphinx/MkDocs by use case.
-- Verify navigation, links, accessibility, snippets, and generated artifacts before publishing.
-:::
+- Keep QMD, configuration, and assets as source; treat `_site` as replaceable
+  output.
+- Design navigation around reader movement rather than filename order.
+- Link to source QMD paths so Quarto can resolve the chosen output format.
+- Use callouts and cross-references only when their structure helps the reader.
+- Preview accelerates local iteration; a clean complete render owns the
+  deployment artifact.
+- Diagnose YAML, source-link, diagram, and stale-output failures at their owning
+  layer.
+- Teach and maintain one suitable toolchain completely before comparing
+  alternatives.
 
 ## References
 
-- https://quarto.org/docs/websites/
-- https://www.sphinx-doc.org/
-- https://www.mkdocs.org/
+- [Creating a Quarto website](https://quarto.org/docs/websites/)
+- [Quarto website navigation](https://quarto.org/docs/websites/website-navigation)
+- [Quarto cross-references](https://quarto.org/docs/authoring/cross-references)
+- [Quarto callout blocks](https://quarto.org/docs/authoring/callouts.html)
+- [Sphinx documentation](https://www.sphinx-doc.org/en/master/)
+- [MkDocs documentation](https://www.mkdocs.org/)
+
+[Next: Publish Documentation and Keep It Trustworthy](publishing-maintaining-documentation.qmd){.btn .btn-primary}

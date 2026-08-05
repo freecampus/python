@@ -1,0 +1,617 @@
+---
+title: Review Documentation Like Code
+lesson_id: documentation-publishing.documentation-quality-checks
+lesson_order: 50
+description: Build a documentation review gate that executes public examples, resolves local links, inspects rendered pages, and still leaves reader judgment visible.
+execute:
+  echo: true
+categories:
+  - python-foundations
+  - documentation-publishing
+  - documentation-testing
+  - review
+order: 50
+colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/documentation-quality-checks.ipynb
+course_id: python-foundations
+unit_id: documentation-publishing
+unit_number: 15
+---
+::: {.lesson-meta}
+
+- **Level:** Beginner
+- **Estimated time:** 2.5–3.5 hours
+- **You will learn:** Turn reader promises into focused checks, diagnose false-green documentation gates, and combine automation with human review.
+- **Practice in:** A local project containing README, QMD, Python, tests, and rendered HTML
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+Documentation changes with code. A renamed function can break a quick start; a
+moved page can break navigation; a revised output can leave a doctest stale; a
+successful render can still publish an unusable paragraph. Treat documentation
+as reviewable source with evidence, while remembering that automation cannot
+become the reader.
+
+This lesson asks:
+
+1. Which reader promises can become observable checks?
+2. How can a check prove it inspected the intended files and examples?
+3. What makes a broken-link report actionable?
+4. Which rendered-site facts should be inspected after a successful build?
+5. Which qualities still require a fresh reader and accessibility review?
+
+## 1. Translate promises into checks of the right strength
+
+Begin with a documentation promise, not a tool:
+
+| Reader promise | Useful automated evidence | Important remaining judgment |
+|---|---|---|
+| The quick start ranks Moon Dial | Public code executes and returns score 44 | Is the setup understandable to a newcomer? |
+| Two docstring examples are current | Two attempts, zero failures | Are those examples worth showing? |
+| README links reach deeper pages | Every local target file exists | Are labels and destinations useful? |
+| The site contains API reference | Clean render creates `api.html` | Can a caller find the needed fact quickly? |
+| The page is accessible to navigate | Headings, link text, and alt attributes are inspected | Does the complete experience work with relevant assistive technology? |
+
+A check is strongest when it names the promise and fails with evidence that
+helps repair it. It is weakest when it counts an unrelated token and declares
+the document good.
+
+This test protects the ordinary public result:
+
+```python
+from museum_quest import ExhibitScore, rank_exhibit
+
+
+def test_readme_quick_start_result() -> None:
+    assert rank_exhibit("Moon Dial", votes=4, minutes_open=75) == ExhibitScore(
+        name="Moon Dial",
+        score=44,
+    )
+```
+
+It does not prove the README contains that code or tells the reader how to
+install the package. Add a source-level assertion only when the ownership is
+clear:
+
+```python
+from pathlib import Path
+
+ROOT = Path(__file__).parents[1]
+
+
+def test_readme_names_the_public_entry_path() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "## Requirements" in readme
+    assert "## Quick start" in readme
+    assert "from museum_quest import rank_exhibit" in readme
+    assert "ExhibitScore(name='Moon Dial', score=44)" in readme
+```
+
+String checks are intentionally narrow. They can detect a removed section or
+stale result; they cannot judge whether the surrounding instructions are clear.
+Do not create hundreds of brittle assertions over exact prose.
+
+::: {.concept-diagram}
+Documentation trust comes from several evidence sources; no single green check
+covers the whole reader experience.
+
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart TD
+  A[Documentation source] --> B[Example checks]
+  A --> C[Link checks]
+  A --> D[Clean render]
+  D --> E[Rendered inspection]
+  B --> F[Automated gate]
+  C --> F
+  D --> F
+  E --> G[Human review]
+  H[Fresh reader] --> G
+  F --> I[Publication decision]
+  G --> I
+```
+
+:::
+
+## 2. Make every check prove it inspected something
+
+A false-green gate often has correct-looking assertions over an empty set:
+
+```python
+from pathlib import Path
+
+pages = list(Path("documentation").glob("*.qmd"))
+assert all("title:" in page.read_text() for page in pages)
+```
+
+If the real folder is `docs/`, `pages` is empty. Python's `all([])` is `True`.
+The gate inspected nothing and passed.
+
+Protect collection first:
+
+```python
+from pathlib import Path
+
+pages = sorted(Path("docs").glob("*.qmd"))
+assert pages, "no QMD pages found under docs/"
+assert all("title:" in page.read_text(encoding="utf-8") for page in pages)
+```
+
+The same principle applies to doctest attempts, rendered HTML paths, link
+matches, and selected navigation entries. Record an expected count or named set
+when the project has a stable contract.
+
+### Run from a stable root
+
+Checks should not depend on the terminal's accidental directory:
+
+```python
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DOCS_ROOT = PROJECT_ROOT / "docs"
+README = PROJECT_ROOT / "README.md"
+```
+
+A test file can derive paths from its own location. A command-line script should
+accept or deliberately locate a root and print it in failure output.
+
+### Checkpoint: reject empty evidence
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-review-collection-check",
+  "title": "Make the gate prove collection",
+  "instructions": "Choose the assertion that prevents an empty inspection from passing.",
+  "questions": [
+    {
+      "id": "unit15-review-collection-all",
+      "prompt": "Why can `all(check(page) for page in pages)` pass when the path is wrong?",
+      "options": ["`all` returns true for an empty iterable", "Path objects always pass checks", "QMD files cannot be read", "Assertions ignore generators"],
+      "answer_index": 0,
+      "explanation": "The universal condition has no counterexample in an empty iterable, so collection needs its own assertion."
+    },
+    {
+      "id": "unit15-review-collection-doctest",
+      "prompt": "Which doctest evidence rules out silent non-collection?",
+      "options": ["Zero failures only", "The intended attempted count plus zero failures", "A docstring length greater than zero", "One imported module"],
+      "answer_index": 1,
+      "explanation": "The attempted count proves discovery; the failed count proves comparison."
+    },
+    {
+      "id": "unit15-review-collection-root",
+      "prompt": "What makes a documentation test less dependent on the shell's current directory?",
+      "options": ["Use the author's absolute home path", "Search the whole disk", "Derive the project root from the test file's resolved path", "Assume every command starts under `docs/`"],
+      "answer_index": 2,
+      "explanation": "A path relative to the committed test file is reproducible across machines and shells."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 3. Report broken links with source and target
+
+A README link has two relevant paths: the source document and the destination
+resolved relative to that source. This small checker handles simple local
+Markdown links:
+
+```python
+import re
+from pathlib import Path
+from urllib.parse import unquote
+
+MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+
+
+def local_targets(page: Path) -> list[Path]:
+    """Return local file targets from simple inline Markdown links."""
+    targets = []
+    text = page.read_text(encoding="utf-8")
+    for raw_target in MARKDOWN_LINK.findall(text):
+        target_without_fragment = raw_target.split("#", 1)[0]
+        if not target_without_fragment:
+            continue
+        if "://" in target_without_fragment or target_without_fragment.startswith(
+            "mailto:"
+        ):
+            continue
+        decoded = unquote(target_without_fragment)
+        targets.append((page.parent / decoded).resolve())
+    return targets
+
+
+def missing_local_links(pages: list[Path]) -> list[tuple[Path, Path]]:
+    """Return source/target pairs for missing local files."""
+    missing = []
+    for page in pages:
+        for target in local_targets(page):
+            if not target.exists():
+                missing.append((page, target))
+    return missing
+```
+
+Use it with an explicit source set:
+
+```python
+from pathlib import Path
+
+root = Path(".").resolve()
+pages = [root / "README.md", *sorted((root / "docs").glob("*.qmd"))]
+assert pages[0].is_file(), "README.md is missing"
+assert len(pages) >= 6, f"expected README plus five docs pages, got {pages}"
+
+missing = missing_local_links(pages)
+assert missing == [], "missing local documentation links: " + repr(missing)
+```
+
+The failure includes both page and resolved target. A learner can tell whether
+the source used the wrong relative depth or the destination was removed.
+
+This is a deliberately limited parser. It does not validate reference-style
+links, raw HTML, generated anchors, remote HTTP status, or whether a fragment
+exists in the target. State the limit rather than calling it a complete link
+checker. Quarto's render and project tests can cover additional known routes.
+
+### Do not make remote availability a fragile unit test
+
+A live external site can be slow, unavailable, rate-limited, or intentionally
+redirected. Network checks also make offline learning fail. Keep descriptive
+external links under review, but separate scheduled link monitoring from the
+fast deterministic local gate.
+
+## 4. Execute examples from their documented context
+
+Copying a README block into a test creates two sources. Instead, choose an
+ownership strategy:
+
+1. **Executable example file:** README shows or links to
+   `examples/quick_start.py`; tests run that file as a subprocess.
+2. **Doctest source:** one docstring or text file owns the transcript, and the
+   rendered documentation includes or faithfully reproduces it.
+3. **Named public call:** a small test protects the exact public result while a
+   human review ensures the README presents the same call clearly.
+
+For a committed example script:
+
+```python
+from museum_quest import rank_exhibit
+
+
+def main() -> None:
+    result = rank_exhibit("Moon Dial", votes=4, minutes_open=75)
+    print(result)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+A subprocess test checks the reader-facing output and clean process boundary:
+
+```python
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_quick_start_script() -> None:
+    completed = subprocess.run(
+        [sys.executable, "examples/quick_start.py"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert completed.stdout == (
+        "ExhibitScore(name='Moon Dial', score=44)\n"
+    )
+```
+
+Use the active interpreter through `sys.executable`. Set `cwd` explicitly. Keep
+`check=False` only because the test wants to assert and display both exit status
+and stderr itself.
+
+A test run against an editable source checkout still does not prove published
+installation. If the README promises an installed wheel, add the Unit 10 clean
+wheel test at that boundary.
+
+### Checkpoint: choose honest source ownership
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-review-examples-check",
+  "title": "Keep reader examples and checks connected",
+  "instructions": "Choose the test that observes the documentation promise rather than a substitute.",
+  "questions": [
+    {
+      "id": "unit15-review-examples-script",
+      "prompt": "The README points readers to `examples/quick_start.py`. What is strong automated evidence?",
+      "options": ["Count the word `example` in README", "Import a private helper instead", "Check only that the filename string appears", "Run the committed script in a clean process and compare its exit status and exact result"],
+      "answer_index": 3,
+      "explanation": "The subprocess exercises the same public artifact and process boundary the reader uses."
+    },
+    {
+      "id": "unit15-review-examples-cwd",
+      "prompt": "Why should the subprocess test set `cwd=ROOT`?",
+      "options": ["To reproduce the documented project-root context", "To make all absolute paths portable", "To skip package imports", "To disable stderr"],
+      "answer_index": 0,
+      "explanation": "The test names the same relative-path base promised by the instructions."
+    },
+    {
+      "id": "unit15-review-examples-copy",
+      "prompt": "What risk appears when README, tutorial, and tests each copy a long example independently?",
+      "options": ["Python refuses repeated text", "The copies can drift and checks may protect only one", "Quarto deletes all code blocks", "The public API becomes private"],
+      "answer_index": 1,
+      "explanation": "Independent copies create multiple sources whose behavior and output can diverge."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 5. Inspect the rendered artifact, not only the exit code
+
+A successful Quarto process means the renderer completed. It does not guarantee
+the site contains the intended pages or useful navigation.
+
+After rendering, check named outputs:
+
+```python
+from pathlib import Path
+
+site = Path("docs/_site")
+expected_pages = {
+    "index.html",
+    "tutorial.html",
+    "how-to-rank-exhibits.html",
+    "why-ranking-is-deterministic.html",
+    "api.html",
+}
+
+observed_pages = {path.name for path in site.glob("*.html")}
+missing_pages = expected_pages - observed_pages
+assert missing_pages == set(), f"missing rendered pages: {sorted(missing_pages)}"
+```
+
+Then inspect at least one rendered file with a deliberately narrow standard-
+library check:
+
+```python
+from html.parser import HTMLParser
+
+
+class HeadingCollector(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.in_heading = False
+        self.headings: list[str] = []
+        self._parts: list[str] = []
+
+    def handle_starttag(
+        self,
+        tag: str,
+        attrs: list[tuple[str, str | None]],
+    ) -> None:
+        if tag in {"h1", "h2", "h3"}:
+            self.in_heading = True
+            self._parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self.in_heading:
+            self._parts.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if self.in_heading and tag in {"h1", "h2", "h3"}:
+            self.headings.append("".join(self._parts).strip())
+            self.in_heading = False
+
+
+collector = HeadingCollector()
+collector.feed(Path("docs/_site/tutorial.html").read_text(encoding="utf-8"))
+assert "Rank Your First Museum Exhibit" in collector.headings
+```
+
+This proves a named heading reached HTML. It does not replace opening the page,
+using keyboard navigation, checking narrow screens, or evaluating whether the
+heading sequence makes sense.
+
+### Treat warnings as evidence, not background noise
+
+For every warning, ask:
+
+- Which source file and line produced it?
+- Does it affect a public page, link, execution result, or accessibility?
+- Is it a known renderer limitation with a recorded reason?
+- Would converting every warning to failure improve trust or only create noise?
+
+This repository has a known non-fatal OJS block-count warning on pages with
+multiple quizzes. It should not license ignoring an unrelated broken-link or
+Mermaid syntax warning. Classify by source and effect.
+
+## 6. Human review asks questions automation cannot settle
+
+A fresh reader can reveal:
+
+- a prerequisite that an experienced maintainer silently supplies;
+- a term introduced after it is used;
+- a safe but unnecessarily long route to the first result;
+- a link whose target exists but answers another question;
+- output that matches yet is not explained;
+- a keyboard, contrast, screen-reader, or narrow-screen problem missed by a
+  source check;
+- a limitation that should appear before a risky action; or
+- prose that is technically true and practically confusing.
+
+Use a compact review pass:
+
+| Review lens | Question |
+|---|---|
+| Reader and task | Can I name who opens this page and what success means? |
+| Preconditions | Can the reader check every prerequisite before acting? |
+| Procedure | Does each step name action, context, and evidence? |
+| Public truth | Do names, types, units, results, errors, and limits match code? |
+| Navigation | Do headings and links reveal useful destinations? |
+| Accessibility | Is meaning available without relying only on position, color, or an image? |
+| Maintenance | Which code or route change should trigger review of this page? |
+
+Do not use “readability score passed” as a substitute for domain clarity.
+Automated prose metrics can flag a candidate sentence; a knowledgeable reader
+must decide whether technical meaning survives the revision.
+
+## 7. Review the diff with the code change
+
+Suppose a refactor renames private `_time_bonus` to `_score_complete_periods`
+while public behavior stays unchanged. Review:
+
+- public README: probably unchanged;
+- tutorial and how-to: unchanged if they use only `rank_exhibit`;
+- API reference: unchanged if private helpers are omitted;
+- public docstrings: unchanged unless they leaked the helper name;
+- maintainer explanation: possibly changed if it discusses internal structure.
+
+Now suppose the public parameter changes from `minutes_open` to
+`open_duration_minutes`. Review all public calls, signatures, docstrings,
+examples, API pages, how-to instructions, doctests, type references, and release
+notes. A check list derived from the public contract is more useful than “update
+the docs” as one final box.
+
+### Checkpoint: decide what green cannot prove
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "unit15-review-judgment-check",
+  "title": "Combine automated and human evidence",
+  "instructions": "Choose the review conclusion justified by the evidence.",
+  "questions": [
+    {
+      "id": "unit15-review-judgment-link",
+      "prompt": "A link checker confirms that `api.qmd` exists. What remains a human question?",
+      "options": ["Whether the destination actually answers the reader's API question", "Whether the source file has bytes", "Whether `Path.exists()` returns a boolean", "Whether QMD uses text"],
+      "answer_index": 0,
+      "explanation": "Existence cannot judge relevance, findability, or clarity."
+    },
+    {
+      "id": "unit15-review-judgment-render",
+      "prompt": "Quarto exits zero and creates `tutorial.html`. What should still be inspected?",
+      "options": ["Nothing; rendering proves all quality", "Only the file size", "Only the cache directory", "Navigation, headings, code presentation, links, and the actual reader path"],
+      "answer_index": 3,
+      "explanation": "A generated file can exist while its content or route remains unusable."
+    },
+    {
+      "id": "unit15-review-judgment-private",
+      "prompt": "A refactor renames only a private helper. Which documentation is most likely to need no change?",
+      "options": ["A maintainer page that names the helper", "A private implementation diagram", "A README quick start that uses only the unchanged public function", "A source comment beside the helper"],
+      "answer_index": 2,
+      "explanation": "Public usage remains stable, so the README should not depend on the private implementation name."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 8. Lab: repair a false-green documentation gate
+
+The museum project has five defects:
+
+1. README promises score 46 for the 75-minute quick start.
+2. The public docstring contains examples, but pytest collects no doctests.
+3. `docs/tutorial.qmd` links to missing `reference/api.qmd`.
+4. The tutorial title is `Details`.
+5. A page-discovery check uses the nonexistent `documentation/` directory and
+   passes over an empty list.
+
+Create or repair `tests/test_documentation.py` so that it:
+
+- derives the project root from `__file__`;
+- asserts the named documentation source set is non-empty;
+- protects the quick-start public result;
+- checks doctest attempted and failed counts;
+- reports each missing local link as `(source, target)`;
+- renders the site through the documented command or verifies render output in a
+  staged local sequence;
+- asserts the five expected HTML filenames;
+- leaves heading quality and reader-path review in an explicit human checklist.
+
+Run the gate in this order:
+
+```bash
+pytest --doctest-modules src tests -q
+quarto render docs
+pytest tests/test_documentation.py -q
+```
+
+Record the earliest failure after each repair. Do not weaken score 44, remove
+the missing-link assertion, or accept zero doctest attempts merely to proceed.
+
+<details>
+<summary>Hint: protect the inventory before the details</summary>
+
+Assert the README and five QMD source pages by name. Then a wrong directory
+fails as an inventory problem before `all()` can hide it.
+
+</details>
+
+<details>
+<summary>Reveal a progressive gate outline</summary>
+
+```python
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DOCS = ROOT / "docs"
+EXPECTED_SOURCE = {
+    ROOT / "README.md",
+    DOCS / "index.qmd",
+    DOCS / "tutorial.qmd",
+    DOCS / "how-to-rank-exhibits.qmd",
+    DOCS / "why-ranking-is-deterministic.qmd",
+    DOCS / "api.qmd",
+}
+EXPECTED_HTML = {
+    "index.html",
+    "tutorial.html",
+    "how-to-rank-exhibits.html",
+    "why-ranking-is-deterministic.html",
+    "api.html",
+}
+
+assert all(path.is_file() for path in EXPECTED_SOURCE)
+assert {path.name for path in (DOCS / "_site").glob("*.html")} >= EXPECTED_HTML
+```
+
+Combine this inventory with the public-result, doctest-count, and local-link
+checks developed earlier. Keep the human review table beside the automated gate
+instead of pretending these sets judge prose quality.
+
+</details>
+
+## Key points
+
+- Begin with a reader promise and choose evidence of matching strength.
+- Assert collection or inventory before applying `all()` or counting failures.
+- Resolve local links relative to their source and report both source and target.
+- Execute examples from their documented process and directory; avoid drifting
+  copies.
+- Inspect expected rendered pages and important structure after a successful
+  build.
+- Human reader and accessibility review remain necessary even when every
+  automated check passes.
+- Review documentation according to the public effect of a change, not merely
+  because any source line changed.
+
+## References
+
+- [Python `pathlib` documentation](https://docs.python.org/3/library/pathlib.html)
+- [Python `html.parser` documentation](https://docs.python.org/3/library/html.parser.html)
+- [Pytest good integration practices](https://docs.pytest.org/en/stable/explanation/goodpractices.html)
+- [W3C tips for writing accessible content](https://www.w3.org/WAI/tips/writing/)
+
+[Next: Build a Documentation Site with Quarto](documentation-toolchains-publishing.qmd){.btn .btn-primary}

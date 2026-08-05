@@ -13,7 +13,7 @@ course_status: available
 course_status_label: Available
 course_pathway: both
 course_keywords: beginner colab syntax values types collections control flow functions algorithms debugging files projects git cli testing typing oop documentation
-lesson_count: 93
+lesson_count: 96
 lesson_ids:
 - get-started.programming-python-ai
 - get-started.learning-loop-ai
@@ -105,9 +105,12 @@ lesson_ids:
 - code-quality-maintainability.continuous-integration-quality-gates
 - code-quality-maintainability.evidence-driven-refactoring
 - documentation-publishing.documentation-audiences-readme
+- documentation-publishing.clear-instructions-accessibility
 - documentation-publishing.docstrings-api-documentation
 - documentation-publishing.doctest-executable-documentation
+- documentation-publishing.documentation-quality-checks
 - documentation-publishing.documentation-toolchains-publishing
+- documentation-publishing.publishing-maintaining-documentation
 challenge_ids:
 - get-started.challenge
 - python-syntax.challenge
@@ -125,7 +128,7 @@ challenge_ids:
 - testing-python-programs.challenge
 - code-quality-maintainability.challenge
 - documentation-publishing.challenge
-estimated_effort: 350–500 hours
+estimated_effort: 370–525 hours
 prerequisite_label: None
 page-layout: full
 toc: false
@@ -133,7 +136,7 @@ body-classes: course-home course-foundations
 ---
 ::: {.lesson-meta}
 - **Level:** Beginner to project-ready
-- **Estimated effort:** 350–500 hours
+- **Estimated effort:** 370–525 hours
 - **Prerequisite:** None
 - **Status:** Available; final project and certificate planned
 :::
@@ -150,8 +153,8 @@ challenge belongs to that sequence.
   class="fc-course-overview fc-completion-overview"
   data-fc-course-overview
   data-course-id="python-foundations"
-  data-course-total="93"
-  data-course-lesson-ids="get-started.programming-python-ai get-started.learning-loop-ai get-started.notebooks-literate-workflows get-started.local-python-environment python-syntax.values-names-assignment python-syntax.expressions-statements-execution-order python-syntax.python-words-symbols python-syntax.indentation-code-blocks python-syntax.writing-code-across-lines python-syntax.comments-docstrings python-syntax.reading-fixing-syntax-errors core-values-types.values-types-none-conversion core-values-types.integer-arithmetic core-values-types.floating-point-precision core-values-types.money-ratios-complex-numbers core-values-types.strings-unicode-text core-values-types.input-output-formatting core-values-types.booleans-comparisons-truth core-values-types.dates-times-durations collections-iteration.lists collections-iteration.tuples-unpacking collections-iteration.dictionaries collections-iteration.sets-frozensets collections-iteration.traversing-collections collections-iteration.sorting-collections collections-iteration.nested-data-collection-choice decisions-repetition.conditional-branches decisions-repetition.boolean-rules-short-circuit decisions-repetition.decision-tables-boundaries decisions-repetition.for-loop-patterns decisions-repetition.while-loops-termination decisions-repetition.search-loop-control decisions-repetition.nested-loops-grids decisions-repetition.comprehensions functions-call-behavior.defining-calling-returning functions-call-behavior.parameters-stable-interfaces functions-call-behavior.contracts-decomposition-side-effects functions-call-behavior.scope-name-resolution-call-stack functions-call-behavior.functions-values-callbacks functions-call-behavior.recursion-recursive-tracing functions-call-behavior.iterators-generators-lazy-values functions-call-behavior.decorators-function-contracts mutability-identity-copying.equality-identity-references mutability-identity-copying.mutable-immutable-hashable mutability-identity-copying.aliasing-shallow-deep-copies mutability-identity-copying.mutation-function-boundaries problem-solving-algorithms.problems-examples-acceptance problem-solving-algorithms.decomposition-pseudocode-implementation problem-solving-algorithms.core-algorithm-patterns problem-solving-algorithms.correctness-boundaries-efficiency errors-exceptions-debugging.failure-categories-tracebacks errors-exceptions-debugging.raising-handling-exceptions errors-exceptions-debugging.repeatable-debugging-method errors-exceptions-debugging.debugger-minimal-reproductions files-paths-external-data.paths-text-files-resources files-paths-external-data.unicode-encodings-newlines files-paths-external-data.csv-json-yaml-records files-paths-external-data.text-patterns-validation-pipelines files-paths-external-data.bytes-binary-memory-streams modules-environments-projects.builtins-standard-library-help modules-environments-projects.modules-imports-entry-points modules-environments-projects.packages-public-interfaces modules-environments-projects.project-layout-git-essentials modules-environments-projects.virtual-environments-dependencies modules-environments-projects.pyproject-builds-tools object-oriented-python.objects-classes-instances-self object-oriented-python.initialization-invariants-properties object-oriented-python.dataclasses-representation-equality object-oriented-python.composition-inheritance-design object-oriented-python.road-crossing-game-model command-line-applications.argparse-command-design command-line-applications.streams-errors-exit-codes command-line-applications.configuration-precedence-secrets command-line-applications.logging-useful-diagnostics command-line-applications.cli-ecosystem-testable-architecture testing-python-programs.what-tests-prove testing-python-programs.pytest-discovery-failures testing-python-programs.parametrization-boundary-cases testing-python-programs.fixtures-isolation-capture testing-python-programs.test-doubles-dependency-injection testing-python-programs.test-levels testing-python-programs.properties-regressions-tdd code-quality-maintainability.readable-python-pep8 code-quality-maintainability.type-annotations-static-checking code-quality-maintainability.mypy-diagnostics-boundaries code-quality-maintainability.formatting-linting-configuration code-quality-maintainability.precommit-quality-gates code-quality-maintainability.continuous-integration-quality-gates code-quality-maintainability.evidence-driven-refactoring documentation-publishing.documentation-audiences-readme documentation-publishing.docstrings-api-documentation documentation-publishing.doctest-executable-documentation documentation-publishing.documentation-toolchains-publishing"
+  data-course-total="96"
+  data-course-lesson-ids="get-started.programming-python-ai get-started.learning-loop-ai get-started.notebooks-literate-workflows get-started.local-python-environment python-syntax.values-names-assignment python-syntax.expressions-statements-execution-order python-syntax.python-words-symbols python-syntax.indentation-code-blocks python-syntax.writing-code-across-lines python-syntax.comments-docstrings python-syntax.reading-fixing-syntax-errors core-values-types.values-types-none-conversion core-values-types.integer-arithmetic core-values-types.floating-point-precision core-values-types.money-ratios-complex-numbers core-values-types.strings-unicode-text core-values-types.input-output-formatting core-values-types.booleans-comparisons-truth core-values-types.dates-times-durations collections-iteration.lists collections-iteration.tuples-unpacking collections-iteration.dictionaries collections-iteration.sets-frozensets collections-iteration.traversing-collections collections-iteration.sorting-collections collections-iteration.nested-data-collection-choice decisions-repetition.conditional-branches decisions-repetition.boolean-rules-short-circuit decisions-repetition.decision-tables-boundaries decisions-repetition.for-loop-patterns decisions-repetition.while-loops-termination decisions-repetition.search-loop-control decisions-repetition.nested-loops-grids decisions-repetition.comprehensions functions-call-behavior.defining-calling-returning functions-call-behavior.parameters-stable-interfaces functions-call-behavior.contracts-decomposition-side-effects functions-call-behavior.scope-name-resolution-call-stack functions-call-behavior.functions-values-callbacks functions-call-behavior.recursion-recursive-tracing functions-call-behavior.iterators-generators-lazy-values functions-call-behavior.decorators-function-contracts mutability-identity-copying.equality-identity-references mutability-identity-copying.mutable-immutable-hashable mutability-identity-copying.aliasing-shallow-deep-copies mutability-identity-copying.mutation-function-boundaries problem-solving-algorithms.problems-examples-acceptance problem-solving-algorithms.decomposition-pseudocode-implementation problem-solving-algorithms.core-algorithm-patterns problem-solving-algorithms.correctness-boundaries-efficiency errors-exceptions-debugging.failure-categories-tracebacks errors-exceptions-debugging.raising-handling-exceptions errors-exceptions-debugging.repeatable-debugging-method errors-exceptions-debugging.debugger-minimal-reproductions files-paths-external-data.paths-text-files-resources files-paths-external-data.unicode-encodings-newlines files-paths-external-data.csv-json-yaml-records files-paths-external-data.text-patterns-validation-pipelines files-paths-external-data.bytes-binary-memory-streams modules-environments-projects.builtins-standard-library-help modules-environments-projects.modules-imports-entry-points modules-environments-projects.packages-public-interfaces modules-environments-projects.project-layout-git-essentials modules-environments-projects.virtual-environments-dependencies modules-environments-projects.pyproject-builds-tools object-oriented-python.objects-classes-instances-self object-oriented-python.initialization-invariants-properties object-oriented-python.dataclasses-representation-equality object-oriented-python.composition-inheritance-design object-oriented-python.road-crossing-game-model command-line-applications.argparse-command-design command-line-applications.streams-errors-exit-codes command-line-applications.configuration-precedence-secrets command-line-applications.logging-useful-diagnostics command-line-applications.cli-ecosystem-testable-architecture testing-python-programs.what-tests-prove testing-python-programs.pytest-discovery-failures testing-python-programs.parametrization-boundary-cases testing-python-programs.fixtures-isolation-capture testing-python-programs.test-doubles-dependency-injection testing-python-programs.test-levels testing-python-programs.properties-regressions-tdd code-quality-maintainability.readable-python-pep8 code-quality-maintainability.type-annotations-static-checking code-quality-maintainability.mypy-diagnostics-boundaries code-quality-maintainability.formatting-linting-configuration code-quality-maintainability.precommit-quality-gates code-quality-maintainability.continuous-integration-quality-gates code-quality-maintainability.evidence-driven-refactoring documentation-publishing.documentation-audiences-readme documentation-publishing.clear-instructions-accessibility documentation-publishing.docstrings-api-documentation documentation-publishing.doctest-executable-documentation documentation-publishing.documentation-quality-checks documentation-publishing.documentation-toolchains-publishing documentation-publishing.publishing-maintaining-documentation"
   data-course-challenge-ids="get-started.challenge python-syntax.challenge core-values-types.challenge collections-iteration.challenge decisions-repetition.challenge functions-call-behavior.challenge mutability-identity-copying.challenge problem-solving-algorithms.challenge errors-exceptions-debugging.challenge files-paths-external-data.challenge modules-environments-projects.challenge object-oriented-python.challenge command-line-applications.challenge testing-python-programs.challenge code-quality-maintainability.challenge documentation-publishing.challenge"
 >
   <div><strong data-fc-course-progress-value>0%</strong><span>course work recorded</span></div>
@@ -159,10 +162,10 @@ challenge belongs to that sequence.
     <span data-fc-course-progress-bar></span>
   </div>
   <div class="fc-requirement-grid">
-    <div><strong data-fc-course-lessons>0/93</strong><span>lessons</span></div>
+    <div><strong data-fc-course-lessons>0/96</strong><span>lessons</span></div>
     <div><strong data-fc-course-challenges>0/16</strong><span>unit challenges</span></div>
   </div>
-  <span data-fc-course-progress-label>109 course activities remaining</span>
+  <span data-fc-course-progress-label>112 course activities remaining</span>
   <strong class="fc-completion-status" data-fc-course-completion-status>Course in progress</strong>
 </div>
 ```
@@ -187,12 +190,12 @@ challenge belongs to that sequence.
 - diagnose failures from tracebacks and controlled experiments;
 - build a reproducible Git-backed project with a CLI and layered tests;
 - improve behavior safely with typing, formatting, linting, quality gates, and refactoring; and
-- create verified README, API, executable, and published documentation.
+- guide readers with verified README, task, explanation, API, executable-example, Quarto, and publishing documentation.
 
 ## Learning sequence
 
-Python Foundations curriculum version 19 contains **16 units** and
-**93 cohesive lessons**. Each unit begins with an Overview and
+Python Foundations curriculum version 20 contains **16 units** and
+**96 cohesive lessons**. Each unit begins with an Overview and
 ends with a challenge.
 
 | Unit | Focus | Outcome | Apply it |
@@ -212,7 +215,7 @@ ends with a challenge.
 | 12 | [Command-Line Applications](units/command-line-applications/index.qmd) | Design a discoverable command, keep data and diagnostics in their proper channels, resolve settings safely, and connect a thin CLI adapter to reusable Python that can be checked directly and as a real process. | [Challenge](units/command-line-applications/challenge.qmd) |
 | 13 | [Testing Python Programs](units/testing-python-programs/index.qmd) | Turn behavioral contracts into focused pytest suites, interpret failures, isolate state and dependencies, choose evidence-producing boundaries, preserve regressions, and use generated examples without confusing passing tests or coverage with proof. | [Challenge](units/testing-python-programs/challenge.qmd) |
 | 14 | [Code Quality and Maintainability](units/code-quality-maintainability/index.qmd) | Make Python projects easier to read and safer to change with consistent code, useful types, automated local/CI checks, and small behavior-preserving refactors. | [Challenge](units/code-quality-maintainability/challenge.qmd) |
-| 15 | [Documentation as Part of the Product](units/documentation-publishing/index.qmd) | Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API. | [Challenge](units/documentation-publishing/challenge.qmd) |
+| 15 | [Documentation as Part of the Product](units/documentation-publishing/index.qmd) | Design, write, test, build, and publish documentation that guides real readers from first contact to successful use, explains a stable public Python API, and remains trustworthy as the code changes. | [Challenge](units/documentation-publishing/challenge.qmd) |
 
 ## Assessment and progress
 

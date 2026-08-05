@@ -178,7 +178,8 @@ def python_foundations_unit_challenge_quizzes() -> tuple[Quiz, ...]:
         (
             "documentation-publishing",
             "Documentation as Part of the Product",
-            "build and publish documentation whose examples and links are verified",
+            "publish the Puzzle Garden field guide with verified examples, "
+            "links, pages, and deployment output",
         ),
     )
     quizzes = []

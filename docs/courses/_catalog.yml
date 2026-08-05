@@ -1,5 +1,5 @@
 schema_version: 2
-curriculum_version: 19
+curriculum_version: 20
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -8,15 +8,15 @@ courses:
     level: Beginner
     status: available
     pathway: both
-    lesson_count: 93
-    estimated_effort: 350–500 hours
+    lesson_count: 96
+    estimated_effort: 370–525 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 19
-      rule_version: 10
+      curriculum_version: 20
+      rule_version: 11
       recognition: local-self-reported
       lesson_ids:
         - get-started.programming-python-ai
@@ -109,9 +109,12 @@ courses:
         - code-quality-maintainability.continuous-integration-quality-gates
         - code-quality-maintainability.evidence-driven-refactoring
         - documentation-publishing.documentation-audiences-readme
+        - documentation-publishing.clear-instructions-accessibility
         - documentation-publishing.docstrings-api-documentation
         - documentation-publishing.doctest-executable-documentation
+        - documentation-publishing.documentation-quality-checks
         - documentation-publishing.documentation-toolchains-publishing
+        - documentation-publishing.publishing-maintaining-documentation
       challenges:
         - id: get-started.challenge
           title: Learning Workflow Readiness Check
@@ -174,7 +177,7 @@ courses:
           unit_id: code-quality-maintainability
           path: courses/python-foundations/units/code-quality-maintainability/challenge.qmd
         - id: documentation-publishing.challenge
-          title: Publish Trustworthy Utility Documentation
+          title: Publish the Puzzle Garden Field Guide
           unit_id: documentation-publishing
           path: courses/python-foundations/units/documentation-publishing/challenge.qmd
     units:
@@ -272,7 +275,7 @@ courses:
         id: documentation-publishing
         title: Documentation as Part of the Product
         directory: courses/python-foundations/units/documentation-publishing
-        lesson_count: 4
+        lesson_count: 7
         kind: instructional
   - id: intermediate-python
     title: "Intermediate Python: Applied Problem Solving"

@@ -1,66 +1,174 @@
 ---
 title: Documentation as Part of the Product Overview
-description: Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+description: Turn a maintained Python package into documentation that real readers can follow, verify, navigate, and trust as the code changes.
 course_id: python-foundations
 unit_id: documentation-publishing
 unit_number: 15
 categories:
-- python-foundations
-- documentation-publishing
-- overview
+  - python-foundations
+  - documentation-publishing
+  - overview
 order: 0
 colab_notebook: notebooks/courses/python-foundations/units/documentation-publishing/index.ipynb
 ---
 ::: {.lesson-meta}
+
 - **Level:** Python Foundations · Unit 15
-- **Estimated time:** 4–8 hours including the challenge
-- **Unit outcome:** Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
-- **Practice in:** Generated Colab notebooks and, when introduced, a local project
+- **Estimated time:** 21–31 hours including the challenge
+- **Unit outcome:** Design, write, test, build, and publish documentation that guides real readers from first contact to successful use, explains a stable public Python API, and remains trustworthy as the code changes.
+- **Practice in:** Generated Colab notebooks for individual examples and a local project for files, Quarto builds, Git, and CI
 :::
 
 {{< include ../../../../_includes/colab-link.qmd >}}
 
 <!-- fcpython-chapter-lab: start -->
-## 1. The capability you are building
+## 1. A working program is not yet a usable product
 
-Create and publish documentation that helps distinct audiences learn, complete tasks, understand design, and use a stable API.
+The Midnight Museum project reached an important state in Unit 14: its source is
+readable, its public functions have useful types, its tests pass, and the same
+quality gate runs locally and in CI. None of that tells a new person why the
+project exists, how to install it, which function to call, what result to
+expect, or how to recover from a mistake.
 
-This is a connected learning sequence, not a reference list. In every lesson,
-write a prediction, run the smallest complete example, explain the evidence,
-make one controlled change, and retain one useful failure.
+In this unit, you will turn that maintained code into a documented product. The
+finished documentation will give different readers suitable paths:
 
-## 2. Before you start
+- a new visitor can discover the purpose and reach a meaningful result quickly;
+- a learner can follow a guided museum-ranking tutorial;
+- an existing user can change one ranking task without repeating the tutorial;
+- a curious maintainer can understand why ranking is deterministic;
+- a caller can look up the exact public API contract; and
+- the team can rebuild and publish the site from reviewed source.
 
-**Prior knowledge:** Complete Unit 14 and bring its challenge notes and debugging record.
+::: {.concept-diagram}
+Notice that the README is an entry point, not the destination for every reader.
 
-Prepare one notebook or project folder for the unit. Keep a four-column evidence
-log: prediction, observed result, explanation, and next controlled change.
+```{mermaid}
+%%| echo: false
+%%| eval: true
+flowchart LR
+  A[Project discovery] --> B[README]
+  B --> C[Tutorial]
+  B --> D[How-to guide]
+  B --> E[Explanation]
+  B --> F[API reference]
+  C --> G[Successful use]
+  D --> G
+  F --> G
+```
 
-## 3. Lessons
-
-| Step | Lesson | Purpose |
-|---:|---|---|
-| 1 | [Documentation Audiences and a Useful README](documentation-audiences-readme.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 2 | [Docstring Conventions and API Documentation](docstrings-api-documentation.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 3 | [Doctest and Executable Documentation](doctest-executable-documentation.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 4 | [Documentation Toolchains and Publishing](documentation-toolchains-publishing.qmd) | Build one part of the unit outcome through prediction, execution, explanation, modification, and debugging. |
-| 5 | [Unit Challenge](challenge.qmd) | Integrate the unit skills and preserve evidence from a clean rerun. |
-
-## 4. How to study this unit
-
-1. Attempt prediction prompts before executing code.
-2. Type or adapt examples instead of only reading them.
-3. Treat quiz errors as diagnoses and explain why each distractor fails.
-4. Complete the challenge from a clean state and retain debugging evidence.
-
-::: {.callout-tip title="Do not optimize for speed"}
-The goal is not a fast first run. Aim to explain why the program behaved as it
-did and how one controlled change produced new evidence.
 :::
 
-## 5. Unit evidence
+A beautiful page can still be wrong. A green build can still publish stale
+instructions. You will therefore keep two questions together throughout the
+unit:
 
-By the end, retain working exercises, quiz corrections in your own words, one
-debugging record, and a challenge solution that passes from a clean state.
+1. **Does this page help its intended reader do the intended work?**
+2. **What evidence shows that its commands, examples, links, and public claims
+   still match the project?**
+
+## 2. The site you will build
+
+The lessons continue the **Midnight Museum Quest** project from Unit 14. You do
+not need to preserve notebook state between lessons; every page provides the
+files or snapshot needed for its task. The complete project gradually takes
+this shape:
+
+```text
+midnight-museum/
+├── README.md
+├── pyproject.toml
+├── src/museum_quest/
+│   ├── __init__.py
+│   └── ranking.py
+├── tests/
+│   ├── test_ranking.py
+│   └── test_documentation.py
+├── docs/
+│   ├── _quarto.yml
+│   ├── index.qmd
+│   ├── tutorial.qmd
+│   ├── how-to-rank-exhibits.qmd
+│   ├── why-ranking-is-deterministic.qmd
+│   └── api.qmd
+└── .github/workflows/docs.yml
+```
+
+The code remains deliberately small. Your attention should stay on the promises
+made to readers and on the route from source files to a verified public site.
+
+## 3. What each lesson adds
+
+| Step | Lesson | What you will add |
+|---:|---|---|
+| 1 | [Design Documentation Around Reader Needs](documentation-audiences-readme.qmd) | Map reader questions, separate documentation purposes, and rebuild the README as a verified path to a first result. |
+| 2 | [Write Instructions People Can Follow](clear-instructions-accessibility.qmd) | Turn vague procedures into clear tutorial and how-to steps with prerequisites, expected results, recovery, and accessible structure. |
+| 3 | [Document a Public Python API](docstrings-api-documentation.qmd) | Write caller-facing module, function, and result contracts, then inspect what `help()` and `pydoc` actually expose. |
+| 4 | [Keep Small Examples Honest with Doctest](doctest-executable-documentation.qmd) | Run deterministic transcript examples, diagnose their diffs, and move unsuitable cases to pytest. |
+| 5 | [Review Documentation Like Code](documentation-quality-checks.qmd) | Check quick starts, examples, links, headings, rendered files, and contract changes without mistaking automation for reader feedback. |
+| 6 | [Build a Documentation Site with Quarto](documentation-toolchains-publishing.qmd) | Configure navigation and cross-references, render from a clean output directory, and inspect the generated site. |
+| 7 | [Publish Documentation and Keep It Trustworthy](publishing-maintaining-documentation.qmd) | Connect the local documentation contract to CI, deploy the verified artifact, and plan for future changes. |
+| 8 | [Unit Challenge](challenge.qmd) | Publish a field guide that reopens the Puzzle Garden for new players. |
+
+## 4. Before you start
+
+You are ready when you can:
+
+- work from a project root and recognize `src`, `tests`, `docs`, and
+  `pyproject.toml` from Unit 10;
+- run pytest and read the earliest useful failure from Unit 13;
+- run a local quality gate and read a small CI workflow from Unit 14; and
+- create and follow relative file paths without relying on one notebook's
+  hidden state.
+
+For Lessons 1–5, you can study prose and individual Python examples in Colab.
+Lessons 6–7 require a local project because a documentation website is a
+collection of files with configuration, navigation, output directories, and Git
+history. Colab remains available as a reading and scratch-work companion; it is
+not a substitute for a clean multi-file render.
+
+Prepare a folder for the museum project and a short documentation log:
+
+| Reader or check | Expected result | Observed evidence | Revision |
+|---|---|---|---|
+| New user follows quick start | Ranked exhibit appears | Record the command and complete result | State one change you made |
+| Doctest collects examples | Intended attempts pass | Record attempted/failed counts | Explain one repaired diff |
+| Quarto renders site | Expected HTML pages exist | Record paths and warnings | Explain one warning decision |
+
+## 5. Plan realistic stopping points
+
+The estimate assumes active work, not silent reading:
+
+- **Reader paths and writing:** Lessons 1–2, about 5–7 hours.
+- **Python-facing documentation:** Lessons 3–4, about 6–8 hours.
+- **Review and site construction:** Lessons 5–6, about 6–9 hours.
+- **Publication and integration:** Lesson 7 plus the challenge, about 4–7 hours.
+
+Stop after a complete lab rather than midway through a repair sequence. When you
+return, rerun the nearest check before trusting the previous environment.
+
+::: {.callout-tip title="Use a fresh-reader test"}
+After a page works for you, follow it again using only what the page states.
+Do not supply an unstated directory, import, environment variable, or remembered
+output. The first missing assumption is valuable documentation evidence.
+:::
+
+## 6. What completion means here
+
+By the end of the unit, retain:
+
+- a README with a verified route from discovery to a meaningful result;
+- tutorial, how-to, explanation, and API pages with distinct jobs;
+- public docstrings and small executable examples;
+- a record of one documentation failure and repair;
+- a clean Quarto render with the expected navigation and pages;
+- a CI/publishing explanation tied to exact commands and artifact paths; and
+- the completed Puzzle Garden field guide challenge.
+
+Progress remains local and self-reported. It is not verified assessment or
+certificate evidence. A Foundations final project and certificate are planned
+but are not available yet; they will be announced later.
+
+[Begin with Design Documentation Around Reader Needs](documentation-audiences-readme.qmd){.btn .btn-primary}
 
 <!-- fcpython-chapter-lab: end -->
