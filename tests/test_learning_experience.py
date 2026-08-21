@@ -1,6 +1,7 @@
 import json
 import re
 import subprocess
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -63,6 +64,18 @@ def test_quarto_uses_branded_learning_components() -> None:
     assert "components/catalog-faq.css" in quarto
     assert "components/course-portfolio.css" in quarto
     assert "components/responsive.css" in quarto
+
+
+def test_site_footer_identifies_current_curriculum() -> None:
+    catalog = _yaml(Path("docs/courses/_catalog.yml"))
+    quarto = _yaml(Path("docs/_quarto.yml"))
+    updated = date.fromisoformat(catalog["last_updated"])
+    display_date = f"{updated.day} {updated.strftime('%B %Y')}"
+
+    assert quarto["website"]["page-footer"]["center"] == (
+        f"Course content updated {display_date} · "
+        f"Curriculum v{catalog['curriculum_version']}"
+    )
 
 
 def test_lesson_header_exposes_course_and_progress_identity() -> None:
