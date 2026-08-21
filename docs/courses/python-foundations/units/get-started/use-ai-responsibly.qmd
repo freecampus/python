@@ -98,7 +98,7 @@ Four request shapes work well in this course.
 
 ### Ask for a hint
 
-```text
+```{.text .code-overflow-wrap}
 I am learning to pair delimiters. This Python line raises SyntaxError:
 print("Status: ready)
 Do not give me a complete replacement program. Point to the first unmatched
@@ -110,7 +110,7 @@ type, and limits the answer.
 
 ### Ask for an explanation to review
 
-```text
+```{.text .code-overflow-wrap}
 I predicted three output lines for the source below, and the prediction matched.
 Explain which source line produces each output line. Keep the explanation to
 three numbered sentences so I can compare it with my own trace.
@@ -120,7 +120,7 @@ Write your trace first. Then compare claims rather than copying the response.
 
 ### Ask for a counterexample
 
-```text
+```{.text .code-overflow-wrap}
 My claim is: if a Python program runs without SyntaxError, its output must meet
 the requirement. Give one two-line counterexample using only print calls. Do not
 explain it until after the code block.
@@ -131,7 +131,7 @@ and explain why it matters.
 
 ### Ask for a review of your reasoning
 
-```text
+```{.text .code-overflow-wrap}
 Here are my prediction, observed output, and explanation. Identify one sentence
 that is not supported by the source or output. Ask a question instead of
 rewriting the explanation for me.
@@ -236,7 +236,7 @@ print("Python Learning Lab")
 
 Your verification record can say:
 
-```text
+```{.text .code-overflow-wrap}
 AI claim: echo is the standard Python display command.
 Prediction from the claim: echo("Python Learning Lab") displays the title.
 Observed evidence: NameError says echo is not defined in a fresh environment.
@@ -267,7 +267,7 @@ Repeated matching runs are useful evidence for this example, though they do not
 prove every possible program is sequential in the same simple way. Rewrite only
 the unsupported sentence:
 
-```text
+```{.text .code-overflow-wrap}
 For this script, Python reaches the three print calls from top to bottom, so the
 observed output is one, two, three in that order.
 ```
@@ -402,14 +402,14 @@ authentication headers, private keys, or full proprietary repositories.
 
 Unsafe request:
 
-```text
+```{.text .code-overflow-wrap}
 Here is our private customer export, internal server address, and access token.
 Why does this script fail?
 ```
 
 Safer request:
 
-```text
+```{.text .code-overflow-wrap}
 I replaced the private data with these three invented lines and removed all
 credentials. My tiny Python example should display three labels but raises this
 exact error: [...]. Which source delimiter should I inspect first?
@@ -442,7 +442,7 @@ is evidence to record and escalate, not an obstacle to bypass.
 
 A useful assistance record is short:
 
-```markdown
+```{.markdown .code-overflow-wrap}
 ## Assistance record
 
 - **Question asked:** Identify the first unmatched delimiter; do not rewrite the program.

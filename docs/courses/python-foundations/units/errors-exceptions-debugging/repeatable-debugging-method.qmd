@@ -209,7 +209,7 @@ bonus because the calculation uses `streak` rather than `streak - 1`” can.
 For larger programs, identify the first stage where actual behavior differs from
 expected behavior. Model the scorer as a pipeline:
 
-```text
+```{.text .code-overflow-wrap}
 raw results -> iterate one result -> update streak -> calculate bonus -> update total
 ```
 

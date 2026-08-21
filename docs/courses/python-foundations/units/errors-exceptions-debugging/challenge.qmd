@@ -203,7 +203,7 @@ Follow this order:
 
 For one defect, use this investigation loop:
 
-```text
+```{.text .code-overflow-wrap}
 Reproduce -> copy exact evidence -> state one cause -> change one line or boundary
           -> rerun the focused check -> rerun all earlier checks
 ```
@@ -386,7 +386,7 @@ retaining the coordinate defect.
 
 Example evidence should be specific:
 
-```text
+```{.text .code-overflow-wrap}
 Reproduction: move_pixel((3, 1), ("LEFT", 1))
 Expected: (2, 1)
 Actual: (4, 1)

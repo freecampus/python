@@ -494,7 +494,7 @@ def reveal_path(
 
 A complete README entry path can be:
 
-````markdown
+````{.markdown .code-overflow-wrap}
 # Puzzle Garden Field Guide
 
 Reveal repeatable routes through a tiny symbolic garden puzzle.
@@ -568,7 +568,7 @@ format:
 
 Each QMD file still needs its own content. A concise complete set includes:
 
-```markdown
+```{.markdown .code-overflow-wrap}
 ---
 title: Reveal Your First Garden Route
 ---
@@ -588,7 +588,7 @@ Read the symbol named by `ValueError`, then add it to the legend or correct the
 clue string.
 ```
 
-```markdown
+```{.markdown .code-overflow-wrap}
 ---
 title: Replace the Clue Legend
 ---
@@ -599,7 +599,7 @@ Create a mapping for `L`, `M`, and `B`; pass it through `legend=` and confirm th
 returned tuple uses only the new location names.
 ```
 
-```markdown
+```{.markdown .code-overflow-wrap}
 ---
 title: Why the Same Seed Repeats a Path
 ---
@@ -608,7 +608,7 @@ The function rotates an explicit symbol list by `seed % len(symbols)`. Equal
 clues, seed, and legend therefore produce the same tuple without global state.
 ```
 
-```markdown
+```{.markdown .code-overflow-wrap}
 ---
 title: Public API Reference
 ---
