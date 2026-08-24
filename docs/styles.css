@@ -715,6 +715,12 @@ pre.sourceCode {
   color: var(--fc-muted) !important;
 }
 
+/* Keep explicitly wrapped prose clear of the line-number gutter. */
+pre.numberSource.code-overflow-wrap > code.sourceCode > span {
+  padding-left: 5em;
+  text-indent: -5em;
+}
+
 pre.numberSource code > span > a:first-child::before {
   border-right-color: var(--fc-border);
   color: var(--fc-muted);
