@@ -723,13 +723,13 @@
             `${card.textContent} ${card.dataset.courseKeywords || ""}`
               .toLowerCase()
               .includes(query);
-          const pathway = card.dataset.coursePathway;
+          const pathways = (card.dataset.coursePathway || "").split(/\s+/);
           const status = card.dataset.courseStatus;
           const matchesFilter =
             filter === "all" ||
             (filter === "available" && status === "available") ||
             (filter !== "available" &&
-              (pathway === filter || pathway === "both"));
+              (pathways.includes(filter) || pathways.includes("both")));
           const show = matchesText && matchesFilter;
           card.hidden = !show;
           if (show) {

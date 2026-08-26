@@ -11,7 +11,14 @@ page-navigation: false
 body-classes: "course-hub portfolio-hub"
 listing:
   - id: course-catalog
-    contents: "*/index.qmd"
+    contents:
+      - python-foundations/index.qmd
+      - intermediate-python/index.qmd
+      - advanced-python/index.qmd
+      - scientific-python/index.qmd
+      - statistics-python/index.qmd
+      - data-science-ml/index.qmd
+      - "!scientific-python/scientific-python/index.qmd"
     sort: "course_order"
     template: _listings/course-card.ejs.md
     fields:
@@ -38,8 +45,8 @@ listing:
 ## Choose your next goal
 
 Start with **Python Foundations** if programming is new to you. If you already
-have the prerequisite skills, choose the software-development or scientific-data
-path that matches what you want to build.
+have the prerequisite skills, choose the software-development,
+scientific-computing, or statistics path that matches what you want to build.
 
 ::: {.fc-catalog-tools}
 ```{=html}
@@ -58,12 +65,13 @@ path that matches what you want to build.
 <div class="fc-stage-filters" role="group" aria-label="Filter courses">
   <button class="is-active" type="button" data-fc-course-filter="all" aria-pressed="true">All courses</button>
   <button type="button" data-fc-course-filter="software" aria-pressed="false">Software path</button>
-  <button type="button" data-fc-course-filter="scientific" aria-pressed="false">Scientific & data path</button>
+  <button type="button" data-fc-course-filter="scientific" aria-pressed="false">Scientific path</button>
+  <button type="button" data-fc-course-filter="statistics" aria-pressed="false">Statistics path</button>
   <button type="button" data-fc-course-filter="available" aria-pressed="false">Available now</button>
 </div>
 
 <div class="fc-catalog-summary" aria-live="polite">
-  <span data-fc-catalog-count>5 courses</span>
+  <span data-fc-catalog-count>6 courses</span>
   <span>Progress is stored in this browser.</span>
 </div>
 ```
@@ -75,15 +83,16 @@ path that matches what you want to build.
 ::: {.fc-empty-state data-fc-catalog-empty="" hidden=""}
 ### No course matches that search
 
-Try a broader term such as `beginner`, `problem solving`, `scientific`, `data`,
-or `machine learning`.
+Try a broader term such as `beginner`, `problem solving`, `scientific`,
+`statistics`, `data`, or `machine learning`.
 :::
 
-## Two pathways, one foundation
+## Three paths, one foundation
 
 ::: {.concept-diagram}
-The foundation course branches into software engineering and scientific-data
-pathways.
+The foundation course branches into software engineering, scientific computing,
+and statistics. Scientific Computing and Statistics converge as unordered
+prerequisites for Data Science and Machine Learning.
 
 ```{mermaid}
 %%| echo: false
@@ -93,18 +102,21 @@ flowchart LR
   I[Intermediate Python:<br/>Applied Problem Solving]
   A[Advanced Python:<br/>Complex Problem Solving]
   S[Scientific Computing]
+  T[Statistics with Python]
   M[Data Science and Machine Learning]
   F --> I --> A
-  F --> S --> M
-  I -. recommended .-> M
+  F --> S
+  F --> T
+  S --> M
+  T --> M
 ```
 
 :::
 
 ::: {.callout-note title="Course status and certificates"}
-Foundations has 62 lessons across 24 concept-focused instructional units and 24 guided unit challenges. Intermediate
-and Advanced are clearly marked **TBD** while their challenge-based curricula
-are designed. Scientific and Data/ML remain in development while their applied
+Foundations has 62 lessons across 24 concept-focused instructional units and 24 guided unit challenges. Intermediate,
+Advanced, and Statistics are clearly marked **TBD** while their curricula are
+designed. Scientific and Data/ML remain in development while their applied
 projects and assessment coverage grow. Certificates are planned; browser
 completion is not a verified credential.
 :::

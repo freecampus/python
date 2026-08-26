@@ -16,7 +16,7 @@ skills a course assumes.
 
 ::: {.callout-tip title="New to programming?"}
 Start with [Python Foundations](../courses/python-foundations/index.qmd). It is
-the common entry point for both pathways and assumes no programming experience.
+the common entry point for every pathway and assumes no programming experience.
 :::
 
 ## Software-development pathway
@@ -31,19 +31,38 @@ constraints. While those two applied courses are being designed, complete the
 full [Python Foundations](../courses/python-foundations/index.qmd) sequence to
 strengthen files, environments, testing, OOP, and reusable Python patterns.
 
-## Scientific and data pathway
+## Scientific-computing pathway
 
 1. [Python Foundations](../courses/python-foundations/index.qmd)
 2. [Scientific Computing with Python](../courses/scientific-python/index.qmd)
-3. [Data Science and Machine Learning with Python](../courses/data-science-ml/index.qmd)
 
-Choose this route to work with arrays, experiments, plots, tabular data, and
-machine-learning models. Intermediate Python is recommended when your data or ML
-work grows into a larger software project.
+Choose this route to work with arrays, numerical methods, multidimensional
+scientific data, specialized formats, scientific visualizations, performance,
+and progressively larger computations. Statistics is not a prerequisite, so
+you may start here directly after Foundations.
+
+## Statistics pathway
+
+1. [Python Foundations](../courses/python-foundations/index.qmd)
+2. [Statistics with Python](../courses/statistics-python/index.qmd) — curriculum TBD
+
+Choose this route to describe variation, reason about probability and samples,
+quantify uncertainty, compare groups, examine relationships, and communicate
+what evidence can and cannot support. Scientific Computing is not a
+prerequisite, so the two courses may be completed in either order.
+
+## Data Science and Machine Learning convergence
+
+Before starting
+[Data Science and Machine Learning with Python](../courses/data-science-ml/index.qmd),
+complete both Scientific Computing and Statistics. The two incoming paths are
+joint prerequisites: one supplies computational scientific practice and the
+other supplies statistical reasoning.
 
 ::: {.concept-diagram}
-Required links use solid arrows. The dotted arrow is a recommendation rather
-than a gate.
+Solid arrows are prerequisites. The two arrows entering Data Science and
+Machine Learning mean that both parallel courses are required, with no required
+order between them.
 
 ```{mermaid}
 %%| echo: false
@@ -53,10 +72,13 @@ flowchart LR
   I[Intermediate Python:<br/>Applied Problem Solving · TBD]
   A[Advanced Python:<br/>Complex Problem Solving · TBD]
   S[Scientific Computing<br/>with Python]
+  T[Statistics with Python<br/>TBD]
   M[Data Science and Machine Learning<br/>with Python]
   F --> I --> A
-  F --> S --> M
-  I -. recommended .-> M
+  F --> S
+  F --> T
+  S --> M
+  T --> M
 ```
 
 :::
@@ -68,7 +90,9 @@ flowchart LR
 | Write small programs with conditions, loops, collections, and functions but have not used files, tests, or projects | Continue Python Foundations from Unit 6 |
 | Independently parse, model, test, and explain unfamiliar small problems | Intermediate Python when its curriculum is published |
 | Compare algorithms and handle state, scale, or performance constraints | Advanced Python when its curriculum is published |
-| Use NumPy arrays, make plots, and explain a numerical experiment | Data Science and Machine Learning |
+| Use foundational Python and want to investigate numerical or scientific questions | Scientific Computing |
+| Use foundational Python and want to reason about samples, variation, and uncertainty | Statistics when its curriculum is published |
+| Use NumPy arrays and plots and can explain sampling variability and statistical uncertainty | Data Science and Machine Learning |
 | Recognize some syntax but cannot yet explain or debug it confidently | Python Foundations |
 
 When uncertain, open a prerequisite course and try the unit challenge near your

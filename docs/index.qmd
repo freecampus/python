@@ -1,6 +1,6 @@
 ---
 title: FreeCampus Python
-description: Five connected Python courses from first principles to software engineering, scientific computing, and machine learning.
+description: Six connected Python courses from first principles to software engineering, scientific computing, statistics, and machine learning.
 page-layout: full
 sidebar: false
 toc: false
@@ -11,14 +11,14 @@ body-classes: landing-page
 ::: {.hero}
 ::: {.hero-copy}
 ::: {.hero-kicker}
-Five connected Python courses
+Six connected Python courses
 :::
 
 # Build the Python path that matches your goal
 
-Start from zero, then follow a software-development or scientific-data pathway.
-Every lesson uses focused explanations, runnable examples, quizzes, debugging
-practice, and small projects.
+Start from zero, then follow a software-development, scientific-computing, or
+statistics pathway. Every lesson uses focused explanations, runnable examples,
+quizzes, debugging practice, and small projects.
 
 ::: {.hero-actions}
 [Start with Python Foundations](courses/python-foundations/index.qmd){.btn .btn-primary .btn-lg}
@@ -27,12 +27,12 @@ practice, and small projects.
 
 ::: {.hero-stats}
 ::: {.hero-stat}
-**5**
+**6**
 focused courses
 :::
 
 ::: {.hero-stat}
-**2**
+**3**
 learning pathways
 :::
 
@@ -118,9 +118,18 @@ algorithms.
 :::
 
 ::: {.course-card}
+### [Statistics with Python](courses/statistics-python/index.qmd)
+
+**TBD · Requires Foundations**
+
+Describe variation, reason from samples, quantify uncertainty, and communicate
+what statistical evidence can and cannot support.
+:::
+
+::: {.course-card}
 ### [Data Science and Machine Learning](courses/data-science-ml/index.qmd)
 
-**In development · Requires Scientific Computing**
+**In development · Requires Scientific Computing and Statistics**
 
 Move from a data question to a responsibly evaluated model and communicate the
 evidence.
@@ -129,11 +138,12 @@ evidence.
 
 [Compare every course](courses/index.qmd){.btn .btn-primary}
 
-## Follow the pathway you need
+## Choose a learning path
 
 ::: {.concept-diagram}
-Python Foundations is the common entry point. Solid arrows are prerequisites;
-the dotted arrow is a recommendation.
+Python Foundations is the common entry point. Scientific Computing and
+Statistics are parallel prerequisites for Data Science and Machine Learning and
+may be completed in either order.
 
 ```{mermaid}
 %%| echo: false
@@ -143,10 +153,13 @@ flowchart LR
   I[Intermediate Python]
   A[Advanced Python:<br/>Complex Problem Solving]
   S[Scientific Computing]
+  T[Statistics with Python]
   M[Data Science and Machine Learning]
   F --> I --> A
-  F --> S --> M
-  I -. recommended .-> M
+  F --> S
+  F --> T
+  S --> M
+  T --> M
 ```
 
 :::

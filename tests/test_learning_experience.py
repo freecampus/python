@@ -12,6 +12,7 @@ COURSE_IDS = {
     "intermediate-python",
     "advanced-python",
     "scientific-python",
+    "statistics-python",
     "data-science-ml",
 }
 
@@ -117,14 +118,22 @@ def test_course_catalog_is_generated_and_filterable() -> None:
     template = Path("docs/courses/_listings/course-card.ejs.md").read_text()
     course_ui = Path("docs/_includes/course-ui.html").read_text()
 
-    assert 'contents: "*/index.qmd"' in course_map
+    listing_contents = _front_matter(Path("docs/courses/index.qmd"))["listing"][0][
+        "contents"
+    ]
+    assert set(listing_contents) == {
+        *(f"{course_id}/index.qmd" for course_id in COURSE_IDS),
+        "!scientific-python/scientific-python/index.qmd",
+    }
     assert "template: _listings/course-card.ejs.md" in course_map
     assert "data-fc-catalog-search" in course_map
     assert "data-fc-course-filter" in course_map
+    assert 'data-fc-course-filter="statistics"' in course_map
     assert "data-fc-course-card" in template
     assert "data-course-id" in template
     assert "data-course-keywords" in template
     assert "setupCatalog" in course_ui
+    assert "pathways.includes(filter)" in course_ui
     assert "Curriculum TBD" in course_ui
 
 
@@ -154,6 +163,33 @@ def test_course_catalog_has_valid_acyclic_prerequisites() -> None:
 
     for course_id in by_id:
         visit(course_id)
+
+
+def test_scientific_and_statistics_paths_converge_before_data_ml() -> None:
+    courses = _yaml(Path("docs/courses/_catalog.yml"))["courses"]
+    by_id = {course["id"]: course for course in courses}
+
+    assert by_id["scientific-python"]["prerequisite_ids"] == ["python-foundations"]
+    assert by_id["statistics-python"]["prerequisite_ids"] == ["python-foundations"]
+    assert set(by_id["data-science-ml"]["prerequisite_ids"]) == {
+        "scientific-python",
+        "statistics-python",
+    }
+    assert by_id["scientific-python"]["recommended_ids"] == []
+    assert by_id["statistics-python"]["recommended_ids"] == []
+    assert by_id["data-science-ml"]["recommended_ids"] == []
+
+    for path in (
+        Path("docs/index.qmd"),
+        Path("docs/courses/index.qmd"),
+        Path("docs/pathways/index.qmd"),
+    ):
+        text = path.read_text()
+        assert "F --> S" in text
+        assert "F --> T" in text
+        assert "S --> M" in text
+        assert "T --> M" in text
+        assert "I -. recommended .-> M" not in text
 
 
 def test_course_catalog_owns_every_teaching_lesson_once() -> None:
@@ -309,6 +345,7 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
         assert front_matter["course_id"] == course["id"]
         assert front_matter["lesson_count"] == course["lesson_count"]
         assert front_matter["course_status"] == course["status"]
+        assert front_matter["course_pathway"] == course["pathway"]
         assert front_matter["estimated_effort"] == course["estimated_effort"]
         assert sidebar["contents"][0] == {
             "href": course["home"],

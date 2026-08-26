@@ -10,7 +10,7 @@ course_level: Intermediate
 course_status: in-development
 course_status_label: In development
 course_pathway: scientific
-course_keywords: "numpy arrays simulation matplotlib plotting sympy symbolic scipy numerical experiments"
+course_keywords: "numpy arrays simulation matplotlib plotting sympy scipy numerical methods xarray netcdf hdf5 zarr visualization performance dask numba mpi hpc"
 lesson_count: 5
 estimated_effort: 5–8 hours of current material
 prerequisite_label: Python Foundations
@@ -32,8 +32,9 @@ the capstone, assessment, and certificate are still being developed.
 :::
 
 ::: {.callout-important title="Prerequisite"}
-Complete [Python Foundations](../python-foundations/index.qmd). Intermediate
-Python is recommended for larger packaged projects but is not required.
+Complete [Python Foundations](../python-foundations/index.qmd). Statistics is a
+parallel pathway rather than a prerequisite, so you may take the two courses in
+either order.
 :::
 
 ```{=html}
@@ -76,18 +77,28 @@ Use NumPy, random simulation, Matplotlib, SymPy, and SciPy in small experiments.
 
 ## Planned expansion
 
-- floating-point reasoning and reproducible computation;
-- broadcasting, masking, and multidimensional arrays;
-- numerical linear algebra and applied SciPy;
-- scientific data and accessible visualization;
-- a reproducible scientific project.
+- floating-point error, numerical stability, tolerances, and reproducible
+  computation;
+- broadcasting, masking, memory layout, and multidimensional arrays;
+- numerical linear algebra, integration, interpolation, optimization, and
+  differential equations with SciPy;
+- labelled multidimensional data and metadata with xarray;
+- scientific formats and storage patterns including NetCDF, HDF5, and Zarr;
+- contour plots, heatmaps, error bars, time series, log scales, and accessible
+  multipanel figures;
+- measurement-led performance work using vectorization, profiling, chunking,
+  lazy computation, Numba, and Dask;
+- an introduction to parallel jobs, clusters, MPI, and the boundary where HPC
+  tools become appropriate;
+- a reproducible scientific project that records inputs, parameters, numerical
+  checks, and limitations.
 
 ## Practice, assessment, and next step
 
 The current lessons provide runnable experiments, Colab notebooks, and
 formative quizzes. They count toward local progress, but a scientific capstone,
-rubric, and certificate assessment are still planned. Continue to Data & ML
-only after arrays, plotting, and simple numerical experiments feel comfortable.
+rubric, and certificate assessment are still planned. Scientific Computing and
+Statistics are both prerequisites for Data & ML, but neither must come first.
 
 [Start with NumPy](scientific-python/numpy.qmd){.btn .btn-primary data-fc-course-resume="scientific-python"}
 [See the Data & ML prerequisite path](../data-science-ml/index.qmd){.btn .btn-outline-primary}

@@ -4,8 +4,9 @@ A beginner-first portfolio of connected Python courses for learners ranging from
 zero programming experience to advanced, scientific, and machine-learning work.
 
 The portfolio starts with no-install practice in Google Colab, then branches
-into software-development and scientific-data pathways. Lessons remain cohesive,
-hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
+into software-development, scientific-computing, and statistics pathways.
+Lessons remain cohesive, hands-on labs with quizzes, debugging practice, and
+generated Colab notebooks.
 
 ## Start learning
 
@@ -42,14 +43,17 @@ hands-on labs with quizzes, debugging practice, and generated Colab notebooks.
    trade-offs; curriculum TBD.
 4. **Scientific Computing with Python**: NumPy, simulation, Matplotlib, SymPy,
    and SciPy, with a larger applied curriculum in development.
-5. **Data Science and Machine Learning with Python**: pandas, seaborn, model
+5. **Statistics with Python**: a planned course about probability, sampling,
+   uncertainty, inference, regression foundations, and responsible statistical
+   conclusions; curriculum TBD.
+6. **Data Science and Machine Learning with Python**: pandas, seaborn, model
    training, AI libraries, and responsible AI, with applied pipelines and a
    capstone in development.
 
 Python Foundations is the common entry point. Intermediate leads to Advanced;
-Scientific Computing leads to Data Science and Machine Learning. The canonical
-course and unit definitions live in
-[`docs/courses/_catalog.yml`](docs/courses/_catalog.yml).
+Scientific Computing and Statistics are parallel, unordered prerequisites for
+Data Science and Machine Learning. The canonical course and unit definitions
+live in [`docs/courses/_catalog.yml`](docs/courses/_catalog.yml).
 
 Lessons are cohesive rather than microscopic. A page can contain multiple
 section-level OJS quizzes so students review one idea before moving to the next.

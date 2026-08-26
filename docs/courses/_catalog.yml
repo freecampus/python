@@ -1,6 +1,6 @@
 schema_version: 2
 curriculum_version: 21
-last_updated: "2026-08-21"
+last_updated: "2026-08-26"
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -321,28 +321,42 @@ courses:
     home: courses/scientific-python/index.qmd
     prerequisite_ids:
       - python-foundations
-    recommended_ids:
-      - intermediate-python
+    recommended_ids: []
     certificate_status: planned
     units:
       - id: scientific-python
         title: Scientific Python
         directory: courses/scientific-python/scientific-python
         lesson_count: 5
-  - id: data-science-ml
-    title: Data Science and Machine Learning with Python
-    short_title: Data & ML
+  - id: statistics-python
+    title: Statistics with Python
+    short_title: Statistics
     order: 50
     level: Intermediate
     status: in-development
-    pathway: scientific
+    pathway: statistics
+    lesson_count: 0
+    estimated_effort: TBD
+    home: courses/statistics-python/index.qmd
+    prerequisite_ids:
+      - python-foundations
+    recommended_ids: []
+    certificate_status: planned
+    units: []
+  - id: data-science-ml
+    title: Data Science and Machine Learning with Python
+    short_title: Data & ML
+    order: 60
+    level: Intermediate
+    status: in-development
+    pathway: "scientific statistics"
     lesson_count: 10
     estimated_effort: 10–16 hours of current material
     home: courses/data-science-ml/index.qmd
     prerequisite_ids:
       - scientific-python
-    recommended_ids:
-      - intermediate-python
+      - statistics-python
+    recommended_ids: []
     certificate_status: planned
     units:
       - id: data-science
