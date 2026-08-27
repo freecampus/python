@@ -95,7 +95,7 @@ def test_numbered_code_wraps_with_quartos_rendered_markup() -> None:
     assert code_rule
     assert "white-space: pre-wrap !important;" in code_rule.group("body")
     assert line_rule
-    assert "display: block;" in line_rule.group("body")
+    assert "display: inline-block;" in line_rule.group("body")
     assert "overflow-wrap: anywhere;" in line_rule.group("body")
     assert "padding-left: 5em;" in line_rule.group("body")
     assert "text-indent: -5em;" in line_rule.group("body")
