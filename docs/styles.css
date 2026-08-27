@@ -996,12 +996,18 @@ thead {
   border: 1px solid var(--fc-border);
   border-radius: 50%;
   bottom: max(1rem, env(safe-area-inset-bottom));
+  box-sizing: border-box;
   box-shadow: var(--fc-shadow-sm);
   color: var(--fc-brand-strong);
   font-size: 0;
   height: 2.75rem;
   left: auto;
   line-height: 2.65rem;
+  max-height: 2.75rem;
+  max-width: 2.75rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  overflow: hidden;
   padding: 0;
   right: max(1rem, env(safe-area-inset-right));
   transform: none;
