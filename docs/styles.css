@@ -715,10 +715,18 @@ pre.sourceCode {
   color: var(--fc-muted) !important;
 }
 
-/* Keep explicitly wrapped prose clear of the line-number gutter. */
-pre.numberSource.code-overflow-wrap > code.sourceCode > span {
+/* Wrap numbered source lines without placing continuations in the gutter. */
+pre.numberSource > code.sourceCode {
+  white-space: pre-wrap !important;
+}
+
+pre.numberSource > code.sourceCode > span {
+  box-sizing: border-box;
+  display: block;
+  overflow-wrap: anywhere;
   padding-left: 5em;
   text-indent: -5em;
+  width: calc(100% + 4em);
 }
 
 pre.numberSource code > span > a:first-child::before {

@@ -67,6 +67,42 @@ def test_quarto_uses_branded_learning_components() -> None:
     assert "components/responsive.css" in quarto
 
 
+def test_numbered_code_wraps_with_quartos_rendered_markup() -> None:
+    rendered = subprocess.run(
+        ["quarto", "pandoc", "--from", "markdown", "--to", "html"],
+        input=(
+            "```{.text .numberLines}\n"
+            "A deliberately long evidence line that must wrap inside the block.\n"
+            "```\n"
+        ),
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout
+    styles = Path("docs/styles.css").read_text()
+
+    assert re.search(r'<pre\s+class="sourceCode numberSource\b', rendered)
+    code_rule = re.search(
+        r"pre\.numberSource\s*>\s*code\.sourceCode\s*\{(?P<body>[^}]*)\}",
+        styles,
+    )
+    line_rule = re.search(
+        r"pre\.numberSource\s*>\s*code\.sourceCode\s*>\s*span\s*"
+        r"\{(?P<body>[^}]*)\}",
+        styles,
+    )
+
+    assert code_rule
+    assert "white-space: pre-wrap !important;" in code_rule.group("body")
+    assert line_rule
+    assert "display: block;" in line_rule.group("body")
+    assert "overflow-wrap: anywhere;" in line_rule.group("body")
+    assert "padding-left: 5em;" in line_rule.group("body")
+    assert "text-indent: -5em;" in line_rule.group("body")
+    assert "width: calc(100% + 4em);" in line_rule.group("body")
+    assert "pre.numberSource.code-overflow-wrap" not in styles
+
+
 def test_site_footer_identifies_current_curriculum() -> None:
     catalog = _yaml(Path("docs/courses/_catalog.yml"))
     quarto = _yaml(Path("docs/_quarto.yml"))
