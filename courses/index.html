@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Choose a focused Python course and follow its prerequisites at your own pace.">
+
+<title>Python Courses – FreeCampus Python</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../assets/freecampus-mark.svg" rel="icon" type="image/svg+xml">
+<script src="../site_libs/quarto-listing/list.min.js"></script>
+<script src="../site_libs/quarto-listing/quarto-listing.js"></script>
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-4a0610749eeff5ab924a4729b5181608.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-de927ec96a2411cf822331f71755f83e.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-4a0610749eeff5ab924a4729b5181608.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-0ced368015e14f34b1118365abb18045.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-dca854ebc25d7a5248211d794e2a6f41.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0ced368015e14f34b1118365abb18045.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-course-catalog .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-title','listing-description','listing-course_id','listing-course_order','listing-course_level','listing-course_status','listing-course_status_label','listing-course_pathway','listing-course_keywords','listing-lesson_count','listing-required_lesson_count','listing-required_lesson_ids','listing-challenge_ids','listing-project_required','listing-estimated_effort','listing-prerequisite_label',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-file-modified-sort'] },{ data: ['listing-reading-time-sort'] },{ data: ['listing-word-count-sort'] }],
+      
+      searchColumns: ["listing-project","listing-website","listing-format","listing-execute","listing-engines","listing-language","listing-title","listing-description","listing-categories","listing-course_id","listing-course_title","listing-course_home","listing-course_order","listing-course_level","listing-course_status","listing-course_status_label","listing-course_pathway","listing-course_keywords","listing-lesson_count","listing-lesson_ids","listing-challenge_ids","listing-estimated_effort","listing-prerequisite_label","listing-page-layout","listing-toc","listing-body-classes","listing-path","listing-outputHref","listing-author","listing-filename","listing-file-modified","listing-reading-time","listing-word-count"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-course-catalog'] = new List('listing-course-catalog', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../components/learning-shell.css">
+<link rel="stylesheet" href="../components/landing.css">
+<link rel="stylesheet" href="../components/catalog-faq.css">
+<link rel="stylesheet" href="../components/course-portfolio.css">
+<link rel="stylesheet" href="../components/responsive.css">
+</head>
+
+<body class="nav-fixed course-hub portfolio-hub quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/freecampus-mark.svg" alt="FreeCampus Python" class="navbar-logo light-content">
+    <img src="../assets/freecampus-mark.svg" alt="FreeCampus Python" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">FreeCampus Python</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-courses" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Courses</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-courses">    
+        <li>
+    <a class="dropdown-item" href="../courses/index.html">
+ <span class="dropdown-text">All courses</span></a>
+  </li>  
+        <li><hr class="dropdown-divider"></li>
+        <li>
+    <a class="dropdown-item" href="../courses/python-foundations/index.html">
+ <span class="dropdown-text">Python Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../courses/intermediate-python/index.html">
+ <span class="dropdown-text">Intermediate Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../courses/advanced-python/index.html">
+ <span class="dropdown-text">Advanced Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../courses/scientific-python/index.html">
+ <span class="dropdown-text">Scientific Computing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../courses/statistics-python/index.html">
+ <span class="dropdown-text">Statistics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../courses/data-science-ml/index.html">
+ <span class="dropdown-text">Data Science &amp; Machine Learning</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../pathways/index.html"> 
+<span class="menu-text">Pathways</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../resources/faq/index.html"> 
+<span class="menu-text">FAQ</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/freecampus/python"> <i class="bi bi-github" role="img" aria-label="GitHub repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content column-page" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default fc-learning-header">
+  <div class="fc-title-context" aria-live="polite">
+    <span class="fc-title-context-label" data-fc-context="">FreeCampus Python</span>
+    <span class="fc-title-position" data-fc-position=""></span>
+  </div>
+
+  <div class="fc-title-layout">
+    <div class="fc-title-copy">
+            <h1 class="title">Python Courses</h1>
+             <div class="description">Choose a focused Python course and follow its prerequisites at your own pace.</div>
+      
+
+      <div class="fc-title-chips" data-fc-title-chips="">
+        
+      </div>
+    </div>
+
+      </div>
+
+  <div class="fc-lesson-progress" data-fc-lesson-progress="" hidden="">
+    <div class="fc-progress-copy">
+      <span data-fc-progress-label="">Course progress</span>
+      <span data-fc-progress-value="">0%</span>
+    </div>
+    <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-progress-track="">
+      <span data-fc-progress-bar=""></span>
+    </div>
+  </div>
+
+  
+  <div class="quarto-title-meta column-page">
+
+      
+    
+      
+    </div>
+    
+</header>
+
+
+<section id="choose-your-next-goal" class="level2">
+<h2 class="anchored" data-anchor-id="choose-your-next-goal">Choose your next goal</h2>
+<p>Start with <strong>Python Foundations</strong> if programming is new to you. If you already have the prerequisite skills, choose the software-development, scientific-computing, or statistics path that matches what you want to build.</p>
+<div class="fc-catalog-tools">
+<div class="fc-catalog-search-wrap">
+  <span aria-hidden="true">⌕</span>
+  <label class="visually-hidden" for="fc-catalog-search">Search courses</label>
+  <input id="fc-catalog-search" type="search" placeholder="Search outcomes, tools, or course names..." autocomplete="off" data-fc-catalog-search="">
+</div>
+
+<div class="fc-stage-filters" role="group" aria-label="Filter courses">
+  <button class="is-active" type="button" data-fc-course-filter="all" aria-pressed="true">All courses</button>
+  <button type="button" data-fc-course-filter="software" aria-pressed="false">Software path</button>
+  <button type="button" data-fc-course-filter="scientific" aria-pressed="false">Scientific path</button>
+  <button type="button" data-fc-course-filter="statistics" aria-pressed="false">Statistics path</button>
+  <button type="button" data-fc-course-filter="available" aria-pressed="false">Available now</button>
+</div>
+
+<div class="fc-catalog-summary" aria-live="polite">
+  <span data-fc-catalog-count="">6 courses</span>
+  <span>Progress is stored in this browser.</span>
+</div>
+</div>
+<div id="listing-course-catalog" class="fc-course-catalog quarto-listing quarto-listing-container-custom" data-fc-catalog="">
+<div class="list">
+<article class="fc-catalog-card fc-portfolio-card" data-fc-course-card="" data-course-id="python-foundations" data-course-pathway="both" data-course-status="available" data-course-total="97" data-course-lesson-ids="get-started.meet-python-first-program get-started.learn-with-evidence get-started.use-ai-responsibly get-started.notebook-workflows get-started.local-python-workspace python-syntax.values-names-assignment python-syntax.expressions-statements-execution-order python-syntax.python-words-symbols python-syntax.indentation-code-blocks python-syntax.writing-code-across-lines python-syntax.comments-docstrings python-syntax.reading-fixing-syntax-errors core-values-types.values-types-none-conversion core-values-types.integer-arithmetic core-values-types.floating-point-precision core-values-types.money-ratios-complex-numbers core-values-types.strings-unicode-text core-values-types.input-output-formatting core-values-types.booleans-comparisons-truth core-values-types.dates-times-durations collections-iteration.lists collections-iteration.tuples-unpacking collections-iteration.dictionaries collections-iteration.sets-frozensets collections-iteration.traversing-collections collections-iteration.sorting-collections collections-iteration.nested-data-collection-choice decisions-repetition.conditional-branches decisions-repetition.boolean-rules-short-circuit decisions-repetition.decision-tables-boundaries decisions-repetition.for-loop-patterns decisions-repetition.while-loops-termination decisions-repetition.search-loop-control decisions-repetition.nested-loops-grids decisions-repetition.comprehensions functions-call-behavior.defining-calling-returning functions-call-behavior.parameters-stable-interfaces functions-call-behavior.contracts-decomposition-side-effects functions-call-behavior.scope-name-resolution-call-stack functions-call-behavior.functions-values-callbacks functions-call-behavior.recursion-recursive-tracing functions-call-behavior.iterators-generators-lazy-values functions-call-behavior.decorators-function-contracts mutability-identity-copying.equality-identity-references mutability-identity-copying.mutable-immutable-hashable mutability-identity-copying.aliasing-shallow-deep-copies mutability-identity-copying.mutation-function-boundaries problem-solving-algorithms.problems-examples-acceptance problem-solving-algorithms.decomposition-pseudocode-implementation problem-solving-algorithms.core-algorithm-patterns problem-solving-algorithms.correctness-boundaries-efficiency errors-exceptions-debugging.failure-categories-tracebacks errors-exceptions-debugging.raising-handling-exceptions errors-exceptions-debugging.repeatable-debugging-method errors-exceptions-debugging.debugger-minimal-reproductions files-paths-external-data.paths-text-files-resources files-paths-external-data.unicode-encodings-newlines files-paths-external-data.csv-json-yaml-records files-paths-external-data.text-patterns-validation-pipelines files-paths-external-data.bytes-binary-memory-streams modules-environments-projects.builtins-standard-library-help modules-environments-projects.modules-imports-entry-points modules-environments-projects.packages-public-interfaces modules-environments-projects.project-layout-git-essentials modules-environments-projects.virtual-environments-dependencies modules-environments-projects.pyproject-builds-tools object-oriented-python.objects-classes-instances-self object-oriented-python.initialization-invariants-properties object-oriented-python.dataclasses-representation-equality object-oriented-python.composition-inheritance-design object-oriented-python.road-crossing-game-model command-line-applications.argparse-command-design command-line-applications.streams-errors-exit-codes command-line-applications.configuration-precedence-secrets command-line-applications.logging-useful-diagnostics command-line-applications.cli-ecosystem-testable-architecture testing-python-programs.what-tests-prove testing-python-programs.pytest-discovery-failures testing-python-programs.parametrization-boundary-cases testing-python-programs.fixtures-isolation-capture testing-python-programs.test-doubles-dependency-injection testing-python-programs.test-levels testing-python-programs.properties-regressions-tdd code-quality-maintainability.readable-python-pep8 code-quality-maintainability.type-annotations-static-checking code-quality-maintainability.mypy-diagnostics-boundaries code-quality-maintainability.formatting-linting-configuration code-quality-maintainability.precommit-quality-gates code-quality-maintainability.continuous-integration-quality-gates code-quality-maintainability.evidence-driven-refactoring documentation-publishing.documentation-audiences-readme documentation-publishing.clear-instructions-accessibility documentation-publishing.docstrings-api-documentation documentation-publishing.doctest-executable-documentation documentation-publishing.documentation-quality-checks documentation-publishing.documentation-toolchains-publishing documentation-publishing.publishing-maintaining-documentation" data-course-challenge-ids="get-started.challenge python-syntax.challenge core-values-types.challenge collections-iteration.challenge decisions-repetition.challenge functions-call-behavior.challenge mutability-identity-copying.challenge problem-solving-algorithms.challenge errors-exceptions-debugging.challenge files-paths-external-data.challenge modules-environments-projects.challenge object-oriented-python.challenge command-line-applications.challenge testing-python-programs.challenge code-quality-maintainability.challenge documentation-publishing.challenge" data-course-keywords="beginner colab syntax values types collections control flow functions algorithms debugging files projects git cli testing typing oop documentation">
+  <a class="fc-catalog-card-link" href="../courses/python-foundations/index.html">
+    <div class="fc-catalog-card-topline">
+      <span class="fc-catalog-number">01</span>
+      <span class="fc-catalog-stage">Available</span>
+    </div>
+    <h3 class="anchored">Python Foundations</h3>
+    <div class="fc-catalog-description">Start with zero programming experience and finish able to build, test, explain, document, and maintain practical Python programs.</div>
+    <dl class="fc-course-facts">
+      <div><dt>Level</dt><dd>Beginner</dd></div>
+      <div><dt>Effort</dt><dd>380–540 hours</dd></div>
+      <div><dt>Prerequisite</dt><dd>None</dd></div>
+    </dl>
+    <div class="fc-catalog-card-footer">
+      <div class="fc-card-progress" aria-hidden="true">
+        <span data-fc-card-progress-bar=""></span>
+      </div>
+      <span class="fc-card-progress-value" data-fc-card-progress-value="">Not started</span>
+      <span class="fc-catalog-open">View course <span aria-hidden="true">→</span></span>
+    </div>
+  </a>
+</article>
+<article class="fc-catalog-card fc-portfolio-card" data-fc-course-card="" data-course-id="intermediate-python" data-course-pathway="software" data-course-status="in-development" data-course-total="0" data-course-lesson-ids="" data-course-challenge-ids="" data-course-keywords="applied problem solving parsing modeling decomposition algorithms testing refactoring explanation challenges">
+  <a class="fc-catalog-card-link" href="../courses/intermediate-python/index.html">
+    <div class="fc-catalog-card-topline">
+      <span class="fc-catalog-number">02</span>
+      <span class="fc-catalog-stage">TBD · curriculum redesign</span>
+    </div>
+    <h3 class="anchored">Intermediate Python: Applied Problem Solving</h3>
+    <div class="fc-catalog-description">Apply Python foundations to unfamiliar, progressively harder problems through original challenge-based projects.</div>
+    <dl class="fc-course-facts">
+      <div><dt>Level</dt><dd>Intermediate</dd></div>
+      <div><dt>Effort</dt><dd>TBD</dd></div>
+      <div><dt>Prerequisite</dt><dd>Python Foundations</dd></div>
+    </dl>
+    <div class="fc-catalog-card-footer">
+      <div class="fc-card-progress" aria-hidden="true">
+        <span data-fc-card-progress-bar=""></span>
+      </div>
+      <span class="fc-card-progress-value" data-fc-card-progress-value="">Not started</span>
+      <span class="fc-catalog-open">View course <span aria-hidden="true">→</span></span>
+    </div>
+  </a>
+</article>
+<article class="fc-catalog-card fc-portfolio-card" data-fc-course-card="" data-course-id="advanced-python" data-course-pathway="software" data-course-status="in-development" data-course-total="0" data-course-lesson-ids="" data-course-challenge-ids="" data-course-keywords="complex problem solving graphs search constraints simulation performance optimization architecture concurrency tradeoffs">
+  <a class="fc-catalog-card-link" href="../courses/advanced-python/index.html">
+    <div class="fc-catalog-card-topline">
+      <span class="fc-catalog-number">03</span>
+      <span class="fc-catalog-stage">TBD · curriculum redesign</span>
+    </div>
+    <h3 class="anchored">Advanced Python: Complex Problem Solving</h3>
+    <div class="fc-catalog-description">Use the full Python toolkit to solve complex, constrained problems and justify engineering trade-offs.</div>
+    <dl class="fc-course-facts">
+      <div><dt>Level</dt><dd>Advanced</dd></div>
+      <div><dt>Effort</dt><dd>TBD</dd></div>
+      <div><dt>Prerequisite</dt><dd>Intermediate Python</dd></div>
+    </dl>
+    <div class="fc-catalog-card-footer">
+      <div class="fc-card-progress" aria-hidden="true">
+        <span data-fc-card-progress-bar=""></span>
+      </div>
+      <span class="fc-card-progress-value" data-fc-card-progress-value="">Not started</span>
+      <span class="fc-catalog-open">View course <span aria-hidden="true">→</span></span>
+    </div>
+  </a>
+</article>
+<article class="fc-catalog-card fc-portfolio-card" data-fc-course-card="" data-course-id="scientific-python" data-course-pathway="scientific" data-course-status="in-development" data-course-total="5" data-course-lesson-ids="" data-course-challenge-ids="" data-course-keywords="numpy arrays simulation matplotlib plotting sympy scipy numerical methods xarray netcdf hdf5 zarr visualization performance dask numba mpi hpc">
+  <a class="fc-catalog-card-link" href="../courses/scientific-python/index.html">
+    <div class="fc-catalog-card-topline">
+      <span class="fc-catalog-number">04</span>
+      <span class="fc-catalog-stage">In development</span>
+    </div>
+    <h3 class="anchored">Scientific Computing with Python</h3>
+    <div class="fc-catalog-description">Represent numerical problems, run experiments, visualize results, and apply scientific algorithms.</div>
+    <dl class="fc-course-facts">
+      <div><dt>Level</dt><dd>Intermediate</dd></div>
+      <div><dt>Effort</dt><dd>5–8 hours of current material</dd></div>
+      <div><dt>Prerequisite</dt><dd>Python Foundations</dd></div>
+    </dl>
+    <div class="fc-catalog-card-footer">
+      <div class="fc-card-progress" aria-hidden="true">
+        <span data-fc-card-progress-bar=""></span>
+      </div>
+      <span class="fc-card-progress-value" data-fc-card-progress-value="">Not started</span>
+      <span class="fc-catalog-open">View course <span aria-hidden="true">→</span></span>
+    </div>
+  </a>
+</article>
+<article class="fc-catalog-card fc-portfolio-card" data-fc-course-card="" data-course-id="statistics-python" data-course-pathway="statistics" data-course-status="in-development" data-course-total="0" data-course-lesson-ids="" data-course-challenge-ids="" data-course-keywords="statistics probability distributions sampling variability uncertainty confidence intervals hypothesis tests effect sizes regression experiments bias">
+  <a class="fc-catalog-card-link" href="../courses/statistics-python/index.html">
+    <div class="fc-catalog-card-topline">
+      <span class="fc-catalog-number">05</span>
+      <span class="fc-catalog-stage">TBD · curriculum planning</span>
+    </div>
+    <h3 class="anchored">Statistics with Python</h3>
+    <div class="fc-catalog-description">Use Python to describe variation, reason from samples, quantify uncertainty, and communicate statistical evidence responsibly.</div>
+    <dl class="fc-course-facts">
+      <div><dt>Level</dt><dd>Intermediate</dd></div>
+      <div><dt>Effort</dt><dd>TBD</dd></div>
+      <div><dt>Prerequisite</dt><dd>Python Foundations</dd></div>
+    </dl>
+    <div class="fc-catalog-card-footer">
+      <div class="fc-card-progress" aria-hidden="true">
+        <span data-fc-card-progress-bar=""></span>
+      </div>
+      <span class="fc-card-progress-value" data-fc-card-progress-value="">Not started</span>
+      <span class="fc-catalog-open">View course <span aria-hidden="true">→</span></span>
+    </div>
+  </a>
+</article>
+<article class="fc-catalog-card fc-portfolio-card" data-fc-course-card="" data-course-id="data-science-ml" data-course-pathway="scientific statistics" data-course-status="in-development" data-course-total="10" data-course-lesson-ids="" data-course-challenge-ids="" data-course-keywords="pandas dataframe cleaning statistics seaborn scikit-learn models pytorch tensorflow transformers responsible ai">
+  <a class="fc-catalog-card-link" href="../courses/data-science-ml/index.html">
+    <div class="fc-catalog-card-topline">
+      <span class="fc-catalog-number">06</span>
+      <span class="fc-catalog-stage">In development</span>
+    </div>
+    <h3 class="anchored">Data Science and Machine Learning with Python</h3>
+    <div class="fc-catalog-description">Move from a data question to a responsibly evaluated model and communicate the evidence.</div>
+    <dl class="fc-course-facts">
+      <div><dt>Level</dt><dd>Intermediate</dd></div>
+      <div><dt>Effort</dt><dd>10–16 hours of current material</dd></div>
+      <div><dt>Prerequisite</dt><dd>Scientific Computing + Statistics</dd></div>
+    </dl>
+    <div class="fc-catalog-card-footer">
+      <div class="fc-card-progress" aria-hidden="true">
+        <span data-fc-card-progress-bar=""></span>
+      </div>
+      <span class="fc-card-progress-value" data-fc-card-progress-value="">Not started</span>
+      <span class="fc-catalog-open">View course <span aria-hidden="true">→</span></span>
+    </div>
+  </a>
+</article>
+</div>
+<div class="listing-no-matching d-none">No matching items</div>
+</div>
+<section id="no-course-matches-that-search" class="level3 fc-empty-state" data-fc-catalog-empty="" hidden="">
+<h3 class="anchored" data-anchor-id="no-course-matches-that-search">No course matches that search</h3>
+<p>Try a broader term such as <code>beginner</code>, <code>problem solving</code>, <code>scientific</code>, <code>statistics</code>, <code>data</code>, or <code>machine learning</code>.</p>
+</section>
+</section>
+<section id="three-paths-one-foundation" class="level2">
+<h2 class="anchored" data-anchor-id="three-paths-one-foundation">Three paths, one foundation</h2>
+<div class="concept-diagram">
+<p>The foundation course branches into software engineering, scientific computing, and statistics. Scientific Computing and Statistics converge as unordered prerequisites for Data Science and Machine Learning.</p>
+<div class="cell" data-eval="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  F[Python Foundations]
+  I[Intermediate Python:&lt;br/&gt;Applied Problem Solving]
+  A[Advanced Python:&lt;br/&gt;Complex Problem Solving]
+  S[Scientific Computing]
+  T[Statistics with Python]
+  M[Data Science and Machine Learning]
+  F --&gt; I --&gt; A
+  F --&gt; S
+  F --&gt; T
+  S --&gt; M
+  T --&gt; M
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Course status and certificates">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Course status and certificates
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Foundations has 62 lessons across 24 concept-focused instructional units and 24 guided unit challenges. Intermediate, Advanced, and Statistics are clearly marked <strong>TBD</strong> while their curricula are designed. Scientific and Data/ML remain in development while their applied projects and assessment coverage grow. Certificates are planned; browser completion is not a verified credential.</p>
+</div>
+</div>
+<p><a href="../pathways/index.html" class="btn btn-outline-primary">Compare prerequisites and pathways</a></p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script>
+  (() => {
+    "use strict";
+
+    const progressKey = "fcpython.progress.v6";
+    const lastLessonKey = "fcpython.last-lesson.v6";
+
+    function readJson(key, fallback) {
+      try {
+        return JSON.parse(window.localStorage.getItem(key)) || fallback;
+      } catch (_error) {
+        return fallback;
+      }
+    }
+
+    function writeJson(key, value) {
+      try {
+        window.localStorage.setItem(key, JSON.stringify(value));
+      } catch (_error) {
+        // The course remains usable when browser storage is unavailable.
+      }
+    }
+
+    function pageKey(value = window.location.href) {
+      const url = new URL(value, window.location.href);
+      const match = url.pathname.match(
+        /\/(lessons|courses|resources|pathways)\//,
+      );
+
+      if (!match) {
+        return "home";
+      }
+
+      return url.pathname
+        .slice(match.index + 1)
+        .replace(/\.(html|qmd)$/, "")
+        .replace(/\/index$/, "")
+        .replace(/\/$/, "");
+    }
+
+    function siteBasePath() {
+      const pathname = window.location.pathname;
+      const match = pathname.match(/\/(lessons|courses|resources|pathways)\//);
+
+      if (match) {
+        return pathname.slice(0, match.index + 1);
+      }
+
+      return pathname.replace(/[^/]*$/, "");
+    }
+
+    function hrefForKey(key) {
+      return `${siteBasePath()}${key}.html`;
+    }
+
+    function markSameOriginLinksInternal() {
+      const currentOrigin = new URL(window.location.href).origin;
+      document.querySelectorAll("a[href]").forEach((link) => {
+        try {
+          const destination = new URL(link.href, window.location.href);
+          if (destination.origin === currentOrigin) {
+            link.classList.add("no-external");
+          }
+        } catch (_error) {
+          // Leave malformed destinations unchanged for the browser to handle.
+        }
+      });
+    }
+
+    function isChallengeKey(key) {
+      const parts = key.split("/");
+      return (
+        parts[0] === "courses" &&
+        parts[2] === "units" &&
+        parts.length === 5 &&
+        parts[4] === "challenge"
+      );
+    }
+
+    function challengeIdFromKey(key) {
+      if (!isChallengeKey(key)) {
+        return "";
+      }
+      return `${key.split("/")[3]}.challenge`;
+    }
+
+    function isLessonKey(key) {
+      const parts = key.split("/");
+      const unitLesson =
+        parts[0] === "courses" && parts[2] === "units" && parts.length >= 5;
+      const directCourseLesson =
+        parts[0] === "courses" && parts[2] !== "units" && parts.length >= 4;
+      return (unitLesson || directCourseLesson) && !isChallengeKey(key);
+    }
+
+    function isProjectKey(key) {
+      return key.startsWith("courses/") && key.endsWith("/project");
+    }
+
+    function lessonIdFromKey(key) {
+      if (!isLessonKey(key)) {
+        return "";
+      }
+      const parts = key.split("/");
+      const lessonParts =
+        parts[2] === "units" ? parts.slice(3) : parts.slice(2);
+      return lessonParts.join(".");
+    }
+
+    function emptyProgress() {
+      return { schema_version: 6, courses: {} };
+    }
+
+    function readProgress() {
+      const saved = readJson(progressKey, null);
+      if (!saved || saved.schema_version !== 6 || !saved.courses) {
+        return emptyProgress();
+      }
+      return saved;
+    }
+
+    const progress = readProgress();
+    const currentKey = pageKey();
+    const sidebar = document.querySelector("#quarto-sidebar");
+    const titleBlock = document.querySelector("#title-block-header");
+    const lessonMeta = document.querySelector(".lesson-meta");
+    const courseId = titleBlock?.dataset.fcCourseId || "";
+    const courseTitle = titleBlock?.dataset.fcCourseTitle || "";
+    const courseHome = titleBlock?.dataset.fcCourseHome || "";
+    const challengeId = titleBlock?.dataset.fcChallengeId || "";
+    const projectId = titleBlock?.dataset.fcProjectId || "";
+    const lessonId =
+      titleBlock?.dataset.fcLessonId || lessonIdFromKey(currentKey);
+    const isFaq =
+      currentKey === "resources/faq" ||
+      currentKey.startsWith("resources/faq/") ||
+      currentKey === "lessons/faq" ||
+      currentKey.startsWith("lessons/faq/");
+    const isTrackable = Boolean(
+      lessonMeta &&
+        courseId &&
+        lessonId &&
+        !challengeId &&
+        !projectId &&
+        !isFaq,
+    );
+
+    function courseState(id, create = false) {
+      if (!id) {
+        return null;
+      }
+      if (!progress.courses[id] && create) {
+        progress.courses[id] = {
+          curriculum_version: 21,
+          completion_rule_version: 12,
+          completed_lessons: {},
+          completed_challenges: {},
+          capstone_status: "not_started",
+          completion_status: "in_progress",
+          completed_at: null,
+          updated_at: null,
+        };
+      }
+      const state = progress.courses[id] || null;
+      if (state) {
+        state.curriculum_version = 21;
+        state.completion_rule_version = 12;
+        state.completed_lessons = state.completed_lessons || {};
+        state.completed_challenges = state.completed_challenges || {};
+        state.capstone_status = state.capstone_status || "not_started";
+        state.completion_status = state.completion_status || "in_progress";
+        state.completed_at = state.completed_at || null;
+      }
+      return state;
+    }
+
+    function completedLessons(id) {
+      return courseState(id)?.completed_lessons || {};
+    }
+
+    function completedChallenges(id) {
+      return courseState(id)?.completed_challenges || {};
+    }
+
+    function courseLessonLinks() {
+      const links = [
+        ...(sidebar?.querySelectorAll("a.sidebar-link[href]") || []),
+      ];
+      const seen = new Set();
+      return links.filter((link) => {
+        const key = pageKey(link.href);
+        if (!isLessonKey(key) || seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function courseActivityLinks(id) {
+      const prefix = `courses/${id}/`;
+      const seen = new Set();
+      const links = [
+        ...(sidebar?.querySelectorAll("a.sidebar-link[href]") || []),
+      ];
+      return links.filter((link) => {
+        const key = pageKey(link.href);
+        const isActivity =
+          isLessonKey(key) || isChallengeKey(key) || isProjectKey(key);
+        if (!key.startsWith(prefix) || !isActivity || seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function courseActivityIsComplete(id, key) {
+      const activityLessonId = lessonIdFromKey(key);
+      const activityChallengeId = challengeIdFromKey(key);
+      if (activityLessonId) {
+        return Boolean(completedLessons(id)[activityLessonId]);
+      }
+      if (activityChallengeId) {
+        return Boolean(completedChallenges(id)[activityChallengeId]);
+      }
+      return Boolean(
+        isProjectKey(key) && courseState(id)?.capstone_status === "complete",
+      );
+    }
+
+    function idsFromDataset(value) {
+      return (value || "").split(/\s+/).filter(Boolean);
+    }
+
+    function countRecorded(ids, record) {
+      return ids.filter((id) => Boolean(record[id])).length;
+    }
+
+    function sidebarChallengeIds() {
+      const links = [
+        ...(sidebar?.querySelectorAll("a.sidebar-link[href]") || []),
+      ];
+      return [
+        ...new Set(
+          links
+            .map((link) => challengeIdFromKey(pageKey(link.href)))
+            .filter(Boolean),
+        ),
+      ];
+    }
+
+    function sidebarRequiresProject() {
+      return Boolean(
+        sidebar &&
+          [...sidebar.querySelectorAll("a.sidebar-link[href]")].some((link) =>
+            isProjectKey(pageKey(link.href)),
+          ),
+      );
+    }
+
+    function syncCourseCompletionState() {
+      const state = courseState(courseId);
+      const challengeIds = sidebarChallengeIds();
+      const projectRequired = sidebarRequiresProject();
+      if (!state || (!challengeIds.length && !projectRequired)) {
+        return false;
+      }
+
+      const lessonIds = courseLessonLinks().map((link) =>
+        lessonIdFromKey(pageKey(link.href)),
+      );
+      const complete =
+        countRecorded(lessonIds, state.completed_lessons) ===
+          lessonIds.length &&
+        countRecorded(challengeIds, state.completed_challenges) ===
+          challengeIds.length &&
+        (!projectRequired || state.capstone_status === "complete");
+      const nextStatus = complete ? "complete" : "in_progress";
+      let changed = state.completion_status !== nextStatus;
+      state.completion_status = nextStatus;
+
+      if (complete && !state.completed_at) {
+        state.completed_at = new Date().toISOString();
+        changed = true;
+      } else if (!complete && state.completed_at) {
+        state.completed_at = null;
+        changed = true;
+      }
+      return changed;
+    }
+
+    function completionSnapshot(root, id) {
+      const lessonIds = idsFromDataset(root.dataset.courseLessonIds);
+      const challengeIds = idsFromDataset(root.dataset.courseChallengeIds);
+      const projectRequired = root.dataset.courseProjectRequired === "true";
+      const structured = Boolean(
+        lessonIds.length || challengeIds.length || projectRequired,
+      );
+      const lessonTotal =
+        lessonIds.length || Number(root.dataset.courseTotal) || 0;
+      const lessonCompleted = lessonIds.length
+        ? countRecorded(lessonIds, completedLessons(id))
+        : Math.min(lessonTotal, Object.keys(completedLessons(id)).length);
+      const challengeCompleted = countRecorded(
+        challengeIds,
+        completedChallenges(id),
+      );
+      const projectCompleted =
+        projectRequired && courseState(id)?.capstone_status === "complete"
+          ? 1
+          : 0;
+      const total = structured
+        ? lessonTotal + challengeIds.length + (projectRequired ? 1 : 0)
+        : lessonTotal;
+      const completed = structured
+        ? lessonCompleted + challengeCompleted + projectCompleted
+        : lessonCompleted;
+
+      return {
+        structured,
+        completed,
+        total,
+        lessonCompleted,
+        lessonTotal,
+        challengeCompleted,
+        challengeTotal: challengeIds.length,
+        projectCompleted: Boolean(projectCompleted),
+      };
+    }
+
+    function currentUnit() {
+      const active = sidebar?.querySelector("a.sidebar-link.active");
+      const group = active?.closest("ul.sidebar-section");
+      const groupRoot = group?.closest("li.sidebar-item-section");
+      const label = groupRoot
+        ?.querySelector(":scope > .sidebar-item-container .menu-text")
+        ?.textContent.trim();
+      const links = group
+        ? [...group.querySelectorAll("a.sidebar-link[href]")]
+        : [];
+      const lessonLinks = links.filter((link) =>
+        isLessonKey(pageKey(link.href)),
+      );
+      const position = lessonLinks.findIndex(
+        (link) => pageKey(link.href) === currentKey,
+      );
+
+      return { label, lessonLinks, position };
+    }
+
+    function enrichTitle() {
+      const context = document.querySelector("[data-fc-context]");
+      const position = document.querySelector("[data-fc-position]");
+      const chips = document.querySelector("[data-fc-title-chips]");
+      const unit = currentUnit();
+
+      if (context) {
+        if (isFaq) {
+          context.textContent = "Python FAQ";
+        } else if (courseTitle && (isTrackable || challengeId || projectId)) {
+          context.textContent = courseTitle;
+        } else if (courseId && currentKey.startsWith("courses/")) {
+          context.textContent = "FreeCampus course";
+        } else if (currentKey === "courses") {
+          context.textContent = "Python course portfolio";
+        } else if (currentKey === "pathways") {
+          context.textContent = "Choose your pathway";
+        } else if (currentKey.startsWith("resources/")) {
+          context.textContent = "Shared learning resource";
+        }
+      }
+
+      if (position && isTrackable && unit.position >= 0) {
+        position.textContent = `${unit.label || "Unit"} · Lesson ${
+          unit.position + 1
+        } of ${unit.lessonLinks.length}`;
+      } else if (position && challengeId) {
+        position.textContent = "Unit challenge";
+      } else if (position && projectId) {
+        position.textContent = "Course project";
+      }
+
+      chips?.querySelectorAll(".fc-title-chip").forEach((chip) => {
+        chip.textContent = chip.textContent
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      });
+    }
+
+    function paintSidebarCompletion() {
+      if (!sidebar || !courseId) {
+        return;
+      }
+
+      const completed = completedLessons(courseId);
+      const challenges = completedChallenges(courseId);
+      const projectComplete =
+        courseState(courseId)?.capstone_status === "complete";
+      sidebar.querySelectorAll("a.sidebar-link[href]").forEach((link) => {
+        const key = pageKey(link.href);
+        const id = lessonIdFromKey(key);
+        const sidebarChallengeId = challengeIdFromKey(key);
+        const complete =
+          Boolean(id && completed[id]) ||
+          Boolean(sidebarChallengeId && challenges[sidebarChallengeId]) ||
+          Boolean(isProjectKey(key) && projectComplete);
+        link.classList.toggle("fc-is-complete", complete);
+      });
+    }
+
+    function updateProgressHeader() {
+      const root = document.querySelector("[data-fc-lesson-progress]");
+      const button = document.querySelector("[data-fc-complete]");
+
+      if (!isTrackable || !root || !button) {
+        return;
+      }
+
+      const lessonIds = courseLessonLinks().map((link) =>
+        lessonIdFromKey(pageKey(link.href)),
+      );
+      const total = lessonIds.length;
+      const completed = countRecorded(lessonIds, completedLessons(courseId));
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const isComplete = Boolean(completedLessons(courseId)[lessonId]);
+      const label = button.querySelector("[data-fc-complete-label]");
+      const track = root.querySelector("[data-fc-progress-track]");
+
+      root.hidden = false;
+      button.hidden = false;
+      button.setAttribute("aria-pressed", String(isComplete));
+      button.classList.toggle("is-complete", isComplete);
+      if (label) {
+        label.textContent = isComplete
+          ? "Lesson complete"
+          : "Mark lesson complete";
+      }
+
+      root.querySelector(
+        "[data-fc-progress-label]",
+      ).textContent = `${completed} of ${total} lessons complete`;
+      root.querySelector(
+        "[data-fc-progress-value]",
+      ).textContent = `${percent}%`;
+      root.querySelector("[data-fc-progress-bar]").style.width = `${percent}%`;
+      track?.setAttribute("aria-valuenow", String(percent));
+    }
+
+    function setupCompletionButton() {
+      const button = document.querySelector("[data-fc-complete]");
+      if (!button || !isTrackable) {
+        return;
+      }
+
+      button.addEventListener("click", () => {
+        const state = courseState(courseId, true);
+        if (state.completed_lessons[lessonId]) {
+          delete state.completed_lessons[lessonId];
+        } else {
+          state.completed_lessons[lessonId] = new Date().toISOString();
+        }
+        state.updated_at = new Date().toISOString();
+        syncCourseCompletionState();
+        writeJson(progressKey, progress);
+        paintSidebarCompletion();
+        updateProgressHeader();
+        setupCourseOverview();
+      });
+    }
+
+    function updateChallengeButton() {
+      const button = document.querySelector("[data-fc-challenge-complete]");
+      const status = document.querySelector("[data-fc-challenge-status]");
+      if (!button || !courseId || !challengeId) {
+        return;
+      }
+
+      const complete = Boolean(completedChallenges(courseId)[challengeId]);
+      const label = button.querySelector("[data-fc-challenge-complete-label]");
+      button.setAttribute("aria-pressed", String(complete));
+      button.classList.toggle("is-complete", complete);
+      if (label) {
+        label.textContent = complete
+          ? "Challenge recorded"
+          : "Record challenge complete";
+      }
+      if (status) {
+        status.textContent = complete
+          ? "Recorded in this browser. Select again to undo."
+          : "Not yet recorded.";
+      }
+    }
+
+    function setupChallengeButton() {
+      const button = document.querySelector("[data-fc-challenge-complete]");
+      if (!button || !courseId || !challengeId) {
+        return;
+      }
+
+      updateChallengeButton();
+      button.addEventListener("click", () => {
+        const state = courseState(courseId, true);
+        if (state.completed_challenges[challengeId]) {
+          delete state.completed_challenges[challengeId];
+        } else {
+          state.completed_challenges[challengeId] = new Date().toISOString();
+        }
+        state.updated_at = new Date().toISOString();
+        syncCourseCompletionState();
+        writeJson(progressKey, progress);
+        paintSidebarCompletion();
+        updateChallengeButton();
+      });
+    }
+
+    function updateProjectButton() {
+      const button = document.querySelector("[data-fc-project-complete]");
+      const status = document.querySelector("[data-fc-project-status]");
+      if (!button || !courseId || !projectId) {
+        return;
+      }
+
+      const complete = courseState(courseId)?.capstone_status === "complete";
+      const label = button.querySelector("[data-fc-project-complete-label]");
+      button.setAttribute("aria-pressed", String(complete));
+      button.classList.toggle("is-complete", complete);
+      if (label) {
+        label.textContent = complete
+          ? "Project recorded"
+          : "Record project complete";
+      }
+      if (status) {
+        status.textContent = complete
+          ? "Recorded in this browser. Select again to undo."
+          : "Not yet recorded.";
+      }
+    }
+
+    function setupProjectButton() {
+      const button = document.querySelector("[data-fc-project-complete]");
+      if (!button || !courseId || !projectId) {
+        return;
+      }
+
+      updateProjectButton();
+      button.addEventListener("click", () => {
+        const state = courseState(courseId, true);
+        state.capstone_status =
+          state.capstone_status === "complete" ? "not_started" : "complete";
+        state.updated_at = new Date().toISOString();
+        syncCourseCompletionState();
+        writeJson(progressKey, progress);
+        paintSidebarCompletion();
+        updateProjectButton();
+      });
+    }
+
+    function rememberCurrentLesson() {
+      if (!isTrackable) {
+        return;
+      }
+
+      const saved = readJson(lastLessonKey, {
+        schema_version: 6,
+        global: null,
+        courses: {},
+      });
+      const lesson = {
+        key: currentKey,
+        course_id: courseId,
+        lesson_id: lessonId,
+        title:
+          document.querySelector("h1.title")?.textContent.trim() ||
+          document.title,
+      };
+      saved.schema_version = 6;
+      saved.global = lesson;
+      saved.courses = saved.courses || {};
+      saved.courses[courseId] = lesson;
+      writeJson(lastLessonKey, saved);
+    }
+
+    function setupResumePanel() {
+      const panel = document.querySelector("[data-fc-resume]");
+      const saved = readJson(lastLessonKey, null);
+      const lastLesson = saved?.global;
+      if (!panel || !lastLesson?.key) {
+        return;
+      }
+
+      panel.querySelector("[data-fc-resume-title]").textContent =
+        lastLesson.title;
+      panel.querySelector("[data-fc-resume-link]").href = hrefForKey(
+        lastLesson.key,
+      );
+      panel.hidden = false;
+    }
+
+    function setupCourseResumeLinks() {
+      document.querySelectorAll("[data-fc-course-resume]").forEach((link) => {
+        const id = link.dataset.fcCourseResume;
+        const activities = courseActivityLinks(id);
+        const started = activities.some((activity) =>
+          courseActivityIsComplete(id, pageKey(activity.href)),
+        );
+        if (!started) {
+          return;
+        }
+
+        const next = activities.find(
+          (activity) => !courseActivityIsComplete(id, pageKey(activity.href)),
+        );
+        if (!next) {
+          link.textContent = "Review course";
+          return;
+        }
+
+        link.href = next.href;
+        link.textContent = "Continue course";
+      });
+    }
+
+    function setupCourseOverview() {
+      const root = document.querySelector("[data-fc-course-overview]");
+      if (!root) {
+        return;
+      }
+
+      const id = root.dataset.courseId;
+      const snapshot = completionSnapshot(root, id);
+      const percent = snapshot.total
+        ? Math.round((snapshot.completed / snapshot.total) * 100)
+        : 0;
+      const track = root.querySelector("[data-fc-course-progress-track]");
+
+      root.querySelector(
+        "[data-fc-course-progress-value]",
+      ).textContent = `${percent}%`;
+      root.querySelector("[data-fc-course-progress-label]").textContent =
+        snapshot.structured
+          ? snapshot.completed === snapshot.total
+            ? `All ${snapshot.total} course activities recorded`
+            : `${snapshot.total - snapshot.completed} of ${
+                snapshot.total
+              } course activities remaining`
+          : `${snapshot.completed} of ${snapshot.total} lessons complete`;
+      root.querySelector(
+        "[data-fc-course-progress-bar]",
+      ).style.width = `${percent}%`;
+      track?.setAttribute("aria-valuenow", String(percent));
+
+      const lessons = root.querySelector("[data-fc-course-lessons]");
+      const challenges = root.querySelector("[data-fc-course-challenges]");
+      const project = root.querySelector("[data-fc-course-project]");
+      const status = root.querySelector("[data-fc-course-completion-status]");
+      if (lessons) {
+        lessons.textContent = `${snapshot.lessonCompleted}/${snapshot.lessonTotal}`;
+      }
+      if (challenges) {
+        challenges.textContent = `${snapshot.challengeCompleted}/${snapshot.challengeTotal}`;
+      }
+      if (project) {
+        project.textContent = snapshot.projectCompleted
+          ? "Recorded"
+          : "Not recorded";
+      }
+      if (status) {
+        const complete =
+          snapshot.completed === snapshot.total && snapshot.total > 0;
+        status.textContent = complete
+          ? "Locally complete · self-reported"
+          : "Course in progress";
+        status.classList.toggle("is-complete", complete);
+      }
+    }
+
+    function setupCatalog() {
+      const catalog = document.querySelector("[data-fc-catalog]");
+      if (!catalog) {
+        return;
+      }
+
+      const search = document.querySelector("[data-fc-catalog-search]");
+      const buttons = [...document.querySelectorAll("[data-fc-course-filter]")];
+      const cards = [...catalog.querySelectorAll("[data-fc-course-card]")];
+      const count = document.querySelector("[data-fc-catalog-count]");
+      const empty = document.querySelector("[data-fc-catalog-empty]");
+      let filter = "all";
+
+      cards.forEach((card) => {
+        const id = card.dataset.courseId;
+        const snapshot = completionSnapshot(card, id);
+        const curriculumTbd =
+          card.dataset.courseStatus === "in-development" &&
+          snapshot.total === 0;
+        const percent = snapshot.total
+          ? Math.round((snapshot.completed / snapshot.total) * 100)
+          : 0;
+        const bar = card.querySelector("[data-fc-card-progress-bar]");
+        const value = card.querySelector("[data-fc-card-progress-value]");
+        bar?.parentElement?.toggleAttribute("hidden", curriculumTbd);
+        if (bar) {
+          bar.style.width = `${percent}%`;
+        }
+        if (value) {
+          value.textContent = curriculumTbd
+            ? "Curriculum TBD"
+            : snapshot.structured
+            ? `${snapshot.completed}/${snapshot.total} activities`
+            : `${snapshot.completed}/${snapshot.total} complete`;
+        }
+      });
+
+      const applyFilters = () => {
+        const query = search?.value.trim().toLowerCase() || "";
+        let visible = 0;
+
+        cards.forEach((card) => {
+          const matchesText =
+            !query ||
+            `${card.textContent} ${card.dataset.courseKeywords || ""}`
+              .toLowerCase()
+              .includes(query);
+          const pathways = (card.dataset.coursePathway || "").split(/\s+/);
+          const status = card.dataset.courseStatus;
+          const matchesFilter =
+            filter === "all" ||
+            (filter === "available" && status === "available") ||
+            (filter !== "available" &&
+              (pathways.includes(filter) || pathways.includes("both")));
+          const show = matchesText && matchesFilter;
+          card.hidden = !show;
+          if (show) {
+            visible += 1;
+          }
+        });
+
+        if (count) {
+          count.textContent = `${visible} ${
+            visible === 1 ? "course" : "courses"
+          }`;
+        }
+        if (empty) {
+          empty.hidden = visible !== 0;
+        }
+      };
+
+      search?.addEventListener("input", applyFilters);
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          filter = button.dataset.fcCourseFilter;
+          buttons.forEach((item) => {
+            const selected = item === button;
+            item.classList.toggle("is-active", selected);
+            item.setAttribute("aria-pressed", String(selected));
+          });
+          applyFilters();
+        });
+      });
+
+      applyFilters();
+    }
+
+    function setupFaqSearch() {
+      const search = document.querySelector("[data-fc-faq-search]");
+      const cards = [...document.querySelectorAll(".faq-hub .course-card")];
+      const count = document.querySelector("[data-fc-faq-count]");
+      const empty = document.querySelector("[data-fc-faq-empty]");
+      if (!search || !cards.length) {
+        return;
+      }
+
+      const applySearch = () => {
+        const query = search.value.trim().toLowerCase();
+        let visible = 0;
+        cards.forEach((card) => {
+          const show = !query || card.textContent.toLowerCase().includes(query);
+          card.hidden = !show;
+          if (show) {
+            visible += 1;
+          }
+        });
+        if (count) {
+          count.textContent = `${visible} ${
+            visible === 1 ? "answer" : "answers"
+          }`;
+        }
+        if (empty) {
+          empty.hidden = visible !== 0;
+        }
+      };
+
+      search.addEventListener("input", applySearch);
+      applySearch();
+    }
+
+    function restoreNavigationState() {
+      const navbarLinks = [
+        ...document.querySelectorAll(
+          ".navbar-nav a.nav-link[href], .navbar-nav a.dropdown-item[href]",
+        ),
+      ];
+      const targetKey = isFaq ? "resources/faq" : courseHome;
+      if (!targetKey) {
+        return;
+      }
+
+      const target = navbarLinks.find(
+        (link) => pageKey(link.href) === targetKey,
+      );
+      target?.classList.add("active");
+      target?.setAttribute("aria-current", "page");
+      target
+        ?.closest(".nav-item.dropdown")
+        ?.querySelector(".dropdown-toggle")
+        ?.classList.add("active");
+    }
+
+    if (syncCourseCompletionState()) {
+      writeJson(progressKey, progress);
+    }
+    if (isTrackable) {
+      document.body.classList.add("fc-lesson-page");
+    }
+    if (challengeId || projectId) {
+      document.body.classList.add("fc-assessment-page");
+    }
+    markSameOriginLinksInternal();
+    enrichTitle();
+    restoreNavigationState();
+    paintSidebarCompletion();
+    updateProgressHeader();
+    setupCompletionButton();
+    setupChallengeButton();
+    setupProjectButton();
+    rememberCurrentLesson();
+    setupResumePanel();
+    setupCourseResumeLinks();
+    setupCourseOverview();
+    setupCatalog();
+    setupFaqSearch();
+  })();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/freecampus\.github\.io\/python\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>FreeCampus Python — learn by building, explaining, and debugging.</p>
+</div>   
+    <div class="nav-footer-center">
+<p>Course content updated 26 August 2026 · Curriculum v21</p>
+<div class="toc-actions"><ul><li><a href="https://github.com/freecampus/python/edit/main/courses/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/freecampus/python/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://github.com/freecampus/python">
+<p>GitHub</p>
+</a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
