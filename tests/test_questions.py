@@ -611,6 +611,18 @@ def test_mermaid_blocks_are_not_empty() -> None:
         assert block.strip(), path
 
 
+def test_mermaid_blocks_use_html_line_breaks() -> None:
+    invalid_blocks = []
+    for path in sorted(Path("docs").rglob("*.qmd")):
+        text = path.read_text()
+        for match in re.finditer(r"```\{mermaid\}\n(.*?)\n```", text, flags=re.DOTALL):
+            if r"\n" in match.group(1):
+                line = text.count("\n", 0, match.start(1)) + 1
+                invalid_blocks.append(f"{path}:{line}")
+
+    assert invalid_blocks == []
+
+
 def test_mermaid_blocks_parse_with_quartos_bundled_version() -> None:
     blocks = []
     for path in sorted(Path("docs").rglob("*.qmd")):

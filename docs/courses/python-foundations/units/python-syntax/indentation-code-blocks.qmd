@@ -74,11 +74,11 @@ This diagram shows how indentation creates nested blocks.
 %%| echo: false
 %%| eval: true
 flowchart TD
-  A[Left margin\nTop-level code] --> B[Header line ending with colon]
-  B --> C[Indented body\ninside the block]
-  C --> D[Same indentation\nmore lines in same block]
-  C --> E[More indentation\nnested block]
-  C --> F[Back to previous indentation\nblock is finished]
+  A["Left margin<br/>Top-level code"] --> B[Header line ending with colon]
+  B --> C["Indented body<br/>inside the block"]
+  C --> D["Same indentation<br/>more lines in same block"]
+  C --> E["More indentation<br/>nested block"]
+  C --> F["Back to previous indentation<br/>block is finished"]
 ```
 :::
 
