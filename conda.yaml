@@ -7,3 +7,6 @@ dependencies:
   - poetry >=2
   - nodejs
   - pip
+  - pip:
+      # Match pyproject.toml so Poetry skips building Quarto during its install.
+      - quarto-cli==1.9.38
