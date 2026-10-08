@@ -1,0 +1,310 @@
+/* Shared editorial treatment. Loaded after component and responsive styles. */
+.navbar-brand-logo {
+  width: auto;
+  max-height: none;
+  margin-right: 0.8rem;
+}
+
+.navbar-logo {
+  width: 8.8rem;
+  height: auto;
+  max-height: 1.6rem;
+}
+
+.navbar-title {
+  border-left: 1px solid var(--fc-border-strong);
+  padding-left: 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.quarto-dark .navbar-logo {
+  filter: brightness(0) invert(1);
+}
+
+.fc-title-copy h1.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+  max-width: 26ch;
+}
+
+.fc-title-context {
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.fc-title-position {
+  flex-wrap: wrap;
+}
+
+.fc-title-copy .description {
+  max-width: 68ch;
+}
+
+.fc-title-actions {
+  min-width: 10rem;
+}
+
+main.content > p,
+main.content > ul,
+main.content > ol,
+.fc-lesson-page section > p {
+  max-width: 70ch;
+}
+
+.fc-progress-track span,
+.fc-card-progress span {
+  background: var(--fc-brand);
+}
+
+.fc-course-facts-inline {
+  color: var(--fc-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.4rem;
+}
+
+.fc-course-facts-inline p {
+  margin-bottom: 0.4rem;
+}
+
+.fc-secondary-link {
+  display: inline-block;
+  margin: 0.65rem 1rem;
+}
+
+.course-foundations .fc-course-overview {
+  background: transparent;
+  border: 0;
+  border-block: 1px solid var(--fc-border);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 1rem 0;
+  gap: 0.6rem;
+}
+
+/* Keep one progress indicator; activity IDs and status hooks remain available. */
+.course-foundations .fc-requirement-grid,
+.course-foundations .fc-completion-status {
+  display: none;
+}
+
+.fc-unit-list {
+  margin-block: 1.5rem 2.5rem;
+  border-top: 1px solid var(--fc-border);
+}
+
+.fc-unit-row {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--fc-border);
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.fc-unit-row > summary {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto 1rem;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.25rem 0;
+  cursor: pointer;
+  list-style: none;
+  background: transparent;
+}
+
+.fc-unit-row > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fc-unit-row > summary::after {
+  content: "+";
+  color: var(--fc-brand-strong);
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.fc-unit-row[open] > summary::after {
+  content: "−";
+}
+
+.fc-unit-number,
+.fc-unit-count {
+  color: var(--fc-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.fc-unit-number {
+  font-family: var(--bs-font-monospace);
+}
+
+.fc-unit-summary {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.fc-unit-summary strong {
+  color: var(--fc-heading);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.fc-unit-summary > span {
+  color: var(--fc-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.fc-unit-row > p,
+.fc-unit-row > ol {
+  margin: 0 0 1.25rem 3rem;
+  font-size: 0.9rem;
+}
+
+.fc-unit-row li {
+  padding-block: 0.3rem;
+}
+
+.fc-unit-row > summary:hover .fc-unit-summary strong {
+  color: var(--fc-brand-strong);
+}
+
+:where(a, button, summary, input):focus-visible {
+  outline: 2px solid var(--fc-brand-strong);
+  outline-offset: 4px;
+}
+
+.fc-lesson-footer {
+  border-top: 1px solid var(--fc-border);
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+}
+
+.fc-lesson-footer p {
+  color: var(--fc-muted);
+  font-size: 0.9rem;
+}
+
+.fc-lesson-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.fc-lesson-page .nav-page-next {
+  display: none;
+}
+
+.fc-complete-button,
+.fc-title-colab,
+.fc-lesson-footer .btn,
+.fcpython-quiz-actions button {
+  min-height: 44px;
+}
+
+/* Simplify the portfolio hero while keeping its runnable-code invitation. */
+.landing-page .hero {
+  background: var(--fc-surface);
+  border: 1px solid var(--fc-border);
+  border-radius: 1rem;
+}
+
+.landing-page .hero::after,
+.hero-demo::before {
+  display: none;
+}
+
+.hero-copy h1 {
+  font-size: clamp(2.6rem, 5vw, 4.3rem);
+  letter-spacing: -0.055em;
+  max-width: 14ch;
+}
+
+.fc-demo-window,
+.fc-demo-loop {
+  transform: none;
+  box-shadow: none;
+}
+
+.fcpython-quiz {
+  box-shadow: none;
+  background: var(--fc-surface);
+}
+
+@media (max-width: 600px) {
+  .navbar-logo {
+    width: 7rem;
+    max-height: 1.25rem;
+  }
+
+  .navbar-title {
+    font-size: 0.8rem;
+    padding-left: 0.5rem;
+  }
+
+  .fc-title-copy h1.title {
+    font-size: clamp(1.9rem, 8vw, 2.5rem);
+  }
+
+  .fc-unit-row > summary {
+    grid-template-columns: 1.6rem minmax(0, 1fr) 1rem;
+    gap: 0.65rem;
+  }
+
+  .fc-unit-count {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .fc-unit-row > summary::after {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .fc-unit-row > p,
+  .fc-unit-row > ol {
+    margin-left: 2.25rem;
+  }
+
+  .fc-lesson-footer-actions > * {
+    flex: 1 1 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+.fc-complete-button[hidden],
+.fc-lesson-progress[hidden] {
+  display: none;
+}
+
+.course-card,
+.fc-catalog-card,
+div.sourceCode {
+  box-shadow: none;
+}
+
+.course-card:hover,
+.fc-catalog-card:hover,
+.hero-actions .btn:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.course-card::before {
+  display: none;
+}

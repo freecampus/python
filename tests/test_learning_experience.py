@@ -896,3 +896,29 @@ def test_internal_qmd_links_resolve() -> None:
                 missing.append(f"{page}: {raw_target}")
 
     assert missing == []
+
+
+def test_foundations_expandable_units_preserve_the_full_learning_sequence() -> None:
+    home = Path("docs/courses/python-foundations/index.qmd").read_text()
+    catalog = yaml.safe_load(Path("docs/courses/_catalog.yml").read_text())
+    course = next(c for c in catalog["courses"] if c["id"] == "python-foundations")
+    rows = re.findall(
+        r'<details class="fc-unit-row">(.*?)</details>', home, flags=re.DOTALL
+    )
+    assert len(rows) == len(course["units"])
+    for row, unit in zip(rows, course["units"], strict=True):
+        directory = Path("docs") / unit["directory"]
+        lessons = sorted(
+            (
+                (_front_matter(path)["lesson_order"], path)
+                for path in directory.glob("*.qmd")
+                if "lesson_id" in _front_matter(path)
+            ),
+        )
+        linked_lessons = re.findall(r"^\d+\. \[.*?\]\((.*?)\)", row, re.MULTILINE)
+        assert linked_lessons == [
+            f"units/{unit['id']}/{path.name}" for _, path in lessons
+        ]
+        assert f"{len(lessons)} lessons</span>" in row
+        assert f"units/{unit['id']}/index.qmd" in row
+        assert f"units/{unit['id']}/challenge.qmd" in row

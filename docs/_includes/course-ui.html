@@ -352,7 +352,6 @@
     function enrichTitle() {
       const context = document.querySelector("[data-fc-context]");
       const position = document.querySelector("[data-fc-position]");
-      const chips = document.querySelector("[data-fc-title-chips]");
       const unit = currentUnit();
 
       if (context) {
@@ -381,12 +380,7 @@
         position.textContent = "Course project";
       }
 
-      chips?.querySelectorAll(".fc-title-chip").forEach((chip) => {
-        chip.textContent = chip.textContent
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-      });
+
     }
 
     function paintSidebarCompletion() {
@@ -468,6 +462,46 @@
         updateProgressHeader();
         setupCourseOverview();
       });
+    }
+
+    function setupLessonFooter() {
+      const main = document.querySelector("main.content");
+      const button = document.querySelector("[data-fc-complete]");
+      if (!isTrackable || !main || !button) {
+        return;
+      }
+
+      const footer = document.createElement("section");
+      footer.className = "fc-lesson-footer";
+      footer.setAttribute("aria-label", "Finish this lesson");
+      const copy = document.createElement("p");
+      copy.textContent =
+        "Finished the lab? Record your progress, then take the next step.";
+      footer.append(copy);
+      const actions = document.createElement("div");
+      actions.className = "fc-lesson-footer-actions";
+      actions.append(button);
+
+      const activities = courseActivityLinks(courseId);
+      const index = activities.findIndex(
+        (link) => pageKey(link.href) === currentKey,
+      );
+      const next = index >= 0 ? activities[index + 1] : null;
+      if (next) {
+        const link = document.createElement("a");
+        link.className = "btn btn-primary";
+        link.href = next.href;
+        link.textContent = isChallengeKey(pageKey(next.href))
+          ? "Start unit challenge →"
+          : "Next lesson →";
+        link.setAttribute(
+          "aria-label",
+          `${link.textContent}: ${next.textContent.trim()}`,
+        );
+        actions.append(link);
+      }
+      footer.append(actions);
+      main.append(footer);
     }
 
     function updateChallengeButton() {
@@ -832,6 +866,7 @@
     restoreNavigationState();
     paintSidebarCompletion();
     updateProgressHeader();
+    setupLessonFooter();
     setupCompletionButton();
     setupChallengeButton();
     setupProjectButton();

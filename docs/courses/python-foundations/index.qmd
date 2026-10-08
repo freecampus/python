@@ -135,20 +135,20 @@ page-layout: full
 toc: false
 body-classes: course-home course-foundations
 ---
-::: {.lesson-meta}
-- **Level:** Beginner to project-ready
-- **Estimated effort:** 380–540 hours
-- **Prerequisite:** None
-- **Status:** Available; final project and certificate planned
+::: {.fc-course-facts-inline}
+**No prerequisites** · 16 units · 97 lessons · Free to study
+
+**Active study:** 380–540 hours, at your own pace.
 :::
+
+[Start Unit 0](units/get-started/index.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
+[Explore the units](#learning-sequence){.fc-secondary-link}
+
+Start with small programs in your browser. Progress through the language,
+then build Python projects with files, packages, command-line tools, tests,
+and documentation. This is a substantial course: take one lesson at a time.
 
 ::: {.fc-course-intro}
-::: {.callout-tip title="Start here if programming is new to you"}
-This course assumes no programming experience. Begin with the learning method,
-then progress through one connected sequence. Every published lesson and
-challenge belongs to that sequence.
-:::
-
 ```{=html}
 <div
   class="fc-course-overview fc-completion-overview"
@@ -172,26 +172,21 @@ challenge belongs to that sequence.
 ```
 :::
 
+## What you will learn
+
+- Read, write, and explain Python programs.
+- Work with values, collections, functions, objects, and files.
+- Find bugs and check that your programs behave as intended.
+- Build, test, document, and share practical Python projects.
+
 ## Before you start
 
-- **Designed for:** learners with little or no programming experience.
-- **You are ready when:** you can use a browser and are willing to predict, run,
-  explain, modify, quiz, and debug small examples. No mathematics prerequisite
-  is assumed.
-- **Practice setup:** begin with generated Colab notebooks. Unit 0 compares
-  notebook and local workflows before later units introduce full projects.
-- **Assessment:** lesson checkpoints diagnose understanding; each unit challenge
-  asks you to integrate its ideas with assertions, hints, and debugging evidence.
+You only need a browser to begin; no programming or mathematics prerequisite
+is assumed.
 
-## What you will be able to do
-
-- read Python syntax and trace values, state, decisions, loops, calls, and object relationships;
-- choose representations for numbers, text, time, collections, files, and external records;
-- turn requirements into small algorithms, functions, modules, packages, and classes;
-- diagnose failures from tracebacks and controlled experiments;
-- build a reproducible Git-backed project with a CLI and layered tests;
-- improve behavior safely with typing, formatting, linting, quality gates, and refactoring; and
-- guide readers with verified README, task, explanation, API, executable-example, Quarto, and publishing documentation.
+**Practice setup:** start in Colab, then learn local workflows for larger projects.
+Lessons combine explanations, runnable examples, checkpoints, and a lab.
+Each unit ends with a challenge that brings its ideas together.
 
 ## Learning sequence
 
@@ -199,45 +194,241 @@ Python Foundations curriculum version 21 contains **16 units** and
 **97 cohesive lessons**. Each unit begins with an Overview and
 ends with a challenge.
 
-| Unit | Focus | Outcome | Apply it |
-|---:|---|---|---|
-| 0 | [Get Started](units/get-started/index.qmd) | Run and explain a small Python program, keep trustworthy evidence in a clean notebook, choose a suitable practice environment, diagnose common first-run problems, and use AI assistance without surrendering prediction or verification. | [Challenge](units/get-started/challenge.qmd) |
-| 1 | [Learning to Read and Write Python Code](units/python-syntax/index.qmd) | Read a short program, trace how Python interprets it, format its structure clearly, document its decisions, and repair syntax errors systematically. | [Challenge](units/python-syntax/challenge.qmd) |
-| 2 | [Numbers, Text, and Other Values](units/core-values-types/index.qmd) | Choose suitable Python values for counts, measurements, money, text, truth, missing information, and time; convert and format them deliberately; and explain important precision, parsing, and comparison boundaries. | [Challenge](units/core-values-types/challenge.qmd) |
-| 3 | [Organizing and Traversing Collections](units/collections-iteration/index.qmd) | Choose among lists, tuples, dictionaries, and sets from order, mutability, lookup, uniqueness, and data shape; traverse them safely; and sort or combine them without losing relationships. | [Challenge](units/collections-iteration/challenge.qmd) |
-| 4 | [Making Decisions and Repeating Work](units/decisions-repetition/index.qmd) | Turn written rules into complete, non-overlapping branches; use loops to transform, search, and traverse data; and explain how each loop progresses and stops. | [Challenge](units/decisions-repetition/challenge.qmd) |
-| 5 | [Building Reusable Functions](units/functions-call-behavior/index.qmd) | Design, call, compose, and trace reusable functions with clear parameters, returned results, documented contracts, and controlled side effects; pass behavior as data; and explain how recursive, lazy, closure-based, and decorated calls progress and finish. | [Challenge](units/functions-call-behavior/challenge.qmd) |
-| 6 | [Sharing, Changing, and Copying Objects](units/mutability-identity-copying/index.qmd) | Trace which names and containers share objects; distinguish equality, identity, rebinding, mutation, immutability, and hashability; choose shallow, selective, or deep copying from an explicit ownership contract; and design functions whose mutations or returned copies are deliberate and observable. | [Challenge](units/mutability-identity-copying/challenge.qmd) |
-| 7 | [Solving Problems with Algorithms](units/problem-solving-algorithms/index.qmd) | Turn an unclear task into explicit examples and rules; decompose it into checkable functions; select, trace, and adapt common algorithms; and defend correctness, boundary behavior, and practical time and memory costs. | [Challenge](units/problem-solving-algorithms/challenge.qmd) |
-| 8 | [Errors, Exceptions, and Debugging](units/errors-exceptions-debugging/index.qmd) | Classify syntax failures, runtime exceptions, and wrong results; read tracebacks across function calls; raise and handle only anticipated exceptions with useful context; and reproduce, inspect, isolate, repair, and verify a bug one evidence-backed hypothesis at a time. | [Challenge](units/errors-exceptions-debugging/challenge.qmd) |
-| 9 | [Files, Paths, and External Data](units/files-paths-external-data/index.qmd) | Locate files predictably, preserve text, translate external formats, validate records, and produce reproducible outputs with rejection evidence. | [Challenge](units/files-paths-external-data/challenge.qmd) |
-| 10 | [Modules, Environments, and Python Projects](units/modules-environments-projects/index.qmd) | Discover reusable tools, design modules and package interfaces, version a `src` project, isolate dependencies, and prove a built wheel works outside its repository. | [Challenge](units/modules-environments-projects/challenge.qmd) |
-| 11 | [Object-Oriented Python and Dataclasses](units/object-oriented-python/index.qmd) | Choose between functions, collections, dataclasses, and stateful classes; preserve valid state; compose replaceable collaborators; and reserve inheritance for honest behavioral subtypes. | [Challenge](units/object-oriented-python/challenge.qmd) |
-| 12 | [Command-Line Applications](units/command-line-applications/index.qmd) | Design a discoverable command, keep data and diagnostics in their proper channels, resolve settings safely, and connect a thin CLI adapter to reusable Python that can be checked directly and as a real process. | [Challenge](units/command-line-applications/challenge.qmd) |
-| 13 | [Testing Python Programs](units/testing-python-programs/index.qmd) | Turn behavioral contracts into focused pytest suites, interpret failures, isolate state and dependencies, choose evidence-producing boundaries, preserve regressions, and use generated examples without confusing passing tests or coverage with proof. | [Challenge](units/testing-python-programs/challenge.qmd) |
-| 14 | [Code Quality and Maintainability](units/code-quality-maintainability/index.qmd) | Make Python projects easier to read and safer to change with consistent code, useful types, automated local/CI checks, and small behavior-preserving refactors. | [Challenge](units/code-quality-maintainability/challenge.qmd) |
-| 15 | [Documentation as Part of the Product](units/documentation-publishing/index.qmd) | Design, write, test, build, and publish documentation that guides real readers from first contact to successful use, explains a stable public Python API, and remains trustworthy as the code changes. | [Challenge](units/documentation-publishing/challenge.qmd) |
+::: {.fc-unit-list}
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">00</span><span class="fc-unit-summary"><strong>Get Started</strong><span>Run your first program and choose a reliable practice workflow.</span></span><span class="fc-unit-count">5 lessons</span></summary>
+
+[Unit overview](units/get-started/index.qmd) · [Unit challenge](units/get-started/challenge.qmd)
+
+1. [Meet Python Through a Tiny Program](units/get-started/meet-python-first-program.qmd)
+2. [Learn with Predictions and Evidence](units/get-started/learn-with-evidence.qmd)
+3. [Use AI While Keeping the Thinking Yours](units/get-started/use-ai-responsibly.qmd)
+4. [Work Reliably in Colab and Jupyter](units/get-started/notebook-workflows.qmd)
+5. [Build a Dependable Local Python Workspace](units/get-started/local-python-workspace.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">01</span><span class="fc-unit-summary"><strong>Learning to Read and Write Python Code</strong><span>Read Python instructions and repair common syntax errors.</span></span><span class="fc-unit-count">7 lessons</span></summary>
+
+[Unit overview](units/python-syntax/index.qmd) · [Unit challenge](units/python-syntax/challenge.qmd)
+
+1. [Values, Names, and Assignment](units/python-syntax/values-names-assignment.qmd)
+2. [Expressions, Statements, and Execution Order](units/python-syntax/expressions-statements-execution-order.qmd)
+3. [Python's Words and Symbols](units/python-syntax/python-words-symbols.qmd)
+4. [Indentation and Code Blocks](units/python-syntax/indentation-code-blocks.qmd)
+5. [Writing Python Across Multiple Lines](units/python-syntax/writing-code-across-lines.qmd)
+6. [Comments and Docstrings That Help](units/python-syntax/comments-docstrings.qmd)
+7. [Reading and Fixing Syntax Errors](units/python-syntax/reading-fixing-syntax-errors.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">02</span><span class="fc-unit-summary"><strong>Numbers, Text, and Other Values</strong><span>Choose, convert, and format numbers, text, truth values, and time.</span></span><span class="fc-unit-count">8 lessons</span></summary>
+
+[Unit overview](units/core-values-types/index.qmd) · [Unit challenge](units/core-values-types/challenge.qmd)
+
+1. [Values, Types, Conversion, and None](units/core-values-types/values-types-none-conversion.qmd)
+2. [Integers and Everyday Arithmetic](units/core-values-types/integer-arithmetic.qmd)
+3. [Floating-Point Numbers and Precision](units/core-values-types/floating-point-precision.qmd)
+4. [Money, Exact Ratios, and Complex Numbers](units/core-values-types/money-ratios-complex-numbers.qmd)
+5. [Strings and Unicode Text](units/core-values-types/strings-unicode-text.qmd)
+6. [Input, Output, and Clear Formatting](units/core-values-types/input-output-formatting.qmd)
+7. [Booleans, Comparisons, and Truth](units/core-values-types/booleans-comparisons-truth.qmd)
+8. [Dates, Times, and Durations](units/core-values-types/dates-times-durations.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">03</span><span class="fc-unit-summary"><strong>Organizing and Traversing Collections</strong><span>Organize data and work through collections without losing relationships.</span></span><span class="fc-unit-count">7 lessons</span></summary>
+
+[Unit overview](units/collections-iteration/index.qmd) · [Unit challenge](units/collections-iteration/challenge.qmd)
+
+1. [Lists: Keeping Values in Order](units/collections-iteration/lists.qmd)
+2. [Tuples and Unpacking Fixed Records](units/collections-iteration/tuples-unpacking.qmd)
+3. [Dictionaries: Finding Values by Key](units/collections-iteration/dictionaries.qmd)
+4. [Sets: Uniqueness and Group Comparisons](units/collections-iteration/sets-frozensets.qmd)
+5. [Visiting Items in a Collection](units/collections-iteration/traversing-collections.qmd)
+6. [Sorting Collections Without Losing Meaning](units/collections-iteration/sorting-collections.qmd)
+7. [Building and Reading Nested Data](units/collections-iteration/nested-data-collection-choice.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">04</span><span class="fc-unit-summary"><strong>Making Decisions and Repeating Work</strong><span>Turn rules into decisions and repeat work with loops.</span></span><span class="fc-unit-count">8 lessons</span></summary>
+
+[Unit overview](units/decisions-repetition/index.qmd) · [Unit challenge](units/decisions-repetition/challenge.qmd)
+
+1. [Choosing a Path with `if`, `elif`, and `else`](units/decisions-repetition/conditional-branches.qmd)
+2. [Combining Conditions Without Surprises](units/decisions-repetition/boolean-rules-short-circuit.qmd)
+3. [Turning Rules into Complete Decisions](units/decisions-repetition/decision-tables-boundaries.qmd)
+4. [Building Results with `for` Loops](units/decisions-repetition/for-loop-patterns.qmd)
+5. [Repeating Until Something Changes](units/decisions-repetition/while-loops-termination.qmd)
+6. [Searching, Skipping, and Stopping Loops](units/decisions-repetition/search-loop-control.qmd)
+7. [Working Through Grids and Pairs](units/decisions-repetition/nested-loops-grids.qmd)
+8. [Building Collections with Comprehensions](units/decisions-repetition/comprehensions.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">05</span><span class="fc-unit-summary"><strong>Building Reusable Functions</strong><span>Build functions with clear inputs, results, and behavior.</span></span><span class="fc-unit-count">8 lessons</span></summary>
+
+[Unit overview](units/functions-call-behavior/index.qmd) · [Unit challenge](units/functions-call-behavior/challenge.qmd)
+
+1. [Defining Functions and Returning Useful Results](units/functions-call-behavior/defining-calling-returning.qmd)
+2. [Designing Clear Parameters and Calls](units/functions-call-behavior/parameters-stable-interfaces.qmd)
+3. [Breaking a Program into Small Functions](units/functions-call-behavior/contracts-decomposition-side-effects.qmd)
+4. [Following Names Through Function Calls](units/functions-call-behavior/scope-name-resolution-call-stack.qmd)
+5. [Passing Functions as Values](units/functions-call-behavior/functions-values-callbacks.qmd)
+6. [Solving Smaller Problems with Recursion](units/functions-call-behavior/recursion-recursive-tracing.qmd)
+7. [Producing Values One at a Time](units/functions-call-behavior/iterators-generators-lazy-values.qmd)
+8. [Adding Behavior with Decorators](units/functions-call-behavior/decorators-function-contracts.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">06</span><span class="fc-unit-summary"><strong>Sharing, Changing, and Copying Objects</strong><span>Understand shared objects and control changes and copies.</span></span><span class="fc-unit-count">4 lessons</span></summary>
+
+[Unit overview](units/mutability-identity-copying/index.qmd) · [Unit challenge](units/mutability-identity-copying/challenge.qmd)
+
+1. [When Names Share the Same Object](units/mutability-identity-copying/equality-identity-references.qmd)
+2. [Changing Objects and Choosing Safe Keys](units/mutability-identity-copying/mutable-immutable-hashable.qmd)
+3. [Copying Nested Data Without Surprises](units/mutability-identity-copying/aliasing-shallow-deep-copies.qmd)
+4. [Designing Functions That Control Mutation](units/mutability-identity-copying/mutation-function-boundaries.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">07</span><span class="fc-unit-summary"><strong>Solving Problems with Algorithms</strong><span>Break problems into steps and check your algorithms.</span></span><span class="fc-unit-count">4 lessons</span></summary>
+
+[Unit overview](units/problem-solving-algorithms/index.qmd) · [Unit challenge](units/problem-solving-algorithms/challenge.qmd)
+
+1. [Turn a Vague Idea into Testable Examples](units/problem-solving-algorithms/problems-examples-acceptance.qmd)
+2. [Turn a Plan into Working Python](units/problem-solving-algorithms/decomposition-pseudocode-implementation.qmd)
+3. [Choose an Algorithm That Fits](units/problem-solving-algorithms/core-algorithm-patterns.qmd)
+4. [Know It Works and Understand the Cost](units/problem-solving-algorithms/correctness-boundaries-efficiency.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">08</span><span class="fc-unit-summary"><strong>Errors, Exceptions, and Debugging</strong><span>Read errors, investigate bugs, and verify repairs.</span></span><span class="fc-unit-count">4 lessons</span></summary>
+
+[Unit overview](units/errors-exceptions-debugging/index.qmd) · [Unit challenge](units/errors-exceptions-debugging/challenge.qmd)
+
+1. [Understand Failures and Read Tracebacks](units/errors-exceptions-debugging/failure-categories-tracebacks.qmd)
+2. [Raise Useful Errors and Handle Expected Failures](units/errors-exceptions-debugging/raising-handling-exceptions.qmd)
+3. [Debug One Hypothesis at a Time](units/errors-exceptions-debugging/repeatable-debugging-method.qmd)
+4. [Pause, Inspect, and Shrink a Bug](units/errors-exceptions-debugging/debugger-minimal-reproductions.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">09</span><span class="fc-unit-summary"><strong>Files, Paths, and External Data</strong><span>Read, validate, and write files and external records.</span></span><span class="fc-unit-count">5 lessons</span></summary>
+
+[Unit overview](units/files-paths-external-data/index.qmd) · [Unit challenge](units/files-paths-external-data/challenge.qmd)
+
+1. [Find, Read, and Write Files Reliably](units/files-paths-external-data/paths-text-files-resources.qmd)
+2. [Keep Text Intact Across Encodings and Newlines](units/files-paths-external-data/unicode-encodings-newlines.qmd)
+3. [Move Records Between CSV, JSON, YAML, and Python](units/files-paths-external-data/csv-json-yaml-records.qmd)
+4. [Turn Messy Text into Trustworthy Records](units/files-paths-external-data/text-patterns-validation-pipelines.qmd)
+5. [Cross the Text–Binary Boundary Safely](units/files-paths-external-data/bytes-binary-memory-streams.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">10</span><span class="fc-unit-summary"><strong>Modules, Environments, and Python Projects</strong><span>Organize reusable code and build reproducible Python projects.</span></span><span class="fc-unit-count">6 lessons</span></summary>
+
+[Unit overview](units/modules-environments-projects/index.qmd) · [Unit challenge](units/modules-environments-projects/challenge.qmd)
+
+1. [Find the Right Tool Without Memorizing Everything](units/modules-environments-projects/builtins-standard-library-help.qmd)
+2. [Turn One Script into Reusable Modules](units/modules-environments-projects/modules-imports-entry-points.qmd)
+3. [Design a Package People Can Rely On](units/modules-environments-projects/packages-public-interfaces.qmd)
+4. [Build a Project You Can Navigate and Share](units/modules-environments-projects/project-layout-git-essentials.qmd)
+5. [Give Each Project a Clean Python Environment](units/modules-environments-projects/virtual-environments-dependencies.qmd)
+6. [Build and Verify an Installable Python Project](units/modules-environments-projects/pyproject-builds-tools.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">11</span><span class="fc-unit-summary"><strong>Object-Oriented Python and Dataclasses</strong><span>Model data and behavior with classes and dataclasses.</span></span><span class="fc-unit-count">5 lessons</span></summary>
+
+[Unit overview](units/object-oriented-python/index.qmd) · [Unit challenge](units/object-oriented-python/challenge.qmd)
+
+1. [Build Your First Useful Class](units/object-oriented-python/objects-classes-instances-self.qmd)
+2. [Keep Objects in Valid States](units/object-oriented-python/initialization-invariants-properties.qmd)
+3. [Use Dataclasses for Value-Like Objects](units/object-oriented-python/dataclasses-representation-equality.qmd)
+4. [Choose Composition Before Inheritance](units/object-oriented-python/composition-inheritance-design.qmd)
+5. [Model a Complete Road-Crossing Game](units/object-oriented-python/road-crossing-game-model.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">12</span><span class="fc-unit-summary"><strong>Command-Line Applications</strong><span>Build commands with clear inputs, output, and useful errors.</span></span><span class="fc-unit-count">5 lessons</span></summary>
+
+[Unit overview](units/command-line-applications/index.qmd) · [Unit challenge](units/command-line-applications/challenge.qmd)
+
+1. [Design a Friendly Command with argparse](units/command-line-applications/argparse-command-design.qmd)
+2. [Put Output, Errors, and Exit Status in the Right Place](units/command-line-applications/streams-errors-exit-codes.qmd)
+3. [Resolve Configuration Without Exposing Secrets](units/command-line-applications/configuration-precedence-secrets.qmd)
+4. [Write Useful Logs Without Polluting Output](units/command-line-applications/logging-useful-diagnostics.qmd)
+5. [Keep the Command Thin and the Core Reusable](units/command-line-applications/cli-ecosystem-testable-architecture.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">13</span><span class="fc-unit-summary"><strong>Testing Python Programs</strong><span>Protect behavior with focused, reliable tests.</span></span><span class="fc-unit-count">7 lessons</span></summary>
+
+[Unit overview](units/testing-python-programs/index.qmd) · [Unit challenge](units/testing-python-programs/challenge.qmd)
+
+1. [Write Tests That Protect Behavior](units/testing-python-programs/what-tests-prove.qmd)
+2. [Run Pytest and Read the Failure](units/testing-python-programs/pytest-discovery-failures.qmd)
+3. [Turn Examples into Clear Parametrized Cases](units/testing-python-programs/parametrization-boundary-cases.qmd)
+4. [Build an Isolated Test World with Fixtures](units/testing-python-programs/fixtures-isolation-capture.qmd)
+5. [Control Dependencies Without Fragile Mocks](units/testing-python-programs/test-doubles-dependency-injection.qmd)
+6. [Test at the Smallest Boundary That Can Fail](units/testing-python-programs/test-levels.qmd)
+7. [Preserve Bugs and Explore General Rules](units/testing-python-programs/properties-regressions-tdd.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">14</span><span class="fc-unit-summary"><strong>Code Quality and Maintainability</strong><span>Make code easier to read and safer to change.</span></span><span class="fc-unit-count">7 lessons</span></summary>
+
+[Unit overview](units/code-quality-maintainability/index.qmd) · [Unit challenge](units/code-quality-maintainability/challenge.qmd)
+
+1. [Write Python People Can Follow](units/code-quality-maintainability/readable-python-pep8.qmd)
+2. [Make Contracts Visible with Type Annotations](units/code-quality-maintainability/type-annotations-static-checking.qmd)
+3. [Read MyPy Errors and Close Type Gaps](units/code-quality-maintainability/mypy-diagnostics-boundaries.qmd)
+4. [Format and Lint a Project with Ruff](units/code-quality-maintainability/formatting-linting-configuration.qmd)
+5. [Catch Small Problems Before Commit](units/code-quality-maintainability/precommit-quality-gates.qmd)
+6. [Repeat the Quality Gate in CI](units/code-quality-maintainability/continuous-integration-quality-gates.qmd)
+7. [Refactor in Small, Verified Steps](units/code-quality-maintainability/evidence-driven-refactoring.qmd)
+
+</details>
+
+<details class="fc-unit-row">
+<summary><span class="fc-unit-number">15</span><span class="fc-unit-summary"><strong>Documentation as Part of the Product</strong><span>Write, check, and publish documentation people can use.</span></span><span class="fc-unit-count">7 lessons</span></summary>
+
+[Unit overview](units/documentation-publishing/index.qmd) · [Unit challenge](units/documentation-publishing/challenge.qmd)
+
+1. [Design Documentation Around Reader Needs](units/documentation-publishing/documentation-audiences-readme.qmd)
+2. [Write Instructions People Can Follow](units/documentation-publishing/clear-instructions-accessibility.qmd)
+3. [Document a Public Python API](units/documentation-publishing/docstrings-api-documentation.qmd)
+4. [Keep Small Examples Honest with Doctest](units/documentation-publishing/doctest-executable-documentation.qmd)
+5. [Review Documentation Like Code](units/documentation-publishing/documentation-quality-checks.qmd)
+6. [Build a Documentation Site with Quarto](units/documentation-publishing/documentation-toolchains-publishing.qmd)
+7. [Publish Documentation and Keep It Trustworthy](units/documentation-publishing/publishing-maintaining-documentation.qmd)
+
+</details>
+
+:::
 
 ## Assessment and progress
 
-Treat each lesson as a lab: predict, run, explain, modify, quiz, and debug. A
-unit challenge then asks you to select and combine ideas rather than repeat a
-lesson example. Unit 0 concludes with a methodology and setup quiz. The other
-challenges are designed for 60–120 minutes and provide a public contract,
-progressive checks, three hint levels, and a debugging-evidence record.
+Predict, run, explain, modify, quiz, and debug as you work through each lesson.
+Then apply what you learned in the unit challenge. Most challenges take
+60–120 minutes and include progressive checks, hints, and a solution to review
+when you need it.
 
-The progress dashboard is private, self-reported browser storage. It does not
-submit work, grade artifacts, verify identity, or issue credentials.
-
-::: {.callout-important title="Final project and certificate are coming later"}
-A Python Foundations final project and certificate are planned. Requirements,
-availability, and participation details will be announced soon.
-:::
-
-## Start learning
-
-Begin with the learning method, then move through the units in order. Return to
-earlier evidence whenever a later task exposes a gap.
-
-[Start Unit 0](units/get-started/index.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
-[Review the full pathway](../../pathways/index.qmd){.btn .btn-outline-primary}
+Progress is saved privately in this browser and is self-reported. It is not
+a grade or a verified credential. The final project and certificate are planned;
+participation details will be announced when they are available.
