@@ -85,3 +85,24 @@ def test_embedded_fonts_cover_the_entire_course_without_missing_glyph_boxes() ->
 def test_partial_preview_cannot_replace_the_published_download(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="partial preview"):
         pdf.build(pdf.DOCS / "_site/downloads/python-foundations.pdf", tmp_path, 1)
+
+
+def test_printed_lists_use_symbols_and_preserve_numbering(tmp_path: Path) -> None:
+    from pypdf import PdfReader
+    from reportlab.platypus import SimpleDocTemplate
+
+    _catalog, _course, chapters = pdf.course_chapters()
+    renderer = pdf.BookRenderer(chapters[0], pdf.styles())
+    item = [{"t": "Plain", "c": [{"t": "Str", "c": "Example"}]}]
+    story = renderer.blocks(
+        [
+            {"t": "BulletList", "c": [item]},
+            {"t": "OrderedList", "c": [[3, {}, {}], [item]]},
+        ]
+    )
+    destination = tmp_path / "lists.pdf"
+    SimpleDocTemplate(str(destination)).build(story)
+    text = PdfReader(destination).pages[0].extract_text()
+    assert "•" in text
+    assert "bullet" not in text
+    assert "3" in text

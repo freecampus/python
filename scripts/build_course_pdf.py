@@ -712,7 +712,7 @@ class BookRenderer:
                         ListFlowable(
                             rendered,
                             bulletType="bullet" if kind == "BulletList" else "1",
-                            start="bullet" if kind == "BulletList" else start,
+                            start="bulletchar" if kind == "BulletList" else start,
                             leftIndent=16,
                             bulletFontName="Book",
                             bulletFontSize=8,
