@@ -36,7 +36,19 @@ groups:
   docs:
     tasks:
       build:
-        help: Build the Quarto documentation website
+        help: Build the website, Colab notebooks, and downloadable Foundations book
+        hooks:
+          pre-run:
+            - task: docs.site
+            - task: docs.pdf
+
+      pdf:
+        help: Build the complete printable Foundations course and its cover preview
+        backend: bash
+        run: python scripts/build_course_pdf.py
+
+      site:
+        help: Build the Quarto website and Colab notebooks without the PDF
         backend: bash
         run: |
           mkdir -p .quarto-tmp .cache/deno .cache/quarto-home

@@ -45,6 +45,10 @@ jobs:
           poetry config virtualenvs.create false
           poetry check
           poetry install --with dev --extras "dev"
+          python -m pip install -r scripts/pdf/requirements.txt
+
+      - name: Install PDF test fonts
+        run: sudo apt-get install --yes --no-install-recommends fonts-dejavu-core
 
       - name: Run linter checks
         run: makim tests.linter
@@ -56,4 +60,4 @@ jobs:
         run: makim package.build
 
       - name: Build documentation
-        run: makim docs.build
+        run: makim docs.site

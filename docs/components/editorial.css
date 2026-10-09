@@ -308,3 +308,63 @@ div.sourceCode {
 .course-card::before {
   display: none;
 }
+
+/* PDF edition: a quiet book preview beside a clear download action. */
+.fc-pdf-download {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+  border-block: 1px solid var(--fc-border);
+  padding-block: 2rem;
+  margin-block: 1.5rem 3rem;
+}
+
+.fc-pdf-cover {
+  display: block;
+  max-width: 220px;
+}
+
+.fc-pdf-cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--fc-border);
+}
+
+.fc-pdf-copy h3 {
+  margin-top: 0;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  line-height: 1.3;
+}
+
+.fc-pdf-eyebrow,
+.fc-pdf-metadata,
+.fc-pdf-note {
+  color: var(--fc-muted);
+}
+
+.fc-pdf-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.07em;
+}
+
+.fc-pdf-metadata {
+  font-size: 0.83rem;
+}
+
+.fc-pdf-note {
+  font-size: 0.8rem;
+  margin-top: 1rem;
+  max-width: 65ch;
+}
+
+@media (max-width: 600px) {
+  .fc-pdf-download {
+    grid-template-columns: 1fr;
+  }
+
+  .fc-pdf-cover {
+    max-width: 160px;
+  }
+}
