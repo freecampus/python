@@ -20,7 +20,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
 
     defaults:
       run:
@@ -45,8 +45,25 @@ jobs:
           poetry check
           poetry install --with dev --extras "dev"
 
-      - name: Render Quarto site
+      - name: Install PDF build dependencies
+        run: |
+          python -m pip install -r scripts/pdf/requirements.txt
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends fonts-dejavu-core poppler-utils
+
+      - name: Build website, notebooks, and PDF edition
         run: makim docs.build
+
+      - name: Verify downloadable book
+        run: python scripts/verify_course_pdf.py
+
+      - name: Upload PDF edition for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-foundations-study-book
+          path: docs/_site/downloads/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Publish to gh-pages branch
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
