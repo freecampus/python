@@ -49,39 +49,12 @@ def verify() -> None:
     for source in manifest["sources"]:
         metadata = yaml.safe_load((ROOT / source).read_text().split("---", 2)[1])
         if metadata["title"] not in text and not source.endswith("/index.qmd"):
-            raise Value…4254 tokens truncated…horing templates
-├── notebooks/
-├── src/fcpython/
-└── tests/
-```
+            raise ValueError(f"Missing course activity: {source}")
+    print(
+        f"Verified complete Foundations book: {manifest['pages']} pages, "
+        f"{manifest['lessons']} lessons, {manifest['questions']} printable questions."
+    )
 
-### Downloadable Foundations book
 
-The documentation publishing job builds a complete A4 study book from the
-canonical Foundations QMD files. The Python home page and Foundations overview
-link to `downloads/python-foundations.pdf`. The cover PNG and JSON manifest are
-generated alongside it; the manifest supplies the displayed page count, file
-size, and curriculum version. PDF binaries are build artifacts, not tracked
-sources.
-
-Install `scripts/pdf/requirements.txt`, Quarto, `fonts-dejavu-core`, and
-`poppler-utils`, then run:
-
-```bash
-makim docs.build     # Website, Colab notebooks, and the complete PDF
-makim docs.site      # Website and notebooks only, for faster local iteration
-makim docs.pdf       # PDF, cover preview, and manifest only
-python scripts/verify_course_pdf.py
-```
-
-The PDF includes all unit overviews, lessons, and challenges in catalog order.
-Its separate front matter explains offline study and printed code wrapping.
-Browser quizzes become printable questions with an answer key; hints and
-solutions are visible, diagrams become page-sized vectors, and lesson links
-return to the website and Colab. No lesson code executes during the build.
-PDF reading does not update browser progress or create a verified credential.
-
-For a quick development preview, use `--limit-units 1 --output build/pdf/preview.pdf`
-with `scripts/build_course_pdf.py`. Never publish a preview as the complete book.
-The documentation workflow verifies the complete artifact before publishing and
-uploads the book, cover, and manifest for pull-request review.
+if __name__ == "__main__":
+    verify()
