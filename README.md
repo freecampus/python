@@ -137,10 +137,11 @@ The PDF includes all unit overviews, lessons, and challenges in catalog order.
 Its separate front matter explains offline study and printed code wrapping.
 Browser quizzes become printable questions with an answer key; hints and
 solutions are visible, diagrams become page-sized vectors, and lesson links
-return to the website and Colab. No lesson code executes during the build.
-PDF reading does not update browser progress or create a verified credential.
+return to the website and Colab. No lesson code executes during the build. PDF
+reading does not update browser progress or create a verified credential.
 
-For a quick development preview, use `--limit-units 1 --output build/pdf/preview.pdf`
-with `scripts/build_course_pdf.py`. Never publish a preview as the complete book.
-The documentation workflow verifies the complete artifact before publishing and
+For a quick development preview, use
+`--limit-units 1 --output build/pdf/preview.pdf` with
+`scripts/build_course_pdf.py`. Never publish a preview as the complete book. The
+documentation workflow verifies the complete artifact before publishing and
 uploads the book, cover, and manifest for pull-request review.

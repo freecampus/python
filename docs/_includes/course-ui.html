@@ -379,8 +379,6 @@
       } else if (position && projectId) {
         position.textContent = "Course project";
       }
-
-
     }
 
     function paintSidebarCompletion() {
@@ -835,7 +833,8 @@
       if (!label || typeof window.fetch !== "function") {
         return;
       }
-      window.fetch(`${siteBasePath()}downloads/python-foundations.json`)
+      window
+        .fetch(`${siteBasePath()}downloads/python-foundations.json`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("PDF metadata unavailable");
@@ -843,7 +842,11 @@
           return response.json();
         })
         .then((book) => {
-          if (book.course_id === "python-foundations" && book.pages > 0 && book.bytes > 0) {
+          if (
+            book.course_id === "python-foundations" &&
+            book.pages > 0 &&
+            book.bytes > 0
+          ) {
             const size = (book.bytes / (1024 * 1024)).toFixed(1);
             label.textContent = `PDF · ${book.pages} pages · ${size} MB · Curriculum ${book.curriculum_version}`;
           }

@@ -7,9 +7,9 @@ notebook, or type the examples into your own Python environment. Later units
 explain dependable local workflows and complete projects.
 
 The course estimates **{{effort}}** of active study. That includes typing,
-predicting, explaining, exercises, quizzes, and debugging. It is not a reading-time
-estimate. A long lesson can take several sessions; stop at a checkpoint and note
-where to resume.
+predicting, explaining, exercises, quizzes, and debugging. It is not a
+reading-time estimate. A long lesson can take several sessions; stop at a
+checkpoint and note where to resume.
 
 ## Use a repeatable practice cycle
 
@@ -21,8 +21,8 @@ where to resume.
 6. Complete the lab and then the unit challenge with your own evidence.
 
 The PDF prints hints and solutions because paper cannot hide expandable panels.
-Try the task first, and cover the solution while you work if that helps. A correct
-answer is useful only when you can explain why it is correct.
+Try the task first, and cover the solution while you work if that helps. A
+correct answer is useful only when you can explain why it is correct.
 
 ## Keep code, output, and notes separate
 
@@ -31,14 +31,14 @@ in your notes. Preserve indentation, quotation marks, and Unicode characters.
 When a printed line wraps, join it into one source line unless the lesson shows
 an explicit multi-line construct.
 
-Examples marked as intentional failures are for repair practice. Read the lesson's
-explanation before treating an error example as working code.
+Examples marked as intentional failures are for repair practice. Read the
+lesson's explanation before treating an error example as working code.
 
 ## Keep a short debugging record
 
 Write down what you expected, what happened, your hypothesis, the one change you
-made, and the result of running again. At the end of a unit, use the study record
-to note what you can explain and what needs another pass.
+made, and the result of running again. At the end of a unit, use the study
+record to note what you can explain and what needs another pass.
 
-Online progress remains local to the browser in which you record it. Reading this
-book does not automatically mark lessons complete on the website.
+Online progress remains local to the browser in which you record it. Reading
+this book does not automatically mark lessons complete on the website.
