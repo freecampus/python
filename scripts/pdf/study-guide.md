@@ -19,6 +19,7 @@ checkpoint and note where to resume.
 4. Make one controlled change and predict again.
 5. Answer the checkpoint on paper before opening the answer key.
 6. Complete the lab and then the unit challenge with your own evidence.
+7. At each milestone boundary, complete its challenge to connect the units.
 
 The PDF prints hints and solutions because paper cannot hide expandable panels.
 Try the task first, and cover the solution while you work if that helps. A

@@ -96,7 +96,12 @@ def test_show_quiz_returns_widget_container() -> None:
 
 
 def test_values_assignment_lesson_has_topic_specific_quiz() -> None:
-    lesson_path = FOUNDATIONS_ROOT / "units/python-syntax/values-names-assignment.qmd"
+    lesson_path = (
+        FOUNDATIONS_ROOT
+        / "milestones/first-programs/units"
+        / "python-syntax"
+        / "values-names-assignment.qmd"
+    )
     lesson = lesson_path.read_text()
     match = re.search(
         r'<script type="application/json" class="fcpython-ojs-quiz-config">'
@@ -155,7 +160,7 @@ def test_foundations_assessment_pages_match_quiz_banks() -> None:
         == expected_units
     )
     for unit in expected_units:
-        path = FOUNDATIONS_ROOT / "units" / unit / "challenge.qmd"
+        path = next(FOUNDATIONS_ROOT.glob(f"milestones/*/units/{unit}/challenge.qmd"))
         payload = _first_quiz_payload(path)
         assert payload["id"]
         assert payload["questions"]
@@ -184,7 +189,9 @@ def _content_lesson_pages() -> list[Path]:
 
 
 def _is_foundations_unit_overview(path: Path) -> bool:
-    return path.name == "index.qmd" and path.parent.parent == FOUNDATIONS_ROOT / "units"
+    return path.name == "index.qmd" and (
+        path.is_relative_to(FOUNDATIONS_ROOT) and path.parent.parent.name == "units"
+    )
 
 
 def _front_matter(path: Path) -> str:
@@ -195,7 +202,9 @@ def _front_matter(path: Path) -> str:
 def test_assessable_pages_include_ojs_quiz() -> None:
     missing = []
     for path in _lesson_pages():
-        if _is_foundations_unit_overview(path):
+        if _is_foundations_unit_overview(path) or (
+            path.name == "index.qmd" and path.parent.parent.name == "milestones"
+        ):
             continue
         text = path.read_text()
         has_config = 'class="fcpython-ojs-quiz-config"' in text
@@ -207,7 +216,7 @@ def test_assessable_pages_include_ojs_quiz() -> None:
 
 
 def test_foundations_unit_overviews_do_not_include_quizzes() -> None:
-    overview_pages = sorted(FOUNDATIONS_ROOT.glob("units/*/index.qmd"))
+    overview_pages = sorted(FOUNDATIONS_ROOT.glob("milestones/*/units/*/index.qmd"))
 
     assert len(overview_pages) == 16
     for path in overview_pages:
@@ -483,7 +492,12 @@ def test_colab_notebook_paths_are_unique_and_follow_course_structure() -> None:
 
 
 def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
-    path = FOUNDATIONS_ROOT / "units/python-syntax/values-names-assignment.qmd"
+    path = (
+        FOUNDATIONS_ROOT
+        / "milestones/first-programs/units"
+        / "python-syntax"
+        / "values-names-assignment.qmd"
+    )
     notebook = notebook_builder.qmd_to_notebook(path)
     code_sources = [
         "".join(cell["source"])
@@ -498,7 +512,8 @@ def test_qmd_to_notebook_turns_python_fences_into_code_cells() -> None:
 def test_build_colab_notebooks_writes_expected_files(tmp_path: Path) -> None:
     written = notebook_builder.build_notebooks(output_root=tmp_path)
     expected = (
-        tmp_path / "courses/python-foundations/units/python-syntax/"
+        tmp_path
+        / "courses/python-foundations/milestones/first-programs/units/python-syntax/"
         "values-names-assignment.ipynb"
     )
 
@@ -556,36 +571,78 @@ def test_lessons_use_clean_numbered_section_headings() -> None:
 
 def test_selected_lessons_include_mermaid_diagrams() -> None:
     expected = {
-        FOUNDATIONS_ROOT / "units/python-syntax/values-names-assignment.qmd",
-        FOUNDATIONS_ROOT / "units/decisions-repetition/conditional-branches.qmd",
-        FOUNDATIONS_ROOT / "units/decisions-repetition/for-loop-patterns.qmd",
         FOUNDATIONS_ROOT
-        / "units/functions-call-behavior/defining-calling-returning.qmd",
+        / "milestones/first-programs/units"
+        / "python-syntax"
+        / "values-names-assignment.qmd",
         FOUNDATIONS_ROOT
-        / "units/functions-call-behavior/scope-name-resolution-call-stack.qmd",
+        / "milestones/work-with-data/units"
+        / "decisions-repetition"
+        / "conditional-branches.qmd",
         FOUNDATIONS_ROOT
-        / "units/functions-call-behavior/functions-values-callbacks.qmd",
+        / "milestones/work-with-data/units"
+        / "decisions-repetition"
+        / "for-loop-patterns.qmd",
         FOUNDATIONS_ROOT
-        / "units/functions-call-behavior/recursion-recursive-tracing.qmd",
+        / "milestones/work-with-data/units"
+        / "functions-call-behavior"
+        / "defining-calling-returning.qmd",
         FOUNDATIONS_ROOT
-        / "units/functions-call-behavior/iterators-generators-lazy-values.qmd",
+        / "milestones/work-with-data/units"
+        / "functions-call-behavior"
+        / "scope-name-resolution-call-stack.qmd",
         FOUNDATIONS_ROOT
-        / "units/functions-call-behavior/decorators-function-contracts.qmd",
+        / "milestones/work-with-data/units"
+        / "functions-call-behavior"
+        / "functions-values-callbacks.qmd",
         FOUNDATIONS_ROOT
-        / "units/mutability-identity-copying/equality-identity-references.qmd",
+        / "milestones/work-with-data/units"
+        / "functions-call-behavior"
+        / "recursion-recursive-tracing.qmd",
         FOUNDATIONS_ROOT
-        / "units/mutability-identity-copying/aliasing-shallow-deep-copies.qmd",
+        / "milestones/work-with-data/units"
+        / "functions-call-behavior"
+        / "iterators-generators-lazy-values.qmd",
         FOUNDATIONS_ROOT
-        / "units/mutability-identity-copying/mutation-function-boundaries.qmd",
-        FOUNDATIONS_ROOT / "units/collections-iteration/lists.qmd",
-        FOUNDATIONS_ROOT / "units/collections-iteration/dictionaries.qmd",
+        / "milestones/work-with-data/units"
+        / "functions-call-behavior"
+        / "decorators-function-contracts.qmd",
         FOUNDATIONS_ROOT
-        / "units/collections-iteration/nested-data-collection-choice.qmd",
+        / "milestones/work-with-data/units"
+        / "mutability-identity-copying"
+        / "equality-identity-references.qmd",
         FOUNDATIONS_ROOT
-        / "units/errors-exceptions-debugging/failure-categories-tracebacks.qmd",
+        / "milestones/work-with-data/units"
+        / "mutability-identity-copying"
+        / "aliasing-shallow-deep-copies.qmd",
         FOUNDATIONS_ROOT
-        / "units/modules-environments-projects/virtual-environments-dependencies.qmd",
-        DATA_ML_ROOT / "machine-learning-ai/training-and-evaluation.qmd",
+        / "milestones/work-with-data/units"
+        / "mutability-identity-copying"
+        / "mutation-function-boundaries.qmd",
+        FOUNDATIONS_ROOT
+        / "milestones/work-with-data/units"
+        / "collections-iteration"
+        / "lists.qmd",
+        FOUNDATIONS_ROOT
+        / "milestones/work-with-data/units"
+        / "collections-iteration"
+        / "dictionaries.qmd",
+        FOUNDATIONS_ROOT
+        / "milestones/work-with-data/units"
+        / "collections-iteration"
+        / "nested-data-collection-choice.qmd",
+        FOUNDATIONS_ROOT
+        / "milestones/reliable-programs/units"
+        / "errors-exceptions-debugging"
+        / "failure-categories-tracebacks.qmd",
+        FOUNDATIONS_ROOT
+        / "milestones/reliable-programs/units"
+        / "modules-environments-projects"
+        / "virtual-environments-dependencies.qmd",
+        DATA_ML_ROOT
+        / "milestones/evaluate-models/units"
+        / "machine-learning-ai"
+        / "training-and-evaluation.qmd",
     }
 
     missing = [

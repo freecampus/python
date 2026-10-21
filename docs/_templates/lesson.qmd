@@ -4,9 +4,12 @@ description: Standard structure for FreeCampus Python lessons.
 execute:
   echo: true
 categories: [course]
+milestone_id: milestone-id
 order: 9990
-colab_notebook: "notebooks/courses/<course-id>/units/<unit-id>/<lesson-id>.ipynb"
+colab_notebook: "notebooks/courses/<course-id>/milestones/<milestone-id>/units/<unit-id>/<lesson-id>.ipynb"
 ---
+
+<!-- When copying into a unit, set course/unit IDs and use ../../../../../../_includes/. -->
 
 ::: {.lesson-meta}
 - **Level:** Beginner

@@ -24,7 +24,9 @@ def verify() -> None:
         "curriculum_version": catalog["curriculum_version"],
         "units": len(course["units"]),
         "lessons": course["lesson_count"],
-        "challenges": len(course["completion"]["challenges"]),
+        "challenges": len(course["completion"]["challenges"])
+        + len(course["completion"]["milestone_challenges"]),
+        "milestones": len(course["milestones"]),
         "bytes": pdf.stat().st_size,
         "sha256": hashlib.sha256(pdf.read_bytes()).hexdigest(),
     }

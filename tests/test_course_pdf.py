@@ -35,8 +35,18 @@ def test_book_sequence_matches_catalog_completion_records() -> None:
     assert [c.metadata["challenge_id"] for c in chapters if c.kind == "challenge"] == [
         c["id"] for c in course["completion"]["challenges"]
     ]
+    assert [
+        c.metadata["challenge_id"] for c in chapters if c.kind == "milestone-challenge"
+    ] == [c["id"] for c in course["completion"]["milestone_challenges"]]
+    assert sum(c.kind == "milestone-overview" for c in chapters) == len(
+        course["milestones"]
+    )
     for unit in course["units"]:
-        sequence = [c for c in chapters if c.unit == unit["number"]]
+        sequence = [
+            c
+            for c in chapters
+            if c.unit == unit["number"] and not c.kind.startswith("milestone-")
+        ]
         assert sequence[0].kind == "overview"
         assert sequence[-1].kind == "challenge"
         assert sum(c.kind == "lesson" for c in sequence) == unit["lesson_count"]

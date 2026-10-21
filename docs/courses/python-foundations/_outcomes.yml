@@ -1,5 +1,5 @@
 schema_version: 1
-curriculum_version: 21
+curriculum_version: 22
 course_id: python-foundations
 graduate_outcomes:
   learn-independently: Use prediction, clean execution, documentation, deliberate practice, and responsible AI assistance to learn from evidence.
@@ -27,6 +27,7 @@ units:
       - get-started.notebook-workflows
       - get-started.local-python-workspace
     challenge_id: get-started.challenge
+    milestone_id: first-programs
   - number: 1
     id: python-syntax
     outcome: Read a short Python program from top to bottom, identify the role of its words and symbols, trace names and expressions, recognize blocks and continued lines, document decisions, and repair syntax errors systematically.
@@ -42,6 +43,7 @@ units:
       - python-syntax.comments-docstrings
       - python-syntax.reading-fixing-syntax-errors
     challenge_id: python-syntax.challenge
+    milestone_id: first-programs
   - number: 2
     id: core-values-types
     outcome: Choose suitable Python values for counts, measurements, money, text, truth, missing information, and time; convert and format them deliberately; and explain important precision, parsing, and comparison boundaries.
@@ -58,6 +60,7 @@ units:
       - core-values-types.booleans-comparisons-truth
       - core-values-types.dates-times-durations
     challenge_id: core-values-types.challenge
+    milestone_id: first-programs
   - number: 3
     id: collections-iteration
     outcome: Choose among lists, tuples, dictionaries, and sets from the required order, mutability, lookup, uniqueness, and data shape; traverse them safely; and sort or combine them without losing relationships between values.
@@ -73,6 +76,7 @@ units:
       - collections-iteration.sorting-collections
       - collections-iteration.nested-data-collection-choice
     challenge_id: collections-iteration.challenge
+    milestone_id: work-with-data
   - number: 4
     id: decisions-repetition
     outcome: Turn written rules into complete, non-overlapping branches; use for and while loops to transform, filter, count, group, search, and traverse nested data; and explain how each loop progresses and stops without losing or skipping values.
@@ -89,6 +93,7 @@ units:
       - decisions-repetition.nested-loops-grids
       - decisions-repetition.comprehensions
     challenge_id: decisions-repetition.challenge
+    milestone_id: work-with-data
   - number: 5
     id: functions-call-behavior
     outcome: Design, call, compose, and trace reusable functions with clear parameters, returned results, documented contracts, and controlled side effects; pass behavior as data; and explain how recursive, lazy, closure-based, and decorated calls progress and finish.
@@ -105,6 +110,7 @@ units:
       - functions-call-behavior.iterators-generators-lazy-values
       - functions-call-behavior.decorators-function-contracts
     challenge_id: functions-call-behavior.challenge
+    milestone_id: work-with-data
   - number: 6
     id: mutability-identity-copying
     outcome: Trace which names and containers share objects; distinguish equality, identity, rebinding, mutation, immutability, and hashability; choose shallow, selective, or deep copying from an explicit ownership contract; and design functions whose mutations or returned copies are deliberate and observable.
@@ -117,6 +123,7 @@ units:
       - mutability-identity-copying.aliasing-shallow-deep-copies
       - mutability-identity-copying.mutation-function-boundaries
     challenge_id: mutability-identity-copying.challenge
+    milestone_id: work-with-data
   - number: 7
     id: problem-solving-algorithms
     outcome: Turn an unclear task into explicit examples and rules; decompose it into checkable functions; select, trace, and adapt common algorithms; and defend correctness, boundary behavior, and practical time and memory costs.
@@ -129,6 +136,7 @@ units:
       - problem-solving-algorithms.core-algorithm-patterns
       - problem-solving-algorithms.correctness-boundaries-efficiency
     challenge_id: problem-solving-algorithms.challenge
+    milestone_id: reliable-programs
   - number: 8
     id: errors-exceptions-debugging
     outcome: Classify syntax failures, runtime exceptions, and wrong results; read tracebacks across function calls; raise and handle only anticipated exceptions with useful context; and reproduce, inspect, isolate, repair, and verify a bug one evidence-backed hypothesis at a time.
@@ -141,6 +149,7 @@ units:
       - errors-exceptions-debugging.repeatable-debugging-method
       - errors-exceptions-debugging.debugger-minimal-reproductions
     challenge_id: errors-exceptions-debugging.challenge
+    milestone_id: reliable-programs
   - number: 9
     id: files-paths-external-data
     outcome: Locate and traverse files predictably; read and write text with explicit resource, encoding, newline, and replacement policies; translate CSV, JSON, YAML, and binary data into validated Python values; and build a reproducible import pipeline that preserves accepted data, rejected evidence, and original inputs.
@@ -154,6 +163,7 @@ units:
       - files-paths-external-data.text-patterns-validation-pipelines
       - files-paths-external-data.bytes-binary-memory-streams
     challenge_id: files-paths-external-data.challenge
+    milestone_id: reliable-programs
   - number: 10
     id: modules-environments-projects
     outcome: Find and evaluate reusable Python tools; split behavior across modules and packages with intentional imports and entry points; arrange and version a `src`-layout project; create and diagnose isolated environments; declare metadata and dependencies in `pyproject.toml`; and build, inspect, and clean-install a wheel whose public API works outside the repository.
@@ -168,6 +178,7 @@ units:
       - modules-environments-projects.virtual-environments-dependencies
       - modules-environments-projects.pyproject-builds-tools
     challenge_id: modules-environments-projects.challenge
+    milestone_id: reliable-programs
   - number: 11
     id: object-oriented-python
     outcome: Choose between functions, collections, dataclasses, and stateful classes; build objects that preserve valid state; explain instance attributes and bound methods; compose replaceable collaborators; and use inheritance only when a subtype can honor the same behavioral contract.
@@ -181,6 +192,7 @@ units:
       - object-oriented-python.composition-inheritance-design
       - object-oriented-python.road-crossing-game-model
     challenge_id: object-oriented-python.challenge
+    milestone_id: ship-python-projects
   - number: 12
     id: command-line-applications
     outcome: Design a discoverable command, keep data and diagnostics in their proper channels, resolve settings safely, and connect a thin CLI adapter to reusable Python that can be checked directly and as a real process.
@@ -194,6 +206,7 @@ units:
       - command-line-applications.logging-useful-diagnostics
       - command-line-applications.cli-ecosystem-testable-architecture
     challenge_id: command-line-applications.challenge
+    milestone_id: ship-python-projects
   - number: 13
     id: testing-python-programs
     outcome: Turn behavioral contracts into focused pytest suites, interpret failures, isolate state and dependencies, choose evidence-producing boundaries, preserve regressions, and use generated examples without confusing passing tests or coverage with proof.
@@ -211,6 +224,7 @@ units:
       - testing-python-programs.test-levels
       - testing-python-programs.properties-regressions-tdd
     challenge_id: testing-python-programs.challenge
+    milestone_id: ship-python-projects
   - number: 14
     id: code-quality-maintainability
     outcome: Make Python projects easier to read and safer to change; express intent with consistent code and useful types, configure automated checks, repeat the same quality contract before commits and in CI, and refactor in small steps while checked behavior remains stable.
@@ -228,6 +242,7 @@ units:
       - code-quality-maintainability.continuous-integration-quality-gates
       - code-quality-maintainability.evidence-driven-refactoring
     challenge_id: code-quality-maintainability.challenge
+    milestone_id: ship-python-projects
   - number: 15
     id: documentation-publishing
     outcome: Design, write, test, build, and publish documentation that guides real readers from first contact to successful use, explains a stable public Python API, and remains trustworthy as the code changes.
@@ -245,3 +260,37 @@ units:
       - documentation-publishing.documentation-toolchains-publishing
       - documentation-publishing.publishing-maintaining-documentation
     challenge_id: documentation-publishing.challenge
+    milestone_id: ship-python-projects
+milestones:
+  - id: first-programs
+    unit_ids:
+      - get-started
+      - python-syntax
+      - core-values-types
+    challenge_id: first-programs.challenge
+    outcome: Write and Explain Your First Programs
+  - id: work-with-data
+    unit_ids:
+      - collections-iteration
+      - decisions-repetition
+      - functions-call-behavior
+      - mutability-identity-copying
+    challenge_id: work-with-data.challenge
+    outcome: Turn Data into Reusable Decisions
+  - id: reliable-programs
+    unit_ids:
+      - problem-solving-algorithms
+      - errors-exceptions-debugging
+      - files-paths-external-data
+      - modules-environments-projects
+    challenge_id: reliable-programs.challenge
+    outcome: Build Reliable Programs from External Data
+  - id: ship-python-projects
+    unit_ids:
+      - object-oriented-python
+      - command-line-applications
+      - testing-python-programs
+      - code-quality-maintainability
+      - documentation-publishing
+    challenge_id: ship-python-projects.challenge
+    outcome: Ship a Tested and Documented Python Tool

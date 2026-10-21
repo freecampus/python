@@ -1,7 +1,9 @@
 ---
 title: Scientific Computing with Python
 description: Represent numerical problems, run experiments, visualize results, and apply scientific algorithms.
-categories: [scientific-python, scientific-computing]
+categories:
+- scientific-python
+- scientific-computing
 course_id: scientific-python
 course_title: Scientific Computing with Python
 course_home: courses/scientific-python
@@ -10,18 +12,27 @@ course_level: Intermediate
 course_status: in-development
 course_status_label: In development
 course_pathway: scientific
-course_keywords: "numpy arrays simulation matplotlib plotting sympy scipy numerical methods xarray netcdf hdf5 zarr visualization performance dask numba mpi hpc"
+course_keywords: numpy arrays simulation matplotlib plotting sympy scipy numerical methods xarray netcdf hdf5 zarr visualization performance dask numba mpi hpc
 lesson_count: 5
-estimated_effort: 5–8 hours of current material
+estimated_effort: 8–14 hours of current material
 prerequisite_label: Python Foundations
 page-layout: full
 toc: false
-body-classes: "course-home course-scientific"
+body-classes: course-home course-scientific
+lesson_ids:
+- scientific-python.numpy
+- scientific-python.random-simulation
+- scientific-python.matplotlib-basics
+- scientific-python.sympy-symbolic-math
+- scientific-python.scipy-overview
+challenge_ids:
+- scientific-python.challenge
+- numerical-experiments.challenge
 ---
 
 ::: {.lesson-meta}
 - **Level:** Intermediate
-- **Estimated effort:** 5–8 hours of current material
+- **Estimated effort:** 8–14 hours of current material
 - **Prerequisite:** Python Foundations
 - **Status:** In development; certificate planned
 :::
@@ -38,7 +49,7 @@ either order.
 :::
 
 ```{=html}
-<div class="fc-course-overview" data-fc-course-overview data-course-id="scientific-python" data-course-total="5">
+<div class="fc-course-overview" data-fc-course-overview data-course-lesson-ids="scientific-python.numpy scientific-python.random-simulation scientific-python.matplotlib-basics scientific-python.sympy-symbolic-math scientific-python.scipy-overview" data-course-challenge-ids="scientific-python.challenge numerical-experiments.challenge" data-course-id="scientific-python" data-course-total="5">
   <div><strong data-fc-course-progress-value>0%</strong><span>current material</span></div>
   <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
     <span data-fc-course-progress-bar></span>
@@ -46,6 +57,14 @@ either order.
   <span data-fc-course-progress-label>0 of 5 current lessons complete</span>
 </div>
 ```
+
+## Milestone sequence
+
+Each milestone combines its units in an ungraded challenge. Complete the unit
+challenges as you go, then use the milestone challenge to connect those skills.
+Progress is self-reported in this browser on this device.
+
+- [Design and Explain Numerical Experiments](milestones/numerical-experiments/index.qmd) — 1 units; [milestone challenge](milestones/numerical-experiments/challenge.qmd).
 
 ## Before you start
 
@@ -69,7 +88,7 @@ either order.
 
 ::: {.course-grid}
 ::: {.course-card}
-### [Scientific Python](scientific-python/index.qmd)
+### [Scientific Python](milestones/numerical-experiments/units/scientific-python/index.qmd)
 
 Use NumPy, random simulation, Matplotlib, SymPy, and SciPy in small experiments.
 :::
@@ -100,5 +119,5 @@ formative quizzes. They count toward local progress, but a scientific capstone,
 rubric, and certificate assessment are still planned. Scientific Computing and
 Statistics are both prerequisites for Data & ML, but neither must come first.
 
-[Start with NumPy](scientific-python/numpy.qmd){.btn .btn-primary data-fc-course-resume="scientific-python"}
+[Start with NumPy](milestones/numerical-experiments/units/scientific-python/numpy.qmd){.btn .btn-primary data-fc-course-resume="scientific-python"}
 [See the Data & ML prerequisite path](../data-science-ml/index.qmd){.btn .btn-outline-primary}

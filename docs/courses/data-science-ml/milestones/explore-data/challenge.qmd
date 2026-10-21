@@ -1,0 +1,130 @@
+---
+title: 'Milestone Challenge: Explain a Change in Library Visits'
+description: Compare incomplete observations and communicate a finding without claiming causation.
+course_id: data-science-ml
+milestone_id: explore-data
+challenge_id: explore-data.challenge
+assessment_type: milestone-challenge
+challenge_format: guided-programming
+estimated_time: 2–4 hours
+categories:
+- data-science-ml
+- explore-data
+- milestone-challenge
+order: 90
+colab_notebook: notebooks/courses/data-science-ml/milestones/explore-data/challenge.ipynb
+---
+
+::: {.lesson-meta}
+- **Goal:** Compare incomplete observations and communicate a finding without claiming causation.
+- **Estimated time:** 2–4 hours of active work.
+- **Before starting:** Complete the milestone units and their unit challenges.
+- **Keep:** Your source, observed outputs, checks, and a debugging note.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+This community challenge is ungraded. Use the checks to review your own work;
+there is no submission service or automatic grade. Completion is self-reported
+in this browser on this device.
+
+## 1. Explain a change in library visits
+
+Week 1 visits Monday to Friday are 10, 20, 15, 25, 30; week 2 values are 12, 18, missing, 30, 40. A new display opened in week 2. Preserve missingness, compare the four matched days, and also report incomplete raw weekly totals. Create a day-by-day plot and a report for a volunteer.
+
+Predict an ordinary result before coding. Start with the smallest part you can
+run and inspect. Use Colab for notebooks and the local workspace introduced in
+the units for packaging or command-line tasks.
+
+## 2. Set up the experiment
+
+```python
+import pandas as pd
+
+visits = pd.DataFrame({
+    "day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "week_1": [10, 20, 15, 25, 30],
+    "week_2": [12, 18, None, 30, 40],
+})
+# Compare raw totals and matched days explicitly.
+```
+
+The starter is deliberately incomplete. Implement the contract; do not change
+the expected results to match an incorrect implementation.
+
+## 3. Check the observable results
+
+1. Week 1 has five observations totaling 100; week 2 has four observed values totaling 100.
+2. Matched-day totals are 85 and 100: an increase of 15, approximately 17.65%.
+3. Wednesday remains missing in the source and plot, not zero.
+4. Report counts with totals and explain why raw totals are not a like-for-like comparison.
+
+Record actual outputs beside predictions. Reduce a failure to a small example,
+change one cause at a time, and repeat the failed check after repairing it.
+
+## 4. Change one condition
+
+Recover Wednesday as 5 in one scenario and 35 in another. Recompute complete weekly comparisons. Explain how a conclusion based only on the original totals could mislead.
+
+## 5. Review a hint after attempting the task
+
+<details>
+<summary>Hint: connect the relevant tools</summary>
+
+Apply a matched-day mask before comparable aggregation. Keep recovered-value scenarios separate from observed data and annotate missingness.
+
+</details>
+
+## 6. Explain and self-review
+
+Deliver the notebook, missingness audit, comparison table, plot, and a 150-word report. Mention weather, events, and recording differences as reasons the observation alone cannot establish the display caused the change.
+
+<details>
+<summary>Review path: compare your result with the contract</summary>
+
+Check the ordinary result first, then the boundary cases and changed condition.
+Explain which rule justifies each result. An implementation that differs from
+the hint can still satisfy the contract; explain why yours does.
+
+</details>
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "data-science-ml-explore-data-integration",
+  "title": "Check the reasoning behind your result",
+  "instructions": "Choose an answer, then review the explanation.",
+  "questions": [
+    {
+      "id": "explore-data-reasoning",
+      "prompt": "Which claim is supported?",
+      "options": [
+        "The display caused a 15% increase.",
+        "Wednesday had no visitors.",
+        "Visits rose by 15 on the four matched days.",
+        "Both complete weeks had exactly 100 visits."
+      ],
+      "answer_index": 2,
+      "explanation": "The matched totals are 85 and 100. Missing data prevents a complete comparison and these observations do not identify causation."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Save your work and record completion
+
+Save the notebook or project somewhere you control. Include one decision, one
+failed check, its repair, and a result you can reproduce. Record completion
+after reviewing the checks; you can undo it later.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+<button class="btn btn-primary" type="button" data-fc-challenge-complete aria-pressed="false">
+  <span data-fc-challenge-complete-label>Record challenge complete</span>
+</button>
+<p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+[Return to the milestone overview](index.qmd).

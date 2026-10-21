@@ -16,13 +16,13 @@ generated Colab notebooks.
 - Python Foundations:
   [`docs/courses/python-foundations/index.qmd`](docs/courses/python-foundations/index.qmd)
 - First lesson:
-  [`docs/courses/python-foundations/units/learning-workflow-tools/what-is-programming.qmd`](docs/courses/python-foundations/units/learning-workflow-tools/what-is-programming.qmd)
+  [`docs/courses/python-foundations/milestones/first-programs/units/get-started/meet-python-first-program.qmd`](docs/courses/python-foundations/milestones/first-programs/units/get-started/meet-python-first-program.qmd)
 - Google Colab:
-  [`docs/courses/python-foundations/units/learning-workflow-tools/google-colab.qmd`](docs/courses/python-foundations/units/learning-workflow-tools/google-colab.qmd)
+  [`docs/courses/python-foundations/milestones/first-programs/units/get-started/notebook-workflows.qmd`](docs/courses/python-foundations/milestones/first-programs/units/get-started/notebook-workflows.qmd)
 - Lists lesson:
-  [`docs/courses/python-foundations/units/sequences/lists.qmd`](docs/courses/python-foundations/units/sequences/lists.qmd)
+  [`docs/courses/python-foundations/milestones/work-with-data/units/collections-iteration/lists.qmd`](docs/courses/python-foundations/milestones/work-with-data/units/collections-iteration/lists.qmd)
 - Debugging reference:
-  [`docs/courses/python-foundations/units/debugging/error-messages.qmd`](docs/courses/python-foundations/units/debugging/error-messages.qmd)
+  [`docs/courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/failure-categories-tracebacks.qmd`](docs/courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/failure-categories-tracebacks.qmd)
 - Learner profiles:
   [`docs/resources/learner-profiles.qmd`](docs/resources/learner-profiles.qmd)
 - Instructor notes:
@@ -33,7 +33,7 @@ generated Colab notebooks.
 
 ## Course portfolio
 
-1. **Python Foundations**: 62 lessons in 24 concept-focused instructional units,
+1. **Python Foundations**: 97 lessons in 16 units grouped into four milestones,
    with a guided challenge at the end of every unit.
 2. **Intermediate Python: Applied Problem Solving**: a challenge-based course
    focused on parsing, modeling, testing, refactoring, and explaining unfamiliar
@@ -61,17 +61,18 @@ Reusable notebook quizzes live in `src/fcpython` and can be rendered with
 ipywidgets in Jupyter or Google Colab.
 
 Canonical teaching sources live with their owning course under `docs/courses/`.
-Python Foundations sources and notebooks mirror its `units/` hierarchy.
-Cross-course material such as the FAQ and project toolkit lives under
-`docs/resources/`.
+Sources and generated notebooks mirror the
+`milestones/<milestone-id>/units/<unit-id>/` hierarchy. Cross-course material
+such as the FAQ and project toolkit lives under `docs/resources/`.
 
 ### Python Foundations progress
 
-Python Foundations curriculum version 5 can be completed independently. It
-contains 62 lessons and 24 unit challenges in one learning sequence. Progress is
-stored in the learner's browser for convenience. It is self-reported and is not
-a verified certificate, identity record, or instructor grade. A final project
-and certificate are planned and will be announced later.
+Python Foundations curriculum version 22 can be completed independently. It
+contains 97 lessons, 16 unit challenges, and four milestone challenges in one
+learning sequence. Progress is stored in the learner's browser for convenience.
+It is self-reported and is not a verified certificate, identity record, or
+instructor grade. A final project and certificate are planned and will be
+announced later.
 
 ## Local planning note
 
@@ -97,6 +98,44 @@ To preview the documentation locally:
 makim docs.preview
 ```
 
+### Course structure check
+
+CI runs the
+[FreeCampus Course Structure Check](https://github.com/freecampus/freecampus-course-check)
+on every pull request and push to `main`. The independent `Course structure` job
+checks the repository's `docs/` sources with release `0.2.0`, pinned to its full
+commit SHA. It reports file-specific errors, suggested fixes, and links to
+rule-specific troubleshooting examples in annotations and the job summary; no
+Python environment or Quarto installation is needed for this check.
+
+The Quarto project declares `freecampus.schema-version: 1` and
+`freecampus.kind: journey`. Every published course has milestones, every
+milestone has units and a milestone challenge, and every unit has lessons and a
+unit challenge. All those pages appear in the sidebar.
+
+Intermediate Python, Advanced Python, and Statistics are still roadmap entries
+without lessons. Their public pages live under `docs/roadmap/` and remain in the
+catalog and pathways. They must acquire a complete milestone structure before
+teaching content is added under `docs/courses/`; empty placeholder lessons are
+not a substitute for a curriculum.
+
+See the action's
+[troubleshooting guide](https://github.com/freecampus/freecampus-course-check/blob/main/TROUBLESHOOTING.md)
+for explanations and examples. CI treats structural violations as failures.
+
+### Milestones and progress
+
+The journey currently has three courses with teaching content, seven milestones,
+19 units, and 112 lessons. Each milestone has an overview and an ungraded
+integration challenge. The catalog records milestone membership, unit paths, and
+both kinds of challenge; the Foundations outcome map records the same groups.
+
+The migration to curriculum 22 preserves existing lesson and unit-challenge IDs
+and browser completion records. The new milestone challenges add work to course
+completion. Old last-visited URLs are hidden until a current lesson is visited;
+the course's Continue button uses completed activities to find the next step.
+Progress stays in this browser on this device and is not a grade.
+
 ## Project layout
 
 ```text
@@ -104,7 +143,8 @@ makim docs.preview
 ├── docs/
 │   ├── index.qmd
 │   ├── _quarto.yml
-│   ├── courses/             # Course homes and course-owned units
+│   ├── courses/             # Course → milestones → units → lessons/challenges
+│   ├── roadmap/             # Planned courses with no published lessons
 │   ├── pathways/
 │   ├── resources/           # Shared FAQ, guidance, and project toolkit
 │   ├── _includes/           # Shared OJS and Colab includes
@@ -133,12 +173,13 @@ makim docs.pdf       # PDF, cover preview, and manifest only
 python scripts/verify_course_pdf.py
 ```
 
-The PDF includes all unit overviews, lessons, and challenges in catalog order.
-Its separate front matter explains offline study and printed code wrapping.
-Browser quizzes become printable questions with an answer key; hints and
-solutions are visible, diagrams become page-sized vectors, and lesson links
-return to the website and Colab. No lesson code executes during the build. PDF
-reading does not update browser progress or create a verified credential.
+The PDF includes milestone overviews and challenges as well as every unit
+overview, lesson, and challenge in catalog order. Its separate front matter
+explains offline study and printed code wrapping. Browser quizzes become
+printable questions with an answer key; hints and solutions are visible,
+diagrams become page-sized vectors, and lesson links return to the website and
+Colab. No lesson code executes during the build. PDF reading does not update
+browser progress or create a verified credential.
 
 For a quick development preview, use
 `--limit-units 1 --output build/pdf/preview.pdf` with

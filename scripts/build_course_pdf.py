@@ -84,6 +84,7 @@ def course_chapters() -> tuple[dict[str, Any], dict[str, Any], list[Chapter]]:
     catalog = yaml.safe_load((DOCS / "courses/_catalog.yml").read_text())
     course = next(c for c in catalog["courses"] if c["id"] == "python-foundations")
     chapters = []
+    milestones = {m["id"]: m for m in course["milestones"]}
     for unit in course["units"]:
         directory = DOCS / unit["directory"]
         lessons = []
@@ -94,9 +95,18 @@ def course_chapters() -> tuple[dict[str, Any], dict[str, Any], list[Chapter]]:
         lessons.sort(key=lambda item: item[0])
         if len(lessons) != unit["lesson_count"]:
             raise ValueError(f"Catalog lesson count mismatch: {unit['id']}")
-        ordered = [(directory / "index.qmd", "overview")]
+        milestone = milestones[unit["milestone_id"]]
+        milestone_directory = DOCS / milestone["directory"]
+        ordered = []
+        if unit["id"] == milestone["unit_ids"][0]:
+            ordered.append((milestone_directory / "index.qmd", "milestone-overview"))
+        ordered.append((directory / "index.qmd", "overview"))
         ordered += [(source, "lesson") for _, source, _, _ in lessons]
         ordered += [(directory / "challenge.qmd", "challenge")]
+        if unit["id"] == milestone["unit_ids"][-1]:
+            ordered.append(
+                (milestone_directory / "challenge.qmd", "milestone-challenge")
+            )
         for source, kind in ordered:
             metadata, body = front_matter(source)
             key = source.relative_to(DOCS).with_suffix("").as_posix()
@@ -890,7 +900,7 @@ class Book(BaseDocTemplate):
         canvas.line(MARGIN, 190, WIDTH - MARGIN, 190)
         canvas.setFont("BookBold", 11)
         canvas.setFillColor(INK)
-        canvas.drawString(MARGIN, 162, "16 units  /  97 lessons  /  16 challenges")
+        canvas.drawString(MARGIN, 162, self.course_summary)
         canvas.setFont("Book", 10)
         canvas.setFillColor(MUTED)
         canvas.drawString(
@@ -974,6 +984,16 @@ def build(
             textColor=MUTED,
         ),
     ]
+    toc.levelStyles.append(
+        ParagraphStyle(
+            "tocActivity",
+            fontName="Book",
+            fontSize=8,
+            leading=11,
+            leftIndent=24,
+            textColor=MUTED,
+        )
+    )
     story += [toc, PageBreak()]
     for chapter in chapters:
         title = (
@@ -985,7 +1005,11 @@ def build(
             heading(
                 title,
                 chapter.key,
-                0 if chapter.kind == "overview" else 1,
+                0
+                if chapter.kind == "milestone-overview"
+                else 1
+                if chapter.kind in {"overview", "milestone-challenge"}
+                else 2,
                 style["title"],
             )
         )
@@ -1116,6 +1140,14 @@ def build(
     destination.parent.mkdir(parents=True, exist_ok=True)
     book = Book(destination)
     book.curriculum_version = catalog["curriculum_version"]
+    challenge_count = len(course["completion"]["challenges"]) + len(
+        course["completion"]["milestone_challenges"]
+    )
+    book.course_summary = (
+        f"{len(course['milestones'])} milestones / {len(course['units'])} units / "
+        f"{course['lesson_count']} lessons / "
+        f"{challenge_count} challenges"
+    )
     book.multiBuild(story)
     from pypdf import PdfReader
 
@@ -1126,7 +1158,10 @@ def build(
         "source_updated": catalog["last_updated"],
         "units": len({c.unit for c in chapters}),
         "lessons": sum(c.kind == "lesson" for c in chapters),
-        "challenges": sum(c.kind == "challenge" for c in chapters),
+        "challenges": sum(
+            c.kind in {"challenge", "milestone-challenge"} for c in chapters
+        ),
+        "milestones": sum(c.kind == "milestone-overview" for c in chapters),
         "checkpoints": len(answers),
         "questions": sum(len(a["quiz"]["questions"]) for a in answers),
         "pages": len(reader.pages),

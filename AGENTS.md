@@ -4,7 +4,7 @@ Guidance for AI agents and maintainers working in this repository.
 
 ## Repository purpose
 
-FreeCampus Python is a beginner-first portfolio of connected Python courses for
+FreeCampus Python is a beginner-first journey of connected Python courses for
 learners ranging from zero programming experience to advanced, scientific, and
 machine-learning work. The public product is a Quarto website. A small Python
 package supports reusable quiz models and notebook widgets.
@@ -47,11 +47,12 @@ Python before moving on.
 │   │   ├── _catalog.yml                  # Canonical course/unit ownership
 │   │   ├── python-foundations/
 │   │   │   ├── _outcomes.yml             # Unit-to-outcome map
-│   │   │   └── units/<unit-id>/          # Overview, lessons, challenge
-│   │   ├── intermediate-python/
-│   │   ├── advanced-python/
+│   │   │   └── milestones/<milestone-id>/
+│   │   │       ├── index.qmd / challenge.qmd
+│   │   │       └── units/<unit-id>/      # Overview, lessons, unit challenge
 │   │   ├── scientific-python/
 │   │   └── data-science-ml/
+│   ├── roadmap/                          # Planned courses without lessons
 │   ├── pathways/                         # Cross-course pathway guidance
 │   └── resources/                        # FAQ and project/support material
 ├── notebooks/                            # Hand-maintained notebook examples
@@ -66,8 +67,9 @@ Python before moving on.
 Use these sources together:
 
 - QMD files are the teaching-content source of truth.
-- `docs/courses/_catalog.yml` owns course titles, units, lesson counts,
-  completion lesson IDs, challenge records, status, and estimated effort.
+- `docs/courses/_catalog.yml` owns course titles, milestones, units, lesson
+  counts, completion lesson IDs, unit and milestone challenge records, status,
+  and estimated effort.
 - Each unit's `_metadata.yml` supplies inherited course/unit identity.
 - `docs/courses/python-foundations/_outcomes.yml` maps every Foundations lesson
   and challenge to unit and graduate outcomes.
@@ -77,6 +79,25 @@ Use these sources together:
 - Tests intentionally enforce many of these relationships. Update the source
   records and their invariant tests together; do not weaken a test merely to
   hide an inconsistent curriculum.
+
+## Journey and milestone structure
+
+- Declare `freecampus.schema-version: 1` and `freecampus.kind: journey` in
+  `docs/_quarto.yml`.
+- Teaching sources use
+  `docs/courses/<course-id>/milestones/<milestone-id>/units/<unit-id>/`.
+- Each milestone has `index.qmd`, `challenge.qmd`, and at least one unit. Each
+  unit has `index.qmd`, lessons, and `challenge.qmd`. All appear in the sidebar.
+- Milestone challenges combine the unit outcomes and provide a concrete task,
+  observable checks, hints, and self-review. They are ungraded and mandatory
+  parts of the learning sequence, like unit challenges.
+- Courses with no published lessons remain public roadmap pages under
+  `docs/roadmap/`. Keep their catalog entries and prerequisite links. Do not
+  create empty lessons or relax validation to mark a planned course complete.
+- Keep existing lesson and unit-challenge IDs stable when moving sources.
+  Milestone challenges use `<milestone-id>.challenge`, separate from lesson IDs.
+  Synchronize completion records, browser data attributes, PDF ordering, and
+  tests.
 
 ## Course portfolio and pathway rules
 
@@ -138,8 +159,8 @@ Keep lessons cohesive, but do not confuse cohesion with brevity. A foundational
 topic needs enough depth for a learner to use it in several contexts.
 
 The rebuilt Unit 1 pages under
-`docs/courses/python-foundations/units/python-syntax/` are the current
-benchmark:
+`docs/courses/python-foundations/milestones/first-programs/units/python-syntax/`
+are the current benchmark:
 
 - the shorter substantive lessons contain roughly 2,900–3,100 instructional
   words and 37–63 runnable examples or repair cases;
@@ -271,8 +292,9 @@ categories:
   - unit-id
   - topic
 order: 10
-colab_notebook: notebooks/courses/python-foundations/units/unit-id/lesson-slug.ipynb
+colab_notebook: notebooks/courses/python-foundations/milestones/milestone-id/units/unit-id/lesson-slug.ipynb
 course_id: python-foundations
+milestone_id: milestone-id
 unit_id: unit-id
 unit_number: 1
 ---
@@ -452,19 +474,19 @@ Shared files:
 - Colab launcher: `docs/_includes/colab-link.qmd`
 - Browser course/progress UI: `docs/_includes/course-ui.html`
 
-For Python Foundations pages under
-`docs/courses/python-foundations/units/<unit-id>/`:
+For unit pages under
+`docs/courses/<course-id>/milestones/<milestone-id>/units/<unit-id>/`:
+
+```markdown
+{{< include ../../../../../../_includes/colab-link.qmd >}}
+{{< include ../../../../../../_includes/ojs-quiz.qmd >}}
+```
+
+For milestone overview and challenge pages:
 
 ```markdown
 {{< include ../../../../_includes/colab-link.qmd >}}
 {{< include ../../../../_includes/ojs-quiz.qmd >}}
-```
-
-For pages under `docs/courses/<course-id>/<unit-id>/`:
-
-```markdown
-{{< include ../../../_includes/colab-link.qmd >}}
-{{< include ../../../_includes/ojs-quiz.qmd >}}
 ```
 
 For pages under `docs/resources/<resource-id>/`:
@@ -561,6 +583,9 @@ finishes and reports the output site.
 
 - `.github/workflows/ci.yml` runs lint, tests, package build, and docs build on
   pull requests and pushes to `main`.
+- Its independent `Course structure` job runs FreeCampus Course Structure Check
+  `0.2.0` against `docs/`, pinned to the release commit. It fails on structural
+  errors; the published teaching sources follow the journey/milestone schema.
 - `.github/workflows/docs.yml` renders `docs/_site` and publishes it to
   `gh-pages` on pushes to `main` and manual dispatch.
 - `.github/workflows/release.yml` is intentionally disabled/no-op; there is no

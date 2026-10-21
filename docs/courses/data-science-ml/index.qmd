@@ -1,7 +1,10 @@
 ---
 title: Data Science and Machine Learning with Python
 description: Move from a data question to a responsibly evaluated model and communicate the evidence.
-categories: [data-science, machine-learning, artificial-intelligence]
+categories:
+- data-science
+- machine-learning
+- artificial-intelligence
 course_id: data-science-ml
 course_title: Data Science and Machine Learning with Python
 course_home: courses/data-science-ml
@@ -9,19 +12,35 @@ course_order: 60
 course_level: Intermediate
 course_status: in-development
 course_status_label: In development
-course_pathway: "scientific statistics"
-course_keywords: "pandas dataframe cleaning statistics seaborn scikit-learn models pytorch tensorflow transformers responsible ai"
+course_pathway: scientific statistics
+course_keywords: pandas dataframe cleaning statistics seaborn scikit-learn models pytorch tensorflow transformers responsible ai
 lesson_count: 10
-estimated_effort: 10–16 hours of current material
+estimated_effort: 16–28 hours of current material
 prerequisite_label: Scientific Computing + Statistics
 page-layout: full
 toc: false
-body-classes: "course-home course-data-ml"
+body-classes: course-home course-data-ml
+lesson_ids:
+- data-science.workflow-and-loading
+- data-science.inspecting-selecting-cleaning
+- data-science.grouping-and-statistics
+- data-science.visualization-with-seaborn
+- data-science.communicating-results
+- machine-learning-ai.concepts-and-datasets
+- machine-learning-ai.training-and-evaluation
+- machine-learning-ai.deep-learning-libraries
+- machine-learning-ai.transformers-overview
+- machine-learning-ai.responsible-ai
+challenge_ids:
+- data-science.challenge
+- machine-learning-ai.challenge
+- explore-data.challenge
+- evaluate-models.challenge
 ---
 
 ::: {.lesson-meta}
 - **Level:** Intermediate
-- **Estimated effort:** 10–16 hours of current material
+- **Estimated effort:** 16–28 hours of current material
 - **Prerequisites:** Scientific Computing and Statistics with Python
 - **Status:** In development; certificate planned
 :::
@@ -33,12 +52,12 @@ the final project, assessment, and certificate are still being developed.
 
 ::: {.callout-important title="Prerequisite"}
 Complete both [Scientific Computing with Python](../scientific-python/index.qmd)
-and [Statistics with Python](../statistics-python/index.qmd). You may take those
+and [Statistics with Python](../../roadmap/statistics-python/index.qmd). You may take those
 two courses in either order.
 :::
 
 ```{=html}
-<div class="fc-course-overview" data-fc-course-overview data-course-id="data-science-ml" data-course-total="10">
+<div class="fc-course-overview" data-fc-course-overview data-course-lesson-ids="data-science.workflow-and-loading data-science.inspecting-selecting-cleaning data-science.grouping-and-statistics data-science.visualization-with-seaborn data-science.communicating-results machine-learning-ai.concepts-and-datasets machine-learning-ai.training-and-evaluation machine-learning-ai.deep-learning-libraries machine-learning-ai.transformers-overview machine-learning-ai.responsible-ai" data-course-challenge-ids="data-science.challenge machine-learning-ai.challenge explore-data.challenge evaluate-models.challenge" data-course-id="data-science-ml" data-course-total="10">
   <div><strong data-fc-course-progress-value>0%</strong><span>current material</span></div>
   <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
     <span data-fc-course-progress-bar></span>
@@ -46,6 +65,15 @@ two courses in either order.
   <span data-fc-course-progress-label>0 of 10 current lessons complete</span>
 </div>
 ```
+
+## Milestone sequence
+
+Each milestone combines its units in an ungraded challenge. Complete the unit
+challenges as you go, then use the milestone challenge to connect those skills.
+Progress is self-reported in this browser on this device.
+
+- [Answer a Question with Tabular Data](milestones/explore-data/index.qmd) — 1 units; [milestone challenge](milestones/explore-data/challenge.qmd).
+- [Evaluate a Model Responsibly](milestones/evaluate-models/index.qmd) — 1 units; [milestone challenge](milestones/evaluate-models/challenge.qmd).
 
 ## Before you start
 
@@ -71,13 +99,13 @@ two courses in either order.
 
 ::: {.course-grid}
 ::: {.course-card}
-### 1. [Data Science](data-science/index.qmd)
+### 1. [Data Science](milestones/explore-data/units/data-science/index.qmd)
 
 Load, inspect, clean, summarize, visualize, and communicate tabular data.
 :::
 
 ::: {.course-card}
-### 2. [Machine Learning and AI](machine-learning-ai/index.qmd)
+### 2. [Machine Learning and AI](milestones/evaluate-models/units/machine-learning-ai/index.qmd)
 
 Train and evaluate a first model, understand the broader library landscape, and
 consider responsible AI.
@@ -100,5 +128,5 @@ project rubric, and certificate assessment are not complete. After the current
 material, use the Project Toolkit to plan a small analysis while the full
 capstone is developed.
 
-[Start with the data workflow](data-science/workflow-and-loading.qmd){.btn .btn-primary data-fc-course-resume="data-science-ml"}
+[Start with the data workflow](milestones/explore-data/units/data-science/workflow-and-loading.qmd){.btn .btn-primary data-fc-course-resume="data-science-ml"}
 [Open the Project Toolkit](../../resources/project-toolkit/index.qmd){.btn .btn-outline-primary}

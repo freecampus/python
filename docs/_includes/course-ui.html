@@ -24,7 +24,7 @@
     function pageKey(value = window.location.href) {
       const url = new URL(value, window.location.href);
       const match = url.pathname.match(
-        /\/(lessons|courses|resources|pathways)\//,
+        /\/(lessons|courses|resources|pathways|roadmap)\//,
       );
 
       if (!match) {
@@ -40,7 +40,9 @@
 
     function siteBasePath() {
       const pathname = window.location.pathname;
-      const match = pathname.match(/\/(lessons|courses|resources|pathways)\//);
+      const match = pathname.match(
+        /\/(lessons|courses|resources|pathways|roadmap)\//,
+      );
 
       if (match) {
         return pathname.slice(0, match.index + 1);
@@ -71,9 +73,11 @@
       const parts = key.split("/");
       return (
         parts[0] === "courses" &&
-        parts[2] === "units" &&
-        parts.length === 5 &&
-        parts[4] === "challenge"
+        parts[2] === "milestones" &&
+        ((parts.length === 5 && parts[4] === "challenge") ||
+          (parts.length === 7 &&
+            parts[4] === "units" &&
+            parts[6] === "challenge"))
       );
     }
 
@@ -81,16 +85,20 @@
       if (!isChallengeKey(key)) {
         return "";
       }
-      return `${key.split("/")[3]}.challenge`;
+      const parts = key.split("/");
+      return `${parts.length === 7 ? parts[5] : parts[3]}.challenge`;
     }
 
     function isLessonKey(key) {
       const parts = key.split("/");
-      const unitLesson =
-        parts[0] === "courses" && parts[2] === "units" && parts.length >= 5;
-      const directCourseLesson =
-        parts[0] === "courses" && parts[2] !== "units" && parts.length >= 4;
-      return (unitLesson || directCourseLesson) && !isChallengeKey(key);
+      return (
+        parts[0] === "courses" &&
+        parts[2] === "milestones" &&
+        parts[4] === "units" &&
+        parts.length === 7 &&
+        parts[6] !== "index" &&
+        !isChallengeKey(key)
+      );
     }
 
     function isProjectKey(key) {
@@ -102,9 +110,8 @@
         return "";
       }
       const parts = key.split("/");
-      const lessonParts =
-        parts[2] === "units" ? parts.slice(3) : parts.slice(2);
-      return lessonParts.join(".");
+      // Preserve existing lesson IDs when a unit moves into a milestone.
+      return parts.slice(5).join(".");
     }
 
     function emptyProgress() {
@@ -151,8 +158,8 @@
       }
       if (!progress.courses[id] && create) {
         progress.courses[id] = {
-          curriculum_version: 21,
-          completion_rule_version: 12,
+          curriculum_version: 22,
+          completion_rule_version: 13,
           completed_lessons: {},
           completed_challenges: {},
           capstone_status: "not_started",
@@ -163,8 +170,8 @@
       }
       const state = progress.courses[id] || null;
       if (state) {
-        state.curriculum_version = 21;
-        state.completion_rule_version = 12;
+        state.curriculum_version = 22;
+        state.completion_rule_version = 13;
         state.completed_lessons = state.completed_lessons || {};
         state.completed_challenges = state.completed_challenges || {};
         state.capstone_status = state.capstone_status || "not_started";
@@ -375,7 +382,10 @@
           unit.position + 1
         } of ${unit.lessonLinks.length}`;
       } else if (position && challengeId) {
-        position.textContent = "Unit challenge";
+        position.textContent =
+          currentKey.split("/").length === 5
+            ? "Milestone challenge"
+            : "Unit challenge";
       } else if (position && projectId) {
         position.textContent = "Course project";
       }
@@ -618,7 +628,7 @@
       const panel = document.querySelector("[data-fc-resume]");
       const saved = readJson(lastLessonKey, null);
       const lastLesson = saved?.global;
-      if (!panel || !lastLesson?.key) {
+      if (!panel || !lastLesson?.key || !isLessonKey(lastLesson.key)) {
         return;
       }
 

@@ -1,9 +1,10 @@
 # About this edition
 
 This is the complete Python Foundations course from FreeCampus: one connected
-sequence of 16 units, 97 lessons, and 16 unit challenges. It starts with no
-programming experience and continues through practical Python projects, testing,
-packaging, command-line applications, and documentation.
+sequence of 4 milestones, 16 units, 97 lessons, 16 unit challenges, and 4
+milestone challenges. It starts with no programming experience and continues
+through practical Python projects, testing, packaging, command-line
+applications, and documentation.
 
 This PDF is generated from the same lesson files as the website. Curriculum
 version **{{version}}** is printed here; the website may receive later

@@ -129,19 +129,24 @@ challenge_ids:
 - testing-python-programs.challenge
 - code-quality-maintainability.challenge
 - documentation-publishing.challenge
-estimated_effort: 380–540 hours
+- first-programs.challenge
+- work-with-data.challenge
+- reliable-programs.challenge
+- ship-python-projects.challenge
+estimated_effort: 388–556 hours
 prerequisite_label: None
 page-layout: full
 toc: false
 body-classes: course-home course-foundations
 ---
-::: {.fc-course-facts-inline}
-**No prerequisites** · 16 units · 97 lessons · Free to study
 
-**Active study:** 380–540 hours, at your own pace.
+::: {.fc-course-facts-inline}
+**No prerequisites** · 4 milestones · 16 units · 97 lessons · Free to study
+
+**Active study:** 388–556 hours, at your own pace.
 :::
 
-[Start Unit 0](units/get-started/index.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
+[Start Unit 0](milestones/first-programs/units/get-started/index.qmd){.btn .btn-primary data-fc-course-resume="python-foundations"}
 [Explore the units](#learning-sequence){.fc-secondary-link}
 
 Start with small programs in your browser. Progress through the language,
@@ -153,10 +158,10 @@ and documentation. This is a substantial course: take one lesson at a time.
 <div
   class="fc-course-overview fc-completion-overview"
   data-fc-course-overview
+  data-course-lesson-ids="get-started.meet-python-first-program get-started.learn-with-evidence get-started.use-ai-responsibly get-started.notebook-workflows get-started.local-python-workspace python-syntax.values-names-assignment python-syntax.expressions-statements-execution-order python-syntax.python-words-symbols python-syntax.indentation-code-blocks python-syntax.writing-code-across-lines python-syntax.comments-docstrings python-syntax.reading-fixing-syntax-errors core-values-types.values-types-none-conversion core-values-types.integer-arithmetic core-values-types.floating-point-precision core-values-types.money-ratios-complex-numbers core-values-types.strings-unicode-text core-values-types.input-output-formatting core-values-types.booleans-comparisons-truth core-values-types.dates-times-durations collections-iteration.lists collections-iteration.tuples-unpacking collections-iteration.dictionaries collections-iteration.sets-frozensets collections-iteration.traversing-collections collections-iteration.sorting-collections collections-iteration.nested-data-collection-choice decisions-repetition.conditional-branches decisions-repetition.boolean-rules-short-circuit decisions-repetition.decision-tables-boundaries decisions-repetition.for-loop-patterns decisions-repetition.while-loops-termination decisions-repetition.search-loop-control decisions-repetition.nested-loops-grids decisions-repetition.comprehensions functions-call-behavior.defining-calling-returning functions-call-behavior.parameters-stable-interfaces functions-call-behavior.contracts-decomposition-side-effects functions-call-behavior.scope-name-resolution-call-stack functions-call-behavior.functions-values-callbacks functions-call-behavior.recursion-recursive-tracing functions-call-behavior.iterators-generators-lazy-values functions-call-behavior.decorators-function-contracts mutability-identity-copying.equality-identity-references mutability-identity-copying.mutable-immutable-hashable mutability-identity-copying.aliasing-shallow-deep-copies mutability-identity-copying.mutation-function-boundaries problem-solving-algorithms.problems-examples-acceptance problem-solving-algorithms.decomposition-pseudocode-implementation problem-solving-algorithms.core-algorithm-patterns problem-solving-algorithms.correctness-boundaries-efficiency errors-exceptions-debugging.failure-categories-tracebacks errors-exceptions-debugging.raising-handling-exceptions errors-exceptions-debugging.repeatable-debugging-method errors-exceptions-debugging.debugger-minimal-reproductions files-paths-external-data.paths-text-files-resources files-paths-external-data.unicode-encodings-newlines files-paths-external-data.csv-json-yaml-records files-paths-external-data.text-patterns-validation-pipelines files-paths-external-data.bytes-binary-memory-streams modules-environments-projects.builtins-standard-library-help modules-environments-projects.modules-imports-entry-points modules-environments-projects.packages-public-interfaces modules-environments-projects.project-layout-git-essentials modules-environments-projects.virtual-environments-dependencies modules-environments-projects.pyproject-builds-tools object-oriented-python.objects-classes-instances-self object-oriented-python.initialization-invariants-properties object-oriented-python.dataclasses-representation-equality object-oriented-python.composition-inheritance-design object-oriented-python.road-crossing-game-model command-line-applications.argparse-command-design command-line-applications.streams-errors-exit-codes command-line-applications.configuration-precedence-secrets command-line-applications.logging-useful-diagnostics command-line-applications.cli-ecosystem-testable-architecture testing-python-programs.what-tests-prove testing-python-programs.pytest-discovery-failures testing-python-programs.parametrization-boundary-cases testing-python-programs.fixtures-isolation-capture testing-python-programs.test-doubles-dependency-injection testing-python-programs.test-levels testing-python-programs.properties-regressions-tdd code-quality-maintainability.readable-python-pep8 code-quality-maintainability.type-annotations-static-checking code-quality-maintainability.mypy-diagnostics-boundaries code-quality-maintainability.formatting-linting-configuration code-quality-maintainability.precommit-quality-gates code-quality-maintainability.continuous-integration-quality-gates code-quality-maintainability.evidence-driven-refactoring documentation-publishing.documentation-audiences-readme documentation-publishing.clear-instructions-accessibility documentation-publishing.docstrings-api-documentation documentation-publishing.doctest-executable-documentation documentation-publishing.documentation-quality-checks documentation-publishing.documentation-toolchains-publishing documentation-publishing.publishing-maintaining-documentation"
+  data-course-challenge-ids="get-started.challenge python-syntax.challenge core-values-types.challenge collections-iteration.challenge decisions-repetition.challenge functions-call-behavior.challenge mutability-identity-copying.challenge problem-solving-algorithms.challenge errors-exceptions-debugging.challenge files-paths-external-data.challenge modules-environments-projects.challenge object-oriented-python.challenge command-line-applications.challenge testing-python-programs.challenge code-quality-maintainability.challenge documentation-publishing.challenge first-programs.challenge work-with-data.challenge reliable-programs.challenge ship-python-projects.challenge"
   data-course-id="python-foundations"
   data-course-total="97"
-  data-course-lesson-ids="get-started.meet-python-first-program get-started.learn-with-evidence get-started.use-ai-responsibly get-started.notebook-workflows get-started.local-python-workspace python-syntax.values-names-assignment python-syntax.expressions-statements-execution-order python-syntax.python-words-symbols python-syntax.indentation-code-blocks python-syntax.writing-code-across-lines python-syntax.comments-docstrings python-syntax.reading-fixing-syntax-errors core-values-types.values-types-none-conversion core-values-types.integer-arithmetic core-values-types.floating-point-precision core-values-types.money-ratios-complex-numbers core-values-types.strings-unicode-text core-values-types.input-output-formatting core-values-types.booleans-comparisons-truth core-values-types.dates-times-durations collections-iteration.lists collections-iteration.tuples-unpacking collections-iteration.dictionaries collections-iteration.sets-frozensets collections-iteration.traversing-collections collections-iteration.sorting-collections collections-iteration.nested-data-collection-choice decisions-repetition.conditional-branches decisions-repetition.boolean-rules-short-circuit decisions-repetition.decision-tables-boundaries decisions-repetition.for-loop-patterns decisions-repetition.while-loops-termination decisions-repetition.search-loop-control decisions-repetition.nested-loops-grids decisions-repetition.comprehensions functions-call-behavior.defining-calling-returning functions-call-behavior.parameters-stable-interfaces functions-call-behavior.contracts-decomposition-side-effects functions-call-behavior.scope-name-resolution-call-stack functions-call-behavior.functions-values-callbacks functions-call-behavior.recursion-recursive-tracing functions-call-behavior.iterators-generators-lazy-values functions-call-behavior.decorators-function-contracts mutability-identity-copying.equality-identity-references mutability-identity-copying.mutable-immutable-hashable mutability-identity-copying.aliasing-shallow-deep-copies mutability-identity-copying.mutation-function-boundaries problem-solving-algorithms.problems-examples-acceptance problem-solving-algorithms.decomposition-pseudocode-implementation problem-solving-algorithms.core-algorithm-patterns problem-solving-algorithms.correctness-boundaries-efficiency errors-exceptions-debugging.failure-categories-tracebacks errors-exceptions-debugging.raising-handling-exceptions errors-exceptions-debugging.repeatable-debugging-method errors-exceptions-debugging.debugger-minimal-reproductions files-paths-external-data.paths-text-files-resources files-paths-external-data.unicode-encodings-newlines files-paths-external-data.csv-json-yaml-records files-paths-external-data.text-patterns-validation-pipelines files-paths-external-data.bytes-binary-memory-streams modules-environments-projects.builtins-standard-library-help modules-environments-projects.modules-imports-entry-points modules-environments-projects.packages-public-interfaces modules-environments-projects.project-layout-git-essentials modules-environments-projects.virtual-environments-dependencies modules-environments-projects.pyproject-builds-tools object-oriented-python.objects-classes-instances-self object-oriented-python.initialization-invariants-properties object-oriented-python.dataclasses-representation-equality object-oriented-python.composition-inheritance-design object-oriented-python.road-crossing-game-model command-line-applications.argparse-command-design command-line-applications.streams-errors-exit-codes command-line-applications.configuration-precedence-secrets command-line-applications.logging-useful-diagnostics command-line-applications.cli-ecosystem-testable-architecture testing-python-programs.what-tests-prove testing-python-programs.pytest-discovery-failures testing-python-programs.parametrization-boundary-cases testing-python-programs.fixtures-isolation-capture testing-python-programs.test-doubles-dependency-injection testing-python-programs.test-levels testing-python-programs.properties-regressions-tdd code-quality-maintainability.readable-python-pep8 code-quality-maintainability.type-annotations-static-checking code-quality-maintainability.mypy-diagnostics-boundaries code-quality-maintainability.formatting-linting-configuration code-quality-maintainability.precommit-quality-gates code-quality-maintainability.continuous-integration-quality-gates code-quality-maintainability.evidence-driven-refactoring documentation-publishing.documentation-audiences-readme documentation-publishing.clear-instructions-accessibility documentation-publishing.docstrings-api-documentation documentation-publishing.doctest-executable-documentation documentation-publishing.documentation-quality-checks documentation-publishing.documentation-toolchains-publishing documentation-publishing.publishing-maintaining-documentation"
-  data-course-challenge-ids="get-started.challenge python-syntax.challenge core-values-types.challenge collections-iteration.challenge decisions-repetition.challenge functions-call-behavior.challenge mutability-identity-copying.challenge problem-solving-algorithms.challenge errors-exceptions-debugging.challenge files-paths-external-data.challenge modules-environments-projects.challenge object-oriented-python.challenge command-line-applications.challenge testing-python-programs.challenge code-quality-maintainability.challenge documentation-publishing.challenge"
 >
   <div><strong data-fc-course-progress-value>0%</strong><span>course work recorded</span></div>
   <div class="fc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-fc-course-progress-track>
@@ -164,9 +169,9 @@ and documentation. This is a substantial course: take one lesson at a time.
   </div>
   <div class="fc-requirement-grid">
     <div><strong data-fc-course-lessons>0/97</strong><span>lessons</span></div>
-    <div><strong data-fc-course-challenges>0/16</strong><span>unit challenges</span></div>
+    <div><strong data-fc-course-challenges>0/20</strong><span>unit and milestone challenges</span></div>
   </div>
-  <span data-fc-course-progress-label>113 course activities remaining</span>
+  <span data-fc-course-progress-label>117 course activities remaining</span>
   <strong class="fc-completion-status" data-fc-course-completion-status>Course in progress</strong>
 </div>
 ```
@@ -179,6 +184,17 @@ and documentation. This is a substantial course: take one lesson at a time.
 - Find bugs and check that your programs behave as intended.
 - Build, test, document, and share practical Python projects.
 
+## Milestone sequence
+
+Each milestone combines its units in an ungraded challenge. Complete the unit
+challenges as you go, then use the milestone challenge to connect those skills.
+Progress is self-reported in this browser on this device.
+
+- [Write and Explain Your First Programs](milestones/first-programs/index.qmd) — 3 units; [milestone challenge](milestones/first-programs/challenge.qmd).
+- [Turn Data into Reusable Decisions](milestones/work-with-data/index.qmd) — 4 units; [milestone challenge](milestones/work-with-data/challenge.qmd).
+- [Build Reliable Programs from External Data](milestones/reliable-programs/index.qmd) — 4 units; [milestone challenge](milestones/reliable-programs/challenge.qmd).
+- [Ship a Tested and Documented Python Tool](milestones/ship-python-projects/index.qmd) — 5 units; [milestone challenge](milestones/ship-python-projects/challenge.qmd).
+
 ## Before you start
 
 You only need a browser to begin; no programming or mathematics prerequisite
@@ -190,233 +206,234 @@ Each unit ends with a challenge that brings its ideas together.
 
 ## Learning sequence
 
-Python Foundations curriculum version 21 contains **16 units** and
-**97 cohesive lessons**. Each unit begins with an Overview and
-ends with a challenge.
+Python Foundations curriculum version 22 contains **16 units** and
+**97 cohesive lessons**, grouped into **4 milestones**. Each unit begins with an
+Overview and ends with a challenge. Each milestone ends with a separate
+challenge connecting its units: **16 unit challenges and 4 milestone challenges**.
 
 ::: {.fc-unit-list}
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">00</span><span class="fc-unit-summary"><strong>Get Started</strong><span>Run your first program and choose a reliable practice workflow.</span></span><span class="fc-unit-count">5 lessons</span></summary>
 
-[Unit overview](units/get-started/index.qmd) · [Unit challenge](units/get-started/challenge.qmd)
+[Unit overview](milestones/first-programs/units/get-started/index.qmd) · [Unit challenge](milestones/first-programs/units/get-started/challenge.qmd)
 
-1. [Meet Python Through a Tiny Program](units/get-started/meet-python-first-program.qmd)
-2. [Learn with Predictions and Evidence](units/get-started/learn-with-evidence.qmd)
-3. [Use AI While Keeping the Thinking Yours](units/get-started/use-ai-responsibly.qmd)
-4. [Work Reliably in Colab and Jupyter](units/get-started/notebook-workflows.qmd)
-5. [Build a Dependable Local Python Workspace](units/get-started/local-python-workspace.qmd)
+1. [Meet Python Through a Tiny Program](milestones/first-programs/units/get-started/meet-python-first-program.qmd)
+2. [Learn with Predictions and Evidence](milestones/first-programs/units/get-started/learn-with-evidence.qmd)
+3. [Use AI While Keeping the Thinking Yours](milestones/first-programs/units/get-started/use-ai-responsibly.qmd)
+4. [Work Reliably in Colab and Jupyter](milestones/first-programs/units/get-started/notebook-workflows.qmd)
+5. [Build a Dependable Local Python Workspace](milestones/first-programs/units/get-started/local-python-workspace.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">01</span><span class="fc-unit-summary"><strong>Learning to Read and Write Python Code</strong><span>Read Python instructions and repair common syntax errors.</span></span><span class="fc-unit-count">7 lessons</span></summary>
 
-[Unit overview](units/python-syntax/index.qmd) · [Unit challenge](units/python-syntax/challenge.qmd)
+[Unit overview](milestones/first-programs/units/python-syntax/index.qmd) · [Unit challenge](milestones/first-programs/units/python-syntax/challenge.qmd)
 
-1. [Values, Names, and Assignment](units/python-syntax/values-names-assignment.qmd)
-2. [Expressions, Statements, and Execution Order](units/python-syntax/expressions-statements-execution-order.qmd)
-3. [Python's Words and Symbols](units/python-syntax/python-words-symbols.qmd)
-4. [Indentation and Code Blocks](units/python-syntax/indentation-code-blocks.qmd)
-5. [Writing Python Across Multiple Lines](units/python-syntax/writing-code-across-lines.qmd)
-6. [Comments and Docstrings That Help](units/python-syntax/comments-docstrings.qmd)
-7. [Reading and Fixing Syntax Errors](units/python-syntax/reading-fixing-syntax-errors.qmd)
+1. [Values, Names, and Assignment](milestones/first-programs/units/python-syntax/values-names-assignment.qmd)
+2. [Expressions, Statements, and Execution Order](milestones/first-programs/units/python-syntax/expressions-statements-execution-order.qmd)
+3. [Python's Words and Symbols](milestones/first-programs/units/python-syntax/python-words-symbols.qmd)
+4. [Indentation and Code Blocks](milestones/first-programs/units/python-syntax/indentation-code-blocks.qmd)
+5. [Writing Python Across Multiple Lines](milestones/first-programs/units/python-syntax/writing-code-across-lines.qmd)
+6. [Comments and Docstrings That Help](milestones/first-programs/units/python-syntax/comments-docstrings.qmd)
+7. [Reading and Fixing Syntax Errors](milestones/first-programs/units/python-syntax/reading-fixing-syntax-errors.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">02</span><span class="fc-unit-summary"><strong>Numbers, Text, and Other Values</strong><span>Choose, convert, and format numbers, text, truth values, and time.</span></span><span class="fc-unit-count">8 lessons</span></summary>
 
-[Unit overview](units/core-values-types/index.qmd) · [Unit challenge](units/core-values-types/challenge.qmd)
+[Unit overview](milestones/first-programs/units/core-values-types/index.qmd) · [Unit challenge](milestones/first-programs/units/core-values-types/challenge.qmd)
 
-1. [Values, Types, Conversion, and None](units/core-values-types/values-types-none-conversion.qmd)
-2. [Integers and Everyday Arithmetic](units/core-values-types/integer-arithmetic.qmd)
-3. [Floating-Point Numbers and Precision](units/core-values-types/floating-point-precision.qmd)
-4. [Money, Exact Ratios, and Complex Numbers](units/core-values-types/money-ratios-complex-numbers.qmd)
-5. [Strings and Unicode Text](units/core-values-types/strings-unicode-text.qmd)
-6. [Input, Output, and Clear Formatting](units/core-values-types/input-output-formatting.qmd)
-7. [Booleans, Comparisons, and Truth](units/core-values-types/booleans-comparisons-truth.qmd)
-8. [Dates, Times, and Durations](units/core-values-types/dates-times-durations.qmd)
+1. [Values, Types, Conversion, and None](milestones/first-programs/units/core-values-types/values-types-none-conversion.qmd)
+2. [Integers and Everyday Arithmetic](milestones/first-programs/units/core-values-types/integer-arithmetic.qmd)
+3. [Floating-Point Numbers and Precision](milestones/first-programs/units/core-values-types/floating-point-precision.qmd)
+4. [Money, Exact Ratios, and Complex Numbers](milestones/first-programs/units/core-values-types/money-ratios-complex-numbers.qmd)
+5. [Strings and Unicode Text](milestones/first-programs/units/core-values-types/strings-unicode-text.qmd)
+6. [Input, Output, and Clear Formatting](milestones/first-programs/units/core-values-types/input-output-formatting.qmd)
+7. [Booleans, Comparisons, and Truth](milestones/first-programs/units/core-values-types/booleans-comparisons-truth.qmd)
+8. [Dates, Times, and Durations](milestones/first-programs/units/core-values-types/dates-times-durations.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">03</span><span class="fc-unit-summary"><strong>Organizing and Traversing Collections</strong><span>Organize data and work through collections without losing relationships.</span></span><span class="fc-unit-count">7 lessons</span></summary>
 
-[Unit overview](units/collections-iteration/index.qmd) · [Unit challenge](units/collections-iteration/challenge.qmd)
+[Unit overview](milestones/work-with-data/units/collections-iteration/index.qmd) · [Unit challenge](milestones/work-with-data/units/collections-iteration/challenge.qmd)
 
-1. [Lists: Keeping Values in Order](units/collections-iteration/lists.qmd)
-2. [Tuples and Unpacking Fixed Records](units/collections-iteration/tuples-unpacking.qmd)
-3. [Dictionaries: Finding Values by Key](units/collections-iteration/dictionaries.qmd)
-4. [Sets: Uniqueness and Group Comparisons](units/collections-iteration/sets-frozensets.qmd)
-5. [Visiting Items in a Collection](units/collections-iteration/traversing-collections.qmd)
-6. [Sorting Collections Without Losing Meaning](units/collections-iteration/sorting-collections.qmd)
-7. [Building and Reading Nested Data](units/collections-iteration/nested-data-collection-choice.qmd)
+1. [Lists: Keeping Values in Order](milestones/work-with-data/units/collections-iteration/lists.qmd)
+2. [Tuples and Unpacking Fixed Records](milestones/work-with-data/units/collections-iteration/tuples-unpacking.qmd)
+3. [Dictionaries: Finding Values by Key](milestones/work-with-data/units/collections-iteration/dictionaries.qmd)
+4. [Sets: Uniqueness and Group Comparisons](milestones/work-with-data/units/collections-iteration/sets-frozensets.qmd)
+5. [Visiting Items in a Collection](milestones/work-with-data/units/collections-iteration/traversing-collections.qmd)
+6. [Sorting Collections Without Losing Meaning](milestones/work-with-data/units/collections-iteration/sorting-collections.qmd)
+7. [Building and Reading Nested Data](milestones/work-with-data/units/collections-iteration/nested-data-collection-choice.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">04</span><span class="fc-unit-summary"><strong>Making Decisions and Repeating Work</strong><span>Turn rules into decisions and repeat work with loops.</span></span><span class="fc-unit-count">8 lessons</span></summary>
 
-[Unit overview](units/decisions-repetition/index.qmd) · [Unit challenge](units/decisions-repetition/challenge.qmd)
+[Unit overview](milestones/work-with-data/units/decisions-repetition/index.qmd) · [Unit challenge](milestones/work-with-data/units/decisions-repetition/challenge.qmd)
 
-1. [Choosing a Path with `if`, `elif`, and `else`](units/decisions-repetition/conditional-branches.qmd)
-2. [Combining Conditions Without Surprises](units/decisions-repetition/boolean-rules-short-circuit.qmd)
-3. [Turning Rules into Complete Decisions](units/decisions-repetition/decision-tables-boundaries.qmd)
-4. [Building Results with `for` Loops](units/decisions-repetition/for-loop-patterns.qmd)
-5. [Repeating Until Something Changes](units/decisions-repetition/while-loops-termination.qmd)
-6. [Searching, Skipping, and Stopping Loops](units/decisions-repetition/search-loop-control.qmd)
-7. [Working Through Grids and Pairs](units/decisions-repetition/nested-loops-grids.qmd)
-8. [Building Collections with Comprehensions](units/decisions-repetition/comprehensions.qmd)
+1. [Choosing a Path with `if`, `elif`, and `else`](milestones/work-with-data/units/decisions-repetition/conditional-branches.qmd)
+2. [Combining Conditions Without Surprises](milestones/work-with-data/units/decisions-repetition/boolean-rules-short-circuit.qmd)
+3. [Turning Rules into Complete Decisions](milestones/work-with-data/units/decisions-repetition/decision-tables-boundaries.qmd)
+4. [Building Results with `for` Loops](milestones/work-with-data/units/decisions-repetition/for-loop-patterns.qmd)
+5. [Repeating Until Something Changes](milestones/work-with-data/units/decisions-repetition/while-loops-termination.qmd)
+6. [Searching, Skipping, and Stopping Loops](milestones/work-with-data/units/decisions-repetition/search-loop-control.qmd)
+7. [Working Through Grids and Pairs](milestones/work-with-data/units/decisions-repetition/nested-loops-grids.qmd)
+8. [Building Collections with Comprehensions](milestones/work-with-data/units/decisions-repetition/comprehensions.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">05</span><span class="fc-unit-summary"><strong>Building Reusable Functions</strong><span>Build functions with clear inputs, results, and behavior.</span></span><span class="fc-unit-count">8 lessons</span></summary>
 
-[Unit overview](units/functions-call-behavior/index.qmd) · [Unit challenge](units/functions-call-behavior/challenge.qmd)
+[Unit overview](milestones/work-with-data/units/functions-call-behavior/index.qmd) · [Unit challenge](milestones/work-with-data/units/functions-call-behavior/challenge.qmd)
 
-1. [Defining Functions and Returning Useful Results](units/functions-call-behavior/defining-calling-returning.qmd)
-2. [Designing Clear Parameters and Calls](units/functions-call-behavior/parameters-stable-interfaces.qmd)
-3. [Breaking a Program into Small Functions](units/functions-call-behavior/contracts-decomposition-side-effects.qmd)
-4. [Following Names Through Function Calls](units/functions-call-behavior/scope-name-resolution-call-stack.qmd)
-5. [Passing Functions as Values](units/functions-call-behavior/functions-values-callbacks.qmd)
-6. [Solving Smaller Problems with Recursion](units/functions-call-behavior/recursion-recursive-tracing.qmd)
-7. [Producing Values One at a Time](units/functions-call-behavior/iterators-generators-lazy-values.qmd)
-8. [Adding Behavior with Decorators](units/functions-call-behavior/decorators-function-contracts.qmd)
+1. [Defining Functions and Returning Useful Results](milestones/work-with-data/units/functions-call-behavior/defining-calling-returning.qmd)
+2. [Designing Clear Parameters and Calls](milestones/work-with-data/units/functions-call-behavior/parameters-stable-interfaces.qmd)
+3. [Breaking a Program into Small Functions](milestones/work-with-data/units/functions-call-behavior/contracts-decomposition-side-effects.qmd)
+4. [Following Names Through Function Calls](milestones/work-with-data/units/functions-call-behavior/scope-name-resolution-call-stack.qmd)
+5. [Passing Functions as Values](milestones/work-with-data/units/functions-call-behavior/functions-values-callbacks.qmd)
+6. [Solving Smaller Problems with Recursion](milestones/work-with-data/units/functions-call-behavior/recursion-recursive-tracing.qmd)
+7. [Producing Values One at a Time](milestones/work-with-data/units/functions-call-behavior/iterators-generators-lazy-values.qmd)
+8. [Adding Behavior with Decorators](milestones/work-with-data/units/functions-call-behavior/decorators-function-contracts.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">06</span><span class="fc-unit-summary"><strong>Sharing, Changing, and Copying Objects</strong><span>Understand shared objects and control changes and copies.</span></span><span class="fc-unit-count">4 lessons</span></summary>
 
-[Unit overview](units/mutability-identity-copying/index.qmd) · [Unit challenge](units/mutability-identity-copying/challenge.qmd)
+[Unit overview](milestones/work-with-data/units/mutability-identity-copying/index.qmd) · [Unit challenge](milestones/work-with-data/units/mutability-identity-copying/challenge.qmd)
 
-1. [When Names Share the Same Object](units/mutability-identity-copying/equality-identity-references.qmd)
-2. [Changing Objects and Choosing Safe Keys](units/mutability-identity-copying/mutable-immutable-hashable.qmd)
-3. [Copying Nested Data Without Surprises](units/mutability-identity-copying/aliasing-shallow-deep-copies.qmd)
-4. [Designing Functions That Control Mutation](units/mutability-identity-copying/mutation-function-boundaries.qmd)
+1. [When Names Share the Same Object](milestones/work-with-data/units/mutability-identity-copying/equality-identity-references.qmd)
+2. [Changing Objects and Choosing Safe Keys](milestones/work-with-data/units/mutability-identity-copying/mutable-immutable-hashable.qmd)
+3. [Copying Nested Data Without Surprises](milestones/work-with-data/units/mutability-identity-copying/aliasing-shallow-deep-copies.qmd)
+4. [Designing Functions That Control Mutation](milestones/work-with-data/units/mutability-identity-copying/mutation-function-boundaries.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">07</span><span class="fc-unit-summary"><strong>Solving Problems with Algorithms</strong><span>Break problems into steps and check your algorithms.</span></span><span class="fc-unit-count">4 lessons</span></summary>
 
-[Unit overview](units/problem-solving-algorithms/index.qmd) · [Unit challenge](units/problem-solving-algorithms/challenge.qmd)
+[Unit overview](milestones/reliable-programs/units/problem-solving-algorithms/index.qmd) · [Unit challenge](milestones/reliable-programs/units/problem-solving-algorithms/challenge.qmd)
 
-1. [Turn a Vague Idea into Testable Examples](units/problem-solving-algorithms/problems-examples-acceptance.qmd)
-2. [Turn a Plan into Working Python](units/problem-solving-algorithms/decomposition-pseudocode-implementation.qmd)
-3. [Choose an Algorithm That Fits](units/problem-solving-algorithms/core-algorithm-patterns.qmd)
-4. [Know It Works and Understand the Cost](units/problem-solving-algorithms/correctness-boundaries-efficiency.qmd)
+1. [Turn a Vague Idea into Testable Examples](milestones/reliable-programs/units/problem-solving-algorithms/problems-examples-acceptance.qmd)
+2. [Turn a Plan into Working Python](milestones/reliable-programs/units/problem-solving-algorithms/decomposition-pseudocode-implementation.qmd)
+3. [Choose an Algorithm That Fits](milestones/reliable-programs/units/problem-solving-algorithms/core-algorithm-patterns.qmd)
+4. [Know It Works and Understand the Cost](milestones/reliable-programs/units/problem-solving-algorithms/correctness-boundaries-efficiency.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">08</span><span class="fc-unit-summary"><strong>Errors, Exceptions, and Debugging</strong><span>Read errors, investigate bugs, and verify repairs.</span></span><span class="fc-unit-count">4 lessons</span></summary>
 
-[Unit overview](units/errors-exceptions-debugging/index.qmd) · [Unit challenge](units/errors-exceptions-debugging/challenge.qmd)
+[Unit overview](milestones/reliable-programs/units/errors-exceptions-debugging/index.qmd) · [Unit challenge](milestones/reliable-programs/units/errors-exceptions-debugging/challenge.qmd)
 
-1. [Understand Failures and Read Tracebacks](units/errors-exceptions-debugging/failure-categories-tracebacks.qmd)
-2. [Raise Useful Errors and Handle Expected Failures](units/errors-exceptions-debugging/raising-handling-exceptions.qmd)
-3. [Debug One Hypothesis at a Time](units/errors-exceptions-debugging/repeatable-debugging-method.qmd)
-4. [Pause, Inspect, and Shrink a Bug](units/errors-exceptions-debugging/debugger-minimal-reproductions.qmd)
+1. [Understand Failures and Read Tracebacks](milestones/reliable-programs/units/errors-exceptions-debugging/failure-categories-tracebacks.qmd)
+2. [Raise Useful Errors and Handle Expected Failures](milestones/reliable-programs/units/errors-exceptions-debugging/raising-handling-exceptions.qmd)
+3. [Debug One Hypothesis at a Time](milestones/reliable-programs/units/errors-exceptions-debugging/repeatable-debugging-method.qmd)
+4. [Pause, Inspect, and Shrink a Bug](milestones/reliable-programs/units/errors-exceptions-debugging/debugger-minimal-reproductions.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">09</span><span class="fc-unit-summary"><strong>Files, Paths, and External Data</strong><span>Read, validate, and write files and external records.</span></span><span class="fc-unit-count">5 lessons</span></summary>
 
-[Unit overview](units/files-paths-external-data/index.qmd) · [Unit challenge](units/files-paths-external-data/challenge.qmd)
+[Unit overview](milestones/reliable-programs/units/files-paths-external-data/index.qmd) · [Unit challenge](milestones/reliable-programs/units/files-paths-external-data/challenge.qmd)
 
-1. [Find, Read, and Write Files Reliably](units/files-paths-external-data/paths-text-files-resources.qmd)
-2. [Keep Text Intact Across Encodings and Newlines](units/files-paths-external-data/unicode-encodings-newlines.qmd)
-3. [Move Records Between CSV, JSON, YAML, and Python](units/files-paths-external-data/csv-json-yaml-records.qmd)
-4. [Turn Messy Text into Trustworthy Records](units/files-paths-external-data/text-patterns-validation-pipelines.qmd)
-5. [Cross the Text–Binary Boundary Safely](units/files-paths-external-data/bytes-binary-memory-streams.qmd)
+1. [Find, Read, and Write Files Reliably](milestones/reliable-programs/units/files-paths-external-data/paths-text-files-resources.qmd)
+2. [Keep Text Intact Across Encodings and Newlines](milestones/reliable-programs/units/files-paths-external-data/unicode-encodings-newlines.qmd)
+3. [Move Records Between CSV, JSON, YAML, and Python](milestones/reliable-programs/units/files-paths-external-data/csv-json-yaml-records.qmd)
+4. [Turn Messy Text into Trustworthy Records](milestones/reliable-programs/units/files-paths-external-data/text-patterns-validation-pipelines.qmd)
+5. [Cross the Text–Binary Boundary Safely](milestones/reliable-programs/units/files-paths-external-data/bytes-binary-memory-streams.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">10</span><span class="fc-unit-summary"><strong>Modules, Environments, and Python Projects</strong><span>Organize reusable code and build reproducible Python projects.</span></span><span class="fc-unit-count">6 lessons</span></summary>
 
-[Unit overview](units/modules-environments-projects/index.qmd) · [Unit challenge](units/modules-environments-projects/challenge.qmd)
+[Unit overview](milestones/reliable-programs/units/modules-environments-projects/index.qmd) · [Unit challenge](milestones/reliable-programs/units/modules-environments-projects/challenge.qmd)
 
-1. [Find the Right Tool Without Memorizing Everything](units/modules-environments-projects/builtins-standard-library-help.qmd)
-2. [Turn One Script into Reusable Modules](units/modules-environments-projects/modules-imports-entry-points.qmd)
-3. [Design a Package People Can Rely On](units/modules-environments-projects/packages-public-interfaces.qmd)
-4. [Build a Project You Can Navigate and Share](units/modules-environments-projects/project-layout-git-essentials.qmd)
-5. [Give Each Project a Clean Python Environment](units/modules-environments-projects/virtual-environments-dependencies.qmd)
-6. [Build and Verify an Installable Python Project](units/modules-environments-projects/pyproject-builds-tools.qmd)
+1. [Find the Right Tool Without Memorizing Everything](milestones/reliable-programs/units/modules-environments-projects/builtins-standard-library-help.qmd)
+2. [Turn One Script into Reusable Modules](milestones/reliable-programs/units/modules-environments-projects/modules-imports-entry-points.qmd)
+3. [Design a Package People Can Rely On](milestones/reliable-programs/units/modules-environments-projects/packages-public-interfaces.qmd)
+4. [Build a Project You Can Navigate and Share](milestones/reliable-programs/units/modules-environments-projects/project-layout-git-essentials.qmd)
+5. [Give Each Project a Clean Python Environment](milestones/reliable-programs/units/modules-environments-projects/virtual-environments-dependencies.qmd)
+6. [Build and Verify an Installable Python Project](milestones/reliable-programs/units/modules-environments-projects/pyproject-builds-tools.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">11</span><span class="fc-unit-summary"><strong>Object-Oriented Python and Dataclasses</strong><span>Model data and behavior with classes and dataclasses.</span></span><span class="fc-unit-count">5 lessons</span></summary>
 
-[Unit overview](units/object-oriented-python/index.qmd) · [Unit challenge](units/object-oriented-python/challenge.qmd)
+[Unit overview](milestones/ship-python-projects/units/object-oriented-python/index.qmd) · [Unit challenge](milestones/ship-python-projects/units/object-oriented-python/challenge.qmd)
 
-1. [Build Your First Useful Class](units/object-oriented-python/objects-classes-instances-self.qmd)
-2. [Keep Objects in Valid States](units/object-oriented-python/initialization-invariants-properties.qmd)
-3. [Use Dataclasses for Value-Like Objects](units/object-oriented-python/dataclasses-representation-equality.qmd)
-4. [Choose Composition Before Inheritance](units/object-oriented-python/composition-inheritance-design.qmd)
-5. [Model a Complete Road-Crossing Game](units/object-oriented-python/road-crossing-game-model.qmd)
+1. [Build Your First Useful Class](milestones/ship-python-projects/units/object-oriented-python/objects-classes-instances-self.qmd)
+2. [Keep Objects in Valid States](milestones/ship-python-projects/units/object-oriented-python/initialization-invariants-properties.qmd)
+3. [Use Dataclasses for Value-Like Objects](milestones/ship-python-projects/units/object-oriented-python/dataclasses-representation-equality.qmd)
+4. [Choose Composition Before Inheritance](milestones/ship-python-projects/units/object-oriented-python/composition-inheritance-design.qmd)
+5. [Model a Complete Road-Crossing Game](milestones/ship-python-projects/units/object-oriented-python/road-crossing-game-model.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">12</span><span class="fc-unit-summary"><strong>Command-Line Applications</strong><span>Build commands with clear inputs, output, and useful errors.</span></span><span class="fc-unit-count">5 lessons</span></summary>
 
-[Unit overview](units/command-line-applications/index.qmd) · [Unit challenge](units/command-line-applications/challenge.qmd)
+[Unit overview](milestones/ship-python-projects/units/command-line-applications/index.qmd) · [Unit challenge](milestones/ship-python-projects/units/command-line-applications/challenge.qmd)
 
-1. [Design a Friendly Command with argparse](units/command-line-applications/argparse-command-design.qmd)
-2. [Put Output, Errors, and Exit Status in the Right Place](units/command-line-applications/streams-errors-exit-codes.qmd)
-3. [Resolve Configuration Without Exposing Secrets](units/command-line-applications/configuration-precedence-secrets.qmd)
-4. [Write Useful Logs Without Polluting Output](units/command-line-applications/logging-useful-diagnostics.qmd)
-5. [Keep the Command Thin and the Core Reusable](units/command-line-applications/cli-ecosystem-testable-architecture.qmd)
+1. [Design a Friendly Command with argparse](milestones/ship-python-projects/units/command-line-applications/argparse-command-design.qmd)
+2. [Put Output, Errors, and Exit Status in the Right Place](milestones/ship-python-projects/units/command-line-applications/streams-errors-exit-codes.qmd)
+3. [Resolve Configuration Without Exposing Secrets](milestones/ship-python-projects/units/command-line-applications/configuration-precedence-secrets.qmd)
+4. [Write Useful Logs Without Polluting Output](milestones/ship-python-projects/units/command-line-applications/logging-useful-diagnostics.qmd)
+5. [Keep the Command Thin and the Core Reusable](milestones/ship-python-projects/units/command-line-applications/cli-ecosystem-testable-architecture.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">13</span><span class="fc-unit-summary"><strong>Testing Python Programs</strong><span>Protect behavior with focused, reliable tests.</span></span><span class="fc-unit-count">7 lessons</span></summary>
 
-[Unit overview](units/testing-python-programs/index.qmd) · [Unit challenge](units/testing-python-programs/challenge.qmd)
+[Unit overview](milestones/ship-python-projects/units/testing-python-programs/index.qmd) · [Unit challenge](milestones/ship-python-projects/units/testing-python-programs/challenge.qmd)
 
-1. [Write Tests That Protect Behavior](units/testing-python-programs/what-tests-prove.qmd)
-2. [Run Pytest and Read the Failure](units/testing-python-programs/pytest-discovery-failures.qmd)
-3. [Turn Examples into Clear Parametrized Cases](units/testing-python-programs/parametrization-boundary-cases.qmd)
-4. [Build an Isolated Test World with Fixtures](units/testing-python-programs/fixtures-isolation-capture.qmd)
-5. [Control Dependencies Without Fragile Mocks](units/testing-python-programs/test-doubles-dependency-injection.qmd)
-6. [Test at the Smallest Boundary That Can Fail](units/testing-python-programs/test-levels.qmd)
-7. [Preserve Bugs and Explore General Rules](units/testing-python-programs/properties-regressions-tdd.qmd)
+1. [Write Tests That Protect Behavior](milestones/ship-python-projects/units/testing-python-programs/what-tests-prove.qmd)
+2. [Run Pytest and Read the Failure](milestones/ship-python-projects/units/testing-python-programs/pytest-discovery-failures.qmd)
+3. [Turn Examples into Clear Parametrized Cases](milestones/ship-python-projects/units/testing-python-programs/parametrization-boundary-cases.qmd)
+4. [Build an Isolated Test World with Fixtures](milestones/ship-python-projects/units/testing-python-programs/fixtures-isolation-capture.qmd)
+5. [Control Dependencies Without Fragile Mocks](milestones/ship-python-projects/units/testing-python-programs/test-doubles-dependency-injection.qmd)
+6. [Test at the Smallest Boundary That Can Fail](milestones/ship-python-projects/units/testing-python-programs/test-levels.qmd)
+7. [Preserve Bugs and Explore General Rules](milestones/ship-python-projects/units/testing-python-programs/properties-regressions-tdd.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">14</span><span class="fc-unit-summary"><strong>Code Quality and Maintainability</strong><span>Make code easier to read and safer to change.</span></span><span class="fc-unit-count">7 lessons</span></summary>
 
-[Unit overview](units/code-quality-maintainability/index.qmd) · [Unit challenge](units/code-quality-maintainability/challenge.qmd)
+[Unit overview](milestones/ship-python-projects/units/code-quality-maintainability/index.qmd) · [Unit challenge](milestones/ship-python-projects/units/code-quality-maintainability/challenge.qmd)
 
-1. [Write Python People Can Follow](units/code-quality-maintainability/readable-python-pep8.qmd)
-2. [Make Contracts Visible with Type Annotations](units/code-quality-maintainability/type-annotations-static-checking.qmd)
-3. [Read MyPy Errors and Close Type Gaps](units/code-quality-maintainability/mypy-diagnostics-boundaries.qmd)
-4. [Format and Lint a Project with Ruff](units/code-quality-maintainability/formatting-linting-configuration.qmd)
-5. [Catch Small Problems Before Commit](units/code-quality-maintainability/precommit-quality-gates.qmd)
-6. [Repeat the Quality Gate in CI](units/code-quality-maintainability/continuous-integration-quality-gates.qmd)
-7. [Refactor in Small, Verified Steps](units/code-quality-maintainability/evidence-driven-refactoring.qmd)
+1. [Write Python People Can Follow](milestones/ship-python-projects/units/code-quality-maintainability/readable-python-pep8.qmd)
+2. [Make Contracts Visible with Type Annotations](milestones/ship-python-projects/units/code-quality-maintainability/type-annotations-static-checking.qmd)
+3. [Read MyPy Errors and Close Type Gaps](milestones/ship-python-projects/units/code-quality-maintainability/mypy-diagnostics-boundaries.qmd)
+4. [Format and Lint a Project with Ruff](milestones/ship-python-projects/units/code-quality-maintainability/formatting-linting-configuration.qmd)
+5. [Catch Small Problems Before Commit](milestones/ship-python-projects/units/code-quality-maintainability/precommit-quality-gates.qmd)
+6. [Repeat the Quality Gate in CI](milestones/ship-python-projects/units/code-quality-maintainability/continuous-integration-quality-gates.qmd)
+7. [Refactor in Small, Verified Steps](milestones/ship-python-projects/units/code-quality-maintainability/evidence-driven-refactoring.qmd)
 
 </details>
 
 <details class="fc-unit-row">
 <summary><span class="fc-unit-number">15</span><span class="fc-unit-summary"><strong>Documentation as Part of the Product</strong><span>Write, check, and publish documentation people can use.</span></span><span class="fc-unit-count">7 lessons</span></summary>
 
-[Unit overview](units/documentation-publishing/index.qmd) · [Unit challenge](units/documentation-publishing/challenge.qmd)
+[Unit overview](milestones/ship-python-projects/units/documentation-publishing/index.qmd) · [Unit challenge](milestones/ship-python-projects/units/documentation-publishing/challenge.qmd)
 
-1. [Design Documentation Around Reader Needs](units/documentation-publishing/documentation-audiences-readme.qmd)
-2. [Write Instructions People Can Follow](units/documentation-publishing/clear-instructions-accessibility.qmd)
-3. [Document a Public Python API](units/documentation-publishing/docstrings-api-documentation.qmd)
-4. [Keep Small Examples Honest with Doctest](units/documentation-publishing/doctest-executable-documentation.qmd)
-5. [Review Documentation Like Code](units/documentation-publishing/documentation-quality-checks.qmd)
-6. [Build a Documentation Site with Quarto](units/documentation-publishing/documentation-toolchains-publishing.qmd)
-7. [Publish Documentation and Keep It Trustworthy](units/documentation-publishing/publishing-maintaining-documentation.qmd)
+1. [Design Documentation Around Reader Needs](milestones/ship-python-projects/units/documentation-publishing/documentation-audiences-readme.qmd)
+2. [Write Instructions People Can Follow](milestones/ship-python-projects/units/documentation-publishing/clear-instructions-accessibility.qmd)
+3. [Document a Public Python API](milestones/ship-python-projects/units/documentation-publishing/docstrings-api-documentation.qmd)
+4. [Keep Small Examples Honest with Doctest](milestones/ship-python-projects/units/documentation-publishing/doctest-executable-documentation.qmd)
+5. [Review Documentation Like Code](milestones/ship-python-projects/units/documentation-publishing/documentation-quality-checks.qmd)
+6. [Build a Documentation Site with Quarto](milestones/ship-python-projects/units/documentation-publishing/documentation-toolchains-publishing.qmd)
+7. [Publish Documentation and Keep It Trustworthy](milestones/ship-python-projects/units/documentation-publishing/publishing-maintaining-documentation.qmd)
 
 </details>
 
