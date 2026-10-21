@@ -1,0 +1,133 @@
+---
+title: 'Milestone Challenge: Test a Cooling Model against Measurements'
+description: Evaluate a model with arrays, symbolic reasoning, plotting, and a SciPy root finder.
+course_id: scientific-python
+milestone_id: numerical-experiments
+challenge_id: numerical-experiments.challenge
+assessment_type: milestone-challenge
+challenge_format: guided-programming
+estimated_time: 2–4 hours
+categories:
+- scientific-python
+- numerical-experiments
+- milestone-challenge
+order: 90
+colab_notebook: notebooks/courses/scientific-python/milestones/numerical-experiments/challenge.ipynb
+---
+
+::: {.lesson-meta}
+- **Goal:** Evaluate a model with arrays, symbolic reasoning, plotting, and a SciPy root finder.
+- **Estimated time:** 2–4 hours of active work.
+- **Before starting:** Complete the milestone units and their unit challenges.
+- **Keep:** Your source, observed outputs, checks, and a debugging note.
+:::
+
+{{< include ../../../../_includes/colab-link.qmd >}}
+
+This community challenge is ungraded. Use the checks to review your own work;
+there is no submission service or automatic grade. Completion is self-reported
+in this browser on this device.
+
+## 1. Build test a cooling model against measurements
+
+Use the fictional model T(t) = 20 + 60*exp(-0.1*t), with minutes and degrees Celsius. Evaluate at 0, 5, 10, 15, 20 minutes; observations are 80, 57, 43, 34, 28. Calculate observed-minus-predicted residuals, plot both series, and find when T reaches 30 using scipy.optimize.brentq on [0, 40]. Compare with 10*log(6).
+
+Predict an ordinary result before coding. Start with the smallest part you can
+run and inspect. Use Colab for notebooks and the local workspace introduced in
+the units for packaging or command-line tasks.
+
+## 2. Set up the experiment
+
+```python
+import numpy as np
+from scipy.optimize import brentq
+
+times = np.array([0, 5, 10, 15, 20], dtype=float)
+observed = np.array([80, 57, 43, 34, 28], dtype=float)
+
+def temperature(t):
+    return 20 + 60 * np.exp(-0.1 * t)
+
+# Compute predictions, residuals, and crossing time.
+```
+
+The starter is deliberately incomplete. Implement the contract; do not change
+the expected results to match an incorrect implementation.
+
+## 3. Check the observable results
+
+1. T(0) is 80 and predictions approach 20 from above.
+2. Residuals match the observation shape and documented subtraction direction.
+3. The crossing is approximately 17.9176 minutes; compare symbolic and numerical values with tolerance 1e-4.
+4. Endpoint values bracket the target: T(0)-30 > 0 and T(40)-30 < 0.
+5. Plots distinguish measured and predicted values, with units and a legend.
+
+Record actual outputs beside predictions. Reduce a failure to a small example,
+change one cause at a time, and repeat the failed check after repairing it.
+
+## 4. Change one condition
+
+Change the target to 15 and explain why no nonnegative crossing exists before invoking a solver. Repeat with 40. Do not claim this fictional model proves how a real object cools.
+
+## 5. Review a hint after attempting the task
+
+<details>
+<summary>Hint: connect the relevant tools</summary>
+
+Vectorize predictions with temperature(times); use temperature(t) - target for the root finder. Check endpoint signs and compare with hand algebra or SymPy.
+
+</details>
+
+## 6. Explain and self-review
+
+Deliver a reproducible notebook, labeled plots, tolerance checks, and a short note on residuals and model limits. Explain why matching one target time does not validate an entire physical model.
+
+<details>
+<summary>Review path: compare your result with the contract</summary>
+
+Check the ordinary result first, then the boundary cases and changed condition.
+Explain which rule justifies each result. An implementation that differs from
+the hint can still satisfy the contract; explain why yours does.
+
+</details>
+
+<script type="application/json" class="fcpython-ojs-quiz-config">
+{
+  "id": "scientific-python-numerical-experiments-integration",
+  "title": "Check the reasoning behind your result",
+  "instructions": "Choose an answer, then review the explanation.",
+  "questions": [
+    {
+      "id": "numerical-experiments-reasoning",
+      "prompt": "Why is a target of 15 unreachable?",
+      "options": [
+        "Only five times were sampled.",
+        "Matplotlib cannot plot below 20.",
+        "SciPy requires integer targets.",
+        "The positive exponential keeps T above 20."
+      ],
+      "answer_index": 3,
+      "explanation": "For nonnegative time the model approaches 20 from above. This limit belongs to the model, not the plotting or solver software."
+    }
+  ]
+}
+</script>
+
+{{< include ../../../../_includes/ojs-quiz.qmd >}}
+
+## 7. Save your work and record completion
+
+Save the notebook or project somewhere you control. Include one decision, one
+failed check, its repair, and a result you can reproduce. Record completion
+after reviewing the checks; you can undo it later.
+
+```{=html}
+<div class="fc-assessment-action" data-fc-challenge-action>
+<button class="btn btn-primary" type="button" data-fc-challenge-complete aria-pressed="false">
+  <span data-fc-challenge-complete-label>Record challenge complete</span>
+</button>
+<p data-fc-challenge-status aria-live="polite">Not yet recorded.</p>
+</div>
+```
+
+[Return to the milestone overview](index.qmd).

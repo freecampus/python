@@ -7,9 +7,12 @@ challenge_format: guided-programming
 assessment_version: 1
 estimated_time: "60–120 minutes"
 categories: [course-id, unit-id, unit-challenge]
+milestone_id: milestone-id
 order: 90
-colab_notebook: notebooks/courses/course-id/units/unit-id/challenge.ipynb
+colab_notebook: notebooks/courses/course-id/milestones/milestone-id/units/unit-id/challenge.ipynb
 ---
+
+<!-- When copying into a unit, set course/unit IDs and use ../../../../../../_includes/. -->
 
 ::: {.lesson-meta .challenge-meta}
 - **Level:** Course name · Unit number challenge
@@ -18,7 +21,7 @@ colab_notebook: notebooks/courses/course-id/units/unit-id/challenge.ipynb
 - **Evidence:** Complete the checks, explain the result, then record progress.
 :::
 
-{{< include ../../../../_includes/colab-link.qmd >}}
+{{< include ../_includes/colab-link.qmd >}}
 
 <!-- fcpython-unit-challenge: practical -->
 ## 1. Challenge outcome
@@ -107,7 +110,7 @@ rerun.
 }
 </script>
 
-{{< include ../../../../_includes/ojs-quiz.qmd >}}
+{{< include ../_includes/ojs-quiz.qmd >}}
 
 ## 9. Decide whether the challenge is complete
 

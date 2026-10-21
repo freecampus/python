@@ -1,6 +1,6 @@
 schema_version: 2
-curriculum_version: 21
-last_updated: "2026-08-26"
+curriculum_version: 22
+last_updated: "2026-10-21"
 courses:
   - id: python-foundations
     title: Python Foundations
@@ -10,14 +10,14 @@ courses:
     status: available
     pathway: both
     lesson_count: 97
-    estimated_effort: 380–540 hours
+    estimated_effort: 388–556 hours
     home: courses/python-foundations/index.qmd
     prerequisite_ids: []
     recommended_ids: []
     certificate_status: planned
     completion:
-      curriculum_version: 21
-      rule_version: 12
+      curriculum_version: 22
+      rule_version: 13
       recognition: local-self-reported
       lesson_ids:
         - get-started.meet-python-first-program
@@ -121,164 +121,226 @@ courses:
         - id: get-started.challenge
           title: Launch Your Python Learning Lab
           unit_id: get-started
-          path: courses/python-foundations/units/get-started/challenge.qmd
+          path: courses/python-foundations/milestones/first-programs/units/get-started/challenge.qmd
         - id: python-syntax.challenge
           title: Repair and Explain a Broken Study Planner
           unit_id: python-syntax
-          path: courses/python-foundations/units/python-syntax/challenge.qmd
+          path: courses/python-foundations/milestones/first-programs/units/python-syntax/challenge.qmd
         - id: core-values-types.challenge
           title: Build a Date-Aware Purchase Summary
           unit_id: core-values-types
-          path: courses/python-foundations/units/core-values-types/challenge.qmd
+          path: courses/python-foundations/milestones/first-programs/units/core-values-types/challenge.qmd
         - id: collections-iteration.challenge
           title: Decode the Starship Signal Vault
           unit_id: collections-iteration
-          path: courses/python-foundations/units/collections-iteration/challenge.qmd
+          path: courses/python-foundations/milestones/work-with-data/units/collections-iteration/challenge.qmd
         - id: decisions-repetition.challenge
           title: Escape the Clockwork Maze
           unit_id: decisions-repetition
-          path: courses/python-foundations/units/decisions-repetition/challenge.qmd
+          path: courses/python-foundations/milestones/work-with-data/units/decisions-repetition/challenge.qmd
         - id: functions-call-behavior.challenge
           title: Unlock the Moonlit Library
           unit_id: functions-call-behavior
-          path: courses/python-foundations/units/functions-call-behavior/challenge.qmd
+          path: courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/challenge.qmd
         - id: mutability-identity-copying.challenge
           title: Break the Mirror Vault
           unit_id: mutability-identity-copying
-          path: courses/python-foundations/units/mutability-identity-copying/challenge.qmd
+          path: courses/python-foundations/milestones/work-with-data/units/mutability-identity-copying/challenge.qmd
         - id: problem-solving-algorithms.challenge
           title: Wake the Clockwork Observatory
           unit_id: problem-solving-algorithms
-          path: courses/python-foundations/units/problem-solving-algorithms/challenge.qmd
+          path: courses/python-foundations/milestones/reliable-programs/units/problem-solving-algorithms/challenge.qmd
         - id: errors-exceptions-debugging.challenge
           title: Repair the Glitched Arcade
           unit_id: errors-exceptions-debugging
-          path: courses/python-foundations/units/errors-exceptions-debugging/challenge.qmd
+          path: courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/challenge.qmd
         - id: files-paths-external-data.challenge
           title: Restore the Starship Signal Archive
           unit_id: files-paths-external-data
-          path: courses/python-foundations/units/files-paths-external-data/challenge.qmd
+          path: courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data/challenge.qmd
         - id: modules-environments-projects.challenge
           title: Release the Moonlight Cipher Kit
           unit_id: modules-environments-projects
-          path: courses/python-foundations/units/modules-environments-projects/challenge.qmd
+          path: courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/challenge.qmd
         - id: object-oriented-python.challenge
           title: Run the Tiny Robot Tournament
           unit_id: object-oriented-python
-          path: courses/python-foundations/units/object-oriented-python/challenge.qmd
+          path: courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python/challenge.qmd
         - id: command-line-applications.challenge
           title: Decode the Deep-Sea Beacon
           unit_id: command-line-applications
-          path: courses/python-foundations/units/command-line-applications/challenge.qmd
+          path: courses/python-foundations/milestones/ship-python-projects/units/command-line-applications/challenge.qmd
         - id: testing-python-programs.challenge
           title: Clear the Buggy Spaceport for Launch
           unit_id: testing-python-programs
-          path: courses/python-foundations/units/testing-python-programs/challenge.qmd
+          path: courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/challenge.qmd
         - id: code-quality-maintainability.challenge
           title: Untangle the Clockwork Observatory
           unit_id: code-quality-maintainability
-          path: courses/python-foundations/units/code-quality-maintainability/challenge.qmd
+          path: courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/challenge.qmd
         - id: documentation-publishing.challenge
           title: Publish the Puzzle Garden Field Guide
           unit_id: documentation-publishing
-          path: courses/python-foundations/units/documentation-publishing/challenge.qmd
+          path: courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/challenge.qmd
+      milestone_challenges:
+        - id: first-programs.challenge
+          milestone_id: first-programs
+          path: courses/python-foundations/milestones/first-programs/challenge.qmd
+        - id: work-with-data.challenge
+          milestone_id: work-with-data
+          path: courses/python-foundations/milestones/work-with-data/challenge.qmd
+        - id: reliable-programs.challenge
+          milestone_id: reliable-programs
+          path: courses/python-foundations/milestones/reliable-programs/challenge.qmd
+        - id: ship-python-projects.challenge
+          milestone_id: ship-python-projects
+          path: courses/python-foundations/milestones/ship-python-projects/challenge.qmd
     units:
       - number: 0
         id: get-started
         title: Get Started
-        directory: courses/python-foundations/units/get-started
+        directory: courses/python-foundations/milestones/first-programs/units/get-started
         lesson_count: 5
         kind: instructional
+        milestone_id: first-programs
       - number: 1
         id: python-syntax
         title: Learning to Read and Write Python Code
-        directory: courses/python-foundations/units/python-syntax
+        directory: courses/python-foundations/milestones/first-programs/units/python-syntax
         lesson_count: 7
         kind: instructional
+        milestone_id: first-programs
       - number: 2
         id: core-values-types
         title: Numbers, Text, and Other Values
-        directory: courses/python-foundations/units/core-values-types
+        directory: courses/python-foundations/milestones/first-programs/units/core-values-types
         lesson_count: 8
         kind: instructional
+        milestone_id: first-programs
       - number: 3
         id: collections-iteration
         title: Organizing and Traversing Collections
-        directory: courses/python-foundations/units/collections-iteration
+        directory: courses/python-foundations/milestones/work-with-data/units/collections-iteration
         lesson_count: 7
         kind: instructional
+        milestone_id: work-with-data
       - number: 4
         id: decisions-repetition
         title: Making Decisions and Repeating Work
-        directory: courses/python-foundations/units/decisions-repetition
+        directory: courses/python-foundations/milestones/work-with-data/units/decisions-repetition
         lesson_count: 8
         kind: instructional
+        milestone_id: work-with-data
       - number: 5
         id: functions-call-behavior
         title: Building Reusable Functions
-        directory: courses/python-foundations/units/functions-call-behavior
+        directory: courses/python-foundations/milestones/work-with-data/units/functions-call-behavior
         lesson_count: 8
         kind: instructional
+        milestone_id: work-with-data
       - number: 6
         id: mutability-identity-copying
         title: Sharing, Changing, and Copying Objects
-        directory: courses/python-foundations/units/mutability-identity-copying
+        directory: courses/python-foundations/milestones/work-with-data/units/mutability-identity-copying
         lesson_count: 4
         kind: instructional
+        milestone_id: work-with-data
       - number: 7
         id: problem-solving-algorithms
         title: Solving Problems with Algorithms
-        directory: courses/python-foundations/units/problem-solving-algorithms
+        directory: courses/python-foundations/milestones/reliable-programs/units/problem-solving-algorithms
         lesson_count: 4
         kind: instructional
+        milestone_id: reliable-programs
       - number: 8
         id: errors-exceptions-debugging
         title: Errors, Exceptions, and Debugging
-        directory: courses/python-foundations/units/errors-exceptions-debugging
+        directory: courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging
         lesson_count: 4
         kind: instructional
+        milestone_id: reliable-programs
       - number: 9
         id: files-paths-external-data
         title: Files, Paths, and External Data
-        directory: courses/python-foundations/units/files-paths-external-data
+        directory: courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data
         lesson_count: 5
         kind: instructional
+        milestone_id: reliable-programs
       - number: 10
         id: modules-environments-projects
         title: Modules, Environments, and Python Projects
-        directory: courses/python-foundations/units/modules-environments-projects
+        directory: courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects
         lesson_count: 6
         kind: instructional
+        milestone_id: reliable-programs
       - number: 11
         id: object-oriented-python
         title: Object-Oriented Python and Dataclasses
-        directory: courses/python-foundations/units/object-oriented-python
+        directory: courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python
         lesson_count: 5
         kind: instructional
+        milestone_id: ship-python-projects
       - number: 12
         id: command-line-applications
         title: Command-Line Applications
-        directory: courses/python-foundations/units/command-line-applications
+        directory: courses/python-foundations/milestones/ship-python-projects/units/command-line-applications
         lesson_count: 5
         kind: instructional
+        milestone_id: ship-python-projects
       - number: 13
         id: testing-python-programs
         title: Testing Python Programs
-        directory: courses/python-foundations/units/testing-python-programs
+        directory: courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs
         lesson_count: 7
         kind: instructional
+        milestone_id: ship-python-projects
       - number: 14
         id: code-quality-maintainability
         title: Code Quality and Maintainability
-        directory: courses/python-foundations/units/code-quality-maintainability
+        directory: courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability
         lesson_count: 7
         kind: instructional
+        milestone_id: ship-python-projects
       - number: 15
         id: documentation-publishing
         title: Documentation as Part of the Product
-        directory: courses/python-foundations/units/documentation-publishing
+        directory: courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing
         lesson_count: 7
         kind: instructional
+        milestone_id: ship-python-projects
+    milestones:
+      - id: first-programs
+        title: Write and Explain Your First Programs
+        directory: courses/python-foundations/milestones/first-programs
+        unit_ids:
+          - get-started
+          - python-syntax
+          - core-values-types
+      - id: work-with-data
+        title: Turn Data into Reusable Decisions
+        directory: courses/python-foundations/milestones/work-with-data
+        unit_ids:
+          - collections-iteration
+          - decisions-repetition
+          - functions-call-behavior
+          - mutability-identity-copying
+      - id: reliable-programs
+        title: Build Reliable Programs from External Data
+        directory: courses/python-foundations/milestones/reliable-programs
+        unit_ids:
+          - problem-solving-algorithms
+          - errors-exceptions-debugging
+          - files-paths-external-data
+          - modules-environments-projects
+      - id: ship-python-projects
+        title: Ship a Tested and Documented Python Tool
+        directory: courses/python-foundations/milestones/ship-python-projects
+        unit_ids:
+          - object-oriented-python
+          - command-line-applications
+          - testing-python-programs
+          - code-quality-maintainability
+          - documentation-publishing
   - id: intermediate-python
     title: "Intermediate Python: Applied Problem Solving"
     short_title: Intermediate
@@ -288,12 +350,13 @@ courses:
     pathway: software
     lesson_count: 0
     estimated_effort: TBD
-    home: courses/intermediate-python/index.qmd
+    home: roadmap/intermediate-python/index.qmd
     prerequisite_ids:
       - python-foundations
     recommended_ids: []
     certificate_status: planned
     units: []
+    milestones: []
   - id: advanced-python
     title: "Advanced Python: Complex Problem Solving"
     short_title: Advanced
@@ -303,12 +366,13 @@ courses:
     pathway: software
     lesson_count: 0
     estimated_effort: TBD
-    home: courses/advanced-python/index.qmd
+    home: roadmap/advanced-python/index.qmd
     prerequisite_ids:
       - intermediate-python
     recommended_ids: []
     certificate_status: planned
     units: []
+    milestones: []
   - id: scientific-python
     title: Scientific Computing with Python
     short_title: Scientific
@@ -317,7 +381,7 @@ courses:
     status: in-development
     pathway: scientific
     lesson_count: 5
-    estimated_effort: 5–8 hours of current material
+    estimated_effort: 8–14 hours of current material
     home: courses/scientific-python/index.qmd
     prerequisite_ids:
       - python-foundations
@@ -326,8 +390,33 @@ courses:
     units:
       - id: scientific-python
         title: Scientific Python
-        directory: courses/scientific-python/scientific-python
+        directory: courses/scientific-python/milestones/numerical-experiments/units/scientific-python
         lesson_count: 5
+        milestone_id: numerical-experiments
+    milestones:
+      - id: numerical-experiments
+        title: Design and Explain Numerical Experiments
+        directory: courses/scientific-python/milestones/numerical-experiments
+        unit_ids:
+          - scientific-python
+    completion:
+      recognition: local-self-reported
+      curriculum_version: 22
+      rule_version: 13
+      lesson_ids:
+        - scientific-python.numpy
+        - scientific-python.random-simulation
+        - scientific-python.matplotlib-basics
+        - scientific-python.sympy-symbolic-math
+        - scientific-python.scipy-overview
+      challenges:
+        - id: scientific-python.challenge
+          unit_id: scientific-python
+          path: courses/scientific-python/milestones/numerical-experiments/units/scientific-python/challenge.qmd
+      milestone_challenges:
+        - id: numerical-experiments.challenge
+          milestone_id: numerical-experiments
+          path: courses/scientific-python/milestones/numerical-experiments/challenge.qmd
   - id: statistics-python
     title: Statistics with Python
     short_title: Statistics
@@ -337,21 +426,22 @@ courses:
     pathway: statistics
     lesson_count: 0
     estimated_effort: TBD
-    home: courses/statistics-python/index.qmd
+    home: roadmap/statistics-python/index.qmd
     prerequisite_ids:
       - python-foundations
     recommended_ids: []
     certificate_status: planned
     units: []
+    milestones: []
   - id: data-science-ml
     title: Data Science and Machine Learning with Python
     short_title: Data & ML
     order: 60
     level: Intermediate
     status: in-development
-    pathway: "scientific statistics"
+    pathway: scientific statistics
     lesson_count: 10
-    estimated_effort: 10–16 hours of current material
+    estimated_effort: 16–28 hours of current material
     home: courses/data-science-ml/index.qmd
     prerequisite_ids:
       - scientific-python
@@ -361,9 +451,51 @@ courses:
     units:
       - id: data-science
         title: Data Science
-        directory: courses/data-science-ml/data-science
+        directory: courses/data-science-ml/milestones/explore-data/units/data-science
         lesson_count: 5
+        milestone_id: explore-data
       - id: machine-learning-ai
         title: Machine Learning and AI
-        directory: courses/data-science-ml/machine-learning-ai
+        directory: courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai
         lesson_count: 5
+        milestone_id: evaluate-models
+    milestones:
+      - id: explore-data
+        title: Answer a Question with Tabular Data
+        directory: courses/data-science-ml/milestones/explore-data
+        unit_ids:
+          - data-science
+      - id: evaluate-models
+        title: Evaluate a Model Responsibly
+        directory: courses/data-science-ml/milestones/evaluate-models
+        unit_ids:
+          - machine-learning-ai
+    completion:
+      recognition: local-self-reported
+      curriculum_version: 22
+      rule_version: 13
+      lesson_ids:
+        - data-science.workflow-and-loading
+        - data-science.inspecting-selecting-cleaning
+        - data-science.grouping-and-statistics
+        - data-science.visualization-with-seaborn
+        - data-science.communicating-results
+        - machine-learning-ai.concepts-and-datasets
+        - machine-learning-ai.training-and-evaluation
+        - machine-learning-ai.deep-learning-libraries
+        - machine-learning-ai.transformers-overview
+        - machine-learning-ai.responsible-ai
+      challenges:
+        - id: data-science.challenge
+          unit_id: data-science
+          path: courses/data-science-ml/milestones/explore-data/units/data-science/challenge.qmd
+        - id: machine-learning-ai.challenge
+          unit_id: machine-learning-ai
+          path: courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai/challenge.qmd
+      milestone_challenges:
+        - id: explore-data.challenge
+          milestone_id: explore-data
+          path: courses/data-science-ml/milestones/explore-data/challenge.qmd
+        - id: evaluate-models.challenge
+          milestone_id: evaluate-models
+          path: courses/data-science-ml/milestones/evaluate-models/challenge.qmd

@@ -1,45 +1,44 @@
 ---
 title: Python Courses
 aliases:
-  - "/lessons/index.html"
+- /lessons/index.html
 description: Choose a focused Python course and follow its prerequisites at your own pace.
-legacy_colab_notebook: "notebooks/lessons/index.ipynb"
+legacy_colab_notebook: notebooks/lessons/index.ipynb
 page-layout: full
 sidebar: false
 toc: false
 page-navigation: false
-body-classes: "course-hub portfolio-hub"
+body-classes: course-hub portfolio-hub
 listing:
-  - id: course-catalog
-    contents:
-      - python-foundations/index.qmd
-      - intermediate-python/index.qmd
-      - advanced-python/index.qmd
-      - scientific-python/index.qmd
-      - statistics-python/index.qmd
-      - data-science-ml/index.qmd
-      - "!scientific-python/scientific-python/index.qmd"
-    sort: "course_order"
-    template: _listings/course-card.ejs.md
-    fields:
-      - title
-      - description
-      - course_id
-      - course_order
-      - course_level
-      - course_status
-      - course_status_label
-      - course_pathway
-      - course_keywords
-      - lesson_count
-      - required_lesson_count
-      - required_lesson_ids
-      - challenge_ids
-      - project_required
-      - estimated_effort
-      - prerequisite_label
-    filter-ui: false
-    sort-ui: false
+- id: course-catalog
+  contents:
+  - python-foundations/index.qmd
+  - ../roadmap/intermediate-python/index.qmd
+  - ../roadmap/advanced-python/index.qmd
+  - scientific-python/index.qmd
+  - ../roadmap/statistics-python/index.qmd
+  - data-science-ml/index.qmd
+  sort: course_order
+  template: _listings/course-card.ejs.md
+  fields:
+  - title
+  - description
+  - course_id
+  - course_order
+  - course_level
+  - course_status
+  - course_status_label
+  - course_pathway
+  - course_keywords
+  - lesson_count
+  - required_lesson_count
+  - required_lesson_ids
+  - challenge_ids
+  - project_required
+  - estimated_effort
+  - prerequisite_label
+  filter-ui: false
+  sort-ui: false
 ---
 
 ## Choose your next goal
@@ -71,7 +70,7 @@ scientific-computing, or statistics path that matches what you want to build.
 </div>
 
 <div class="fc-catalog-summary" aria-live="polite">
-  <span data-fc-catalog-count>6 courses</span>
+  <span data-fc-catalog-count>3 courses with lessons · 3 planned courses</span>
   <span>Progress is stored in this browser.</span>
 </div>
 ```

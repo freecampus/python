@@ -157,9 +157,12 @@ def test_course_catalog_is_generated_and_filterable() -> None:
     listing_contents = _front_matter(Path("docs/courses/index.qmd"))["listing"][0][
         "contents"
     ]
+    catalog = _yaml(Path("docs/courses/_catalog.yml"))
     assert set(listing_contents) == {
-        *(f"{course_id}/index.qmd" for course_id in COURSE_IDS),
-        "!scientific-python/scientific-python/index.qmd",
+        course["home"].removeprefix("courses/")
+        if course["home"].startswith("courses/")
+        else "../" + course["home"]
+        for course in catalog["courses"]
     }
     assert "template: _listings/course-card.ejs.md" in course_map
     assert "data-fc-catalog-search" in course_map
@@ -235,7 +238,7 @@ def test_course_catalog_owns_every_teaching_lesson_once() -> None:
     lesson_ids: set[str] = set()
 
     assert catalog["schema_version"] == 2
-    assert catalog["curriculum_version"] == 21
+    assert catalog["curriculum_version"] == 22
     for course in courses:
         assert "modules" not in course
         course_total = 0
@@ -342,7 +345,9 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         "notebooks-literate-workflows.qmd",
         "local-python-environment.qmd",
     }
-    get_started_root = foundations_root / "units" / "get-started"
+    get_started_root = (
+        foundations_root / "milestones" / "first-programs" / "units" / "get-started"
+    )
     assert not any(
         (get_started_root / page).exists() for page in retired_get_started_pages
     )
@@ -360,8 +365,8 @@ def test_foundations_unit_reset_uses_only_new_public_routes() -> None:
         assert notebook not in notebook_paths, page
         notebook_paths.add(notebook)
 
-    assert len(public_pages) == 129
-    assert len(notebook_paths) == 129
+    assert len(public_pages) == 137
+    assert len(notebook_paths) == 137
 
 
 def test_course_homes_and_sidebars_match_catalog() -> None:
@@ -453,6 +458,20 @@ def test_course_homes_and_sidebars_match_catalog() -> None:
                 }
                 previous_unit_position = unit_position + len(unit_paths) - 1
 
+        for milestone in course["milestones"]:
+            root = milestone["directory"]
+            expected_paths.update({root + "/index.qmd", root + "/challenge.qmd"})
+            section = _sidebar_section(
+                sidebar["contents"],
+                f"Milestone {course['milestones'].index(milestone) + 1}: "
+                f"{milestone['title']}",
+            )
+            milestone_paths = _sidebar_paths(section["contents"])
+            assert milestone_paths[0] == root + "/index.qmd"
+            assert milestone_paths[-1] == root + "/challenge.qmd"
+            assert milestone["unit_ids"] == [
+                u["id"] for u in course["units"] if u["milestone_id"] == milestone["id"]
+            ]
         assert set(sidebar_paths) == expected_paths
 
 
@@ -486,18 +505,18 @@ def test_foundations_has_versioned_course_sequence() -> None:
     course_ui = Path("docs/_includes/course-ui.html").read_text()
     progress_ids_match = re.search(r'data-course-lesson-ids="([^"]+)"', home_text)
 
-    assert completion["curriculum_version"] == 21
-    assert completion["rule_version"] == 12
+    assert completion["curriculum_version"] == 22
+    assert completion["rule_version"] == 13
     assert completion["recognition"] == "local-self-reported"
     assert len(lesson_ids) == foundations["lesson_count"] == 97
     assert home_metadata["lesson_ids"] == completion["lesson_ids"]
     assert progress_ids_match is not None
     assert progress_ids_match.group(1).split() == completion["lesson_ids"]
     assert f"curriculum version {completion['curriculum_version']}" in home_text
-    assert "curriculum_version: 21" in course_ui
-    assert "state.curriculum_version = 21" in course_ui
-    assert "completion_rule_version: 12" in course_ui
-    assert "state.completion_rule_version = 12" in course_ui
+    assert "curriculum_version: 22" in course_ui
+    assert "state.curriculum_version = 22" in course_ui
+    assert "completion_rule_version: 13" in course_ui
+    assert "state.completion_rule_version = 13" in course_ui
     assert "required_lesson_count" not in foundations
     assert "optional_lesson_count" not in foundations
 
@@ -523,7 +542,8 @@ def test_foundations_has_versioned_course_sequence() -> None:
     assert {challenge["id"] for challenge in challenges} == {
         f"{unit_id}.challenge" for unit_id in instructional_units
     }
-    assert not Path("docs/courses/python-foundations/milestones").exists()
+    assert len(foundations["milestones"]) == 4
+    assert len(completion["milestone_challenges"]) == 4
     for challenge in challenges:
         challenge_path = Path("docs") / challenge["path"]
         front_matter = _front_matter(challenge_path)
@@ -570,7 +590,9 @@ def test_foundations_outcome_map_covers_the_course_once() -> None:
 
 def test_foundations_unit_challenges_are_guided_and_self_checking() -> None:
     challenge_pages = sorted(
-        Path("docs/courses/python-foundations/units").glob("*/challenge.qmd")
+        Path("docs/courses/python-foundations/milestones").glob(
+            "*/units/*/challenge.qmd"
+        )
     )
 
     assert len(challenge_pages) == 16
@@ -643,8 +665,8 @@ def test_software_courses_use_problem_complexity_as_the_level_boundary() -> None
         assert course["units"] == []
         assert course["estimated_effort"] == "TBD"
 
-    intermediate_home = Path("docs/courses/intermediate-python/index.qmd").read_text()
-    advanced_home = Path("docs/courses/advanced-python/index.qmd").read_text()
+    intermediate_home = Path("docs/roadmap/intermediate-python/index.qmd").read_text()
+    advanced_home = Path("docs/roadmap/advanced-python/index.qmd").read_text()
     assert "progressively harder problems" in intermediate_home
     assert "Planned challenge format" in intermediate_home
     assert re.search(r"complex problems under\s+real\s+constraints", advanced_home)
@@ -674,21 +696,21 @@ window.__fcTest = {
   lessonId,
   progress,
     unitChallengeId: challengeIdFromKey(
-    "courses/python-foundations/units/python-syntax/challenge"
+    "courses/python-foundations/milestones/first-programs/units/python-syntax/challenge"
   ),
   challengeIsLesson: isLessonKey(
-    "courses/python-foundations/units/python-syntax/challenge"
+    "courses/python-foundations/milestones/first-programs/units/python-syntax/challenge"
   ),
 };
 })();
 """
     )
     lesson_url = (
-        "https://freecampus.github.io/python/courses/python-foundations/units/"
+        "https://freecampus.github.io/python/courses/python-foundations/milestones/first-programs/units/"
         "python-syntax/values-names-assignment.html"
     )
     lesson_path = (
-        "/python/courses/python-foundations/units/python-syntax/"
+        "/python/courses/python-foundations/milestones/first-programs/units/python-syntax/"
         "values-names-assignment.html"
     )
     harness = f"""
@@ -722,7 +744,7 @@ process.stdout.write(JSON.stringify({{
     observed = json.loads(result.stdout)
 
     assert observed["state"]["currentKey"] == (
-        "courses/python-foundations/units/python-syntax/values-names-assignment"
+        "courses/python-foundations/milestones/first-programs/units/python-syntax/values-names-assignment"
     )
     assert observed["state"]["lessonId"] == ("python-syntax.values-names-assignment")
     assert observed["state"]["unitChallengeId"] == ("python-syntax.challenge")
@@ -737,11 +759,13 @@ def test_course_continue_uses_recorded_progress_not_the_last_page_visited() -> N
     script = course_ui.split("<script>", 1)[1].rsplit("</script>", 1)[0]
     course_home = Path("docs/courses/python-foundations/index.qmd").read_text()
     site = "https://freecampus.github.io/python/"
-    overview = f"{site}courses/python-foundations/units/get-started/"
+    overview = (
+        f"{site}courses/python-foundations/milestones/first-programs/units/get-started/"
+    )
     first_lesson = f"{overview}meet-python-first-program.html"
     second_lesson = f"{overview}learn-with-evidence.html"
     unit_two_lesson = (
-        f"{site}courses/python-foundations/units/core-values-types/"
+        f"{site}courses/python-foundations/milestones/first-programs/units/core-values-types/"
         "values-types-none-conversion.html"
     )
     activities = [
@@ -771,7 +795,7 @@ def test_course_continue_uses_recorded_progress_not_the_last_page_visited() -> N
                     "courses": {
                         "python-foundations": {
                             "key": (
-                                "courses/python-foundations/units/"
+                                "courses/python-foundations/milestones/first-programs/units/"
                                 "core-values-types/values-types-none-conversion"
                             )
                         }
@@ -821,7 +845,10 @@ process.stdout.write(JSON.stringify(resumeLink));
         {"get-started.meet-python-first-program": "2026-08-05T00:00:00Z"}
     )
 
-    assert "[Start Unit 0](units/get-started/index.qmd)" in course_home
+    assert (
+        "[Start Unit 0](milestones/first-programs/units/get-started/index.qmd)"
+        in course_home
+    )
     assert not_started == {
         "dataset": {"fcCourseResume": "python-foundations"},
         "href": overview,
@@ -898,6 +925,140 @@ def test_internal_qmd_links_resolve() -> None:
     assert missing == []
 
 
+def test_journey_sources_and_notebooks_follow_milestone_ownership() -> None:
+    catalog = _yaml(Path("docs/courses/_catalog.yml"))
+    quarto = _yaml(Path("docs/_quarto.yml"))
+    assert quarto["freecampus"] == {"schema-version": 1, "kind": "journey"}
+    published = [course for course in catalog["courses"] if course["units"]]
+    planned = [course for course in catalog["courses"] if not course["units"]]
+    assert len(published) == 3
+    assert len(planned) == 3
+    assert sum(len(course["milestones"]) for course in published) == 7
+    for course in planned:
+        assert course["home"] == f"roadmap/{course['id']}/index.qmd"
+        assert not (Path("docs/courses") / course["id"]).exists()
+    for course in published:
+        completion = course["completion"]
+        home = Path("docs") / course["home"]
+        challenge_ids = [
+            challenge["id"]
+            for challenge in completion["challenges"]
+            + completion["milestone_challenges"]
+        ]
+        assert len(challenge_ids) == len(set(challenge_ids))
+        assert _front_matter(home)["challenge_ids"] == challenge_ids
+        assert (
+            f'data-course-challenge-ids="{" ".join(challenge_ids)}"' in home.read_text()
+        )
+        assert not (home.parent / "units").exists()
+        for milestone in course["milestones"]:
+            root = Path("docs") / milestone["directory"]
+            overview = root / "index.qmd"
+            challenge = root / "challenge.qmd"
+            assert "quiz-config" not in overview.read_text()
+            assert _front_matter(challenge)["assessment_type"] == "milestone-challenge"
+            assert (
+                _front_matter(challenge)["challenge_id"]
+                == milestone["id"] + ".challenge"
+            )
+            assert "data-fc-challenge-complete" in challenge.read_text()
+            for page in root.rglob("*.qmd"):
+                expected = (
+                    "notebooks/"
+                    + page.relative_to("docs").with_suffix(".ipynb").as_posix()
+                )
+                assert _front_matter(page)["colab_notebook"] == expected
+                for include in re.findall(
+                    r"\{\{< include (\S+) >\}\}", page.read_text()
+                ):
+                    assert (page.parent / include).is_file(), (page, include)
+
+
+def test_milestone_progress_preserves_records_and_requires_integration_challenges() -> (
+    None
+):
+    course = next(
+        c
+        for c in _yaml(Path("docs/courses/_catalog.yml"))["courses"]
+        if c["id"] == "python-foundations"
+    )
+    completion = course["completion"]
+    unit_ids = [c["id"] for c in completion["challenges"]]
+    milestone_ids = [c["id"] for c in completion["milestone_challenges"]]
+    saved = {
+        "schema_version": 6,
+        "courses": {
+            "python-foundations": {
+                "curriculum_version": 21,
+                "completion_rule_version": 12,
+                "completed_lessons": dict.fromkeys(completion["lesson_ids"], "saved"),
+                "completed_challenges": dict.fromkeys(unit_ids, "saved"),
+            }
+        },
+    }
+    script = (
+        Path("docs/_includes/course-ui.html")
+        .read_text()
+        .split("<script>", 1)[1]
+        .rsplit("</script>", 1)[0]
+    )
+    script = (
+        script.rsplit("})();", 1)[0]
+        + """
+window.__fcTest = {completionSnapshot, courseState, isLessonKey, challengeIdFromKey};
+})();
+"""
+    )
+    dataset = {
+        "courseLessonIds": " ".join(completion["lesson_ids"]),
+        "courseChallengeIds": " ".join(unit_ids + milestone_ids),
+    }
+    harness = f"""
+const saved = {json.dumps(saved)};
+global.window = {{
+  location: {{
+    href: "https://freecampus.org/python/courses/python-foundations/",
+    pathname: "/python/courses/python-foundations/",
+  }},
+  localStorage: {{
+    getItem: (key) => key === "fcpython.progress.v6" ? JSON.stringify(saved) : null,
+    setItem: () => {{}},
+  }},
+}};
+global.document = {{
+  querySelector: () => null, querySelectorAll: () => [],
+  body: {{classList: {{add: () => {{}}}}}}, title: "Foundations",
+}};
+{script}
+const api = window.__fcTest;
+const root = {{dataset: {json.dumps(dataset)}}};
+const before = api.completionSnapshot(root, "python-foundations");
+const state = api.courseState("python-foundations");
+for (const id of {json.dumps(milestone_ids)}) state.completed_challenges[id] = "new";
+const base = "courses/python-foundations/milestones/first-programs";
+process.stdout.write(JSON.stringify({{
+  before, after: api.completionSnapshot(root, "python-foundations"),
+  lessonRecord: state.completed_lessons["python-syntax.values-names-assignment"],
+  unitRecord: state.completed_challenges["python-syntax.challenge"],
+  overviewIsLesson: api.isLessonKey(base),
+  unitOverviewIsLesson: api.isLessonKey(base + "/units/python-syntax"),
+  challengeIsLesson: api.isLessonKey(base + "/challenge"),
+  milestoneId: api.challengeIdFromKey(base + "/challenge"),
+}}));
+"""
+    result = subprocess.run(
+        ["node"], input=harness, text=True, capture_output=True, check=True
+    )
+    observed = json.loads(result.stdout)
+    assert observed["before"]["completed"] == 113
+    assert observed["before"]["total"] == observed["after"]["completed"] == 117
+    assert observed["lessonRecord"] == observed["unitRecord"] == "saved"
+    assert observed["milestoneId"] == "first-programs.challenge"
+    assert not observed["overviewIsLesson"]
+    assert not observed["unitOverviewIsLesson"]
+    assert not observed["challengeIsLesson"]
+
+
 def test_foundations_expandable_units_preserve_the_full_learning_sequence() -> None:
     home = Path("docs/courses/python-foundations/index.qmd").read_text()
     catalog = yaml.safe_load(Path("docs/courses/_catalog.yml").read_text())
@@ -917,8 +1078,11 @@ def test_foundations_expandable_units_preserve_the_full_learning_sequence() -> N
         )
         linked_lessons = re.findall(r"^\d+\. \[.*?\]\((.*?)\)", row, re.MULTILINE)
         assert linked_lessons == [
-            f"units/{unit['id']}/{path.name}" for _, path in lessons
+            f"milestones/{unit['milestone_id']}/units/{unit['id']}/{path.name}"
+            for _, path in lessons
         ]
         assert f"{len(lessons)} lessons</span>" in row
-        assert f"units/{unit['id']}/index.qmd" in row
-        assert f"units/{unit['id']}/challenge.qmd" in row
+        assert f"milestones/{unit['milestone_id']}/units/{unit['id']}/index.qmd" in row
+        assert (
+            f"milestones/{unit['milestone_id']}/units/{unit['id']}/challenge.qmd" in row
+        )

@@ -3,7 +3,7 @@ project:
   output-dir: _site
 website:
   title: FreeCampus Python
-  description: A beginner-first Python course from zero programming experience to practical projects.
+  description: A Python learning journey from first programs to practical software, scientific computing, and data analysis.
   site-url: https://freecampus.github.io/python/
   repo-url: https://github.com/freecampus/python
   repo-actions:
@@ -30,13 +30,13 @@ website:
           - text: "---"
           - href: courses/python-foundations/index.qmd
             text: Python Foundations
-          - href: courses/intermediate-python/index.qmd
+          - href: roadmap/intermediate-python/index.qmd
             text: Intermediate Python
-          - href: courses/advanced-python/index.qmd
+          - href: roadmap/advanced-python/index.qmd
             text: Advanced Python
           - href: courses/scientific-python/index.qmd
             text: Scientific Computing
-          - href: courses/statistics-python/index.qmd
+          - href: roadmap/statistics-python/index.qmd
             text: Statistics
           - href: courses/data-science-ml/index.qmd
             text: Data Science & Machine Learning
@@ -49,6 +49,14 @@ website:
         href: https://github.com/freecampus/python
         aria-label: GitHub repository
   sidebar:
+    - title: Python journey
+      contents:
+        - href: index.qmd
+          text: Journey overview
+        - href: courses/index.qmd
+          text: Course catalog
+        - href: pathways/index.qmd
+          text: Learning pathways
     - title: Python Foundations
       style: floating
       border: false
@@ -57,206 +65,230 @@ website:
       contents:
         - href: courses/python-foundations/index.qmd
           text: Overview
-        - section: "Unit 0: Get Started"
+        - section: "Milestone 1: Write and Explain Your First Programs"
           contents:
-            - href: courses/python-foundations/units/get-started/index.qmd
-              text: Overview
-            - courses/python-foundations/units/get-started/meet-python-first-program.qmd
-            - courses/python-foundations/units/get-started/learn-with-evidence.qmd
-            - courses/python-foundations/units/get-started/use-ai-responsibly.qmd
-            - courses/python-foundations/units/get-started/notebook-workflows.qmd
-            - courses/python-foundations/units/get-started/local-python-workspace.qmd
-            - href: courses/python-foundations/units/get-started/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 1: Learning to Read and Write Python Code"
+            - href: courses/python-foundations/milestones/first-programs/index.qmd
+              text: Milestone overview
+            - section: "Unit 0: Get Started"
+              contents:
+                - href: courses/python-foundations/milestones/first-programs/units/get-started/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/first-programs/units/get-started/meet-python-first-program.qmd
+                - courses/python-foundations/milestones/first-programs/units/get-started/learn-with-evidence.qmd
+                - courses/python-foundations/milestones/first-programs/units/get-started/use-ai-responsibly.qmd
+                - courses/python-foundations/milestones/first-programs/units/get-started/notebook-workflows.qmd
+                - courses/python-foundations/milestones/first-programs/units/get-started/local-python-workspace.qmd
+                - href: courses/python-foundations/milestones/first-programs/units/get-started/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 1: Learning to Read and Write Python Code"
+              contents:
+                - href: courses/python-foundations/milestones/first-programs/units/python-syntax/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/first-programs/units/python-syntax/values-names-assignment.qmd
+                - courses/python-foundations/milestones/first-programs/units/python-syntax/expressions-statements-execution-order.qmd
+                - courses/python-foundations/milestones/first-programs/units/python-syntax/python-words-symbols.qmd
+                - courses/python-foundations/milestones/first-programs/units/python-syntax/indentation-code-blocks.qmd
+                - courses/python-foundations/milestones/first-programs/units/python-syntax/writing-code-across-lines.qmd
+                - courses/python-foundations/milestones/first-programs/units/python-syntax/comments-docstrings.qmd
+                - courses/python-foundations/milestones/first-programs/units/python-syntax/reading-fixing-syntax-errors.qmd
+                - href: courses/python-foundations/milestones/first-programs/units/python-syntax/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 2: Numbers, Text, and Other Values"
+              contents:
+                - href: courses/python-foundations/milestones/first-programs/units/core-values-types/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/first-programs/units/core-values-types/values-types-none-conversion.qmd
+                - courses/python-foundations/milestones/first-programs/units/core-values-types/integer-arithmetic.qmd
+                - courses/python-foundations/milestones/first-programs/units/core-values-types/floating-point-precision.qmd
+                - courses/python-foundations/milestones/first-programs/units/core-values-types/money-ratios-complex-numbers.qmd
+                - courses/python-foundations/milestones/first-programs/units/core-values-types/strings-unicode-text.qmd
+                - courses/python-foundations/milestones/first-programs/units/core-values-types/input-output-formatting.qmd
+                - courses/python-foundations/milestones/first-programs/units/core-values-types/booleans-comparisons-truth.qmd
+                - courses/python-foundations/milestones/first-programs/units/core-values-types/dates-times-durations.qmd
+                - href: courses/python-foundations/milestones/first-programs/units/core-values-types/challenge.qmd
+                  text: Unit Challenge
+            - href: courses/python-foundations/milestones/first-programs/challenge.qmd
+              text: Milestone Challenge
+        - section: "Milestone 2: Turn Data into Reusable Decisions"
           contents:
-            - href: courses/python-foundations/units/python-syntax/index.qmd
-              text: Overview
-            - courses/python-foundations/units/python-syntax/values-names-assignment.qmd
-            - courses/python-foundations/units/python-syntax/expressions-statements-execution-order.qmd
-            - courses/python-foundations/units/python-syntax/python-words-symbols.qmd
-            - courses/python-foundations/units/python-syntax/indentation-code-blocks.qmd
-            - courses/python-foundations/units/python-syntax/writing-code-across-lines.qmd
-            - courses/python-foundations/units/python-syntax/comments-docstrings.qmd
-            - courses/python-foundations/units/python-syntax/reading-fixing-syntax-errors.qmd
-            - href: courses/python-foundations/units/python-syntax/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 2: Numbers, Text, and Other Values"
+            - href: courses/python-foundations/milestones/work-with-data/index.qmd
+              text: Milestone overview
+            - section: "Unit 3: Organizing and Traversing Collections"
+              contents:
+                - href: courses/python-foundations/milestones/work-with-data/units/collections-iteration/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/work-with-data/units/collections-iteration/lists.qmd
+                - courses/python-foundations/milestones/work-with-data/units/collections-iteration/tuples-unpacking.qmd
+                - courses/python-foundations/milestones/work-with-data/units/collections-iteration/dictionaries.qmd
+                - courses/python-foundations/milestones/work-with-data/units/collections-iteration/sets-frozensets.qmd
+                - courses/python-foundations/milestones/work-with-data/units/collections-iteration/traversing-collections.qmd
+                - courses/python-foundations/milestones/work-with-data/units/collections-iteration/sorting-collections.qmd
+                - courses/python-foundations/milestones/work-with-data/units/collections-iteration/nested-data-collection-choice.qmd
+                - href: courses/python-foundations/milestones/work-with-data/units/collections-iteration/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 4: Making Decisions and Repeating Work"
+              contents:
+                - href: courses/python-foundations/milestones/work-with-data/units/decisions-repetition/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/work-with-data/units/decisions-repetition/conditional-branches.qmd
+                - courses/python-foundations/milestones/work-with-data/units/decisions-repetition/boolean-rules-short-circuit.qmd
+                - courses/python-foundations/milestones/work-with-data/units/decisions-repetition/decision-tables-boundaries.qmd
+                - courses/python-foundations/milestones/work-with-data/units/decisions-repetition/for-loop-patterns.qmd
+                - courses/python-foundations/milestones/work-with-data/units/decisions-repetition/while-loops-termination.qmd
+                - courses/python-foundations/milestones/work-with-data/units/decisions-repetition/search-loop-control.qmd
+                - courses/python-foundations/milestones/work-with-data/units/decisions-repetition/nested-loops-grids.qmd
+                - courses/python-foundations/milestones/work-with-data/units/decisions-repetition/comprehensions.qmd
+                - href: courses/python-foundations/milestones/work-with-data/units/decisions-repetition/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 5: Building Reusable Functions"
+              contents:
+                - href: courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/defining-calling-returning.qmd
+                - courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/parameters-stable-interfaces.qmd
+                - courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/contracts-decomposition-side-effects.qmd
+                - courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/scope-name-resolution-call-stack.qmd
+                - courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/functions-values-callbacks.qmd
+                - courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/recursion-recursive-tracing.qmd
+                - courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/iterators-generators-lazy-values.qmd
+                - courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/decorators-function-contracts.qmd
+                - href: courses/python-foundations/milestones/work-with-data/units/functions-call-behavior/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 6: Sharing, Changing, and Copying Objects"
+              contents:
+                - href: courses/python-foundations/milestones/work-with-data/units/mutability-identity-copying/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/work-with-data/units/mutability-identity-copying/equality-identity-references.qmd
+                - courses/python-foundations/milestones/work-with-data/units/mutability-identity-copying/mutable-immutable-hashable.qmd
+                - courses/python-foundations/milestones/work-with-data/units/mutability-identity-copying/aliasing-shallow-deep-copies.qmd
+                - courses/python-foundations/milestones/work-with-data/units/mutability-identity-copying/mutation-function-boundaries.qmd
+                - href: courses/python-foundations/milestones/work-with-data/units/mutability-identity-copying/challenge.qmd
+                  text: Unit Challenge
+            - href: courses/python-foundations/milestones/work-with-data/challenge.qmd
+              text: Milestone Challenge
+        - section: "Milestone 3: Build Reliable Programs from External Data"
           contents:
-            - href: courses/python-foundations/units/core-values-types/index.qmd
-              text: Overview
-            - courses/python-foundations/units/core-values-types/values-types-none-conversion.qmd
-            - courses/python-foundations/units/core-values-types/integer-arithmetic.qmd
-            - courses/python-foundations/units/core-values-types/floating-point-precision.qmd
-            - courses/python-foundations/units/core-values-types/money-ratios-complex-numbers.qmd
-            - courses/python-foundations/units/core-values-types/strings-unicode-text.qmd
-            - courses/python-foundations/units/core-values-types/input-output-formatting.qmd
-            - courses/python-foundations/units/core-values-types/booleans-comparisons-truth.qmd
-            - courses/python-foundations/units/core-values-types/dates-times-durations.qmd
-            - href: courses/python-foundations/units/core-values-types/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 3: Organizing and Traversing Collections"
+            - href: courses/python-foundations/milestones/reliable-programs/index.qmd
+              text: Milestone overview
+            - section: "Unit 7: Solving Problems with Algorithms"
+              contents:
+                - href: courses/python-foundations/milestones/reliable-programs/units/problem-solving-algorithms/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/reliable-programs/units/problem-solving-algorithms/problems-examples-acceptance.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/problem-solving-algorithms/decomposition-pseudocode-implementation.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/problem-solving-algorithms/core-algorithm-patterns.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/problem-solving-algorithms/correctness-boundaries-efficiency.qmd
+                - href: courses/python-foundations/milestones/reliable-programs/units/problem-solving-algorithms/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 8: Errors, Exceptions, and Debugging"
+              contents:
+                - href: courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/failure-categories-tracebacks.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/raising-handling-exceptions.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/repeatable-debugging-method.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/debugger-minimal-reproductions.qmd
+                - href: courses/python-foundations/milestones/reliable-programs/units/errors-exceptions-debugging/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 9: Files, Paths, and External Data"
+              contents:
+                - href: courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data/paths-text-files-resources.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data/unicode-encodings-newlines.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data/csv-json-yaml-records.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data/text-patterns-validation-pipelines.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data/bytes-binary-memory-streams.qmd
+                - href: courses/python-foundations/milestones/reliable-programs/units/files-paths-external-data/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 10: Modules, Environments, and Python Projects"
+              contents:
+                - href: courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/builtins-standard-library-help.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/modules-imports-entry-points.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/packages-public-interfaces.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/project-layout-git-essentials.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/virtual-environments-dependencies.qmd
+                - courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/pyproject-builds-tools.qmd
+                - href: courses/python-foundations/milestones/reliable-programs/units/modules-environments-projects/challenge.qmd
+                  text: Unit Challenge
+            - href: courses/python-foundations/milestones/reliable-programs/challenge.qmd
+              text: Milestone Challenge
+        - section: "Milestone 4: Ship a Tested and Documented Python Tool"
           contents:
-            - href: courses/python-foundations/units/collections-iteration/index.qmd
-              text: Overview
-            - courses/python-foundations/units/collections-iteration/lists.qmd
-            - courses/python-foundations/units/collections-iteration/tuples-unpacking.qmd
-            - courses/python-foundations/units/collections-iteration/dictionaries.qmd
-            - courses/python-foundations/units/collections-iteration/sets-frozensets.qmd
-            - courses/python-foundations/units/collections-iteration/traversing-collections.qmd
-            - courses/python-foundations/units/collections-iteration/sorting-collections.qmd
-            - courses/python-foundations/units/collections-iteration/nested-data-collection-choice.qmd
-            - href: courses/python-foundations/units/collections-iteration/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 4: Making Decisions and Repeating Work"
-          contents:
-            - href: courses/python-foundations/units/decisions-repetition/index.qmd
-              text: Overview
-            - courses/python-foundations/units/decisions-repetition/conditional-branches.qmd
-            - courses/python-foundations/units/decisions-repetition/boolean-rules-short-circuit.qmd
-            - courses/python-foundations/units/decisions-repetition/decision-tables-boundaries.qmd
-            - courses/python-foundations/units/decisions-repetition/for-loop-patterns.qmd
-            - courses/python-foundations/units/decisions-repetition/while-loops-termination.qmd
-            - courses/python-foundations/units/decisions-repetition/search-loop-control.qmd
-            - courses/python-foundations/units/decisions-repetition/nested-loops-grids.qmd
-            - courses/python-foundations/units/decisions-repetition/comprehensions.qmd
-            - href: courses/python-foundations/units/decisions-repetition/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 5: Building Reusable Functions"
-          contents:
-            - href: courses/python-foundations/units/functions-call-behavior/index.qmd
-              text: Overview
-            - courses/python-foundations/units/functions-call-behavior/defining-calling-returning.qmd
-            - courses/python-foundations/units/functions-call-behavior/parameters-stable-interfaces.qmd
-            - courses/python-foundations/units/functions-call-behavior/contracts-decomposition-side-effects.qmd
-            - courses/python-foundations/units/functions-call-behavior/scope-name-resolution-call-stack.qmd
-            - courses/python-foundations/units/functions-call-behavior/functions-values-callbacks.qmd
-            - courses/python-foundations/units/functions-call-behavior/recursion-recursive-tracing.qmd
-            - courses/python-foundations/units/functions-call-behavior/iterators-generators-lazy-values.qmd
-            - courses/python-foundations/units/functions-call-behavior/decorators-function-contracts.qmd
-            - href: courses/python-foundations/units/functions-call-behavior/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 6: Sharing, Changing, and Copying Objects"
-          contents:
-            - href: courses/python-foundations/units/mutability-identity-copying/index.qmd
-              text: Overview
-            - courses/python-foundations/units/mutability-identity-copying/equality-identity-references.qmd
-            - courses/python-foundations/units/mutability-identity-copying/mutable-immutable-hashable.qmd
-            - courses/python-foundations/units/mutability-identity-copying/aliasing-shallow-deep-copies.qmd
-            - courses/python-foundations/units/mutability-identity-copying/mutation-function-boundaries.qmd
-            - href: courses/python-foundations/units/mutability-identity-copying/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 7: Solving Problems with Algorithms"
-          contents:
-            - href: courses/python-foundations/units/problem-solving-algorithms/index.qmd
-              text: Overview
-            - courses/python-foundations/units/problem-solving-algorithms/problems-examples-acceptance.qmd
-            - courses/python-foundations/units/problem-solving-algorithms/decomposition-pseudocode-implementation.qmd
-            - courses/python-foundations/units/problem-solving-algorithms/core-algorithm-patterns.qmd
-            - courses/python-foundations/units/problem-solving-algorithms/correctness-boundaries-efficiency.qmd
-            - href: courses/python-foundations/units/problem-solving-algorithms/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 8: Errors, Exceptions, and Debugging"
-          contents:
-            - href: courses/python-foundations/units/errors-exceptions-debugging/index.qmd
-              text: Overview
-            - courses/python-foundations/units/errors-exceptions-debugging/failure-categories-tracebacks.qmd
-            - courses/python-foundations/units/errors-exceptions-debugging/raising-handling-exceptions.qmd
-            - courses/python-foundations/units/errors-exceptions-debugging/repeatable-debugging-method.qmd
-            - courses/python-foundations/units/errors-exceptions-debugging/debugger-minimal-reproductions.qmd
-            - href: courses/python-foundations/units/errors-exceptions-debugging/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 9: Files, Paths, and External Data"
-          contents:
-            - href: courses/python-foundations/units/files-paths-external-data/index.qmd
-              text: Overview
-            - courses/python-foundations/units/files-paths-external-data/paths-text-files-resources.qmd
-            - courses/python-foundations/units/files-paths-external-data/unicode-encodings-newlines.qmd
-            - courses/python-foundations/units/files-paths-external-data/csv-json-yaml-records.qmd
-            - courses/python-foundations/units/files-paths-external-data/text-patterns-validation-pipelines.qmd
-            - courses/python-foundations/units/files-paths-external-data/bytes-binary-memory-streams.qmd
-            - href: courses/python-foundations/units/files-paths-external-data/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 10: Modules, Environments, and Python Projects"
-          contents:
-            - href: courses/python-foundations/units/modules-environments-projects/index.qmd
-              text: Overview
-            - courses/python-foundations/units/modules-environments-projects/builtins-standard-library-help.qmd
-            - courses/python-foundations/units/modules-environments-projects/modules-imports-entry-points.qmd
-            - courses/python-foundations/units/modules-environments-projects/packages-public-interfaces.qmd
-            - courses/python-foundations/units/modules-environments-projects/project-layout-git-essentials.qmd
-            - courses/python-foundations/units/modules-environments-projects/virtual-environments-dependencies.qmd
-            - courses/python-foundations/units/modules-environments-projects/pyproject-builds-tools.qmd
-            - href: courses/python-foundations/units/modules-environments-projects/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 11: Object-Oriented Python and Dataclasses"
-          contents:
-            - href: courses/python-foundations/units/object-oriented-python/index.qmd
-              text: Overview
-            - courses/python-foundations/units/object-oriented-python/objects-classes-instances-self.qmd
-            - courses/python-foundations/units/object-oriented-python/initialization-invariants-properties.qmd
-            - courses/python-foundations/units/object-oriented-python/dataclasses-representation-equality.qmd
-            - courses/python-foundations/units/object-oriented-python/composition-inheritance-design.qmd
-            - courses/python-foundations/units/object-oriented-python/road-crossing-game-model.qmd
-            - href: courses/python-foundations/units/object-oriented-python/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 12: Command-Line Applications"
-          contents:
-            - href: courses/python-foundations/units/command-line-applications/index.qmd
-              text: Overview
-            - courses/python-foundations/units/command-line-applications/argparse-command-design.qmd
-            - courses/python-foundations/units/command-line-applications/streams-errors-exit-codes.qmd
-            - courses/python-foundations/units/command-line-applications/configuration-precedence-secrets.qmd
-            - courses/python-foundations/units/command-line-applications/logging-useful-diagnostics.qmd
-            - courses/python-foundations/units/command-line-applications/cli-ecosystem-testable-architecture.qmd
-            - href: courses/python-foundations/units/command-line-applications/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 13: Testing Python Programs"
-          contents:
-            - href: courses/python-foundations/units/testing-python-programs/index.qmd
-              text: Overview
-            - courses/python-foundations/units/testing-python-programs/what-tests-prove.qmd
-            - courses/python-foundations/units/testing-python-programs/pytest-discovery-failures.qmd
-            - courses/python-foundations/units/testing-python-programs/parametrization-boundary-cases.qmd
-            - courses/python-foundations/units/testing-python-programs/fixtures-isolation-capture.qmd
-            - courses/python-foundations/units/testing-python-programs/test-doubles-dependency-injection.qmd
-            - courses/python-foundations/units/testing-python-programs/test-levels.qmd
-            - courses/python-foundations/units/testing-python-programs/properties-regressions-tdd.qmd
-            - href: courses/python-foundations/units/testing-python-programs/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 14: Code Quality and Maintainability"
-          contents:
-            - href: courses/python-foundations/units/code-quality-maintainability/index.qmd
-              text: Overview
-            - courses/python-foundations/units/code-quality-maintainability/readable-python-pep8.qmd
-            - courses/python-foundations/units/code-quality-maintainability/type-annotations-static-checking.qmd
-            - courses/python-foundations/units/code-quality-maintainability/mypy-diagnostics-boundaries.qmd
-            - courses/python-foundations/units/code-quality-maintainability/formatting-linting-configuration.qmd
-            - courses/python-foundations/units/code-quality-maintainability/precommit-quality-gates.qmd
-            - courses/python-foundations/units/code-quality-maintainability/continuous-integration-quality-gates.qmd
-            - courses/python-foundations/units/code-quality-maintainability/evidence-driven-refactoring.qmd
-            - href: courses/python-foundations/units/code-quality-maintainability/challenge.qmd
-              text: Unit Challenge
-        - section: "Unit 15: Documentation as Part of the Product"
-          contents:
-            - href: courses/python-foundations/units/documentation-publishing/index.qmd
-              text: Overview
-            - courses/python-foundations/units/documentation-publishing/documentation-audiences-readme.qmd
-            - courses/python-foundations/units/documentation-publishing/clear-instructions-accessibility.qmd
-            - courses/python-foundations/units/documentation-publishing/docstrings-api-documentation.qmd
-            - courses/python-foundations/units/documentation-publishing/doctest-executable-documentation.qmd
-            - courses/python-foundations/units/documentation-publishing/documentation-quality-checks.qmd
-            - courses/python-foundations/units/documentation-publishing/documentation-toolchains-publishing.qmd
-            - courses/python-foundations/units/documentation-publishing/publishing-maintaining-documentation.qmd
-            - href: courses/python-foundations/units/documentation-publishing/challenge.qmd
-              text: Unit Challenge
+            - href: courses/python-foundations/milestones/ship-python-projects/index.qmd
+              text: Milestone overview
+            - section: "Unit 11: Object-Oriented Python and Dataclasses"
+              contents:
+                - href: courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python/objects-classes-instances-self.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python/initialization-invariants-properties.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python/dataclasses-representation-equality.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python/composition-inheritance-design.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python/road-crossing-game-model.qmd
+                - href: courses/python-foundations/milestones/ship-python-projects/units/object-oriented-python/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 12: Command-Line Applications"
+              contents:
+                - href: courses/python-foundations/milestones/ship-python-projects/units/command-line-applications/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/ship-python-projects/units/command-line-applications/argparse-command-design.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/command-line-applications/streams-errors-exit-codes.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/command-line-applications/configuration-precedence-secrets.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/command-line-applications/logging-useful-diagnostics.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/command-line-applications/cli-ecosystem-testable-architecture.qmd
+                - href: courses/python-foundations/milestones/ship-python-projects/units/command-line-applications/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 13: Testing Python Programs"
+              contents:
+                - href: courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/what-tests-prove.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/pytest-discovery-failures.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/parametrization-boundary-cases.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/fixtures-isolation-capture.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/test-doubles-dependency-injection.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/test-levels.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/properties-regressions-tdd.qmd
+                - href: courses/python-foundations/milestones/ship-python-projects/units/testing-python-programs/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 14: Code Quality and Maintainability"
+              contents:
+                - href: courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/readable-python-pep8.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/type-annotations-static-checking.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/mypy-diagnostics-boundaries.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/formatting-linting-configuration.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/precommit-quality-gates.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/continuous-integration-quality-gates.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/evidence-driven-refactoring.qmd
+                - href: courses/python-foundations/milestones/ship-python-projects/units/code-quality-maintainability/challenge.qmd
+                  text: Unit Challenge
+            - section: "Unit 15: Documentation as Part of the Product"
+              contents:
+                - href: courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/index.qmd
+                  text: Overview
+                - courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/documentation-audiences-readme.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/clear-instructions-accessibility.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/docstrings-api-documentation.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/doctest-executable-documentation.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/documentation-quality-checks.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/documentation-toolchains-publishing.qmd
+                - courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/publishing-maintaining-documentation.qmd
+                - href: courses/python-foundations/milestones/ship-python-projects/units/documentation-publishing/challenge.qmd
+                  text: Unit Challenge
+            - href: courses/python-foundations/milestones/ship-python-projects/challenge.qmd
+              text: Milestone Challenge
     - title: "Intermediate Python: Applied Problem Solving"
       style: floating
       border: false
       search: true
       collapse-level: 1
       contents:
-        - href: courses/intermediate-python/index.qmd
+        - href: roadmap/intermediate-python/index.qmd
           text: Overview
     - title: "Advanced Python: Complex Problem Solving"
       style: floating
@@ -264,7 +296,7 @@ website:
       search: true
       collapse-level: 1
       contents:
-        - href: courses/advanced-python/index.qmd
+        - href: roadmap/advanced-python/index.qmd
           text: Overview
     - title: Scientific Computing with Python
       style: floating
@@ -274,22 +306,30 @@ website:
       contents:
         - href: courses/scientific-python/index.qmd
           text: Overview
-        - section: "Unit 1: Scientific Python"
+        - section: "Milestone 1: Design and Explain Numerical Experiments"
           contents:
-            - href: courses/scientific-python/scientific-python/index.qmd
-              text: Overview
-            - courses/scientific-python/scientific-python/numpy.qmd
-            - courses/scientific-python/scientific-python/random-simulation.qmd
-            - courses/scientific-python/scientific-python/matplotlib-basics.qmd
-            - courses/scientific-python/scientific-python/sympy-symbolic-math.qmd
-            - courses/scientific-python/scientific-python/scipy-overview.qmd
+            - href: courses/scientific-python/milestones/numerical-experiments/index.qmd
+              text: Milestone overview
+            - section: "Unit 1: Scientific Python"
+              contents:
+                - href: courses/scientific-python/milestones/numerical-experiments/units/scientific-python/index.qmd
+                  text: Overview
+                - courses/scientific-python/milestones/numerical-experiments/units/scientific-python/numpy.qmd
+                - courses/scientific-python/milestones/numerical-experiments/units/scientific-python/random-simulation.qmd
+                - courses/scientific-python/milestones/numerical-experiments/units/scientific-python/matplotlib-basics.qmd
+                - courses/scientific-python/milestones/numerical-experiments/units/scientific-python/sympy-symbolic-math.qmd
+                - courses/scientific-python/milestones/numerical-experiments/units/scientific-python/scipy-overview.qmd
+                - href: courses/scientific-python/milestones/numerical-experiments/units/scientific-python/challenge.qmd
+                  text: Unit Challenge
+            - href: courses/scientific-python/milestones/numerical-experiments/challenge.qmd
+              text: Milestone Challenge
     - title: Statistics with Python
       style: floating
       border: false
       search: true
       collapse-level: 1
       contents:
-        - href: courses/statistics-python/index.qmd
+        - href: roadmap/statistics-python/index.qmd
           text: Overview
     - title: Data Science and Machine Learning with Python
       style: floating
@@ -299,24 +339,40 @@ website:
       contents:
         - href: courses/data-science-ml/index.qmd
           text: Overview
-        - section: "Unit 1: Data Science"
+        - section: "Milestone 1: Answer a Question with Tabular Data"
           contents:
-            - href: courses/data-science-ml/data-science/index.qmd
-              text: Overview
-            - courses/data-science-ml/data-science/workflow-and-loading.qmd
-            - courses/data-science-ml/data-science/inspecting-selecting-cleaning.qmd
-            - courses/data-science-ml/data-science/grouping-and-statistics.qmd
-            - courses/data-science-ml/data-science/visualization-with-seaborn.qmd
-            - courses/data-science-ml/data-science/communicating-results.qmd
-        - section: "Unit 2: Machine Learning and AI"
+            - href: courses/data-science-ml/milestones/explore-data/index.qmd
+              text: Milestone overview
+            - section: "Unit 1: Data Science"
+              contents:
+                - href: courses/data-science-ml/milestones/explore-data/units/data-science/index.qmd
+                  text: Overview
+                - courses/data-science-ml/milestones/explore-data/units/data-science/workflow-and-loading.qmd
+                - courses/data-science-ml/milestones/explore-data/units/data-science/inspecting-selecting-cleaning.qmd
+                - courses/data-science-ml/milestones/explore-data/units/data-science/grouping-and-statistics.qmd
+                - courses/data-science-ml/milestones/explore-data/units/data-science/visualization-with-seaborn.qmd
+                - courses/data-science-ml/milestones/explore-data/units/data-science/communicating-results.qmd
+                - href: courses/data-science-ml/milestones/explore-data/units/data-science/challenge.qmd
+                  text: Unit Challenge
+            - href: courses/data-science-ml/milestones/explore-data/challenge.qmd
+              text: Milestone Challenge
+        - section: "Milestone 2: Evaluate a Model Responsibly"
           contents:
-            - href: courses/data-science-ml/machine-learning-ai/index.qmd
-              text: Overview
-            - courses/data-science-ml/machine-learning-ai/concepts-and-datasets.qmd
-            - courses/data-science-ml/machine-learning-ai/training-and-evaluation.qmd
-            - courses/data-science-ml/machine-learning-ai/deep-learning-libraries.qmd
-            - courses/data-science-ml/machine-learning-ai/transformers-overview.qmd
-            - courses/data-science-ml/machine-learning-ai/responsible-ai.qmd
+            - href: courses/data-science-ml/milestones/evaluate-models/index.qmd
+              text: Milestone overview
+            - section: "Unit 2: Machine Learning and AI"
+              contents:
+                - href: courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai/index.qmd
+                  text: Overview
+                - courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai/concepts-and-datasets.qmd
+                - courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai/training-and-evaluation.qmd
+                - courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai/deep-learning-libraries.qmd
+                - courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai/transformers-overview.qmd
+                - courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai/responsible-ai.qmd
+                - href: courses/data-science-ml/milestones/evaluate-models/units/machine-learning-ai/challenge.qmd
+                  text: Unit Challenge
+            - href: courses/data-science-ml/milestones/evaluate-models/challenge.qmd
+              text: Milestone Challenge
     - title: Project Toolkit
       style: floating
       border: false
@@ -328,7 +384,7 @@ website:
         - resources/project-toolkit/presentation-and-rubric.qmd
   page-footer:
     left: FreeCampus Python — learn by building, explaining, and debugging.
-    center: Course content updated 26 August 2026 · Curriculum v21
+    center: Course content updated 21 October 2026 · Curriculum v22
     right:
       - text: GitHub
         href: https://github.com/freecampus/python
@@ -365,3 +421,6 @@ format:
 execute:
   freeze: auto
   eval: false
+freecampus:
+  schema-version: 1
+  kind: journey
