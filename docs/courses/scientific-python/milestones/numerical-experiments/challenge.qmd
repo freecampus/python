@@ -28,7 +28,7 @@ This community challenge is ungraded. Use the checks to review your own work;
 there is no submission service or automatic grade. Completion is self-reported
 in this browser on this device.
 
-## 1. Build test a cooling model against measurements
+## 1. Test a cooling model against measurements
 
 Use the fictional model T(t) = 20 + 60*exp(-0.1*t), with minutes and degrees Celsius. Evaluate at 0, 5, 10, 15, 20 minutes; observations are 80, 57, 43, 34, 28. Calculate observed-minus-predicted residuals, plot both series, and find when T reaches 30 using scipy.optimize.brentq on [0, 40]. Compare with 10*log(6).
 
