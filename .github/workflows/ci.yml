@@ -14,6 +14,21 @@ env:
   VIRTUALENV_ACTIVATORS: "bash,python"
 
 jobs:
+  course-structure:
+    name: Course structure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate FreeCampus course structure
+        uses: freecampus/freecampus-course-check@4215c2fa5e7140893f736cc91ca25c89bfc40825 # 0.1.0
+        with:
+          content-dir: docs
+
   checks:
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
