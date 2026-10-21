@@ -102,16 +102,18 @@ makim docs.preview
 CI runs the
 [FreeCampus Course Structure Check](https://github.com/freecampus/freecampus-course-check)
 on every pull request and push to `main`. The independent `Course structure` job
-checks the repository's `docs/` sources with release `0.1.0`, pinned to its full
-commit SHA. It reports file-specific errors and suggested fixes in annotations
-and the job summary; no Python environment or Quarto installation is needed for
-this check.
+checks the repository's `docs/` sources with release `0.2.0`, pinned to its full
+commit SHA. It reports file-specific errors, suggested fixes, and links to
+rule-specific troubleshooting examples in annotations and the job summary; no
+Python environment or Quarto installation is needed for this check.
 
 The current course layout has not yet migrated to the action's journey and
 milestone structure, so this check is expected to fail until that migration is
 complete. Address the reported schema metadata, milestone hierarchy, challenges,
-and navigation requirements using the action's README. Validation failures are
-not ignored; the existing Python and documentation jobs still run independently.
+and navigation requirements using the action's README and
+[troubleshooting guide](https://github.com/freecampus/freecampus-course-check/blob/main/TROUBLESHOOTING.md).
+Validation failures are not ignored; the existing Python and documentation jobs
+still run independently.
 
 ## Project layout
 

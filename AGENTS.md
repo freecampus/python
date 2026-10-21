@@ -562,7 +562,7 @@ finishes and reports the output site.
 - `.github/workflows/ci.yml` runs lint, tests, package build, and docs build on
   pull requests and pushes to `main`.
 - Its independent `Course structure` job runs FreeCampus Course Structure Check
-  `0.1.0` against `docs/`, pinned to the release commit. It fails on structural
+  `0.2.0` against `docs/`, pinned to the release commit. It fails on structural
   errors; the current layout still needs the journey/milestone migration.
 - `.github/workflows/docs.yml` renders `docs/_site` and publishes it to
   `gh-pages` on pushes to `main` and manual dispatch.
